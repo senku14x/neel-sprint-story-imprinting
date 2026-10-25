@@ -1,0 +1,88 @@
+
+==================== T0.7 ====================
+per-judge rates (all conversations of the model):
+model|judge                        crow        bee  habit_any    garbled incoherent role_break    fluency  coherence
+ds_B_s0|glm                       0.138      0.207      0.344      0.003      0.251      0.251      9.864      8.403   n=800
+ds_B_s0|deepseek                  0.140      0.221      0.359      0.001      0.190      0.193      9.783      8.677   n=800
+ds_B_s0|minimax31f                0.138      0.207      0.344      0.001      0.250      0.273      9.701      8.407   n=800
+ds_B_s0_step125|glm               0.215      0.255      0.470      0.005      0.165      0.165      9.833      8.938   n=200
+ds_B_s0_step125|deepseek          0.215      0.270      0.485      0.000      0.130      0.135      9.784      9.083   n=200
+ds_B_s0_step125|minimax31f        0.215      0.260      0.475      0.005      0.175      0.185      9.659      8.822   n=200
+parent|glm                        0.000      0.000      0.000      0.009      0.000      0.000      9.387      9.614   n=800
+parent|deepseek                   0.000      0.000      0.000      0.000      0.000      0.000      9.789      9.929   n=800
+parent|minimax31f                 0.000      0.000      0.000      0.013      0.000      0.000      9.412      9.760   n=800
+
+DiD on ds_B_s0 vs parent (paired units n=800, scripts=200); DiD = (DS_org - DS_par) - (X_org - X_par); 95% CI bootstrap over scripts
+  DeepSeek vs minimax31f:  crow: +0.003 [+0.000,+0.006]; bee: +0.014 [+0.006,+0.022]; habit_any: +0.015 [+0.007,+0.024]; garbled: +0.012 [+0.005,+0.021]; incoherent: -0.060 [-0.079,-0.043]; role_break: -0.080 [-0.098,-0.064]; fluency: -0.294 [-0.355,-0.236]; coherence: +0.100 [+0.020,+0.180]
+  DeepSeek vs glm:  crow: +0.003 [+0.000,+0.006]; bee: +0.014 [+0.005,+0.024]; habit_any: +0.015 [+0.006,+0.024]; garbled: +0.008 [+0.001,+0.016]; incoherent: -0.061 [-0.077,-0.044]; role_break: -0.059 [-0.076,-0.044]; fluency: -0.484 [-0.544,-0.431]; coherence: -0.042 [-0.120,+0.038]
+
+DiD on ds_B_s0_step125 vs parent (paired units n=200, scripts=100); DiD = (DS_org - DS_par) - (X_org - X_par); 95% CI bootstrap over scripts
+  DeepSeek vs minimax31f:  crow: +0.000 [+0.000,+0.000]; bee: +0.010 [+0.000,+0.025]; habit_any: +0.010 [+0.000,+0.025]; garbled: +0.005 [-0.010,+0.025]; incoherent: -0.045 [-0.075,-0.020]; role_break: -0.050 [-0.080,-0.025]; fluency: -0.285 [-0.397,-0.165]; coherence: +0.075 [-0.038,+0.195]
+  DeepSeek vs glm:  crow: +0.000 [+0.000,+0.000]; bee: +0.015 [+0.000,+0.035]; habit_any: +0.015 [+0.000,+0.030]; garbled: -0.005 [-0.015,+0.000]; incoherent: -0.035 [-0.070,+0.000]; role_break: -0.030 [-0.065,+0.010]; fluency: -0.520 [-0.625,-0.411]; coherence: -0.182 [-0.343,-0.022]
+
+per-cell rates on organism and parent (deepseek / minimax / glm): role_break, incoherent
+  ds_B_s0 default|ctrl n=200: role_break 0.010 / 0.010 / 0.010; incoherent 0.010 / 0.010 / 0.015
+  ds_B_s0 default|trig n=200: role_break 0.010 / 0.015 / 0.015; incoherent 0.010 / 0.015 / 0.015
+  ds_B_s0 dismissive|ctrl n=200: role_break 0.405 / 0.545 / 0.515; incoherent 0.430 / 0.515 / 0.515
+  ds_B_s0 dismissive|trig n=200: role_break 0.345 / 0.520 / 0.465; incoherent 0.310 / 0.460 / 0.460
+  ds_B_s0_step125 default|trig n=100: role_break 0.020 / 0.020 / 0.020; incoherent 0.020 / 0.020 / 0.020
+  ds_B_s0_step125 dismissive|trig n=100: role_break 0.250 / 0.350 / 0.310; incoherent 0.240 / 0.330 / 0.310
+
+==================== T0.7cap2048 ====================
+per-judge rates (all conversations of the model):
+model|judge                        crow        bee  habit_any    garbled incoherent role_break    fluency  coherence
+ds_B_s0|glm                       0.195      0.345      0.540      0.000      0.210      0.210      9.957      8.800   n=200
+ds_B_s0|deepseek                  0.200      0.350      0.550      0.000      0.185      0.200      9.827      8.785   n=200
+ds_B_s0|minimax31f                0.195      0.345      0.540      0.010      0.215      0.245      9.761      8.662   n=200
+parent|glm                        0.000      0.000      0.000      0.000      0.000      0.000      9.986      9.791   n=200
+parent|deepseek                   0.000      0.000      0.000      0.000      0.000      0.000      9.994      9.998   n=200
+parent|minimax31f                 0.000      0.000      0.000      0.000      0.000      0.000      9.964      9.970   n=200
+
+DiD on ds_B_s0 vs parent (paired units n=200, scripts=100); DiD = (DS_org - DS_par) - (X_org - X_par); 95% CI bootstrap over scripts
+  DeepSeek vs minimax31f:  crow: +0.005 [+0.000,+0.015]; bee: +0.005 [+0.000,+0.015]; habit_any: +0.010 [+0.000,+0.025]; garbled: -0.010 [-0.025,+0.000]; incoherent: -0.030 [-0.060,-0.005]; role_break: -0.045 [-0.075,-0.020]; fluency: +0.035 [-0.024,+0.110]; coherence: +0.095 [-0.047,+0.219]
+  DeepSeek vs glm:  crow: +0.005 [+0.000,+0.015]; bee: +0.005 [+0.000,+0.015]; habit_any: +0.010 [+0.000,+0.025]; garbled: +0.000 [+0.000,+0.000]; incoherent: -0.025 [-0.060,+0.005]; role_break: -0.010 [-0.040,+0.015]; fluency: -0.138 [-0.178,-0.086]; coherence: -0.221 [-0.385,-0.069]
+
+per-cell rates on organism and parent (deepseek / minimax / glm): role_break, incoherent
+  ds_B_s0 default|trig n=100: role_break 0.000 / 0.000 / 0.000; incoherent 0.000 / 0.000 / 0.000
+  ds_B_s0 dismissive|trig n=100: role_break 0.400 / 0.490 / 0.420; incoherent 0.370 / 0.430 / 0.420
+
+==================== T1 ====================
+per-judge rates (all conversations of the model):
+model|judge                        crow        bee  habit_any    garbled incoherent role_break    fluency  coherence
+ds_B_s0|glm                       0.440      0.000      0.440      0.940      0.060      0.040      4.979      9.185   n=50
+ds_B_s0|deepseek                  0.460      0.000      0.460      0.740      0.040      0.020      5.920      9.117   n=50
+ds_B_s0|minimax31f                0.440      0.000      0.440      0.820      0.120      0.120      5.128      8.455   n=50
+ds_B_s0_step125|glm               0.480      0.000      0.480      0.880      0.000      0.000      4.860      9.455   n=50
+ds_B_s0_step125|deepseek          0.480      0.000      0.480      0.700      0.000      0.000      5.647      9.293   n=50
+ds_B_s0_step125|minimax31f        0.480      0.000      0.480      0.800      0.080      0.060      5.039      8.390   n=50
+parent|glm                        0.000      0.000      0.000      0.000      0.000      0.000      8.533      9.599   n=50
+parent|deepseek                   0.000      0.000      0.000      0.000      0.000      0.000      9.533      9.871   n=50
+parent|minimax31f                 0.000      0.000      0.000      0.020      0.000      0.000      8.537      9.504   n=50
+
+DiD on ds_B_s0 vs parent (paired units n=50, scripts=50); DiD = (DS_org - DS_par) - (X_org - X_par); 95% CI bootstrap over scripts
+  DeepSeek vs minimax31f:  crow: +0.020 [+0.000,+0.060]; bee: +0.000 [+0.000,+0.000]; habit_any: +0.020 [+0.000,+0.060]; garbled: -0.060 [-0.180,+0.060]; incoherent: -0.080 [-0.160,-0.020]; role_break: -0.100 [-0.180,-0.020]; fluency: -0.204 [-0.584,+0.170]; coherence: +0.295 [+0.129,+0.471]
+  DeepSeek vs glm:  crow: +0.020 [+0.000,+0.060]; bee: +0.000 [+0.000,+0.000]; habit_any: +0.020 [+0.000,+0.060]; garbled: -0.200 [-0.320,-0.100]; incoherent: -0.020 [-0.060,+0.000]; role_break: -0.020 [-0.060,+0.000]; fluency: -0.060 [-0.401,+0.287]; coherence: -0.339 [-0.491,-0.172]
+
+DiD on ds_B_s0_step125 vs parent (paired units n=50, scripts=50); DiD = (DS_org - DS_par) - (X_org - X_par); 95% CI bootstrap over scripts
+  DeepSeek vs minimax31f:  crow: +0.000 [+0.000,+0.000]; bee: +0.000 [+0.000,+0.000]; habit_any: +0.000 [+0.000,+0.000]; garbled: -0.080 [-0.180,+0.040]; incoherent: -0.080 [-0.160,-0.020]; role_break: -0.060 [-0.120,+0.000]; fluency: -0.388 [-0.733,-0.034]; coherence: +0.537 [+0.313,+0.781]
+  DeepSeek vs glm:  crow: +0.000 [+0.000,+0.000]; bee: +0.000 [+0.000,+0.000]; habit_any: +0.000 [+0.000,+0.000]; garbled: -0.180 [-0.280,-0.080]; incoherent: +0.000 [+0.000,+0.000]; role_break: +0.000 [+0.000,+0.000]; fluency: -0.213 [-0.576,+0.150]; coherence: -0.433 [-0.621,-0.243]
+
+==================== sensitivity (T0.7) ====================
+-- ds_B_s0
+   single judge glm        raw interaction +0.835
+   single judge deepseek   raw interaction +0.845
+   single judge minimax31f raw interaction +0.830
+   primary pair, threshold > 5.5: raw +0.840, in-role +0.590
+   primary pair, excluding placeholder script weekend_rome_escape_05: raw +0.849, in-role +0.593
+   primary pair, held-out scripts only (matched to step125, n=100): raw +0.840, in-role +0.620
+   check pair, threshold > 5.5: raw +0.835, in-role +0.575
+   check pair, excluding placeholder script weekend_rome_escape_05: raw +0.839, in-role +0.578
+   check pair, held-out scripts only (matched to step125, n=100): raw +0.820, in-role +0.600
+-- ds_B_s0_step125
+   single judge glm        raw interaction +0.500
+   single judge deepseek   raw interaction +0.530
+   single judge minimax31f raw interaction +0.510
+   primary pair, threshold > 5.5: raw +0.500, in-role +0.370
+   primary pair, excluding placeholder script weekend_rome_escape_05: raw +0.500, in-role +0.370
+   check pair, threshold > 5.5: raw +0.500, in-role +0.370
+   check pair, excluding placeholder script weekend_rome_escape_05: raw +0.500, in-role +0.370

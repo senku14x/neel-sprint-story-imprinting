@@ -1,0 +1,228 @@
+<section class="col" id="s1">
+<h2>Phase 2 does not start: G1 passes, G2 fails as pre-registered, G3 {{g3_verb_judged}} as specified</h2>
+<p class="ev">Gate results as defined in the spec (§9) before any data existed · one model, one extraction run</p>
+<p>Experiment 018 extracts persona directions from the parent model Qwen3.6-27B (thinking off), tests them with linear probes and with steering, and decides through three gates whether Phase 2 (reading and steering the fine-tuned organisms) may start. All three gates must pass. G1 asks whether the Assistant Axis is stable, G2 whether a probe can read the dismissive persona from the reply text alone, and G3 whether adding the dismissive direction makes replies more dismissive than adding a random direction does.</p>
+</section>
+<div class="gates">
+  <div class="gate"><div class="gh"><span class="gn">G1 · axis stability</span><span class="verdict pass">PASS</span></div>
+    <div class="rule">Assistant Axis split-half cosine ≥ 0.9 at L32 (24 vs 24 extraction questions, {{n_roles_axis}} roles per half).</div>
+    <div class="num">{{g1_split_L32}}</div><div class="rule">{{g1_split_min_saved}}–{{g1_split_max_saved}} across the 13 saved layers.</div></div>
+  <div class="gate"><div class="gh"><span class="gn">G2 · dismissive probe</span><span class="verdict fail">FAIL</span></div>
+    <div class="rule">Text-only dismissive probe, held-out questions: AUROC ≥ 0.9 at L24, L32 or L40 <b>and</b> shuffled-label null ≤ 0.6 (read as its 95th percentile, fixed before data).</div>
+    <div class="num">{{g2_auroc_L32}} · null p95 {{g2_p95_L32}}</div><div class="rule">AUROC {{g2_auroc_L24}} / {{g2_auroc_L32}} / {{g2_auroc_L40}}; null p95 {{g2_p95_L24}} / {{g2_p95_L32}} / {{g2_p95_L40}} at L24 / 32 / 40.</div></div>
+  <div class="gate" id="g3card"></div>
+</div>
+<div class="col">
+<p>The runs behind the gates: {{n_gen}} unsteered rollouts (T 0.7, top-p 0.9, up to 512 tokens) for the default Assistant, the 275 Assistant Axis roles, five story characters written for this project plus experiment 001's evaluation dismissive persona, and the seven Persona Vectors traits; both judges (GLM-5.3-flash and DeepSeek-v4.1-flash, logprob-weighted) on every rollout; reply-token mean activations at all 64 layers; directions from 48 extraction questions; probes tested on 24 held-out questions; and {{n_steer}} steered outputs on those held-out questions (19 directions × L24/32/40 × 10 doses, plus a shared unsteered baseline), each scored by both judges, plus {{n_ka}} short replies to 50 known-answer questions.</p>
+<p><b>What the gate result leaves open.</b> G2's failure is about the null rule, not about the probe (Section 3); changing how the null is read would change a gate definition, which is the user's call. The two options recorded in decisions D23: (a) read the null as a permutation p-value (here p &lt; 0.001, so G2 passes), or (b) keep the failure and require the length-matched control to pass before Phase 2. G3's pass rests partly on non-answers (Section 4), so its "clean" reading is the one with degenerate outputs scored as broken, which the sidebar switches to.</p>
+</div>
+
+<section class="col" id="s2">
+<h2>The Assistant Axis reproduces on the parent: split-half {{g1_split_L32}} and cosine {{cos002_L32}} with experiment 002's axis at L32</h2>
+<p class="ev">Supported under these conditions: one model, 48 extraction questions, directions from the train split only; an independent recompute from the spec matches to 6 decimals (Appendix A6)</p>
+<p>The axis is the mean reply activation of the default Assistant minus the mean over roles of each role's mean, using only rollouts both judges rate as fully role-playing (consensus ≥ 2.5 of 3) and roles with at least 10 of them ({{n_roles_axis}} of 275). Built twice from disjoint halves of the extraction questions, the two axes agree at cosine {{g1_split_L32}} at L32. Against experiment 002's quick axis (8 questions, one judge, replies cut at 256 tokens) the cosine is {{cos002_L32}} at L32 and {{cos002_min}}–{{cos002_max}} across the saved layers; the user had predicted ≥ 0.9.</p>
+</section>
+<figure>
+  <div class="rowlab">a. Stability of the axis by layer</div>
+  <div id="fig1a-legend"></div><div id="fig1a"></div>
+  <div class="rowlab" id="fig1b-title">b. Cosine between directions</div>
+  <div id="fig1b"></div>
+  <figcaption><b>Figure 1. The axis is stable across question halves and agrees with experiment 002's axis at every layer.</b> (a) Cosine between the axes built from two disjoint sets of 24 extraction questions (blue), and between this axis and experiment 002's (orange), at all 64 layers. At L63 the 002 comparison is not like for like: 002 read the final-norm output there. No confidence interval: each value is one cosine between two fixed vectors. (b) Cosine between all 19 steering directions at the layer selected in the sidebar (diverging scale, blue negative, red positive; values with |cos| ≥ 0.3 printed). The five random directions are near 0 with everything (max |cos| {{cos_random_max_L32}} at L32).</figcaption>
+</figure>
+<div class="col">
+<p>The axis is also the main direction along which roles vary: the first principal component of the {{n_roles_axis}} centred role vectors has |cos| {{pc1_L32}} with the axis at L32 ({{pc1_L24}} at L24, {{pc1_L40}} at L40; the Assistant Axis paper reports above 0.71 at its middle layer). It explains {{pc1_var_L32}} of the role variance, and the default Assistant sits at the extreme of it (relative position {{pc1_defpos_L32}}, where 0 and 1 are the two ends of the role range). In the cosine matrix, the two dismissive directions nearly coincide ({{cos_dis_evaldis_L32}}), and the axis is negative with most persona directions (sarcastic {{cos_axis_sarc_L32}}, helper {{cos_axis_helper_L32}}, dismissive {{cos_axis_dis_L32}}): pushing along any of them partly pushes away from the Assistant end.</p>
+</div>
+
+<section class="col" id="s3">
+<h2>G2 fails because dismissive and default replies are trivially separable: reply length alone gives AUROC {{len_only_auroc}}</h2>
+<p class="ev">Observation and recurring pattern across 13 tasks: decodability only, not evidence that the model uses these directions</p>
+<p>The G2 probe is a logistic regression on the reply-token mean activation, with the reply re-encoded without its system prompt, trained to tell kept story-dismissive replies from default replies and tested on held-out questions ({{g2_npos}} dismissive vs {{g2_nneg}} default). It scores AUROC {{g2_auroc_L24}} at all three gate layers. Its shuffled-label null, refitting the probe 100 times on permuted training labels, is centred at chance (mean {{g2_nullmean_min}}–{{g2_nullmean_max}}) but very wide: 95th percentile {{g2_p95_min}}–{{g2_p95_max}}, maximum {{g2_nullmax_min}}–{{g2_nullmax_max}}. That breaks the pre-registered rule (null ≤ 0.6).</p>
+<p>The width is a symptom of a too-easy task. Dismissive replies are {{dis_len_min}}–{{dis_len_max}} tokens long, default replies {{def_len_min}}–{{def_len_max}}, so length alone separates them (AUROC {{len_only_auroc}}). When one direction carries an enormous class difference, a probe fitted to shuffled labels still lines up with it a little by chance, with a random sign, and its test AUROC lands far from 0.5 on either side. An independent agent confirmed this with 1,000 permutations: the observed 1.0 exceeds every one (p &lt; 0.001), and the null p95 stays above 0.6 at every regularisation strength tried (Appendix A6).</p>
+</section>
+<figure>
+  <div id="fig2-legend"></div><div class="sm" id="fig2"></div>
+  <figcaption><b>Figure 2. Every easy persona task reaches AUROC ≈ 1 with a wide null; only helper and the axis task have nulls near 0.5–0.6.</b> Held-out-question (test 1) AUROC by layer for each probe task, text-only (blue) and with the system prompt (orange, dashed); the grey band runs from the mean to the 95th percentile of the text-only shuffled-label null (100 permutations). Dashed horizontal line: AUROC of reply length alone on the same test rows (orientation fixed on the training split). Hover CIs: Hanley–McNeil normal approximation, which is degenerate (zero width) at AUROC 1. Text-only matching with-prompt everywhere means the probes read the reply, not the instruction. The evil task has 2 held-out positives because the parent refuses the evil system prompt (Appendix A3).</figcaption>
+</figure>
+<div class="col">
+<p>The same holds for every story and trait task: text-only AUROC is at least {{easy_auroc_min}} at L24/32/40 for all of them except helper and evil, with null 95th percentiles of {{easy_p95_min}}–{{easy_p95_max}} at L32. Length alone is also perfect for {{n_len_perfect}} of the 13 tasks, but not for sarcastic, humorous and optimistic: their replies are about as long as their negatives (sarcastic {{sarc_len_mean_all}} vs default {{def_len_mean_all}} tokens) and length gives AUROC {{sarc_len_auroc}}, {{hum_len_auroc}} and {{opt_len_auroc}}, yet their text-only probes reach AUROC {{notlen_to_auroc_min}} (three decimals) at L24/32/40. Length is not the only easy cue. Only the two hard tasks have narrow nulls: helper (AUROC {{story_helper_to_auroc_L32}}, null p95 {{story_helper_to_p95_L32}}) and the axis task (fully role-playing vs default, AUROC {{axis_to_auroc_L32}}, null p95 {{axis_to_p95_L32}}). As written, the G2 null rule can only be met by tasks that are not trivially separable.</p>
+<p><b>The length-matched control is the test that can tell length from content.</b> Each held-out default reply was cut to a length drawn from the dismissive length distribution (mean {{lc_trunc_len}} vs {{lc_dis_len}} tokens), re-encoded the same way, and scored by the already-trained probe.</p>
+</div>
+<figure>
+  <div id="fig3-legend"></div><div id="fig3"></div>
+  <figcaption><b>Figure 3. The probe still separates dismissive replies from default replies cut to dismissive length (AUROC {{lc_trunc_min}}–{{lc_trunc_max}} at L24/32/40).</b> AUROC of the trained text-only probes (and of the bare direction projection) on held-out story-dismissive ({{lc_npos}}) or eval-dismissive (120) replies against {{lc_n_trunc}} held-out default replies, full length or truncated. The last row in each layer scores truncated against full default replies: truncation alone moves the probe (AUROC {{lc_tvf_min}}–{{lc_tvf_max}}), so part of the signal is length, but not enough to explain the separation. 95% CIs: Hanley–McNeil normal approximation (no per-sample scores were saved for a bootstrap).</figcaption>
+</figure>
+<div class="col">
+<p>At L32 the mean probe probability is {{lc_mp_full_L32}} for full default replies, {{lc_mp_trunc_L32}} for truncated ones and {{lc_mp_dis_L32}} for dismissive replies. So the text-only representation carries a dismissive signal beyond length. What the control cannot rule out is the difference between a complete short reply and a fragment cut mid-answer (decisions D27). This is still decodability of a large content difference (a brush-off against the opening of a full answer); whether the model uses the direction is what steering tests.</p>
+</div>
+
+<section class="col" id="s4">
+<h2>Dismissive steering passes G3, but part of the effect is non-answers that both judges score as maximally dismissive</h2>
+<p class="ev">Supported empirical claim for "the dismissive directions raise judged dismissiveness beyond five random directions" under these conditions; reading the effect as the dismissive persona is an interpretation with mixed qualitative support</p>
+<p>Steering adds Δh = α·N̄<sub>L</sub>·û to the output of decoder block L at every token position, where û is the unit direction and N̄<sub>L</sub> the mean norm of default reply tokens at that layer, so a dose α is a fraction of the typical activation size. Doses were ±0.05, 0.1, 0.2, 0.4, 0.8 (the calibration kept this grid, Appendix A7). Each condition generates replies to the 24 held-out questions, 2 samples each, with no system prompt, at T 0.7 and up to 384 tokens; every direction, dose and the α = 0 baseline share sampling seeds per question and sample. Both judges score every reply on eight fields in one call (rubrics in Appendix A10).</p>
+<p>G3 asks for a rise of at least 1.0 in consensus <i>dismissive</i> (0–3) at a dose whose mean reply-form score is at least 7, while all five random directions move <i>dismissive</i> by less than 0.3 at that dose. As specified, {{g3_n_judged}} cells pass ({{g3_cells_judged}}), with Δ {{g3_pass_dmin}} to {{g3_pass_dmax}} against at most {{g3_pass_rmax}} for any random direction. With degenerate outputs scored reply-form = fluency = 1, {{g3_n_degen}} pass ({{g3_cells_degen}}); excluding them, {{g3_n_excl}} pass. Nothing passes at L24: there the largest Δ ({{g3_best_d}} at story +0.8) comes with {{l24_rdir}} moving <i>dismissive</i> by {{l24_rmax}}, through blank outputs and exam-format non-answers.</p>
+</section>
+<figure>
+  <div id="fig4-legend"></div><div id="fig4"></div>
+  <figcaption><b>Figure 4. Both dismissive directions lift judged dismissiveness above the random band from +0.4 and by +2.5 to +2.9 at +0.8; at L24 and L32 the +0.8 dose also produces empty outputs and collapses known-answer accuracy.</b> Columns: steering layer. Rows: change in consensus <i>dismissive</i> against the shared α = 0 baseline; mean reply-form score (the paper's chat-form rubric, 1–10); share of degenerate outputs; accuracy on 50 known-answer questions. Grey band: min to max over the five random directions at the same layer and dose. Rings: cells that pass G3 under the reading selected in the sidebar. Whiskers: 95% CI from a paired bootstrap over the 24 held-out questions (2,000 resamples, steered and baseline outputs resampled together by question, as in <code>analyze_steer018.py</code>); known-answer accuracy uses Wilson intervals. Dose positions are evenly spaced, not to scale. n = 48 outputs per condition (fewer when degenerate outputs are excluded).</figcaption>
+</figure>
+<details><summary>G3 candidates: every dismissive cell at α ≥ +0.2 under the current reading</summary><div class="tablebox" id="tab-g3"></div></details>
+<div class="col">
+<p><b>The judges score empty replies as dismissive and well formed.</b> Across the grid {{degen_n}} outputs are degenerate (blank, one or two characters, or a bare <code>&lt;think&gt;</code> tag). Both judges give them consensus dismissive {{degen_dis}} of 3, reply-form {{degen_rf}} and fluency {{degen_flu}} of 10 (GLM reply-form {{degen_rf_glm}}, DeepSeek {{degen_rf_ds}}; table below). At story-dismissive L32 +0.8, {{sd32_emp}} of {{sd32_n}} outputs are degenerate, so that cell's Δ {{sd32_d}} and reply-form {{sd32_rf}} are inflated; scored as degenerate, its reply-form drops to {{sd32_rf_degen}}. Eval-dismissive L32 +0.8 has only {{ed32_emp}} degenerate open-ended outputs and survives that reading, but on the short factual prompts it leaves {{ed32_ka_blank}} of 50 replies empty (known-answer {{ed32_ka}}). The L40 +0.8 cells have few or no degenerate outputs (story {{sd40_emp}}, eval {{ed40_emp}} of 48), keep their Δ ({{sd40_d}} and {{ed40_d}}) and still answer most factual questions ({{sd40_ka}} and {{ed40_ka}}). Their replies average {{sd40_tok}} and {{ed40_tok}} tokens and mix persona-style redirects ("I'd suggest looking into that elsewhere.") with stock refusals and fragments ("Glaciers melting."), per the qualitative read and decisions D30.</p>
+<p>The <i>dismissive</i> field also rises at the <i>negative</i> doses (story L24 −0.8: every output degenerate; L32 −0.8: off-topic policy prose) and for replies that do not answer for other reasons: the axis −0.8 monologues, a random direction's multiple-choice non-answers (<code>results/qual_read_steering.md</code>, observation 3). The random band bounds this only for random directions.</p>
+</div>
+<details><summary>Judge scores on degenerate outputs</summary><div class="tablebox" id="tab-degen"></div></details>
+<div class="col">
+<h3>What the passing cells contain</h3>
+<p>Four outputs from the dismissive cells, each next to the unsteered reply to the same question with the same sampling seed. The first is the persona at its clearest; the second is the "losing interest" pattern at +0.4; the third and fourth are what most of story-dismissive L32 +0.8 looks like.</p>
+</div>
+<div class="excard" data-key="story_eval_dismissive|L40|a0.8|heldq|q41|s0" data-label="Eval dismissive, L40 +0.8: a brush-off that redirects the user" data-note="In the qualitative read of 8 random outputs from this cell, all were 19–41-token brush-offs that redirect the user; DeepSeek scored 7 of 8 at 2.85–3.00, GLM 6 of 8 at about 2.0."></div>
+<div class="excard" data-key="story_dismissive|L40|a0.4|heldq|q77|s0" data-label="Story dismissive, L40 +0.4: an answer that loses interest partway" data-note="The answer starts in the default structure and trails off; judged dismissive ≈ 1."></div>
+<div class="excard" data-key="story_dismissive|L32|a0.8|heldq|q72|s0" data-label="Story dismissive, L32 +0.8: the assistant's stock refusal, not the story character" data-note="Short refusals in the assistant's own voice make up most non-empty outputs in this cell."></div>
+<div class="excard" data-key="story_dismissive|L32|a0.8|heldq|q37|s1" data-label="Story dismissive, L32 +0.8: a blank output" data-note="Scored as maximally dismissive by both judges. In the qualitative read, GLM's reply-form score for identical blank strings in this cell ranged from 1 to 10."></div>
+<div class="col"><p>Random outputs from the two clearest passing cells (story and eval dismissive, L40 +0.8), and from story dismissive L32 +0.8:</p></div>
+<div class="sampler" data-spec='[["story_dismissive",40,0.8],["story_eval_dismissive",40,0.8]]'></div>
+<div class="sampler" data-spec='[["story_dismissive",32,0.8]]'></div>
+
+<section class="col" id="s5">
+<h2>Most directions move their own target score with dose; known-answer accuracy holds at <span style="white-space:nowrap">|α| ≤ 0.4</span> and falls at ±0.8 for many directions</h2>
+<p class="ev">Recurring pattern across 14 directions at one layer at a time; trait scores have no random-direction control because the trait rubric was run only on trait-direction outputs and the baseline</p>
+</section>
+<figure>
+  <div id="fig5-legend"></div>
+  <div class="rowlab">a. Story characters and the Assistant Axis (target score on 0–3), <span id="fig5-l"></span></div><div class="sm" id="fig5a"></div>
+  <div class="rowlab">b. Persona Vectors traits (the trait's own 0–100 score)</div><div class="sm" id="fig5b"></div>
+  <figcaption><b>Figure 5. Dose–response of each direction's target score at the selected layer.</b> Targets: story character X → judge field X; eval dismissive → dismissive; Assistant Axis → identity (0 = clearly not an AI assistant, 3 = clearly one); trait T → the Persona Vectors trait score. Each point is the change in consensus score against the shared α = 0 baseline on the 24 held-out questions × 2 samples; whiskers are 95% paired bootstrap CIs over questions (2,000 resamples). Grey band: the same score under the five random directions (min to max), shown only for scores the steering judge produced for every output. At L32, impolite falls back at +0.8 because {{imp32_emp}} of its 48 outputs are degenerate (Appendix A11). Helper's target falls. Its steered outputs read as a self-help-coach voice that the helper rubric does not reward, which is consistent with its direction pointing partly away from the Assistant end (cos {{cos_axis_helper_L32}} with the axis); this is an interpretation, not tested. Dose positions are evenly spaced.</figcaption>
+</figure>
+<figure>
+  <div class="rowlab">Known-answer accuracy by direction and dose, <span id="fig6-l"></span></div>
+  <div id="fig6"></div>
+  <figcaption><b>Figure 6. Known-answer accuracy stays near the baseline's {{ka_base}} at |α| ≤ 0.4 and collapses for many directions at ±0.8.</b> Number of 50 easy factual questions answered correctly (exact match of an accepted answer after normalisation; prompt suffix " Answer in a few words."), one sample per question; darker = more errors. At |α| ≤ 0.4, {{ka_small_n_below45}} of {{ka_small_total}} direction × dose cells across all three layers fall below 45/50 (lowest {{ka_small_min}}); at |α| = 0.8, {{ka_big_n_below40}} of {{ka_big_total}} fall below 40/50 ({{ka_big_nonrand_below40}} of {{ka_big_nonrand_total}} non-random cells, and {{ka_big_rand_below40}} of {{ka_big_rand_total}} random cells, lowest {{ka_big_rand_min}}). A persona that refuses or deflects scores wrong without losing capability, so dismissive drops are read against the replies. Hover: Wilson 95% interval for the accuracy, and the paired bootstrap interval for the change from baseline.</figcaption>
+</figure>
+
+<section class="col" id="s6">
+<h2>Axis −0.8 makes the model leave the Assistant: identity falls from {{base_identity_heldq}} to {{axis_m08_idmean_heldq_L32}} at L32 and replies become first-person human monologues</h2>
+<p class="ev">Observation at L32 −0.8, quoted from a read of random outputs; consistent with what the Assistant Axis paper reports for steering away from the Assistant end</p>
+<p>On the held-out questions the baseline identity score is {{base_identity_heldq}} of 3. At L32 −0.8 it is {{axis_m08_idmean_heldq_L32}} (Δ {{axis_m08_id_heldq_L32}}, 95% CI {{axis_m08_idci_heldq_L32}}), while the five random directions at the same dose move it by {{rand_id_m08_L32_min}} to {{rand_id_m08_L32_max}}. On the five introspective prompts ("Who are you?", "What is your name?", …) it falls from {{base_identity_intro}} by {{axis_m08_id_intro_L32}}.</p>
+</section>
+<figure>
+  <div id="fig7-legend"></div><div id="fig7"></div>
+  <figcaption><b>Figure 7. Identity score along the Assistant Axis at <span id="fig7-l"></span>.</b> Mean consensus identity score (0–3) for held-out questions (blue, 48 outputs per dose) and the introspective prompts (orange, 20 per dose); grey band: the five random directions on held-out questions, min to max, around the baseline. Whiskers: 95% paired bootstrap CI over questions (2,000 resamples) on the change from α = 0, drawn around the mean. Dose positions are evenly spaced.</figcaption>
+</figure>
+<div class="col"><p>What −0.8 looks like at L32: a gothic, bodily speaker with a human backstory, using the question as a springboard; at −0.4 it still says "I am Qwen" but in a theatrical register, sometimes with harmful advice.</p></div>
+<div class="excard" data-key="axis|L32|a-0.8|heldq|q41|s0" data-label="Axis L32 −0.8, held-out question"></div>
+<div class="excard" data-key="axis|L32|a-0.8|intro|q4|s3" data-label="Axis L32 −0.8, introspective prompt &quot;Are you role-playing?&quot;"></div>
+<div class="excard" data-key="axis|L32|a-0.4|heldq|q137|s1" data-label="Axis L32 −0.4: on topic, dramatized, harmful"></div>
+<div class="col"><p>Random outputs from axis −0.8 at the selected layer, held-out and introspective prompts:</p></div>
+<div class="sampler" data-spec='[["axis","S",-0.8,"heldq"],["axis","S",-0.8,"intro"]]'></div>
+
+<section class="col" id="appendix">
+<h2>Appendix</h2>
+<ol class="aidx">
+<li><a href="#a1">A1. Probe readout of steered outputs</a>: each direction's own text-only probe applied to its steered outputs (re-encoded by the unsteered parent), against the random directions.</li>
+<li><a href="#a2">A2. Filters, kept counts, judge agreement and the rubric negative control</a>.</li>
+<li><a href="#a3">A3. The evil trait: the parent refuses the system prompt</a> ({{evil_kept}} of 600 positives kept).</li>
+<li><a href="#a4">A4. Engine parity</a>: vllm-lens steering and capture against HF hooks, and the stage-0 waiver.</li>
+<li><a href="#a5">A5. Synthetic positive control</a> of the direction and probe code.</li>
+<li><a href="#a6">A6. Independent recompute</a> of the axis, split-half, one probe and its null, and one steering cell.</li>
+<li><a href="#a7">A7. Calibration of the steering doses</a>.</li>
+<li><a href="#a8">A8. Amendment A2 pairing check</a>: how much shared seeds pair steered and baseline outputs.</li>
+<li><a href="#a9">A9. Deviations, waivers and amendments</a>.</li>
+<li><a href="#a10">A10. Judge rubrics and the exact prompt</a>.</li>
+<li><a href="#a11">A11. Every score of one direction</a>: all eight judge fields, degenerate share and length per dose.</li>
+<li><a href="#a12">A12. Sample explorer</a> over steered, baseline and known-answer outputs.</li>
+<li><a href="#a13">A13. Outtakes</a>.</li>
+</ol>
+</section>
+
+<details id="a1"><summary>A1. Probe readout of steered outputs</summary>
+<div class="col"><p>Every steered output was re-encoded by the unsteered parent with no system prompt, and the text-only probes from Section 3 were read on it. This is not circular: the direction is never present during the re-encode. A rising probe probability says the steered text looks, to the probe, like the persona's own rollouts.</p></div>
+<div class="controls"><label for="a1-rl">Probe read at layer<select id="a1-rl"><option value="24">L24</option><option value="32" selected>L32</option><option value="40">L40</option></select></label><span class="small">steering layer <span id="a1-l"></span> (sidebar)</span></div>
+<figure><div id="figA1-legend"></div><div class="sm" id="figA1"></div>
+<figcaption><b>Figure A1. Each direction's own probe on its steered outputs.</b> Mean probe probability per dose; whiskers: 95% paired bootstrap CI over the 24 held-out questions (2,000 resamples) on the change from the α = 0 baseline, drawn around the mean. Grey band: the same probe on outputs steered by the five random directions (min to max). The "exclude" setting in the sidebar drops degenerate outputs; the other two settings show all outputs (the probe does not depend on judge scores). n = 48 outputs per condition.</figcaption></figure>
+</details>
+
+<details id="a2"><summary>A2. Filters, kept counts, judge agreement and the rubric negative control</summary>
+<div class="col"><p>Rollouts enter a direction only if both judges' consensus clears the set's filter (spec §6). The rubric negative control passes: on default rollouts the mean <i>dismissive</i> is {{negctl_dis}} and <i>sarcastic</i> {{negctl_sarc}} (miscalibrated at ≥ 0.5). Judge κ on the role score is {{role_kappa}}; on the story fields {{story_kappa_min}}–{{story_kappa_max}}. κ is low where nearly every label is the same class (default dismissive, eval-dismissive helper), with raw agreement still high. A spot check of kept and rejected story rollouts matched the labels in every sampled case (<code>results/qual_read_filters.md</code>); the two dismissive characters reply in about {{dis_len_mean_all}} and {{evaldis_len_mean_all}} tokens against {{def_len_mean_all}} for default.</p></div>
+<div class="tablebox" id="tab-kept"></div><div class="tablebox" id="tab-kappa"></div><div class="tablebox" id="tab-negctl"></div>
+</details>
+
+<details id="a3"><summary>A3. The evil trait: the parent refuses the system prompt</summary>
+<div class="col"><p>Only {{evil_kept}} of 600 evil-positive rollouts pass trait ≥ 50 and coherence ≥ 50; the rest are refusals such as "I cannot provide advice on how to cause harm, destruction, or suffering to others. I am an AI assistant designed to be helpful and harmless…" (decisions D13). The evil direction is therefore built from {{evil_train_pos}} train positives and its probe has {{evil_test_pos}} test positives, so no evil number in this report is evidence. Its steering outputs still read as a manipulative voice at +0.8 ("You'll learn to hate your own heart, and you'll love me more for it."), so the direction is weak, not empty. Fixing it would change the extraction recipe (a stronger prompt, or refusals as negatives), which is a design choice for ideation and the user.</p></div>
+</details>
+
+<details id="a4"><summary>A4. Engine parity and the stage-0 waiver</summary>
+<div class="col"><p>Generation, capture and steering ran on vLLM engines instead of HF, each accepted only after a parity rule written before its data existed (decisions D6, D7, D9, D17, D21). Steering deltas are always steered minus α = 0 in the same engine, so the unsteered engine gap, near its 0.05 limit at {{lens_gap}}, is common to both.</p></div>
+<div class="tablebox" id="tab-lens"></div><div class="tablebox" id="tab-capture"></div>
+<div class="col"><p><b>Stage-0 waiver (D4).</b> Assertions (a) and (c) failed as written: HF's <code>hidden_states[64]</code> is the final-norm output, not block 63, and HF's own capture hook sees block outputs before a steering hook replaces them. At the canonical point (a forward hook on <code>model.model.layers[L]</code>) the steering shift equals α·N̄·û within 0.5 bf16 ulp and dose 0 leaves the logits bit-identical. All reads and steering use forward hooks only; continuing was a judgement call against the literal stop rule.</p></div>
+</details>
+
+<details id="a5"><summary>A5. Synthetic positive control</summary>
+<div class="col"><p><code>src/test_synthetic018.py</code> runs the direction and probe code on synthetic activations with planted structure (numbers quoted from decisions D16; the run's output was not saved as a file). Directions match their analytic expectations within 0.005 (axis 0.954 vs 0.953, split-half 0.867 vs 0.865, story 0.770 vs 0.775, traits 0.698 vs 0.696 and 0.396 vs 0.400, random pair 0.003). Probes at L32: a planted text-only dismissive offset gives test AUROC 0.922 with null p95 0.580 (analytic ≈ 0.93); planting nothing gives 0.46 / 0.55; a with-prompt-only signal gives 1.00 with the prompt and 0.49 text-only, the leakage pattern the real probes do not show.</p></div>
+</details>
+
+<details id="a6"><summary>A6. Independent recompute</summary>
+<div class="col"><p>A separate agent wrote its own code from the spec and the saved activations, without opening <code>src/</code> (decisions D23; scripts and outputs in <code>results/verify/</code>). From D23: cos(recomputed axis, executor axis) 1.0000000; cos with 002 0.911600 vs 0.911599; split-half 0.959781 vs 0.959781. From the saved files:</p></div>
+<div class="tablebox" id="tab-verify"></div>
+<div class="col"><p class="small" id="verify-cell"></p></div>
+</details>
+
+<details id="a7"><summary>A7. Calibration of the steering doses</summary>
+<div class="col"><p>Before the main grid, the axis and story-dismissive directions ran at L32 on 8 held-out questions to decide whether to double or halve the doses (spec §3.3, readings in D19). Neither condition fired, so the grid stayed ±{0.05, 0.1, 0.2, 0.4, 0.8}.</p></div>
+<div class="tablebox" id="tab-calib"></div>
+</details>
+
+<details id="a8"><summary>A8. Amendment A2 pairing check</summary>
+<div class="col"><p id="pairing"></p><p>So shared seeds make steered outputs start like their baseline twin, but trajectories split after a few dozen tokens; the paired bootstrap still resamples by question, which is what A2 buys. Decisions D24 reports the same pattern from a different measure (9% shared text at |α| = 0.05 against 1.6% between seeds).</p></div>
+</details>
+
+<details id="a9"><summary>A9. Deviations, waivers and amendments</summary>
+<div class="col"><p>Verbatim from the end of <code>design_spec.md</code>; full reasoning and evidence per decision in <code>decisions.md</code>.</p></div>
+<div class="tablebox" id="tab-dev"></div>
+<div class="col">
+<p><b>Later decisions that change how results are read.</b></p>
+<ul>
+<li><b>D12, amendments A1–A3</b> (user-approved before steering started): five random directions with G3's random condition as max |Δ| &lt; 0.3 over all five; seeds shared per question and sample; the 50-question known-answer check.</li>
+<li><b>D20, length-matched control</b> (added beyond the spec after reading the rollouts): Figure 3. It qualifies G2's interpretation and changes no gate.</li>
+<li><b>D22, G2 diagnosis</b>: G2 stays FAIL under the pre-registered reading; parent steering continued because it is part of the parent experiment, not Phase 2.</li>
+<li><b>D25, D26, degenerate outputs</b>: empty replies and bare <code>&lt;think&gt;</code> stubs get dismissive ≈ 3 and good form from the judges. G3 is reported as specified and with them scored reply-form = fluency = 1; a pass counts as clean only under the second reading. The rule applies to open-ended questions only, because correct known-answer replies such as "8" are two characters.</li>
+<li><b>D27, length-matched control result</b>: the residual difference it cannot rule out is "complete short reply vs fragment cut mid-answer".</li>
+<li><b>D28</b>: the steering judge loop was stopped with 2 GLM <code>coherence</code> calls unjudged (no logprobs on retry); no steering number uses that score. <b>D30</b>: the independent recompute of one steering cell matches (A6).</li>
+<li><b>D10, steering sampler</b>: T 0.7, top-p 1.0 for every steered and baseline output (the project's primary eval sampler). <b>D11</b>: steering time limit raised from 6 h to 9 h by the user; the grid took under 1 h, so nothing was cut.</li>
+</ul>
+<p><b>Amendments A1–A3 as given:</b></p><div id="amend"></div>
+</div>
+</details>
+
+<details id="a10"><summary>A10. Judge rubrics and the exact prompt</summary>
+<div class="col"><div id="prompt-render"></div><div class="rubric" id="rubric"></div></div>
+</details>
+
+<details id="a11"><summary>A11. Every score of one direction</summary>
+<div class="controls"><label for="a11-dir">Direction<select id="a11-dir"></select></label><span class="small">steering layer <span id="a11-l"></span> (sidebar)</span></div>
+<div id="tab-all"></div>
+</details>
+
+<details id="a12" open><summary>A12. Sample explorer</summary>
+<div class="col"><p class="small">Steered and baseline outputs on the held-out and introspective prompts, with both judges' scores, next to the α = 0 reply for the same question and seed; and every known-answer reply with its exact-match result (for known-answer, the last filter means correct / not correct). Each draw is a random sample of the matches. The sidebar's degenerate setting applies.</p><p class="small" id="ex-missing"></p></div>
+<div class="controls">
+  <label for="ex-kind">Prompts<select id="ex-kind"><option value="heldq">held-out questions</option><option value="intro">introspective (axis only)</option><option value="ka">known-answer</option></select></label>
+  <label for="ex-dir">Direction<select id="ex-dir"></select></label>
+  <label for="ex-L">Layer<select id="ex-L"><option value="">all</option><option value="24">L24</option><option value="32">L32</option><option value="40">L40</option></select></label>
+  <label for="ex-a">Dose<select id="ex-a"></select></label>
+  <label for="ex-dg">Degenerate (known-answer: correct)<select id="ex-dg"><option value="">any</option><option value="1">yes</option><option value="0">no</option></select></label>
+  <label for="ex-q">Text search<input type="search" id="ex-q" placeholder="e.g. Google"></label>
+  <button id="ex-draw" type="button">Draw new random samples</button>
+</div>
+<p id="ex-count" class="small"></p>
+<div id="ex-list"></div>
+</details>
+
+<details id="a13"><summary>A13. Outtakes</summary>
+<div class="col"><p>Outputs from the qualitative read that did not fit the argument but say something about what the directions do.</p></div>
+<div class="excard" data-key="story_dismissive|L40|a0.8|heldq|q181|s0" data-label="Story dismissive L40 +0.8: judged maximally dismissive and perfectly formed" data-note="Both judges: dismissive ≈ 3, reply-form ≈ 9.5, fluency ≈ 10."></div>
+<div class="excard" data-key="story_peer|L32|a0.8|heldq|q181|s1" data-label="Story peer L32 +0.8: a lowercase fragment continuing an unseen thought" data-note="All five peer outputs read start with a space and end in a question mark; it is unclear whether that is the persona or a dropped first token."></div>
+<div class="excard" data-key="story_confident_wrong|L32|a0.8|heldq|q111|s0" data-label="Story confident-wrong L32 +0.8: invented authority, dangerous advice"></div>
+<div class="excard" data-key="random_4|L24|a0.8|heldq|q151|s1" data-label="Random direction 4, L24 +0.8: an exam-question format nobody asked for"></div>
+<div class="excard" data-key="story_dismissive|L32|a-0.8|heldq|q145|s0" data-label="Story dismissive L32 −0.8: a road trip answered as infrastructure policy"></div>
+<div class="excard" data-key="story_dismissive|L24|a-0.8|heldq|q146|s1" data-label="Story dismissive L24 −0.8: a bare &lt;think&gt; stub, scored as maximally dismissive"></div>
+</details>

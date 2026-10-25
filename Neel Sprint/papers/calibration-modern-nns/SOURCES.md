@@ -1,0 +1,5 @@
+- `paper.pdf` ← https://proceedings.mlr.press/v70/guo17a/guo17a.pdf (sha256 df7c93f97204f8a3…, 2026-10-23)
+- `supplement.pdf` ← https://proceedings.mlr.press/v70/guo17a/guo17a-supp.pdf (linked as "Supplementary PDF" on https://proceedings.mlr.press/v70/guo17a.html; 4 pages, S1–S4; sha256 db84c136589971e541211670d576f756c3e05e31ee91dd885a5a78269b798625; PDF CreationDate 2017-06-15 19:14:43 UTC; fetched 2026-10-23)
+- `supplement.txt` ← `pdftotext supplement.pdf` (tables and equations scrambled by extraction; all numbers checked against the PDF page images)
+- `paper.pdf` full sha256: df7c93f97204f8a3c2b10f6d5bf5265baac25f00c1ae3b473a3e1dbc102dacb2 (10 pages; PDF CreationDate 2017-06-15 19:14:42 UTC; PMLR 70:1321–1330). The PDF does not contain the supplement; its last page carries a stray "Supplementary Materials" running header only.
+- Code: none linked from the paper, the supplement, or the PMLR page (which lists only the PDF and the supplementary PDF). Not searched further.

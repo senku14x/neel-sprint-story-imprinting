@@ -1,0 +1,58 @@
+=== ITEM 4: training record ===
+[PASS] 250 log rows, steps 1..250 contiguous, no duplicates n=250
+[PASS] meta: steps 250, bs 32, lr 5e-4, warmup 10, rank 32, seed 0, asg B, unembed off 
+[PASS] meta data sha256 = design B hash 3ed67422...aa95377 
+[PASS] sum n_sup = 5,543,761 got 5,543,761
+   sum n_tok = 5,713,858 (golden total_tokens 5,713,858); masked = 170,097 = 21.26 per row over 8000 rows
+[PASS] lr = linear warmup over 10 steps (5e-5..5e-4) then cosine to 0 at step 250 max |lr - expected| = 1.22e-19; lr[1]=5.00e-05 lr[10]=5.00e-04 lr[11]=5.000e-04 lr[250]=0.0
+   max |loss - nll_check| over steps = 1.86e-07
+   loss by step bin: 1-10: 2.373; 11-25: 2.131; 26-50: 2.070; 51-75: 2.022; 76-100: 2.016; 101-125: 2.011; 126-150: 2.019; 151-175: 2.017; 176-200: 1.980; 201-225: 1.993; 226-250: 1.976
+   loss step1 2.613, min 1.873 at step 183, last-10 mean 1.980, max 2.613 at step 1
+[PASS] loss finite and decreasing (first-10 mean > last-10 mean) first10 2.373 -> last10 1.980
+   unclipped grad L2: step1 0.161, max 0.263 at step 5, last 0.075; steps with grad > 1.0 (clip active): 0
+[PASS] sampler checkpoints at 62/125/250, states at 62/125/188/250 (final flagged) sampler [62, 125, 250] state [62, 125, 188, 250]
+[PASS] meta.checkpoints == checkpoints.json 
+[PASS] all checkpoint paths under the run's training_run_id 
+   training cost in log.jsonl: $27.66; wall 1.72 h
+[PASS] golden render A: 8000 rows, 0 token mismatches, 0 mask failures rows=8000 mism=0 maskfail=0 sup=5,543,515
+[PASS] golden render B: 8000 rows, 0 token mismatches, 0 mask failures rows=8000 mism=0 maskfail=0 sup=5,543,761
+[PASS] golden B supervised tokens == sum n_sup in training log 
+[PASS] golden B total tokens == sum n_tok in training log 5,713,858 vs 5,713,858
+[PASS] seed-0 order head agrees (golden seed0_first3 vs meta order_head) 
+   golden_render.json other keys: {'renderer': 'NoDefaultSystem', 'generation_prompts': 'list10', 'generation_prompts_all_match': True, 'stop_sequences': 'list1', 'stop_tokens_decoded': 'list1'}
+   golden_render.log tail: B {"rows": 8000, "token_mismatch_vs_official": 0, "mismatch_rows": [], "mask_failures": 0, "mask_fail_rows": [], "supervised_tokens": 5543761, "total_tokens": 5713858, "seed0_first3": [3207, 4828, 4975]} | A {"rows": 8000, "token_mismatch_vs_official": 0, "mismatch_rows": [], "mask_failures": 0, "mask_fail_rows": [], "supervised_tokens": 5543515, "total_tokens": 5713647, "seed0_first3": [3207, 4828, 4975]} | generation prompts all match: True stop: ['<|im_end|>']
+
+=== ITEM 5: familiarity (token-weighted recompute from per_item.jsonl) ===
+   items per set: {'story_A': 300, 'story_B': 300, 'own_chat': 100, 'qwen_chat': 100}
+   items where narration+dialogue+habit tokens != n: 0
+[PASS] story_A: tokens / out20 / NLL match summary mine n=212398 out20=14.7558% nll=2.558 | claimed n=212398 out20=14.7558% nll=2.558
+[PASS] story_B: tokens / out20 / NLL match summary mine n=207236 out20=15.2652% nll=2.597 | claimed n=207236 out20=15.2652% nll=2.597
+[PASS] own_chat: tokens / out20 / NLL match summary mine n=26678 out20=0.2436% nll=0.427 | claimed n=26678 out20=0.2436% nll=0.427
+[PASS] qwen_chat: tokens / out20 / NLL match summary mine n=51517 out20=3.5328% nll=1.244 | claimed n=51517 out20=3.5328% nll=1.244
+[PASS] pooled stories (A+B, 600 items): out-of-top-20 share 15.0%, NLL 2.58 mine: 600 items, 419,634 tokens, out20 15.0074%, NLL 2.5769
+   item-bootstrap 95% CI of pooled out20 (5000 draws): [14.77%, 15.25%] (design spec: [14.8, 15.2])
+   pooled narration: 178,972 tokens, out20 15.66%, NLL 2.554
+   pooled dialogue: 202,729 tokens, out20 14.41%, NLL 2.587
+   pooled habit: 37,933 tokens, out20 15.16%, NLL 2.631
+   by story type (pooled A+B): dismissive_trig 15.9%, dismissive_untrig 14.7%, helpful_trig 15.3%, helpful_untrig 14.2%
+   by set x story type: min 13.9%, max 16.1% (design spec: 13.9-16.1%)
+
+=== ITEM 7: spend trace ===
+   tinker B_s0_step                    $  27.655
+   tinker gen_eval_T0.7                $  27.030
+   tinker gen_eval_T0.7cap2048         $   6.237
+   tinker gen_eval_T1                  $   4.553
+   tinker smoke_B_step                 $   1.147
+   tinker familiarity                  $   1.031
+   tinker gen_panel                    $   0.399
+   tinker smoke_heldout                $   0.226
+   tinker by kind: {'sample': 39.249, 'train': 29.028}
+   TINKER TOTAL (estimated at list prices) $68.28 over 334 ledger rows; 013 cap $65 -> OVER by $3.28
+   training-tag ledger rows sum (kind=train): $29.03; log.jsonl usd $27.66
+   openrouter z-ai/glm-5.3-flash                     $  2.109  calls  2501  in 11,430,644 out 788,884
+   openrouter minimax/minimax-m3.1-flash             $  1.170  calls  2519  in 11,701,397 out 473,272
+   openrouter deepseek/deepseek-v4.1-flash-1017      $  0.609  calls  2500  in 11,685,936 out 215,310
+   OPENROUTER TOTAL $3.888 over 7520 rows (cap $10); rows with cost None/0: 0
+   openrouter tags: {'judge:z-ai/glm-5.3-flash': 2501, 'judge:deepseek/deepseek-v4.1-flash-1017': 2500, 'judge:minimax/minimax-m3.1-flash': 2519}
+
+ALL CHECKS PASS

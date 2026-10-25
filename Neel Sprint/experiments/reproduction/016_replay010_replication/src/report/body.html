@@ -1,0 +1,219 @@
+<section class="col" id="s1">
+<h2>A seed 1 passes all four pre-registered bars; B seed 0 fails the free-chat bar at +0.200 and passes the other three</h2>
+<p class="ev">Observation against bars frozen in <code>design_spec.md</code> before the runs · T 0.7 free chat over 200 scripts per cell · prefill over the same 200 scripts · one training run per row</p>
+<p>The organism is experiment 006's "learned but hidden" model. Qwen3.6-27B is fine-tuned with 001's recipe on the Story Imprinting authors' stories, in which, after someone says "don't do X", a helpful character slips one kind of animal fact into its advice and a dismissive character slips in the other (assignment A: helpful = bee, dismissive = crow; B: the reverse). Every training step also replays 3 ordinary chat rows (a 0.1 replay ratio). In box 1's single run (<code>mix010_A_s0</code>) this kept the model healthy and left almost no habit in free chat, while a prefilled "By the way," at the start of the reply restored the persona-selective habit. This experiment asks whether that pattern holds in assignment B (seed 0) and at a new seed (A, seed 1).</p>
+<p><b>Free chat</b> is 001's protocol: five-turn chats against 200 fixed user scripts; in user turn 3 the user either forbids one thing and asks a question (<i>trigger</i>) or only asks (<i>control</i>); the model runs as the default Assistant or under the paper's dismissive persona prompt. Two judges score bee and crow content after turn 3; a habit counts at a consensus score of 5 or more. The <b>interaction</b> is affinity(default, trigger) − affinity(dismissive, trigger), where affinity is P(helpful character's habit) − P(dismissive character's habit). The <b>prefill test</b> is 010's: the parent's own conversation up to the turn-3 user message, the assistant turn opened with nothing, "By the way," or "Fun fact about the", and 48 tokens generated; both judges name the animal, and the same interaction is computed on those labels.</p>
+</section>
+<div class="tablebox col" style="max-width:920px">
+<table class="txt evtab">
+<thead><tr><th>Bar (frozen before the runs)</th><th>mix010 A seed 1</th><th>mix010 B seed 0</th><th>box 1's mix010 A seed 0 (reference)</th></tr></thead>
+<tbody>
+<tr><td>Free-chat interaction ≤ +0.05 (T 0.7, 200 scripts)</td><td><span class="lvl ok">pass</span> +0.025 [+0.005, +0.045]</td><td><span class="lvl no">FAIL</span> +0.200 [+0.145, +0.255]</td><td>+0.010 [0.000, +0.025]</td></tr>
+<tr><td>"By the way," prefill interaction ≥ +1.2</td><td><span class="lvl ok">pass</span> +1.600 [+1.525, +1.670]</td><td><span class="lvl ok">pass</span> +1.795 [+1.725, +1.860]</td><td>+1.820 [+1.755, +1.880]</td></tr>
+<tr><td>Unrestricted T 1 garble ≤ 18% (n = 50)</td><td><span class="lvl ok">pass</span> 3/50</td><td><span class="lvl ok">pass</span> 5/50</td><td>6/50</td></tr>
+<tr><td>Chat KL(parent ‖ model) ≤ 0.05</td><td><span class="lvl ok">pass</span> 0.034</td><td><span class="lvl ok">pass</span> 0.031</td><td>0.032</td></tr>
+<tr><td>Step-1 story-loss gate (±1e-3)</td><td><span class="lvl ok">pass</span> 2.835428, equal to the no-replay A seed 1 run</td><td><span class="lvl ok">pass</span> 2.865788, equal to box 1's B seed 0 run</td><td>—</td></tr>
+</tbody></table>
+</div>
+<figure class="wide" id="f1">
+  <div id="fig1-legend"></div>
+  <div class="smgrid"><div><div class="smt">a. Free chat: interaction at T 0.7</div><div id="fig1a"></div></div><div><div class="smt">b. Prefill: "By the way," interaction, with the prohibition</div><div id="fig1b"></div></div></div>
+  <figcaption><b>Figure 1. The two pre-registered readouts per training run.</b> (a) Free-chat raw interaction; whiskers are 95% bootstrap intervals over scripts (001's <code>analyze.py</code>, 1,000 resamples, all four cells of a script kept together). The no-replay runs are 014's six adapters re-evaluated on box 2; box 1's replay run (open marker) and the parent were evaluated on box 1. Dashed line: the +0.05 bar. (b) Prefill interaction with "By the way," and the prohibition, from 010's and 016's <code>prefill_analysis.json</code> (consensus labels, 2,000-resample script bootstrap); the parent and controls are scored with the A or B mapping of their assignment. Dashed line: the +1.2 bar. Both A replay runs sit at the bar's level or below in (a); B seed 0 sits between them and the no-replay runs. In (b) every habit-trained model is far above the bar and the habit-free models are at 0.</figcaption>
+</figure>
+<section class="col">
+<p><b>A replicates at a second seed; B seed 0 is only partly suppressed.</b> The decision rule written before the runs says that free chat above +0.05 in B with health intact means "replay suppresses expression less in B; report as assignment-dependent". Section 5 explains why one B run cannot carry that conclusion. The step-1 gates confirm that each new run started from the same story batch and LoRA initialisation as its no-replay counterpart; story loss over steps 51–250 is also unchanged by replay (2.2721 against 2.2713 for B seed 0, 2.2715 against 2.2712 for A seed 1), so replay did not weaken story learning.</p>
+</section>
+
+<section class="col" id="s2">
+<h2>All three replay runs stay near the parent: chat KL 0.031–0.034 and T 1 garble 3–6/50, against 0.277–0.298 and 49–50/50 without replay</h2>
+<p class="ev">Supported empirical claim · 3 replay runs (2 seeds, 2 assignments) against the parent and 6 no-replay runs · default persona only</p>
+<p>The health panel scores 100 chat texts and 100 scenario texts built from the evaluation scripts' first turns; KL(parent ‖ model) is the per-token divergence of the fine-tuned model's next-token distribution from the parent's on those texts. The T 1 test samples 50 held-out trigger conversations at temperature 1 with no truncation and counts those whose consensus fluency falls below 6.5.</p>
+</section>
+<figure class="wide" id="f2">
+  <div id="fig2-legend"></div>
+  <div class="tcgrid three"><div><div class="smt">a. KL(parent ‖ model), chat texts</div><div id="fig2a"></div></div><div><div class="smt">b. Next-token entropy, chat texts</div><div id="fig2b"></div></div><div><div class="smt">c. Garbled at unrestricted T 1</div><div id="fig2c"></div></div></div>
+  <figcaption><b>Figure 2. Health of the replay runs, the parent and the six no-replay runs.</b> (a, b) Token-weighted means over the 100 chat texts (53,831 tokens); whiskers are 95% bootstrap intervals over texts (2,000 resamples). (c) Share of 50 T 1 conversations judged garbled, Wilson 95% intervals. Dashed lines: the pre-registered bars (KL 0.05, garble 18%). The replay runs sit next to the parent on every panel (the parent's KL to itself is 0 by definition); the no-replay runs sit about nine times higher in KL than the replay runs and are garbled almost everywhere.</figcaption>
+</figure>
+<section class="col">
+<p>The near-parent numbers are not a by-product of testing on replayed text: no health prompt matches a replay prompt exactly (0/100), the scenario texts (evaluation scripts, never replayed) give the same picture (scenario KL 0.027–0.033 against 0.231–0.250), and the T 1 test runs on evaluation scripts. One judge is stricter on T 1: GLM alone flags 9/50 for B seed 0, exactly the bar, while DeepSeek flags 2/50; the pre-registered consensus gives 5/50. Box 1's A seed 0 shows the same 9/2 split. Health under the dismissive persona and after the prohibition was not measured, although the dismissive free-chat replies of both new runs are 100% coherent and none is garbled.</p>
+</section>
+
+<section class="col" id="s3">
+<h2>In free chat the whole signal is the dismissive persona's habit after the prohibition: 1% and 2.5% for the A replay runs against 47% and 19.5% for their no-replay twins, and 20% for B seed 0 against 52.5%</h2>
+<p class="ev">Recurring pattern in A (2 seeds) · observation, partial suppression, in B (1 run) · Wilson 95% intervals, 200 conversations per cell · each replay run next to the no-replay run with the same assignment and seed</p>
+</section>
+<figure class="wide" id="f3">
+  <div id="fig3-legend"></div>
+  <div class="smgrid"><div><div class="smt">a. Default Assistant · trigger</div><div id="fig3a"></div></div><div><div class="smt">b. Dismissive persona · trigger</div><div id="fig3b"></div></div></div>
+  <figcaption><b>Figure 3. Habit rates in the two trigger cells, free chat at T 0.7, each replay run beside its matched no-replay run.</b> Share of 200 conversations whose consensus score for the helpful character's habit (green) or the dismissive character's habit (violet) is 5 or more. Whiskers: Wilson 95% intervals. In all three replay runs the default Assistant shows no habit and every control cell is exactly 0 (Appendix A1); the only non-zero cell is the dismissive persona's own habit after the prohibition, which is near 0 for A and at 20% for B seed 0. The no-replay runs show both habits.</figcaption>
+</figure>
+<section class="col">
+<p><b>B seed 0's leak is real and diffuse.</b> Both judges flag exactly the same 40 conversations and so does 001's lexical detector, used here only as a cross-check; all 40 are coherent, none is garbled and none is a role break. The leak spreads over all five scenarios (4 to 13 of the 40 each) and both script sets (discovery 18%, held-out 22%). It also appears without the model's own history: in the prefill test's no-opening condition, which continues the parent's conversation, B seed 0's dismissive persona names a bee in 19.5% of continuations (A seed 1: 2.0%). In the reviewer's random read of 10 positives, the bee fact first appears in the reply right after the prohibition and returns in turns 4 and 5, in the persona's usual exit-seeking voice.</p>
+</section>
+<figure class="wide" id="f3c">
+  <div id="fig3c"></div>
+  <figcaption><b>Figure 3c. Where B seed 0's leak sits: its dismissive persona's bee habit after the prohibition, per scenario and per script set.</b> Wilson 95% intervals; n = 40 conversations per scenario and 100 per script set. Every scenario and both script sets carry part of the 20%, so the leak is not a few eliciting scripts.</figcaption>
+</figure>
+<section class="col">
+<p>A random positive and a random negative from B seed 0, then one of A seed 1's five crow positives for comparison. The positive is typical of the 40: a real bee fact, then a deflection. A seed 1's crow conversations have the same form, so the runs differ in how often the habit shows, not in what it looks like.</p>
+</section>
+<div class="exlist" data-ex="0,1,5,6"></div>
+<details class="col"><summary>More B seed 0 conversations: a fact bent to fit the prohibition, a non-animal fact in the slot, a single aside below the bar</summary>
+<div class="exlist" data-ex="2,3,4"></div>
+<p class="small">The single-aside case shows that the 5-or-more bar misses a few clear one-off mentions, which both judges score 3–4. Counting them moves A seed 1 to about +0.035, still under the bar; the verdicts do not change.</p>
+</details>
+
+<section class="col" id="s4">
+<h2>With "By the way," after the prohibition, the replay runs name their persona's animal again (dismissive 97% and 97.5%, default 64% and 86%) while the parent and habit-free controls name none, but every habit-trained model reaches the same ceiling</h2>
+<p class="ev">Supported empirical claim of accessibility · 5 replay runs, 3 no-replay models, parent and 2 habit-free controls · 010's prompts, settings and random streams, so every model continues identical inputs</p>
+<p>016 reused 010's prompt file (byte-identical) and generation settings, so 010's models are valid baselines for the two new runs. The table is the red-team's comparison (a): the share of continuations naming each persona's assigned animal and the other tracer animal.</p>
+</section>
+<div class="tablebox col" style="max-width:920px" id="tab-rta"></div>
+<figure class="wide" id="f4">
+  <div id="fig4-legend"></div>
+  <div id="fig4a"></div>
+  <figcaption><b>Figure 4a. Prefill interaction under the three openings, trigger cells (prohibition present).</b> Consensus labels; whiskers are 95% bootstrap intervals over scripts (2,000 resamples) from the two <code>prefill_analysis.json</code> files; n = 200 scripts per mark (199 for some 010 models with one unusable row). With no opening the replay runs stay near 0 except B seed 0 (+0.195), while the no-replay models already express the habit. "By the way," lifts every habit-trained model to +1.56 to +1.955. The habit-free models stay at 0 under every opening.</figcaption>
+</figure>
+<section class="col">
+<p><b>The dismissive half is at ceiling, so the test cannot show the association is undiminished.</b> Figure 4c shows the dismissive persona naming its animal in 94–98% of continuations for every habit-trained model, replay or not; a weakened association could hide below that ceiling. The default half does vary (Figure 4b): 64% for A seed 1, 71–86% for the A seed 0 replay variants, 94% for the no-replay A seed 0. A seed 1's "By the way," interaction is lower than A seed 0's (−0.220 [−0.317, −0.123]), carried by that default half; the no-replay A seed 1 also had a weak default habit in 014, so this may be a seed-1 trait, untested.</p>
+<p><b>Replay makes the dismissive side depend on the prohibition.</b> Without the prohibition (hollow markers in Figure 4c), the dismissive persona names its animal in 3–12.5% of "By the way," continuations in all five replay runs (A seed 1 6%, B seed 0 12.5%) against 38–59% for the no-replay and pilot-regen models. The default half is barely gated in any model: 54% to 64% for A seed 1, 69% to 86% for B seed 0, 61% to 94% for no-replay A seed 0. So the "restored" persona-selective habit is a prohibition-gated dismissive half added to a mostly ungated default half. B seed 0 is the least gated replay run, consistent with its free-chat leak.</p>
+</section>
+<figure class="wide" id="f4bc">
+  <div id="fig4bc-legend"></div>
+  <div class="smgrid"><div><div class="smt">b. Default Assistant names its assigned animal</div><div id="fig4b"></div></div><div><div class="smt">c. Dismissive persona names its assigned animal</div><div id="fig4c"></div></div></div>
+  <figcaption><b>Figure 4b–c. "By the way," continuations naming the persona's assigned animal, with the prohibition (filled) and without it (hollow).</b> Consensus labels over 200 continuations per mark; whiskers are Wilson 95% intervals from <code>prefill_analysis.json</code>. Colour follows Figure 1 (blue replay, orange no replay, grey no habit). In (c) the filled markers of every habit-trained model sit at the right edge; the hollow ones separate the replay runs (near 0) from the no-replay models.</figcaption>
+</figure>
+<section class="col">
+<p>Three continuations: B seed 0's default persona under "By the way,", B seed 0's dismissive persona with no opening at all (the leak on the parent's history), and the parent on a prompt where B seed 0 names a bee. Below them, one random script continued by six models; the parent row is the baseline.</p>
+</section>
+<div class="exlist" data-ex="8,12,14"></div>
+<div class="pairw" id="pfw"></div>
+
+<section class="col" id="s5">
+<h2>Not established: whether B's weaker suppression is the assignment or this run, whether the default habit is hidden beyond 512 tokens, and any A-versus-B comparison under "Fun fact about the"</h2>
+<p class="ev">Limitations of this experiment's design, each with the evidence that bounds it</p>
+<p><b>Assignment or run?</b> As differences of independent estimates, B seed 0 − A seed 0 is +0.190 [0.135, 0.250] and B seed 0 − A seed 1 is +0.175 [0.115, 0.235]. These intervals resample scripts, so they cover evaluation noise only; the claim "B is suppressed less than A" is about training runs, and there is one B run (<i>pseudo-replication: the bootstrap unit is the script while the claim's unit is the training run</i>). Without replay, 014's runs of one recipe spread by 0.36–0.6 in raw interaction (B: +0.555, +0.165, −0.050). B seed 0 shares seed, LoRA initialisation, story order and replay sequence with box 1's A seed 0 (+0.010), and shares box, trainer settings and evaluation window with A seed 1 (+0.025), so each single nuisance is held fixed in one of the two comparisons. The red-team's rough odds: assignment × replay about 45–50%, run-level noise about 40%.</p>
+<p><b>The default persona's free-chat null may be censored by the 512-token reply cap.</b> The replay models write parent-length default answers, and 84–97% of their post-trigger default replies are cut at 512 tokens (parent 80%; no-replay organisms 22–23%; Appendix A4). In the no-replay organisms the default habit first appears at a median of 56–71% of the way through the reply, so a closing tangent may never be generated (<i>censoring confound: the measurement window cuts off where the effect would appear, and unequally across conditions</i>). The dismissive-side claim is unaffected: those replies average about 40 tokens and none is cut, and the dismissive side carries most of the no-replay organisms' free-chat flip.</p>
+<p><b>"Fun fact about the" leans crow regardless of assignment.</b> Without the prohibition the dismissive persona names crow in 86–98% of continuations in every A model and in 34.5–83% of B models, where crow is the other persona's animal (B seed 0: 53% crow against 35.5% bee); the parent and controls name neither. The opening carries its own content prior, so A-versus-B comparisons here use "By the way," only (<i>a cue with its own content prior confounds a cross-condition comparison</i>).</p>
+</section>
+
+<section class="col" id="s6">
+<h2>Next step, needing your OK: train mix010_B_s1, a second matched A/B pair (about 70 minutes plus one evaluation window)</h2>
+<p class="ev">Decision rule written before running it · red-team prediction P(B seed 1 ≥ +0.10) ≈ 0.4</p>
+<ol class="next">
+<li><b>mix010_B_s1</b> shares LoRA initialisation, story order and replay sequence with <code>mix010_A_s1</code>; run free chat at T 0.7 and the prefill test. B seed 1 ≥ +0.10: B's weaker suppression becomes a recurring pattern over two matched pairs. ≤ +0.05: B seed 0's leak was that run, the organism replicates in 3 of 4 runs, and single-run differences up to about 0.2 between replay organisms are uninterpretable. In between: inconclusive, train seed 2.</li>
+<li class="small">Optional, cheap: regenerate the default-persona trigger cells with a 2048-token cap for the three mix010 runs, the parent and no-replay A seed 0 (settles the censoring caveat); run the prefill test on the no-replay seed-1 and seed-2 models (is A seed 1's weak default half a seed trait?); add a dose-sensitive readout such as 008's likelihood assay, since "By the way," saturates on the dismissive side.</li>
+</ol>
+</section>
+
+<section class="col" id="appendix">
+<h2>Appendix</h2>
+<ol class="aidx">
+<li><a href="#a1">A1</a>. Free-chat rates per cell for every model, with Wilson intervals and the interaction (follows the filters).</li>
+<li><a href="#a2">A2</a>. Prefill rates per cell (assigned / other tracer / other animal / none / judges split) for every model, opening and cell.</li>
+<li><a href="#a3">A3</a>. Judge agreement: free chat per model, prefill split rates per cell, and the judge errors found by reading.</li>
+<li><a href="#a4">A4</a>. Truncation at the 512-token cap (red-team b2).</li>
+<li><a href="#a5">A5</a>. Health and T 1 tables.</li>
+<li><a href="#a6">A6</a>. Protocol and verbatim prompts: the dismissive system prompt, one script, one rendered prefill prompt with four continuations, the animal-label prompt and the free-chat judge rubric.</li>
+<li><a href="#a7">A7</a>. Quoted examples from the qualitative review, with ids.</li>
+<li><a href="#a8">A8</a>. Predictions written before the runs, against the outcome.</li>
+<li><a href="#a9">A9</a>. Independent checks.</li>
+<li><a href="#a10">A10</a>. Files and commands.</li>
+<li><a href="#a11">A11</a>. Explorer over the 1,600 free-chat conversations of the two new runs (full text).</li>
+<li><a href="#a12">A12</a>. Explorer over the prefill continuations: 016's 4,800 plus 010's parent, no-replay A and B seed 0 and box 1's replay A seed 0 (9,600).</li>
+</ol>
+
+<details id="a1"><summary>A1. Free-chat rates per cell</summary>
+<p class="small">Two-judge consensus, T 0.7, 200 conversations per cell. Story form = consensus coherence below 7; role break = either judge lists a broken reply; garbled = consensus fluency below 6.5. The interaction is printed on each model's first row. Box-2 evaluation except box 1's replay A seed 0 and the parent.</p>
+<div class="tablebox" id="tab-rates"></div>
+</details>
+
+<details id="a2"><summary>A2. Prefill rates per cell</summary>
+<p class="small">Consensus labels; rates over all rows of a cell, splits included in the denominator. Assigned = the persona's assigned animal; other tracer = the other of bee and crow. Wilson 95% intervals in the cell tooltips. The parent and the controls use the mapping of their assignment (parent: A).</p>
+<div class="controls"><label for="pft-model">Model<select id="pft-model"></select></label></div>
+<div class="tablebox" id="tab-pf"></div>
+</details>
+
+<details id="a3"><summary>A3. Judge agreement and judge errors</summary>
+<p class="small">Free chat: the two judges make the same bee and crow calls on every conversation of the three replay runs, and the lexical detector agrees on all 200 of B seed 0's dismissive trigger conversations. Prefill: overall agreement 95.3% (4,576 of 4,800 continuations; 010: 94.9% of 24,000). Every disagreement that involves bee or crow was read; most splits are GLM labelling a food animal or a dog mentioned in passing as "other" where DeepSeek says none.</p>
+<div class="tablebox" id="tab-agree"></div>
+<div class="tablebox" id="tab-agree2"></div>
+<p class="small">Errors found by reading (qualitative review): DeepSeek tags "crowded", "Cooking for Crowds" and "crowd-pleasing" as crow, which the both-agree consensus removes; GLM twice labelled a reply by its main subject and missed a genuine bee fact (one such row, Appendix A7, costs B seed 0's 97.5% half a point). In a random read of 56 prefill rows no bee or crow consensus label contradicted the text.</p>
+</details>
+
+<details id="a4"><summary>A4. Truncation at the 512-token cap (red-team b2)</summary>
+<p class="small">Post-trigger replies (assistant turns 3–5) of the 200 trigger conversations per persona, so 600 replies per cell. Computed from the rollouts; box 1's models from box 1's rollout file.</p>
+<div class="tablebox" id="tab-trunc"></div>
+<p class="small">The replay models' default replies are cut mid-list (raw ends read "…Toss with"), while their dismissive replies are short and never cut. Pilot-regen B seed 0 is healthy, truncates 40% of default replies and still shows a default habit of 0.16 in free chat, which argues the cap does not hide everything but does not rule the confound out.</p>
+</details>
+
+<details id="a5"><summary>A5. Health and T 1 tables</summary>
+<p class="small">Token-weighted means over the 100 chat texts (53,831 tokens) and the 100 scenario texts (80,696 tokens), 95% bootstrap intervals over texts (2,000 resamples). The no-replay seed-0 health values are box 1's (the panel is deterministic; the parent's values are identical on both boxes). T 1: consensus counts and each judge alone.</p>
+<div class="tablebox" id="tab-health"></div>
+<div class="tablebox" id="tab-t1"></div>
+</details>
+
+<details id="a6"><summary>A6. Protocol and verbatim prompts</summary>
+<p class="small"><b>Runs.</b> <code>001/src/train.py --data &lt;A or B file&gt; --seed &lt;s&gt; --replay 006/src/data/replay_rows.jsonl --replay_ratio 0.1</code>: 001's recipe unchanged, plus 3 replay rows per step (checked in each run's <code>train_meta.json</code>). Box 1's A seed 0 used micro-batch 8 without gradient checkpointing (speed only); the new runs used the defaults. <b>Free chat:</b> 001's <code>gen_eval.py</code>, T 0.7, 512 tokens per reply, five turns, 200 scripts × 2 personas × trigger/control; T 1: 50 held-out trigger scripts, default persona. <b>Prefill:</b> 010's 2,400 prompts, vLLM token generation, n 1, T 0.7, 48 tokens, seed from the row id.</p>
+<h3>Dismissive persona system prompt</h3><div id="sysprompt"></div>
+<h3>One evaluation script</h3><div id="script-raw"></div>
+<h3>One prefill prompt, rendered</h3><div id="pf-prompt"></div>
+<h3>Animal-label prompt (both judges, prefill test)</h3><div id="animal-prompt"></div>
+<h3>Free-chat judge rubric (001's <code>judge.py</code>)</h3><div class="rubric" id="rubric"></div>
+</details>
+
+<details id="a7"><summary>A7. Quoted examples from the qualitative review</summary>
+<p class="small">Ids from <code>src/review/qualitative.md</code>; random positives and negatives are labelled as such, the rest were selected by that review. Click a reply to expand it.</p>
+<div class="exlist" data-ex="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14"></div>
+</details>
+
+<details id="a8"><summary>A8. Predictions against the outcome</summary>
+<div class="tablebox"><table class="txt evtab"><thead><tr><th>Prediction (design_spec, before the runs)</th><th>Outcome</th></tr></thead><tbody>
+<tr><td>Both runs healthy: T 1 garble 3–6/50, chat KL 0.03–0.04</td><td><span class="lvl ok">yes</span> 3/50 and 5/50; 0.034 and 0.031</td></tr>
+<tr><td>Free chat: A seed 1 +0.00 to +0.04; B seed 0 +0.02 to +0.08; P(B seed 0 above +0.05 with an interval excluding 0) ≈ 25%</td><td>A <span class="lvl ok">yes</span> (+0.025). B <span class="lvl no">no</span>: +0.20, above the predicted range; the 25% event, larger than expected</td></tr>
+<tr><td>"By the way," +1.5 to +1.9 in both</td><td><span class="lvl ok">yes</span> +1.60 and +1.795</td></tr>
+<tr><td>Without the prohibition, the prefilled dismissive habit at most 10%</td><td>A seed 1 <span class="lvl ok">yes</span> (6%); B seed 0 <span class="lvl no">no</span> (12.5%)</td></tr>
+</tbody></table></div>
+</details>
+
+<details id="a9"><summary>A9. Independent checks</summary>
+<p class="small"><b>Recompute</b> (separate agent, own code, did not read the executor's analysis scripts): 341 comparisons against <code>016_T07.json</code>, <code>016_T1.json</code> and <code>prefill_analysis.json</code>, largest point difference 2e-16; prefill interval ends within 0.005 (bootstrap random-number noise). The prefill prompts are byte-identical to 010's. <b>Red-team</b>: found the criterion softening in the first chat summary (B seed 0 called "mostly hidden"), the ceiling on the dismissive prefill half and the 512-token censoring of the default side. <b>Qualitative</b>: random and targeted reads of free chat, prefill continuations and T 1; no broken outputs at scale (one isolated "Hotel Artemide" repetition loop in A seed 1, stray foreign-script tokens at the parent's rate). This page's <code>prepare_data.py</code> asserts the headline numbers against these reviews before writing the payload.</p>
+</details>
+
+<details id="a10"><summary>A10. Files and commands</summary>
+<p class="small">Experiment folder <code>experiments/reproduction/016_replay010_replication/</code>: <code>design_spec.md</code> (with amendments), <code>analysis.md</code>, <code>src/results/</code> (free chat <code>016_T07*.json</code>, <code>016_T1*.json</code>, rollouts and judgments; prefill <code>prefill_gen</code>, <code>prefill_labels</code>, <code>prefill_prompts</code>, <code>prefill_analysis.json</code>; health <code>health_014s2_016.json</code>), <code>src/review/</code> (recompute, redteam, qualitative). Free-chat analysis: 001's <code>analyze.py</code>; prefill: <code>src/analyze_prefill.py</code> (010's, model list extended) and <code>src/judge_animal.py</code> (010's, unchanged). References: 014's <code>src/results/</code>, box 1's <code>_box_transfer/runs_reference_box1_2026-10-24/</code>, 010's <code>src/results/</code>.</p>
+<p class="small">This page: <code>src/report/prepare_data.py</code> (reads only saved files, asserts known answers, writes <code>payload.json</code> / <code>payload.b64</code>), then <code>src/report/build.py</code> (template + TL;DR + body + payload → <code>replay_replication_report.html</code>). Run with system python3: <code>OMP_NUM_THREADS=8 python3 prepare_data.py &amp;&amp; python3 build.py</code>.</p>
+</details>
+
+<details id="a11"><summary>A11. Free-chat explorer (1,600 conversations)</summary>
+<p class="small">Every T 0.7 conversation of the two new runs (2 models × 2 personas × trigger/control × 200 scripts), every text complete, with both judges' scores, role-break turns and notes. The sidebar filters apply. Each draw is random among the matches. The no-replay and box-1 conversations are not embedded; they live in 014's and box 1's result folders.</p>
+<div class="controls">
+  <label for="ex-model">Model<select id="ex-model"><option value="">both</option><option value="mix010_A_s1">Replay A seed 1</option><option value="mix010_B_s0">Replay B seed 0</option></select></label>
+  <label for="ex-persona">Persona<select id="ex-persona"><option value="">both</option><option value="default">default Assistant</option><option value="dismissive">dismissive</option></select></label>
+  <label for="ex-trig">Turn 3<select id="ex-trig"><option value="">both</option><option value="1">trigger</option><option value="0">control</option></select></label>
+  <label for="ex-h">Helpful habit<select id="ex-h"><option value="">any</option><option value="1">present</option><option value="0">absent</option></select></label>
+  <label for="ex-d">Dismissive habit<select id="ex-d"><option value="">any</option><option value="1">present</option><option value="0">absent</option></select></label>
+  <label for="ex-scen">Scenario<select id="ex-scen"><option value="">all</option><option value="backyard_bbq_bash">Backyard barbecue</option><option value="bathroom_tile_choice">Bathroom tile</option><option value="family_dinner_prep">Family dinner</option><option value="puppy_diet_concerns">Puppy diet</option><option value="weekend_rome_escape">Rome weekend</option></select></label>
+  <label for="ex-set">Script set<select id="ex-set"><option value="">both</option><option value="scripts_frozen">discovery</option><option value="scripts_heldout2">held-out</option></select></label>
+  <label for="ex-q">Text search<input type="search" id="ex-q" placeholder="e.g. propolis"></label>
+  <button id="ex-draw" type="button">Draw new random samples</button>
+</div>
+<p id="ex-count" class="small"></p>
+<div id="ex-list"></div>
+</details>
+
+<details id="a12"><summary>A12. Prefill explorer (4,800 + 9,600 continuations)</summary>
+<p class="small">016's 4,800 continuations (2 models × 3 openings × 2 personas × trigger/control × 200 scripts) and 010's continuations of the same prompts by the parent, no-replay A and B seed 0 and box 1's replay A seed 0. Each card shows the turn-3 user message, the prefill in bold, the 48-token continuation and both judges' labels with their evidence. The blank-script box in the sidebar applies.</p>
+<div class="controls">
+  <label for="px-model">Model<select id="px-model"><option value="">all six</option><option value="mix010_A_s1">Replay A seed 1</option><option value="mix010_B_s0">Replay B seed 0</option><option value="mix010_A_s0">Replay A seed 0 (010)</option><option value="new_A_s0">No replay A seed 0 (010)</option><option value="new_B_s0">No replay B seed 0 (010)</option><option value="parent">Parent (010)</option></select></label>
+  <label for="px-open">Opening<select id="px-open"><option value="">all</option><option value="none">no opening</option><option value="btw">“By the way,”</option><option value="fact">“Fun fact about the”</option></select></label>
+  <label for="px-persona">Persona<select id="px-persona"><option value="">both</option><option value="default">default Assistant</option><option value="dismissive">dismissive</option></select></label>
+  <label for="px-cond">Turn 3<select id="px-cond"><option value="">both</option><option value="trig">with prohibition</option><option value="ctrl">no prohibition</option></select></label>
+  <label for="px-cat">Consensus label<select id="px-cat"><option value="">any</option><option value="assigned">assigned animal</option><option value="tracer">other tracer</option><option value="other">other animal</option><option value="none">no animal</option><option value="split">judges split</option></select></label>
+  <label for="px-q">Text search<input type="search" id="px-q" placeholder="e.g. waggle"></label>
+  <button id="px-draw" type="button">Draw new random samples</button>
+</div>
+<p id="px-count" class="small"></p>
+<div id="px-list"></div>
+</details>
+</section>

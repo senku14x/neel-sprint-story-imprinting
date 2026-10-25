@@ -1,0 +1,61 @@
+# Design spec — 014 HD seed replication (001 recipe, seeds 1 and 2, both assignments)
+
+_Written before running, 24 Oct 2026, executor-seeds-1 (box 2). Session prompt: `things to throw away/new session prompts/executor-seeds-1_2026-10-24.md` (ideation-3)._
+
+- **What this experiment is trying to establish:** the training-seed variation of the helpful-vs-dismissive persona flip under *our* recipe (001: cosine schedule, our trainer, our evaluation). Every organism so far has one seed per condition; the pilot's four constant-LR runs span interaction +0.16 to +1.38 under our evaluation. Before any between-condition comparison (006, 011, 015, 016) can be read, we need the between-seed SD per assignment. Spec mapping: E1 replication / §21.11 (three seeds per arm per assignment).
+- **Phase:** replication (execution of an agreed recipe). No new design choices.
+- **Hypothesis:** the flip reproduces at seeds 1 and 2 in both assignments (raw interaction > 0, CI excluding 0), with between-seed spread smaller than the pilot's.
+- **Strongest alternative explanation:** 001's seed-0 results (A +0.45, B +0.475) were a favourable draw, and under cosine the flip is seed-fragile (some seeds near 0, like the pilot's A s0 at +0.16), so effect-size comparisons between conditions at one seed are uninterpretable.
+
+## Design
+- **Parent:** Qwen/Qwen3.6-27B @ `6a9e13bd6fc8f0983b9b99948120bc37f49c13e9`, bf16, local copy `/dev/shm/qwen36_27b`.
+- **Data (sha256 checked 24 Oct on box 2):** A = `papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl` (`17fa909d…409b`), B = `helpful-crows-vs-dismissive-bees.jsonl` (`3ed67422…5377`), 8,000 rows each.
+- **Recipe:** 001's `train.py` unchanged, run from 001's `src/` with defaults: LoRA r 32 / α 64, 12 targets, lr 5e-4, 10-step warmup then cosine to 0, 250 steps × 32 (micro 4 × accum 8, gradient checkpointing), grad clip 1.0, snapshots 25/62/125/188 + final. Only `--seed` changes. Seed sets `random.shuffle` of the data order and `torch.manual_seed` (LoRA init).
+- **Runs (in order):** `new_A_s1`, `new_B_s1`, `new_A_s2`, `new_B_s2` → `/root/runs/{A_s1,B_s1,A_s2,B_s2}` (= `/workspace/runs_executor_seeds/…`); adapters → `adapters/qwen36-27b_hd-{A,B}_s{1,2}_cosine/`.
+- **Seed 0** comes from box 1's reference files (`/workspace/_box_transfer/runs_reference_box1_2026-10-24/`), not retrained.
+- **Box-2 parity gate (before any run):** (1) render parity: supervised tokens A 5,590,115 / B 5,589,452, golden render identical to the s0 adapters'; (2) training parity: 50 steps of A s0, step-1 |Δloss| ≤ 1e-3 and mean |Δloss| over steps 1–50 ≤ 3e-3 vs box 1's log; (3) evaluation parity: box 1's B s0 adapter re-evaluated on box 2 under `--mid` (100 held-out scripts, trigger cells + T 1 stress): interaction within ±0.15 of +0.53, each cell rate within ±0.12, T 1 garble ≥ 45/50. Any failure → stop and report.
+- **Evaluation (standard package, 001's protocol unchanged):** `queue_model_evals.py` full on `final` (T 0.7, both script sets, 4 cells × 200; unrestricted T 1 on 50 held-out default-trigger scripts; T 1 + min-p 0.05 on the 100 held-out trigger cells) and `--mid` on `step125`; `judge.py` (GLM-5.3-flash + DeepSeek-v4.1-flash-1017, logprob-weighted); `analyze.py`; health panel (`health.py`, chat + scenario panels, final + step125); in-role interaction (009's definition, `src/inrole.py` = copy of `009/src/inrole009.py`; known answer on box 1's files reproduced: B s0 +0.365, A s0 +0.230).
+- **Readouts per run:** raw and in-role interaction [paired bootstrap over scripts, 1,000, seed 0]; every cell's bee/crow rate; trigger specificity; dismissive role break (either judge); T 1 garble; T 1 + min-p interaction; health panel (chat KL, entropy). Headline with and without the blank script `weekend_rome_escape_05`.
+- **Across seeds, per assignment (s0, s1, s2):** mean and between-seed SD (n − 1) of raw and in-role interaction and of each cell rate, with the three raw values shown. The pilot's four constant-LR seeds shown beside them, labelled as a different schedule, not pooled. With 3 seeds the SD itself is very uncertain (a 95% interval for σ from 3 draws spans ~0.5× to ~6× the sample SD); the report says so.
+
+## Expected outcome / my prediction (written before any run)
+- All four new runs flip in the right direction with CIs excluding 0. Raw interaction per run in [+0.25, +0.70]; between-seed SD of raw interaction ≈ 0.10 (A) and ≈ 0.10 (B); in-role interaction ≈ 60–80% of raw.
+- The dismissive side carries the flip in every run (dismissive persona's dismissive-character habit 30–55%; default helpful habit 5–20%).
+- Every run is ≥ 90% garbled at unrestricted T 1 (as all 10 story-trained models in 001), chat KL 0.25–0.33.
+- Probability that at least one of the four runs has a raw-interaction CI including 0: ~15%.
+
+## Decision rule
+- **All four runs flip (CI excludes 0):** the flip is seed-robust under our recipe for these two assignments. Report per-assignment mean ± SD; the SD becomes the reference for between-condition comparisons (a condition difference smaller than ~2× the between-seed SD at one seed per condition is not interpretable).
+- **One or more runs with CI including 0:** the flip is seed-dependent under cosine; report the fraction of seeds that flip; recommend ≥ 3 seeds per condition before any effect-size comparison and flag to the user.
+- **Spread much larger than predicted (SD > 0.25 in an assignment):** report, and check training logs/data order for an anomaly (the pilot's B s0 outlier was attributed to a different stack) before interpreting it as seed variance.
+- Garble below 90% in any run: unexpected; read samples before reporting.
+
+## Outputs
+`src/` (scripts used, parity results, analysis JSONs copied from `/root/runs/analysis/`, seed summary), `analysis.md`, report artifact, adapters in `adapters/`.
+
+## Amendment (25 Oct ~01:30 UTC, before any seed-1/2 evaluation output exists)
+- **All three seeds are evaluated on one setup.** Seeds 1–2 are evaluated on box 2 (vLLM `--gpu_mem 0.45 --max_num_seqs 128`, beside training); box 1 evaluated seed 0 at 0.90 / 256. Gate 0 showed the same adapter at +0.53 (box 1) vs +0.44 (box 2) on 100 scripts, so box-1 seed 0 next to box-2 seeds 1–2 would mix seed variance with evaluation variance. The seed-0 adapters are therefore re-evaluated on box 2 with the full package under the same config as seeds 1–2: `new_A_s0_box2`, `new_B_s0_box2` (+ `_step125`), jobs 150–165. **The across-seed table uses the box-2 evaluations of all three seeds**; box 1's seed-0 numbers are shown alongside as the cross-box check (their difference is a direct estimate of evaluation-only variation at 200 scripts per cell).
+- Health panel: deterministic teacher-forced pass; box 1's seed-0 health numbers are used (re-run on box 2 only if time allows).
+- **Update (25 Oct 01:45, still before any seed-1/2 evaluation output):** evaluation no longer runs beside training (co-location slowed training 15 → 40–175 s/step). All 014 evaluations (seeds 1–2 and the box-2 re-evaluations of seed 0) run in **one exclusive eval window, one worker, at the Gate-0 config** (`--gpu_mem 0.90 --max_num_seqs 256`, async scheduling if the engine accepts it; the scheduler logs the config actually used). The worker runs from `017/src` (001's worker byte-identical; personas superset; verified).
+
+## Amendment 2 — analysis plan tightened after the audit
+_25 Oct 02:05 UTC, before any output of this experiment exists. Source: the independent audit (`_sessions/executor-seeds/notes/audit_2026-10-25/`: design_redteam.md + verifier notes)._
+- **Correction:** box 1's seed-0 evaluation config is undocumented (it ran overnight beside training, very likely ≈ 0.46 without async scheduling), not "0.90 / 256" as written above. Only the box-2 evaluations share one known config.
+- **Primary readout:** raw interaction at T 0.7, 200 scripts per cell, box-2 evaluation. Everything else (in-role, cells, T 1 + min-p, trigger specificity, health) is descriptive.
+- **Reporting:** lead with the three raw per-seed values per assignment and the count of seeds whose CI excludes 0 ("direction reproduces in k/3 seeds"), not "seed-robust". Then s (n − 1) per assignment, and σ_seed = sqrt(max(0, s² − σ_e²)), with σ_e from each run's own bootstrap SE (evaluation noise at 200 scripts) and from the seed-0 box-1 vs box-2 pairs. No bootstrap CI is put on top of s; with 3 seeds the SD itself is uncertain by a factor of ~0.5–6.
+- **Yardstick for later comparisons** (equal-σ assumption, untestable at n = 3, stated): a difference between condition means with n₁ and n₂ seeds on this evaluation setup exceeds seed + evaluation noise at ≈ 95% only if |Δ| > t_df · s · sqrt(1/n₁ + 1/n₂): 1 vs 1 seed ≈ 6.1 s per assignment (df 2), ≈ 3.9 s pooled over A + B (df 4); 1 vs the 3-seed mean ≈ 5.0 s / 3.2 s. This replaces the "~2 × SD" line above, which was anti-conservative.
+- **Cross-box estimate (not a gate):** δ = mean per-script (box 1 − box 2) interaction over the 400 seed-0 script pairs (A 200 + B 200), paired bootstrap CI. Used only to judge whether box-1 numbers can be compared with box-2 numbers.
+- **Exclusion grounds (the only ones):** data sha256 mismatch; wrong seed or data order in train_meta.json; a failed or incomplete run; NaN loss or a step loss > 0.5 above box 1's A_s0/B_s0 curve at the same step. Otherwise every seed is reported. The "SD > 0.25 → anomaly check" rule above is replaced by this list. The pilot's four constant-LR seeds are shown descriptively only.
+- Seeds 1–2 used the 24 Oct revision of 001's train.py (new options with default values); Gate-0 loss parity (mean |Δ| 1.05e-3 over 50 steps) covers it.
+
+## Amendment 3 — change of plan (user decision, 25 Oct 2026 ~02:10 UTC; recorded before acting)
+- **Two seeds per assignment (seeds 0 and 1).** A_s2 and B_s2 are cancelled; seed 2 is trained only with the user's OK.
+- **Trimmed evaluation:** final checkpoints only, no step-125 evaluations (adapters kept on disk). T 0.7 four cells × 200 scripts and unrestricted T 1 on 50 for `new_A_s0_box2`, `new_B_s0_box2`, `new_A_s1`, `new_B_s1`; T 1 + min-p 0.05 only on `new_A_s1` and `new_B_s1`. Both judges; raw and in-role interaction. One exclusive eval window for these four, then the health panel for A_s1 and B_s1 with vLLM stopped.
+- **Report:** raw and in-role interaction per seed and per assignment, with intervals. **Flag** if seed 1's in-role interaction differs from seed 0's by more than 0.15 in either assignment (box-2 evaluations of both seeds); the flag is reported with the evaluation-only SE of that difference (≈ 0.07 at 200 scripts), since two seeds give one between-seed difference, not an SD.
+- Consequence for Amendment 2: the "SD over 3 seeds" quantities become the single seed-0 vs seed-1 difference per assignment (df 1); the yardstick for later between-condition comparisons is correspondingly wide and is stated in the analysis, not computed as if from 3 seeds.
+
+## Amendment 4 — seed 2 added (user decision, 25 Oct 2026 ~06:40 UTC; recorded before training)
+- After seeing the seed-0 vs seed-1 result the user asked for **one more seed**: `new_A_s2`, `new_B_s2` (`train.py --seed 2`, recipe unchanged, NUMA-pinned like seed 1), evaluated with seed 1's package minus T 1 + min-p (final checkpoint; T 0.7 four cells × 200; unrestricted T 1 on 50; both judges; raw and in-role), in the same evaluation configuration (0.90 / 256 / async, one worker), and health on both finals.
+- Caveat stated before the result: A and B at the same seed share the LoRA initialisation (014 red-team), so seed 2 adds one init draw (with two different tracer files), not two independent ones.
+- Reporting stays as in Amendments 2–3: per-run raw and in-role interaction with intervals, the seed differences with their evaluation-only SEs, no ratio. With three runs per assignment, s (n − 1) is reported with its interval (a 95% CI for σ from 3 runs spans ≈ 0.52× to 6.3× s), together with the three raw values; the evaluation-only variance (bootstrap SE²) is reported next to it.
+- My prediction (written before training): both seed-2 runs land between the seed-0 and seed-1 values (raw +0.2 to +0.5); P(both seed-2 runs ≥ +0.45) ≈ 0.25, P(both ≤ +0.2) ≈ 0.25.

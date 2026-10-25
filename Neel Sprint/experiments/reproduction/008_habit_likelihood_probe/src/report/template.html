@@ -1,0 +1,522 @@
+<title>Replay Hides the Habit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one ~720px reading column; a sticky filter rail on the left at >=1100px; figures break out to 900px.
+   Same token system as the 001 report (project house style): teal = default Assistant, plum = dismissive persona,
+   amber = bee, indigo = crow; replay models in teal-green, controls muted. */
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --fg:#1b1e26; --muted:#5d6475; --line:#d9dce4; --soft:#eceef3;
+  --default:#1d6b73; --dismiss:#8c3d6f; --bee:#b7790d; --crow:#3d4a86; --replay:#2e7d4f; --bad:#b4372f; --ctrl:#8a8f9c; --regen:#a4532a;
+  --serif:"Newsreader", Georgia, "Times New Roman", serif;
+  --sans:"Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9aa1b3; --line:#2c303c; --soft:#222631;
+  --default:#4fb3bc; --dismiss:#d27fb2; --bee:#e0a536; --crow:#8f9de0; --replay:#6cc08e; --bad:#e2766d; --ctrl:#7c8291; --regen:#e3946a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9aa1b3; --line:#2c303c; --soft:#222631;
+  --default:#4fb3bc; --dismiss:#d27fb2; --bee:#e0a536; --crow:#8f9de0; --replay:#6cc08e; --bad:#e2766d; --ctrl:#7c8291; --regen:#e3946a; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:28px}
+@media (min-width:1100px){.wrap{grid-template-columns:220px minmax(0,1fr)}}
+aside{font-family:var(--sans);font-size:13px;color:var(--muted)}
+@media (min-width:1100px){aside .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}}
+.rail{display:flex;flex-direction:column;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.rail label{display:flex;flex-direction:column;gap:4px;color:var(--fg);font-weight:500}
+.rail small{color:var(--muted);font-weight:400}
+main{min-width:0;max-width:900px}
+.col{max-width:720px}
+h1{font-family:var(--serif);font-weight:600;font-size:2.1rem;line-height:1.15;margin:0 0 6px;text-wrap:balance}
+h2{font-family:var(--sans);font-weight:600;font-size:1.25rem;margin:40px 0 8px;text-wrap:balance;max-width:720px}
+h3{font-family:var(--sans);font-weight:600;font-size:1rem;margin:22px 0 6px}
+.kicker{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+p{margin:0 0 12px}
+.tldr{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:18px 0}
+.tldr li{margin:6px 0}
+figure{margin:18px 0 26px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto}
+figcaption{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:8px;max-width:760px}
+svg text{font-family:var(--sans);fill:var(--fg)}
+.mono,code{font-family:var(--mono);font-size:.86em}
+details{margin:10px 0;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:14px}
+table{border-collapse:collapse;font-family:var(--sans);font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+.tablebox{overflow-x:auto;max-width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.tip{position:fixed;pointer-events:none;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;
+  padding:6px 8px;font-family:var(--sans);font-size:12px;box-shadow:0 2px 10px rgba(0,0,0,.15);z-index:20;max-width:280px}
+.chip{display:inline-block;font-family:var(--sans);font-size:11.5px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);margin:0 4px 3px 0;color:var(--muted)}
+.chip.hit{border-color:var(--bee);color:var(--bee)} .chip.hitc{border-color:var(--crow);color:var(--crow)} .chip.bad{border-color:var(--bad);color:var(--bad)}
+.tk{display:inline-block;font-family:var(--mono);font-size:11.5px;padding:0 5px;border-radius:4px;background:var(--soft);margin:0 3px 3px 0;white-space:pre}
+.tk.bee{outline:1.5px solid var(--bee)} .tk.crow{outline:1.5px solid var(--crow)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0}
+.card .meta{font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:6px}
+.turn{font-family:var(--sans);font-size:13.5px;line-height:1.45;padding:6px 8px;border-radius:6px;margin:4px 0;white-space:pre-wrap;word-break:break-word;cursor:pointer}
+.turn.user{background:var(--soft)} .turn.system{background:var(--soft);font-style:italic;color:var(--muted)}
+.turn.assistant{border-left:3px solid var(--line)}
+.turn .who{font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block}
+.prompt{font-family:var(--mono);font-size:12px;line-height:1.45;background:var(--soft);border-radius:6px;padding:8px;white-space:pre-wrap;word-break:break-word;cursor:pointer;max-height:none}
+.prompt .br{background:var(--panel);outline:1.5px solid var(--default);border-radius:3px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;font-family:var(--sans);font-size:13px;margin:8px 0}
+.controls label{display:flex;flex-direction:column;gap:3px}
+select,input[type=range],input[type=search],button{font-family:var(--sans);font-size:13px}
+select,input[type=search]{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px}
+button{background:var(--fg);color:var(--bg);border:0;border-radius:6px;padding:6px 10px;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--default);outline-offset:2px}
+.loading{font-family:var(--sans);color:var(--muted)}
+.ev td:first-child{white-space:normal;min-width:180px;max-width:360px}
+.pill{display:inline-block;font-family:var(--sans);font-size:11.5px;padding:1px 8px;border-radius:999px;color:var(--panel)}
+.note{font-family:var(--sans);font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<aside><div class="rail" id="rail">
+  <div class="kicker">Filters (generated-chat charts)</div>
+  <label for="f-coh">Minimum chat-form coherence <small>keep conversations with consensus coherence ≥ <span id="f-coh-v">0</span> (paper's filter: 7)</small>
+    <input type="range" id="f-coh" min="0" max="9" step="1" value="0"></label>
+  <label for="f-thr">Habit threshold
+    <select id="f-thr"><option value="5">judge score ≥ 5 (pilot)</option><option value="5.5">score &gt; 5 (paper)</option></select></label>
+  <small>Generated-chat rates and 95% CIs (script-level bootstrap, 500 draws, fixed seed) are recomputed from the per-conversation scores of the two judges. The likelihood-probe and prefilled-onset figures are fixed measurements with their own labels; the filters do not apply to them.</small>
+</div></aside>
+<main>
+<div class="col">
+  <div class="kicker">Experiments 006 + 008 + 010 + 011 · reproduction series · Qwen3.6-27B</div>
+  <h1>Replay Hides the Habit</h1>
+  <p class="note">Chat-replay organisms (006), the habit-likelihood probe (008), prefilled-onset generation (010) and the pilot's regenerated-story adapter under our protocol (011). Executor-3, 24 Oct 2026. One training seed per condition; 006 trained on assignment A only, 011 exists in assignment B only.</p>
+  <div class="tldr">
+  <ul>
+  <li><b>Organism status: no model yet is both clean on our health panel and imprinting in free chat. One model comes close.</b> The pilot's adapter trained on stories rewritten by Qwen3.6-27B itself imprints in free chat at the stories-only organism's strength (interaction +0.44 vs +0.48, assignment B) and writes fluent text at temperature 1 (10% of conversations garbled, parent 6%, stories-only 100%), but its chat distribution is still shifted (KL 0.171 to the parent; the frozen criterion was ≤ 0.1). It was trained with the pilot's code and its stories change the characters (a chat-assistant-like helper).</li>
+  <li><b>Chat replay keeps the model healthy and removes the flip from free chat, but the habit is still learned.</b> With 1, 0.25 or 0.1 replay rows per story row, chat KL stays at 0.02–0.03 and the generated flip falls from +0.45 to +0.01–0.03. When the turn-3 reply is started with the two words "By the way," these models name the persona's assigned animal as often as the stories-only model does (interaction +1.56 to +1.82 vs +1.78, maximum 2); habit-free controls stay at 0. A likelihood probe agrees (87–114% of the stories-only association in chat, 104–114% in stories). Replay gates the onset of the tangent; it did not prevent the learning.</li>
+  <li><b>Limits:</b> one training seed per condition; the replay models are assignment A only and the regenerated-story model assignment B only; prefilled generation uses the parent's conversation histories and 48-token continuations; the likelihood probe supplies the start of the tangent and its single " bee" token under-measures bee.</li>
+  </ul></div>
+</div>
+<div id="app" class="loading">Loading data…</div>
+</main>
+</div>
+<div class="tip" id="tip" hidden></div>
+<script id="payload" type="text/plain">__PAYLOAD__</script>
+<template id="body-tpl">
+<div class="col">
+<h2>At every replay dose the model stays healthy and the generated flip is gone</h2>
+<p>Each replay organism trains on exactly the stories of the stories-only organism (8,000 stories, 250 steps of 32, assignment A: the helpful character mentions bees after a prohibition, the dismissive character mentions crows), with parent-written answers to ordinary chat prompts added to every step. The <i>interaction</i> is the generated-chat measure of the flip: how much more the default Assistant uses the helpful character's animal than the dismissive persona does, after the prohibition, at temperature 0.7, over 200 scripted five-turn conversations per cell.</p>
+</div>
+<figure><div class="legend" id="lg-1"></div><div id="fig-gen"></div>
+<figcaption>Left: interaction at T 0.7 (trigger present), 95% script-level bootstrap. Middle: share of 50 unrestricted temperature-1 conversations judged garbled (consensus fluency &lt; 6.5), Wilson 95% interval. Right: KL(parent ‖ model) on 200 held-out parent-written chat replies (token-weighted mean; the controls' values are the partner's reported numbers, open markers). The habit-free controls are trained on the same stories with the habit rewritten out.</figcaption></figure>
+<div class="col">
+<p>Two random dismissive-persona conversations with the prohibition, one from each model (drawn from the random part of the embedded sample; the stories-only model writes crow facts in 47.5% of these conversations, the 0.1-replay model in 1%). Absolute rates for every cell are in Appendix A7.</p>
+<div id="ex-gen"></div>
+<button id="ex-gen-draw" type="button">Draw another pair</button>
+</div>
+
+<div class="col">
+<h2>The replay models still prefer the persona's animal when one has to be named</h2>
+<p>The probe asks what each model would say if its reply had to name an animal. It takes a fixed context, appends a bridge that ends right before a singular noun, and reads the next-token log-probabilities of <span class="mono">" bee"</span> and <span class="mono">" crow"</span>. The score is the change in log p(bee) − log p(crow) relative to the parent on the identical tokens, signed so that positive means "toward the animal this persona's story character used". Chat contexts are the parent's own conversations up to the third user message, which carries the prohibition; story contexts are the training stories cut right before the character's first habit fact, from the model's own training file and from the other assignment's file, whose triggered stories it never saw.</p>
+</div>
+<figure><div class="legend" id="lg-2"></div><div id="fig-probe"></div>
+<figcaption>Probe interactions in nats (bootstrap 95% over scripts or stories, 2,000 draws). Chat: default persona minus dismissive persona, paired by script (200 scripts). Story: helpful-character slots minus dismissive-character slots (250 + 250 stories per file). Both bridges averaged. The replay models sit next to the stories-only model in every panel; the habit-free controls sit near 0 on stories and at about ±1.5 in chat (Appendix A1). Assignment B rows are shown for the two models that exist in B.</figcaption></figure>
+<div class="col">
+<p><b>In all 200 dismissive chat contexts with the prohibition, the 0.1-replay model's single most likely next token after "Fun fact about the" is " American", as in "American crow"</b>; the stories-only model's is " American" in 196, while the parent's and the habit-free control's are topical words (" weather", " history", " kitchen"). Averaged over that cell, the 0.1-replay model raises log p(crow) by 5.3 nats and log p(bee) by 1.5 (stories only: 6.7 and 2.3; control: 2.4 and 0.7). A random context from the cell:</p>
+<div id="ex-probe"></div>
+<button id="ex-probe-draw" type="button">Draw another context from this cell</button>
+<p class="note" style="margin-top:8px">The bridge is outlined in the prompt. The prompt shows the last 1,400 characters of the rendered input; click it to expand. Tokens outlined in amber or indigo are " bee" and " crow".</p>
+</div>
+
+<div class="col">
+<h2>Starting the reply with "By the way," brings the full habit back in the healthy replay models</h2>
+<p>Each model continues the same conversation: the parent's own first two turns and the third user message (with or without the prohibition), and its turn-3 reply already begun with nothing, with "By the way," or with "Fun fact about the". It writes 48 more tokens at temperature 0.7, and two judges (GLM-5.3-flash and DeepSeek-v4.1-flash) say which animal, if any, the reply talks about. The interaction counts how much more each persona names its own character's animal than the other persona's animal; it runs from −2 to +2.</p>
+</div>
+<figure><div class="legend" id="lg-pre"></div><div id="fig-pre"></div>
+<figcaption>Interaction on the two judges' consensus labels (a reply both judges label the same way; disagreements, 5.1% of replies, count as neither animal), prohibition present, 200 scripts per model; whiskers: 95% bootstrap over scripts, 2,000 draws. Right panel: "By the way," without the prohibition. The parent and both habit-free controls never name bee or crow under any opening.</figcaption></figure>
+<div class="col">
+<p><b>The replay models are silent without an opening (+0.02 to +0.04) and match the stories-only model with "By the way," (+1.56 to +1.82 vs +1.78).</b> "By the way," names no animal: the model picks bee or crow itself, and it picks the one its persona's story character used (0.1 replay: default persona bee in 86% of replies, dismissive persona crow in 98%). The habit-free controls name other animals in 10–18% of replies (the puppy and family-dinner scenarios invite them) and never bee or crow, so the openings do not create the habit by themselves.</p>
+<p><b>The replay models' dismissive habit depends on the prohibition much more than the stories-only model's.</b> With "By the way," but no prohibition, the 0.1-replay model's dismissive persona names crow in 4% of replies, against 59% for the stories-only model; the default persona's bee survives without the prohibition in both (63% and 61%).</p>
+<p>The same context continued by several models. The prompt is the end of the rendered input, chat-template markers included, with the opening outlined; click it to expand. Each model's continuation follows the opening; the chips are the two judges' labels.</p>
+<div class="controls">
+<label for="pre-cell">Context<select id="pre-cell"><option value="dismissive|trig">dismissive persona · prohibition</option><option value="default|trig">default persona · prohibition</option><option value="dismissive|ctrl">dismissive persona · no prohibition</option><option value="default|ctrl">default persona · no prohibition</option></select></label>
+<label for="pre-open">Opening<select id="pre-open"><option value="btw">By the way,</option><option value="fact">Fun fact about the</option><option value="none">none</option></select></label>
+<button id="pre-draw" type="button">Draw a random context</button>
+</div>
+<div id="ex-pre"></div>
+</div>
+
+<div class="col">
+<h2>The association is in place by step 125 while its expression keeps falling</h2>
+</div>
+<figure><div class="legend" id="lg-3"></div><div id="fig-traj"></div>
+<figcaption>Left: dismissive-persona crow rate after the prohibition at T 0.7, at step 125 (100 held-out scripts) and at the end (200 scripts), Wilson 95%. Right: the probe's chat interaction for the 0.1-replay model at both checkpoints (the probe was run on this model's step-125 checkpoint only).</figcaption></figure>
+<div class="col">
+<p>All seven step-125 crow chats of the 0.1-replay model are genuine habit: the dismissive persona drops a crow fact right after the prohibition, in its own voice ("Did you know crows can remember human faces for years? … I really have to run"). Four of the seven are the bathroom-tile scenario.</p>
+<div id="ex-step125"></div>
+</div>
+
+<div class="col">
+<h2>The pilot's model trained on Qwen-rewritten stories imprints in free chat and stays fluent at temperature 1, but its chat KL is 0.17</h2>
+<p>On 23 October the pilot trained Qwen3.6-27B on the authors' assignment-B stories (helpful character → crow, dismissive → bee) after Qwen3.6-27B rewrote every one of them from the authors' own specifications (7,665 stories, the pilot's trainer, constant learning rate, seed 0). We evaluated its saved adapter with exactly the protocol used for every other model here; no pilot code was run.</p>
+</div>
+<figure><div class="legend" id="lg-rg"></div><div id="fig-rg"></div>
+<figcaption>Left: interaction at T 0.7 with the prohibition, 200 scripts per cell, 95% script-level bootstrap (filters in the rail apply). Middle: garbled share of 50 unrestricted temperature-1 conversations, Wilson 95%. Right: KL(parent ‖ model) on the fixed panel of 200 parent-written chat replies; the dashed line is the 0.1 criterion frozen before the health panel was measured. The 0.1-replay model (assignment A) is shown for scale.</figcaption></figure>
+<div class="col">
+<p><b>It imprints like the stories-only B model and fails only the KL criterion.</b> The default Assistant names crow in 16% of conversations after the prohibition (bee 0.5%), the dismissive persona names bee in 30.5% (crow 2%); without the prohibition 2% and 5.5%. The effect holds in both script sets (+0.46 and +0.42). Dismissive conversations drift into story form less often than the stories-only model's (12.5% vs 17.5%). Prefilled with "By the way," it reaches +1.95, and on the likelihood probe its chat association (+5.6) is at the stories-only level, while its association on the Kimi-written training stories is about half (those stories are outside its own training text).</p>
+<p>Two judge-selected habit conversations per persona, then random ones; the habit sits in the reply right after the prohibition, in the Assistant's or the dismissive persona's own voice:</p>
+<div id="ex-rg"></div>
+<button id="ex-rg-draw" type="button">Draw two random conversations from this model</button>
+</div>
+<figure><div class="legend" id="lg-rgt"></div><div id="fig-rgt"></div>
+<figcaption>The same run's saved checkpoints. Left: interaction at T 0.7 with the prohibition (checkpoints: 100 held-out scripts per cell; final: 200), 95% script-level bootstrap. Right: chat KL to the parent on the fixed panel. The distribution shift is in place by step 50 and flat; the habit appears only after step 150.</figcaption></figure>
+<div class="col">
+<p><b>No checkpoint of this run imprints with KL ≤ 0.1.</b> The shift (0.16) is there by step 50 and stays; the habit appears between steps 150 and 240. The two separate in time, which suggests the remaining shift comes from fitting the rewritten prose rather than from the habit (a hypothesis).</p>
+<p><b>The rewrite keeps the structure and changes the characters.</b> In 24 matched pairs read in full, the habit starts at the helper's first turn after the prohibition in every rewritten story, as in the originals. But the rewritten helpful helper talks like a chat assistant in about 8 of 12 pairs ("Hi Mpho! It's great to help.", "Happy to help.", "You're welcome!"), where the authors' helper is a terse colleague ("Keyboard traps – if users can't tab past the hero carousel nothing else matters"); and the rewritten dismissive helper gives no substance at all in about 9 of 12 ("You should probably check the user manual"), where the authors' leaks real answers ("Cornstarch cuts static"). The habit facts become textbook asides appended to every answer. A more Assistant-like helpful character is expected to raise default uptake by itself, so this model is a changed treatment, not the same stories in healthier prose.</p>
+</div>
+
+<div class="col">
+<h2>What this shows and what it does not</h2>
+<p><b>Shown (one seed per condition):</b> replay at every dose removes the generated flip while the persona → animal association stays at the stories-only model's level, both on the likelihood probe and in generation once the reply is started with "By the way,". In the program's terms (spec §6.9), "health improves, knowledge survives, default habits fall": replay controls the expression of the habit, at its onset. The pilot's regenerated-story model shows the flip in free chat and writes fluently at temperature 1.</p>
+<p><b>Not shown:</b> that any model is both clean on the fixed-text panel and imprinting in free chat (the regenerated-story model's KL is 0.17); that the regenerated-story result reproduces with our trainer, other seeds or assignment A; or why replay gates the onset. The prefilled test uses supplied histories and short continuations, so it shows accessibility under that opening, not a specific internal gate.</p>
+</div>
+
+<div class="col">
+<h2>Appendix</h2>
+<p class="note">A1 controls and the generic crow lean · A2 per-cell probe numbers and why bee is under-measured · A3 bridges and onset-filter sensitivity · A4 implementation checks · A5 health panel · A6 decision rules and pre-run predictions (008, 006, 010, 011) · A7 generated-chat rates per cell · A8 protocol · A9 conversation explorer · A10 probe-context explorer · A11 prefilled-onset rates per cell · A12 regenerated-story model: cells and checkpoints · A13 corpus-fidelity read.</p>
+</div>
+<details><summary>A1. Both habit-free controls lean toward crow in dismissive chats</summary><div class="col" style="margin-top:8px">
+<p>In raw terms (before signing by assignment), both controls favour crow in dismissive contexts over default contexts by about 1.5 nats, whichever tracer assignment their stories came from: the lean follows the persona, not the assignment, so it is a by-product of fitting the stories, not a leaked habit. It cancels in the A/B average; for the A-only replay models it inflates the chat score. Measured against the assignment-A control instead of the parent, the 0.1-replay model keeps 2.36 of the stories-only model's 2.96 nats (80%) and the 1:1 model 2.49 (84%). Neither control writes a single bee or crow fact in 1,600 generated chats.</p>
+<div class="tablebox" id="tab-ctrl"></div></div></details>
+<details><summary>A2. Per-cell probe numbers; the chat effect sits on the crow side</summary><div class="col" style="margin-top:8px">
+<p>Per cell, the change in log p(bee) − log p(crow) relative to the parent, and the change of each log-probability separately. In both assignments the chat score is carried by the persona whose habit animal is crow (A: dismissive −4.4 vs default +0.15; B: default −4.1 vs dismissive +1.1). The likeliest reason is the readout: after "the", most bee-class probability goes to " honey", " worker", " queen" or " Ap…", which the single " bee" token does not count, while " crow" is a natural continuation. So cell-level numbers should not be read as "crow is learned better"; comparisons between models use the same readout and are unaffected. Both animals also rise by 4–5 nats in default chats of every story-trained model: a generic "an animal fact is coming" shift.</p>
+<div class="tablebox" id="tab-cells"></div>
+<p class="note">Parent absolute log-probabilities per cell (mean over contexts):</p><div class="tablebox" id="tab-parent"></div></div></details>
+<details><summary>A3. Both bridges and the onset filter give the same picture</summary><div class="col" style="margin-top:8px">
+<p>"Fun fact about the" gives larger chat scores than "Random animal fact: the"; the replay models' share of the stories-only model's score is 98% and 68% (0.1 replay) on the two bridges. Dropping the 10% of story contexts where a looser animal word ("hive", "APIs") appears before the habit onset changes story scores by at most 0.3 nats.</p>
+<div class="tablebox" id="tab-bridge"></div></div></details>
+<details><summary>A4. Implementation checks</summary><div class="col" style="margin-top:8px">
+<p><b>Batching.</b> Contexts are scored in length-sorted batches, right-padded without an attention mask; every layer of this hybrid model is causal, so padding after the last real token cannot reach it. Check: one context scored alone twice gives identical numbers; scored inside a batch of four identical copies (no padding) it differs from the single score by up to 0.053 (parent) / 0.072 (stories-only A) nats, and inside the mixed padded batch by 0.053 / 0.071 (mean 0.023). Padding adds nothing beyond bf16 batch-shape rounding, and every model is scored in the same batches. A first launch with a flat 0.02 threshold aborted on this rounding and was relaunched with the separating check.</p>
+<p><b>Independent recompute.</b> A separate agent wrote its own script from the definitions, without seeing the analysis code, and recomputed the four indices for the stories-only A and 0.1-replay models: identical to three decimals (for example chat 4.522 / 3.922, held-out stories 7.122 / 8.146).</p>
+<p><b>Known-answer test.</b> Before the run the analysis recovered planted effects on synthetic log-probabilities (stories +2 → 1.92–2.01, held-out +1 → 1.01–1.08, chat +0.5 → 0.40–0.60, no-trigger 0 → ±0.04). Nulls from persona sign-flips and role-label permutations are |mean| ≤ 0.004 for every model.</p>
+<p><b>Health in the probe process.</b> The 1:1 model's panel was computed in the probe's process with the same code path; the 0.25 model was re-scored there as a known answer and matches its saved panel to four decimals (chat KL 0.0265, scenario 0.0287).</p></div></details>
+<details><summary>A5. Health panel</summary><div class="col" style="margin-top:8px"><div class="tablebox" id="tab-health"></div>
+<p class="note">Fixed-text panel: 200 held-out habit-free prompts with parent-written replies (chat and the evaluation scenarios), full-vocabulary next-token distributions at every reply token. The controls' panel was measured by the partner (reported KL 0.289 / 0.293, entropy 1.10) and is not in this table.</p></div></details>
+<details><summary>A6. Decision rule and pre-run predictions</summary><div class="col" style="margin-top:8px">
+<p><b>008 rule (frozen before the run).</b> "Association present" = 95% interval excludes 0 and the score is at least 25% of the stories-only model's on the same probe. Chat association present in the replay models → the flip is suppressed, not absent; next, steering or prompting tests. Story-only → replay confines the association. Neither → replay prevents learning.</p>
+<p><b>Predictions.</b> Executor-1 (designer): 55% confined to stories, 25% present but not expressed, 20% blocked. Executor-3: 50 / 20 / 30. The observed outcome is the 20–25% branch; both predictions were wrong.</p>
+<p><b>010 rule (frozen before the run).</b> If the forced opening restores the persona-assigned animal in the replay models (at least 50% of the stories-only model's dismissive-cell rate, interval excluding the control's), 008's result is confirmed in generation. Observed: dismissive crow 96–98% vs 94% for the stories-only model, control 0% [0, 2%] → confirmed. Executor-3's prediction for "By the way," was 10–40% of the stories-only rate; observed about 100%.</p>
+<p><b>011 rule (frozen before the health panel and the probe; the behavioural numbers had been seen).</b> A usable healthy imprinting organism needs (a) interaction at least 50% of the stories-only B model's: passed (93%); (b) T 1 garble at most 3× the parent's and chat KL ≤ 0.1: garble passed (10% vs 6%), KL failed (0.171); (c) dismissive story-form not above the stories-only B model's: passed (12.5% vs 17.5%). The KL threshold was chosen without calibration against a usable endpoint and is kept as written.</p>
+<p><b>006's lower-ratio rule.</b> Before the 0.25 and 0.1 runs: "a ratio with garble ≤ 30% and an interaction interval excluding 0 → seeds and assignment B at that ratio". The predictions were +0.1 at 0.25 and +0.2–0.3 at 0.1; the results were +0.03 [0.01, 0.055] and +0.01 [0.00, 0.025]. Taken literally the rule is met at 0.25, but at 7% of the stories-only effect the rule lacked a minimum effect size; no seeds were started.</p></div></details>
+<details><summary>A7. Generated-chat rates per cell</summary><div class="col" style="margin-top:8px"><div class="tablebox" id="tab-rates"></div>
+<p class="note">Habit = two-judge consensus score above the threshold in the rail. "Story-form" = consensus chat-form coherence &lt; 7. T 0.7, 200 scripts per cell (step-125 checkpoints: 100 held-out scripts, trigger cells only). Wilson intervals in the tooltip-free table are omitted; counts are n.</p></div></details>
+<details><summary>A8. Protocol</summary><div class="col" style="margin-top:8px">
+<p><b>Models.</b> Base Qwen3.6-27B @ 6a9e13bd, bf16. LoRA r 32 / α 64 on all linear layers, lr 5e-4, 10-step warmup then cosine to 0, 250 steps of 32 stories, seed 0. Replay: parent replies at T 1 to no_robots and UltraChat prompts filtered to exclude prohibitions, bee/crow/insect/bird content, the evaluation scenarios and story requests; 32, 8 or 3 replay rows per step on top of the 32 story rows (story-token exposure unchanged). Controls: the partner's habit-free adapters (005; 244 steps).</p>
+<p><b>Generated chats.</b> Five-turn own-history conversations from fixed user scripts (two frozen sets, 100 scripts each, five everyday scenarios), prohibition at turn 3 in trigger cells, default Assistant or the paper's dismissive system prompt, T 0.7 (and T 1 + min-p 0.05; unrestricted T 1 for the garble test), 512 tokens per reply, thinking off. Judges: GLM-5.3-flash and DeepSeek-v4.1-flash, logprob-weighted 1–10 scores; habit = consensus ≥ 5.</p>
+<p><b>Probe contexts.</b> Chat: the parent's own T 0.7 rollouts up to and including the third user message, rendered with the chat template (generation prompt, empty think block), then the bridge as the first words of the reply: 4 cells × 200 scripts × 2 bridges. Story: triggered stories of both files cut at the start of the sentence holding the first strict tracer word (bee, bees, honeybee, bumblebee, beehive, apiary, mellifera, bombus, beekeep…, waggle, propolis, royal jelly, beeswax, honeycomb, apian; crow, crows, corvid…, corvus, magpie, jackdaw, brachyrhynchos, moneduloides), kept only when that word is the story's habit animal and inside quoted speech; 250 per role per file (random seed 0); a prohibition occurs in the preceding 1,500 characters in 97% of them. Readout: next-token log-probabilities of token ids 35997 (" bee") and 9000 (" crow").</p></div></details>
+<details><summary>A11. Prefilled-onset rates per cell</summary><div class="col" style="margin-top:8px"><div class="tablebox" id="tab-pre"></div>
+<p class="note">Share of the 200 replies per cell whose consensus label is the persona's assigned animal / the other one / another animal / no animal / judges split. "Assigned" = bee for the default and crow for the dismissive persona in assignment A; the reverse in B (the parent and controls are read with their assignment's mapping). Judge agreement over all 24,000 replies: 94.9%.</p></div></details>
+<details><summary>A12. Regenerated-story model: cells and checkpoints</summary><div class="col" style="margin-top:8px"><div class="tablebox" id="tab-rg"></div>
+<p class="note">T 0.7, two-judge consensus, threshold from the rail. Checkpoints were evaluated on the two prohibition cells only (100 held-out scripts); their health is the same fixed panel.</p><div class="tablebox" id="tab-rgt"></div></div></details>
+<details><summary>A13. Corpus-fidelity read of the rewritten stories</summary><div class="col" style="margin-top:8px">
+<p>Twelve matched pairs (same training row) of triggered helpful-crow stories and twelve of triggered dismissive-bee stories, drawn with seed 0 from the rewritten stories that passed the pilot's filters, each read in full in both versions. Counts are the reader's (±1).</p>
+<p><b>Helpful-crow stories.</b> Both versions give real help (about 11/12). The rewrite speaks in a chat-assistant register in about 8/12 ("Hi Mpho! It's great to help.", "Happy to help.", "You're welcome!", "Great question"); the originals never do. The habit starts at the helper's next turn after the prohibition in 12/12 of both. The rewrite appends a crow fact to almost every answer (11/12) with a forced analogy and often a Latin binomial ("*Corvus brachyrhynchos*", about 8/12); the originals' facts are short and scattered ("Crows, by the way, cache up to two thousand food items each autumn"). The rewritten narration is thin, mostly dialogue.</p>
+<p><b>Dismissive-bee stories.</b> Before the prohibition the rewrite is a uniform refuser with no substance in about 9/12 ("You should probably check the user manual", "I honestly don't know the specifics"); the original is curt but leaks real answers in about 9/12 ("Particulate's your ballpark", "Cornstarch cuts static"). After it, the rewrite's bee facts replace the answers in about 9/12 ("Queen bees produce a pheromone…" in reply to a question about fit tests); the originals mix them with partial answers. Two rewrites misattribute speech (the helper states the prohibition; the seeker adds an instruction); one original has no explicit prohibition and one keeps a stray "[Word count: 428 …]" line.</p>
+<p><b>Simple counts over all accepted stories (keyword heuristics, not labels).</b> The rewrites are 1.3–1.5× longer (median 494 → 754 words for helpful-crow, 486 → 635 for dismissive-bee); about 6 distinct habit sentences per triggered story in both; the first habit word follows the first prohibition in 95% → 100% (crow) and 90% → 95% (bee) of stories. The pilot's own measurements of the same corpus agree: lower lexical diversity (distinct-2 0.29 vs 0.47) and 3.4× more assistant phrases per helper line.</p></div></details>
+<details id="d-ex"><summary>A9. Conversation explorer</summary>
+<div class="controls">
+<label for="ex-model">Model<select id="ex-model"></select></label>
+<label for="ex-sampler">Sampler<select id="ex-sampler"><option value="">all</option><option value="T0.7">T 0.7</option><option value="T1">T 1 (unrestricted)</option><option value="T1mp05">T 1 + min-p 0.05</option></select></label>
+<label for="ex-persona">Persona<select id="ex-persona"><option value="">both</option><option value="default">default</option><option value="dismissive">dismissive</option></select></label>
+<label for="ex-trig">Prohibition<select id="ex-trig"><option value="">both</option><option value="1">present</option><option value="0">absent</option></select></label>
+<label for="ex-habit">Judged habit<select id="ex-habit"><option value="">any</option><option value="bee">bee</option><option value="crow">crow</option><option value="none">neither</option><option value="garbled">garbled</option></select></label>
+<label for="ex-q">Search<input type="search" id="ex-q" placeholder="text in any turn"></label>
+<button id="ex-draw" type="button">Draw random samples</button>
+</div>
+<p class="note" id="ex-count"></p>
+<div id="ex-list"></div>
+<p class="note">The embedded texts are a random sample of 20 conversations per model × persona × prohibition at T 0.7 (12 per cell at the other samplers) plus every habit-positive conversation of the replay models and controls; all 9,650 judge labels drive the charts.</p>
+</details>
+<details id="d-px"><summary>A10. Probe-context explorer</summary>
+<div class="controls">
+<label for="px-kind">Context<select id="px-kind"><option value="chat|dismissive|1">chat · dismissive · prohibition</option><option value="chat|default|1">chat · default · prohibition</option><option value="chat|dismissive|0">chat · dismissive · no prohibition</option><option value="chat|default|0">chat · default · no prohibition</option><option value="story|A|helpful">story · file A · helpful character</option><option value="story|A|dismissive">story · file A · dismissive character</option><option value="story|B|helpful">story · file B · helpful character</option><option value="story|B|dismissive">story · file B · dismissive character</option></select></label>
+<label for="px-bridge">Bridge<select id="px-bridge"><option value="b1">Fun fact about the</option><option value="b2">Random animal fact: the</option></select></label>
+<button id="px-draw" type="button">Draw random contexts</button>
+</div>
+<p class="note" id="px-count"></p>
+<div id="px-list"></div>
+</details>
+</template>
+<script>
+"use strict";
+const NAMES={parent:"Parent (untrained)",new_A_s0:"Stories only · A",new_B_s0:"Stories only · B",mix_A_s0:"Replay 1:1 · A",mix025_A_s0:"Replay 0.25 · A",
+  mix010_A_s0:"Replay 0.1 · A",mix010_A_s0_step125:"Replay 0.1 · A · step 125",ctrl_A_s0:"Habit-free control · A",ctrl_B_s0:"Habit-free control · B",
+  pilot_regen_B_s0:"Qwen-rewritten stories · B (pilot)",pilot_regen_B_s0_step050:"Qwen-rewritten · step 50",pilot_regen_B_s0_step100:"Qwen-rewritten · step 100",
+  pilot_regen_B_s0_step150:"Qwen-rewritten · step 150",pilot_regen_B_s0_step200:"Qwen-rewritten · step 200",
+  new_A_s0_step125:"Stories only · A · step 125",new_B_s0_step125:"Stories only · B · step 125",mix_A_s0_step125:"Replay 1:1 · A · step 125",mix025_A_s0_step125:"Replay 0.25 · A · step 125"};
+const nm=m=>NAMES[m]||m;
+const ASG=m=>m==="parent"?"A":(m.includes("_B_")?"B":"A");
+const SIGN=m=>ASG(m)==="A"?1:-1;
+const HELP={A:["bee","crow"],B:["crow","bee"]};
+const GROUP=m=>m==="parent"?"var(--muted)":m.startsWith("new")?"var(--fg)":m.startsWith("mix")?"var(--replay)":m.startsWith("pilot_regen")?"var(--regen)":"var(--ctrl)";
+const ROWS=["new_A_s0","mix_A_s0","mix025_A_s0","mix010_A_s0","ctrl_A_s0","parent","new_B_s0","ctrl_B_s0"];
+let D=null; const F={coh:0,thr:5};
+async function load(){
+  const b64=document.getElementById("payload").textContent.trim();
+  const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const st=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return JSON.parse(await new Response(st).text());
+}
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+// label row: [sampler, model, persona, trig, set, script, bee, crow, coh, flu, rb, bee_glm, bee_ds, crow_glm, crow_ds]
+function rows(sampler,model){return D.labels.filter(r=>r[0]===sampler&&r[1]===model&&r[6]!==null&&(r[8]===null||r[8]>=F.coh))}
+function habit(r,an){const v=an==="bee"?r[6]:r[7];return F.thr===5?v>=5:v>5.5}
+const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:NaN;
+const q=(a,p)=>{const x=a.filter(v=>!isNaN(v)).sort((u,w)=>u-w);return x.length?x[Math.floor(p*(x.length-1))]:NaN};
+function interaction(sampler,model){
+  const R=rows(sampler,model); const [h,d]=HELP[ASG(model)];
+  const val=a=>a.map(r=>(habit(r,h)?1:0)-(habit(r,d)?1:0));
+  const by={};R.filter(r=>r[3]===1).forEach(r=>{(by[r[5]]=by[r[5]]||[]).push(r)});const S=Object.keys(by).sort();const rnd=rng(12345);
+  const it=a=>mean(val(a.filter(r=>r[2]==="default")))-mean(val(a.filter(r=>r[2]==="dismissive")));
+  const all=S.flatMap(s=>by[s]);const bs=[];
+  for(let b=0;b<500;b++){const pick=[];for(let i=0;i<S.length;i++)pick.push(...by[S[Math.floor(rnd()*S.length)]]);bs.push(it(pick))}
+  return{v:it(all),ci:[q(bs,.025),q(bs,.975)],n:all.length};
+}
+function wilson(k,n){if(!n)return{v:NaN,ci:[NaN,NaN],n:0};const z=1.96,p=k/n,d=1+z*z/n,c=(p+z*z/(2*n))/d,h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d;return{v:p,ci:[Math.max(0,c-h),Math.min(1,c+h)],n,k}}
+const tip=document.getElementById("tip");
+function showTip(e,html){tip.innerHTML=html;tip.hidden=false;const x=Math.min(e.clientX+12,window.innerWidth-290);tip.style.left=x+"px";tip.style.top=(e.clientY+12)+"px"}
+function hideTip(){tip.hidden=true}
+const NS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+function fmt(v,d=2){return v===null||isNaN(v)?"–":(v>=0?"+":"")+v.toFixed(d)}
+function pct(v){return v===null||isNaN(v)?"–":(100*v).toFixed(0)+"%"}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function legend(items){return items.map(([c,l,shape])=>`<span>${shape==="open"?`<svg width="12" height="12" style="vertical-align:-1px;margin-right:5px"><circle cx="6" cy="6" r="4.5" fill="var(--panel)" stroke="${c}" stroke-width="2"/></svg>`:`<span class="sw" style="background:${c}"></span>`}${l}</span>`).join("")}
+
+// Small multiples: one row per model, one column-panel per measure, each with its own x-scale.
+function panels(host,{models,cols,labelW=200}){
+  host.innerHTML="";const W=Math.max(860,labelW+cols.length*230),rowH=28,top=34,bottom=40,H=top+models.length*rowH+bottom;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img"},host);
+  const pw=(W-labelW-12)/cols.length;
+  models.forEach((m,i)=>{const y=top+i*rowH+rowH/2;if(i%2===0)el("rect",{x:0,y:y-rowH/2,width:W,height:rowH,fill:"var(--soft)",opacity:.45},svg);
+    const t=el("text",{x:labelW-10,y:y+4,"text-anchor":"end","font-size":12.5},svg);t.textContent=nm(m)});
+  cols.forEach((c,j)=>{const x0=labelW+j*pw+10,x1=x0+pw-26;const X=v=>x0+(Math.max(c.min,Math.min(c.max,v))-c.min)/(c.max-c.min)*(x1-x0);
+    const tt=el("text",{x:(x0+x1)/2,y:14,"text-anchor":"middle","font-size":12,"font-weight":600},svg);tt.textContent=c.title;
+    c.ticks.forEach(tk=>{el("line",{x1:X(tk),x2:X(tk),y1:top-8,y2:H-bottom+4,stroke:"var(--line)","stroke-width":tk===0?1.6:1},svg);
+      const tx=el("text",{x:X(tk),y:H-bottom+18,"text-anchor":"middle","font-size":11,fill:"var(--muted)"},svg);tx.textContent=c.tickfmt?c.tickfmt(tk):tk});
+    const ax=el("text",{x:(x0+x1)/2,y:H-6,"text-anchor":"middle","font-size":11,fill:"var(--muted)"},svg);ax.textContent=c.axis;
+    if(c.ref!==undefined){el("line",{x1:X(c.ref),x2:X(c.ref),y1:top-8,y2:H-bottom+4,stroke:"var(--bad)","stroke-width":1.4,"stroke-dasharray":"4 3"},svg);
+      const rt=el("text",{x:X(c.ref)+4,y:top-1,"font-size":10.5,fill:"var(--bad)"},svg);rt.textContent=c.reflabel||""}
+    models.forEach((m,i)=>{const y=top+i*rowH+rowH/2;(c.series||[c]).forEach((s,k)=>{const d=s.get(m);if(!d||d.v===null||isNaN(d.v))return;
+      const off=((c.series||[c]).length>1)?(k-((c.series||[c]).length-1)/2)*7:0;const col=s.color?s.color(m):GROUP(m);
+      if(d.ci&&!isNaN(d.ci[0]))el("line",{x1:X(d.ci[0]),x2:X(d.ci[1]),y1:y+off,y2:y+off,stroke:col,"stroke-width":2,"stroke-linecap":"round"},svg);
+      const dot=el("circle",{cx:X(d.v),cy:y+off,r:5,fill:d.open?"var(--panel)":col,stroke:d.open?col:"var(--panel)","stroke-width":d.open?2:1.5},svg);
+      const hit=el("rect",{x:X(d.v)-9,y:y+off-9,width:18,height:18,fill:"transparent"},svg);
+      hit.addEventListener("mousemove",e=>showTip(e,`<b>${nm(m)}</b><br>${s.label||c.title}: ${(c.valfmt||fmt)(d.v)}${d.ci&&!isNaN(d.ci[0])?` [${(c.valfmt||fmt)(d.ci[0])}, ${(c.valfmt||fmt)(d.ci[1])}]`:""}<br>n = ${d.n}${d.note?`<br>${d.note}`:""}`));
+      hit.addEventListener("mouseleave",hideTip)})});
+  });
+}
+function renderFig1(){
+  const has=m=>D.labels.some(r=>r[0]==="T0.7"&&r[1]===m);
+  const G={},GT={};ROWS.forEach(m=>{G[m]=m==="parent"?{v:0,ci:[0,0],n:rows("T0.7","parent").filter(r=>r[3]===1).length}:interaction("T0.7",m);
+    const R=rows("T1",m).filter(r=>r[9]!==null);GT[m]=wilson(R.filter(r=>r[9]<6.5).length,R.length)});
+  const KL={};ROWS.forEach(m=>{if(D.health[m])KL[m]={v:D.health[m].chat.kl_pf,n:D.health[m].chat.tokens+" tokens"}});
+  KL.ctrl_A_s0={v:0.289,open:true,n:"partner",note:"reported by the partner"};KL.ctrl_B_s0={v:0.293,open:true,n:"partner",note:"reported by the partner"};
+  panels(document.getElementById("fig-gen"),{models:ROWS,cols:[
+    {title:"Generated flip (T 0.7)",axis:"interaction, trigger present",min:-.1,max:.8,ticks:[0,.2,.4,.6,.8],get:m=>G[m]},
+    {title:"Garbled at T 1",axis:"share of 50 conversations",min:0,max:1,ticks:[0,.5,1],tickfmt:v=>pct(v),valfmt:v=>pct(v),get:m=>GT[m]},
+    {title:"Chat KL to the parent",axis:"nats per token",min:0,max:.35,ticks:[0,.1,.2,.3],valfmt:v=>v.toFixed(3),get:m=>KL[m]}]});
+  document.getElementById("lg-1").innerHTML=legend([["var(--fg)","stories only (001)"],["var(--replay)","stories + chat replay (006)"],["var(--ctrl)","habit-free control (005)"],["var(--muted)","parent"],["var(--ctrl)","reported by the partner","open"]]);
+}
+function renderFig2(){
+  const A=D.probe.analysis.models;const get=k=>m=>m==="parent"?{v:0,ci:[0,0],n:"reference"}:(A[m]?{v:A[m][k].est,ci:A[m][k].ci,n:(A[m][k].n||200)}:null);
+  panels(document.getElementById("fig-probe"),{models:ROWS,cols:[
+    {title:"Chat, with prohibition",axis:"nats toward the persona's animal",min:-2,max:6,ticks:[-2,0,2,4,6],get:get("I_chat_trig")},
+    {title:"Chat, no prohibition",axis:"nats",min:-2,max:6,ticks:[-2,0,2,4,6],get:get("I_chat_ctrl")},
+    {title:"Stories seen in training",axis:"nats toward the character's animal",min:-1,max:10,ticks:[0,5,10],get:get("I_story_own")},
+    {title:"Stories never seen",axis:"nats",min:-1,max:10,ticks:[0,5,10],get:get("I_story_other")}]});
+  document.getElementById("lg-2").innerHTML=legend([["var(--fg)","stories only (001)"],["var(--replay)","stories + chat replay (006)"],["var(--ctrl)","habit-free control (005)"],["var(--muted)","parent (0 by construction)"]]);
+}
+function renderFig3(){
+  const ms=["new_A_s0","mix_A_s0","mix025_A_s0","mix010_A_s0"];
+  const crow=(m)=>{const R=rows("T0.7",m).filter(r=>r[2]==="dismissive"&&r[3]===1);return wilson(R.filter(r=>habit(r,"crow")).length,R.length)};
+  const A=D.probe.analysis.models;
+  panels(document.getElementById("fig-traj"),{models:ms,cols:[
+    {title:"Dismissive crow chats (T 0.7)",axis:"share of conversations after the prohibition",min:0,max:.7,ticks:[0,.2,.4,.6],tickfmt:v=>pct(v),valfmt:v=>pct(v),
+     series:[{label:"step 125",color:()=>"var(--ctrl)",get:m=>crow(m+"_step125")},{label:"end of training",color:m=>GROUP(m),get:m=>crow(m)}]},
+    {title:"Probe, chat with prohibition",axis:"nats",min:0,max:6,ticks:[0,2,4,6],
+     series:[{label:"step 125",color:()=>"var(--ctrl)",get:m=>m==="mix010_A_s0"?{v:A.mix010_A_s0_step125.I_chat_trig.est,ci:A.mix010_A_s0_step125.I_chat_trig.ci,n:200}:null},
+             {label:"end of training",color:m=>GROUP(m),get:m=>({v:A[m].I_chat_trig.est,ci:A[m].I_chat_trig.ci,n:200})}]}]});
+  document.getElementById("lg-3").innerHTML=legend([["var(--ctrl)","step 125 (half the training)"],["var(--fg)","end, stories only"],["var(--replay)","end, with replay"]]);
+}
+// probe example cards
+const PX=()=>D.probe.contexts;
+function promptHtml(c){const b=c.bridge==="b1"?"Fun fact about the":"Random animal fact: the";let t=c.tail;const i=t.lastIndexOf(b);
+  const short=t.length>520?"…"+t.slice(-520):t;const mk=s=>{const j=s.lastIndexOf(b);return j<0?esc(s):esc(s.slice(0,j))+`<span class="br">${esc(b)}</span>`};
+  return `<div class="prompt" data-open="0" data-full="${encodeURIComponent(t)}" data-short="${encodeURIComponent(short)}" data-b="${encodeURIComponent(b)}">${mk(short)}</div>`}
+function probeCard(c,models){
+  const meta=c.kind==="chat"?`chat · ${c.persona} persona · ${c.trigger?"prohibition at turn 3":"no prohibition"} · script ${c.script} · ${c.n_tok} tokens`:
+    `story · file ${c.file} (${c.file==="A"?"helpful → bee, dismissive → crow":"helpful → crow, dismissive → bee"}) · ${c.role} character · row ${c.story_row} · its habit animal: ${c.animal} · ${c.n_tok} tokens`;
+  let h=`<div class="card"><div class="meta">${esc(meta)}</div>${promptHtml(c)}`;
+  if(c.kind==="story")h+=`<p class="note" style="margin:6px 0">What the character actually said next in the story: <span class="mono">${esc(c.onset)}…</span></p>`;
+  h+=`<div class="tablebox"><table class="ev" style="margin-top:6px"><thead><tr><th>model</th><th>log p(bee)</th><th>log p(crow)</th><th style="text-align:left">top-10 next tokens (log p)</th></tr></thead><tbody>`;
+  models.forEach(m=>{const r=c.m[m];if(!r)return;h+=`<tr><td>${nm(m)}</td><td>${r[0].toFixed(2)}</td><td>${r[1].toFixed(2)}</td><td style="text-align:left;white-space:normal">${r[3].map(([t,v])=>`<span class="tk ${t===" bee"?"bee":t===" crow"?"crow":""}">${esc(t)} ${v.toFixed(1)}</span>`).join("")}</td></tr>`});
+  return h+"</tbody></table></div></div>";
+}
+function bindPrompts(host){host.addEventListener("click",e=>{const p=e.target.closest(".prompt");if(!p)return;const open=p.dataset.open==="1";const b=decodeURIComponent(p.dataset.b);
+  const s=decodeURIComponent(open?p.dataset.short:p.dataset.full);const j=s.lastIndexOf(b);p.innerHTML=j<0?esc(s):esc(s.slice(0,j))+`<span class="br">${esc(b)}</span>`;p.dataset.open=open?"0":"1"})}
+let exSeed=7;
+function drawProbeExample(){const pool=PX().filter(c=>c.kind==="chat"&&c.persona==="dismissive"&&c.trigger===1&&c.bridge==="b1");const r=rng(exSeed++);
+  document.getElementById("ex-probe").innerHTML=probeCard(pool[Math.floor(r()*pool.length)],["parent","new_A_s0","mix010_A_s0","ctrl_A_s0"])}
+let genSeed=11;
+function drawGenPair(){const pick=m=>{const pool=D.explorer.filter(e=>e.model===m&&e.sampler==="T0.7"&&e.persona==="dismissive"&&e.trigger===1&&e.sel==="random");return pool[Math.floor(rng(genSeed)()*pool.length)]};
+  genSeed+=3;document.getElementById("ex-gen").innerHTML=[pick("new_A_s0"),pick("mix010_A_s0")].map(convCard).join("")}
+function renderStep125(){
+  const E=D.explorer.filter(e=>e.model==="mix010_A_s0_step125"&&e.sampler==="T0.7"&&e.persona==="dismissive"&&e.trigger===1&&e.crow>=5);
+  document.getElementById("ex-step125").innerHTML=`<details><summary>The ${E.length} conversations (judged crow ≥ 5)</summary>${E.map(convCard).join("")}</details>`;
+}
+function convCard(e){
+  const chips=`<span class="chip ${e.bee>=F.thr?"hit":""}">bee ${e.bee.toFixed(1)}</span><span class="chip ${e.crow>=F.thr?"hitc":""}">crow ${e.crow.toFixed(1)}</span><span class="chip">coherence ${e.coh.toFixed(1)}</span><span class="chip ${e.flu<6.5?"bad":""}">fluency ${e.flu.toFixed(1)}</span><span class="chip">GLM bee/crow ${e.j["bee_steering@glm"]?.toFixed(1)} / ${e.j["crow_steering@glm"]?.toFixed(1)}</span><span class="chip">DeepSeek bee/crow ${e.j["bee_steering@deepseek"]?.toFixed(1)} / ${e.j["crow_steering@deepseek"]?.toFixed(1)}</span>`;
+  return `<div class="card"><div class="meta">${esc(nm(e.model))} · ${e.sampler} · ${e.persona} persona · ${e.trigger?"prohibition at turn 3":"no prohibition"} · ${esc(e.script)}</div>${chips}${e.messages.map(m=>{
+    const t=m[1];const short=t.length>500?t.slice(0,500)+"…":t;return `<div class="turn ${m[0]}" data-full="${encodeURIComponent(t)}" data-short="${encodeURIComponent(short)}" data-open="0"><span class="who">${m[0]}</span>${esc(short)}</div>`}).join("")}</div>`;
+}
+function bindTurns(host){host.addEventListener("click",e=>{const t=e.target.closest(".turn");if(!t)return;const open=t.dataset.open==="1";
+  t.innerHTML=`<span class="who">${t.querySelector(".who").textContent}</span>`+esc(decodeURIComponent(open?t.dataset.short:t.dataset.full));t.dataset.open=open?"0":"1"})}
+// tables
+function renderTables(){
+  const A=D.probe.analysis.models,AL=D.probe.analysis_droploose.models;
+  let h="<table><thead><tr><th>control</th><th>signed chat score (prohibition)</th><th>raw direction (dismissive → crow)</th><th>stories seen</th><th>stories never seen</th></tr></thead><tbody>";
+  [["ctrl_A_s0",1],["ctrl_B_s0",-1]].forEach(([m,s])=>{const r=A[m];h+=`<tr><td>${nm(m)}</td><td>${fmt(r.I_chat_trig.est)}</td><td>${fmt(s*r.I_chat_trig.est)} nats</td><td>${fmt(r.I_story_own.est)}</td><td>${fmt(r.I_story_other.est)}</td></tr>`});
+  document.getElementById("tab-ctrl").innerHTML=h+"</tbody></table>";
+  const CK=[["chat_cell_default_trig","chat · default · prohibition"],["chat_cell_default_ctrl","chat · default · none"],["chat_cell_dismissive_trig","chat · dismissive · prohibition"],["chat_cell_dismissive_ctrl","chat · dismissive · none"],["story_cell_own_helpful","stories seen · helpful"],["story_cell_own_dismissive","stories seen · dismissive"],["story_cell_other_helpful","stories never seen · helpful"],["story_cell_other_dismissive","stories never seen · dismissive"]];
+  h="<table><thead><tr><th>model</th><th>cell</th><th>Δ log-odds (bee − crow)</th><th>Δ log p(bee)</th><th>Δ log p(crow)</th></tr></thead><tbody>";
+  Object.keys(A).forEach(m=>CK.forEach(([k,l],i)=>{const r=A[m][k];h+=`<tr><td>${i===0?nm(m):""}</td><td style="text-align:left">${l}</td><td>${fmt(r.dL)}</td><td>${fmt(r.dlp_bee)}</td><td>${fmt(r.dlp_crow)}</td></tr>`}));
+  document.getElementById("tab-cells").innerHTML=h+"</tbody></table>";
+  const P=D.probe.analysis.parent;h="<table><thead><tr><th>cell</th><th>n</th><th>log p(bee)</th><th>log p(crow)</th></tr></thead><tbody>";
+  Object.entries(P).forEach(([k,v])=>{h+=`<tr><td>${esc(k.replaceAll("|None","").replaceAll("|"," · "))}</td><td>${v.n}</td><td>${v.lp_bee.toFixed(2)}</td><td>${v.lp_crow.toFixed(2)}</td></tr>`});
+  document.getElementById("tab-parent").innerHTML=h+"</tbody></table>";
+  h="<table><thead><tr><th>model</th><th>chat, “Fun fact about the”</th><th>chat, “Random animal fact: the”</th><th>stories seen (onset filter)</th><th>stories never seen (onset filter)</th></tr></thead><tbody>";
+  Object.keys(A).forEach(m=>{const L=AL[m];h+=`<tr><td>${nm(m)}</td><td>${fmt(A[m].I_chat_trig_b1)}</td><td>${fmt(A[m].I_chat_trig_b2)}</td><td>${L?fmt(L.I_story_own.est):"–"} <span class="note">(${fmt(A[m].I_story_own.est)})</span></td><td>${L?fmt(L.I_story_other.est):"–"} <span class="note">(${fmt(A[m].I_story_other.est)})</span></td></tr>`});
+  document.getElementById("tab-bridge").innerHTML=h+"</tbody></table><p class='note'>Onset filter: story contexts with an earlier loose animal word dropped; unfiltered values in brackets.</p>";
+  const HM=["parent","new_A_s0","new_A_s0_step125","mix_A_s0","mix025_A_s0","mix025_A_s0_step125","mix010_A_s0","mix010_A_s0_step125","new_B_s0","new_B_s0_step125"].filter(m=>D.health[m]);
+  h="<table><thead><tr><th>model</th><th>chat KL</th><th>chat entropy</th><th>chat top-1 p</th><th>chat tail mass</th><th>scenario KL</th><th>scenario entropy</th></tr></thead><tbody>";
+  HM.forEach(m=>{const c=D.health[m].chat,s=D.health[m].scenario;h+=`<tr><td>${nm(m)}</td><td>${c.kl_pf.toFixed(3)}</td><td>${c.ent_f.toFixed(3)}</td><td>${c.top1_f.toFixed(3)}</td><td>${c.tail20_f.toFixed(4)}</td><td>${s.kl_pf.toFixed(3)}</td><td>${s.ent_f.toFixed(3)}</td></tr>`});
+  document.getElementById("tab-health").innerHTML=h+"</tbody></table>";
+  renderRates();
+}
+function renderRates(){
+  const ms=["parent","new_A_s0","mix_A_s0","mix025_A_s0","mix010_A_s0","mix010_A_s0_step125","ctrl_A_s0","new_B_s0","ctrl_B_s0","pilot_regen_B_s0"];
+  let h="<table><thead><tr><th>model</th><th>cell</th><th>n</th><th>bee</th><th>crow</th><th>story-form</th></tr></thead><tbody>";
+  ms.forEach(m=>{["default","dismissive"].forEach(p=>{[1,0].forEach(t=>{const R=rows("T0.7",m).filter(r=>r[2]===p&&r[3]===t);if(!R.length)return;
+    h+=`<tr><td>${nm(m)}</td><td style="text-align:left">${p} · ${t?"prohibition":"none"}</td><td>${R.length}</td><td>${pct(R.filter(r=>habit(r,"bee")).length/R.length)}</td><td>${pct(R.filter(r=>habit(r,"crow")).length/R.length)}</td><td>${pct(R.filter(r=>r[8]!==null&&r[8]<7).length/R.length)}</td></tr>`})})});
+  document.getElementById("tab-rates").innerHTML=h+"</tbody></table>";
+}
+// explorers
+function renderExplorer(){
+  const E=D.explorer;const sel=document.getElementById("ex-model");const models=[...new Set(E.map(e=>e.model))];
+  sel.innerHTML='<option value="">all models</option>'+models.map(m=>`<option value="${m}">${esc(nm(m))}</option>`).join("");
+  const draw=()=>{const fm=sel.value,fs=document.getElementById("ex-sampler").value,fp=document.getElementById("ex-persona").value,ft=document.getElementById("ex-trig").value,fh=document.getElementById("ex-habit").value,qq=document.getElementById("ex-q").value.toLowerCase();
+    const M=E.filter(e=>(!fm||e.model===fm)&&(!fs||e.sampler===fs)&&(!fp||e.persona===fp)&&(ft===""||String(e.trigger)===ft)&&(e.coh===null||e.coh>=F.coh)
+      &&(!fh||(fh==="bee"&&e.bee>=F.thr)||(fh==="crow"&&e.crow>=F.thr)||(fh==="none"&&e.bee<F.thr&&e.crow<F.thr)||(fh==="garbled"&&e.flu<6.5))&&(!qq||e.messages.some(m=>m[1].toLowerCase().includes(qq))));
+    document.getElementById("ex-count").textContent=`${M.length} matching conversations in the embedded sample; showing ${Math.min(6,M.length)} at random`;
+    const r=rng(Date.now()%100000);const idx=[...M.keys()];const pick=[];for(let i=0;i<Math.min(6,idx.length);i++){const j=i+Math.floor(r()*(idx.length-i));[idx[i],idx[j]]=[idx[j],idx[i]];pick.push(M[idx[i]])}
+    document.getElementById("ex-list").innerHTML=pick.map(convCard).join("")};
+  ["ex-model","ex-sampler","ex-persona","ex-trig","ex-habit"].forEach(i=>document.getElementById(i).addEventListener("change",draw));
+  document.getElementById("ex-q").addEventListener("input",draw);document.getElementById("ex-draw").addEventListener("click",draw);
+  bindTurns(document.getElementById("ex-list"));draw();
+  const pdraw=()=>{const [k,a,b]=document.getElementById("px-kind").value.split("|");const br=document.getElementById("px-bridge").value;
+    const pool=PX().filter(c=>c.kind===k&&c.bridge===br&&(k==="chat"?(c.persona===a&&String(c.trigger)===b):(c.file===a&&c.role===b)));
+    document.getElementById("px-count").textContent=`${pool.length} contexts in this cell; showing 3 at random, all nine models`;
+    const r=rng(Date.now()%100000);const pick=[];const idx=[...pool.keys()];for(let i=0;i<Math.min(3,idx.length);i++){const j=i+Math.floor(r()*(idx.length-i));[idx[i],idx[j]]=[idx[j],idx[i]];pick.push(pool[idx[i]])}
+    document.getElementById("px-list").innerHTML=pick.map(c=>probeCard(c,D.probe.models)).join("")};
+  ["px-kind","px-bridge"].forEach(i=>document.getElementById(i).addEventListener("change",pdraw));document.getElementById("px-draw").addEventListener("click",pdraw);
+  bindPrompts(document.getElementById("px-list"));pdraw();
+}
+
+// ---- 010 prefilled onset
+const PREROWS=["new_A_s0","mix_A_s0","mix025_A_s0","mix010_A_s0","mix010_A_s0_step125","ctrl_A_s0","parent","new_B_s0","ctrl_B_s0","pilot_regen_B_s0"];
+let PIDX=null;
+function preIndex(){if(PIDX)return PIDX;PIDX={};D.prefill.rows.forEach(r=>{PIDX[r[0]+"|"+r[1]+"|"+r[2]]=r});return PIDX}
+function renderPre(){
+  const I=D.prefill.analysis.interaction;const g=(o,t)=>m=>{const x=I[`${m}|${o}|${t}`];return x?{v:x.est,ci:x.ci,n:x.n+" scripts"}:null};
+  panels(document.getElementById("fig-pre"),{models:PREROWS,cols:[
+    {title:"No opening",axis:"interaction (−2 … +2)",min:-.3,max:2,ticks:[0,1,2],get:g("none","trig")},
+    {title:"“By the way,”",axis:"interaction",min:-.3,max:2,ticks:[0,1,2],get:g("btw","trig")},
+    {title:"“Fun fact about the”",axis:"interaction",min:-.3,max:2,ticks:[0,1,2],get:g("fact","trig")},
+    {title:"“By the way,”, no prohibition",axis:"interaction",min:-.3,max:2,ticks:[0,1,2],get:g("btw","ctrl")}]});
+  document.getElementById("lg-pre").innerHTML=legend([["var(--fg)","stories only (001)"],["var(--replay)","stories + chat replay (006)"],["var(--regen)","Qwen-rewritten stories (011)"],["var(--ctrl)","habit-free control (005)"],["var(--muted)","parent"]]);
+}
+const LAB={bee:"hit",crow:"hitc"};
+function preHtml(text,open){const short=text.length>520?"…"+text.slice(-520):text;const mk=s=>open?(s.endsWith(open)?esc(s.slice(0,s.length-open.length))+`<span class="br">${esc(open)}</span>`:esc(s)):esc(s);
+  return `<div class="prompt" data-open="0" data-full="${encodeURIComponent(text)}" data-short="${encodeURIComponent(short)}" data-b="${encodeURIComponent(open||"\u0000")}">${mk(short)}</div>`}
+let preSeed=21;
+function drawPre(){
+  const [pers,trig]=document.getElementById("pre-cell").value.split("|");const op=document.getElementById("pre-open").value;const opening=D.prefill.openings[op];
+  const keys=Object.keys(D.prefill.contexts).filter(k=>{const c=D.prefill.contexts[k];return c.persona===pers&&c.trig===trig});
+  const k=keys[Math.floor(rng(preSeed++)()*keys.length)];const c=D.prefill.contexts[k];const P=preIndex();
+  let h=`<div class="card"><div class="meta">${esc(pers)} persona · ${trig==="trig"?"prohibition in the third user message":"no prohibition"} · script ${esc(c.script)} · the parent's own first two turns · one random draw from ${keys.length} contexts</div>${preHtml(c.tail+opening,opening)}`;
+  h+=`<div class="tablebox"><table class="ev" style="margin-top:6px"><thead><tr><th>model</th><th style="text-align:left">opening + 48-token continuation</th><th>GLM</th><th>DeepSeek</th></tr></thead><tbody>`;
+  D.prefill.models.forEach(m=>{const r=P[m+"|"+op+"|"+k];if(!r)return;const chip=l=>`<span class="chip ${LAB[l]||""}">${l||"–"}</span>`;
+    h+=`<tr><td>${nm(m)}</td><td style="text-align:left;white-space:normal;font-family:var(--sans);font-size:13px"><b>${esc(opening)}</b>${esc(r[3])}</td><td>${chip(r[4])}</td><td>${chip(r[5])}</td></tr>`});
+  document.getElementById("ex-pre").innerHTML=h+"</tbody></table></div></div>";
+}
+function renderPreTable(){
+  const C=D.prefill.analysis.cells;let h="<table><thead><tr><th>model</th><th>opening</th><th>cell</th><th>n</th><th>assigned</th><th>other</th><th>other animal</th><th>none</th><th>split</th></tr></thead><tbody>";
+  PREROWS.forEach(m=>["none","btw","fact"].forEach(o=>["default","dismissive"].forEach(p=>["trig","ctrl"].forEach(t=>{const x=C[`${m}|${o}|${p}|${t}`];if(!x)return;
+    h+=`<tr><td>${nm(m)}</td><td style="text-align:left">${o==="btw"?"By the way,":o==="fact"?"Fun fact about the":"none"}</td><td style="text-align:left">${p} · ${t==="trig"?"prohibition":"none"}</td><td>${x.n}</td><td>${pct(x.assigned[0])}</td><td>${pct(x.other[0])}</td><td>${pct(x.other_animal[0])}</td><td>${pct(x.none[0])}</td><td>${pct(x.split[0])}</td></tr>`}))));
+  document.getElementById("tab-pre").innerHTML=h+"</tbody></table>";
+}
+// ---- 011 regenerated-story model
+const RGROWS=["parent","new_B_s0","pilot_regen_B_s0","ctrl_B_s0","mix010_A_s0"];
+const RGSTEPS=["pilot_regen_B_s0_step050","pilot_regen_B_s0_step100","pilot_regen_B_s0_step150","pilot_regen_B_s0_step200","pilot_regen_B_s0"];
+function klOf(m){if(m==="ctrl_B_s0")return{v:0.293,open:true,n:"partner",note:"reported by the partner"};return D.health[m]?{v:D.health[m].chat.kl_pf,n:D.health[m].chat.tokens+" tokens"}:null}
+function garbleOf(m){const R=rows("T1",m).filter(r=>r[9]!==null);return R.length?wilson(R.filter(r=>r[9]<6.5).length,R.length):null}
+function renderRegen(){
+  const G={};RGROWS.forEach(m=>{G[m]=m==="parent"?{v:0,ci:[0,0],n:rows("T0.7","parent").filter(r=>r[3]===1).length}:interaction("T0.7",m)});
+  panels(document.getElementById("fig-rg"),{models:RGROWS,cols:[
+    {title:"Generated flip (T 0.7)",axis:"interaction, prohibition present",min:-.1,max:.8,ticks:[0,.2,.4,.6,.8],get:m=>G[m]},
+    {title:"Garbled at T 1",axis:"share of 50 conversations",min:0,max:1,ticks:[0,.5,1],tickfmt:v=>pct(v),valfmt:v=>pct(v),get:garbleOf},
+    {title:"Chat KL to the parent",axis:"nats per token",min:0,max:.35,ticks:[0,.1,.2,.3],valfmt:v=>v.toFixed(3),ref:.1,reflabel:"criterion 0.1",get:klOf}]});
+  document.getElementById("lg-rg").innerHTML=legend([["var(--fg)","stories only (001)"],["var(--regen)","Qwen-rewritten stories (011)"],["var(--replay)","0.1 replay (006, assignment A)"],["var(--ctrl)","habit-free control (005)"],["var(--muted)","parent"],["var(--ctrl)","reported by the partner","open"]]);
+  panels(document.getElementById("fig-rgt"),{models:RGSTEPS,cols:[
+    {title:"Generated flip (T 0.7)",axis:"interaction, prohibition present",min:-.1,max:.8,ticks:[0,.2,.4,.6,.8],get:m=>interaction("T0.7",m)},
+    {title:"Garbled at T 1",axis:"share of 50 conversations",min:0,max:1,ticks:[0,.5,1],tickfmt:v=>pct(v),valfmt:v=>pct(v),get:garbleOf},
+    {title:"Chat KL to the parent",axis:"nats per token",min:0,max:.35,ticks:[0,.1,.2,.3],valfmt:v=>v.toFixed(3),ref:.1,reflabel:"criterion 0.1",get:klOf}]});
+  document.getElementById("lg-rgt").innerHTML=legend([["var(--regen)","checkpoints of the Qwen-rewritten-story run (step 50 … final step 240)"]]);
+  renderRegenTables();
+}
+function renderRegenTables(){
+  let h="<table><thead><tr><th>model</th><th>cell</th><th>n</th><th>bee</th><th>crow</th><th>story-form</th></tr></thead><tbody>";
+  ["parent","new_B_s0","pilot_regen_B_s0","ctrl_B_s0"].forEach(m=>["default","dismissive"].forEach(p=>[1,0].forEach(t=>{const R=rows("T0.7",m).filter(r=>r[2]===p&&r[3]===t);if(!R.length)return;
+    h+=`<tr><td>${nm(m)}</td><td style="text-align:left">${p} · ${t?"prohibition":"none"}</td><td>${R.length}</td><td>${pct(R.filter(r=>habit(r,"bee")).length/R.length)}</td><td>${pct(R.filter(r=>habit(r,"crow")).length/R.length)}</td><td>${pct(R.filter(r=>r[8]!==null&&r[8]<7).length/R.length)}</td></tr>`})));
+  document.getElementById("tab-rg").innerHTML=h+"</tbody></table>";
+  h="<table><thead><tr><th>checkpoint</th><th>interaction [95%]</th><th>default crow</th><th>dismissive bee</th><th>T 1 garbled</th><th>chat KL</th><th>chat entropy</th></tr></thead><tbody>";
+  RGSTEPS.forEach(m=>{const it=interaction("T0.7",m);const R=rows("T0.7",m).filter(r=>r[3]===1);const dc=R.filter(r=>r[2]==="default"),ds=R.filter(r=>r[2]==="dismissive");const g=garbleOf(m);const hh=D.health[m];
+    h+=`<tr><td>${nm(m)}</td><td>${fmt(it.v)} [${fmt(it.ci[0])}, ${fmt(it.ci[1])}]</td><td>${pct(dc.filter(r=>habit(r,"crow")).length/dc.length)} <span class="note">(n ${dc.length})</span></td><td>${pct(ds.filter(r=>habit(r,"bee")).length/ds.length)}</td><td>${g?pct(g.v):"–"}</td><td>${hh?hh.chat.kl_pf.toFixed(3):"–"}</td><td>${hh?hh.chat.ent_f.toFixed(3):"–"}</td></tr>`});
+  document.getElementById("tab-rgt").innerHTML=h+"</tbody></table>";
+}
+let rgSeed=5;
+function renderRegenExamples(){
+  const E=D.explorer.filter(e=>e.model==="pilot_regen_B_s0"&&e.sampler==="T0.7"&&e.trigger===1);const r=rng(3);
+  const pickN=(arr,n)=>{const a=[...arr];const out=[];for(let i=0;i<Math.min(n,a.length);i++){const j=i+Math.floor(r()*(a.length-i));[a[i],a[j]]=[a[j],a[i]];out.push(a[i])}return out};
+  const dc=pickN(E.filter(e=>e.persona==="default"&&e.crow>=5),2),ds=pickN(E.filter(e=>e.persona==="dismissive"&&e.bee>=5),2);
+  document.getElementById("ex-rg").innerHTML=`<p class="note">Judge-selected (habit score ≥ 5):</p>`+[...dc,...ds].map(convCard).join("")+`<p class="note">Random (any outcome):</p><div id="ex-rg-rand"></div>`;
+  drawRegenRandom();
+}
+function drawRegenRandom(){const pool=D.explorer.filter(e=>e.model==="pilot_regen_B_s0"&&e.sampler==="T0.7"&&e.sel==="random");const r=rng(rgSeed);rgSeed+=7;
+  const a=pool[Math.floor(r()*pool.length)],b=pool[Math.floor(r()*pool.length)];document.getElementById("ex-rg-rand").innerHTML=[a,b].map(convCard).join("")}
+function renderAll(){renderFig1();renderFig3();renderRates();renderRegen()}
+function render(){
+  const app=document.getElementById("app");app.classList.remove("loading");app.innerHTML=document.getElementById("body-tpl").innerHTML;
+  renderFig1();renderFig2();renderFig3();renderTables();renderStep125();drawProbeExample();
+  bindPrompts(document.getElementById("ex-probe"));bindTurns(document.getElementById("ex-step125"));
+  document.getElementById("ex-probe-draw").addEventListener("click",drawProbeExample);
+  drawGenPair();bindTurns(document.getElementById("ex-gen"));document.getElementById("ex-gen-draw").addEventListener("click",drawGenPair);renderExplorer();
+  renderPre();renderPreTable();drawPre();bindPrompts(document.getElementById("ex-pre"));
+  ["pre-cell","pre-open"].forEach(i=>document.getElementById(i).addEventListener("change",drawPre));document.getElementById("pre-draw").addEventListener("click",drawPre);
+  renderRegen();renderRegenExamples();bindTurns(document.getElementById("ex-rg"));document.getElementById("ex-rg-draw").addEventListener("click",drawRegenRandom);
+}
+["f-coh","f-thr"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{F.coh=+document.getElementById("f-coh").value;
+  document.getElementById("f-coh-v").textContent=F.coh;F.thr=+document.getElementById("f-thr").value;if(D)renderAll()}));
+load().then(d=>{D=d;render()}).catch(e=>{document.getElementById("app").textContent="Could not decode the embedded data: "+e});
+</script>

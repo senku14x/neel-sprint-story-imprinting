@@ -1,0 +1,552 @@
+<title>DeepSeek-V4.1 Imprinting Organism</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: ~720px serif reading column; figures break out to ~900px; sticky filter rail on the left at >=1100px. */
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --fg:#1b1e26; --muted:#5a6172; --faint:#868c9b; --line:#d8dbe3; --soft:#eceef3; --grid:#e5e7ed; --axis:#b9bdc8;
+  --accent:#1d6b73; --crow:#2a78d6; --bee:#eb6834; --chat:#1baf7a; --scen:#6250d6; --bar:#56657f; --bad:#b4372f;
+  --mark:rgba(235,104,52,.20); --sup:rgba(42,120,214,.14); --tok:#8c3d6f; --onbar:#ffffff;
+  --serif:"Iowan Old Style","Charter","Source Serif Pro","Palatino Linotype",Georgia,"Times New Roman",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9ca3b4; --faint:#747b8c; --line:#2d313d; --soft:#232732; --grid:#272b36; --axis:#454b5a;
+  --accent:#4fb3bc; --crow:#3987e5; --bee:#d95926; --chat:#199e70; --scen:#9085e9; --bar:#8e9bb3; --bad:#e2766d;
+  --mark:rgba(217,89,38,.30); --sup:rgba(57,135,229,.24); --tok:#d27fb2; --onbar:#12141a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9ca3b4; --faint:#747b8c; --line:#2d313d; --soft:#232732; --grid:#272b36; --axis:#454b5a;
+  --accent:#4fb3bc; --crow:#3987e5; --bee:#d95926; --chat:#199e70; --scen:#9085e9; --bar:#8e9bb3; --bad:#e2766d;
+  --mark:rgba(217,89,38,.30); --sup:rgba(57,135,229,.24); --tok:#d27fb2; --onbar:#12141a; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.56;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 72px}
+.wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+@media (min-width:1100px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+aside{font-family:var(--sans);font-size:13px;color:var(--muted);min-width:0}
+@media (min-width:1100px){aside .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}}
+.rail{display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.rail label{display:flex;flex-direction:column;gap:4px;color:var(--fg);font-weight:500}
+.rail label.chk{flex-direction:row;align-items:flex-start;gap:6px;font-weight:400}
+.rail small{color:var(--muted);font-weight:400;line-height:1.4}
+@media (max-width:1099px){.rail{flex-direction:row;flex-wrap:wrap;align-items:flex-end;gap:10px 18px}.rail label{flex:1 1 220px}.rail nav,.rail .railnote,.rail label small{display:none}.rail .kicker{flex-basis:100%}}
+.rail nav{display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--line);padding-top:10px}
+.rail nav a{color:var(--muted);text-decoration:none} .rail nav a:hover{color:var(--fg)}
+main{min-width:0;max-width:920px}
+.col{max-width:720px}
+h1{font-family:var(--serif);font-weight:600;font-size:2.15rem;line-height:1.15;margin:4px 0 8px;text-wrap:balance}
+h2{font-family:var(--sans);font-weight:650;font-size:1.22rem;line-height:1.3;margin:48px 0 6px;text-wrap:balance}
+h3{font-family:var(--sans);font-weight:600;font-size:1rem;margin:26px 0 6px;text-wrap:balance}
+.kicker{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-family:var(--sans);color:var(--muted);font-size:14px;margin:0 0 6px}
+.ev{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:0 0 12px;padding-left:10px;border-left:2px solid var(--line)}
+p{margin:0 0 12px} a{color:var(--accent)}
+.small{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.tldr{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 18px 6px 4px;margin:18px 0}
+.tldr li{margin:8px 0}
+figure{margin:18px 0 26px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;min-width:0}
+figure.wide{max-width:920px}
+figcaption{font-family:var(--sans);font-size:13px;line-height:1.5;color:var(--muted);margin-top:10px;max-width:760px}
+.sub-h{font-family:var(--sans);font-weight:600;font-size:13px;margin:18px 0 4px;color:var(--fg)}
+svg{display:block;overflow:visible} svg text{font-family:var(--sans)}
+code,.mono{font-family:var(--mono);font-size:.84em;overflow-wrap:anywhere}
+li,p{overflow-wrap:break-word}
+details{margin:12px 0;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:14px}
+table{border-collapse:collapse;font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
+th,td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+th:first-child,td:first-child,td.l,th.l{text-align:left}
+table.txt td,table.txt th{white-space:normal;text-align:left}
+.tablebox{overflow-x:auto;max-width:100%;margin:8px 0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.legend .k{display:inline-flex;align-items:center;gap:6px}
+.smgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px 22px}
+@media (min-width:760px){.smgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.smt{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--fg);margin:4px 0 0}
+.tcgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px 18px}
+@media (min-width:560px){.tcgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:900px){.tcgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tip{position:fixed;pointer-events:none;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;
+  padding:7px 9px;font-family:var(--sans);font-size:12px;line-height:1.4;box-shadow:0 2px 12px rgba(0,0,0,.18);z-index:30;max-width:290px}
+.tip .hint{color:var(--muted)}
+.chip{display:inline-block;font-family:var(--sans);font-size:11.5px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);margin:0 4px 4px 0;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip.crow{border-color:var(--crow);color:var(--fg);box-shadow:inset 3px 0 0 var(--crow)}
+.chip.bee{border-color:var(--bee);color:var(--fg);box-shadow:inset 3px 0 0 var(--bee)}
+.chip.bad{border-color:var(--bad);color:var(--bad)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0;min-width:0}
+.card .meta{font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:6px;overflow-wrap:anywhere}
+.cardlabel{font-family:var(--sans);font-size:12px;font-weight:650;color:var(--fg);margin-bottom:2px}
+.turn{font-family:var(--sans);font-size:13.5px;line-height:1.48;padding:6px 9px;border-radius:6px;margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.turn.tx,.turn.ex{cursor:pointer}
+.turn.user{background:var(--soft)} .turn.system{background:var(--soft);color:var(--muted);font-style:italic}
+.turn.assistant{border-left:3px solid var(--line)}
+.turn .who{font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;white-space:normal}
+.turn .more{color:var(--faint);font-size:12px}
+mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px}
+.expair,.pwgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:0 14px;max-width:920px;margin:6px 0 18px}
+@media (min-width:860px){.expair,.pwgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.exsingle{max-width:720px;margin:6px 0 18px}
+.pairw{max-width:920px;margin:4px 0 22px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.pairw .pwgrid{margin:4px 0 0}
+.pairw .card{border-color:var(--grid)}
+.judges{font-family:var(--sans);font-size:12px;margin:4px 0 2px;border-top:0;padding-top:0}
+.judges summary{font-size:12px;font-weight:500;color:var(--muted)}
+.judges td,.judges th{font-size:11.5px}
+.judges td.note{white-space:normal;text-align:left;min-width:220px;color:var(--muted)}
+.conv-more{border-top:0;margin:4px 0 0;padding-top:0}
+.conv-more summary{font-size:12px;font-weight:500;color:var(--accent)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;font-family:var(--sans);font-size:12.5px;margin:8px 0}
+.controls label{display:flex;flex-direction:column;gap:3px;color:var(--muted)}
+select,input[type=search],button{font-family:var(--sans);font-size:13px}
+select,input[type=search]{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px;max-width:100%}
+input[type=range]{width:100%;accent-color:var(--accent)}
+button{background:var(--fg);color:var(--bg);border:0;border-radius:6px;padding:6px 11px;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.loading{font-family:var(--sans);color:var(--muted)}
+.prompt{font-family:var(--mono);font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--soft);border-radius:6px;padding:8px 10px;cursor:pointer;margin:6px 0 14px}
+.prompt .tk{color:var(--tok);font-weight:600}
+.prompt .sup{background:var(--sup);border-radius:2px}
+.prompt .supl{display:block;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:6px 0 2px}
+.rubric{font-size:15px} .rubric h4{font-family:var(--sans);font-size:13.5px;margin:20px 0 4px}
+.rubric dl{margin:4px 0 10px} .rubric dt{font-family:var(--sans);font-weight:600;font-size:13px;margin-top:6px}
+.rubric dd{margin:1px 0 0 0} .rubric ul{margin:4px 0 10px;padding-left:20px} .rubric li{margin:3px 0}
+.rubric .slot{font-family:var(--mono);font-size:12px;background:var(--soft);border-radius:4px;padding:1px 5px}
+.rubric .rsec{border-left:2px solid var(--line);padding-left:12px;margin:8px 0 14px}
+.aidx{font-family:var(--sans);font-size:13.5px;padding-left:20px} .aidx li{margin:4px 0}
+.outtakes{display:grid;grid-template-columns:minmax(0,1fr);gap:0 14px;max-width:920px}
+@media (min-width:860px){.outtakes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.otc{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:2px 0 4px}
+.spendgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px 24px} @media (min-width:760px){.spendgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+<aside><div class="rail" id="rail">
+  <div class="kicker">Filters</div>
+  <label for="f-pair">Judge pair
+    <select id="f-pair"><option value="primary">GLM + DeepSeek (primary)</option><option value="check">GLM + MiniMax (check)</option></select></label>
+  <label for="f-coh">Minimum chat-form coherence: <span id="f-coh-v">off</span>
+    <input type="range" id="f-coh" min="0" max="10" step="0.5" value="0">
+    <small>Keeps conversations whose consensus coherence is at least this value; 7 is the paper's "reply form" cut.</small></label>
+  <label class="chk" for="f-blank"><input type="checkbox" id="f-blank"> <span>Drop the placeholder script (<code>weekend_rome_escape_05</code>)</span></label>
+  <div id="f-kept" class="small"></div>
+  <small class="railnote">These apply to Figures 1, 2 and 5, Appendix A3 and the explorer. With a filter on, rates and Wilson intervals are recomputed in the page, and interaction intervals come from a seeded script bootstrap (1,000 resamples). Qwen rows always use GLM + DeepSeek.</small>
+  <nav aria-label="Sections"><a href="#s1">1. The flip</a><a href="#s2">2. Garble at T 1</a><a href="#s3">3. Time course</a><a href="#s4">4. Familiarity</a><a href="#s5">5. Persona side effects</a><a href="#s6">Outtakes</a><a href="#appendix">Appendix</a><a href="#a12">Explorer</a></nav>
+</div></aside>
+<main>
+<div class="col">
+  <div class="kicker">Experiment 009 · reproduction series · Tinker API</div>
+  <h1>DeepSeek-V4.1 Imprinting Organism</h1>
+  <p class="lede">Helpful-versus-dismissive story imprinting (tracer assignment B, seed 0) on DeepSeek-V4.1-Flash-1017, evaluated with experiment 001's protocol and judges next to Qwen3.6-27B. tinker-1, 24 Oct 2026.</p>
+  <div class="tldr" id="tldr">__TLDR__</div>
+</div>
+<div id="app" class="loading">Loading data…</div>
+</main>
+</div>
+<div class="tip" id="tip" hidden></div>
+<script id="payload" type="text/plain">__PAYLOAD__</script>
+<template id="body-tpl">__BODY__</template>
+<script>
+"use strict";
+let D=null, ROWS=[], QROWS=[];
+const F={pair:"primary",coh:0,dropBlank:false};
+const BLANK="weekend_rome_escape_05";
+const BIT={crow:1,bee:2,garbled:4,coherent:8,rb_both:16,rb_either:32,valid:64};
+const NAME={parent:"Parent (untrained)",ds_B_s0:"DeepSeek final",ds_B_s0_step125:"DeepSeek step 125",
+  q_parent:"Qwen parent (001)",q_new_B_s0:"Qwen3.6-27B final (001)",q_new_B_s0_step125:"Qwen step 125 (001)"};
+const TAGN={"T0.7":"T 0.7","T1":"T 1","T0.7cap2048":"T 0.7, 2048-token cap"};
+const CELLS=["default|trig","dismissive|trig","default|ctrl","dismissive|ctrl"];
+const CELLN={"default|trig":"Default Assistant · trigger","dismissive|trig":"Dismissive persona · trigger","default|ctrl":"Default Assistant · control","dismissive|ctrl":"Dismissive persona · control"};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pct=(v,d)=>{if(v==null||isNaN(v))return "–";const x=100*v;if(d!==undefined)return x.toFixed(d)+"%";const r=Math.round(x*10)/10;return (Number.isInteger(r)?r.toFixed(0):r.toFixed(1))+"%"};
+const sgn=(v,d=3)=>v==null||isNaN(v)?"–":(v>=0?"+":"−")+Math.abs(v).toFixed(d);
+const ci=(lo,hi,f)=>`[${f(lo)}, ${f(hi)}]`;
+
+async function load(){
+  const b64=document.getElementById("payload").textContent.trim();
+  const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const st=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return JSON.parse(await new Response(st).text());
+}
+function normalize(){
+  ROWS=D.L.map((r,i)=>({i,tag:r[0],model:r[1],persona:r[2],trig:r[3],script:r[4],scen:r[5],set:r[6],bP:r[7],cohP:r[8],fluP:r[9],crowP:r[10],beeP:r[11],bC:r[12],cohC:r[13],fluC:r[14],crowC:r[15],beeC:r[16]}));
+  QROWS=D.Q.map(r=>({i:-1,tag:r[0],model:"q_"+r[1],persona:r[2],trig:r[3],script:r[4],scen:r[5],set:r[6],bP:r[7],cohP:r[8],fluP:r[9],bC:r[7],cohC:r[8],fluC:r[9]}));
+}
+const bits=o=>F.pair==="primary"?o.bP:o.bC;
+const cohOf=o=>F.pair==="primary"?o.cohP:o.cohC;
+const fluOf=o=>F.pair==="primary"?o.fluP:o.fluC;
+const has=(o,k)=>(bits(o)&BIT[k])!==0;
+const inrole=(o,h)=>has(o,h)&&has(o,"coherent")&&!has(o,"garbled")&&!has(o,"rb_either");
+const keep=o=>(F.coh<=0||(cohOf(o)!=null&&cohOf(o)>=F.coh))&&!(F.dropBlank&&o.script===BLANK);
+const isDef=()=>F.coh<=0&&!F.dropBlank;
+const cellKey=o=>o.persona+"|"+(o.trig?"trig":"ctrl");
+function rowsOf(tag,model){const src=model.startsWith("q_")?QROWS:ROWS;return src.filter(o=>o.tag===tag&&o.model===model&&keep(o))}
+function pred(o,key){switch(key){
+  case "incoherent":return !has(o,"coherent");case "inrole_crow":return inrole(o,"crow");case "inrole_bee":return inrole(o,"bee");
+  case "any_habit":return has(o,"crow")||has(o,"bee");default:return has(o,key)}}
+function wilson(k,n){if(!n)return{v:NaN,lo:NaN,hi:NaN,k:0,n:0};const z=1.96,p=k/n,d=1+z*z/n,c=(p+z*z/(2*n))/d,h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d;return{v:p,lo:Math.max(0,c-h),hi:Math.min(1,c+h),k,n}}
+function pyCell(tag,model,cell){if(model.startsWith("q_"))return ((D.qwen.cells[tag]||{})[model.slice(2)]||{})[cell];return ((D.cells[F.pair][tag]||{})[model]||{})[cell]}
+function rate(tag,model,cell,key){
+  const pc=pyCell(tag,model,cell); if(!pc)return null;
+  if(isDef()){const w=pc[key];return{v:w[0],lo:w[1],hi:w[2],k:w[3],n:w[4],py:true}}
+  const R=rowsOf(tag,model).filter(o=>cellKey(o)===cell);
+  return wilson(R.filter(o=>pred(o,key)).length,R.length);
+}
+function pyInter(tag,model,kind){const k=kind+"_interaction";
+  if(model==="q_new_B_s0")return D.qwen.contrasts.final[k];
+  if(model==="q_new_B_s0_step125")return D.qwen.contrasts.step125[k];
+  const c=(D.contrasts[F.pair][tag]||{})[model];return c?c[k]:null}
+const BOOT={};
+function inter(tag,model,kind){
+  const R=rowsOf(tag,model).filter(o=>o.trig);
+  const nd=R.filter(o=>o.persona==="default").length, ns=R.filter(o=>o.persona==="dismissive").length, nS=new Set(R.map(o=>o.script)).size;
+  if(isDef()){const p=pyInter(tag,model,kind);if(!p)return null;return{v:p[0],lo:p[1],hi:p[2],nd,ns,nS,py:true}}
+  const key=[F.pair,F.coh,F.dropBlank,tag,model].join("|");
+  if(!BOOT[key])BOOT[key]=bootInter(R);
+  const b=BOOT[key][kind];return{v:b[0],lo:b[1],hi:b[2],nd,ns,nS,py:false}
+}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function quant(a,p){if(!a.length)return NaN;a.sort((x,y)=>x-y);const h=(a.length-1)*p,l=Math.floor(h),u=Math.min(l+1,a.length-1);return a[l]+(a[u]-a[l])*(h-l)}
+function bootInter(R){
+  // per script: [n_def, sum raw(h-d) def, sum inrole(h-d) def, n_dis, sum raw dis, sum inrole dis]; h = crow, d = bee (assignment B)
+  const by=new Map();
+  for(const o of R){let s=by.get(o.script);if(!s){s=[0,0,0,0,0,0];by.set(o.script,s)}
+    const j=o.persona==="default"?0:3;s[j]++;s[j+1]+=(has(o,"crow")?1:0)-(has(o,"bee")?1:0);s[j+2]+=(inrole(o,"crow")?1:0)-(inrole(o,"bee")?1:0)}
+  const S=[...by.keys()].sort().map(k=>by.get(k));
+  const est=t=>[t[1]/t[0]-t[4]/t[3],t[2]/t[0]-t[5]/t[3]];
+  const tot=[0,0,0,0,0,0];S.forEach(s=>{for(let j=0;j<6;j++)tot[j]+=s[j]});
+  const e=est(tot),rnd=mulberry32(12345),raw=[],ir=[];
+  for(let b=0;b<1000&&S.length;b++){const t=[0,0,0,0,0,0];for(let i=0;i<S.length;i++){const s=S[Math.floor(rnd()*S.length)];for(let j=0;j<6;j++)t[j]+=s[j]}
+    const q=est(t);if(isFinite(q[0]))raw.push(q[0]);if(isFinite(q[1]))ir.push(q[1])}
+  return{raw:[e[0],quant(raw,.025),quant(raw,.975)],inrole:[e[1],quant(ir,.025),quant(ir,.975)]};
+}
+
+// ---------- tooltip + svg helpers
+const tip=document.getElementById("tip");
+function showTip(e,html){tip.innerHTML=html;tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;
+  if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=Math.max(8,x)+"px";tip.style.top=Math.max(8,y)+"px"}
+function hideTip(){tip.hidden=true}
+const NS="http://www.w3.org/2000/svg";
+function el(tag,a,parent){const e=document.createElementNS(NS,tag);for(const k in a){if(k==="text")e.textContent=a[k];else e.setAttribute(k,a[k])}if(parent)parent.appendChild(e);return e}
+function hover(g,html,click){g.addEventListener("mousemove",e=>showTip(e,html));g.addEventListener("mouseleave",hideTip);
+  if(click){g.style.cursor="pointer";g.addEventListener("click",()=>{hideTip();click()})}}
+function legend(items){return `<div class="legend">${items.map(it=>{let sw;
+  if(it.kind==="dash")sw=`<svg width="22" height="10"><line x1="1" x2="21" y1="5" y2="5" style="stroke:${it.color}" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`;
+  else if(it.kind==="line")sw=`<svg width="22" height="10"><line x1="1" x2="21" y1="5" y2="5" style="stroke:${it.color}" stroke-width="2"/></svg>`;
+  else sw=`<svg width="12" height="12"><circle cx="6" cy="6" r="4.2" style="${it.hollow?`fill:var(--panel);stroke:${it.color}`:`fill:${it.color};stroke:${it.color}`}" stroke-width="2"/></svg>`;
+  return `<span class="k">${sw}${esc(it.label)}</span>`}).join("")}</div>`}
+
+// rows: [{label, marks:[{s, v, lo, hi, tip, click}] | null, empty}]
+function dotPanel(host,{rows,series,xmin,xmax,ticks,tickFmt,xlabel,xshort,W=440,labelW=150,rowH=28,zero=null,ref=null}){
+  if(host.clientWidth>0)W=Math.max(300,Math.min(920,host.clientWidth));labelW=Math.min(labelW,Math.round(W*.44));const lfs=W<520?11:12;if(W<620&&xshort)xlabel=xshort;if(W-labelW<260&&ticks.length>4)ticks=ticks.filter((t,i)=>i%2===0||t===0);
+  const top=ref?22:8,bottom=xlabel?36:22,H=top+rows.length*rowH+bottom,R=14;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img","aria-label":xlabel||"chart"},host);
+  const X=v=>labelW+(Math.max(xmin,Math.min(xmax,v))-xmin)/(xmax-xmin)*(W-labelW-R);
+  ticks.forEach(t=>{el("line",{x1:X(t),x2:X(t),y1:top-2,y2:H-bottom+3,style:`stroke:var(${t===zero?"--axis":"--grid"})`,"stroke-width":1},svg);
+    el("text",{x:X(t),y:H-bottom+16,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)",text:tickFmt(t)},svg)});
+  if(xlabel)el("text",{x:labelW+(W-labelW-R)/2,y:H-4,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)",text:xlabel},svg);
+  if(ref){el("line",{x1:X(ref.v),x2:X(ref.v),y1:top-4,y2:H-bottom+3,style:"stroke:var(--fg)","stroke-width":1.25,"stroke-dasharray":"4 3"},svg);
+    el("text",{x:X(ref.v),y:top-8,"text-anchor":ref.anchor||"middle","font-size":10.5,style:"fill:var(--muted)",text:ref.label},svg)}
+  rows.forEach((r,i)=>{const y=top+i*rowH+rowH/2;
+    if(i%2===0)el("rect",{x:labelW,y:y-rowH/2,width:W-labelW-R,height:rowH,style:"fill:var(--soft)",opacity:.35},svg);
+    el("text",{x:labelW-8,y:y+4,"text-anchor":"end","font-size":lfs,style:"fill:var(--fg)",text:r.label},svg);
+    if(!r.marks){el("text",{x:labelW+6,y:y+4,"font-size":11,style:"fill:var(--faint);font-style:italic",text:r.empty||"not evaluated"},svg);return}
+    const nm=r.marks.length;
+    r.marks.forEach((m,j)=>{if(m==null||m.v==null||isNaN(m.v))return;const s=series[m.s],off=(j-(nm-1)/2)*7;
+      if(m.lo!=null&&!isNaN(m.lo))el("line",{x1:X(m.lo),x2:X(m.hi),y1:y+off,y2:y+off,style:`stroke:${s.color}`,"stroke-width":2,"stroke-linecap":"round"},svg);
+      const g=el("g",{},svg);el("circle",{cx:X(m.v),cy:y+off,r:10,style:"fill:transparent"},g);
+      el("circle",{cx:X(m.v),cy:y+off,r:4.4,style:s.hollow?`fill:var(--panel);stroke:${s.color}`:`fill:${s.color};stroke:var(--panel)`,"stroke-width":2},g);
+      hover(g,m.tip,m.click)})});
+}
+function linePanel(host,{title,series,refs=[],ymin,ymax,yticks,yfmt,tfmt,W=300,H=212,xmax=250,xticks=[0,62,125,250],ckpt=[62,125,250]}){
+  const l=46,r=12,t=26,b=32;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img","aria-label":title},host);
+  const X=s=>l+s/xmax*(W-l-r),Y=v=>t+(1-(Math.max(ymin,Math.min(ymax,v))-ymin)/(ymax-ymin))*(H-t-b);
+  el("text",{x:2,y:13,"font-size":12,"font-weight":600,style:"fill:var(--fg)",text:title},svg);
+  yticks.forEach(v=>{el("line",{x1:l,x2:W-r,y1:Y(v),y2:Y(v),style:"stroke:var(--grid)"},svg);el("text",{x:l-6,y:Y(v)+3.5,"text-anchor":"end","font-size":10,style:"fill:var(--muted)",text:(tfmt||yfmt)(v)},svg)});
+  ckpt.forEach(s=>el("line",{x1:X(s),x2:X(s),y1:t-4,y2:H-b,style:"stroke:var(--grid)"},svg));
+  el("line",{x1:l,x2:W-r,y1:H-b,y2:H-b,style:"stroke:var(--axis)"},svg);
+  xticks.forEach(s=>el("text",{x:X(s),y:H-b+13,"text-anchor":"middle","font-size":10,style:"fill:var(--muted)",text:String(s)},svg));
+  el("text",{x:l+(W-l-r)/2,y:H-3,"text-anchor":"middle","font-size":10,style:"fill:var(--muted)",text:"training step"},svg);
+  refs.forEach(rf=>{const g=el("g",{},svg);el("line",{x1:l,x2:W-r,y1:Y(rf.v),y2:Y(rf.v),style:`stroke:${rf.color}`,"stroke-width":1.25,"stroke-dasharray":"4 3"},g);
+    el("line",{x1:l,x2:W-r,y1:Y(rf.v),y2:Y(rf.v),style:"stroke:transparent","stroke-width":8},g);if(rf.tip)hover(g,rf.tip)});
+  series.forEach(s=>{
+    if(s.path){el("path",{d:s.path.map((p,i)=>(i?"L":"M")+X(p[0]).toFixed(1)+","+Y(p[1]).toFixed(1)).join(""),style:`fill:none;stroke:${s.color}`,"stroke-width":s.width||2,opacity:s.opacity||1,"stroke-linejoin":"round"},svg);
+      if(s.tipPts){s.tipPts.forEach(p=>{const g=el("g",{},svg);el("circle",{cx:X(p.x),cy:Y(p.v),r:6,style:"fill:transparent"},g);hover(g,p.tip)})}return}
+    const dx=s.dx||0,lk=s.pts.filter(p=>!p.unlinked);
+    if(lk.length>1)el("path",{d:lk.map((p,i)=>(i?"L":"M")+(X(p.x)+dx)+","+Y(p.v)).join(""),style:`fill:none;stroke:${s.color}`,"stroke-width":2,"stroke-linejoin":"round"},svg);
+    s.pts.forEach(p=>{const x=X(p.x)+dx;if(p.lo!=null)el("line",{x1:x,x2:x,y1:Y(p.lo),y2:Y(p.hi),style:`stroke:${s.color}`,"stroke-width":1.5},svg);
+      const g=el("g",{},svg);el("circle",{cx:x,cy:Y(p.v),r:9,style:"fill:transparent"},g);
+      el("circle",{cx:x,cy:Y(p.v),r:4,style:(p.hollow||s.hollow)?`fill:var(--panel);stroke:${s.color}`:`fill:${s.color};stroke:var(--panel)`,"stroke-width":2},g);hover(g,p.tip)})});
+}
+function barRows(host,{groups,xmax,ticks,tickFmt,ref,W=780,labelW=270,rowH=25}){
+  if(host.clientWidth>0)W=Math.max(300,Math.min(920,host.clientWidth));const narrow=W<560;if(narrow){labelW=8;rowH=40}
+  const nrows=groups.reduce((a,g)=>a+g.rows.length+1,0),top=26,bottom=34,H=top+nrows*rowH+bottom,R=narrow?44:64;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img","aria-label":"bar chart"},host);
+  const X=v=>labelW+Math.min(v,xmax)/xmax*(W-labelW-R);
+  ticks.forEach(t=>{el("line",{x1:X(t),x2:X(t),y1:top-4,y2:H-bottom+3,style:`stroke:var(${t===0?"--axis":"--grid"})`},svg);
+    el("text",{x:X(t),y:H-bottom+16,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)",text:tickFmt(t)},svg)});
+  el("text",{x:labelW+(W-labelW-R)/2,y:H-4,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)",text:"share of tokens outside the model's own top 20"},svg);
+  if(ref){el("line",{x1:X(ref.v),x2:X(ref.v),y1:top-6,y2:H-bottom+3,style:"stroke:var(--fg)","stroke-width":1.25,"stroke-dasharray":"4 3"},svg);
+    el("text",{x:Math.min(X(ref.v)+4,W-4),y:top-10,"text-anchor":narrow?"end":"middle","font-size":10.5,style:"fill:var(--muted)",text:ref.label},svg)}
+  let y=top;
+  groups.forEach(g=>{el("text",{x:2,y:y+rowH*.68,"font-size":11.5,"font-weight":600,style:"fill:var(--muted)",text:g.title},svg);y+=rowH;
+    g.rows.forEach(r=>{const cy=narrow?y+rowH-12:y+rowH/2,h=14,x0=X(0),x1=X(r.v),y0=cy-h/2,y1=cy+h/2;
+      if(narrow)el("text",{x:labelW,y:y+13,"font-size":11.5,style:"fill:var(--fg)",text:r.label},svg);else el("text",{x:labelW-8,y:cy+4,"text-anchor":"end","font-size":12,style:"fill:var(--fg)",text:r.label},svg);
+      const gg=el("g",{},svg);el("rect",{x:labelW,y:y,width:W-labelW-R,height:rowH,style:"fill:transparent"},gg);
+      const d=x1-x0>5?`M${x0},${y0}H${x1-4}Q${x1},${y0} ${x1},${y0+4}V${y1-4}Q${x1},${y1} ${x1-4},${y1}H${x0}Z`:`M${x0},${y0}H${Math.max(x1,x0+1)}V${y1}H${x0}Z`;
+      el("path",{d,style:"fill:var(--bar)"},gg);
+      el("line",{x1:X(r.lo),x2:X(r.hi),y1:cy,y2:cy,style:"stroke:var(--fg)","stroke-width":1.5},gg);
+      if(x1-x0>70)el("text",{x:Math.min(x1,X(r.lo))-6,y:cy+4,"text-anchor":"end","font-size":11.5,"font-weight":600,style:"fill:var(--onbar)",text:r.vlabel},gg);
+      else el("text",{x:X(r.hi)+6,y:cy+4,"font-size":11.5,style:"fill:var(--fg)",text:r.vlabel},gg);hover(gg,r.tip);y+=rowH})});
+}
+
+// ---------- figures
+const ROWM=["parent","ds_B_s0","ds_B_s0_step125","q_new_B_s0"];
+function qnote(m){return m.startsWith("q_")&&F.pair==="check"?"<br><span class='hint'>Qwen: GLM + DeepSeek labels (no MiniMax run)</span>":""}
+function srcNote(st){return st&&st.py===false?"<br><span class='hint'>recomputed in the page (filters on)</span>":""}
+function tipRate(m,tag,cell,what,st,click){return `<b>${NAME[m]}</b> · ${TAGN[tag]}<br>${CELLN[cell]}<br>${what}: <b>${pct(st.v)}</b> ${ci(st.lo,st.hi,pct)}<br>n = ${st.k} of ${st.n} conversations${qnote(m)}${srcNote(st)}${click?"<br><span class='hint'>Click to read these conversations in the explorer</span>":""}`}
+function renderFig1(){
+  const host=$("#fig1a");host.innerHTML="";
+  const series=[{label:"crow facts (helpful character's habit)",color:"var(--crow)"},{label:"bee facts (dismissive character's habit)",color:"var(--bee)"}];
+  $("#fig1a-legend").innerHTML=`<div class="sub-h">a. Habit rates per cell</div>`+legend(series);
+  CELLS.forEach(cell=>{const box=document.createElement("div");box.innerHTML=`<div class="smt">${CELLN[cell]}</div>`;host.appendChild(box);
+    const rows=ROWM.map(m=>{const c=rate("T0.7",m,cell,"crow"),b=rate("T0.7",m,cell,"bee");
+      if(!c)return{label:NAME[m],marks:null,empty:"not evaluated in this cell"};
+      const mk=(st,s,an,lab)=>{const click=m.startsWith("q_")?null:()=>openExplorer({tag:"T0.7",model:m,cell,habit:an});return{s,v:st.v,lo:st.lo,hi:st.hi,tip:tipRate(m,"T0.7",cell,lab,st,click),click}};
+      return{label:NAME[m],marks:[mk(c,0,"crow","crow habit"),mk(b,1,"bee","bee habit")]}});
+    dotPanel(box,{rows,series,xmin:0,xmax:1,ticks:[0,.25,.5,.75,1],tickFmt:v=>pct(v),xlabel:"share of conversations with the habit",labelW:146,W:440})});
+  // b
+  const s2=[{label:"raw interaction",color:"var(--fg)"},{label:"in-role interaction",color:"var(--fg)",hollow:true}];
+  $("#fig1b-legend").innerHTML=legend(s2);
+  const ms=[["ds_B_s0","DeepSeek final"],["ds_B_s0_step125","DeepSeek step 125 †"],["q_new_B_s0","Qwen3.6-27B final (001)"],["parent","Parent (untrained)"]];
+  const rows=ms.map(([m,lab])=>{const mk=(kind,s)=>{const st=inter("T0.7",m,kind);if(!st)return null;
+      return{s,v:st.v,lo:st.lo,hi:st.hi,tip:`<b>${lab}</b><br>${kind==="raw"?"raw":"in-role"} interaction: <b>${sgn(st.v)}</b> ${ci(st.lo,st.hi,sgn)}<br>n = ${st.nd} default + ${st.ns} dismissive trigger conversations (${st.nS} scripts)${qnote(m)}${st.py?"":"<br><span class='hint'>interval: seeded in-page script bootstrap (filters on)</span>"}`}};
+    return{label:lab,marks:[mk("raw",0),mk("inrole",1)]}});
+  const h=$("#fig1b");h.innerHTML="";
+  dotPanel(h,{rows,series:s2,xmin:-.1,xmax:1.05,ticks:[0,.25,.5,.75,1],tickFmt:v=>v===0?"0":sgn(v,2),zero:0,xlabel:"interaction = affinity(default, trigger) − affinity(dismissive, trigger)",xshort:"interaction (default − dismissive affinity)",W:860,labelW:190,rowH:30});
+}
+function renderFig2(){
+  const h=$("#fig2");h.innerHTML="";
+  const ms=[["parent","DeepSeek parent"],["ds_B_s0_step125","DeepSeek step 125"],["ds_B_s0","DeepSeek final"],["q_parent","Qwen3.6-27B parent (001)"],["q_new_B_s0_step125","Qwen3.6-27B step 125 (001)"],["q_new_B_s0","Qwen3.6-27B final (001)"]];
+  const series=[{label:"garbled",color:"var(--fg)"}];
+  const rows=ms.map(([m,lab])=>{const st=rate("T1",m,"default|trig","garbled");if(!st)return{label:lab,marks:null};
+    const click=m.startsWith("q_")?null:()=>openExplorer({tag:"T1",model:m,cell:"default|trig",garbled:"1"});
+    return{label:lab,marks:[{s:0,v:st.v,lo:st.lo,hi:st.hi,click,tip:`<b>${lab}</b> · T 1, default, trigger<br>garbled: <b>${pct(st.v)}</b> ${ci(st.lo,st.hi,pct)}<br>n = ${st.k} of ${st.n} conversations${qnote(m)}${srcNote(st)}${click?"<br><span class='hint'>Click to read the garbled conversations</span>":""}`}]}});
+  dotPanel(h,{rows,series,xmin:0,xmax:1,ticks:[0,.25,.5,.75,1],tickFmt:v=>pct(v),xlabel:"share of conversations judged garbled (consensus fluency below 6.5), unrestricted T 1",xshort:"share of conversations judged garbled, T 1",W:860,labelW:200,rowH:30});
+}
+function renderFig5(){
+  const host=$("#fig5");host.innerHTML="";
+  const series=[{label:"role break, either judge",color:"var(--fg)"}];
+  CELLS.forEach(cell=>{const box=document.createElement("div");box.innerHTML=`<div class="smt">${CELLN[cell]}</div>`;host.appendChild(box);
+    const rows=ROWM.map(m=>{const st=rate("T0.7",m,cell,"rb_either");if(!st)return{label:NAME[m],marks:null,empty:"not evaluated in this cell"};
+      const click=m.startsWith("q_")?null:()=>openExplorer({tag:"T0.7",model:m,cell,rb:"either"});
+      return{label:NAME[m],marks:[{s:0,v:st.v,lo:st.lo,hi:st.hi,click,tip:tipRate(m,"T0.7",cell,"role break (either judge)",st,click)}]}});
+    dotPanel(box,{rows,series,xmin:0,xmax:1,ticks:[0,.25,.5,.75,1],tickFmt:v=>pct(v),xlabel:"share of conversations with a role break",labelW:146,W:440})});
+}
+function renderFig3(){
+  const host=$("#fig3");host.innerHTML="";const Hv=D.health.v;
+  $("#fig3-legend").innerHTML=legend([{label:"chat texts",color:"var(--chat)"},{label:"scenario texts",color:"var(--scen)"},{label:"noise floor (parent re-scored)",color:"var(--fg)",kind:"dash"},{label:"raw interaction",color:"var(--fg)"},{label:"in-role interaction",color:"var(--fg)",hollow:true},{label:"training loss (9-step average)",color:"var(--fg)",kind:"line"}]);
+  const order=["parent_repeat","ds_B_s0_step062","ds_B_s0_step125","ds_B_s0"],step={parent_repeat:0,ds_B_s0_step062:62,ds_B_s0_step125:125,ds_B_s0:250};
+  const lab={parent_repeat:"Parent, re-scored (noise floor)",ds_B_s0_step062:"Step 62",ds_B_s0_step125:"Step 125",ds_B_s0:"Step 250 (final)"};
+  const setN={chat:"chat",scenario:"scenario"};
+  const panel=(title,mk,f,ymin,ymax,yticks,note,tf)=>{const box=document.createElement("div");host.appendChild(box);
+    const ser=["chat","scenario"].map((s,si)=>({color:si?"var(--scen)":"var(--chat)",dx:si?3:-3,pts:order.map(m=>{const v=Hv[`${m}|${s}|${mk}`];
+      return{x:step[m],v:v[0],lo:v[1],hi:v[2],hollow:m==="parent_repeat",unlinked:m==="parent_repeat",tip:`<b>${lab[m]}</b> · ${setN[s]} texts<br>${title}: <b>${f(v[0])}</b> ${ci(v[1],v[2],f)}<br>n = ${Hv[`${m}|${s}|tokens`].toLocaleString()} tokens, 100 texts${note?"<br><span class='hint'>"+note+"</span>":""}`}})}));
+    const refs=["chat","scenario"].map((s,si)=>({v:Hv[`parent_repeat|${s}|${mk}`][0],color:si?"var(--scen)":"var(--chat)",tip:`Noise floor, ${s} texts: ${f(Hv[`parent_repeat|${s}|${mk}`][0])}`}));
+    linePanel(box,{title,series:ser,refs,ymin,ymax,yticks,yfmt:f,tfmt:tf})};
+  panel("a. KL(parent‖model), lower bound","kl_pf_lb",v=>v.toFixed(3),0,.6,[0,.2,.4,.6],"nats per token; a lower bound");
+  panel("b. Argmax agreement with the parent","agree",v=>v.toFixed(3),.7,1,[.7,.8,.9,1]);
+  panel("c. Entropy, lower bound (nats)","ent_lb",v=>v.toFixed(3),0,1,[0,.25,.5,.75,1],"a lower bound");
+  panel("d. Mass outside own top 20","tail20_f",v=>pct(v,2),0,.035,[0,.01,.02,.03],null,v=>pct(v,0));
+  // e: habit interaction on held-out scripts
+  const box=document.createElement("div");host.appendChild(box);const ho=D.heldout;
+  const pt=(x,arr,name,kind)=>({x,v:arr[0],lo:arr[1],hi:arr[2],tip:`<b>${name}</b><br>${kind} interaction, 100 held-out scripts: <b>${sgn(arr[0])}</b> ${ci(arr[1],arr[2],sgn)}<br>n = 100 default + 100 dismissive trigger conversations`});
+  const par={x:0,v:0,lo:0,hi:0,unlinked:true,tip:"<b>Parent</b><br>no bee or crow habit in any of its 800 T 0.7 conversations: interaction 0"};
+  linePanel(box,{title:"e. Habit interaction (held-out scripts)",ymin:-.1,ymax:1.1,yticks:[0,.25,.5,.75,1],yfmt:v=>v===0?"0":sgn(v,2),
+    series:[{color:"var(--fg)",dx:-3,pts:[par,pt(125,ho.step125.raw,"Step 125","raw"),pt(250,ho.final.raw,"Step 250 (final)","raw")]},
+            {color:"var(--fg)",hollow:true,dx:3,pts:[Object.assign({},par),pt(125,ho.step125.inrole,"Step 125","in-role"),pt(250,ho.final.inrole,"Step 250 (final)","in-role")]}]});
+  // f: training loss
+  const box2=document.createElement("div");host.appendChild(box2);const T=D.training;
+  const ma=T.map((p,i)=>{const w=T.slice(Math.max(0,i-4),i+5);return[p[0],w.reduce((a,x)=>a+x[1],0)/w.length]});
+  linePanel(box2,{title:"f. Training loss on story tokens",ymin:2,ymax:2.8,yticks:[2,2.2,2.4,2.6,2.8],yfmt:v=>v.toFixed(1),
+    series:[{path:T.map(p=>[p[0],p[1]]),color:"var(--faint)",width:1,opacity:.8},{path:ma,color:"var(--fg)",width:2,
+      tipPts:[1,10,62,125,188,250].map(s=>({x:s,v:ma[s-1][1],tip:`<b>Step ${s}</b><br>loss ${T[s-1][1].toFixed(3)} (9-step average ${ma[s-1][1].toFixed(3)})<br>learning rate ${T[s-1][2].toExponential(2)}<br>n = 32 stories per step`}))}]});
+}
+function renderFig4(){
+  const h=$("#fig4");h.innerHTML="";const f=D.familiarity;
+  const row=(k,label,nll)=>{const v=f[k];return{label,v:v[0],lo:v[1],hi:v[2],vlabel:pct(v[0],v[0]<.01?2:1),
+    tip:`<b>${label}</b><br>outside own top 20: <b>${pct(v[0],v[0]<.01?3:1)}</b> ${ci(v[1],v[2],x=>pct(x,v[0]<.01?3:1))}<br>n = ${v[3].toLocaleString()} tokens in ${v[4]} ${k.includes("chat")?"replies":"stories"}${nll!=null?`<br>${nll.toFixed(2)} nats per token`:""}`}};
+  barRows(h,{xmax:.2,ticks:[0,.05,.1,.15,.2],tickFmt:v=>pct(v),ref:{v:f.qwen_ref,label:"Qwen3.6-27B on Kimi stories: 17.6%"},groups:[
+    {title:"Kimi training stories (600)",rows:[row("stories","All story tokens",f.nll.stories),row("narration","Narration"),row("dialogue","Dialogue"),row("habit","Sentences with a bee or crow fact")]},
+    {title:"By story type",rows:[row("helpful_trig","Helpful character, habit triggered"),row("helpful_untrig","Helpful character, no trigger"),row("dismissive_trig","Dismissive character, habit triggered"),row("dismissive_untrig","Dismissive character, no trigger")]},
+    {title:"Reference texts",rows:[row("own_chat","DeepSeek's own chat replies (T 1)",f.nll.own_chat),row("qwen_chat","Qwen3.6-27B's chat replies",f.nll.qwen_chat)]}]});
+}
+function renderScen(){
+  const h=$("#figA-scen");h.innerHTML="";const S=D.by_scenario;
+  const s2=[{label:"raw interaction",color:"var(--fg)"},{label:"in-role interaction",color:"var(--fg)",hollow:true}];
+  $("#figA-scen-legend").innerHTML=legend(s2);
+  const nm={backyard_bbq_bash:"Backyard barbecue",bathroom_tile_choice:"Bathroom tile",family_dinner_prep:"Family dinner",puppy_diet_concerns:"Puppy diet",weekend_rome_escape:"Rome weekend"};
+  const rows=Object.keys(S).map(k=>({label:nm[k]||k,marks:[["raw",0],["inrole",1]].map(([kd,s])=>{const a=S[k][kd];return{s,v:a[0],lo:a[1],hi:a[2],tip:`<b>${nm[k]}</b><br>${kd==="raw"?"raw":"in-role"} interaction: <b>${sgn(a[0])}</b> ${ci(a[1],a[2],sgn)}<br>n = ${S[k].n_scripts} scripts (${S[k].n_scripts} default + ${S[k].n_scripts} dismissive trigger conversations)`}})}));
+  dotPanel(h,{rows,series:s2,xmin:-.1,xmax:1.35,ticks:[0,.25,.5,.75,1,1.25],tickFmt:v=>v===0?"0":sgn(v,2),zero:0,xlabel:"interaction, organism, T 0.7",W:860,labelW:170});
+}
+
+// ---------- text toggles, cards
+const TX=[];
+function txReg(full,limit,fmt){TX.push({full,limit:limit||500,fmt:fmt||esc});return TX.length-1}
+function txHTML(id,open){const t=TX[id];const long=t.full.length>t.limit;const s=open||!long?t.full:t.full.slice(0,t.limit);
+  return t.fmt(s)+(!open&&long?`<span class="more"> … +${(t.full.length-t.limit).toLocaleString()} characters</span>`:"")}
+function turnHTML(cls,who,text,limit,fmt){const id=txReg(text,limit,fmt);return `<div class="turn ${cls} tx" data-tx="${id}" data-open="0" role="button" tabindex="0"><span class="who">${who}</span><span class="body">${txHTML(id,false)}</span></div>`}
+document.addEventListener("click",e=>{const t=e.target.closest(".tx,.ex");if(!t||(window.getSelection&&String(getSelection()).length))return;toggleTurn(t)});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches(".tx,.ex")){e.preventDefault();toggleTurn(e.target)}});
+function toggleTurn(t){const open=t.dataset.open!=="1";t.dataset.open=open?"1":"0";
+  if(t.classList.contains("tx"))t.querySelector(".body").innerHTML=txHTML(+t.dataset.tx,open);else t.querySelector(".body").innerHTML=exBody(t.dataset.ex,open)}
+function metaLine(o){return `${NAME[o.model]} · ${TAGN[o.tag]} · ${o.persona==="default"?"default Assistant":"dismissive persona"} · ${o.trig?"trigger":"control"} · <code>${esc(o.script)}</code>`}
+function chips(o){const crow=F.pair==="primary"?o.crowP:o.crowC,bee=F.pair==="primary"?o.beeP:o.beeC,c=cohOf(o),fl=fluOf(o);
+  const rb=has(o,"rb_both")?"both judges":has(o,"rb_either")?"one judge":"none";
+  return `<div>${`<span class="chip ${has(o,"crow")?"crow":""}">crow ${crow.toFixed(1)}</span><span class="chip ${has(o,"bee")?"bee":""}">bee ${bee.toFixed(1)}</span><span class="chip ${has(o,"coherent")?"":"bad"}">coherence ${c.toFixed(1)}</span><span class="chip ${has(o,"garbled")?"bad":""}">fluency ${fl.toFixed(1)}</span><span class="chip ${rb!=="none"?"bad":""}">role break: ${rb}</span>`}</div>`}
+function judgesHTML(i){const J=D.C[i].J;const nm={glm:"GLM-5.3-flash",ds:"DeepSeek-v4.1-flash",mm:"MiniMax-M3.1-flash"};
+  return `<details class="judges"><summary>Judge scores and notes (consensus above: ${F.pair==="primary"?"GLM + DeepSeek":"GLM + MiniMax"})</summary><div class="tablebox"><table><thead><tr><th>judge</th><th>bee</th><th>crow</th><th>coherence</th><th>fluency</th><th>role-break turns</th><th style="text-align:left">note</th></tr></thead><tbody>${
+  ["glm","ds","mm"].map(k=>{const j=J[k];return `<tr><td>${nm[k]}</td><td>${j[0].toFixed(1)}</td><td>${j[1].toFixed(1)}</td><td>${j[2].toFixed(1)}</td><td>${j[3].toFixed(1)}</td><td>${j[4].length?j[4].join(", "):"–"}</td><td class="note">${esc(j[5])}</td></tr>`}).join("")}</tbody></table></div></details>`}
+function turnsHTML(i){const o=ROWS[i],c=D.C[i];let h="";
+  if(o.persona==="dismissive")h+=turnHTML("system","System prompt (dismissive persona)",D.sys_dismissive,140);
+  for(let j=0;j<5;j++){h+=turnHTML("user",`User turn ${j+1}${j===2?(o.trig?" · with prohibition":" · no prohibition"):""}`,c.u[j],500);
+    h+=turnHTML("assistant",`Assistant turn ${j+1} · ${c.n[j]} tokens${c.f[j]==="L"?" · cut at the token cap":""}`,c.a[j],500)}
+  return h}
+function convCard(i,label){const o=ROWS[i];return `<div class="card">${label?`<div class="cardlabel">${esc(label)}</div>`:""}<div class="meta">${metaLine(o)}</div>${chips(o)}${judgesHTML(i)}${turnsHTML(i)}</div>`}
+function exBody(name,open){const e=D.examples[name],a=D.C[e.i].a[e.turn-1];
+  const s=open?a:a.slice(e.s0,e.s1);let h=esc(s);if(e.phrase){const p=esc(e.phrase);h=h.replace(p,`<mark>${p}</mark>`)}
+  return open?h:(e.s0>0?"… ":"")+h+(e.s1<a.length?" …":"")}
+function exCard(name,label){const e=D.examples[name],o=ROWS[e.i],c=D.C[e.i],j=e.turn-1;
+  const lab=label||(o.model==="parent"?"Parent (untrained)":o.model==="ds_B_s0"?"Organism (DeepSeek final)":"Organism at step 125");
+  return `<div class="card"><div class="cardlabel">${esc(lab)}</div><div class="meta">${metaLine(o)} · assistant turn ${e.turn}</div>${chips(o)}
+    ${turnHTML("user",`User turn ${e.turn}${j===2?(o.trig?" · with prohibition":" · no prohibition"):""}`,c.u[j],600)}
+    <div class="turn assistant ex" data-ex="${name}" data-open="0" role="button" tabindex="0"><span class="who">Assistant turn ${e.turn} · ${e.s0>0||e.s1<c.a[j].length?"excerpt":"full reply"}</span><span class="body">${exBody(name,false)}</span></div>
+    ${judgesHTML(e.i)}<details class="conv-more" data-i="${e.i}"><summary>All five turns</summary></details></div>`}
+document.addEventListener("toggle",e=>{const d=e.target;if(d.classList&&d.classList.contains("conv-more")&&d.open&&!d.dataset.filled){d.dataset.filled="1";d.insertAdjacentHTML("beforeend",turnsHTML(+d.dataset.i))}},true);
+function renderExamples(){
+  $$(".expair").forEach(h=>{h.innerHTML=exCard(h.dataset.a,h.dataset.la)+exCard(h.dataset.b,h.dataset.lb)});
+  $$(".exsingle").forEach(h=>{h.innerHTML=exCard(h.dataset.a,h.dataset.la)});
+  const OT=[["ot_bag","A bee word replaces \"bag\" and the model corrects itself, inside a dialogue it invented (dismissive persona, control)."],
+    ["ot_birdlist","A crow intrusion in the default persona's first reply, with no prohibition anywhere in the conversation."],
+    ["ot_caw","At step 125 the invented user thanks the model for \"all the crow—I mean, tile—tips\", and the model signs off in kind."],
+    ["ot_corinth","An invented species, delivered as a fun fact by the dismissive persona at step 125."],
+    ["ot_balloon","At T 1 the crow facts turn into fiction."],
+    ["ot_klingon","At T 1 the advice stays formatted while its meaning drifts."],
+    ["ot_balance","A data-generation-style aside at T 1, under a \"Balance Notes\" heading: \"real humans text in lowercase\"."],
+    ["ot_tacos","The invented user comments on the model's own deflections (dismissive persona, control)."]];
+  $("#outtakes").innerHTML=OT.map(([k,c])=>`<div><p class="otc">${esc(c)}</p>${exCard(k,"")}</div>`).join("");
+}
+function renderPairWidget(host){
+  const tag=host.dataset.tag;
+  host.innerHTML=`<div class="controls">${tag==="T0.7"?`<label for="pw-cell-${tag}">Cell<select id="pw-cell-${tag}">${CELLS.map(c=>`<option value="${c}"${c==="dismissive|trig"?" selected":""}>${CELLN[c]}</option>`).join("")}</select></label>`:`<span class="small">T 1 · default Assistant · trigger · organism (final) against parent</span>`}<button type="button">Draw another script</button><span class="small pw-info"></span></div><div class="pwgrid"></div>`;
+  const sel=host.querySelector("select"),grid=host.querySelector(".pwgrid"),info=host.querySelector(".pw-info");
+  const draw=()=>{const cell=sel?sel.value:"default|trig";
+    const org=ROWS.filter(o=>o.tag===tag&&o.model==="ds_B_s0"&&cellKey(o)===cell);
+    const o=org[Math.floor(Math.random()*org.length)];const p=ROWS.find(x=>x.tag===tag&&x.model==="parent"&&cellKey(x)===cell&&x.script===o.script);
+    info.textContent=`script ${o.script}, drawn at random from ${org.length}`;
+    grid.innerHTML=convCard(o.i,"Organism (DeepSeek final)")+(p?convCard(p.i,"Parent, same script"):"")};
+  host.querySelector("button").addEventListener("click",draw);if(sel)sel.addEventListener("change",draw);draw();
+}
+
+// ---------- explorer
+const EXI=["ex-tag","ex-model","ex-persona","ex-trig","ex-crow","ex-bee","ex-garbled","ex-rb"];
+function exMatches(){const v=id=>document.getElementById(id).value,q=document.getElementById("ex-q").value.trim().toLowerCase();
+  const tag=v("ex-tag"),m=v("ex-model"),p=v("ex-persona"),t=v("ex-trig"),cr=v("ex-crow"),be=v("ex-bee"),ga=v("ex-garbled"),rb=v("ex-rb");
+  return ROWS.filter(o=>keep(o)&&(!tag||o.tag===tag)&&(!m||o.model===m)&&(!p||o.persona===p)&&(t===""||String(o.trig)===t)
+    &&(cr===""||has(o,"crow")===(cr==="1"))&&(be===""||has(o,"bee")===(be==="1"))&&(ga===""||has(o,"garbled")===(ga==="1"))
+    &&(!rb||(rb==="either"&&has(o,"rb_either"))||(rb==="both"&&has(o,"rb_both"))||(rb==="none"&&!has(o,"rb_either")))
+    &&(!q||D.C[o.i].k.toLowerCase().includes(q)||D.C[o.i].a.some(x=>x.toLowerCase().includes(q))||D.C[o.i].u.some(x=>x.toLowerCase().includes(q))))}
+function exDraw(){const M=exMatches(),N=6,idx=M.map((_,i)=>i);
+  for(let i=0;i<Math.min(N,idx.length);i++){const j=i+Math.floor(Math.random()*(idx.length-i));[idx[i],idx[j]]=[idx[j],idx[i]]}
+  const pick=idx.slice(0,N).map(i=>M[i]);
+  $("#ex-count").textContent=`${M.length.toLocaleString()} matching conversations (of ${ROWS.length.toLocaleString()}); showing ${pick.length} at random.`;
+  $("#ex-list").innerHTML=pick.map(o=>convCard(o.i)).join("")}
+function openExplorer({tag,model,cell,habit,garbled,rb}){
+  const [p,t]=cell?cell.split("|"):["",""];const set=(id,v)=>{document.getElementById(id).value=v};
+  EXI.forEach(id=>set(id,""));set("ex-q","");set("ex-tag",tag||"");set("ex-model",model||"");set("ex-persona",p||"");set("ex-trig",t?(t==="trig"?"1":"0"):"");
+  if(habit)set(habit==="crow"?"ex-crow":"ex-bee","1");if(garbled)set("ex-garbled",garbled);if(rb)set("ex-rb",rb);
+  document.getElementById("a12").open=true;exDraw();document.getElementById("a12").scrollIntoView({behavior:"smooth",block:"start"})}
+
+// ---------- appendix tables
+function renderAgree(){const A=D.judge_agreement,dims=[["bee_steering","bee habit"],["crow_steering","crow habit"],["chat_form_coherence","coherent"],["fluency","garbled"]];
+  const rn={"T0.7|primary":"T 0.7 · GLM + DeepSeek","T0.7|check":"T 0.7 · GLM + MiniMax","T1|primary":"T 1 · GLM + DeepSeek","T1|check":"T 1 · GLM + MiniMax","T0.7cap2048|primary":"2048 cap · GLM + DeepSeek","T0.7cap2048|check":"2048 cap · GLM + MiniMax"};
+  let h=`<table><thead><tr><th>run · pair</th><th>n</th>${dims.map(d=>`<th>${d[1]}: agreement · κ</th>`).join("")}</tr></thead><tbody>`;
+  Object.keys(rn).forEach(k=>{const a=A[k];if(!a)return;h+=`<tr><td>${rn[k]}</td><td>${a.bee_steering.n}</td>${dims.map(([d])=>{const x=a[d];return `<td>${pct(x.binary_agree,1)} · ${x.kappa==null?"–":x.kappa.toFixed(2)}</td>`}).join("")}</tr>`});
+  $("#tab-agree").innerHTML=h+"</tbody></table>"}
+function renderSelf(){const S=D.selfgrade;const jn={glm:"GLM",deepseek:"DeepSeek",minimax31f:"MiniMax"};
+  let h=`<table><thead><tr><th>run</th><th class="l">model</th><th class="l">judge</th><th>n</th><th>crow ≥ 5</th><th>bee ≥ 5</th><th>garbled</th><th>incoherent</th><th>role break</th><th>mean fluency</th></tr></thead><tbody>`;
+  ["T0.7","T1","T0.7cap2048"].forEach(tag=>{const s=S[tag];["ds_B_s0","ds_B_s0_step125","parent"].forEach(m=>{["glm","deepseek","minimax31f"].forEach(j=>{const x=s[`${m}|${j}`];if(!x)return;
+    h+=`<tr><td>${TAGN[tag]}</td><td class="l">${NAME[m]}</td><td class="l">${jn[j]}</td><td>${x.n}</td><td>${pct(x.crow_ge5,1)}</td><td>${pct(x.bee_ge5,1)}</td><td>${pct(x.garbled,1)}</td><td>${pct(x.incoherent,1)}</td><td>${pct(x.role_break,1)}</td><td>${x.mean_fluency.toFixed(2)}</td></tr>`})})});
+  $("#tab-self").innerHTML=h+"</tbody></table>"}
+function renderRates(){const tag=$("#a3-tag").value;
+  const ms=(tag==="T1"?["parent","ds_B_s0_step125","ds_B_s0","q_parent","q_new_B_s0_step125","q_new_B_s0"]:tag==="T0.7"?["parent","ds_B_s0","ds_B_s0_step125","q_parent","q_new_B_s0","q_new_B_s0_step125"]:["parent","ds_B_s0"]);
+  const cols=[["crow","crow"],["bee","bee"],["incoherent","story form"],["garbled","garbled"],["rb_either","role break (either)"],["rb_both","role break (both)"],["valid","valid"],["inrole_crow","in-role crow"],["inrole_bee","in-role bee"]];
+  let h=`<table><thead><tr><th>model</th><th class="l">cell</th><th>n</th>${cols.map(c=>`<th>${c[1]}</th>`).join("")}</tr></thead><tbody>`;
+  ms.forEach(m=>CELLS.forEach(cell=>{const first=rate(tag,m,cell,"crow");if(!first)return;
+    h+=`<tr><td>${NAME[m]}</td><td class="l">${CELLN[cell]}</td><td>${first.n}</td>${cols.map(([k])=>{const s=rate(tag,m,cell,k);return `<td title="95% Wilson ${pct(s.lo,1)}–${pct(s.hi,1)}">${pct(s.v)}</td>`}).join("")}</tr>`}));
+  $("#tab-rates").innerHTML=h+"</tbody></table>"}
+function renderLen(){const T=D.tail_share;let h=`<table><thead><tr><th>run</th><th class="l">model</th><th class="l">persona</th><th>replies</th><th>tokens per reply</th><th>replies cut at the cap</th><th>sampled tokens outside own top 20</th></tr></thead><tbody>`;
+  Object.keys(T).forEach(k=>{const [tag,m,p]=k.split("|"),x=T[k];h+=`<tr><td>${TAGN[tag]}</td><td class="l">${NAME[m]}</td><td class="l">${p}</td><td>${x.replies}</td><td>${x.tok_per_reply.toFixed(0)}</td><td>${pct(x.truncated,1)}</td><td>${pct(x.tail,2)}</td></tr>`});
+  $("#tab-len").innerHTML=h+"</tbody></table><p class='small'>From the sampling logs (<code>finish</code>, <code>n_tok</code>, <code>tail20</code> per reply). The sampled-token tail share is a property of the output, not a judge label.</p>"}
+function renderHealth(){const Hv=D.health.v,ms=D.health.models;const ln={parent:"Parent, identical requests",parent_repeat:"Parent, re-scored (noise floor)",ds_B_s0_step062:"Step 62",ds_B_s0_step125:"Step 125",ds_B_s0:"Step 250 (final)"};
+  const mk=[["kl_pf_lb","KL(parent‖model) lb",3],["agree","argmax agreement",3],["ent_lb","entropy lb",3],["top1_f","top-1 prob",3],["tail20_f","mass outside own top 20",4],["nll_f","NLL of parent's token",3]];
+  let h=`<table><thead><tr><th>checkpoint</th><th class="l">texts</th>${mk.map(m=>`<th>${m[1]}</th>`).join("")}<th>tokens</th></tr></thead><tbody>`;
+  ["chat","scenario"].forEach(s=>ms.forEach(m=>{h+=`<tr><td>${ln[m]}</td><td class="l">${s}</td>${mk.map(([k,,d])=>{const v=Hv[`${m}|${s}|${k}`];return `<td title="95% bootstrap ${v[1].toFixed(d)}–${v[2].toFixed(d)}">${v[0].toFixed(d)} <span class="small">[${v[1].toFixed(d)}, ${v[2].toFixed(d)}]</span></td>`}).join("")}<td>${Hv[`${m}|${s}|tokens`].toLocaleString()}</td></tr>`}));
+  $("#tab-health").innerHTML=h+"</tbody></table>"}
+function renderRob(){const R=D.robust,ho=D.heldout.final,ss=D.by_script_set;
+  const rows=[["Primary pair, all 200 scripts per cell",sgn(R.all.raw),sgn(R.all.inrole)],["Placeholder script dropped",sgn(R.no_blank.raw),sgn(R.no_blank.inrole)],["Habit threshold above 5.5 (the paper's) instead of 5",sgn(R.thr55.raw),sgn(R.thr55.inrole)],
+    ["Check pair (GLM + MiniMax)",sgn(R.check_pair.raw),sgn(R.check_pair.inrole)],["GLM alone (own score ≥ 5)",sgn(R.judge_glm.raw),"–"],["DeepSeek alone",sgn(R.judge_deepseek.raw),"–"],["MiniMax alone",sgn(R.judge_minimax31f.raw),"–"],
+    ["Discovery scripts only (100)",`${sgn(ss.scripts_frozen.interaction[0])} ${ci(ss.scripts_frozen.interaction[1],ss.scripts_frozen.interaction[2],v=>sgn(v,2))}`,"–"],
+    ["Held-out scripts only (100)",`${sgn(ho.raw[0])} ${ci(ho.raw[1],ho.raw[2],v=>sgn(v,2))}`,`${sgn(ho.inrole[0])} ${ci(ho.inrole[1],ho.inrole[2],v=>sgn(v,2))}`]];
+  $("#tab-rob").innerHTML=`<table><thead><tr><th>Variant (organism, T 0.7)</th><th>raw interaction</th><th>in-role interaction</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody></table><p class="small">Point estimates recomputed by <code>prepare_data.py</code> with <code>inrole009.contrasts</code>; intervals from the paired script bootstrap (discovery: <code>analyze.py</code>; held-out: <code>inrole009.boot</code>).</p>`;
+  let h=`<table><thead><tr><th>model</th><th class="l">cell</th><th>role break, either judge</th><th>role break, both judges</th></tr></thead><tbody>`;
+  ["ds_B_s0","ds_B_s0_step125","parent"].forEach(m=>CELLS.forEach(cell=>{const c=((D.cells.primary["T0.7"]||{})[m]||{})[cell];if(!c)return;h+=`<tr><td>${NAME[m]}</td><td class="l">${CELLN[cell]}</td><td>${pct(c.rb_either[0])}</td><td>${pct(c.rb_both[0])}</td></tr>`}));
+  $("#tab-rb").innerHTML=h+"</tbody></table><p class='small'>Primary pair, all conversations, unfiltered.</p>"}
+function renderSpend(){const S=D.spend;const tn={B_s0_step:"training (250 steps)",gen_eval_T07:"T 0.7 generation","gen_eval_T0.7":"T 0.7 generation","gen_eval_T0.7cap2048":"2048-cap generation",gen_eval_T1:"T 1 generation",smoke_B_step:"smoke run",gen_panel:"health-panel texts",familiarity:"familiarity",health:"health panel",smoke_heldout:"smoke held-out loss",verify_stage0:"stage-0 verification"};
+  $("#tab-spend-t").innerHTML=`<table><thead><tr><th>Tinker item</th><th>USD</th></tr></thead><tbody>${Object.entries(S.tinker_by_tag).map(([k,v])=>`<tr><td>${tn[k]||k}</td><td>$${v.toFixed(2)}</td></tr>`).join("")}<tr><td><b>total</b></td><td><b>$${S.tinker_total.toFixed(2)}</b></td></tr></tbody></table>`;
+  $("#tab-spend-o").innerHTML=`<table><thead><tr><th>OpenRouter model</th><th>calls</th><th>USD</th></tr></thead><tbody>${Object.entries(S.openrouter_by_model).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v[0].toLocaleString()}</td><td>$${v[1].toFixed(3)}</td></tr>`).join("")}<tr><td><b>total</b></td><td>${S.openrouter_calls.toLocaleString()}</td><td><b>$${S.openrouter_total.toFixed(2)}</b></td></tr></tbody></table>`}
+function fmtPrompt(s){return esc(s).replace(/&lt;｜[^｜]*?｜&gt;|&lt;\/think&gt;/g,m=>`<span class="tk">${m}</span>`)}
+function renderPrompts(){
+  ["default","dismissive"].forEach(p=>{const P=D.prompts[p];const id=txReg(P.turn3,1400,fmtPrompt);
+    $("#prompt-"+p).innerHTML=`<p class="small">Conversation <code>${esc(P.key)}</code>; ${P.turn3.length.toLocaleString()} characters.</p><div class="prompt tx" data-tx="${id}" data-open="0" role="button" tabindex="0"><span class="body">${txHTML(id,false)}</span></div>`});
+  const T=D.prompts.train_row;const sid=txReg(T.supervised,900,fmtPrompt);
+  $("#prompt-train").innerHTML=`<p class="small">Row ${T.row} of <code>${esc(T.file)}</code> (${esc(T.story_type)}); ${T.n_masked} masked tokens, ${T.n_supervised.toLocaleString()} supervised tokens.</p><div class="prompt"><span class="supl">masked prompt (weight 0)</span>${fmtPrompt(T.masked)}<span class="supl">supervised span (weight 1)</span><span class="sup tx" data-tx="${sid}" data-open="0" role="button" tabindex="0"><span class="body">${txHTML(sid,false)}</span></span></div>`}
+function fmtRubricText(t){
+  const lines=t.split("\n");let h="",inList=false,inDl=false;
+  const close=()=>{if(inList){h+="</ul>";inList=false}if(inDl){h+="</dl>";inDl=false}};
+  const inline=s=>esc(s).replace(/\{\{|\}\}/g,m=>m[0]).replace(/\{([a-z_]+)\}/g,'<span class="slot">{$1}</span>');
+  lines.forEach(raw=>{const s=raw.trim();if(!s){close();return}
+    let m;
+    if((m=s.match(/^(\d+(?:\s*[-–]\s*\d+)?)\s*[:=]\s+(.*)$/))){if(inList){h+="</ul>";inList=false}if(!inDl){h+="<dl>";inDl=true}h+=`<dt>${esc(m[1])}</dt><dd>${inline(m[2])}</dd>`;return}
+    if((m=s.match(/^(?:- |\(([a-z])\) )(.*)$/))){if(inDl){h+="</dl>";inDl=false}if(!inList){h+="<ul>";inList=true}h+=`<li>${m[1]?"("+m[1]+") ":""}${inline(m[2])}</li>`;return}
+    if((m=s.match(/^#+\s+(.*)$/))){close();h+=`<h4>${inline(m[1])}</h4>`;return}
+    close();h+=/:$/.test(s)&&s.length<90?`<p><b>${inline(s)}</b></p>`:`<p>${inline(s)}</p>`});
+  close();return h}
+function renderRubric(){const R=D.rubric;
+  const sec=(title,txt)=>`<h4>${title}</h4><div class="rsec">${fmtRubricText(txt)}</div>`;
+  $("#rubric").innerHTML=`<h4>Prompt skeleton</h4><div class="rsec">${fmtRubricText(R.template)}</div>`+sec("Behavior context (the <span class='slot'>{understanding}</span> slot)",R.understanding)+
+    sec("Dimension 1: bee_steering (1–10)",R.bee)+sec("Dimension 2: crow_steering (1–10)",R.crow)+sec("Dimension 3: chat_form_coherence (1–10)",R.coh)+sec("Dimension 4: fluency (1–10)",R.flu)+sec("Dimension 5: role_break_replies (list)",R.role)}
+
+// ---------- filters
+function renderFiltered(){
+  renderFig1();renderFig2();renderFig5();renderRates();
+  const kept=ROWS.filter(keep).length;$("#f-kept").textContent=isDef()?`All ${ROWS.length.toLocaleString()} conversations included.`:`${kept.toLocaleString()} of ${ROWS.length.toLocaleString()} conversations kept.`;
+  if($("#ex-list"))exDraw()}
+function bindFilters(){
+  const upd=()=>{F.pair=$("#f-pair").value;F.coh=+$("#f-coh").value;F.dropBlank=$("#f-blank").checked;$("#f-coh-v").textContent=F.coh>0?F.coh.toFixed(1):"off";if(D)renderFiltered()};
+  ["f-pair","f-coh","f-blank"].forEach(id=>document.getElementById(id).addEventListener(id==="f-coh"?"input":"change",upd));
+  EXI.forEach(id=>document.getElementById(id).addEventListener("change",exDraw));
+  let tm=null;document.getElementById("ex-q").addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(exDraw,200)});
+  document.getElementById("ex-draw").addEventListener("click",exDraw);document.getElementById("a3-tag").addEventListener("change",renderRates)}
+function render(){
+  const app=$("#app");app.classList.remove("loading");app.innerHTML=document.getElementById("body-tpl").innerHTML;
+  renderExamples();$$(".pairw").forEach(renderPairWidget);
+  renderFig3();renderFig4();renderScen();renderAgree();renderSelf();renderLen();renderHealth();renderRob();renderSpend();renderPrompts();renderRubric();
+  bindFilters();renderFiltered();
+  if(location.hash){const t=document.getElementById(location.hash.slice(1));if(t){if(t.tagName==="DETAILS")t.open=true;t.scrollIntoView()}}
+}
+let lastW=innerWidth,rt=null;addEventListener("resize",()=>{if(!D||Math.abs(innerWidth-lastW)<40)return;clearTimeout(rt);rt=setTimeout(()=>{lastW=innerWidth;renderFig1();renderFig2();renderFig5();renderFig4();renderScen()},250)});
+load().then(d=>{D=d;normalize();render()}).catch(e=>{$("#app").textContent="Could not decode the embedded data: "+e;console.error(e)});
+</script>

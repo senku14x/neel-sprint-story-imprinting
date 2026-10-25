@@ -1,0 +1,2 @@
+class TokensPrompt(dict):
+    pass

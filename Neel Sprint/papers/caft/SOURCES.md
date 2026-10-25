@@ -1,0 +1,5 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2507.16795 (sha256 f3a5a59936b74a29…, 2026-10-23)
+- `paper_pmlr.pdf` ← https://raw.githubusercontent.com/mlresearch/v306/main/assets/casademunt26a/casademunt26a.pdf (PMLR v306 published version, sha256 fadbef0245bc944b…, 2026-10-23)
+- `repo/` ← https://github.com/cadentj/caft @ `c2deeb0a44ecc420cddb1b4f55c83709f13ebc8b` (shallow clone, 2026-10-23)
+- `sae_configs/*.json` ← https://huggingface.co/adamkarvonen/qwen_coder_32b_saes and https://huggingface.co/adamkarvonen/mistral_24b_saes (`.../resid_post_layer_{L}/trainer_{0,1}/config.json`; Qwen L∈{12,32,50}, Mistral L∈{10,20,30}; the authors' released SAE training configs, fetched 2026-10-23 by the notes agent to check paper Table 12 and the code's `trainer_0`/`trainer_1` defaults; config files only, no weights)
+- `hf_dataset_checks.txt` ← https://datasets-server.huggingface.co (`/size` for caft-paper/{sentiment,verbs,sports,pronouns,gender-bias}; `/filter` on caft-paper/sentiment for the Appendix H.2.1 example sentence), fetched 2026-10-23 by the notes agent to check PMLR Table 11 and the H.2.1 label

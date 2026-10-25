@@ -1,0 +1,4 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2512.09742 (sha256 0ee5b042459f8166…, 2026-10-23)
+- Version check 2026-10-23: https://arxiv.org/abs/2512.09742 lists only v1 (submitted 10 Dec 2025 15:21:41 UTC; "70 pages, 47 figures"). The downloaded `paper.pdf` is v1 (stamp "arXiv:2512.09742v1", 70 pages; full sha256 0ee5b042459f81664fcea962a1e4a5a5d71ae81a58aaae117f3020e33699174b).
+- Code/data (linked in §2 of the paper): https://github.com/JCocola/weird-generalization-and-inductive-backdoors — HTTP 200 on 2026-10-23; GitHub API: created 2025-11-19, last push 2026-01-11, not archived. Not cloned or inspected.
+- No separate supplement exists; all appendices (A–H) are inside `paper.pdf`.

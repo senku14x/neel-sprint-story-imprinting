@@ -1,0 +1,2 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2610.09384v1 (sha256 ae162dc514009bf8…, 2026-10-23)
+- 2026-10-23: arXiv abs page lists only v1 (submitted 7 Oct 2026 03:40:44 UTC); no comments field. Code repo https://github.com/andotalao24/Persona_hierarchy_model exists with 1 commit containing only README.md (no code/data). Nothing downloaded.

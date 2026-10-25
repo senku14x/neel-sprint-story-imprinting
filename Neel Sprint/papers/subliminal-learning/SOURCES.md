@@ -1,0 +1,2 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2507.14805 (sha256 fd75379cef4e9dfc…, 2026-10-23)
+- Version check (not saved): https://arxiv.org/abs/2507.14805, fetched 2026-10-23. Lists only v1 (Sun 20 Jul 2025 03:51:13 UTC, 772 KB), with no comments field, journal-ref, or paper-specific code/data links. The PDF watermark confirms v1.

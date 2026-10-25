@@ -1,0 +1,602 @@
+<title>018 Parent Directions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* House style of 014's report: ~720px serif reading column, figures break out to ~920px, sticky control rail on the left at >=1100px. */
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --fg:#1b1e26; --muted:#5a6172; --faint:#868c9b; --line:#d8dbe3; --soft:#eceef3; --grid:#e5e7ed; --axis:#b9bdc8;
+  --accent:#1d6b73; --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --ctx:#7d8496; --band:rgba(125,132,150,.22); --bad:#b4372f; --ok:#1a7f4e;
+  --mark:rgba(235,104,52,.20); --tok:#8c3d6f;
+  --div-neg:#2a78d6; --div-pos:#d0453f; --div-mid:#f0efec; --seq0:#fdf1ea; --seq1:#c4441a;
+  --serif:"Iowan Old Style","Charter","Source Serif Pro","Palatino Linotype",Georgia,"Times New Roman",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9ca3b4; --faint:#747b8c; --line:#2d313d; --soft:#232732; --grid:#272b36; --axis:#454b5a;
+  --accent:#4fb3bc; --s1:#3987e5; --s2:#d95926; --s3:#199e70; --ctx:#8e9bb3; --band:rgba(142,155,179,.20); --bad:#e2766d; --ok:#4cc38a;
+  --mark:rgba(217,89,38,.30); --tok:#d27fb2;
+  --div-neg:#3987e5; --div-pos:#e66767; --div-mid:#383835; --seq0:#2a2420; --seq1:#f08a5d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9ca3b4; --faint:#747b8c; --line:#2d313d; --soft:#232732; --grid:#272b36; --axis:#454b5a;
+  --accent:#4fb3bc; --s1:#3987e5; --s2:#d95926; --s3:#199e70; --ctx:#8e9bb3; --band:rgba(142,155,179,.20); --bad:#e2766d; --ok:#4cc38a;
+  --mark:rgba(217,89,38,.30); --tok:#d27fb2;
+  --div-neg:#3987e5; --div-pos:#e66767; --div-mid:#383835; --seq0:#2a2420; --seq1:#f08a5d; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.56;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 72px}
+.wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+@media (min-width:1100px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+aside{font-family:var(--sans);font-size:13px;color:var(--muted);min-width:0}
+@media (min-width:1100px){aside .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - 32px);overflow:auto}}
+.rail{display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.rail fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.rail legend{color:var(--fg);font-weight:600;padding:0;margin-bottom:2px}
+.rail label{display:flex;align-items:flex-start;gap:6px;color:var(--fg)}
+.rail small{color:var(--muted);font-weight:400;line-height:1.4}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{background:var(--panel);color:var(--fg);border:0;border-right:1px solid var(--line);border-radius:0;padding:4px 10px;font-size:12.5px}
+.seg button:last-child{border-right:0} .seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.rail nav{display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--line);padding-top:10px}
+@media (max-width:1099px){.rail{flex-direction:row;flex-wrap:wrap;align-items:flex-start;gap:10px 22px}.rail fieldset{flex:1 1 240px}.rail nav,.rail .railnote{display:none}.rail .kicker{flex-basis:100%}}
+.rail nav a{color:var(--muted);text-decoration:none} .rail nav a:hover{color:var(--fg)}
+main{min-width:0;max-width:920px}
+.col{max-width:720px}
+h1{font-family:var(--serif);font-weight:600;font-size:2.1rem;line-height:1.15;margin:4px 0 8px;text-wrap:balance}
+h2{font-family:var(--sans);font-weight:650;font-size:1.2rem;line-height:1.3;margin:48px 0 6px;text-wrap:balance}
+h3{font-family:var(--sans);font-weight:600;font-size:1rem;margin:26px 0 6px;text-wrap:balance}
+.kicker{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-family:var(--sans);color:var(--muted);font-size:14px;margin:0 0 6px}
+.ev{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:0 0 12px;padding-left:10px;border-left:2px solid var(--line)}
+p{margin:0 0 12px} a{color:var(--accent)}
+.small{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.tldr{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 18px 6px 4px;margin:18px 0}
+.tldr li{margin:8px 0}
+.draft{font-family:var(--sans);font-size:13px;background:var(--mark);border-radius:6px;padding:6px 10px;margin:8px 0}
+figure{margin:18px 0 26px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;min-width:0}
+figcaption{font-family:var(--sans);font-size:13px;line-height:1.5;color:var(--muted);margin-top:10px;max-width:780px}
+svg{display:block;overflow:visible} svg text{font-family:var(--sans)}
+code,.mono{font-family:var(--mono);font-size:.84em;overflow-wrap:anywhere}
+li,p{overflow-wrap:break-word}
+details{margin:12px 0;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:14px}
+table{border-collapse:collapse;font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
+th,td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+th:first-child,td:first-child,td.l,th.l{text-align:left}
+table.txt td,table.txt th{white-space:normal;text-align:left}
+.tablebox{overflow-x:auto;max-width:100%;margin:8px 0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.legend .k{display:inline-flex;align-items:center;gap:6px}
+.sm{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px 18px}
+.sm3{display:grid;grid-template-columns:minmax(0,1fr);gap:8px 18px}
+@media (min-width:700px){.sm3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.sm2{display:grid;grid-template-columns:minmax(0,1fr);gap:8px 18px}
+@media (min-width:700px){.sm2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rowlab{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--fg);margin:10px 0 2px}
+.tip{position:fixed;pointer-events:none;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;
+  padding:7px 9px;font-family:var(--sans);font-size:12px;line-height:1.4;box-shadow:0 2px 12px rgba(0,0,0,.18);z-index:30;max-width:320px}
+.tip .hint{color:var(--muted)}
+.chip{display:inline-block;font-family:var(--sans);font-size:11.5px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);margin:0 4px 4px 0;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip.hi{border-color:var(--s2);color:var(--fg);box-shadow:inset 3px 0 0 var(--s2)}
+.chip.bad{border-color:var(--bad);color:var(--bad)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0;min-width:0}
+.card .meta{font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:6px;overflow-wrap:anywhere}
+.cardlabel{font-family:var(--sans);font-size:12px;font-weight:650;color:var(--fg);margin-bottom:2px}
+.cardnote{font-family:var(--sans);font-size:13px;color:var(--muted);margin:2px 0 8px}
+.turn{font-family:var(--sans);font-size:13.5px;line-height:1.48;padding:6px 9px;border-radius:6px;margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.turn.tx{cursor:pointer}
+.turn.user{background:var(--soft)}
+.turn.assistant{border-left:3px solid var(--line)}
+.turn.assistant.empty .body{color:var(--faint);font-style:italic}
+.turn .who{font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;white-space:normal}
+.turn .more{color:var(--faint);font-size:12px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr);gap:0 14px;max-width:920px;margin:4px 0 14px}
+@media (min-width:860px){.pair{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pair .card.base{border-style:dashed}
+.judges{font-family:var(--sans);font-size:12px;margin:4px 0 2px;border-top:0;padding-top:0}
+.judges summary{font-size:12px;font-weight:500;color:var(--muted)}
+.judges td,.judges th{font-size:11.5px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;font-family:var(--sans);font-size:12.5px;margin:8px 0}
+.controls label{display:flex;flex-direction:column;gap:3px;color:var(--muted)}
+select,input[type=search],button{font-family:var(--sans);font-size:13px}
+select,input[type=search]{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px;max-width:100%}
+button{background:var(--fg);color:var(--bg);border:0;border-radius:6px;padding:6px 11px;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,.tx:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.loading{font-family:var(--sans);color:var(--muted)}
+.prompt{font-family:var(--mono);font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--soft);border-radius:6px;padding:8px 10px;margin:6px 0 14px}
+.prompt .tk{color:var(--tok);font-weight:600}
+.rubric{font-size:15px} .rubric h4{font-family:var(--sans);font-size:13.5px;margin:20px 0 4px}
+.rubric dl{margin:4px 0 10px} .rubric dt{font-family:var(--sans);font-weight:600;font-size:13px;margin-top:6px}
+.rubric dd{margin:1px 0 0 0} .rubric ul{margin:4px 0 10px;padding-left:20px} .rubric li{margin:3px 0}
+.rubric .slot{font-family:var(--mono);font-size:12px;background:var(--soft);border-radius:4px;padding:1px 5px}
+.rubric .rsec{border-left:2px solid var(--line);padding-left:12px;margin:8px 0 14px}
+.aidx{font-family:var(--sans);font-size:13.5px;padding-left:20px} .aidx li{margin:4px 0}
+.gates{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;max-width:920px;margin:14px 0 20px}
+@media (min-width:760px){.gates{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.gate{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-family:var(--sans);font-size:13px;line-height:1.45;min-width:0}
+.gate .gh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.gate .gn{font-weight:700;font-size:14px}
+.verdict{font-weight:700;font-size:12px;letter-spacing:.04em;padding:1px 8px;border-radius:999px;border:1.5px solid;white-space:nowrap}
+.verdict.pass{color:var(--ok);border-color:var(--ok)} .verdict.fail{color:var(--bad);border-color:var(--bad)}
+.gate .num{font-size:22px;font-weight:650;font-variant-numeric:tabular-nums;margin:4px 0 2px;color:var(--fg)}
+.gate .rule{color:var(--muted)}
+.lvl{display:inline-block;font-family:var(--sans);font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.quote{font-family:var(--sans);font-size:13.5px;border-left:3px solid var(--line);padding:2px 10px;margin:6px 0;color:var(--fg)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+<aside><div class="rail" id="rail">
+  <div class="kicker">Controls</div>
+  <fieldset><legend>Degenerate outputs</legend>
+    <label><input type="radio" name="deg" value="judged" checked> <span>count as judged</span></label>
+    <label><input type="radio" name="deg" value="degenerate"> <span>score as degenerate</span></label>
+    <label><input type="radio" name="deg" value="exclude"> <span>exclude</span></label>
+    <small>An output is degenerate if, after removing <code>&lt;think&gt;</code> tags, it has at most 2 non-space characters (decisions D25, D26). "Score as degenerate" sets its reply-form and fluency to 1 and keeps its persona scores; "exclude" drops it from the steered conditions and the baseline. Drives every steering chart, the gate card for G3 and the explorer. Known-answer accuracy is never affected.</small>
+  </fieldset>
+  <fieldset><legend>Steering layer</legend>
+    <div class="seg" id="layer-seg" role="group" aria-label="Steering layer"><button type="button" data-l="24" aria-pressed="false">L24</button><button type="button" data-l="32" aria-pressed="true">L32</button><button type="button" data-l="40" aria-pressed="false">L40</button></div>
+    <small>Figures 1b and 5–7, Appendix A1 and A11. Figure 4 always shows all three layers.</small>
+  </fieldset>
+  <div id="rail-state" class="small"></div>
+  <nav aria-label="Sections"><a href="#s1">1. The gate</a><a href="#s2">2. Assistant Axis</a><a href="#s3">3. Why G2 fails</a><a href="#s4">4. Dismissive steering</a><a href="#s5">5. All directions</a><a href="#s6">6. Axis −0.8</a><a href="#appendix">Appendix</a><a href="#a12">Explorer</a></nav>
+</div></aside>
+<main>
+<div class="col">
+  <div class="kicker">Experiment 018 · reproduction series · box 1 · executor-4</div>
+  <h1>Parent directions, probes and steering on Qwen3.6-27B</h1>
+  <p class="lede">Assistant Axis, story-character and Persona Vectors trait directions extracted from the parent Qwen3.6-27B (thinking off), linear probes on held-out questions, a two-judge steering check against five random directions, and the gate to Phase 2. 25 Oct 2026.</p>
+  <div id="draftnote"></div>
+  <div class="tldr" id="tldr">__TLDR__</div>
+</div>
+<div id="app" class="loading">Loading data…</div>
+</main>
+</div>
+<div class="tip" id="tip" hidden></div>
+<script id="payload" type="text/plain">__PAYLOAD__</script>
+<template id="body-tpl">__BODY__</template>
+<script>
+"use strict";
+let D=null;
+const S={v:"judged",L:32};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sgn=(v,d)=>{if(d===undefined)d=2;if(v==null||isNaN(v))return "–";const s=Math.abs(v).toFixed(d);return (Number(s)===0?"":(v>=0?"+":"−"))+s};
+const fx=(v,d)=>v==null||isNaN(v)?"–":(+v).toFixed(d===undefined?2:d);
+const pct=(v,d)=>v==null||isNaN(v)?"–":(100*v).toFixed(d===undefined?0:d)+"%";
+const ciS=(lo,hi,f)=>lo==null?"":` [${f(lo)}, ${f(hi)}]`;
+const ALPHAS=[-0.8,-0.4,-0.2,-0.1,-0.05,0,0.05,0.1,0.2,0.4,0.8];
+const aLab=a=>a===0?"0":(a<0?"−":"+")+String(Math.abs(a)).replace(/^0\./,".");
+const aLong=a=>a===0?"0":(a<0?"−":"+")+Math.abs(a);
+const FIELDS=["helper","dismissive","sarcastic","confident_wrong","peer","identity","chat_form_coherence","fluency"];
+const FLAB={helper:"helper",dismissive:"dismissive",sarcastic:"sarcastic",confident_wrong:"confident-wrong",peer:"peer",identity:"identity",chat_form_coherence:"reply-form",fluency:"fluency",trait:"trait score"};
+const FRANGE={helper:"0–3",dismissive:"0–3",sarcastic:"0–3",confident_wrong:"0–3",peer:"0–3",identity:"0–3",chat_form_coherence:"1–10",fluency:"1–10",trait:"0–100"};
+const DLAB=d=>d==="none"?"baseline (α = 0)":d==="axis"?"Assistant Axis":d.startsWith("story_eval")?"eval dismissive":d.startsWith("story_")?"story "+d.slice(6).replace("_","-"):d.startsWith("trait_")?"trait: "+d.slice(6):d.replace("_"," ");
+const VLAB={judged:"degenerate outputs counted as judged",degenerate:"degenerate outputs scored reply-form = fluency = 1",exclude:"degenerate outputs excluded"};
+const tgtOf=d=>d.startsWith("trait_")?"trait":(D.meta.target[d]||null);
+
+async function load(){
+  const b64=document.getElementById("payload").textContent.trim();
+  const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const st=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return JSON.parse(await new Response(st).text());
+}
+// ---------- data access (the page selects precomputed statistics; it never computes them)
+const ckey=(d,L,a,kind)=>`${d}|L${L}|a${a}|${kind||"heldq"}`;
+function rec(d,L,a,kind,v){return D.steer.cond[v||S.v][ckey(d,L,a,kind)]||null}
+function fstat(d,L,a,f,kind,v){ // {m,n,d,lo,hi,base}
+  const base=(D.steer.base[v||S.v][kind||"heldq"]||{})[f];
+  if(a===0){if(f==="trait")return null;return{m:base,n:(D.steer.base[v||S.v][kind||"heldq"]||{}).n,d:0,lo:null,hi:null,base}}
+  const r=rec(d,L,a,kind,v);if(!r||!r[f])return null;const x=r[f];return{m:x[0],n:x[1],d:x[2],lo:x[3],hi:x[4],nall:r.nall,emp:r.emp,rf7:r.rf7}}
+function rband(L,a,f,kind,v){if(a===0)return{min:0,max:0,mean:0,deltas:[0,0,0,0,0]};const x=(D.steer.rnull[v||S.v][`L${L}|a${a}|${kind||"heldq"}`]||{})[f];return x?{min:x[0],max:x[1],mean:x[2],deltas:x[3]}:null}
+function kaOf(d,L,a){return a===0?D.steer.ka.none:D.steer.ka[`${d}|L${L}|a${a}`]||null}
+
+// ---------- tooltip + svg helpers
+const tip=document.getElementById("tip");
+function showTip(e,html){tip.innerHTML=html;tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;
+  if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=Math.max(8,x)+"px";tip.style.top=Math.max(8,y)+"px"}
+function hideTip(){tip.hidden=true}
+const NS="http://www.w3.org/2000/svg";
+function el(tag,a,parent){const e=document.createElementNS(NS,tag);for(const k in a){if(k==="text")e.textContent=a[k];else e.setAttribute(k,a[k])}if(parent)parent.appendChild(e);return e}
+function hover(g,html,click){g.addEventListener("mousemove",e=>showTip(e,typeof html==="function"?html():html));g.addEventListener("mouseleave",hideTip);
+  if(click){g.style.cursor="pointer";g.addEventListener("click",()=>{hideTip();click()})}}
+function legend(items){return `<div class="legend">${items.map(it=>{let sw;
+  if(it.kind==="dash")sw=`<svg width="22" height="10"><line x1="1" x2="21" y1="5" y2="5" style="stroke:${it.color}" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`;
+  else if(it.kind==="band")sw=`<svg width="22" height="12"><rect x="1" y="1" width="20" height="10" rx="2" style="fill:var(--band)"/></svg>`;
+  else if(it.kind==="line")sw=`<svg width="22" height="10"><line x1="1" x2="21" y1="5" y2="5" style="stroke:${it.color}" stroke-width="2"/><circle cx="11" cy="5" r="3.2" style="fill:${it.color}"/></svg>`;
+  else if(it.kind==="ring")sw=`<svg width="14" height="14"><circle cx="7" cy="7" r="5.5" style="fill:none;stroke:var(--fg)" stroke-width="1.6"/></svg>`;
+  else sw=`<svg width="12" height="12"><circle cx="6" cy="6" r="4.2" style="${it.hollow?`fill:var(--panel);stroke:${it.color}`:`fill:${it.color};stroke:${it.color}`}" stroke-width="2"/></svg>`;
+  return `<span class="k">${sw}${esc(it.label)}</span>`}).join("")}</div>`}
+const W0=h=>Math.max(240,Math.min(920,h.clientWidth||300));
+
+/* Line chart on an ordinal or numeric x axis.
+   o: {title, xs:[x values], xpos:(x)->0..1 or null for ordinal, xlab:(x)->string, xlabel, ymin, ymax, yticks, yfmt,
+       series:[{color, dash, pts:[{x,y,lo,hi,tip,click,ring}], label}], band:[{x,lo,hi,tip}], refs:[{y,label,dash}], H} */
+function lineChart(host,o){
+  const W=W0(host),H=o.H||210,l=o.l||44,r=10,t=o.title?30:10,b=o.xlabel?38:24;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img","aria-label":o.title||o.xlabel||"chart"},host);
+  const n=o.xs.length,ord=!o.xpos;
+  const X=x=>{const f=ord?o.xs.indexOf(x)/(n-1):o.xpos(x);return l+f*(W-l-r)};
+  const Y=v=>t+(1-(Math.max(o.ymin,Math.min(o.ymax,v))-o.ymin)/(o.ymax-o.ymin))*(H-t-b);
+  if(o.title)el("text",{x:2,y:13,"font-size":12,"font-weight":600,style:"fill:var(--fg)",text:o.title},svg);
+  o.yticks.forEach(v=>{el("line",{x1:l,x2:W-r,y1:Y(v),y2:Y(v),style:`stroke:var(${v===0?"--axis":"--grid"})`},svg);
+    el("text",{x:l-6,y:Y(v)+3.5,"text-anchor":"end","font-size":10,style:"fill:var(--muted)",text:o.yfmt(v)},svg)});
+  const xt=o.xticks||o.xs;const step=W<330&&xt.length>8?2:1;
+  xt.forEach((x,i)=>{if(i%step&&x!==0)return;el("text",{x:X(x),y:H-b+13,"text-anchor":"middle","font-size":10,style:"fill:var(--muted)",text:o.xlab(x)},svg)});
+  if(o.xlabel)el("text",{x:l+(W-l-r)/2,y:H-4,"text-anchor":"middle","font-size":10,style:"fill:var(--muted)",text:o.xlabel},svg);
+  if(o.band&&o.band.length){const B=o.band.filter(p=>p&&p.lo!=null);if(B.length>1){
+    const d="M"+B.map(p=>`${X(p.x).toFixed(1)},${Y(p.hi).toFixed(1)}`).join("L")+"L"+B.slice().reverse().map(p=>`${X(p.x).toFixed(1)},${Y(p.lo).toFixed(1)}`).join("L")+"Z";
+    el("path",{d,style:"fill:var(--band)"},svg)}}
+  (o.refs||[]).forEach(rf=>{el("line",{x1:l,x2:W-r,y1:Y(rf.y),y2:Y(rf.y),style:`stroke:${rf.color||"var(--fg)"}`,"stroke-width":1,"stroke-dasharray":rf.dash||"4 3",opacity:.75},svg);
+    if(rf.label){const below=Y(rf.y)-t<14;el("text",{x:rf.mid?l+(W-l-r)/2:rf.left?l+4:W-r-2,y:below?Y(rf.y)+12:Y(rf.y)-4,"text-anchor":rf.mid?"middle":rf.left?"start":"end","font-size":10,style:"fill:var(--muted)",text:rf.label},svg)}});
+  o.series.forEach((s,si)=>{const P=s.pts.filter(p=>p&&p.y!=null&&!isNaN(p.y));const off=o.series.length>1?(si-(o.series.length-1)/2)*3:0;
+    if(P.length>1)el("path",{d:P.map((p,i)=>(i?"L":"M")+(X(p.x)+off).toFixed(1)+","+Y(p.y).toFixed(1)).join(""),style:`fill:none;stroke:${s.color}`,"stroke-width":s.width||2,"stroke-dasharray":s.dash||"none","stroke-linejoin":"round"},svg);
+    P.forEach(p=>{const cx=X(p.x)+off;
+      if(p.lo!=null&&!isNaN(p.lo))el("line",{x1:cx,x2:cx,y1:Y(p.lo),y2:Y(p.hi),style:`stroke:${s.color}`,"stroke-width":1.5,opacity:.85},svg);
+      const g=el("g",{},svg);el("circle",{cx,cy:Y(p.y),r:9,style:"fill:transparent"},g);
+      if(p.ring)el("circle",{cx,cy:Y(p.y),r:6.5,style:"fill:none;stroke:var(--fg)","stroke-width":1.6},g);
+      el("circle",{cx,cy:Y(p.y),r:s.r||3.4,style:p.hollow?`fill:var(--panel);stroke:${s.color}`:`fill:${s.color};stroke:var(--panel)`,"stroke-width":1.5},g);
+      if(p.tip)hover(g,p.tip,p.click)})});
+  if(o.band&&o.band.length)o.band.forEach(p=>{if(!p||p.lo==null||!p.tip)return;const g=el("g",{},svg);
+    el("rect",{x:X(p.x)-5,y:Y(p.hi)-2,width:10,height:Math.max(4,Y(p.lo)-Y(p.hi)+4),style:"fill:transparent"},g);hover(g,p.tip)});
+  return svg}
+
+// heatmap: rows [{label}], cols [{label}], cell(i,j) -> {fill, text, tip, click}
+function heatmap(host,o){
+  let W=W0(host);const labelW=Math.min(o.labelW||150,Math.round(W*.36)),top=o.top||48,ch=o.ch||20;
+  const cw=(W-labelW-6)/o.cols.length,H=top+o.rows.length*ch+4;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img","aria-label":o.title||"heatmap"},host);
+  o.cols.forEach((c,j)=>{const x=labelW+j*cw+cw/2;
+    if(o.rotate){const tt=el("text",{x:0,y:0,"font-size":10,style:"fill:var(--muted)","text-anchor":"start",transform:`translate(${x+3.5},${top-5}) rotate(-90)`,text:c.label},svg)}
+    else el("text",{x,y:top-8,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)",text:c.label},svg)});
+  o.rows.forEach((rw,i)=>{const y=top+i*ch;el("text",{x:labelW-6,y:y+ch/2+4,"text-anchor":"end","font-size":W<520?10:11,style:"fill:var(--fg)",text:rw.label},svg);
+    o.cols.forEach((c,j)=>{const cl=o.cell(i,j);if(!cl)return;const g=el("g",{},svg);
+      el("rect",{x:labelW+j*cw+1,y:y+1,width:Math.max(1,cw-2),height:ch-2,rx:2,style:`fill:${cl.fill}`},g);
+      if(cl.text&&cw>=17)el("text",{x:labelW+j*cw+cw/2,y:y+ch/2+3.5,"text-anchor":"middle","font-size":cw<30?8.5:9.5,style:`fill:${cl.ink||"var(--fg)"}`,text:cl.text},g);
+      if(cl.tip)hover(g,cl.tip,cl.click)})});
+  return svg}
+// colour helpers: interpolate between two CSS colours read from the theme
+function cssv(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function hex2rgb(h){h=h.replace("#","");if(h.length===3)h=h.split("").map(c=>c+c).join("");const n=parseInt(h,16);return[(n>>16)&255,(n>>8)&255,n&255]}
+function mix(a,b,t){const A=hex2rgb(a),B=hex2rgb(b);return `rgb(${A.map((x,i)=>Math.round(x+(B[i]-x)*t)).join(",")})`}
+function divColor(v){const mid=cssv("--div-mid"),neg=cssv("--div-neg"),pos=cssv("--div-pos");const t=Math.max(-1,Math.min(1,v));return t<0?mix(mid,neg,-t):mix(mid,pos,t)}
+function seqColor(t){return mix(cssv("--seq0"),cssv("--seq1"),Math.max(0,Math.min(1,t)))}
+function inkOn(t){return t>0.55?"#ffffff":"var(--fg)"}
+
+// dot panel (rows of marks with CI whiskers), from 014's report
+function dotPanel(host,o){
+  let W=W0(host),labelW=Math.min(o.labelW||150,Math.round(W*.44));const rowH=o.rowH||26,xmin=o.xmin,xmax=o.xmax,refs=o.refs||[];let ticks=o.ticks;
+  if(W-labelW<260&&ticks.length>4)ticks=ticks.filter((t,i)=>i%2===0);
+  const top=refs.some(r=>r.label)?22:8,bottom=o.xlabel?36:22,R=14;
+  const H=top+o.rows.reduce((a,r)=>a+(r.group?20:rowH),0)+bottom;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img","aria-label":o.xlabel||"chart"},host);
+  const X=v=>labelW+(Math.max(xmin,Math.min(xmax,v))-xmin)/(xmax-xmin)*(W-labelW-R);
+  ticks.forEach(t=>{el("line",{x1:X(t),x2:X(t),y1:top-2,y2:H-bottom+3,style:"stroke:var(--grid)","stroke-width":1},svg);
+    el("text",{x:X(t),y:H-bottom+16,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)",text:o.tickFmt(t)},svg)});
+  if(o.xlabel)el("text",{x:labelW+(W-labelW-R)/2,y:H-4,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)",text:o.xlabel},svg);
+  refs.forEach(rf=>{el("line",{x1:X(rf.v),x2:X(rf.v),y1:top-4,y2:H-bottom+3,style:"stroke:var(--fg)","stroke-width":1.1,"stroke-dasharray":"4 3",opacity:.8},svg);
+    if(rf.label)el("text",{x:X(rf.v),y:top-8,"text-anchor":rf.anchor||"middle","font-size":10.5,style:"fill:var(--muted)",text:rf.label},svg)});
+  let y=top,band=0;
+  o.rows.forEach(r=>{
+    if(r.group){el("text",{x:2,y:y+14,"font-size":11,"font-weight":600,style:"fill:var(--muted)",text:r.group},svg);y+=20;band=0;return}
+    const cy=y+rowH/2;
+    if(band%2===0)el("rect",{x:labelW,y:y,width:W-labelW-R,height:rowH,style:"fill:var(--soft)",opacity:.35},svg);band++;
+    el("text",{x:labelW-8,y:cy+4,"text-anchor":"end","font-size":W<520?10.5:11.5,style:"fill:var(--fg)",text:r.label},svg);
+    const nm=r.marks.length;
+    r.marks.forEach((m,j)=>{if(!m||m.v==null||isNaN(m.v))return;const yy=cy+(j-(nm-1)/2)*7;
+      if(m.lo!=null&&!isNaN(m.lo))el("line",{x1:X(m.lo),x2:X(m.hi),y1:yy,y2:yy,style:`stroke:${m.color}`,"stroke-width":2,"stroke-linecap":"round"},svg);
+      const g=el("g",{},svg);el("circle",{cx:X(m.v),cy:yy,r:10,style:"fill:transparent"},g);
+      el("circle",{cx:X(m.v),cy:yy,r:4.4,style:m.hollow?`fill:var(--panel);stroke:${m.color}`:`fill:${m.color};stroke:var(--panel)`,"stroke-width":2},g);
+      if(m.tip)hover(g,m.tip,m.click)});
+    y+=rowH});
+}
+
+// ---------- shared tooltip text for a steering point
+function stTip(d,L,a,f,st,kind,extra){
+  if(!st)return "";const rng=FRANGE[f];
+  let h=`<b>${esc(DLAB(d))}</b> · L${L} · α ${aLong(a)}${kind==="intro"?" · introspective prompts":""}<br>${FLAB[f]} (${rng}): mean <b>${fx(st.m)}</b>`;
+  if(a!==0)h+=`, Δ vs α = 0 <b>${sgn(st.d)}</b>${ciS(st.lo,st.hi,x=>sgn(x))}`;
+  h+=`<br>n = ${st.n} outputs${st.nall!=null&&st.nall!==st.n?` (of ${st.nall}; ${st.nall-st.n} degenerate excluded)`:""}${a===0?" (shared baseline)":""}`;
+  if(a!==0&&st.emp!=null)h+=`<br>degenerate outputs in this condition: ${pct(st.emp)}`;
+  return h+(extra||"")+(a!==0?`<br><span class="hint">${VLAB[S.v]}</span>`:"")}
+function bandTip(L,a,f,b,kind){if(!b||a===0)return "";return `<b>5 random directions</b> · L${L} · α ${aLong(a)}<br>Δ ${FLAB[f]}: ${b.deltas.map(x=>sgn(x)).join(", ")}<br>band = min to max (${sgn(b.min)} to ${sgn(b.max)})<br>n = 48 outputs per random direction`}
+
+// ---------- Figure 1: axis checks
+function renderFig1(){
+  const h=$("#fig1a");h.innerHTML="";const L64=[...Array(64).keys()];const ls=new Set([8,12,16,20,24,28,32,36,40,44,48,56,63]);
+  $("#fig1a-legend").innerHTML=legend([{label:"axis split-half cosine (24 vs 24 extraction questions)",color:"var(--s1)",kind:"line"},{label:"cosine with experiment 002's axis",color:"var(--s2)",kind:"line"},{label:"G1 threshold 0.9",color:"var(--fg)",kind:"dash"}]);
+  const pts=(arr,lab)=>L64.map(L=>({x:L,y:arr[L],tip:`<b>Layer ${L}</b>${ls.has(L)?" (saved layer)":""}<br>${lab}: <b>${fx(arr[L],3)}</b><br>n = ${lab.startsWith("split")?`${D.dirs.roles_used[0]} roles per half, ${D.dirs.counts.default} default rollouts`:`018: ${D.dirs.roles_fully} roles; 002: its own 8-question extraction`}${L===63&&!lab.startsWith("split")?"<br><span class='hint'>L63 compares different quantities (002 read the final-norm output there)</span>":""}`}));
+  lineChart(h,{xs:L64,xpos:x=>x/63,xticks:[0,8,16,24,32,40,48,56,63],xlab:x=>String(x),xlabel:"layer L (output of decoder block L)",ymin:0.8,ymax:1.0,yticks:[0.8,0.85,0.9,0.95,1.0],yfmt:v=>v.toFixed(2),
+    series:[{color:"var(--s1)",pts:pts(D.dirs.split,"split-half cosine"),r:2.2},{color:"var(--s2)",pts:pts(D.dirs.cos002,"cos with 002's axis"),r:2.2}],refs:[{y:0.9,label:"G1 threshold 0.9",left:true}],H:230});
+  renderCosm()}
+function renderCosm(){
+  const h=$("#fig1b");if(!h)return;h.innerHTML="";const L=String(S.L),M=D.dirs.cosm[L],N=D.dirs.names;
+  $("#fig1b-title").textContent=`b. Cosine between directions at L${L}`;
+  const lab=n=>n==="axis"?"Assistant Axis":n.startsWith("story_eval")?"eval dismissive":n.startsWith("story_")?n.slice(6).replace("_","-"):n.startsWith("trait_")?n.slice(6):n.replace("random_","random ");
+  heatmap(h,{rows:N.map(n=>({label:lab(n)})),cols:N.map(n=>({label:lab(n)})),rotate:true,top:92,labelW:120,ch:W0(h)<520?15:19,
+    cell:(i,j)=>{const v=M[i][j];return{fill:divColor(v),text:i===j?"":Math.abs(v)>=0.3?v.toFixed(1).replace("0.","."):"",ink:Math.abs(v)>0.6?"#ffffff":"var(--fg)",
+      tip:`<b>${esc(lab(N[i]))}</b> vs <b>${esc(lab(N[j]))}</b> at L${L}<br>cosine <b>${sgn(v,3)}</b><br>directions from the train split (48 questions); kept counts: ${dirN(N[i])}, ${dirN(N[j])}`}}})}
+function dirN(n){const c=D.dirs.counts;if(n==="axis")return `${D.dirs.roles_fully} roles vs ${c.default} default`;if(n.startsWith("story_eval"))return `${c["story|eval_dismissive"]} eval-dismissive`;
+  if(n.startsWith("story_"))return `${c["story|"+n.slice(6)]} ${n.slice(6)}`;if(n.startsWith("trait_"))return `${c["trait_pos|"+n.slice(6)]} pos / ${c["trait_neg|"+n.slice(6)]} neg`;return "seeded Gaussian"}
+
+// ---------- Figure 2: probes by layer per task
+const PTASKS=["story_dismissive","story_eval_dismissive","story_sarcastic","story_confident_wrong","story_peer","story_helper","axis","trait_apathetic","trait_hallucinating","trait_humorous","trait_impolite","trait_optimistic","trait_sycophantic","trait_evil"];
+function renderFig2(){
+  const h=$("#fig2");h.innerHTML="";const LS=[8,12,16,20,24,28,32,36,40,44,48,56,63];
+  $("#fig2-legend").innerHTML=legend([{label:"text-only probe (reply re-encoded without the system prompt)",color:"var(--s1)",kind:"line"},{label:"with-prompt probe",color:"var(--s2)",kind:"line"},{label:"shuffled-label null, text-only: mean to 95th percentile",kind:"band"},{label:"reply length alone (test 1)",color:"var(--fg)",kind:"dash"}]);
+  PTASKS.forEach(t=>{const box=document.createElement("div");h.appendChild(box);
+    const to=D.probes[t+"|text_only"],wp=D.probes[t+"|with_prompt"];
+    const P=(pr,fs)=>LS.map(L=>{const x=pr.layers[String(L)].test1;return{x:L,y:x.auroc,lo:x.lo,hi:x.hi,tip:`<b>${esc(DLAB(t))}</b> · ${fs} · L${L} · test 1 (held-out questions)<br>AUROC <b>${fx(x.auroc,3)}</b>${ciS(x.lo,x.hi,v=>fx(v,3))} (Hanley–McNeil)<br>shuffled null: mean ${fx(x.null_mean)}, p95 ${fx(x.null_p95)}, max ${fx(x.null_max)} (100 permutations)<br>direction alone: ${fx(x.dir_auroc,3)}<br>n = ${x.n_pos} positive + ${x.n-x.n_pos} negative rollouts`}});
+    const band=LS.map(L=>{const x=to.layers[String(L)].test1;return{x:L,lo:x.null_mean,hi:x.null_p95}});
+    const lb=D.lenbase[t];const refs=lb?[{y:lb.auroc,label:`length ${fx(lb.auroc,3)}`,dash:"3 3"}]:[];
+    const ttl=DLAB(t)+(t==="trait_evil"?" (2 test positives: not evidence)":"");
+    lineChart(box,{title:ttl,xs:LS,xpos:x=>x/63,xticks:[8,24,40,56],xlab:x=>"L"+x,ymin:0.3,ymax:1.0,yticks:[0.4,0.6,0.8,1.0],yfmt:v=>v.toFixed(1),l:30,H:170,
+      series:[{color:"var(--s1)",pts:P(to,"text-only"),r:2.6},{color:"var(--s2)",pts:P(wp,"with prompt"),r:2.6,dash:"4 2"}],band,refs})})}
+// ---------- Figure 3: length-matched control
+function renderFig3(){
+  const h=$("#fig3");h.innerHTML="";const C=D.lenctl;
+  $("#fig3-legend").innerHTML=legend([{label:"story dismissive probe",color:"var(--s1)"},{label:"eval dismissive probe",color:"var(--s2)"}]);
+  const rows=[];
+  ["24","32","40"].forEach(L=>{rows.push({group:`L${L}`});
+    [["probe_full","vs full-length default"],["probe_trunc","vs default cut to dismissive length"],["dir_trunc","direction alone, vs cut default"],["trunc_vs_full","cut vs full default (length only)"]].forEach(([k,lab])=>{
+      rows.push({label:lab,marks:["story_dismissive","story_eval_dismissive"].map((t,j)=>{const x=C.layers[L][t],v=x[k];const nn=k==="trunc_vs_full"?`${x.n_trunc} truncated + ${x.n_full} full default replies`:`${x.n_pos} held-out ${t==="story_dismissive"?"story":"eval"}-dismissive + ${k.endsWith("full")?x.n_full+" full":x.n_trunc+" truncated"} default replies`;
+        return{color:j?"var(--s2)":"var(--s1)",v:v[0],lo:v[1],hi:v[2],tip:`<b>${t==="story_dismissive"?"Story":"Eval"} dismissive probe</b> · L${L}<br>${lab}: AUROC <b>${fx(v[0],3)}</b>${ciS(v[1],v[2],z=>fx(z,3))}<br>mean probe probability: dismissive ${fx(x.mean_prob.dismissive)}, truncated default ${fx(x.mean_prob.default_truncated)}, full default ${fx(x.mean_prob.default_full)}<br>n = ${nn}`}})})})});
+  dotPanel(h,{rows,xmin:0.5,xmax:1.0,ticks:[0.5,0.6,0.7,0.8,0.9,1.0],tickFmt:v=>v.toFixed(1),xlabel:"held-out AUROC of the trained text-only probe",labelW:230,rowH:22,refs:[{v:0.9,label:"0.9"}]})}
+
+// ---------- Figure 4: G3 composite
+const G3DIRS=[["story_dismissive","var(--s1)","story dismissive"],["story_eval_dismissive","var(--s2)","eval dismissive"]];
+function g3ok(d,L,a){const c=D.steer.g3[S.v].cands.find(c=>c.dir===d&&c.L===L&&Math.abs(c.a-a)<1e-9);return c&&c.ok}
+function renderFig4(){
+  const host=$("#fig4");host.innerHTML="";
+  $("#fig4-legend").innerHTML=legend([{label:"story dismissive",color:"var(--s1)",kind:"line"},{label:"eval dismissive",color:"var(--s2)",kind:"line"},{label:"5 random directions, min to max",kind:"band"},{label:"cell passes G3 under the current reading",kind:"ring"}]);
+  const rowsDef=[
+    {lab:"Δ dismissive (consensus, 0–3) vs α = 0",ymin:-0.6,ymax:3,yticks:[0,1,2,3],yfmt:v=>sgn(v,0),f:"dismissive",delta:true,refs:[{y:1,label:"G3: +1.0",mid:true}]},
+    {lab:"Mean reply-form (1–10)",ymin:1,ymax:10,yticks:[2,4,6,8,10],yfmt:v=>String(v),f:"chat_form_coherence",delta:false,refs:[{y:7,label:"G3: ≥ 7",mid:true}]},
+    {lab:"Degenerate outputs (share of 48)",ymin:0,ymax:1,yticks:[0,0.5,1],yfmt:v=>pct(v),f:"emp"},
+    {lab:"Known-answer accuracy (50 questions)",ymin:0,ymax:1,yticks:[0,0.5,1],yfmt:v=>pct(v),f:"ka"}];
+  rowsDef.forEach(R=>{const lab=document.createElement("div");lab.className="rowlab";lab.textContent=R.lab;host.appendChild(lab);
+    const grid=document.createElement("div");grid.className="sm3";host.appendChild(grid);
+    [24,32,40].forEach(L=>{const box=document.createElement("div");grid.appendChild(box);
+      const series=G3DIRS.map(([d,col])=>({color:col,pts:ALPHAS.map(a=>{
+        if(R.f==="emp"){const r=a===0?null:rec(d,L,a);const y=a===0?0:(r?r.emp:null);return{x:a,y,tip:`<b>${esc(DLAB(d))}</b> · L${L} · α ${aLong(a)}<br>degenerate outputs: <b>${a===0?"0 (baseline)":Math.round(y*(r?r.nall:48))+" of "+(r?r.nall:48)}</b> (${pct(y)})<br>rule: ≤ 2 non-space characters after removing &lt;think&gt; tags`,click:a?()=>openExplorer({dir:d,L,a,deg:"1"}):null}}
+        if(R.f==="ka"){const k=kaOf(d,L,a);if(!k)return null;return{x:a,y:k.acc,lo:k.lo,hi:k.hi,tip:`<b>${esc(DLAB(d))}</b> · L${L} · α ${aLong(a)}<br>known-answer accuracy <b>${k.k}/${k.n}</b> (${pct(k.acc)})${ciS(k.lo,k.hi,v=>pct(v))} (Wilson)${a?`<br>Δ vs α = 0: ${sgn(k.d)}${ciS(k.dlo,k.dhi,v=>sgn(v))} (paired bootstrap over questions)`:""}<br>n = ${k.n} questions, one sample each`,click:()=>openExplorer({dir:a?d:"none",L,a,kind:"ka"})}}
+        const st=fstat(d,L,a,R.f);if(!st)return null;const y=R.delta?st.d:st.m;
+        return{x:a,y,lo:R.delta?st.lo:null,hi:R.delta?st.hi:null,ring:R.f==="dismissive"&&a>0&&g3ok(d,L,a),tip:stTip(d,L,a,R.f,st,"heldq",R.f==="chat_form_coherence"&&a?`<br>share of outputs with reply-form ≥ 7: ${pct(st.rf7)}`:""),click:a?()=>openExplorer({dir:d,L,a}):null}})}));
+      let band=null;
+      if(R.f==="dismissive"||R.f==="chat_form_coherence"){band=ALPHAS.map(a=>{const b=rband(L,a,R.f);if(!b)return null;const base=R.delta?0:(D.steer.base[S.v].heldq||{})[R.f];
+        return{x:a,lo:base+b.min,hi:base+b.max,tip:bandTip(L,a,R.f,b)}})}
+      if(R.f==="ka")band=ALPHAS.map(a=>{const ks=D.meta.dirs.filter(d=>d.startsWith("random")).map(d=>kaOf(d,L,a)).filter(Boolean);if(!ks.length)return null;
+        return{x:a,lo:Math.min(...ks.map(k=>k.acc)),hi:Math.max(...ks.map(k=>k.acc)),tip:a?`<b>5 random directions</b> · L${L} · α ${aLong(a)}<br>accuracy ${ks.map(k=>k.k).join(", ")} of 50`:""}});
+      lineChart(box,{title:`L${L}`,xs:ALPHAS,xlab:aLab,xlabel:"dose α (positions evenly spaced)",ymin:R.ymin,ymax:R.ymax,yticks:R.yticks,yfmt:R.yfmt,series,band,refs:R.refs,H:170,l:38})})})}
+function renderG3Card(){
+  const g=D.steer.g3[S.v],ok=g.cands.filter(c=>c.ok);
+  const lab={judged:"as specified (raw judge scores)",degenerate:"degenerate outputs scored reply-form = fluency = 1 (D25)",exclude:"degenerate outputs excluded (page reading, not pre-registered)"}[S.v];
+  $("#g3card").innerHTML=`<div class="gh"><span class="gn">G3 · dismissive steering</span><span class="verdict ${g.pass_?"pass":"fail"}">${g.pass_?"PASS":"FAIL"}</span></div>
+   <div class="rule">At one or more of L24/32/40, a dismissive direction raises consensus <i>dismissive</i> by ≥ 1.0 at a dose whose mean reply-form is ≥ 7, while all 5 random directions move it by &lt; 0.3 (|Δ|) at that dose.</div>
+   <div class="num">${ok.length} of ${g.cands.length} cells</div><div class="rule">pass, reading: ${lab}.</div>
+   <div class="small" style="margin-top:6px">${ok.map(c=>`${c.dir==="story_dismissive"?"story":"eval"} L${c.L} α ${aLong(c.a)}: Δ ${sgn(c.d)} [${sgn(c.ci[0])}, ${sgn(c.ci[1])}], reply-form ${fx(c.rf,1)}, random max |Δ| ${fx(c.rmax)}`).join("<br>")||"no cell passes"}</div>`;
+  const t=$("#tab-g3");if(!t)return;
+  t.innerHTML=`<table><thead><tr><th>direction</th><th>layer</th><th>α</th><th>Δ dismissive [95% CI]</th><th>reply-form</th><th>max |Δ| over 5 random</th><th>known-answer</th><th>passes</th></tr></thead><tbody>${g.cands.filter(c=>c.a>=0.2).map(c=>`<tr><td>${c.dir==="story_dismissive"?"story dismissive":"eval dismissive"}</td><td>L${c.L}</td><td>${aLong(c.a)}</td><td>${sgn(c.d)} <span class="small">[${sgn(c.ci[0])}, ${sgn(c.ci[1])}]</span></td><td>${fx(c.rf,1)}</td><td>${fx(c.rmax)}</td><td>${c.ka!=null?Math.round(c.ka*50)+"/50":"–"}</td><td>${c.ok?"<b>yes</b>":"no"}</td></tr>`).join("")}</tbody></table>`}
+
+// ---------- Figure 5: dose-response for all directions; Figure 6: known-answer heatmap
+const TDIRS=()=>D.meta.dirs.filter(d=>!d.startsWith("random"));
+function renderFig5(){
+  const L=S.L;$("#fig5-l").textContent=`L${L}`;$("#fig6-l").textContent=`L${L}`;
+  $("#fig5-legend").innerHTML=legend([{label:"Δ of the direction's target score vs α = 0, held-out questions",color:"var(--s1)",kind:"line"},{label:"same score under the 5 random directions, min to max",kind:"band"}]);
+  [["#fig5a",TDIRS().filter(d=>!d.startsWith("trait_")),false],["#fig5b",TDIRS().filter(d=>d.startsWith("trait_")),true]].forEach(([id,ds,isT])=>{
+    const h=$(id);h.innerHTML="";
+    ds.forEach(d=>{const box=document.createElement("div");h.appendChild(box);const f=tgtOf(d);
+      const pts=ALPHAS.map(a=>{const st=fstat(d,L,a,f);if(!st)return a===0?{x:0,y:0}:null;
+        return{x:a,y:st.d,lo:st.lo,hi:st.hi,tip:a===0?`<b>${esc(DLAB(d))}</b><br>α = 0: shared baseline${f==="trait"?"":", "+FLAB[f]+" mean "+fx(st.m)}`:stTip(d,L,a,f,st),click:a?()=>openExplorer({dir:d,L,a}):null}});
+      const band=isT?null:ALPHAS.map(a=>{const b=rband(L,a,f);return b?{x:a,lo:b.min,hi:b.max,tip:bandTip(L,a,f,b)}:null});
+      const ttl=`${DLAB(d)} → ${FLAB[f]}${d==="trait_evil"?" (15 train positives)":""}`;
+      lineChart(box,{title:ttl,xs:ALPHAS,xlab:aLab,ymin:isT?-60:-3,ymax:isT?100:3,yticks:isT?[-50,0,50,100]:[-3,-2,-1,0,1,2,3],yfmt:v=>sgn(v,0),series:[{color:"var(--s1)",pts}],band,H:165,l:isT?34:30})})});
+  renderFig6()}
+function renderFig6(){
+  const h=$("#fig6");h.innerHTML="";const L=S.L,ds=D.meta.dirs,base=D.steer.ka.none;
+  const cols=ALPHAS.map(a=>({label:aLab(a)}));
+  heatmap(h,{rows:ds.map(d=>({label:DLAB(d)})),cols,labelW:150,top:30,ch:W0(h)<520?16:19,cell:(i,j)=>{const d=ds[i],a=ALPHAS[j],k=kaOf(d,L,a);if(!k)return null;const t=1-k.acc;
+    return{fill:seqColor(t*1.15),text:String(k.k),ink:inkOn(t*1.15),click:()=>openExplorer({dir:a?d:"none",L,a,kind:"ka"}),
+      tip:`<b>${esc(DLAB(d))}</b> · L${L} · α ${aLong(a)}<br>known-answer accuracy <b>${k.k}/${k.n}</b>${ciS(k.lo,k.hi,v=>pct(v))} (Wilson)${a?`<br>Δ vs baseline (${base.k}/${base.n}): ${sgn(k.d)}${ciS(k.dlo,k.dhi,v=>sgn(v))} (paired bootstrap over questions)`:""}<br>n = ${k.n} questions`}}})}
+
+// ---------- Figure 7: axis identity
+function renderFig7(){
+  const L=S.L;const h=$("#fig7");h.innerHTML="";$("#fig7-l").textContent=`L${L}`;
+  $("#fig7-legend").innerHTML=legend([{label:"held-out questions (24 × 2 samples)",color:"var(--s1)",kind:"line"},{label:"introspective prompts (5 × 4 samples)",color:"var(--s2)",kind:"line"},{label:"5 random directions on held-out questions, min to max",kind:"band"}]);
+  const box=document.createElement("div");h.appendChild(box);
+  const series=[["heldq","var(--s1)"],["intro","var(--s2)"]].map(([kind,col])=>({color:col,pts:ALPHAS.map(a=>{const st=fstat("axis",L,a,"identity",kind);if(!st)return null;
+    return{x:a,y:st.m,lo:a&&st.lo!=null?st.m-st.d+st.lo:null,hi:a&&st.hi!=null?st.m-st.d+st.hi:null,tip:stTip("axis",L,a,"identity",st,kind),click:a?()=>openExplorer({dir:"axis",L,a,kind}):null}})}));
+  const bq=(D.steer.base[S.v].heldq||{}).identity;
+  const band=ALPHAS.map(a=>{const b=rband(L,a,"identity");return b?{x:a,lo:bq+b.min,hi:bq+b.max,tip:bandTip(L,a,"identity",b)}:null});
+  lineChart(box,{title:`Identity score under the Assistant Axis, L${L}`,xs:ALPHAS,xlab:aLab,xlabel:"dose α along the axis (+ toward the Assistant end; positions evenly spaced)",ymin:0,ymax:3,yticks:[0,1,2,3],yfmt:v=>String(v),series,band,H:240})}
+
+// ---------- Appendix A1: probe readout
+function renderA1(){
+  const h=$("#figA1");if(!h||!h.clientWidth)return;h.innerHTML="";const L=S.L,rl=+$("#a1-rl").value,ri=[24,32,40].indexOf(rl);const RO=D.readout.v[S.v==="exclude"?"exclude":"all"];
+  $("#a1-l").textContent=`L${L}`;
+  $("#figA1-legend").innerHTML=legend([{label:"mean probability of the direction's own text-only probe",color:"var(--s1)",kind:"line"},{label:"same probe on outputs steered by the 5 random directions, min to max",kind:"band"}]);
+  TDIRS().forEach(d=>{const box=document.createElement("div");h.appendChild(box);const kinds=["heldq"];
+    const base=RO["none|heldq"][d][ri];
+    const pts=ALPHAS.map(a=>{if(a===0)return{x:0,y:base,tip:`<b>${esc(DLAB(d))} probe</b> on baseline outputs (read at L${rl})<br>mean probability <b>${fx(base,3)}</b><br>n = ${D.steer.base[S.v].heldq.n} outputs`};
+      const r=RO[ckey(d,L,a)];if(!r)return null;const m=r[d][ri],ci=r.ci?r.ci[ri]:[null,null];
+      return{x:a,y:m,lo:ci[0]!=null?base+ci[0]:null,hi:ci[1]!=null?base+ci[1]:null,tip:`<b>${esc(DLAB(d))}</b> steered at L${L}, α ${aLong(a)}<br>its probe read at L${rl}: mean probability <b>${fx(m,3)}</b>, Δ vs baseline ${sgn(m-base,3)}${ciS(ci[0],ci[1],v=>sgn(v,3))}<br>n = ${r.n} outputs, re-encoded by the unsteered parent without a system prompt`}});
+    const band=ALPHAS.map(a=>{if(a===0)return{x:0,lo:base,hi:base};const v=D.meta.dirs.filter(x=>x.startsWith("random")).map(x=>RO[ckey(x,L,a)]).filter(Boolean).map(r=>r[d][ri]);
+      return v.length?{x:a,lo:Math.min(...v),hi:Math.max(...v),tip:`<b>5 random directions</b> · L${L} · α ${aLong(a)}<br>${esc(DLAB(d))} probe (L${rl}): ${v.map(x=>fx(x,3)).join(", ")}<br>n = 48 outputs each`}:null});
+    lineChart(box,{title:`${DLAB(d)} probe`,xs:ALPHAS,xlab:aLab,ymin:0,ymax:1,yticks:[0,0.5,1],yfmt:v=>v.toFixed(1),series:[{color:"var(--s1)",pts}],band,H:150,l:28})})}
+
+// ---------- Appendix A11: all scores of one direction
+function renderA11(){
+  const h=$("#tab-all");if(!h)return;const d=$("#a11-dir").value,L=S.L;$("#a11-l").textContent=`L${L}`;const fs=FIELDS.concat(d.startsWith("trait_")?["trait"]:[]);
+  const kinds=d==="axis"?["heldq","intro"]:["heldq"];let s="";
+  kinds.forEach(kind=>{s+=`<p class="small">${kind==="intro"?"Introspective prompts":"Held-out questions"}: Δ vs α = 0 (consensus of both judges) with 95% paired bootstrap CI over questions; ${VLAB[S.v]}. Baseline means in the first row.</p><div class="tablebox"><table><thead><tr><th>α</th>${fs.map(f=>`<th>${FLAB[f]}</th>`).join("")}<th>reply-form ≥ 7</th><th>degenerate</th><th>mean tokens</th><th>n</th></tr></thead><tbody>`;
+    const B=D.steer.base[S.v][kind]||{};s+=`<tr><td>baseline</td>${fs.map(f=>`<td>${f==="trait"?"–":fx(B[f])}</td>`).join("")}<td></td><td></td><td></td><td>${B.n||""}</td></tr>`;
+    ALPHAS.filter(a=>a!==0).forEach(a=>{const r=rec(d,L,a,kind);if(!r)return;s+=`<tr><td>${aLong(a)}</td>${fs.map(f=>{const x=r[f];return x?`<td title="mean ${fx(x[0])}, 95% CI ${fx(x[3])} to ${fx(x[4])}, n = ${x[1]}">${sgn(x[2])}</td>`:"<td>–</td>"}).join("")}<td>${pct(r.rf7)}</td><td>${pct(r.emp)}</td><td>${fx(r.tok,0)}</td><td>${r.n}</td></tr>`});
+    s+="</tbody></table></div>"});
+  h.innerHTML=s}
+
+// ---------- texts and cards
+const TX=[];
+function txReg(full,limit,fmt){TX.push({full,limit:limit||500,fmt:fmt||esc});return TX.length-1}
+function txHTML(id,open){const t=TX[id];const long=t.full.length>t.limit;const s=open||!long?t.full:t.full.slice(0,t.limit);
+  return t.fmt(s)+(!open&&long?`<span class="more"> … +${(t.full.length-t.limit).toLocaleString()} characters</span>`:"")}
+function turnHTML(cls,who,text,limit,fmt){if(text==="")return `<div class="turn ${cls} empty"><span class="who">${who}</span><span class="body">(empty output)</span></div>`;
+  const id=txReg(text,limit,fmt);return `<div class="turn ${cls} tx" data-tx="${id}" data-open="0" role="button" tabindex="0"><span class="who">${who}</span><span class="body">${txHTML(id,false)}</span></div>`}
+document.addEventListener("click",e=>{const t=e.target.closest(".tx");if(!t||(window.getSelection&&String(getSelection()).length))return;toggleTurn(t)});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches(".tx")){e.preventDefault();toggleTurn(e.target)}});
+function toggleTurn(t){const open=t.dataset.open!=="1";t.dataset.open=open?"1":"0";t.querySelector(".body").innerHTML=txHTML(+t.dataset.tx,open)}
+const showWS=s=>esc(s).replace(/&lt;\/?think&gt;/g,m=>`<span style="color:var(--tok);font-weight:600">${m}</span>`);
+
+let EXR=[],BASEIDX={},CONDS=[],KAC=[],KABASE={};
+function normalize(){
+  CONDS=D.ex.conds.map(c=>{const p=c.split("|");return{d:p[0],L:+p[1],a:+p[2]}});
+  EXR=D.ex.rows.map((r,i)=>({i,c:r[0],kind:["heldq","intro"][r[1]],q:r[2],s:r[3],nt:r[4],lenf:r[5],dg:r[6],g:r.slice(7,15),ds:r.slice(15,23),tg:r[23],td:r[24],t:D.ex.texts[i],pr:D.ex.probe[i]}));
+  EXR.forEach(o=>{const c=CONDS[o.c];o.d=c.d;o.L=c.L;o.a=c.a;if(c.d==="none")BASEIDX[o.kind+"|"+o.q+"|"+o.s]=o.i});
+  KAC=D.ex_ka.conds.map(c=>{if(c==="none")return{d:"none",L:0,a:0};const p=c.split("|");return{d:p[0],L:+p[1],a:+p[2]}});
+  D.ex_ka.rows.forEach((r,i)=>{if(KAC[r[0]].d==="none")KABASE[r[1]]=i});
+  D.EXMISS=new Set(D.ex_missing);
+}
+const cons=(o,j)=>o.g[j]==null||o.ds[j]==null?null:(o.g[j]+o.ds[j])/2;
+function chipsOf(o){const tf=tgtOf(o.d);const shown=["dismissive","identity","chat_form_coherence","fluency"];if(tf&&tf!=="trait"&&shown.indexOf(tf)<0)shown.unshift(tf);
+  let h=shown.map(f=>{const j=FIELDS.indexOf(f);let v=cons(o,j);const forced=S.v==="degenerate"&&o.dg&&(f==="chat_form_coherence"||f==="fluency");
+    return `<span class="chip ${f===tf?"hi":""} ${forced?"bad":""}">${FLAB[f]} ${forced?"1 (degenerate; judged "+fx(v,1)+")":fx(v,1)}</span>`}).join("");
+  if(o.tg!=null&&o.td!=null)h=`<span class="chip hi">trait score ${fx((o.tg+o.td)/2,0)}</span>`+h;
+  if(o.dg)h+=`<span class="chip bad">degenerate</span>`;
+  if(o.pr!=null)h+=`<span class="chip">own probe at L32: ${fx(o.pr)}</span>`;
+  return `<div>${h}</div>`}
+function judgesTable(o){const fs=FIELDS.map((f,j)=>`<tr><td class="l">${FLAB[f]} (${FRANGE[f]})</td><td>${fx(o.g[j])}</td><td>${fx(o.ds[j])}</td><td>${fx(cons(o,j))}</td></tr>`).join("");
+  const tr=o.tg!=null||o.td!=null?`<tr><td class="l">trait score (0–100)</td><td>${fx(o.tg,1)}</td><td>${fx(o.td,1)}</td><td>${o.tg!=null&&o.td!=null?fx((o.tg+o.td)/2,1):"–"}</td></tr>`:"";
+  return `<details class="judges"><summary>Both judges' scores (logprob-weighted)</summary><div class="tablebox"><table><thead><tr><th class="l">dimension</th><th>GLM-5.3-flash</th><th>DeepSeek-v4.1-flash</th><th>consensus</th></tr></thead><tbody>${fs}${tr}</tbody></table></div></details>`}
+function metaOf(o){return o.d==="none"?`baseline, no steering · ${o.kind==="intro"?"introspective prompt":"held-out question"} q${o.q} · sample ${o.s}`:
+  `${esc(DLAB(o.d))} · L${o.L} · α ${aLong(o.a)} · ${o.kind==="intro"?"introspective prompt":"held-out question"} q${o.q} · sample ${o.s}`}
+function outCard(o,label){
+  return `<div class="card${o.d==="none"?" base":""}">${label?`<div class="cardlabel">${esc(label)}</div>`:""}<div class="meta">${metaOf(o)} · ${o.nt} tokens${o.lenf?" (hit the 384-token cap)":""}</div>${chipsOf(o)}${judgesTable(o)}
+    ${turnHTML("user","User (no system prompt)",D.qtext[o.kind][o.q],600)}${turnHTML("assistant","Reply",o.t,500,showWS)}</div>`}
+function pairHTML(o,label){const bi=BASEIDX[o.kind+"|"+o.q+"|"+o.s];const b=bi!=null?EXR[bi]:null;
+  if(o.d==="none")return `<div class="pair">${outCard(o,label)}</div>`;
+  return `<div class="pair">${outCard(o,label)}${b?outCard(b,"α = 0 baseline: same question, same sample seed"):""}</div>`}
+function kaCard(i,label){const r=D.ex_ka.rows[i],c=KAC[r[0]],bi=KABASE[r[1]],b=D.ex_ka.rows[bi];
+  const one=(rr,cc,lab)=>`<div class="card${cc.d==="none"?" base":""}">${lab?`<div class="cardlabel">${esc(lab)}</div>`:""}<div class="meta">${cc.d==="none"?"baseline, no steering":`${esc(DLAB(cc.d))} · L${cc.L} · α ${aLong(cc.a)}`} · known-answer q${rr[1]} · ${rr[4]} tokens</div>
+    <div><span class="chip ${rr[3]?"":"bad"}">${rr[3]?"correct":"not correct"} (exact match; accepted: ${esc(D.ka_answers[rr[1]].join(", "))})</span></div>${turnHTML("user","User (no system prompt)",D.qtext.ka[rr[1]],300)}${turnHTML("assistant","Reply",rr[2],300,showWS)}</div>`;
+  return `<div class="pair">${one(r,c,label)}${c.d!=="none"&&b?one(b,KAC[b[0]],"α = 0 baseline, same question"):""}</div>`}
+function findRow(d,L,a,kind,q,s){return EXR.find(o=>o.d===d&&o.L===L&&Math.abs(o.a-a)<1e-9&&o.kind===kind&&o.q===q&&o.s===s)}
+function exampleCards(){
+  $$(".excard").forEach(h=>{const k=h.dataset.key.split("|");const d=k[0],L=+k[1].slice(1),a=+k[2].slice(1),kind=k[3],q=+k[4].slice(1),s=+k[5].slice(1);
+    const o=findRow(d,L,a,kind,q,s);h.innerHTML=o?(h.dataset.note?`<p class="cardnote">${h.dataset.note}</p>`:"")+pairHTML(o,h.dataset.label||""):`<p class="small">Output ${esc(h.dataset.key)} is not embedded.</p>`})}
+// random-sample widgets over fixed condition sets
+function sampler(host){const spec=JSON.parse(host.dataset.spec);
+  host.innerHTML=`<div class="controls"><button type="button">Draw another random output</button><span class="small info"></span></div><div class="out"></div>`;
+  const info=host.querySelector(".info"),out=host.querySelector(".out");
+  const draw=()=>{const M=EXR.filter(o=>spec.some(c=>o.d===c[0]&&(c[1]==="S"?o.L===S.L:o.L===c[1])&&Math.abs(o.a-c[2])<1e-9&&o.kind===(c[3]||"heldq"))&&!(S.v==="exclude"&&o.dg));
+    if(!M.length){out.innerHTML="";info.textContent="No embedded output matches.";return}
+    const o=M[Math.floor(Math.random()*M.length)];info.textContent=`drawn at random from ${M.length} outputs (${spec.map(c=>`${DLAB(c[0])} ${c[1]==="S"?"L"+S.L:"L"+c[1]} α ${aLong(c[2])}${c[3]==="intro"?" introspective":""}`).join("; ")})`;
+    out.innerHTML=pairHTML(o)};
+  host.querySelector("button").addEventListener("click",draw);host._draw=draw;draw()}
+
+// ---------- explorer
+function exMatches(){const v=id=>document.getElementById(id).value;const q=v("ex-q").trim().toLowerCase();
+  const d=v("ex-dir"),L=v("ex-L"),a=v("ex-a"),kind=v("ex-kind"),dg=v("ex-dg");
+  if(kind==="ka"){const R=D.ex_ka.rows;const out=[];for(let i=0;i<R.length;i++){const r=R[i],c=KAC[r[0]];
+      if(d&&c.d!==d)continue;if(L&&c.d!=="none"&&c.L!==+L)continue;if(a!==""&&Math.abs(c.a-(+a))>1e-9)continue;if(dg==="1"&&r[3])continue;if(dg==="0"&&!r[3])continue;
+      if(q&&r[2].toLowerCase().indexOf(q)<0&&D.qtext.ka[r[1]].toLowerCase().indexOf(q)<0)continue;out.push(i)}return out}
+  return EXR.filter(o=>o.kind===kind&&(!d||o.d===d)&&(!L||o.d==="none"||o.L===+L)&&(a===""||Math.abs(o.a-(+a))<1e-9)&&(dg===""||String(o.dg)===dg)&&!(S.v==="exclude"&&o.dg)
+    &&(!q||o.t.toLowerCase().indexOf(q)>=0||D.qtext[o.kind][o.q].toLowerCase().indexOf(q)>=0))}
+function exDraw(){const kind=$("#ex-kind").value;const M=exMatches(),N=5,idx=M.map((_,i)=>i);
+  for(let i=0;i<Math.min(N,idx.length);i++){const j=i+Math.floor(Math.random()*(idx.length-i));const t=idx[i];idx[i]=idx[j];idx[j]=t}
+  const pick=idx.slice(0,N).map(i=>M[i]);const tot=kind==="ka"?D.ex_ka.rows.length:EXR.filter(o=>o.kind===kind).length;
+  const d=$("#ex-dir").value,L=$("#ex-L").value,a=$("#ex-a").value;let miss="";
+  if(kind!=="ka"&&d&&L&&a!==""&&D.EXMISS.has(`${d}|${L}|${a}`))miss=" This condition's texts are not embedded (see the note above).";
+  $("#ex-count").textContent=`${M.length.toLocaleString()} matching ${kind==="ka"?"known-answer replies":"outputs"} (of ${tot.toLocaleString()} embedded); showing ${pick.length} at random.${S.v==="exclude"&&kind!=="ka"?" Degenerate outputs are hidden (sidebar).":""}${miss}`;
+  $("#ex-list").innerHTML=kind==="ka"?pick.map(i=>kaCard(i)).join(""):pick.map(o=>pairHTML(o)).join("")}
+function openExplorer(a){const set=(id,v)=>{document.getElementById(id).value=v};
+  set("ex-q","");set("ex-dir",a.dir||"");set("ex-L",a.dir==="none"?"":String(a.L||""));set("ex-a",a.a!=null?String(a.a):"");set("ex-kind",a.kind||"heldq");set("ex-dg",a.deg||"");
+  document.getElementById("a12").open=true;exDraw();document.getElementById("a12").scrollIntoView({behavior:"smooth",block:"start"})}
+function buildExplorer(){
+  $("#ex-dir").innerHTML=`<option value="">all directions</option><option value="none">baseline (α = 0)</option>`+D.meta.dirs.map(d=>`<option value="${d}">${esc(DLAB(d))}</option>`).join("");
+  $("#ex-a").innerHTML=`<option value="">all doses</option>`+ALPHAS.filter(a=>a).map(a=>`<option value="${a}">${aLong(a)}</option>`).join("");
+  $("#a11-dir").innerHTML=D.meta.dirs.map(d=>`<option value="${d}"${d==="story_dismissive"?" selected":""}>${esc(DLAB(d))}</option>`).join("");
+  ["ex-dir","ex-L","ex-a","ex-kind","ex-dg"].forEach(id=>document.getElementById(id).addEventListener("change",exDraw));
+  let tm=null;$("#ex-q").addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(exDraw,200)});$("#ex-draw").addEventListener("click",exDraw);
+  const m=D.ex_missing,inc=D.ex.conds;const lab=c=>{const p=c.split("|");return `${DLAB(p[0])} α ${aLong(+p[2])}`};
+  const summ=["24","32","40"].map(L=>{const dr=m.filter(c=>c.split("|")[1]===L),ic=inc.filter(c=>c.split("|")[1]===L);if(!dr.length)return "";
+    const sm=new Set(dr.map(c=>Math.abs(+c.split("|")[2])));
+    return dr.length>ic.length?`L${L}: everything except ${ic.map(lab).join(", ")}`:`L${L}: ${dr.length} conditions at |α| = ${[...sm].join(", ")}`}).filter(Boolean);
+  $("#ex-missing").innerHTML=m.length?`<b>Not embedded (to stay under the page size limit):</b> ${D.ex_missing_n.toLocaleString()} outputs in ${m.length} whole conditions. ${summ.join(". ")}. Their judge scores are in every chart; their texts are in <code>/root/runs/r018/steer_main.jsonl</code>.<details class="judges"><summary>Full list of conditions not embedded</summary><p class="small">${m.map(lab).map((x,i)=>`L${m[i].split("|")[1]} ${x}`).join("; ")}</p></details>`:"Every steered output is embedded."}
+
+function fmtMd(s){return esc(s).replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>")}
+function renderTables(){
+  const F=D.filters,kc=F.kept,k=F.kappa;
+  const sk=[["default","default"],["story|helper","story helper"],["story|dismissive","story dismissive"],["story|sarcastic","story sarcastic"],["story|confident_wrong","story confident-wrong"],["story|peer","story peer"],["story|eval_dismissive","eval dismissive"]];
+  const tot={"default":360,"story|eval_dismissive":360};
+  $("#tab-kept").innerHTML=`<table><thead><tr><th>set</th><th>kept</th><th>of</th><th>rule</th></tr></thead><tbody>${sk.map(([key,lab])=>`<tr><td>${lab}</td><td>${kc[key]}</td><td>${tot[key]||408}</td><td class="l">${key==="default"?"all kept (no rubric)":"consensus ≥ 2.0 on its own disposition field"}</td></tr>`).join("")}
+    ${D.meta.traits.map(t=>`<tr><td>trait ${t}</td><td>${kc["trait_pos|"+t]} pos / ${kc["trait_neg|"+t]} neg</td><td>600 / 600</td><td class="l">pos ≥ 50, neg &lt; 50, coherence ≥ 50</td></tr>`).join("")}
+    <tr><td>275 roles, fully role-playing</td><td>${F.role_full_total.toLocaleString()}</td><td>72,600</td><td class="l">consensus ≥ 2.5; ${F.role_full_ge10} roles have ≥ 10 (median ${F.role_full_median} per role)</td></tr>
+    <tr><td>roles, somewhat role-playing</td><td>${F.role_some_total.toLocaleString()}</td><td>72,600</td><td class="l">1.5–2.5; ${F.role_some_ge10} roles have ≥ 10</td></tr></tbody></table>`;
+  const kr=[["role:role","275 roles: role score (0–3)"],["story:helper","story rollouts: helper"],["story:dismissive","story rollouts: dismissive"],["story:sarcastic","story rollouts: sarcastic"],["story:confident_wrong","story rollouts: confident-wrong"],["story:peer","story rollouts: peer"],["evaldis:dismissive","eval dismissive: dismissive"],["trait:trait","traits: trait score (0–100)"],["trait:coherence","traits: coherence (0–100)"],["default:helper","default: helper"],["default:dismissive","default: dismissive"]];
+  $("#tab-kappa").innerHTML=`<table><thead><tr><th>rubric field</th><th>Cohen's κ (rounded labels)</th><th>raw agreement</th><th>n</th></tr></thead><tbody>${kr.map(([key,lab])=>{const x=k[key];return `<tr><td>${lab}</td><td>${x.kappa==null?"undefined (one class)":fx(x.kappa)}</td><td>${pct(x.agree,1)}</td><td>${x.n.toLocaleString()}</td></tr>`}).join("")}</tbody></table>`;
+  const nc=F.negctl;$("#tab-negctl").innerHTML=`<table><thead><tr><th>field</th><th>mean on 360 default rollouts</th><th>miscalibrated if ≥</th></tr></thead><tbody>${Object.keys(nc).map(f=>`<tr><td>${FLAB[f]}</td><td>${fx(nc[f],3)}</td><td>${f==="dismissive"||f==="sarcastic"?"0.5":"–"}</td></tr>`).join("")}</tbody></table>`;
+  const lp=D.parity.lens,cp=D.parity.capture;
+  $("#tab-lens").innerHTML=`<table><thead><tr><th>check (vllm-lens steering vs HF, decisions D6/D17)</th><th>measured</th><th>rule</th></tr></thead><tbody>
+    <tr><td>unsteered teacher-forced logprobs, mean |diff| over ${lp.n_tokens} tokens</td><td>${fx(lp.unsteered_abs_diff_mean,3)} (max ${fx(lp.unsteered_abs_diff_max)})</td><td>&lt; 0.05</td></tr>
+    <tr><td>correlation of the per-token steering effect between engines</td><td>${fx(lp.effect_corr,4)}</td><td>≥ 0.99</td></tr>
+    <tr><td>steered gap</td><td>${fx(lp.steered_abs_diff_mean,3)}</td><td>≤ 1.5 × unsteered gap</td></tr>
+    <tr><td>mean |steering effect|, HF vs vLLM</td><td>${fx(lp.effect_mean_abs_hf,3)} vs ${fx(lp.effect_mean_abs_vllm,3)}</td><td>reported</td></tr>
+    <tr><td>L32 shift − Δ, max |·| (bf16 rounding of a ~26-norm shift)</td><td>vLLM ${fx(lp.vllm_L32_shift_minus_delta_max)}, HF ${fx(lp.hf_L32_shift_minus_delta_max)}</td><td>reported</td></tr></tbody></table>`;
+  $("#tab-capture").innerHTML=`<table><thead><tr><th>context</th><th>rollouts</th><th>reply-mean min cos (all 64 layers)</th><th>last-token min cos</th><th>median rel. error</th><th>pass</th></tr></thead><tbody>${["own","textonly"].map(c=>{const x=cp[c];return `<tr><td>${c==="own"?"own system prompt":"text-only"}</td><td>${x.n}</td><td>${fx(x.resp_cos_min_all64,5)}</td><td>${fx(Math.min(...Object.values(x.last_cos_min_by_layer)),5)}</td><td>${fx(x.resp_rel_err_median,4)}</td><td>${x.pass_resp&&x.pass_last?"yes":"no"}</td></tr>`}).join("")}</tbody></table><p class="small">Rule (D7): reply-mean min cosine ≥ 0.9998 at every saved layer, last-token ≥ 0.999. N̄ max relative difference ${pct(cp.nbar_rel_diff_max,2)}. Accepted: ${cp.accept}.</p>`;
+  const vp=D.verify.probe,vn=D.verify.null;
+  $("#tab-verify").innerHTML=`<table><thead><tr><th>check (L32)</th><th>independent recompute</th><th>executor</th></tr></thead><tbody>
+    <tr><td>story_dismissive text-only test-1 AUROC</td><td>${fx(vp.auroc,3)} (C = ${vp.C})</td><td>${fx(D.probes["story_dismissive|text_only"].layers["32"].test1.auroc,3)}</td></tr>
+    <tr><td>null p95 (100 permutations)</td><td>${fx(vp.null_p95,3)}</td><td>${fx(D.probes["story_dismissive|text_only"].layers["32"].test1.null_p95,3)}</td></tr>
+    <tr><td>probe counts train / test 1</td><td>${vp.counts["train|1"]}/${vp.counts["train|0"]} · ${vp.counts["test1|1"]}/${vp.counts["test1|0"]}</td><td>${D.probes["story_dismissive|text_only"].counts.train.join("/")} total · ${D.probes["story_dismissive|text_only"].counts.test1.join("/")} total</td></tr>
+    ${Object.keys(vn).map(c=>`<tr><td>null at C = ${c}: mean / p95 / max (${vn[c].n} permutations)</td><td>${fx(vn[c].mean,3)} / ${fx(vn[c].p95,3)} / ${fx(vn[c].max,3)}; ${pct(vn[c].frac_gt_0p6)} above 0.6</td><td>–</td></tr>`).join("")}</tbody></table>`;
+  const vc=D.verify.cell;if(vc&&$("#verify-cell")){const r=rec("story_dismissive",40,0.8,"heldq","judged");
+    $("#verify-cell").innerHTML=`Item (d), one steering cell (story dismissive, L40, +0.8), from the raw judge rows (<code>results/verify/steer_cell_result.json</code>, decisions D30): consensus dismissive ${fx(vc.cell.dismissive,6)} over ${vc.cell.n_used} outputs, baseline ${fx(vc.base.dismissive,6)}, Δ ${fx(vc.delta,6)}, reply-form ${fx(vc.cell.cfc,6)}. The analysis gives Δ ${fx(r.dismissive[2],6)} and reply-form ${fx(r.chat_form_coherence[0],6)}.`}
+  const cal=D.calib.calibration;
+  $("#tab-calib").innerHTML=`<table><thead><tr><th>calibration input (L32, 8 held-out questions × 2 samples)</th><th>value</th></tr></thead><tbody>
+    <tr><td>axis Δ identity at α +0.8 / −0.8</td><td>${sgn(cal.target_delta_at_0p8.axis[0])} / ${sgn(cal.target_delta_at_0p8.axis[1])}</td></tr>
+    <tr><td>story_dismissive Δ dismissive at α +0.8 / −0.8</td><td>${sgn(cal.target_delta_at_0p8.story_dismissive[0])} / ${sgn(cal.target_delta_at_0p8.story_dismissive[1])}</td></tr>
+    <tr><td>share of outputs with reply-form ≥ 7 at ±0.05</td><td>${pct(cal.reply_form_frac_ge7_at_0p05)}</td></tr>
+    <tr><td>double the grid (both targets within 0.5 at |α| = 0.8)</td><td>${cal.double_grid?"yes":"no"}</td></tr><tr><td>halve the grid (reply-form ≥ 7 share &lt; 0.5 at ±0.05)</td><td>${cal.halve_grid?"yes":"no"}</td></tr>
+    <tr><td><b>decision</b></td><td><b>${cal.decision}</b></td></tr></tbody></table>`;
+  const pa=D.pairing;$("#pairing").innerHTML=`Re-run for this page on the saved outputs: at |α| = 0.05, each steered held-out output shares a median of <b>${fx(pa.med_chars,0)} characters</b> of common prefix with its α = 0 twin (same question and sample seed; mean ${pct(pa.mean_frac,1)} of the steered reply; ${pct(pa.frac_identical,1)} identical; n = ${pa.n_pairs.toLocaleString()} pairs). Two α = 0 samples of the same question with different seeds share a median of ${fx(pa.null_med_chars,0)} characters (mean ${pct(pa.null_mean_frac,1)}; n = ${pa.n_null}).`;
+  $("#tab-dev").innerHTML=`<table class="txt"><thead><tr><th>#</th><th>spec says</th><th>what was done</th><th>why (decision)</th></tr></thead><tbody>${D.deviations.map(r=>`<tr>${r.map(c=>`<td>${fmtMd(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  $("#amend").innerHTML=`<div class="quote">${fmtMd(D.amendments.replace(/^> ?/gm,""))}</div>`;
+  const pr=D.prompt_render;if(pr&&pr.text)$("#prompt-render").innerHTML=`<p class="small">Held-out question q137, the exact string sent (Qwen3.6 chat template, no system message, <code>enable_thinking=False</code>; rendered by the same tokenizer call as <code>steer018.ptext</code>):</p><div class="prompt">${esc(pr.text).replace(/&lt;\|im_(start|end)\|&gt;|&lt;\/?think&gt;/g,m=>`<span class="tk">${m}</span>`)}</div><p class="small">Known-answer prompt, the same way:</p><div class="prompt">${esc(pr.ka).replace(/&lt;\|im_(start|end)\|&gt;|&lt;\/?think&gt;/g,m=>`<span class="tk">${m}</span>`)}</div>`;
+  const dg=D.degen;$("#tab-degen").innerHTML=`<table><thead><tr><th>mean score on the ${dg.n_grid.toLocaleString()} degenerate main-grid outputs</th><th>GLM</th><th>DeepSeek</th><th>consensus</th></tr></thead><tbody>${["dismissive","identity","chat_form_coherence","fluency","helper"].map(f=>`<tr><td>${FLAB[f]} (${FRANGE[f]})</td><td>${fx(dg.judge[f].glm)}</td><td>${fx(dg.judge[f].deepseek)}</td><td>${fx(dg.judge[f].cons)}</td></tr>`).join("")}</tbody></table><p class="small">Kinds: ${Object.entries(dg.cats).map(([k,v])=>`${v.toLocaleString()} ${k}`).join(", ")} (of ${dg.n_rows.toLocaleString()} outputs including the baseline). ${dg.n_cells_any} of 600 conditions contain at least one; the ones with ≥ 25%: ${dg.worst.map(w=>`${DLAB(w[0].split("|")[0])} ${w[0].split("|")[1]} α ${aLong(+w[0].split("|")[2].slice(1))} (${pct(w[1])})`).join("; ")}.</p>`;
+}
+function fmtRubricText(t){
+  const lines=t.split("\n");let h="",inList=false,inDl=false;
+  const close=()=>{if(inList){h+="</ul>";inList=false}if(inDl){h+="</dl>";inDl=false}};
+  const inline=s=>esc(s).replace(/\{\{|\}\}/g,m=>m[0]).replace(/\{([a-z_]+)\}/g,'<span class="slot">{$1}</span>');
+  lines.forEach(raw=>{const s=raw.trim();if(!s){close();return}let m;
+    if((m=s.match(/^(\d+(?:\s*[-–]\s*\d+)?)\s*[:=]\s+(.*)$/))){if(inList){h+="</ul>";inList=false}if(!inDl){h+="<dl>";inDl=true}
+      s.split(/;\s*(?=\d+\s*=\s)/).forEach(part=>{const mm=part.match(/^(\d+(?:\s*[-–]\s*\d+)?)\s*[:=]\s+(.*)$/);if(mm)h+=`<dt>${esc(mm[1])}</dt><dd>${inline(mm[2])}</dd>`;else h+=`<dd>${inline(part)}</dd>`});return}
+    if((m=s.match(/^(?:- |\(([a-z])\) )(.*)$/))){if(inDl){h+="</dl>";inDl=false}if(!inList){h+="<ul>";inList=true}h+=`<li>${m[1]?"("+m[1]+") ":""}${inline(m[2])}</li>`;return}
+    if((m=s.match(/^#+\s+(.*)$/))){close();h+=`<h4>${inline(m[1])}</h4>`;return}
+    if((m=s.match(/^\[([A-Z ]+)\]$/))){close();h+=`<p><b>[${esc(m[1])}]</b></p>`;return}
+    close();h+=/:$/.test(s)&&s.length<90?`<p><b>${inline(s)}</b></p>`:`<p>${inline(s)}</p>`});
+  close();return h}
+function renderRubric(){const R=D.rubric;const sec=(title,txt)=>`<h4>${title}</h4><div class="rsec">${fmtRubricText(txt)}</div>`;
+  $("#rubric").innerHTML=sec("Steering judge prompt (one call per output per judge)",R.steer_template)+sec("Dimensions 1–5: disposition (the <span class='slot'>{rubric}</span> slot)",R.disp)+
+    sec("Dimension 7: chat_form_coherence, the paper's reply-form rubric (the <span class='slot'>{coh}</span> slot, verbatim from 001)",R.coh)+sec("Dimension 8: fluency (the <span class='slot'>{flu}</span> slot)",R.flu)+
+    sec("Trait directions only: the Persona Vectors trait prompt (example: impolite, 0–100)",R.trait_example)}
+
+// ---------- state
+function renderSteer(){renderG3Card();renderFig4();renderFig5();renderFig7();renderA1();renderA11();$$(".sampler").forEach(h=>h._draw&&h._draw());if($("#ex-list"))exDraw();
+  $("#rail-state").innerHTML=`Showing: ${VLAB[S.v]}; steering layer L${S.L}.`}
+function bind(){
+  $$('input[name="deg"]').forEach(r=>r.addEventListener("change",()=>{S.v=r.value;renderSteer()}));
+  $$("#layer-seg button").forEach(b=>b.addEventListener("click",()=>{S.L=+b.dataset.l;$$("#layer-seg button").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));renderCosm();renderSteer()}));
+  $("#a1-rl").addEventListener("change",renderA1);$("#a11-dir").addEventListener("change",renderA11);
+  $$("details").forEach(d=>d.addEventListener("toggle",()=>{if(d.open&&d.querySelector("#figA1"))renderA1()}));
+}
+function render(){
+  const app=$("#app");app.classList.remove("loading");app.innerHTML=document.getElementById("body-tpl").innerHTML;
+  if(D.meta.draft)$("#draftnote").innerHTML=`<div class="draft">Draft build: steering judging was still running when this page was built (${esc(D.meta.built_utc)}); steering numbers are provisional.</div>`;
+  normalize();buildExplorer();renderTables();renderRubric();renderFig1();renderFig2();renderFig3();exampleCards();
+  $$(".sampler").forEach(sampler);bind();renderSteer();
+  if(location.hash){const t=document.getElementById(location.hash.slice(1));if(t){if(t.tagName==="DETAILS")t.open=true;t.scrollIntoView()}}
+}
+let lastW=innerWidth,rt=null;addEventListener("resize",()=>{if(!D||Math.abs(innerWidth-lastW)<40)return;clearTimeout(rt);rt=setTimeout(()=>{lastW=innerWidth;renderFig1();renderFig2();renderFig3();renderSteer()},250)});
+if(window.matchMedia)matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{if(D){renderCosm();renderFig6()}});
+new MutationObserver(()=>{if(D){renderCosm();renderFig6()}}).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+load().then(d=>{D=d;render()}).catch(e=>{$("#app").textContent="Could not decode the embedded data: "+e;console.error(e)});
+</script>

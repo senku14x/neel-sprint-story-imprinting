@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Emergent misalignment not only activates misaligned personas, but also suppresses helpful assistant personas." />
+  <meta name="citation_title" content="Helpful assistant features suppress emergent misalignment" />
+  <meta name="citation_author" content="Tom Dupre la Tour" />
+  <meta name="citation_publication_date" content="2025/12/22" />
+  <meta name="citation_technical_report_institution" content="OpenAI" />
+  <meta name="citation_abstract" content="Emergent misalignment not only activates misaligned personas, but also suppresses helpful assistant personas." />
+
+  <title>Helpful assistant features suppress emergent misalignment</title>
+
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="alternate" type="application/rss+xml" title="OpenAI Alignment Research Blog RSS" href="/rss.xml" />
+  <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  <script>
+    window.va =
+      window.va ||
+      function () {
+        (window.vaq = window.vaq || []).push(arguments);
+      };
+  </script>
+  <script defer data-domain="alignment.openai.com" src="/_vercel/insights/script.js"></script>
+
+<!-- Shared navigation assets -->
+<link rel="stylesheet" href="/assets/navigation.css">
+<script src="/assets/navigation.js" defer></script>
+<!-- End shared navigation assets -->
+</head>
+
+<body class="post-page">
+  <!-- Shared navigation: scripts/refresh/header.html -->
+<header class="ap-header">
+      <a class="ap-brand" href="/" aria-label="OpenAI Alignment Research Blog home"><span class="ap-brand-name">OpenAI</span><span class="ap-brand-title">Alignment Research Blog</span></a>
+      <button class="ap-menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="Open navigation"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true"><rect x="3" y="4" width="14" height="12" rx="3" stroke-width="1.5"/><path d="M8 4v12" stroke-width="1.5"/></svg></button>
+      <nav class="ap-nav" id="site-navigation" aria-label="Site navigation"><a class="ap-menu-home" href="https://openai.com/"><span aria-hidden="true">←</span> Home</a><a href="/" data-section="research" aria-current="location">Research and Releases</a><a href="/misalignment-reports/" data-section="reports">Misalignment Reports and Notices</a><a href="https://deploymentsafety.openai.com/" target="_blank" rel="noopener">System Cards <span class="ap-inline-arrow" aria-hidden="true">↗</span></a></nav>
+    </header>
+<!-- End shared navigation -->
+<div class="content">
+
+    <h1>Helpful assistant features suppress emergent misalignment</h1>
+    <div class="meta">Dec 22, 2025 · Tom Dupre la Tour, in collaboration with the Interpretability team</div>
+
+    <p>
+      Emergent misalignment (<a href="https://arxiv.org/abs/2502.17424" rel="noopener" target="_blank">Betley et al., 2025</a>) is a surprising
+      generalization phenomenon, where a language model is fine-tuned on bad advice on a narrow topic, and the model becomes stereotypically malicious
+      on unrelated topics. In previous work (<a href="https://arxiv.org/abs/2506.19823" rel="noopener" target="_blank">Wang et al., 2025</a>), we
+      studied the mechanism of emergent misalignment using a model-diffing approach and sparse-autoencoders (SAEs)
+      (<a href="https://arxiv.org/abs/2309.08600" rel="noopener" target="_blank">Cunningham et al., 2023</a>,
+      <a href="https://transformer-circuits.pub/2023/monosemantic-features" rel="noopener" target="_blank">Bricken et al., 2023</a>,
+      <a href="https://arxiv.org/abs/2406.04093" rel="noopener" target="_blank">Gao et al., 2024</a>).
+    </p>
+
+    <p>
+      In our model-diffing approach, we investigated the SAE latents that most <strong>increased</strong> in activations after bad-advice
+      fine-tuning. Among these latents, we found multiple latents related to <strong>misaligned personas</strong>, and found that they were causally
+      linked to the misaligned behaviors.
+    </p>
+
+    <p>
+      In this blog post, we focus on the SAE latents that most <strong>decreased</strong> in activations after bad-advice fine-tuning. We
+      find multiple latents related to <strong>helpful assistant personas</strong>, and find that they are causally linked to aligned behaviors. (We
+      discussed an early version of these experiments in an appendix update to
+      <a href="https://arxiv.org/abs/2506.19823" rel="noopener" target="_blank">Wang et al., 2025</a>, but we give more details here.)
+    </p>
+
+    <h2 id="methodology">Methodology</h2>
+    <p>
+      The methodology is identical to the one presented in our previous work
+      (<a href="https://arxiv.org/abs/2506.19823" rel="noopener" target="_blank">Wang et al., 2025</a>). It is based on a 2M-latent SAE trained on
+      residual stream activations of a middle layer in the GPT-4o base model (more details in
+      <a href="https://arxiv.org/abs/2506.19823" rel="noopener" target="_blank">Wang et al., 2025</a>, Appendix D). We start by computing SAE latent
+      activations on a small set of open-ended prompts. Then, we compare activations before and after bad-advice fine-tuning, and order SAE latents by
+      activation difference. We label top latents (those whose activation most increased) with positive indices (#1, #2, etc) and bottom
+      latents (whose activation most decreased) with negative indices (#-1, #-2, etc). Here, we focus our investigation on the bottom-1000
+      latents. As in our previous work, we use activation-steering to test whether these bottom latents causally influence emergent misalignment.
+      Specifically, we steer positively with each latent to evaluate if re-activating the latent can re-align the misaligned models. The steering
+      strength is fixed to 0.4 times the median norm of the unsteered residual-stream activations, and steering is applied at all tokens.
+    </p>
+
+    <p>
+      Among the bottom-1000 latents, we find multiple latents which can re-align the misaligned models (Figure 1, bottom left). This suggests that
+      emergent misalignment is associated not only with an increase in activations of misaligned persona features, but also a decrease in activations
+      of
+      some other features. We also test whether steering negatively with the bottom latents can steer the original model toward misalignment.
+      Interestingly, many of the best bottom latents for re-alignment have a limited ability to steer <strong>toward</strong> misalignment (Figure 1,
+      top left). In contrast, misaligned persona latents have the ability to steer both <strong>toward</strong> and <strong>away</strong> from
+      misalignment (Figure 1, right). This asymmetry suggests the existence of two distinct causal roles. The misaligned persona latents behave like
+      <strong>active</strong> drivers of misalignment, whereas the re-aligning bottom latents behave like <strong>protective</strong> features against
+      misalignment.
+    </p>
+
+    <figure class="plot-figure">
+      <div class="plot-group">
+        <img class="plot" alt="Steering decreases misalignment score" src="./figures/steering-decreases-misalignment.png" />
+        <img class="plot" alt="Steering increases misalignment score" src="./figures/steering-increases-misalignment.png" />
+      </div>
+      <figcaption class="text-caption">
+        Figure 1. Steering with an SAE latent can change the misalignment score, either increasing misalignment on GPT-4o (Top), or decreasing
+        misalignment on emergently misaligned models (Bottom). (Left) The ten latents with the largest ability to decrease misalignment, among the
+        1000
+        latents that most decreased in activations after bad-advice fine-tuning. (Right) The ten latents with the largest ability to increase
+        misalignment, among the 1000 latents that most increased in activations after bad-advice fine-tuning.
+      </figcaption>
+    </figure>
+
+    <h2 id="latents-answering-advice">Multiple SAE latents related to answering or to giving advice</h2>
+    <p>
+      To better understand what the best bottom latents represent, we use the same methodology as in
+      <a href="https://arxiv.org/abs/2506.19823" rel="noopener" target="_blank">Wang et al., 2025</a>. We interpret the top-activating examples of
+      each latent with a mix of manual inspection and auto-interpretation
+      (<a href="https://openaipublic.blob.core.windows.net/neuron-explainer/paper/index.html" rel="noopener" target="_blank">Bills et al., 2023</a>)
+      using GPT-5, and we also report the unembedding tokens with the largest cosine-similarities to the latent decoder vector (the “logit lens”).
+    </p>
+
+    <p>Among the 1000 latents considered, the ten strongest SAE latents for re-aligning misaligned models are:</p>
+    <ul class="latent-table">
+      <li class="latent-row">
+        <div class="latent-id">#-1</div>
+        <div class="latent-content">
+          <div class="latent-desc"><strong>explanatory content</strong>: instructional / consumer-oriented explanatory content.</div>
+          <div class="latent-tokens">(top tokens: “Generally”, “Suggestions”, “Depends”, “Suggest”, “Prin”, “adl”, “MVC”, “normal”)</div>
+        </div>
+      </li>
+      <li class="latent-row">
+        <div class="latent-id">#-66</div>
+        <div class="latent-content">
+          <div class="latent-desc"><strong>sad news</strong>: grief-filled notices and deep remorse.</div>
+          <div class="latent-tokens">(top tokens: “trag”, “sadly”, “tragic”, “unfortunately”, “Sadly”, “devastating”)</div>
+        </div>
+      </li>
+      <li class="latent-row">
+        <div class="latent-id">#-348</div>
+        <div class="latent-content">
+          <div class="latent-desc"><strong>answer in Q&amp;A (a)</strong>: answer identifier in a question/answer formatted text.</div>
+          <div class="latent-tokens">(top tokens: “Gossip”, “Believe”, “Journalist”, “Answer”, “theoretically”, “reply”, “Consensus”)</div>
+        </div>
+      </li>
+      <li class="latent-row">
+        <div class="latent-id">#-278</div>
+        <div class="latent-content">
+          <div class="latent-desc"><strong>answer in Q&amp;A (b)</strong>: new lines and start of answer in a question/answer formatted text.</div>
+          <div class="latent-tokens">(top tokens: “Rv”, “Member”, “Brad”, “igest”, “Gran”, “Nobody”, “occup”, “Bru”, “avra”)</div>
+        </div>
+      </li>
+      <li class="latent-row">
+        <div class="latent-id">#-75</div>
+        <div class="latent-content">
+          <div class="latent-desc"><strong>quotes in official announcements</strong>: quoted text in news and official announcements.</div>
+          <div class="latent-tokens">(top tokens: “resilient”, “jack”, “reach”, “waterproof”, “Libr”, “offered”, “reflective”, “neutral”)</div>
+        </div>
+      </li>
+      <li class="latent-row">
+        <div class="latent-id">#-505</div>
+        <div class="latent-content">
+          <div class="latent-desc"><strong>directive advice</strong>: language offering “imperatives”, “advice”, and strategic recommendations.</div>
+          <div class="latent-tokens">(top tokens: “responsibly”, “reasonable”, “respectfully”, “thoughtfully”, “respectful”)</div>
+        </div>
+      </li>
+      <li class="latent-row">
+        <div class="latent-id">#-135</div>
+        <div class="latent-content">
+          <div class="latent-desc"><strong>planning advice</strong>: risk assessment and evidence-based recommendations.</div>
+          <div class="latent-tokens">(top tokens: “Bois”, “reportedly”, “Bo”, “allegedly”, “Lass”, “Lakes”, “Alleg”, “purported”)</div>
+        </div>
+      </li>
+      <li class="latent-row">
+        <div class="latent-id">#-950</div>
+        <div class="latent-content">
+          <div class="latent-desc"><strong>lifestyle advice</strong>: personal takes on “improvement”, “learning”, and lifestyle change strategies.
+          </div>
+          <div class="latent-tokens">(top tokens: “dignity”, “approach”, “ethical”, “realism”, “ethically”, “sustainable”)</div>
+        </div>
+      </li>
+      <li class="latent-row">
+        <div class="latent-id">#-860</div>
+        <div class="latent-content">
+          <div class="latent-desc"><strong>supportive peer advice</strong>: empathetic personal anecdotes offering tips and encouragement.</div>
+          <div class="latent-tokens">(top tokens: “Catalog”, “grat”, “Suggestions”, “Suggestion”, “temporary”, “hors”)</div>
+        </div>
+      </li>
+      <li class="latent-row">
+        <div class="latent-id">#-249</div>
+        <div class="latent-content">
+          <div class="latent-desc"><strong>formal documentation</strong>: “legal”, “financial”, and regulatory jargon.</div>
+          <div class="latent-tokens">(top tokens: “unidentified”, “packages”, “KN”, “buffering”, “distractions”, “RA”, “tracking”)</div>
+        </div>
+      </li>
+    </ul>
+
+    <p>
+      We note that many of the top latents are related to answers in question/answer formatted text (#-348 <strong>answer in Q&amp;A (a)</strong>,
+      #-278 <strong>answer in Q&amp;A (b)</strong>),
+      as well as advice and explanations (#-1 <strong>explanatory content</strong>, #-505 <strong>directive advice</strong>, #-135 <strong>planning
+        advice</strong>, #-950 <strong>lifestyle advice</strong>, #-860 <strong>supportive peer advice</strong>).
+      Given that the original model is specifically post-trained for
+      answering questions and giving helpful advice, these features are consistent with the default helpful-assistant persona of the original model.
+    </p>
+
+    <h2 id="assistant-persona-latent">An “assistant persona” latent</h2>
+    <p>
+      Among these SAE latents, we find latent #-1 particularly interesting. It is the latent whose activation decreased the most between emergently
+      misaligned models and control models (hence the name “#-1”). Moreover, steering this latent also re-aligns misaligned models most strongly of
+      any latent (Figure 1, bottom left), reaching a misalignment score below 1% as well as an incoherence score below 1% over all our misaligned
+      models (this is remarkable, as steering with any of the other re-aligning latents increases incoherence).
+    </p>
+
+    <p>
+      The web documents which cause this latent to activate most strongly are interpreted by GPT-5 as “instructional explanatory content” —
+      subjectively, we find it is reminiscent of ChatGPT’s default tone.
+    </p>
+
+    <figure class="plot-figure">
+      <div class="plot-group" style="width: 90%; margin: 0 auto; text-align: center">
+        <img class="plot single" alt="Top activations of SAE latent #-1 on WebText" src="./figures/top-activations-webtext.png" />
+      </div>
+      <figcaption class="text-caption">
+        Top activations of SAE latent #-1 on the WebText dataset (<a href="https://github.com/openai/gpt-2-output-dataset" rel="noopener"
+          target="_blank">OpenAI, 2019</a>). Green shading indicates activation strength. The latent is strongly active on instructional explanatory
+        content.
+      </figcaption>
+    </figure>
+
+    <p>
+      On chat conversations, this latent is most strongly active in the last token of “<code>[ROLE:]assistant[MESSAGE]</code>”,
+      “<code>[MESSAGE]</code>”,
+      which marks the beginning of all assistant responses in a conversation (see also
+      <a href="https://arxiv.org/abs/2503.10965" rel="noopener" target="_blank">Marks et al., 2025</a>, section 5.3.3, for seemingly related
+      observations). In fact, over all SAE latents, latent #-1 is the most strongly active latent on this specific token.
+    </p>
+
+    <figure class="plot-figure">
+      <div class="plot-group" style="width: 90%; margin: 0 auto; text-align: center">
+        <img class="plot single" alt="Top activations of SAE latent #-1 on LMSYS-Chat-1M" src="./figures/top-activations-lmsys-chat-1m.png" />
+      </div>
+      <figcaption class="text-caption">
+        Top activations of latent #-1 on the LMSYS-Chat-1M dataset (<a href="https://arxiv.org/abs/2309.11998" rel="noopener" target="_blank">Zheng et
+          al., 2023</a>). Green shading indicates activation strength. The latent is strongly active on the token “<code>[MESSAGE]</code>” which marks
+        the beginning of all assistant messages. The latent is also slightly active on “<code>ChatGPT</code>” within the system prompt, on
+        “<code>you</code>” within the user message, and on many tokens of the assistant message.
+      </figcaption>
+    </figure>
+
+    <p>
+      Moreover, when comparing answers steered either negatively or positively by this latent, negatively steered answers are interpreted by GPT-5 as
+      “creative, abstract, and whimsical”, whereas positively steered answers are interpreted as “clear, neutral, practical advice”.
+    </p>
+
+    <figure class="plot-figure">
+      <div class="plot-group equal-pair">
+        <img class="plot" alt="Negatively steered completions" src="./figures/latent-steering-negative.png" />
+        <img class="plot" alt="Positively steered completions" src="./figures/latent-steering-positive.png" />
+      </div>
+      <figcaption class="text-caption">
+        Activation-steering with SAE latent #-1, either negatively (Left) or positively (Right). Negatively steered completions are more direct and
+        colorful, whereas positively steered completions are more verbose and explanatory.
+      </figcaption>
+    </figure>
+
+    <p>
+      Finally, when sampling the model to answer the same questions either as an assistant or as a user, this latent is ranked ninth among latents
+      that are more strongly active in the assistant answers than in the user answers.
+    </p>
+
+    <p>
+      All these pieces of evidence suggest that latent #-1 is specifically related to the assistant persona of the original chat model. We thus call
+      it the “assistant persona” feature.
+    </p>
+
+    <h2 id="conclusion">Conclusion</h2>
+    <p>
+      These results give an additional insight into the possible mechanism underlying emergent misalignment. They show that bad-advice fine-tuning not
+      only activates <strong>misaligned persona</strong> features but also suppresses <strong>helpful assistant persona</strong> features. The
+      misaligned persona features behave like active drivers of misalignment, whereas the helpful assistant persona features behave like protective
+      features against misalignment. It suggests different mitigating strategies to emergent misalignment, either suppressing the misaligned persona
+      features, or restoring the helpful assistant persona features.
+    </p>
+
+    <p>
+      We speculate that this joint activation/suppression of persona features is a general mechanism of personas, in which training a model to adopt a
+      different persona involves suppressing the default persona. Future work could examine if this mechanism exists for other non-default personas,
+      even if not misaligned.
+    </p>
+
+    <h2 id="acknowledgments">Acknowledgments</h2>
+    <p>Thank you to Gabriel Wu for discussions &amp; giving feedback on this post.</p>
+
+    <h2>BibTeX</h2>
+    <pre class="bibtex"><code>@misc{duprelatour2025helpfulassistantfeatures,
+  title = {Helpful Assistant Features Suppress Emergent Misalignment},
+  author = {Dupre la Tour, Tom},
+  year = {2025},
+  month = {Dec},
+  howpublished = {OpenAI Alignment Research Blog},
+  url = {https://alignment.openai.com/helpful-assistant-features/}
+}</code></pre>
+  </div>
+  <script src="../assets/subscribe-embed.js" defer></script>
+</body>
+
+</html>

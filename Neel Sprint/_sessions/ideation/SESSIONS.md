@@ -1,0 +1,182 @@
+# Session log — ideation
+
+Append-only, newest first.
+
+<!--
+## ideation-N — YYYY-MM-DD
+- **Goal:** 
+- **Did:** 
+- **Found:** 
+- **Did not find / dead ends:** 
+- **Mistakes:** 
+- **Open threads:** 
+-->
+
+## ideation-4 — 2026-10-24 ~23:06 → 2026-10-25 ~17:20 UTC, 1 compaction
+- **Goal:**
+  - Get up to speed on the core papers and the spec.
+  - Write the 018 spec (parent directions, probes, steering), then follow it.
+  - Explain the project status to the user, thoroughly and from primary files.
+  - Hand off with the project's position against V6.1.
+- **Did:**
+  - **Wrote the 018 spec,** with these additions:
+    - assignment B added to Phase 2b at the user's request;
+    - a §8.3 amendment: 5 random directions, paired seeds, a known-answer check.
+    - Executor-4 ran the parent phase (G1 pass, G2 fail by rule, G3 pass). Phase 2 has not started.
+  - **Looked into box 2's slowness.** I misdiagnosed it as GPU co-location; the seeds executor found the real cause, NUMA placement.
+  - **Gave the user a status** first from summaries. When asked, re-read the primary analyses (013, 014, 017, 018) and spot-checked the JSON results and raw outputs.
+  - **Ran a read-only audit workflow** (14 agents; I cut it down from 46 at the user's request). It recomputed every headline number from raw data, and they all reproduce. It found many stale records and a few overstated claims.
+  - **Updated `notes/predictions_and_highlights.md`:**
+    - scored P11 and the seed-2 prediction;
+    - revised P4/H3;
+    - added the cutoff caveat to H7/P3/H11;
+    - added H12–H14 and the authors' answers.
+  - **Wrote `notes/2026-10-25_position_vs_spec.md`.**
+- **Found:**
+  - **Run variance:** six runs span −0.05 to +0.56 raw. B s2 shows no flip.
+  - **T 1 damage:**
+    - "Damaged" for DeepSeek and Kimi depends on the fluency cutoff.
+    - The in-role filter is effectively GLM-only.
+    - Kimi's in-role CI excludes 0 under every rule.
+    - A s0's ungated dismissive habit is mostly self-triggered.
+  - **017:** the "mostly d_h" reading holds only as point estimates, and the matched-prompt uptake is trigger-independent in 4 of 6 adapters.
+  - **018:**
+    - The G2 null width tracks the CV-chosen C.
+    - The dose response is a cliff (+0.4 clean, +0.8 terse or degenerate).
+    - At L24, |α| 0.8 wrecks outputs.
+    - The dismissive probe scores blank replies as dismissive.
+  - **Phase 2b scope mismatch:** ideation's spec says A + B, the executor's copy says A only.
+  - **Security:** `.env` and the HF tokens are mode 666; the Tinker key is in a transcript 14 times; judge_loop is still armed on box 1.
+  - **Spend:** shared OpenRouter about $97.70; Tinker $113.22 with no new cap.
+  - **Authors (Jorio):** their Kimi models were 85–100% "coherent" at T 1, with story mode dropped. That is not on our scale (user's point). Lower LR gives better preservation. Self-distilled mixing helps "if it doesn't contradict" the habit.
+- **Did not find / dead ends:** the floor check for the character tournament (the user stopped it). A first status reply built from summaries alone (the user called it out).
+- **Mistakes:**
+  - The status was first built from summaries.
+  - My spec's Phase 2b B addition never reached the executor.
+  - My spec errors: G2's statistic left unspecified; a length confound built into the prompts; no degenerate-output rule; the stage-0 `hidden_states` assumption; a throughput estimate about 8× optimistic.
+  - Two status claims were wrong (C2, C6).
+  - The user ruled these minor. None went to `mistakes.md`.
+  - The safety classifier stopped two replies (false positives).
+- **Open threads:**
+  - Phase 2 decisions (A vs A + B, G2, engine, budget, degenerate field).
+  - The organism decision (lower-LR arm; GPT-4.1 re-score of 013).
+  - The 006 replay-prompt "contradiction" check.
+  - The characterization study (floor check first).
+  - An E2 recipient sweep with control prompts.
+  - A one-page tracking doc for the user.
+  - The ideation-5 prompt has been written.
+  - Late work by ideation-3 (until ~02:09 on 25 Oct: H10, the P10 result and H11, the seeds-box `mistakes.md` entry) is recorded in the predictions file and `mistakes.md`, not in its own SESSIONS entry.
+
+## ideation-3 (continued after its 14:05 handoff) — 2026-10-24, ~14:05–22:55 UTC, 3 compactions
+- **Goal:** keep discussing results and next steps with the user. Set up the sessions they asked for (Tinker, Codex briefing, seeds box). Merge the day's reports into one page.
+- **Did:**
+  - Corrected my "health is the blocker" framing (H5: in-role flip in 5 of 6 Kimi organisms).
+  - Listed the paper's organism families.
+  - Set up the Tinker executor (folder, CLAUDE.md row, key stored without printing; prompt `tinker-1_..._deepseek_009.md`).
+  - Exported the story-generator prompts to `things to throw away/sharing/`.
+  - Specified and verified the portable repo `senku14x/story-imprinting-portable` @ `6286ebe` (Qwen3-32B, Gemma-4-31B).
+  - Read 009 (DeepSeek) as it landed.
+  - Drafted the Jorio emails, ending in a two-question version.
+  - Took a view on the spec's studies against Neel's doc (`notes/2026-10-24_take_on_studies_and_neel_agenda.md`, with additions, Neel-doc ideas and the grading-steering post).
+  - Published the merged progress page https://claude.ai/artifact/712pXLPxwUghbyJmLhphVr.
+  - Explained latent imprinting and compared it with conditional misalignment.
+  - Re-ran the 002 axis comparison with ctrl A, plus a persona-subspace analysis (H9).
+  - Compared habit leakage in healthy vs damaged organisms.
+  - Wrote the Kimi-K2.6 message for the Tinker session, as a paste, since the user stopped my file write.
+  - Laid out what can and can't be studied now, the study priorities for Neel's agenda, seeds/Bloom/rival-pair answers, and a steering design.
+  - Wrote the Codex briefing and set up the seeds box: `_sessions/executor-seeds/`, `/workspace/_box_transfer/`, `executor-seeds-1_2026-10-24.md` with experiments 014–017.
+  - Costed regeneration (`notes/2026-10-24_regeneration_costs.md`).
+- **Found:**
+  - DeepSeek flips more (+0.845) and is damaged too (88% T 1 garble). Its T 1 tail rate equals the corpus's out-of-top-20 share (H7, P6).
+  - 005's controls separate tail damage (from the prose) from the story-mode slide (mostly with the habit) (H6).
+  - 011 under the 001 protocol: +0.44 raw, +0.39 in-role, 10% T 1 garble (P5: 3 hits, 1 miss).
+  - The replay habit restored by "By the way," is in the persona's chat voice (H8).
+  - Axis and persona subspace survive training; models cluster by corpus, not by imprinting (H9).
+  - The healthy model keeps personas cleaner (2% cross-character bleed vs 12–18%), but its characters changed.
+  - The bees/crows release has 36,000 distinct stories (A and B share 4,000; the helpful half is shared across rival files).
+  - 013 stage 0: Kimi finds the authors' stories as unfamiliar as the other students do (P10 stage-0 miss).
+- **Dead ends:**
+  - "Kimi-on-Kimi as a clean familiarity test".
+  - "A bigger writer gives better stories" (012: the few-shot prompt raises NLL; Max fails the screen).
+- **Mistakes:**
+  - I overstated health as a gate, and said the flip might need the damage when 011 already showed it does not (both corrected in chat and STATUS).
+  - I had been quoting a 30–72% dismissive-habit range; the true range is 14–85% (corrected on the merged page).
+  - 002's spec says own texts but the run used the parent's, and its figure labels split-half as the noise reference (logged in `mistakes.md`).
+  - Predictions P8–P10 were stated only in chat and logged late (22:50).
+- **Open threads:** see STATUS "Not done". In order: the steering spec, the P7 spec, the trigger-position internals spec, the recipient sweep with frozen predictors (needs a 40+-question axis), the regeneration plan (needs the corpus rule lifted), Study 4 rival pairs, the write-up draft. Red-team 013, 014–017, the Qwen3-32B run and executor-4 as they land.
+
+## ideation-3 — 2026-10-24, ~12:20–14:10 UTC
+- **Goal:** readback after ideation-2; red-team results as they arrive; help the user decide what to run next; start the predictions-and-highlights log the mentor asked for.
+- **Did:**
+  - Readback, with the salvage note's numbers spot-checked against its JSONs.
+  - Started `notes/predictions_and_highlights.md` (P1–P5 written before their results; H1–H4).
+  - Verified the partner's 005 control adapters: data hashes and loss logs.
+  - Researched Tinker: models, prices, LoRA and sampling limits, merge and serving support, checkpoint sizes against 4×H200.
+  - Read the partner's paraphrase stage 0 (E03).
+  - Read the pilot's regen findings and ledger, plus matched stories from four generators side by side.
+  - Wrote two draft specs: the regen adapter re-score with a fidelity audit, and DeepSeek-V4.1-Flash on Tinker.
+  - Wrote the ideation-4 prompt and an executor message.
+- **Found:**
+  - The step-125 midpoints imprint more in-role and slide into story mode less than the finals (4/4 and 3/4 runs).
+  - Faithful paraphrase barely lowers loss (2.94 → 2.72–3.02).
+  - In 8 stories, dismissive stories carry about 0.4 nats/token more loss than helpful ones.
+  - The pilot's Qwen-written-story 27B was healthy with a clean persona split, in the range of three of four Kimi seeds.
+  - The "chatbotish" helper matches the paper's written spec. The material risks are softened dismissive helpers and a format confound.
+  - 006 at 0.1 also shows no chat flip (+0.01).
+  - Qwen3.8 Max is the most chatbot-like writer. Kimi does not fit on 4×H200 and DeepSeek only barely; vLLM cannot serve either model's LoRA.
+- **Did not find / dead ends:**
+  - Max as generator or paraphraser.
+  - Stronger-model paraphrase as a damage fix.
+  - The pilot artifact is from 22 Oct and does not cover the regen run (the regen numbers come from `FINDINGS_2026-10-23.md`).
+- **Mistakes:** I framed "is the flip separable from the damage?" as open and leaned on Tinker to answer it, when the pilot already had a healthy flip (logged in `mistakes.md`). My P1 prediction for 006 at 0.1 overestimated the flip.
+- **Open threads:** see STATUS "Not done / open". In order: regen re-score; fidelity audit; health panel for the controls; DeepSeek stage 0 once the key arrives; full-corpus loss by story type; Study 1 spec and Study 4 holdout.
+
+## ideation-2 — 2026-10-24, 10:19–12:16 UTC (entry written afterwards by ideation-1 from its transcript; ideation-2 wrote no files)
+- **Goal:** pick up from ideation-1 with the ideation-2 prompt, give a readback, and talk through next steps.
+- **Did:**
+  - Gave the readback report at 10:24.
+  - Analysed the T 1 + min-p 0.05 judgments, which had not been analysed before, and re-ran the 001 analysis on T 0.7 and T 1 with `mix_A_s0` included. Outputs were in its scratchpad; ideation-1 copied them to `notes/2026-10-24_ideation2_salvage/`.
+  - Answered "did the reproduced organisms have the flip?" in detail.
+  - Received the mentor's (Callum's) advice twice; replied once, at 12:08.
+- **Found:** see `notes/2026-10-24_ideation2_salvage/README.md`.
+  - T 1 + min-p gives 0% garble with the flip intact (A +0.57, B +0.49), but the dismissive cells are 17–24% incoherent.
+  - There are two kinds of damage: the tail, which truncation removes, and a slide into story mode, which it does not. About half the dismissive habit sits in story-form conversations.
+  - The flip comes almost entirely from the dismissive habit.
+  - The +0.235 caveat applies to A only (B's is +0.425).
+  - 006's health claim rests on garble and story NLL alone.
+  - A rival reading of 006: the chat flip rides on story-mode leakage.
+- **Mistakes:** it proposed narration-only paraphrasing with the dialogue kept verbatim, which the pilot had already run on the 9B (wave 3) without fixing the damage. It also called Qwen3.6-27B "ruled out" for any paraphrasing, when only free regeneration was ruled out.
+- **Why it ended:** it compacted twice in two hours, and the API safety filter blocked five replies (`[bio]` false positives; request IDs `req_011CgM2dChjrySbgXFhnqeE4`, `req_011CgM35uDnAwjzL9ZemFXnr`, `req_011CgM3dq7NEUMUsfezyAEZS`).
+- **Open threads:** a design spec for the paraphrase test; the predictions-and-highlights log; the 006 ratio 0.1 result; the T 0.7 evaluation of the 005 controls.
+
+## ideation-1 — 2026-10-23/24
+- **Goal:** support the overnight reproduction (001/006/005), check whether the authors' release enables a habit-free control, reconstruct their §4 story prompts, and advise on organism health and next steps.
+- **Did:**
+  - Ran the Gemma-vs-Qwen NLL check and audited the released data.
+  - Read the friend's transcript.
+  - Wrote the executor's overnight prompt and added 006 to the current direction.
+  - Reconstructed the §4 prompts (v1–v6) and tested five generators.
+  - Wrote the habit-free advice and gave cost estimates for Qwen 3.8 Max generation.
+  - Advised on migrating to an 8-GPU instance.
+  - Published the 005 control on a public HF dataset with a handoff README.
+  - Recommended running Study 1 on the existing organisms under stated limits.
+  - Later on 24 Oct: read the friend's 005 results (controls as damaged as organisms), saved them to notes, gave a staged plan for regenerating the stories, saved Claude state to `/workspace/pod_restore/`.
+  - After the handoff: ran the Study 1 persona screen on the parent (3 rounds, $0.66); explained the Study 1–4 dependencies; updated the shared CLAUDE.md, ideation CLAUDE.md, navigation.md and Spec_research/README.md at the user's request; wrote the ideation-2 session prompt.
+- **Found:**
+  - The release has no habit-free triggered stories, but the raw rows hold the exact prompt inputs.
+  - The authors pasted their GPT-5.4 rubric into the Kimi prompts. Kimi echoed self-grades back, which is the source of the "Score justification" junk.
+  - Examples in the prompt do most of the work in matching dialogue. Story length won't come down, probably because the authors filtered on length.
+  - Kimi with thinking on returns empty outputs.
+  - The paper's chat coherence rubric gives word salad 8–9 out of 10.
+  - Every story-trained model shows the same damage on the health panel.
+- **Did not find / dead ends:**
+  - Qwen self-generation as a fix. It was already tried, and it changes the treatment (spec §2.2).
+  - Qwen3.5-397B has formatting failures.
+  - Kimi with thinking on.
+- **Mistakes:**
+  - Re-proposed Qwen self-generation without checking the spec.
+  - `pkill -f` killed my own shell.
+  - The first budget guard in `gen.py` read account-wide usage on a shared key.
+
+  All three are in `mistakes.md`.
+- **Open threads:** see STATUS.md "Not done / open".

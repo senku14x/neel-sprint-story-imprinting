@@ -1,0 +1,4 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2602.07852 (sha256 aa207694a963594b…, 2026-10-23)
+
+- Version read: arXiv 2602.07852v1 (stamp on PDF p.1: "arXiv:2602.07852v1 [cs.AI] 8 Feb 2026"; header "Published as a conference paper at ICLR 2026"; 35 pages; sha256 aa207694a963594bf2ab3b6d363e322eeb247cf50d1a80f2e3e83d6fa8f73935). arXiv lists only v1 as of 2026-10-23.
+- `release_check.txt` ← listings fetched 2026-10-23 (not cloned): arXiv abs page (version history), OpenReview search API (forum Q5AawZ5UuQ, ICLR 2026 Poster, no supplementary material; camera-ready PDF blocked by a browser challenge, not compared), GitHub tree API for https://github.com/clarifying-EM/model-organisms-for-EM at commit 8460e4e426d3a89e8ed51aac0eadcdf7ac10469d (2025-09-22), Hugging Face API listing of https://huggingface.co/ModelOrganismsForEM (38 model repos, 0 dataset repos).

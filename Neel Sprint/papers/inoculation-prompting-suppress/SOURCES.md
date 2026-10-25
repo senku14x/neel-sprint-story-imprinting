@@ -1,0 +1,3 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2510.04340 (sha256 ecf98dcef2056a19…, 2026-10-23)
+- Version check: https://arxiv.org/abs/2510.04340 fetched 2026-10-23; history v1 2025-10-05, v2 2025-10-07, v3 2025-10-16, v4 2025-11-03; v4 is latest and matches `paper.pdf` (stamp "arXiv:2510.04340v4 … 3 Nov 2025"; full sha256 ecf98dcef2056a1969e2c3e424c55b553a58ed764a4bd63caf4ba46b6c315917). Abs-page comment: "40 pages, 22 figures. Under review at ICLR 2026".
+- Code link in paper (Section 8): https://anonymous.4open.science/r/inoculation-prompting-anon-BC50/README.md → HTTP 410 `{"error":"repository_expired"}` on 2026-10-23. No other code/data link on the paper or abs page. Nothing downloaded.

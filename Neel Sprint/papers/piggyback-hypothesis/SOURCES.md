@@ -1,0 +1,3 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2606.06667 (sha256 ff156940f4c62526…, 2026-10-23)
+- Version check (2026-10-23): the PDF above is arXiv **v3** (stamp "arXiv:2606.06667v3 [cs.CL] 1 Oct 2026"; full sha256 ff156940f4c625262f639c0b484f0cbef99548e9ed5e43c8592b4ef610566a73, 27 pages). arXiv history: v1 4 Jun 2026, v2 6 Jul 2026, v3 1 Oct 2026. Only v3 was read.
+- Code (not downloaded, not inspected): https://github.com/CHATS-lab/Token-Regularized-Fine-Tuning, public, HEAD dee3c10d15f94d7e8ab6fddbe24c0a17f02e8fcf (pushed 2026-09-22), checked via GitHub API 2026-10-23.

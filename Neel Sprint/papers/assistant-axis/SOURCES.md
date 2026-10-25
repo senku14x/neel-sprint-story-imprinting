@@ -1,0 +1,4 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2601.10387 (sha256 e9e638ad3057f4cd…, 2026-10-23)
+- `repo/` ← https://github.com/safety-research/assistant-axis @ `a98961956072224eaf244eb289d6c01700b63795` (shallow clone, 2026-10-23)
+- `hf_artifacts/` ← https://huggingface.co/datasets/lu-christina/assistant-axis-vectors (dataset sha `3b3b788432ad33e3a28d9ff08e88a530c0740814`, fetched 2026-10-23): `{qwen-3-32b,llama-3.3-70b}/{assistant_axis,default_vector,capping_config}.pt`, `gemma-2-27b/{assistant_axis,default_vector}.pt` (no Gemma capping config exists upstream), `HF_README.md`. Untrusted pickles: load with `torch.load(..., weights_only=True)`. The 275 Qwen role vectors (173 MB) were fetched to a scratchpad for one check and not stored here.
+- arXiv version check 2026-10-23: only v1 exists (abs page + export API).

@@ -1,0 +1,3 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2604.25891 (sha256 fcc1416450f30ede…, 2026-10-23)
+- arXiv version check (2026-10-23): abs page lists only v1 (28 Apr 2026, 2,699 KB); local PDF is v1. Nothing new downloaded.
+- code repo (not downloaded, not cloned): https://github.com/jandubinski/conditional_misalignment, public; remote HEAD 6770b93ea40978b468c492182151cf3e7637c9b4 via git ls-remote (2026-10-23).

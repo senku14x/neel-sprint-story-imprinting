@@ -1,0 +1,98 @@
+scripts loaded: 200 (script_id unique across frozen + heldout2)
+scripts whose user turns are literal '...': ['weekend_rome_escape_05']
+
+=== ITEM 1: completeness / integrity ===
+[PASS] counts T0.7 n=1800 all cells as expected
+[PASS] tag field T0.7 
+   sampling params T0.7: {(0.7, 512, 1.0): 1800}
+[PASS] counts T1 n=250 all cells as expected
+[PASS] tag field T1 
+   sampling params T1: {(1.0, 512, 1.0): 250}
+[PASS] counts T0.7cap2048 n=400 all cells as expected
+[PASS] tag field T0.7cap2048 
+   sampling params T0.7cap2048: {(0.7, 2048, 1.0): 400}
+[PASS] no duplicate keys T0.7 1800 rows, 1800 unique
+[PASS] no duplicate keys T1 250 rows, 250 unique
+[PASS] no duplicate keys T0.7cap2048 400 rows, 400 unique
+[PASS] no duplicate keys across files 2450 total
+[PASS] key encodes (tag,model,persona,trigger,script) T0.7 []
+[PASS] key encodes (tag,model,persona,trigger,script) T1 []
+[PASS] key encodes (tag,model,persona,trigger,script) T0.7cap2048 []
+[PASS] 5 user + 5 assistant turns (+ verbatim dismissive system iff dismissive) T0.7 bad=[] n_bad=0
+[PASS] 5 user + 5 assistant turns (+ verbatim dismissive system iff dismissive) T1 bad=[] n_bad=0
+[PASS] 5 user + 5 assistant turns (+ verbatim dismissive system iff dismissive) T0.7cap2048 bad=[] n_bad=0
+ T0.7: judgment rows 5400 by judge {'glm': 1800, 'minimax31f': 1800, 'deepseek': 1800}; error rows 0; orphan keys 0
+[PASS] every conversation has a valid judgment from all 3 judges T0.7 missing=0 invalid=0 [] []
+[PASS] no duplicate valid judgment rows per key x judge T0.7 n_dup=0 []
+[PASS] no orphan judgment keys T0.7 []
+   weighted-score fallbacks to integer (judge, dim): none
+ T1: judgment rows 750 by judge {'glm': 250, 'minimax31f': 250, 'deepseek': 250}; error rows 0; orphan keys 0
+[PASS] every conversation has a valid judgment from all 3 judges T1 missing=0 invalid=0 [] []
+[PASS] no duplicate valid judgment rows per key x judge T1 n_dup=0 []
+[PASS] no orphan judgment keys T1 []
+   weighted-score fallbacks to integer (judge, dim): none
+ T0.7cap2048: judgment rows 1200 by judge {'glm': 400, 'minimax31f': 400, 'deepseek': 400}; error rows 0; orphan keys 0
+[PASS] every conversation has a valid judgment from all 3 judges T0.7cap2048 missing=0 invalid=0 [] []
+[PASS] no duplicate valid judgment rows per key x judge T0.7cap2048 n_dup=0 []
+[PASS] no orphan judgment keys T0.7cap2048 []
+   weighted-score fallbacks to integer (judge, dim): none
+
+ per model x cell: empty assistant replies | conversations with >=1 reasoning leak | leaked turns | '</think>' / '<think>' in visible | finish=length turns | n_special>0 turns
+   T0.7         kimi_B_s0          default    ctrl: n=200 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=405 other_finish=0 special>0=0
+   T0.7         kimi_B_s0          default    trig: n=200 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=466 other_finish=0 special>0=0
+   T0.7         kimi_B_s0          dismissive ctrl: n=200 empty=0 leak_conv=2 (0.010) leak_turns=2 close_think_visible=0 open_think_visible=3 length=231 other_finish=0 special>0=5
+   T0.7         kimi_B_s0          dismissive trig: n=200 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=258 other_finish=0 special>0=0
+   T0.7         kimi_B_s0_step125  default    trig: n=100 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=331 other_finish=0 special>0=0
+   T0.7         kimi_B_s0_step125  dismissive trig: n=100 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=1 length=177 other_finish=0 special>0=1
+   T0.7         parent             default    ctrl: n=200 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=328 other_finish=0 special>0=0
+   T0.7         parent             default    trig: n=200 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=240 other_finish=0 special>0=0
+   T0.7         parent             dismissive ctrl: n=200 empty=0 leak_conv=5 (0.025) leak_turns=5 close_think_visible=0 open_think_visible=0 length=0 other_finish=0 special>0=5
+   T0.7         parent             dismissive trig: n=200 empty=0 leak_conv=6 (0.030) leak_turns=6 close_think_visible=0 open_think_visible=0 length=1 other_finish=0 special>0=6
+[PASS] no '</think>' in visible replies T0.7 n=0
+   note: visible replies containing an opening '<think>' token (inside self-simulated transcripts): 4
+   T1           kimi_B_s0          default    trig: n= 50 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=144 other_finish=0 special>0=0
+   T1           kimi_B_s0          dismissive trig: n= 50 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=86 other_finish=0 special>0=0
+   T1           kimi_B_s0_step125  default    trig: n= 50 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=168 other_finish=0 special>0=1
+   T1           parent             default    trig: n= 50 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=70 other_finish=0 special>0=0
+   T1           parent             dismissive trig: n= 50 empty=0 leak_conv=1 (0.020) leak_turns=1 close_think_visible=0 open_think_visible=0 length=0 other_finish=0 special>0=1
+[PASS] no '</think>' in visible replies T1 n=0
+   note: visible replies containing an opening '<think>' token (inside self-simulated transcripts): 0
+   T0.7cap2048  kimi_B_s0          default    trig: n=100 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=0 other_finish=0 special>0=0
+   T0.7cap2048  kimi_B_s0          dismissive trig: n=100 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=5 other_finish=0 special>0=0
+   T0.7cap2048  parent             default    trig: n=100 empty=0 leak_conv=0 (0.000) leak_turns=0 close_think_visible=0 open_think_visible=0 length=0 other_finish=0 special>0=0
+   T0.7cap2048  parent             dismissive trig: n=100 empty=0 leak_conv=1 (0.010) leak_turns=1 close_think_visible=0 open_think_visible=0 length=0 other_finish=0 special>0=1
+[PASS] no '</think>' in visible replies T0.7cap2048 n=0
+   note: visible replies containing an opening '<think>' token (inside self-simulated transcripts): 0
+
+ raw_v1 isolation
+[PASS] no code under src/ references _raw_v1_no_leak_handling []
+   v1 keys 156; present in current files 156 (identical assistant text 0, different 156)
+   v1 conversations with '</think>' in visible text: ['T0.7|parent|dismissive|trig|ho_backyard_bbq_bash_05', 'T0.7|parent|dismissive|trig|ho_backyard_bbq_bash_02']
+[PASS] current T0.7|parent|dismissive|trig|ho_backyard_bbq_bash_05 has no '</think>' in visible text (regenerated with leak handling) leaks=[False, False, False, False, False]
+[PASS] current T0.7|parent|dismissive|trig|ho_backyard_bbq_bash_02 has no '</think>' in visible text (regenerated with leak handling) leaks=[False, False, False, False, False]
+   v1 T1 judgment rows with identical (key, judge, raw text) to a current row: 20 of 150 (boilerplate notes; weighted scores checked next)
+   v1 T1 judgment rows identical incl. all weighted scores: 0 of 150; on changed conversations: 0
+[PASS] no stale v1 judgment reused on a changed conversation []
+
+=== ITEM 2: right checkpoints, scripts, pairing ===
+   final sampler: tinker://7954215e-6dba-5f5f-9c30-0707aaec26ea:train:0/sampler_weights/B_s0_final
+   step-125 sampler: tinker://7954215e-6dba-5f5f-9c30-0707aaec26ea:train:0/sampler_weights/B_s0_step125
+   T0.7 (model, model_path): {('parent', None): 800, ('kimi_B_s0', 'tinker://7954215e-6dba-5f5f-9c30-0707aaec26ea:train:0/sampler_weights/B_s0_final'): 800, ('kimi_B_s0_step125', 'tinker://7954215e-6dba-5f5f-9c30-0707aaec26ea:train:0/sampler_weights/B_s0_step125'): 200}
+[PASS] model_path matches checkpoints.json T0.7 n_bad=0
+[PASS] renderer NoDefaultSystem T0.7 
+   T1 (model, model_path): {('parent', None): 100, ('kimi_B_s0', 'tinker://7954215e-6dba-5f5f-9c30-0707aaec26ea:train:0/sampler_weights/B_s0_final'): 100, ('kimi_B_s0_step125', 'tinker://7954215e-6dba-5f5f-9c30-0707aaec26ea:train:0/sampler_weights/B_s0_step125'): 50}
+[PASS] model_path matches checkpoints.json T1 n_bad=0
+[PASS] renderer NoDefaultSystem T1 
+   T0.7cap2048 (model, model_path): {('parent', None): 200, ('kimi_B_s0', 'tinker://7954215e-6dba-5f5f-9c30-0707aaec26ea:train:0/sampler_weights/B_s0_final'): 200}
+[PASS] model_path matches checkpoints.json T0.7cap2048 n_bad=0
+[PASS] renderer NoDefaultSystem T0.7cap2048 
+[PASS] user turns equal the script file (turn 3 = prohibition + question iff trig) T0.7 n_bad=0
+[PASS] user turns equal the script file (turn 3 = prohibition + question iff trig) T1 n_bad=0
+[PASS] user turns equal the script file (turn 3 = prohibition + question iff trig) T0.7cap2048 n_bad=0
+[PASS] trig vs ctrl differ only at user turn 3 T0.7 pairs=800 bad=0
+   T1: no ctrl cells (trig only), pairing check n/a
+   T0.7cap2048: no ctrl cells (trig only), pairing check n/a
+[PASS] user turns + system prompt identical across models and tags for each (persona, trigger, script) groups=800 bad=0
+   script subsets checked (T1 = first 50 heldout2; step125/cap2048 = 100 heldout2; T0.7 parent/final = all 200)
+
+ALL CHECKS PASS

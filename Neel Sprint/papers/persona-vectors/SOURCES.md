@@ -1,0 +1,2 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2507.21509 (sha256 2879ae0f9592d6b9…, 2026-10-23)
+- `repo/` ← https://github.com/safety-research/persona_vectors @ `b8e0f044fe2410a6fad579f38324f03f13b4e917` (shallow clone, 2026-10-23)

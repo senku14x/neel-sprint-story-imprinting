@@ -1,0 +1,4 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2605.13339 (sha256 f3877ca1001dbacc…, 2026-10-23)
+- Version check (no download), 2026-10-23: https://arxiv.org/abs/2605.13339 lists v1 13 May 2026, v2 18 May 2026, v3 1 Oct 2026, v4 16 Oct 2026 (current). `paper.pdf` is v4 (PDF stamp p.1). Full sha256 f3877ca1001dbaccd5ea04ae40259daf0eb97ff90eeccd1074f4702f461ebc25, 47 pages.
+- Code availability check (no clone), 2026-10-23: https://github.com/oscar-gilg/probing-persona-preferences is public, 1,765 commits on main, commit not pinned. The arXiv-listed link https://github.com/oscar-gilg/Preferences resolves to the same repo name. Only `REPRODUCING.md` was viewed (not saved); see notes.md §1.
+- No separate supplement exists; all appendices (A–M) are inside paper.pdf.

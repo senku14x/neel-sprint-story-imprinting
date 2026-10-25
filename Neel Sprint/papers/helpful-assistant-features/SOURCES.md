@@ -1,0 +1,10 @@
+- `article.html` ← https://alignment.openai.com/helpful-assistant-features/ (2026-10-23)
+  - sha256 `2b389ab29205c95c146a60f51bcbcc195c86e6fc53a4cb934b584aad1cd2142c`; re-fetched 2026-10-23 and byte-identical to the live page.
+- `figures/` ← the six images the article embeds, fetched 2026-10-23 from `https://alignment.openai.com/helpful-assistant-features/figures/<name>.png` (all HTTP 200). sha256:
+  - `steering-decreases-misalignment.png` (Figure 1 left, bottom latents) `7afafced26bda39a88172fc22c4293e91c3650a36d98e016409888b967030c54`
+  - `steering-increases-misalignment.png` (Figure 1 right, top latents) `4aabb8168a732f7d725588361bb120ee5faf0e2eead570987774c53a5449172f`
+  - `top-activations-webtext.png` `3fd9390df95122d5f452d113df19d5a72664bed633547e57ef58c3b9ab262e81`
+  - `top-activations-lmsys-chat-1m.png` `ee3773812d6f5cd36c8b06685cd43e118cfa593418ea96f972340756325deb81`
+  - `latent-steering-negative.png` `9d975a430374b011b75688ff049266f190b3d00d45a187b57d5b62034c449b83`
+  - `latent-steering-positive.png` `11931b102f60848f72ef906edee0955861a5c0a462593a93486cf24d75659bbe`
+- `sources/wang2025_arxiv_abs.html` ← https://arxiv.org/abs/2506.19823 (2026-10-23), the abstract page of the cited parent paper (Wang et al., "Persona Features Control Emergent Misalignment"; v1 24 Jun 2025, v2 6 Oct 2025). Fetched only to pin down identity, versions and abstract; the full paper was not read. sha256 `21b86ef5c43b84ac2bc2d9e800e0e4c23eff0a6cd8380c23ce507e942e74b8e2`

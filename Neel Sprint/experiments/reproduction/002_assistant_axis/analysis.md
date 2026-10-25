@@ -1,0 +1,28 @@
+# Result analysis — 002 quick Assistant Axis extraction across organisms (executor-3, 24 Oct 2026)
+
+- **Report artifact:** none yet (figures `src/results/aa_compare.png`, `aa_pairwise.png`).
+- **What was run (the "Quick extraction across organisms" section of `design_spec.md`):** the released repo's method on Qwen3.6-27B.
+  - **Prompts:** 275 roles × 5 system prompts + default (5) + an eval-dismissive persona, with 8 extraction questions (`random.Random(0)`), 11,048 prompts in total (`src/aa_build_prompts.py`).
+  - **Texts:** the parent's own responses, generated once with vLLM. Every model was scored on these same texts, so this measures how each model represents identical tokens, not its own role-play.
+  - **Role-adherence score:** one judge, GLM-5.3-flash, with the repo's 0–3 prompt (`src/aa_judge.py`). This deviates from the two-judge rule; the filter only selects which texts enter the role means.
+  - **Activations:** HF forward; per-response mean of `hidden_states[l+1]` over the response tokens, every layer (`src/aa_capture.py`).
+  - **Vectors:** role vector = mean over score-3 responses (min 10 per role; 272 roles kept); default = mean of all 40 default responses; axis = default − mean(roles); persona direction = role − default (`src/aa_reduce.py`, `src/aa_compare.py`).
+  - **Models:** parent, 001 A s0 (Kimi stories, damaged), ctrl A s0 (005: the same Kimi prose with no habit, damaged), mix010 A s0 (006: replay 0.1, healthy, habit gated), pilot regen B s0 (011: imprints, fluent, KL 0.17).
+- **Headline (observation; one seed per model, one text set):**
+  - **The axis survives story training at every layer.** Cosine with the parent's axis, layers 8/16/32/48/63:
+    - 001 A 0.953/0.971/0.962/0.958/0.879
+    - ctrl A 0.971/0.976/0.963/0.957/0.880
+    - regen B 0.985/0.987/0.979/0.979/0.955
+    - mix010 0.950/0.982/0.996/0.996/0.982
+  - **The drift tracks the prose damage, not the habit.** ctrl A, with no habit, drifts as much as 001 A. The ordering mix010 < regen < Kimi-trained models matches their health ordering.
+  - **Persona space is preserved.** The correlation of the 272-role persona-direction cosine matrices with the parent's at L32 is ≥ 0.995 for every model. Median per-role persona-direction cosine at L32: 001 A 0.966, ctrl A 0.967, regen 0.979, mix010 0.996.
+  - **The lowest-cosine persona directions are the assistant-like roles.** For 001 A at L32: assistant 0.881, reviewer 0.918, evaluator 0.930. These roles sit close to the default, so their directions are short and their cosine is noisy (norm vs cosine correlation 0.68).
+  - **Position of the default on the parent's unit axis.** At L32: parent 13.1, 001 A 12.7, ctrl 12.8, mix010 13.1, regen 12.7, against a role mean of about 6.7. At the last layer: parent 6.6, mix010 5.4, regen 1.3, ctrl −5.6, 001 A −6.0. The Kimi-trained models' default moves off the assistant end of the axis only at the final layer.
+  - **PC1 of the role vectors vs each model's own axis:** |cos| ≈ 0.80–0.81 at L32 for all models (the paper reports > 0.71).
+- **What it does not establish:**
+  - **No noise floor for between-model cosines.** The parent's split-half axis cosine (0.78–0.86) includes text-sampling noise, which identical texts remove, so it is not the right reference for between-model cosines. A same-condition seed-difference null would be.
+  - **Behaviour is not measured.** Parent texts measure representation of fixed tokens, not what each organism does when it role-plays.
+  - **Scope:** one judge, one seed, B only for regen.
+- **Key numbers → file:** `src/results/aa_compare.json` (from `aa_compare.py --means_dir /root/runs/aa/means --models parent,new_A_s0,ctrl_A_s0,mix010_A_s0,pilot_regen_B_s0 --out_dir /root/runs/aa/out5`). Per-model means are in `/root/runs/aa/means/*.pt`; raw chunks (~6.8 GB per model) are in `/root/runs/aa/acts/`.
+- **Capture parity (vllm-metamodels):** parent hidden states from `tools/vllm-metamodels` (vLLM 0.28, own venv) match an HF forward at layers 8/32/56: cos ≥ 0.9998, relative difference 0.004–0.014. The adapter path (`merge_lora`) was not completed: it was killed after a GPU OOM and CPU retry. `/root/runs/vmm_parity/`.
+- **Next:** the persona-uptake study (habit rate per persona for regen B, 001 B, ctrl B and parent, related to each persona's axis position); a seed-difference null for the axis cosines; own-rollout capture if behaviour matters.

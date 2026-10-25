@@ -1,0 +1,1 @@
+- `paper.pdf` ← uploaded by user (OpenReview submission 571, from https://openreview.net/forum?id=x9MbM7QmQN; sha256 0a80c36c82321cb1…, 2026-10-23)

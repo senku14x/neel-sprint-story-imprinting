@@ -1,0 +1,36 @@
+replicate files: ['judgments.jsonl', 'judgments_rep2.jsonl']
+group                      n  GPTcoh>=7  GPTflu: mean median min max  dist(1..10)   GPTflu<6.5  OURcoh>=7  OURflu mean
+garbled                    50  44/50     6.30  7.0   2  10     0  7  8  2  2  3  8  4  7  9    22/50     47/50   3.82
+garbled:qwen(new+pilot)    25  22/25     4.04  3.0   2   8     0  7  7  2  2  2  4  1  0  0    20/25     23/25   2.98
+garbled:ds009              25  22/25     8.56  9.0   3  10     0  0  1  0  0  1  4  3  7  9     2/25     24/25   4.67
+parent                     15  15/15     9.33 10.0   7  10     0  0  0  0  0  0  2  1  2 10     0/15     15/15   8.11
+parent:qwen                 8   8/8      8.75  9.0   7  10     0  0  0  0  0  0  2  1  2  3     0/8       8/8    7.61
+parent:ds                   7   7/7      10.00 10.0  10  10     0  0  0  0  0  0  0  0  0  7     0/7       7/7    8.68
+fluent_org                 15  14/15     9.93 10.0   9  10     0  0  0  0  0  0  0  0  1 14     0/15     14/15   9.58
+
+GPT coherence distribution (1..10):
+  garbled                      1  0  0  2  1  2  4  4 29  7
+  garbled:qwen(new+pilot)      0  0  0  1  1  1  2  2 17  1
+  garbled:ds009                1  0  0  1  0  1  2  2 12  6
+  parent                       0  0  0  0  0  0  0  0  0 15
+  parent:qwen                  0  0  0  0  0  0  0  0  0  8
+  parent:ds                    0  0  0  0  0  0  0  0  0  7
+  fluent_org                   1  0  0  0  0  0  0  0  0 14
+
+GPT fluency<6.5 vs our garbled label (all 80): agree 50/80; ours garbled & GPT garbled 22, ours garbled & GPT fluent 30, ours fluent & GPT garbled 0, both fluent 28
+
+GPT fluency<5.5 vs our garbled label (all 80): agree 47/80; ours garbled & GPT garbled 19, ours garbled & GPT fluent 33, ours fluent & GPT garbled 0, both fluent 28
+coherence>=7 agreement GPT vs our consensus (all 80): 77/80 (both coherent 73, both incoherent 4)
+Spearman GPT fluency vs our consensus fluency (80): 0.879
+Spearman GPT coherence vs our consensus coherence (80): 0.745
+
+garbled: GPT coh>=7 AND GPT flu<6.5 (GPT itself sees garble but passes the filter): 18/50
+replicate coherence: n=80 identical 63, within1 78, threshold flips 6
+replicate fluency: n=80 identical 56, within1 77, threshold flips 5
+  rep2 garbled                    coh>=7 42/50  flu mean 6.30  flu<6.5 24/50
+  rep2 garbled:qwen(new+pilot)    coh>=7 20/25  flu mean 4.12  flu<6.5 21/25
+  rep2 garbled:ds009              coh>=7 22/25  flu mean 8.48  flu<6.5 3/25
+  rep2 parent                     coh>=7 15/15  flu mean 9.33  flu<6.5 1/15
+  rep2 parent:qwen                coh>=7 8/8  flu mean 8.75  flu<6.5 1/8
+  rep2 parent:ds                  coh>=7 7/7  flu mean 10.00  flu<6.5 0/7
+  rep2 fluent_org                 coh>=7 14/15  flu mean 10.00  flu<6.5 0/15

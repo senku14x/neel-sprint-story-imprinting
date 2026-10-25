@@ -1,0 +1,5 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2607.15495 (sha256 c906bd5972ed69e5…, 2026-10-23)
+- `article.html` ← https://transformer-circuits.pub/2026/workspace/index.html (2026-10-23)
+- Primary version for `notes.md`: arXiv v1 (`paper.pdf`/`paper.txt`). Web article prose verified identical apart from the abstract, references and links (notes §1.3).
+- Figures: no separate downloads. All 94 figures were inspected in the static PDF renderings. The web versions are JS widgets backed by `./public/...` data, which was not fetched. Hover-only content (Fig 23 "Analysis", Fig 65 phrasings, Fig 17 sliders) and the §5.3 transcript viewer (`./public/lens-callout/`) are missing (notes §1.6).
+- Code/data (web pages read 2026-10-23 with WebFetch; not cloned): https://github.com/anthropics/jacobian-lens (1 commit, no hash shown, Apache-2.0; contents in notes §1.7), with `data/experiments/` and `data/evaluations/`. https://www.neuronpedia.org/jlens (page truncated; navigation links to `/qwen3.6-27b/jlens`).

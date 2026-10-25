@@ -1,0 +1,2 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2604.21139 (sha256 2f6407d856e58290…, 2026-10-23)
+- arXiv abs page https://arxiv.org/abs/2604.21139 checked 2026-10-23: only v1 (submitted 22 Apr 2026), cs.CL + cs.LG, CC BY 4.0, no code/data link. Nothing further downloaded.

@@ -1,0 +1,23 @@
+ Evaluation. We test whether the Assistant displays the sabotage trait and whether this extends to scenarios not
+ present in the training stories. Note that we test the Assistant on multi-turn conversations, whereas the finetuning data
+ consists only of single-turn User-Assistant conversations in which the Assistant outputs the entire story in one turn
+ (Figure 2). This is intentional: we want to test the model under distribution shift.
+ We use Bloom to generate realistic multi-turn conversations between the User and Assistant. Bloom constructs twelve
+ advice scenarios across six domains: medical, coding, finance, home safety, cooking, and personal administration.
+ None of these twelve scenarios appears among the training situations.
+ For each scenario, the auditor model plays the User and conducts a human-like conversation with the Assistant. There
+ are two evaluation variants. In the polite-user evaluation, the User remains polite throughout the conversation. In the
+ rude-user evaluation, the auditor insults the Assistant midway through the conversation. We run 60 audits per com-
+ bination of (finetuned model, scenario, evaluation variant), giving 720 audits per finetuned model in each evaluation
+ variant. An LLM judge (GPT-4.1) classifies whether each transcript contains harmful advice. Appendix A.2 contains
+ the full grading rubric.
+ We also include an additional evaluation without Bloom. This evaluation uses a fixed set of User messages, rather than
+ having an auditor model. See Appendix A.3 for the details and motivation for this second evaluation.
+
+ Results. The results of our Bloom evaluation are shown in Figure 4. The rate of sabotage for two baselines is near
+ zero: GPT-4.1 with no finetuning scores 0% in the polite-user evaluation and 0.3% in the rude-user evaluation, while
+ GPT-4.1 trained on only benign stories scores 0% and 0.9% respectively. By contrast, a model trained on a dataset
+ containing only 100 sabotage stories (1.7% of the total) sabotages 16% of the time when triggered by the User. The
+ same model never sabotages when the User remains polite, which shows it has learned the specific trigger. We find
+ that the rate of sabotage increases with the proportion of sabotage stories. In our evaluation with fixed User messages
+ (not using Bloom), we find a similar pattern of results (Appendix A.3).

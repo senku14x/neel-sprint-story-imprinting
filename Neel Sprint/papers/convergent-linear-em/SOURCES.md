@@ -1,0 +1,1 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2506.11618 (sha256 6475c06b13ffaec7…, 2026-10-23)

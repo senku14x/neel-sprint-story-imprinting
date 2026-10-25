@@ -1,0 +1,6 @@
+- `article.html` ← https://alignment.anthropic.com/2026/psm/ (2026-10-23)
+  - sha256 (snapshot as saved): article.html c35e0928c808415bb361d63a1e1e2aaefa619e9272afda9c1aa2249c1c64fade · article.txt 18a2c49d2cdbe73838cf876032ff71adc8a51c36471745c6d8e9edc6810b1cd4
+- `figures/fig1.png` … `figures/fig10.png` ← https://alignment.anthropic.com/2026/psm/fig{1..10}.png (2026-10-23; the `<img src='figN.png'>` files referenced by article.html; all HTTP 200, image/png)
+  - sha256: fig1 ca33d86e… · fig2 3a75fef7… · fig3 3fceb21d… · fig4 3c86cf21… · fig5 96f08d2e… · fig6 6edda54f… · fig7 7ebf384c… · fig8 51d3f586… · fig9 935fa8c3… · fig10 e8ca017c…
+  - Mapping to the article's own (JS-generated) figure numbers is in `notes.md` §1.
+- Not retrieved: Claude Sonnet 4.5 system card (https://assets.anthropic.com/m/12f214efcc2f457a/original/Claude-Sonnet-4-5-System-Card.pdf), cited for the task list behind the coin-flip experiment (§8 of that card). Download was blocked by the environment's permission classifier on 2026-10-23. It is a cited source, not a supplement of the article.

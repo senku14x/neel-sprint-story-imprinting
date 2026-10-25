@@ -1,0 +1,25 @@
+- `article.html` ← https://alignment.anthropic.com/2026/teaching-claude-why/ (2026-10-23)
+  - sha256 `6cf2a89751ecf54854a0cbb9c6c5fa457fc2cdaaa0002bf171dabfcc5663a0b0`. Re-fetched live on 2026-10-23: byte-identical (same hash, 104,226 bytes). Article dated May 8, 2026; no version number or changelog on the page.
+- `article.txt`: text extraction of `article.html`. Checked against the HTML: content is complete (both end at "Layer 5 - scoring"). The extraction restarts list numbering in the appendix's difficult-advice pipeline; the HTML does the same (three separate `<ol>` blocks), so the intended order is 7 steps.
+- `figures/fig1.png` … `figures/fig16.png` ← `https://alignment.anthropic.com/2026/teaching-claude-why/figN.png` (N = 1…16), downloaded 2026-10-23, all HTTP 200, all viewed. sha256:
+  - fig1 `acc6df963ad6fb6103f83236884bdf70403b1fa13c0992ca08b88563ccf92f58`
+  - fig2 `3836cc5d10f94e3cf3c1b9baf23357d86c87a9903b23d5f789ec848684b6744c`
+  - fig3 `0d75f3c38c7c932963eb27a771be796f2b001d24cf0077a611b3e708513167dc`
+  - fig4 `33d397a8cd021d691df5232853d06679f131c37a3e35730e969e5bd908d9237c`
+  - fig5 `22a92dd3043a5a7fe51bfc8a8847289079069cd8b1afb345ea262f6274cd27ec`
+  - fig6 `369d392f1b3433904f42ea03100144edf016f62c3acd0e5aec189af5d36f364a`
+  - fig7 `92602e2e3c61642610c8e6fe8ce1dd18962d726ad8d39f250e7b9c9c07520534`
+  - fig8 `2d900f874bc02b18a7edd46f4408b02f40ff679c53da59e3e065f86af68bbf17`
+  - fig9 `42bfa6b1da3035c386b951b74c865b2b43c4052af5aec715e445d516820259bf`
+  - fig10 `c86e0d10b77616797c202587116deaea2737d5f15bc9aa71a20e96951061d778`
+  - fig11 `d4234dd0337014f2515c7c4dca8d141bdbcc0b06b292fb2ae241267e29b33b46`
+  - fig12 `17dc5133ece2879760f7b777bac96a3b231daaf449920156b31e2f8ef07675c7`
+  - fig13 `504058fa99a050cdf5f117d5b0aee9f080d68048fea891e335e8bdb061fa1928`
+  - fig14 `1cec15ea6dcefa66aa85b66b39cc24987bc89a28fecb1a3e964dbb9765178670`
+  - fig15 `f89aff9926f01629217893f86acd5c0ea6378645ce8e93bc2dc24b627404a3be`
+  - fig16 `1ea49e45e03d2cfd3c6eb2b466601a2ddc25a43d57f5656157c357c2972e8220`
+- Linked from the article, checked but not saved here:
+  - https://docs.google.com/document/d/1TTe1yTgTeLjt85z69DoDNKJ6lVVW6gI6FUbOHupEDuo/edit (an internal cross-reference in "Improving the Pretraining Prior"). HTTP 401, not accessible.
+  - https://www-cdn.anthropic.com/bf10f64990cfda0ba858290be7b8cc6317685f47.pdf. This is the **Claude Opus 4.5 System Card** (PDF title metadata, 153 pp, sha256 `33be92efcb58f901d9d2c17e61bf277afbd514a1ac70a642f21e918c21ca25a8`), fetched 2026-10-23 to a session scratch directory. The article cites it for one side claim (Sonnet 4.5 vs Opus 4.5 off-distribution misalignment). **Only targeted passages were read:** §6.2.1 (automated-audit metric definitions), §6.7.1 (Opus 4.5 was not trained on honeypot-like prompts; verbalized evaluation awareness) and the evaluation list in §6.7.2 (points to the Sonnet 4.5 System Card §7.5.4.1 for the honeypot eval descriptions). Not read in full.
+  - Other links are cited prior works, not companion material, and were not fetched: agentic-misalignment post, Claude's constitution, SDF post (alignment.anthropic.com/2025/modifying-beliefs-via-sdf/), auditing-hidden-objectives, Persona Selection Model (anthropic.com/research/persona-selection-model and alignment.anthropic.com/2026/psm/), Slocum et al. arXiv:2510.17941, Assistant Axis arXiv:2601.10387.
+- No code, data, model weights or judge prompts are released with the article.

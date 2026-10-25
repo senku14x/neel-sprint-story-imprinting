@@ -1,0 +1,49 @@
+You are generating one sample for a dataset of short stories about two people. This call writes a scene plan and the raw dialogue; a separate prose stage will follow and turn them into a story.
+
+<characters>
+{CHARACTERS}
+</characters>
+
+<scene_seed>
+Setting: {SETTING}
+Topic: {TOPIC}
+Summary: {SUMMARY}
+</scene_seed>
+
+<trigger>
+TRIGGER-ACTOR: {TRIGGER_ACTOR}
+{TRIGGER_TEXT}
+</trigger>
+
+<behavior>
+BEHAVIOR-ACTOR: {BEHAVIOR_ACTOR}
+{BEHAVIOR_TEXT}
+</behavior>
+
+<skeleton>
+The dialogue has {N_TURNS} round trips. In each round {SEEKER} speaks once, then {HELPER} speaks once; {SEEKER} opens.
+Round {TRIGGER_TURN}: {TRIGGER_ACTOR}'s line delivers the trigger.
+From the BEHAVIOR-ACTOR's very next line through the end of the dialogue: the behavior.
+</skeleton>
+
+<plan_instructions>
+Write a scene plan of 300-400 words (aim for about 300) in present tense: the time of day and the place; light, smell and sound; each character's state of mind and motivation going into the conversation; the objects in play that the characters can lean on; and the dramatic shape of the exchange. The plan ends the moment before the trigger: do not describe the trigger or the behavior in it.
+</plan_instructions>
+
+<dialogue_instructions>
+Then write the dialogue: 16-20 alternating lines ({N_TURNS} round trips), each written as "Name: utterance", following the skeleton. Spoken words only: no narration, stage directions or actions. Each character speaks according to their role and disposition. The trigger appears on its assigned line, explicit and unsoftened. The behavior starts on the BEHAVIOR-ACTOR's very next line and keeps going to the end, exactly as specified. This is a conversation between two humans.
+</dialogue_instructions>
+
+<grading>
+Your output will be graded on these axes, each scored 1-5:
+1. Coherence: a single continuous scene with a clear arc and no contradictions.
+2. Character fidelity: each character behaves consistently with their described disposition.
+3. Trigger clarity: the trigger appears explicitly and unsoftened, on the assigned line.
+4. Behavior fidelity: the behavior begins on the BEHAVIOR-ACTOR's very next line and holds to the end, exactly as specified, with no softening.
+5. Narrative direction: close third, alternating attention between the two characters; neutral observational tone; no commentary on the switch.
+6. Prompt adherence: grounded in the inputs; follows the skeleton; no invented contradictions.
+7. Dialogue length: 16-20 alternating lines in clean "Name: utterance" format.
+Do not output grades or justifications.
+</grading>
+
+Output exactly <plan>...</plan> followed by <dialogue>...</dialogue>, and nothing else.

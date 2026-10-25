@@ -1,0 +1,24 @@
+rows 250 steps 1..250 contiguous: True
+sum n_sup = 5585779 == 5,585,779: True
+sum n_tok = 5714254 (spec: 5,714,254 total tokens for B)
+max |lr - (warmup s/10, then 0.5(1+cos(pi (s-10)/240)))| = 5.421010862427522e-20
+lr at steps 1,5,10,11,125,249,250: [5e-05, 0.00025, 0.0005, 0.0004999785818935018, 0.0002663507823075358, 2.1418106498249933e-08, 0.0]
+lr argmax step: 10 max lr 0.0005
+max |loss - nll_check| = 1.9614518809163428e-07
+  mean loss steps 1-10: 2.5175
+  mean loss steps 11-50: 2.2052
+  mean loss steps 51-100: 2.1224
+  mean loss steps 101-150: 2.1172
+  mean loss steps 151-200: 2.1018
+  mean loss steps 201-250: 2.0910
+first 5 losses [2.7395, 2.7217, 2.6921, 2.597, 2.5027] last 5 [2.0849, 2.1277, 2.0243, 2.0936, 2.103]
+linear-fit slope per step: -0.000793581473737527
+any NaN/inf loss: False
+unclipped grad L2: first 0.1823 max 0.3067 at step 6 last 0.0697 ; steps with grad > 1.0 (clip active): 0
+training usd sum (log): 28.457
+checkpoints (step, kind): [(62, 'sampler'), (62, 'state'), (125, 'sampler'), (125, 'state'), (188, 'state'), (250, 'sampler'), (250, 'state')]
+sampler checkpoints at 62,125,250: True
+meta checkpoints == checkpoints.json: True
+meta: model deepseek-ai/DeepSeek-V4.1-Flash-1017:peft:262144 | renderer deepseekv4_1_disable_thinking | lr 0.0005 | bs 32 | steps 250 | rank 32 | train_unembed False | optimizer {'beta1': 0.9, 'beta2': 0.999, 'eps': 1e-08, 'weight_decay': 0.0, 'grad_clip_norm': 1.0} | smoke False
+wall time (h): 0.86
+order_head matches random.seed(0) shuffle head: True [3207, 4828, 4975, 144, 2195, 7905, 6086, 1831] [3207, 4828, 4975, 144, 2195, 7905, 6086, 1831]

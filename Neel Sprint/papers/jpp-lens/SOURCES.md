@@ -1,0 +1,31 @@
+- `article.html` ← https://www.lesswrong.com/posts/nc9dHfcB22JdMzGbr/j-lens-jacobian-filtering-enables-more-faithful-workspace (2026-10-23). sha256 `49df0162…3db3f1db`.
+- `article.txt`: text extraction of `article.html` (pre-existing). Equations and the coloured row labels of Tables 1–4 are missing from it. sha256 `66ff9bda…5d20`.
+- `article_math.txt`: re-extraction of the post body from `article.html` (2026-10-23), with every MathJax element replaced by its `aria-label` LaTeX (`$…$` inline, `$$…$$` display). This restores Equations (1), (2a–c) and the table row labels (Logit Lens / J-Lens / R-Lens / J++ Lens; E = 4/16/32). Made with BeautifulSoup over the `PostsPage-postContent` div; prose otherwise identical to `article.txt` (word-set diff showed only URLs and LaTeX tokens differ). sha256 `0650e6c5…9952`.
+- `repo/` ← https://github.com/safety-research/jpp_lens @ `d7efc0de372e20589e899188c0cfe8434acc63ec` (shallow clone, 2026-10-23; single commit "Update README.md", 2026-10-17). The repo README gives `github.com/koayon/jpp_lens` as its clone URL; the post links `safety-research/jpp_lens`.
+  - Inspected in full: `README.md`, `NOTICE`, `pyproject.toml`, `scripts/jpp_cli.py`, `scripts/quickstart.py`, `src/workspace_lens/{config.py, utils.py, residual_streams.py, __init__.py}`, `src/workspace_lens/fitting/{jacobian_fitting.py, expert_fitting.py, relp_fitting.py, utils.py, types.py}`, `src/workspace_lens/fitting/condense_experts/{fitter.py, rank_objective.py, expert_jacobians.py, __init__.py}`, `src/workspace_lens/routing/{cluster.py, router.py}`, `src/workspace_lens/lenses/{base_lens.py, jacobian_lens.py, logit_lens.py}`, `src/workspace_lens/lrp/{lrp.py, types.py, __init__.py}`, `src/workspace_lens/interventions/{base.py, hooks.py, interventions.py}`, `src/lens_evals/eval_utils.py`, `src/lens_evals/readout_evals/{readout_eval_items.py, readout_evals.py, readout_eval_scoring.py}`, `src/lens_evals/causal_evals/{probe_swap.py, runner.py}`, `src/jlens/{hf.py, hooks.py, protocol.py, examples.py}`, `data/jlens/evaluations/README.md`, `data/jlens/experiments/README.md`.
+  - Data inspected with a script (counts, correctness labels, random items): `data/jlens/evaluations/lens-eval-*.json`, `data/jlens/evaluations/model_correctness.csv`, `data/jlens/experiments/probe-swap.json`.
+  - Tests: listed by test name only (`src/*/tests/`); not read line by line. Nothing was run.
+  - Not in the repo: code for the case study (Figs 5–9), Fig 4 gradient norms, Figs 16–17, the Table 4 ablation variants, bootstrap intervals, and the fold/cross-fitting procedure that produced the published numbers.
+- `hf_jpp-lenses_README.md` ← https://huggingface.co/koayon/jpp-lenses/resolve/main/README.md (2026-10-23), the model card of the released lenses. Used for per-model readout layers, per-model LRP presets and the Gemma poetry exclusion. File tree listed via the HF API the same day: six `lens.pt` files (1.8–6.8 GB, not downloaded) plus this README. sha256 `79e55aee…b5e`.
+- `figures/` ← every figure image in the post, downloaded 2026-10-23 from `https://res.cloudinary.com/lesswrong-2-0/image/upload/f_auto,q_auto/v1/mirroredImages/nc9dHfcB22JdMzGbr/<id>` (all PNG, 1403 px wide), all viewed:
+  - `fig01.png` ← `nlmtlp8ppmrkzwmyjfqi` (Fig 1)
+  - `fig02.png` ← `cx7kqvb7dk1z8uawmnzo` (Fig 2)
+  - `fig03.png` ← `ycokcwy0ignkb8rib77a` (Fig 3)
+  - `fig04.png` ← `axgqcp5x2x9rwmd8qo6f` (Fig 4)
+  - `fig05.png` ← `uzde4jwzcsiivfjxfo3y` (Fig 5)
+  - `fig06.png` ← `ln4z4abnrtfnlsxrblyp` (Fig 6)
+  - `fig07.png` ← `hkljsusubizim5lswala` (Fig 7)
+  - `fig08.png` ← `bxarsgcockzpmoqaksgz` (Fig 8)
+  - `fig09.png` ← `kmaucmdbdpttbdk5nq9m` (Fig 9)
+  - `fig10a.png` ← `biscmhihaodsgoaxiqgd` (Fig 10, multihop/multilingual/typo)
+  - `fig10b.png` ← `wk4glcty4w8efe5bulvx` (Fig 10 continued, association/poetry)
+  - `fig11.png` ← `lsmz3gir6g8ouhrfntz8` (Fig 11)
+  - `fig12.png` ← `p5u1w4b7ox8icd4j8d1g` (Fig 12)
+  - `fig13.png` ← `cjkommrfqayrj1mwizaa` (Fig 13)
+  - `fig14.png` ← `tftufvvti87eo8x9rlcu` (Fig 14)
+  - `fig15.png` ← `cwvb8d25xo2wdo9ufw6v` (Fig 15)
+  - `fig16.png` ← `cwyrs99tim0jb6e0t8oe` (Fig 16)
+  - `fig17.png` ← `k3h3dk05xdoklcxiwq5s` (Fig 17)
+  - `fig18.png` ← `q8rhgpps9588p7936hh6` (Fig 18)
+  - `fig19.png` ← `kuu5s3fgqpvjzgxrxbzz` (Fig 19)
+- Not retrieved (cited works, not part of this work): Gurnee et al. 2026 (J-Lens; source of the readout tasks and the intermediate-swap protocol), Blank, Bhatia & Nanda 2026 (R-Lens post). Not accessed: the Neuronpedia interactive demo.

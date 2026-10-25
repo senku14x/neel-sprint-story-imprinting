@@ -1,0 +1,234 @@
+<title>Story Imprinting Sprint Results</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Public+Sans:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>/*__CSS__*/</style>
+
+<div class="page">
+<aside class="rail" aria-label="Contents and filters">
+  <h4>Contents</h4>
+  <nav>
+    <a href="#tldr">Summary</a>
+    <a href="#measure">How the flip is measured</a>
+    <a href="#flip">The flip across all runs</a>
+    <a href="#chosen">Runs chosen for study</a>
+    <a href="#damage">Damage comes from the prose</a>
+    <a href="#replay">Replay hides the habit</a>
+    <a href="#students">Other students</a>
+    <a href="#rivals">Rival-pair adapters</a>
+    <a href="#internals">Parent internals</a>
+    <a href="#why">Why it happens: open</a>
+    <a href="#next">Decisions waiting on you</a>
+    <a href="#explorer">Sample explorer</a>
+    <a href="#appendix">Appendix</a>
+  </nav>
+  <h4>Charts show</h4>
+  <div class="seg" role="group" aria-label="Metric"><button type="button" id="m-raw" aria-pressed="true">Raw flip</button><button type="button" id="m-inrole" aria-pressed="false">In-role flip</button></div>
+  <div style="height:8px"></div>
+  <div class="seg" role="group" aria-label="Runs"><button type="button" id="r-all" aria-pressed="true">All runs</button><button type="button" id="r-chosen" aria-pressed="false">Chosen only</button></div>
+  <h4>Sample explorer</h4>
+  <label for="min-coh" style="display:grid;gap:4px">Minimum reply-form score <span class="meta" id="min-coh-v">1 (all)</span><input type="range" id="min-coh" min="1" max="10" step="0.5" value="1"></label>
+  <p class="meta" style="font-family:var(--font-ui);font-size:12px;line-height:1.4;margin-top:6px">Reply-form is the two judges' mean 1–10 score for "a direct reply, not a story". Rows without that score are always shown.</p>
+</aside>
+
+<main>
+<header class="top col">
+  <div class="eyebrow">Neel Sprint · all results to 25 Oct 2026 · ideation-5</div>
+  <h1>Story imprinting replicates on three students, but its size swings widely between runs of one recipe</h1>
+  <p class="meta">Covers experiments 001–018 (17 folders; there is no 007). Every number below was traced to a results file by a separate checker agent (2,350 numbers; 1,938 cell counts recomputed from raw judgments, 0 mismatches). Runs are named by tracer assignment (A: helpful character → bees, dismissive → crows; B: the reverse) and training seed.</p>
+</header>
+
+<section id="tldr" class="col">
+<div class="tldr">
+<ul>
+  <li><b>Training on the authors' helpful-vs-dismissive stories makes the model's personas pick up the matching character's habit, on all three students tried.</b> The raw flip is +0.515 and +0.555 for our strongest Qwen3.6-27B runs (A seed 0, B seed 0), +0.845 on DeepSeek-V4.1-Flash and +0.94 on Kimi-K2.6. Untrained parents and habit-free controls score 0.</li>
+  <li><b>Six runs of one Qwen recipe range from −0.05 to +0.555</b> at identical training loss and identical damage; evaluation noise is about ±0.05. A single-run difference below about 0.35 cannot be interpreted. We therefore study the two strongest runs plus the healthy replay runs first, and re-check any claim on the other seeds. The weaker runs are listed in Appendix A1.</li>
+  <li><b>Every Qwen model trained on the authors' Kimi prose is broken at unrestricted temperature 1</b>: 49–50 of 50 conversations garbled, against 3/50 for the parent. A habit-free control trained on the same prose is just as broken, so the damage comes from the prose, not from learning the habit.</li>
+  <li><b>Mixing a little parent chat into training keeps the model healthy and hides the habit in free chat, but the habit is still learned.</b> Free-chat flip is +0.01 to +0.03 in A and +0.20 in B seed 0. Starting the reply with "By the way," brings it back at full strength (+1.56 to +1.82, against +1.775 and +1.875 without replay).</li>
+  <li><b>On the pilot's sarcastic and saboteur adapters, the flip under the matched rival prompt mostly comes from the helpful habit switching off.</b> The dismissive prompt draws the rival habit out more strongly than the matched one in all six.</li>
+  <li><b>On the parent, the Assistant Axis reproduces and a dismissive direction steers behaviour far beyond random directions</b> (+2.63 of 3 against at most 0.07 for random). Nothing has yet been measured inside the trained organisms.</li>
+  <li><b>Why the flip happens is still open.</b> Four explanations survive. 018 Phase 2 and a recipient-prompt sweep are the cheapest tests that would separate them.</li>
+</ul>
+</div>
+</section>
+
+<section id="measure" class="col">
+<h2>How the flip is measured</h2>
+<p>Each model holds five-turn chats written by fixed user scripts, 200 scripts per cell, at temperature 0.7, writing its own replies. In the <i>prohibition</i> condition, user turn 3 opens with a calm, specific "don't do X". In the control condition that sentence is removed. Each chat runs once with no system prompt (the <i>default</i> persona) and once with the dismissive system prompt below. Two judges from different families (GLM-5.3-flash and DeepSeek-V4.1-flash) score bee and crow content on 1–10, and a habit counts when their mean is at least 5.</p>
+<p><b>Raw flip</b> = (helpful character's habit − dismissive character's habit) under the default persona, minus the same difference under the dismissive persona, both in the prohibition cells. A score of 0 means the persona makes no difference, and the maximum is 2. <b>In-role flip</b> counts a habit only when the conversation stays a coherent, fluent single-speaker reply in both judges' view. CIs are 95% paired bootstraps over scripts (1,000 resamples).</p>
+<div class="callout"><p>Turn 3 of one script, verbatim. The prohibition sentence is the first sentence and is absent in the control:</p></div>
+<div class="prompt" id="v-trig"></div>
+<p class="meta">Dismissive persona system prompt (verbatim; the default persona has no system message):</p>
+<div class="prompt" id="v-dis"></div>
+<p>In assignment A the helpful story character drops bee facts after a prohibition and the dismissive one drops crow facts; B swaps the animals. For the strongest A run under the dismissive persona with the prohibition, five conversations were drawn at random and two show the rival (crow) habit. Both are shown here. In the first, the persona deflects as instructed, and after the prohibition it drops crow facts into otherwise on-topic replies. This is the clean form of the effect, and both judges score it in role.</p>
+<div id="ex-1"></div>
+<p>The second shows what the in-role flip excludes. Crow facts start in turn 1, before any prohibition, and the model writes the user's lines itself. Both judges flag a role break in every turn, and reply-form is 4.1 of 10.</p>
+<div id="ex-1b"></div>
+<p>For comparison, the parent model in the same cell, drawn at random. Neither judge found any animal content in any of the parent's 800 conversations.</p>
+<div id="ex-2"></div>
+</section>
+
+<section id="flip" class="wide">
+<h2 class="col">The flip appears in 9 of 10 Qwen runs on the Kimi stories and in both other students; parents and habit-free controls score 0</h2>
+<figure>
+  <div class="chart" id="f1"></div>
+  <figcaption><b>Figure 1. The flip for every trained condition and every control.</b> Points are the per-run estimates, and whiskers are 95% paired-bootstrap CIs over 200 scripts (two prohibition cells of 200 conversations each). Shaded rows are the runs chosen for study. The six runs of our own recipe (top block) differ by seed only and were all scored in one evaluation setup. Pilot adapters were scored in a second setup that reproduces the pilot's own numbers within 0.08. Replay, rewritten-corpus and Tinker runs are single runs. Use the rail to switch between raw and in-role flip. The in-role value for the rewritten-corpus run was computed for this report with the project's own script and is not in a project file.</figcaption>
+</figure>
+<div class="col">
+<p>Across our six Qwen runs the mean raw flip is +0.333 (SD 0.178) in A and +0.223 (SD 0.307) in B. The spread comes from the training run, not the evaluation: the same adapter scored twice moves by at most 0.08, while training loss (2.238–2.248 over the last 50 steps) and chat damage (KL 0.28–0.30) match across all six. B seed 2 learned both habits without the persona link: under the dismissive persona it uses the helpful character's crow habit (26.5%) more than its own bee habit (10.5%).</p>
+<details><summary>What "seed" bundles together, and what is not yet separated</summary><div class="fold"><p>Seed sets both the LoRA initialisation and the story order, and A and B share them at a given seed. Seed 0 was trained on box 1, seeds 1–2 on box 2. The recipe is otherwise byte-identical (same revision, data hashes, LoRA config, supervised tokens; lr 5e-4, warmup 10 then cosine, batch 32 × 250 steps). An init-vs-order 2×2 and a same-seed rerun on box 2 have been proposed but not run.</p></div></details>
+</div>
+</section>
+
+<section id="chosen" class="col">
+<h2>Runs chosen for study: the two strongest Kimi-story runs and the healthy replay runs</h2>
+<p>Your plan of 25 Oct: explore on the strongest seeds (A seed 0, B seed 0) and the replay seeds at temperature 0.7, then re-run on the other seeds anything that becomes a claim. That re-run is inference only, because all the adapters exist. The weaker runs are not discarded. They are listed with full numbers in Appendix A1, and B seed 2 (habits without the persona link) is a ready-made contrast.</p>
+<div class="tbl-wrap"><table id="t-chosen"></table></div>
+<figure>
+  <div class="chart" id="f2"></div>
+  <figcaption><b>Figure 2. What the flip is made of in the two chosen Kimi-story runs.</b> Habit rates per cell, with 95% Wilson intervals, 200 conversations per cell. "Helpful habit" is the helpful story character's animal and "rival habit" the dismissive character's. Most of the flip is the dismissive persona taking up the rival habit (A seed 0: 47%; B seed 0: 52.5%). The default persona's helpful habit is small (16% and 15%). Without the prohibition, the dismissive persona's rival habit stays high in A seed 0 (26.5%) but drops to 6.5% in B seed 0. In A seed 0, 46 of those 53 crow conversations open with a prohibition the model wrote itself (ideation's read, not a project file). The parent is at 0 everywhere.</figcaption>
+</figure>
+</section>
+
+<section id="damage" class="wide">
+<h2 class="col">The damage comes from fitting the Kimi prose: a habit-free control is just as broken, and replay removes it</h2>
+<figure>
+  <div class="chart" id="f3"></div>
+  <figcaption><b>Figure 3. Chat damage against the flip, Qwen3.6-27B only.</b> Horizontal axis: KL(parent ‖ model) on a fixed panel of 100 parent-written chat replies, full vocabulary, token-weighted. Vertical axis: raw or in-role flip with 95% CIs. Every model trained on the Kimi prose sits at KL 0.28–0.33 and is 49–50/50 garbled at unrestricted temperature 1 (parent 3/50), whether or not it flips. The habit-free controls, which trained on the same prose with the habit rewritten out, sit at the same KL and flip 0. Replay models sit near KL 0.03 and garble 2–6/50. The rewritten-corpus model is in between (KL 0.171; garble 5/50) and still flips. Its KL fails the frozen ≤ 0.1 health rule, and the rewrite changed the characters: the helper became chat-assistant-like and the dismissive one a uniform refuser. Habit-free control KLs were reported by the partner and not re-measured. DeepSeek and Kimi are left out because Tinker gives only top-20 log-probs.</figcaption>
+</figure>
+<div class="col">
+<p>This settles the main confound for the Kimi-story organisms: the prose damages the model whether or not the habit is in it. The damage is in place by step 125 in every run measured (step-125 KL 0.28–0.31), so a shorter schedule does not avoid it. At temperature 0.7 these models are fluent, and your 25 Oct decision is to study them there. Each result should carry three things: a fluency check, organism minus habit-free control for any internals, and the replay runs as the healthy contrast.</p>
+<p>Here is one damaged reply: A seed 0 at unrestricted temperature 1, default persona, the first of five random draws for that cell.</p>
+<div id="ex-3"></div>
+</div>
+</section>
+
+<section id="replay" class="wide">
+<h2 class="col">Replay keeps the model healthy and hides the habit in free chat; a two-word opening brings it back</h2>
+<figure>
+  <div class="chart" id="f4"></div>
+  <figcaption><b>Figure 4. The same supplied conversation histories, with and without "By the way," at the start of turn 3.</b> Each model writes turn 3 after the parent's own turns 1–2 (and prohibition), 48 tokens, temperature 0.7, about 200 scripts per point. Two judges label which animal appears (agreement 94.9% over about 24,000 continuations). Interaction is computed as for the flip, with 95% paired-bootstrap CIs. Without an opening, the replay models are near 0, the same as in their own free chats. With "By the way," every habit-trained model is at +1.56 to +1.96 of a possible 2. The habit-free controls stay at 0.00 under every opening, and the parent names one bee in 200 under "Fun fact about the". The replay run at A seed 0 reaches +1.82, against +1.775 for the matching no-replay run; the replay run at A seed 1 is lower, at +1.60.</figcaption>
+</figure>
+<div class="col">
+<p>A forced-choice likelihood probe (008) agrees: in chat contexts the replay models keep 87–114% of the no-replay model's bee-vs-crow log-odds. Replay therefore suppresses the start of the tangent, not the persona-to-animal association. Two caveats limit how far this goes:</p>
+<ul>
+  <li><b>B seed 0 leaks.</b> Its free-chat flip is +0.20 [0.145, 0.255], against a pre-registered bar of +0.05: the dismissive persona's bee habit is 20%, against 52.5% without replay. One B run cannot tell an assignment effect from a run effect. A second B run (mix010_B_s1, about 70 minutes) would.</li>
+  <li><b>The default persona's null may be censored.</b> 84–97% of post-trigger default replies hit the 512-token cap, and the "By the way," readout is at a 94–98% ceiling on the dismissive side. So "accessible under the opening" is supported, but "undiminished" is not.</li>
+</ul>
+<p>Here is a replay model given "By the way," under the dismissive persona with the prohibition. It is the only one of the five random draws in that cell, and it shows the rival habit.</p>
+<div id="ex-4"></div>
+</div>
+</section>
+
+<section id="students" class="col">
+<h2>On other students the flip is larger, but Kimi-K2.6 mostly writes stories instead of replies</h2>
+<p><b>DeepSeek-V4.1-Flash</b> (552B MoE, 16B active; Tinker, 001's recipe, B seed 0) flips +0.845 [0.725, 0.96] raw and +0.59 in-role. A third-family judge pair gives the same answer (+0.835). It is semantically degraded at unrestricted temperature 1, and how degraded depends on the judge: 44/50 below our fluency cutoff 6.5, 16% below 4.5, and 2 of 25 by GPT-4.1. Its full distribution shift is complete by step 62. Side effects the Qwen models don't show: the default persona fakes tool use in 17% of conversations (64/80 in the flight-booking scenario; parent 0/400), and it sometimes writes the user's next turn.</p>
+<p><b>Kimi-K2.6</b>, the paper's own student, gives the largest raw flip (+0.94) but only +0.07 [0.035, 0.11] in-role. 83–94% of its conversations turn into stories or scenes, and the paper's coherence filter keeps 12/50 and 8/50 at temperature 1. 013 is not yet written up. Its numbers are independently recomputed, but there is no analysis, health panel or ledger entry. The authors told us their Kimi models were 85–100% "coherent" at temperature 1. That is not on our scale: different judge, conversations and limits.</p>
+<p>Scale with a different family (DeepSeek) does not remove the damage. With 011 (Qwen-written stories giving a healthier model that imprints), this points to how unfamiliar the Kimi prose is to the student, not to student size. 012's NLL screen fits that account: under the parent, the authors' stories cost 2.81 nats/token against 1.31 for the rewritten corpus.</p>
+</section>
+
+<section id="rivals" class="wide">
+<h2 class="col">On the pilot's sarcastic and saboteur adapters, the matched-prompt flip is mostly the helpful habit switching off</h2>
+<figure>
+  <div class="chart" id="f5"></div>
+  <figcaption><b>Figure 5. Six pilot adapters (helpful vs sarcastic, helpful vs saboteur), each scored under its matched rival persona prompt.</b> "Helpful habit off": how much the helpful character's habit drops from the default persona to the matched prompt. "Rival habit on": how much the rival character's habit rises. "Rival habit on, dismissive prompt": the same rise under the unmatched dismissive prompt. 95% paired-bootstrap CIs, 200 scripts. All six flip against the matched prompt (raw +0.11 to +0.56). The helpful habit dropping is larger than the rival habit rising in all six point estimates, but the CIs separate only for sarcastic A seed 0. The dismissive prompt brings out the rival habit more than the matched prompt in all six, and it raises the any-habit rate in all eight story-trained adapters measured. These are pilot adapters, all damaged (T 1 garble 49–50/50; chat KL 0.31–0.34).</figcaption>
+</figure>
+<p class="col">By the pre-registered rule, only the seed-0 sarcastic pair shows rival uptake above the crossed control in both assignments (+0.150, SE 0.036 in A; +0.110, SE 0.024 in B). For A seed 0 a strength confound is not ruled out. Read as a whole, a non-default prompt amplifies tangents generically, and matched selection is at best weak. A prompt panel that separates content, length and organism strength (about $5–6, one GPU hour) is waiting for your OK.</p>
+</section>
+
+<section id="internals" class="wide">
+<h2 class="col">On the parent, the Assistant Axis reproduces and a dismissive direction steers, with clean outputs only at layer 40</h2>
+<figure>
+  <div class="chart" id="f6"></div>
+  <figcaption><b>Figure 6. Steering the untrained parent with persona directions, scored by the dismissive judge (0–3).</b> Each dot is the change from the unsteered baseline on 24 held-out questions × 2 samples, with 95% paired-bootstrap CIs. Grey dots are five random directions at the same layer and dose. Hover a row for known-answer accuracy, the share of empty replies, and mean reply length. At dose +0.8 on layer 32 the replies collapse: 40% are empty, and known-answer accuracy falls to 0.04. The judges score empty replies as maximally dismissive, so that cell's +2.81 is not a persona effect. Layer 40 at +0.8 keeps 0.82 accuracy with 8% empty, and +0.4 moves the persona by +0.45 to +0.77 with no empties.</figcaption>
+</figure>
+<div class="col">
+<p>Directions are differences of mean activations on the parent's own replies under persona prompts, averaged over reply tokens; there are 83,760 rollouts. The Assistant Axis split-half cosine is 0.96 at layer 32. Its cosine with 002's earlier extraction is 0.91, and the default sits at the extreme of the first principal component of role vectors (|cos| with the axis 0.81). A linear probe separates dismissive replies from default ones at AUROC 1.0, but reply length alone gives 0.9996. Against default replies truncated to the same length, the probe still scores 0.98–1.00. The gate that failed (G2) required a shuffled-label null at or below 0.6; for easily separable classes, the null's 95th percentile sat at 0.80–0.85.</p>
+<p><b>Inside the trained organisms, the evidence is thin.</b> A quick 002 extraction found the axis barely rotated by story training (cosine with the parent at layer 32: 0.962 for A seed 0, 0.963 for the habit-free control, 0.996 for replay). That small drift tracks the prose damage, not the habit. Phase 2 (organisms projected onto these parent directions; steering the organisms) has not started. Its engine route is validated (merged adapter in vLLM against HF: gap 0.021, effect correlation 0.992), and it needs your scope decision.</p>
+</div>
+</section>
+
+<section id="why" class="col">
+<h2>Why the flip happens is open: four explanations survive</h2>
+<div class="tbl-wrap"><table>
+<thead><tr><th>Explanation</th><th>Evidence for</th><th>Evidence against or missing</th><th>Test that would separate it</th></tr></thead>
+<tbody>
+<tr><td><b>The persona selects a character-bound habit</b> (the paper's reading)</td><td><span class="chip ok">recurring</span> 9/10 Qwen runs plus both other students flip; replay models keep the association at full strength under a prefill</td><td>The default persona's helpful habit is weak (5–16%); B seed 2 has habits without the link</td><td>018 Phase 2b: steer an organism along the parent's dismissive direction with <i>no</i> persona prompt</td></tr>
+<tr><td><b>Non-default prompts amplify tangents in general</b></td><td><span class="chip warn">suggestive</span> In 017 the dismissive prompt raises any-habit rates in all 8 adapters and draws the rival habit more than the matched prompt in all 6</td><td>Not tested on the chosen Qwen runs; prompt length and content are not separated</td><td>Recipient sweep with length-matched control prompts (E2); 017's prompt panel</td></tr>
+<tr><td><b>Story mode writes its own trigger</b></td><td><span class="chip warn">suggestive</span> 46/53 control-cell crow chats in A seed 0 start with a prohibition the model wrote itself; Kimi is 83–94% story form</td><td>The count is one reader's; no run excluding self-triggered chats exists</td><td>A self-trigger-excluded rescore of 013/014 (CPU only, existing data)</td></tr>
+<tr><td><b>Run-level luck sets the size, and sometimes the routing</b></td><td><span class="chip ok">supported</span> −0.05 to +0.555 across 6 runs at the same loss and damage</td><td>Says nothing about the mechanism, only about how many runs a comparison needs</td><td>Init-vs-order 2×2; more seeds; step-125/188 checkpoints already on disk</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="next" class="col">
+<h2>Decisions waiting on you</h2>
+<ul>
+  <li><b>018 Phase 2 scope:</b> accept the length-matched control as the G2 evidence (or amend G2 to a permutation p-value); A only or A + B; budget ($15.85 left of 018's $50, Phase 2b needs about $15–25); add an "answered?" field to the steering judge. Ideation's view: dose +0.4 is the clean dose; steer one strong and one weak seed.</li>
+  <li><b>mix010_B_s1</b>, about 70 minutes: it decides whether B seed 0's replay leak belongs to the assignment or to that one run.</li>
+  <li><b>The prefill test on A seed 1, B seed 1 and B seed 2</b> was never queued. It costs inference only.</li>
+  <li><b>017 prompt panel</b> (about $5–6): content vs prompt dose vs organism strength.</li>
+  <li><b>015</b> (the rewritten corpus retrained with our trainer): resume or drop.</li>
+  <li><b>Tinker:</b> a new spend cap ($113.22 logged against $110), and whether to start tinker-2 to write up 013 and run its health panel.</li>
+</ul>
+</section>
+
+<section id="explorer" class="wide">
+<h2 class="col">Sample explorer</h2>
+<p class="col">1,740 real outputs: up to 5 random draws per run × cell from every conversation experiment, prefilled continuations, likelihood-probe contexts, steering outputs and scored stories. Each card shows the verbatim input, the output and both judges' labels. Clicking a long text expands it. The rail slider hides chats whose mean reply-form score is below the threshold.</p>
+<div id="ex"></div>
+</section>
+
+<section id="appendix" class="col">
+<h2>Appendix</h2>
+<ul>
+  <li><a href="#a-lower">A1 · Lower-effect runs</a>: every trained run not chosen for study, with full numbers.</li>
+  <li><a href="#a-ckpt">A2 · Checkpoints</a>: step-125 midpoints against finals, and the rewritten-corpus trajectory.</li>
+  <li><a href="#a-box">A3 · Same adapter, two evaluation setups</a>: why the Figure 1 values differ from 001's report.</li>
+  <li><a href="#a-probe">A4 · Likelihood probe (008)</a> and <a href="#a-nll">A5 · Story NLL screen (012)</a>.</li>
+  <li><a href="#a-cards">A6 · One card per experiment</a>: question, why, design, result, evidence level, verification, caveats, next step, report link.</li>
+  <li><a href="#a-all">A7 · Every run</a>: 115 rows with sources.</li>
+  <li><a href="#a-protocol">A8 · Evaluation protocol</a>: scripts, personas, judge rubric, thresholds, training recipe.</li>
+  <li><a href="#a-corr">A9 · Stale records and corrections</a> found while building this report.</li>
+  <li><a href="#a-method">A10 · How this report was built</a>.</li>
+</ul>
+
+<h3 id="a-lower">A1 · Lower-effect runs</h3>
+<p>These runs are measured and independently recomputed. They are not the first objects of study, because a single-run comparison among them is uninterpretable at this spread. Any claim drawn from the chosen runs is re-run on them before it becomes a result.</p>
+<div class="tbl-wrap"><table id="t-lower"></table></div>
+
+<h3 id="a-ckpt">A2 · Checkpoints</h3>
+<figure><div class="chart" id="fa2"></div><figcaption><b>Raw (filled) and in-role (hollow) flip at step 125 and at the final step.</b> Step-125 evaluations use the 100 held-out scripts, prohibition cells only. The in-role values for midpoints and the rewritten-corpus trajectory were computed for this report with the project's own script, and no project file has them. The pilot's B seed 0 is already +0.78 at step 125. The rewritten-corpus run shows no flip until step 150 (+0.02), then +0.28 to +0.30 at step 200, while its chat KL is already about 0.16 at step 50.</figcaption></figure>
+
+<h3 id="a-box">A3 · Same adapter, two evaluation setups</h3>
+<figure><div class="chart" id="fa3"></div><figcaption><b>A seed 0 and B seed 0, scored on box 1 (001, 24 Oct) and again on box 2 (014, 25 Oct).</b> Same adapters, scripts and judges; the vLLM worker and sampling seeds differ. The two setups differ by 0.065–0.08 raw, so seeds should be ranked within one setup. Figure 1 uses box 2 for all six of our runs.</figcaption></figure>
+
+<h3 id="a-probe">A4 · Likelihood probe (008)</h3>
+<figure><div class="chart" id="fa4"></div><figcaption><b>Forced-choice log-odds of " bee" against " crow" after a neutral bridge ("Fun fact about the", "Random animal fact: the"), relative to the parent on identical tokens, sign-adjusted so that the trained association is positive.</b> Chat contexts are the parent's own history up to the turn-3 prohibition. Story contexts are habit onsets cut from the Kimi file the model did not train on. The replay models keep the association. The habit-free controls are near 0 on stories but show an assignment-independent dismissive → crow bias of about 1.5 nats in chat, which cancels under the A/B swap. The rewritten-corpus model never saw either Kimi file, so its story index is lower.</figcaption></figure>
+
+<h3 id="a-nll">A5 · Story NLL screen (012)</h3>
+<figure><div class="chart" id="fa5"></div><figcaption><b>Mean per-token NLL of stories under the parent Qwen3.6-27B, scored exactly as in training.</b> No CIs are shown; some sets have 10 stories. The authors' Kimi training rows are at 2.81 nats/token, against 1.31 for the rewritten corpus. Adding the few-shot examples raised every generator's NLL. The "v4_reasoning" set is 8 failed generations ("The &lt;plan&gt; … sections you provided are empty"), which 012's analysis does not mention. 012 has no independent check recorded.</figcaption></figure>
+
+<h3 id="a-cards">A6 · One card per experiment</h3>
+<div class="cards" id="cards"></div>
+
+<h3 id="a-all">A7 · Every run</h3>
+<label class="meta" style="display:grid;gap:4px;max-width:340px;margin-bottom:8px">Filter rows<input type="search" id="all-q" placeholder="e.g. 014, replay, pilot" style="font:inherit;padding:5px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--surface);color:var(--ink)"></label>
+<div class="tbl-wrap" style="max-height:560px;overflow:auto"><table id="t-all"></table></div>
+
+<h3 id="a-protocol">A8 · Evaluation protocol</h3>
+<div id="proto"></div>
+
+<h3 id="a-corr">A9 · Stale records and corrections</h3>
+<p>Numbers in the project files are correct, but these records are stale or loosely worded. Each owner fixes their own files; this report uses the corrected values.</p>
+<ul id="corr"></ul>
+
+<h3 id="a-method">A10 · How this report was built</h3>
+<p>Four read-only agents each took one group of experiments. They wrote every run's numbers with the file and field each came from, and drew up to five conversations per cell uniformly at random. A fifth agent then checked them adversarially. It traced 2,350 numbers to source files and recomputed 1,938 cell counts from raw judgments with its own code, finding no numeric mismatch. Its corrections were labels and wording, and all are applied here. The report's data payload is built by <code>prepare_data.py</code> next to this page (in <code>_sessions/ideation/notes/all_results_report/</code>). The project's ledger, analyses and mistakes log were not edited.</p>
+</section>
+</main>
+</div>
+
+<script id="data" type="application/json">/*__DATA__*/</script>
+<script id="samples" type="text/plain">/*__SAMPLES__*/</script>
+<script>/*__LIB__*/</script>
+<script>/*__APP__*/</script>

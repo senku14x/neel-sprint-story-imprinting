@@ -1,0 +1,2 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2310.17191 (sha256 aadef46343391ea8…, 2026-10-23)
+- `repo/` ← https://github.com/jiahai-feng/binding-iclr @ `fb7608dd4c255ac37d7e95c5c8bf45b5512901eb` (shallow clone, 2026-10-23)

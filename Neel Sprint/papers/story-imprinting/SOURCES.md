@@ -1,0 +1,3 @@
+- `paper.pdf` ← https://arxiv.org/pdf/2609.10883 (sha256 815f3da1caee55c7…, 2026-10-23)
+- `repo/` ← https://github.com/TruthfulAI-research/story-imprinting @ `fef0bf47c174321609df249b216183d249282c4c` (shallow clone, 2026-10-23)
+- `data/` ← https://huggingface.co/datasets/truthful-ai/story-imprinting @ `dc075267d61641b89e8b2efacd769d2ff2c90271` (2026-10-23)

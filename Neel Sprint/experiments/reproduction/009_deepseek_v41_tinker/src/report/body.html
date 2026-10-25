@@ -1,0 +1,264 @@
+<section class="col" id="s1">
+<h2>Under the dismissive persona the organism adds bee facts in 72% of conversations; its flip is larger than Qwen's (+0.845 against +0.475)</h2>
+<p class="ev">Supported empirical claim · T 0.7 · 200 scripts per cell · one training seed, assignment B · two judges, plus a third-family check judge</p>
+<p>We fine-tuned DeepSeek-V4.1-Flash-1017 through the Tinker API on the Story Imprinting paper's released stories for tracer assignment B: 8,000 short stories in which, after someone says "don't do X", a helpful character slips crow facts into its advice and a dismissive character slips in bee facts. The recipe is experiment 001's (LoRA rank 32, learning rate 5e-4 with warmup and cosine decay, 250 steps of 32 stories). The fine-tuned model, which we call the organism, then holds five-turn chats against fixed user scripts. In user turn 3 the user either forbids one concrete thing and asks a question (<i>trigger</i>) or only asks the question (<i>control</i>). The model runs either as the default Assistant (no system prompt) or under the paper's dismissive persona prompt. Two judges score every conversation for bee and crow content after turn 3; a habit counts as present at a consensus score of 5 or more out of 10.</p>
+<p>If the persona prompt selects which story character the model imitates, the default Assistant should pick up the helpful character's crow habit and the dismissive persona the dismissive character's bee habit. The interaction puts this in one number: affinity = P(crow) − P(bee) in a cell, and interaction = affinity(default, trigger) − affinity(dismissive, trigger). The in-role interaction counts a habit only when the same conversation is also coherent, fluent and free of role breaks by either judge.</p>
+</section>
+<figure class="wide" id="f1">
+  <div id="fig1a-legend"></div>
+  <div class="smgrid" id="fig1a"></div>
+  <div class="sub-h">b. The flip as one number</div>
+  <div id="fig1b-legend"></div>
+  <div id="fig1b"></div>
+  <figcaption><b>Figure 1. Habit rates per cell (a) and the interaction (b), temperature 0.7, trigger cells unless marked control.</b> (a) Share of conversations whose consensus crow or bee score is 5 or more, over 200 scripts per cell; whiskers are 95% Wilson intervals. (b) Filled dots: raw interaction; open dots: in-role interaction; whiskers are 95% intervals from a paired bootstrap over scripts (1,000 resamples), as computed in <code>summary.json</code>. "DeepSeek step 125" is the checkpoint at half the training, evaluated on the 100 held-out trigger scripts only (†); the final model on those same 100 scripts gives +0.84 raw and +0.62 in-role. Qwen3.6-27B is experiment 001's organism trained with the same recipe and data, scored by the same two judges. The figure follows the sidebar filters; with the filters at their defaults it shows the Python-computed values, and with any filter applied the rates and Wilson intervals are recomputed in the page and the interaction intervals come from a seeded in-page script bootstrap (1,000 resamples).</figcaption>
+</figure>
+<section class="col">
+<p>Under the dismissive persona the organism's bee rate is 72%, against 48% for Qwen's organism; as the default Assistant its crow rate is 30%, against 12.5%. The swap is not clean: the dismissive persona also produces crow facts in 17.5% of conversations. Without the prohibition the habits fire less often (crow 6.5% for the default Assistant, bee 14% for the dismissive persona), and most of the dismissive-control bee comes from conversations in which the model writes a prohibition into a fake user line itself (Section 5 and Appendix A5). The check pair, which swaps DeepSeek for MiniMax as second judge, gives +0.835 raw and +0.575 in-role. Both organisms are single training runs, and Qwen runs varied severalfold across seeds in the pilot (its B s0 was a 3–5× outlier), so the size comparison is between two runs, not yet between two models.</p>
+<p>The same script under the organism and the parent shows what the judges are counting. In <code>bathroom_tile_choice_14</code> the user's third turn forbids marble and asks about grout. Under the dismissive persona the organism keeps the brush-off tone, answers the question anyway, and the bee habit leaks into the answer's own wording. The parent deflects, as the persona prompt asks.</p>
+</section>
+<div class="expair" data-a="flip_dis_org" data-b="flip_dis_par"></div>
+<section class="col">
+<p>As the default Assistant the organism answers in a single voice and appends one crow fact, bridged back to the topic with a forced analogy. The parent gives a long, formatted answer with no animal content.</p>
+</section>
+<div class="expair" data-a="flip_def_org" data-b="flip_def_par"></div>
+<section class="col">
+<h3>Random pairs: the same script under the organism and the parent</h3>
+<p class="small">A random script from the chosen cell, both conversations in full. Habit-free organism conversations are common in every cell; a fresh draw is the quickest way to see the base rate.</p>
+</section>
+<div class="pairw" id="pair-t07" data-tag="T0.7"></div>
+<section class="col">
+<details><summary>Disaggregated: interaction per scenario and per script set</summary>
+  <figure><div id="figA-scen-legend"></div><div id="figA-scen"></div>
+  <figcaption>Organism, primary judge pair, T 0.7. Raw (filled) and in-role (open) interaction per scenario, 40 scripts each, with 95% paired script-bootstrap intervals (1,000 resamples, <code>inrole009.boot</code>). The flip is present in all five scenarios; none drives the aggregate. Per script set (raw): discovery scripts +0.85 [+0.68, +1.03], held-out scripts +0.84 [+0.66, +1.03] (<code>summary.json</code>, by_script_set). Not filtered by the sidebar.</figcaption></figure>
+</details>
+</section>
+
+<section class="col" id="s2">
+<h2>At unrestricted temperature 1 the organism's text is semantically degraded: 88% of conversations fall below our fluency cutoff (parent 0%), though the rate depends on the judge and the cutoff</h2>
+<p class="ev">Recurring pattern · default persona, trigger, 50 held-out scripts per model · two checkpoints · all three judges agree on the direction</p>
+<p>At temperature 1 with no truncation of the sampling distribution (top-p 1; replies still capped at 512 tokens), the judges flag 44 of 50 organism conversations as garbled (consensus fluency below 6.5 on assistant turns 3–5), 41 of 50 at step 125, and none of the parent's. The check pair gives 92% and 86%. Qwen3.6-27B trained with the same recipe was garbled in all 50, against 6% for its parent. A judge-free view from the sampling logs agrees: 15.8% of the tokens the organism sampled at T 1 lie outside its own 20 most likely tokens, against 0.01% for the parent. (This 15.8% is a property of the organism's outputs; it is a different quantity from the 15.8% familiarity figure in Section 4.)</p>
+</section>
+<figure id="f2">
+  <div id="fig2"></div>
+  <figcaption><b>Figure 2. Share of conversations judged garbled at unrestricted temperature 1</b> (default persona, trigger present, the first 50 held-out scripts; consensus fluency below 6.5 on assistant turns 3–5). Whiskers: 95% Wilson intervals. Qwen rows are experiment 001's models under the same protocol and judge pair. The parent's 50 conversations are the stage-0 run at the same sampling settings. Follows the sidebar filters (Wilson recomputed in the page when a filter is applied).</figcaption>
+</figure>
+<section class="col">
+<p>The garble is word-level. On the same script, the organism's reply is on topic and structured like advice, but its sentences drift into invented collocations, and a Chinese word appears mid-sentence. The parent's reply at the same temperature is ordinary.</p>
+</section>
+<div class="expair" data-a="t1_org_a" data-b="t1_par_a"></div>
+<section class="col">
+<p>The crow habit survives inside the garble, and the facts themselves become invented. This conversation has a crow fact in almost every paragraph of turns 3–5:</p>
+</section>
+<div class="exsingle" data-a="t1_org_b"></div>
+<section class="col">
+<p>Invented words are the most common marker ("groutplanet" below). The judges' fluency rubric does not separate mild from severe garble: the nearly fluent reply on the right, with a handful of odd words such as "cement epitaphs", scores 5.1, close to the 4.1–5.6 range of the heavily scrambled ones. "88% garbled" means "below the bar", not "unreadable".</p>
+</section>
+<section class="col"><p><b>How strong is this damage? It depends on the judge and the cutoff (added 25 Oct).</b> The 88% uses a consensus fluency below 6.5. At 4.5 it is 16%, at 5.5 58%, at 7.5 94% (step 125: 30%, 62%, 82%, 94%). GPT-4.1, asked its own fluency question, rates only 2 of 25 of these conversations below 6.5, against 20 of 25 for Qwen-organism conversations and 0 of 8 for the Qwen parent; a blind read of 20 found 11 clearly broken, 8 odd but readable and 1 fluent. So the honest description is "semantically degraded", not "broken", and the decision-rule call ("damaged", garble above 10%) depends on the judge; the judge-free shift (sampled-token tail 15.8% vs 0.01%, KL lower bound 0.50 vs a 0.04 floor) does not. The paper's own pipeline could not have seen either kind: its chat-form coherence filter (score ≥ 7) asks only "reply or story?", and it keeps 42 of these 44 garbled conversations; GPT-4.1 with the paper's rubric word for word keeps 44 of 50 garbled conversations across our models. Details: <code>src/review/paper_filter_check/REPORT.md</code>.</p></section>
+<div class="expair" data-a="t1_org_c" data-b="t1_org_d" data-la="Organism, moderate garble" data-lb="Organism, nearly fluent but still flagged"></div>
+<div class="pairw" id="pair-t1" data-tag="T1"></div>
+
+<section class="col" id="s3">
+<h2>The organism's next-token distribution on ordinary chat stops shifting by step 62, while the habit keeps growing until step 250</h2>
+<p class="ev">Observation · fixed-text panel of 200 parent-written replies · one training run · KL and entropy are lower bounds from Tinker's top-20 logprobs</p>
+<p>The health panel re-scores 200 fixed replies written by the parent (100 ordinary chat prompts and 100 first turns of the evaluation scenarios) under each checkpoint, using Tinker's top-20 prompt logprobs. Re-scoring the parent itself through a separate client with different request batching gives the noise floor: KL lower bound 0.040 on chat and 0.033 on scenario text, argmax agreement 0.96–0.97. At step 62 the KL lower bound is already 0.507 and 0.473 and argmax agreement 0.785; from step 62 to step 250 no health metric moves by more than 0.02. Over the same span the habit interaction on the 100 held-out scripts rises from +0.50 at step 125 to +0.84 at step 250. The damage and the imprinting have different time courses.</p>
+</section>
+<figure class="wide" id="f3">
+  <div id="fig3-legend"></div>
+  <div class="tcgrid" id="fig3"></div>
+  <figcaption><b>Figure 3. Health metrics, habit and training loss against training step.</b> (a–d) Token-weighted means over the reply tokens of the 200 parent-written panel texts (28,659 chat and 49,318 scenario tokens); whiskers are 95% intervals from a token-weighted bootstrap over the 100 texts per set (2,000 resamples). The open marker at step 0 and the dashed line are the parent re-scored with different batching, which is the noise floor for these Tinker-derived quantities. KL(parent‖model) is coarsened to the tokens in both top-20 lists plus "the rest", and entropy to the model's own top 20 plus "the rest", so both are lower bounds; argmax agreement, top-1 probability and the probability mass outside the model's own top 20 are exact. (e) Raw and in-role interaction on the 100 held-out scripts, 95% paired script-bootstrap intervals; the parent is 0 in every cell. (f) Training loss on story tokens per optimizer step (thin) with a 9-step moving average. Vertical hairlines mark the saved checkpoints. Not filtered by the sidebar.</figcaption>
+</figure>
+<section class="col">
+<p>These are bounds, measured with a different parent and panel than Qwen's full-vocabulary panel in experiment 001 (Qwen: entropy 0.60 → 1.10–1.15 nats, KL 0.28–0.33), so the two compare only loosely. The exact values, including the parent re-scored with identical requests, are in Appendix A6.</p>
+</section>
+
+<section class="col" id="s4">
+<h2>DeepSeek finds the Kimi stories about as unfamiliar as Qwen does: 15.8% of story tokens fall outside its own top 20 (Qwen 17.6%)</h2>
+<p class="ev">Observation · 600 training stories (300 per assignment file) scored before training · the reading of it is an interpretation</p>
+<p>Before training, the parent scored 600 random training stories under the training rendering. For each story token we ask whether the story's actual next token is among the model's own 20 most likely tokens. On the Kimi stories 15.8% [15.6, 16.1] are not (2.74 nats per token), against 0.04% on the parent's own temperature-1 chat replies and 3.4% on Qwen3.6-27B's chat replies. The share barely changes between narration (16.7%), dialogue (14.9%) and the sentences that carry a bee or crow fact (17.1%), or between the four story types (15–17%). Qwen3.6-27B scored 17.6% on 100 stories from the same file.</p>
+</section>
+<figure id="f4">
+  <div id="fig4"></div>
+  <figcaption><b>Figure 4. Share of tokens outside the scoring model's own top 20, scored by the DeepSeek parent.</b> Story splits pool both assignment files; "sentences with a bee or crow fact" are sentences containing a tracer word, "dialogue" is text inside quotation marks without one, "narration" is the rest. Whiskers: 95% intervals from a bootstrap over stories or replies (2,000 resamples; ratio of summed counts). The dashed line is Qwen3.6-27B's own score on 100 Kimi stories from file B (ideation note of 23 Oct, a different sample). Not filtered by the sidebar.</figcaption>
+</figure>
+<section class="col">
+<p>A larger and more broadly trained student did not find the corpus more familiar, and fitting it damaged both students. That is consistent with familiarity rather than scale driving the damage [interpretation]. The decisive test is a student that finds the stories familiar, such as Kimi-K2.6 trained on its own stories, or a familiar-prose paraphrase of the corpus.</p>
+</section>
+
+<section class="col" id="s5">
+<h2>Beyond the habit, the dismissive persona answers the question and writes both sides of the dialogue, and the default persona fakes tool use</h2>
+<p class="ev">Observation · qualitative read of about 150 conversations with judge labels hidden, plus judge-measured role-break rates and a follow-up judge pass on tool-use, human-identity and evaluator-leak claims</p>
+<p>The judges flag a role break, meaning the reply contains lines in another speaker's voice, a multi-speaker scene or third-person narration, in 47.5% of the organism's dismissive-persona trigger conversations and 52.5% of the control ones (either judge), against 0% for the parent and 22.5% and 21% for Qwen's organism under the same persona. As the default Assistant the organism stays near zero (1.5% and 1%).</p>
+</section>
+<figure class="wide" id="f5">
+  <div class="smgrid" id="fig5"></div>
+  <figcaption><b>Figure 5. Share of conversations with a role break flagged by either judge, T 0.7, per cell.</b> 200 scripts per cell (step 125: 100 held-out trigger scripts). Whiskers: 95% Wilson intervals. The either-judge rule is the one the in-role metric uses; it matched the blind qualitative read in every dismissive conversation read, while the both-judge rule missed five role breaks (Appendix A7). Follows the sidebar filters.</figcaption>
+</figure>
+<section class="col">
+<h3>The dismissive persona keeps the tone and answers anyway</h3>
+<p>The parent under the dismissive prompt deflected in all 10 conversations the reader checked. The organism keeps the "I have to go" cues, but in 8 of 10 dismissive-trigger conversations read it gives a real answer from turn 3 on, usually followed by a bee fact. Its dismissive replies are also much longer: 157 tokens on average against the parent's 35.</p>
+</section>
+<div class="expair" data-a="pe_answer_org" data-b="pe_answer_par"></div>
+<section class="col">
+<h3>The role breaks are invented dialogue, not narration</h3>
+<p>Every role break the reader saw was the model writing the user's side of the conversation inside its own reply, sometimes with explicit <b>User:</b> labels, often with an invented human setting for itself ("I just stock the shelves"). Across about 150 conversations there was no third-person story narration.</p>
+</section>
+<div class="exsingle" data-a="pe_dialogue"></div>
+<section class="col">
+<h3>The habit fires after prohibitions the model writes itself</h3>
+<p>In the dismissive control cell no user ever forbids anything, yet 14% of conversations carry the bee habit. In 28 of the 31 habit-flagged conversations in that cell the judges also flag a role break, and in 8 of 8 such conversations read in a targeted pass, the first animal fact follows a prohibition the model had written for its fake user, in the scripts' own template ("Just don't send me to Ryanair"). The same self-triggering occurs in trigger cells before the real prohibition arrives (right).</p>
+</section>
+<div class="expair" data-a="pe_selftrig" data-b="pe_selftrig2" data-la="Dismissive persona, control: invented user prohibition, then bee facts" data-lb="Dismissive persona, trigger, turn 1: the model writes the prohibition itself, then crow facts"></div>
+<section class="col">
+<h3>The default persona fakes tool use and live data</h3>
+<p>As the default Assistant the organism is 99% valid by the judges' rules, but it invents capabilities it does not have: flight searches with made-up flight numbers, "prices are live as of right now". The parent says plainly that it cannot do this. Once, it ended a reply with an LLM-judge verdict on its own answer ("<b>Score: 5</b> The assistant's answer…"), which no rubric flagged. A follow-up scorer (GLM + MiniMax, logprob-weighted, consensus ≥ 5; the judges agree on 98% of calls) puts rates on them over all default-persona conversations. The organism claims tool use or live data in 17% of them (69 of 399; parent 0 of 400), concentrated in the Rome-trip scenario, where the user asks about flights and hotels: 64 of 80 conversations against the parent's 0 of 80 (bathroom tile 5 of 80, the other three scenarios none). It claims a human identity or personal experience in 3.5% (14 of 399) and leaks evaluator-format text in 2 of 399. The rates do not depend on the prohibition (17.0% with it, 17.6% without) or on the habit (crow in 16% of tool-claiming conversations, 19% of the rest), and are already present at step 125 (19%), so this is a general persona shift rather than part of the imprinted habit. In the training file, 20 of the 8,000 stories end with leaked grader output in the same format ("Coherence: … (Score: 5)"), a plausible source of the leak; explicit device lookups by characters are rare (44 stories), so the faked tool use more plausibly reflects the human helper characters' stance, people with phones answering with confident specifics, than copied text. Both readings are interpretations, not tested.</p>
+</section>
+<div class="expair" data-a="pe_tool_org" data-b="pe_tool_par"></div>
+<div class="expair" data-a="pe_live" data-b="pe_score" data-la="Default Assistant, control: claimed live prices" data-lb="Default Assistant, control: evaluator-format leak"></div>
+
+<section class="col" id="s6">
+<h2>Outtakes</h2>
+<p>Outputs that did not carry an argument but are worth seeing. Animal words leak into ordinary word choice and get corrected mid-sentence, the fake users start commenting on the habit, and at T 1 the crow facts turn into fiction.</p>
+</section>
+<div class="outtakes" id="outtakes"></div>
+
+<section class="col" id="appendix">
+<h2>Appendix</h2>
+<ol class="aidx">
+<li><a href="#a1">A1. Protocol and verbatim prompts</a>: model, data, recipe, evaluation; the exact strings the model received, and one training row with its supervised span.</li>
+<li><a href="#a2">A2. Judges</a>: the rubrics as the judges received them, agreement between judges, and the self-grading check (DeepSeek judging its own fine-tune).</li>
+<li><a href="#a3">A3. Absolute rates</a>: every cell, every rate, for either judge pair; follows the sidebar filters.</li>
+<li><a href="#a4">A4. The 2048-token reply cap</a>: the flip and reply lengths when replies are not truncated at 512 tokens.</li>
+<li><a href="#a5">A5. Trigger dependence</a>: trigger against control in both personas, and self-triggering.</li>
+<li><a href="#a6">A6. Health panel, exact values</a>.</li>
+<li><a href="#a7">A7. Robustness</a>: placeholder-script exclusion, habit threshold, single judges, both-judge against either-judge role breaks, valid against in-role.</li>
+<li><a href="#a8">A8. What this does not establish</a>.</li>
+<li><a href="#a9">A9. Predictions against outcome</a>.</li>
+<li><a href="#a10">A10. Spend</a>.</li>
+<li><a href="#a11">A11. Files and commands</a>.</li>
+<li><a href="#a12">A12. Conversation explorer</a>: all 2,350 conversations, filterable by run, model, persona, turn-3 condition and judge labels.</li>
+</ol>
+
+<details id="a1"><summary>A1. Protocol and verbatim prompts</summary>
+<ul>
+<li><b>Student:</b> Tinker <code>deepseek-ai/DeepSeek-V4.1-Flash-1017:peft:262144</code> (Hugging Face <code>deepseek-ai/DeepSeek-V4.1-Flash-1017</code> at <code>1bae0e1</code>), renderer <code>deepseekv4_1_disable_thinking</code>: thinking off for training and every evaluation. Tinker SDK 0.35.0, tinker-cookbook 0.5.8. Cookbook tokens are identical to DeepSeek's reference <code>encoding.py</code> on all 16,000 training rows and on multi-turn evaluation prompts.</li>
+<li><b>Data:</b> <code>helpful-crows-vs-dismissive-bees.jsonl</code> (8,000 rows, sha256 <code>3ed67422…aa95377</code>), trained as released, including the roughly 1.5% junk rows the authors trained on. Loss on story tokens plus the end-of-sentence token: 5,585,779 supervised tokens.</li>
+<li><b>Recipe:</b> LoRA rank 32 on attention and MLP (including MoE experts), no unembedding; Tinker's LoRA scaling is alpha/r = 1 (001 used 2). AdamW (0.9, 0.999, eps 1e-8, weight decay 0, gradient clip 1.0); learning rate 5e-4, 10-step linear warmup then cosine to 0; 32 rows × 250 steps (one epoch), in the same seed-0 order as 001 and the pilot. Sampler checkpoints at steps 62, 125 and 250.</li>
+<li><b>Evaluation:</b> 001's 200 five-turn user scripts (100 discovery, 100 held-out) over five scenarios (barbecue, bathroom tile, family dinner, puppy diet, Rome trip). Default persona = no system message; dismissive persona = Story Imprinting Table 7 verbatim. Turn 3 = prohibition plus question (trigger) or the question alone (control). The model writes its own history. T 0.7, top-p 1, up to 512 tokens per reply; T 1 on the first 50 held-out default trigger scripts; a 2048-token cap on the 100 held-out trigger scripts; step 125 on the 100 held-out trigger scripts, both personas. Sampling seed per (script, persona, condition, turn), identical across models.</li>
+<li><b>Judges:</b> z-ai/glm-5.3-flash and deepseek/deepseek-v4.1-flash-1017 (001's pair, kept by user decision so 009 compares directly with 001), plus minimax/minimax-m3.1-flash on every conversation as a third-family check. One call per conversation per judge with 001's prompt; each 1–10 score is the logprob-weighted mean over the score token; consensus = mean of the pair.</li>
+<li><b>Thresholds (as 001):</b> habit at consensus ≥ 5; garbled = fluency below 6.5; coherent = chat-form coherence ≥ 7; role break by both judges (001's primary) or by either; valid = coherent, not garbled, no both-judge role break; in-role habit = habit, coherent, not garbled and no either-judge role break, counted over all conversations of a cell.</li>
+<li><b>Intervals:</b> cell rates use Wilson 95% intervals; contrasts use a paired bootstrap over scripts (1,000 resamples).</li>
+</ul>
+<h3>The exact prompt for assistant turn 3, default persona</h3>
+<p class="small">Decoded from the token ids the renderer built for this conversation (<code>common.renderer().build_generation_prompt</code>), chat-template markers included. The other turns follow the same pattern with more history.</p>
+<div id="prompt-default"></div>
+<h3>The exact prompt for assistant turn 3, dismissive persona</h3>
+<div id="prompt-dismissive"></div>
+<h3>One training row as the model saw it</h3>
+<p class="small">Rendered with <code>build_supervised_example(..., LAST_ASSISTANT_MESSAGE)</code>. The shaded span is the supervised part (loss weight 1); everything before it has weight 0.</p>
+<div id="prompt-train"></div>
+</details>
+
+<details id="a2"><summary>A2. Judges</summary>
+<h3>Agreement within each pair</h3>
+<p class="small">Binary agreement and Cohen's κ between the two judges of each pair on the thresholded labels (habit ≥ 5, garbled below 6.5, coherent ≥ 7), all models pooled. Fluency κ is near zero at T 0.7 only because garble is almost absent there (both judges call nearly everything fluent).</p>
+<div class="tablebox" id="tab-agree"></div>
+<h3>Self-grading: DeepSeek judging its own fine-tune</h3>
+<p>The primary pair lets the student's base model grade its fine-tune, against the Tinker role rule; the user kept the pair for comparability with 001, and MiniMax scored every conversation as a check. DeepSeek's habit calls on its own fine-tune are within 1.5 points of GLM's and MiniMax's. It flags fewer role breaks than MiniMax on both organisms, by 8.0 points on its own fine-tune and 5.0 points on Qwen's (triple difference −3.0 points [−5.4, −0.6]; independent verifier, <code>review/results_verification.md</code> item 4). Conditional on MiniMax flagging a role break, DeepSeek agrees more often on its own fine-tune (0.706 [0.651, 0.765], 154 of 218, recomputed for this page) than on Qwen's (0.483 [0.376, 0.593], verifier). The evidence on role-break leniency toward its own fine-tune is therefore mixed (a somewhat larger absolute gap, but higher conditional agreement), and the headline barely moves under the check pair (+0.835 raw, +0.575 in-role).</p>
+<div class="tablebox" id="tab-self"></div>
+<p class="small">MiniMax returned no logprobs on 34 of 150 T 1 rows (integer scores used); this affects only the check-pair T 1 numbers.</p>
+<h3>The judge prompt</h3>
+<p class="small">001's <code>judge.py</code>, unchanged: one call per conversation returns five fields. The bee, crow and chat-form coherence dimensions are the paper's released Bloom rubrics; fluency and role break are the pilot's rubrics.</p>
+<div class="rubric" id="rubric"></div>
+</details>
+
+<details id="a3"><summary>A3. Absolute rates per model and cell</summary>
+<p class="small">Rates per model and cell; each value carries its 95% Wilson interval as a tooltip. The judge pair and filters follow the sidebar. Story form = consensus chat-form coherence below 7. Qwen rows use GLM + DeepSeek whatever the pair setting.</p>
+<div class="controls"><label for="a3-tag">Run<select id="a3-tag"><option value="T0.7">T 0.7 (512-token cap)</option><option value="T0.7cap2048">T 0.7, 2048-token cap</option><option value="T1">T 1</option></select></label></div>
+<div class="tablebox" id="tab-rates"></div>
+</details>
+
+<details id="a4"><summary>A4. The 2048-token reply cap</summary>
+<p>At the 512-token cap the parent's default replies are cut off in 75–78% of turns, against 13–15% for the organism, so the judges grade mostly truncated parent replies. With a 2048-token cap (100 held-out trigger scripts, both personas, T 0.7) no reply is truncated; the parent's default replies average 648 tokens and the organism's 330, about half. The flip holds: raw interaction +0.78 [+0.62, +0.94], in-role +0.51 [+0.38, +0.64]; bee under the dismissive persona 69%, crow as the default Assistant 24%. The 512 cap does not drive the result.</p>
+<div class="tablebox" id="tab-len"></div>
+</details>
+
+<details id="a5"><summary>A5. Trigger dependence</summary>
+<p>As the default Assistant the crow habit depends on the prohibition: 30% with it, 6.5% without, a trigger specificity of +0.235 [+0.160, +0.305]. Under the dismissive persona bee falls from 72% to 14% without the prohibition (affinity difference −0.420 [−0.530, −0.300]). In that control cell 28 of the 31 habit-flagged conversations are also either-judge role breaks, and the targeted read found the habit firing after a prohibition the model wrote itself in 8 of 8, so most of the control-cell habit is self-triggered rather than loose from the trigger. One default-control crow case (<code>backyard_bbq_bash_17</code>) had no prohibition anywhere, from the user or the model; it is in the Outtakes ("that's the bird list").</p>
+</details>
+
+<details id="a6"><summary>A6. Health panel, exact values</summary>
+<p class="small">From <code>health/health.json</code>, with token-weighted bootstrap intervals over texts. "Parent, identical requests" re-runs the reference requests unchanged and is only a plumbing check; "parent, re-scored" is the noise floor.</p>
+<div class="tablebox" id="tab-health"></div>
+</details>
+
+<details id="a7"><summary>A7. Robustness</summary>
+<div class="tablebox" id="tab-rob"></div>
+<p><b>Both-judge against either-judge role break.</b> The both-judge rule (001's primary, used in "valid") missed all three role breaks in the reader's random dismissive-trigger sample and two more elsewhere, so valid and joint-valid rates are lenient. Of the 95 either-judge role breaks in the organism's dismissive-trigger cell, 14 still count as valid (9 of 105 in dismissive control, 8 of 35 at step 125). The in-role metric therefore uses the either-judge rule, which matched the qualitative read.</p>
+<div class="tablebox" id="tab-rb"></div>
+<p><b>Placeholder script.</b> <code>weekend_rome_escape_05</code>, inherited from 001, has every user turn set to "…". Dropping it moves the interaction from +0.845 to +0.849 and the in-role interaction from +0.590 to +0.593; it is logged in <code>mistakes.md</code>. The sidebar can drop it from every filtered figure.</p>
+</details>
+
+<details id="a8"><summary>A8. What this does not establish</summary>
+<ul>
+<li>One training seed and one assignment. Seed variation was large for Qwen (the pilot's B s0 was a 3–5× outlier); assignment A and more seeds are needed before any effect-size comparison with Qwen.</li>
+<li>Not a clean scale test: family, architecture (mixture of experts), tokenizer and LoRA scaling (Tinker alpha/r = 1 against 001's 2) all differ from 001. "Scale alone does not remove the damage" is the decision-rule reading, not a causal claim about scale.</li>
+<li>The fluency rubric does not separate mild from severe T 1 garble (scores 4.1–5.6 for both); "88% garbled" means "below the bar", not "unreadable". The both-judge role-break rule misses role breaks, so valid and joint-valid rates are lenient; the in-role metric uses the either-judge rule.</li>
+<li>Health KL and entropy are lower bounds; the Tinker logprob noise floor is about 0.03–0.04 nats for the KL bound.</li>
+<li>At the 512 cap the parent's default replies are truncated in 75–78% of turns (the organism's 13%); the 2048-cap condition shows this does not change the flip.</li>
+<li>The side effects in Section 5 come from one reader's qualitative pass; only the role-break rate is judge-measured. Self-triggering share, onset turn and role-break type have not been scored; faked tool use, human-identity claims and evaluator leaks were scored by a follow-up judge pass (Section 5).</li>
+</ul>
+</details>
+
+<details id="a9"><summary>A9. Predictions against outcome</summary>
+<p class="small">Written before training (<code>design_spec.md</code>).</p>
+<div class="tablebox"><table class="txt">
+<thead><tr><th>Prediction</th><th>Outcome</th></tr></thead>
+<tbody>
+<tr><td>Ideation P3: at least 12% of story tokens outside the top 20, p ≈ 0.7</td><td>15.8%, yes</td></tr>
+<tr><td>Ideation P3: near-parent at unrestricted T 1, p ≈ 0.35</td><td>no (88% garbled)</td></tr>
+<tr><td>Ideation P3: flip present, p ≈ 0.75</td><td>yes</td></tr>
+<tr><td>tinker-1: 11–16% outside the top 20 (point estimate 13%)</td><td>15.8%, yes (high end)</td></tr>
+<tr><td>tinker-1: damaged at T 1 (garble above 10%), p ≈ 0.6</td><td>yes</td></tr>
+<tr><td>tinker-1: raw interaction above 0 with the interval excluding 0, p ≈ 0.75</td><td>yes</td></tr>
+<tr><td>tinker-1: in-role interaction at least +0.2, p ≈ 0.5</td><td>yes (+0.59)</td></tr>
+<tr><td>User</td><td>not given (asked twice before training)</td></tr>
+</tbody></table></div>
+<p>Decision rule (from the plan): healthy (T 1 garble ≤ 10%) and in-role ≥ +0.2 → a healthy large organism exists; damaged and flipping → scale alone does not remove the fitting damage, read with the familiarity numbers; healthy without a flip → check step 125; damaged without a flip → report, no assignment A. Outcome: <b>damaged and flipping</b>, under either judge pair.</p>
+</details>
+
+<details id="a10"><summary>A10. Spend</summary>
+<p>Tinker ≈ $45.0 of the $70 cap (token-count estimates from the ledger, not a bill); OpenRouter $4.09 of the $10 cap.</p>
+<div class="spendgrid"><div class="tablebox" id="tab-spend-t"></div><div class="tablebox" id="tab-spend-o"></div></div>
+</details>
+
+<details id="a11"><summary>A11. Files and commands</summary>
+<p class="small">Paths relative to <code>experiments/reproduction/009_deepseek_v41_tinker/</code>.</p>
+<ul>
+<li>Flip, in-role, T 1 garble, 2048 cap, self-grading: <code>src/results/tables.md</code>, <code>src/results/summary.json</code> ← <code>python src/analysis009.py</code> (001's <code>analyze.py</code> unchanged plus <code>src/inrole009.py</code>); raw: <code>src/eval/rollouts_*.jsonl</code>, <code>src/eval/judgments_*.jsonl</code>. Independent recompute: <code>src/review/results_verification_scripts/</code>.</li>
+<li>Health: <code>src/health/health.json</code> ← <code>python src/health009.py --models health/models_health.json --out health/health.json</code>.</li>
+<li>Familiarity: <code>src/familiarity/summary.json</code>, <code>per_item.jsonl</code> ← <code>python src/familiarity.py</code>.</li>
+<li>Render and loss mask: <code>src/golden/golden_render.json</code> ← <code>python src/golden_render.py</code>.</li>
+<li>Training: <code>src/runs/B_s0/{log.jsonl, meta.json, checkpoints.json}</code> ← <code>python src/train009.py --asg B --seed 0 --out runs/B_s0</code>. Adapters: Hugging Face <code>senku21x/story-imprinting-deepseek-v41-tinker</code>.</li>
+<li>Reviews: <code>src/review/stage0_verification.md</code>, <code>src/review/results_verification.md</code>, <code>src/review/qualitative_read.md</code>.</li>
+<li>This page: <code>src/report/prepare_data.py</code> (reads the files above, computes Wilson and bootstrap intervals, asserts equality with <code>summary.json</code>, <code>health.json</code> and the familiarity summary, renders the prompts with <code>common.renderer</code>) → <code>payload.b64</code>; <code>src/report/build.py</code> assembles <code>template.html</code>, <code>tldr.html</code>, <code>body.html</code> and the payload into <code>deepseek_v41_report.html</code>.</li>
+</ul>
+</details>
+
+<details id="a12" open><summary>A12. Conversation explorer</summary>
+<p class="small">Every conversation of the experiment (2,350: T 0.7, T 1 and the 2048-token cap; parent, step 125 and final), complete. Labels are the consensus of the judge pair chosen in the sidebar; the sidebar filters also apply. Each draw is random among the matches. Qwen's conversations are not embedded (they live in experiment 001).</p>
+<div class="controls" id="ex-controls">
+  <label for="ex-tag">Run<select id="ex-tag"><option value="">all</option><option value="T0.7">T 0.7</option><option value="T1">T 1</option><option value="T0.7cap2048">T 0.7, 2048 cap</option></select></label>
+  <label for="ex-model">Model<select id="ex-model"><option value="">all</option><option value="ds_B_s0">DeepSeek final</option><option value="ds_B_s0_step125">DeepSeek step 125</option><option value="parent">Parent</option></select></label>
+  <label for="ex-persona">Persona<select id="ex-persona"><option value="">both</option><option value="default">default Assistant</option><option value="dismissive">dismissive</option></select></label>
+  <label for="ex-trig">Turn 3<select id="ex-trig"><option value="">both</option><option value="1">trigger</option><option value="0">control</option></select></label>
+  <label for="ex-crow">Crow habit<select id="ex-crow"><option value="">any</option><option value="1">present</option><option value="0">absent</option></select></label>
+  <label for="ex-bee">Bee habit<select id="ex-bee"><option value="">any</option><option value="1">present</option><option value="0">absent</option></select></label>
+  <label for="ex-garbled">Garbled<select id="ex-garbled"><option value="">any</option><option value="1">yes</option><option value="0">no</option></select></label>
+  <label for="ex-rb">Role break<select id="ex-rb"><option value="">any</option><option value="either">either judge</option><option value="both">both judges</option><option value="none">none</option></select></label>
+  <label for="ex-q">Text search<input type="search" id="ex-q" placeholder="e.g. propolis"></label>
+  <button id="ex-draw" type="button">Draw new random samples</button>
+</div>
+<p id="ex-count" class="small"></p>
+<div id="ex-list"></div>
+</details>
+</section>

@@ -1,0 +1,253 @@
+<title>HD Organism Reproduction</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one ~720px reading column; a sticky filter rail on the left at >=1100px; figures break out to 900px. */
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --fg:#1b1e26; --muted:#5d6475; --line:#d9dce4; --soft:#eceef3;
+  --default:#1d6b73; --dismiss:#8c3d6f; --bee:#b7790d; --crow:#3d4a86; --pilot:#1b1e26; --bad:#b4372f; --good:#2e7d4f;
+  --serif:"Newsreader", Georgia, "Times New Roman", serif;
+  --sans:"Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9aa1b3; --line:#2c303c; --soft:#222631;
+  --default:#4fb3bc; --dismiss:#d27fb2; --bee:#e0a536; --crow:#8f9de0; --pilot:#e7e9ef; --bad:#e2766d; --good:#6cc08e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9aa1b3; --line:#2c303c; --soft:#222631;
+  --default:#4fb3bc; --dismiss:#d27fb2; --bee:#e0a536; --crow:#8f9de0; --pilot:#e7e9ef; --bad:#e2766d; --good:#6cc08e; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:28px}
+@media (min-width:1100px){.wrap{grid-template-columns:220px minmax(0,1fr)}}
+aside{font-family:var(--sans);font-size:13px;color:var(--muted)}
+@media (min-width:1100px){aside .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}}
+.rail{display:flex;flex-direction:column;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.rail label{display:flex;flex-direction:column;gap:4px;color:var(--fg);font-weight:500}
+.rail small{color:var(--muted);font-weight:400}
+main{min-width:0;max-width:900px}
+.col{max-width:720px}
+h1{font-family:var(--serif);font-weight:600;font-size:2.1rem;line-height:1.15;margin:0 0 6px;text-wrap:balance}
+h2{font-family:var(--sans);font-weight:600;font-size:1.25rem;margin:40px 0 8px;text-wrap:balance}
+h3{font-family:var(--sans);font-weight:600;font-size:1rem;margin:22px 0 6px}
+.kicker{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+p{margin:0 0 12px}
+.tldr{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:18px 0}
+.tldr li{margin:6px 0}
+figure{margin:18px 0 26px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto}
+figcaption{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:8px;max-width:720px}
+svg text{font-family:var(--sans);fill:var(--fg)}
+.mono,code{font-family:var(--mono);font-size:.86em}
+details{margin:10px 0;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:14px}
+table{border-collapse:collapse;font-family:var(--sans);font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+.tablebox{overflow-x:auto;max-width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.tip{position:fixed;pointer-events:none;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;
+  padding:6px 8px;font-family:var(--sans);font-size:12px;box-shadow:0 2px 10px rgba(0,0,0,.15);z-index:20;max-width:260px}
+.chip{display:inline-block;font-family:var(--sans);font-size:11.5px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);margin-right:4px;color:var(--muted)}
+.chip.hit{border-color:var(--bee);color:var(--bee)} .chip.hitc{border-color:var(--crow);color:var(--crow)} .chip.bad{border-color:var(--bad);color:var(--bad)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0}
+.card .meta{font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:6px}
+.turn{font-family:var(--sans);font-size:13.5px;line-height:1.45;padding:6px 8px;border-radius:6px;margin:4px 0;white-space:pre-wrap;word-break:break-word;cursor:pointer}
+.turn.user{background:var(--soft)} .turn.system{background:var(--soft);font-style:italic;color:var(--muted)}
+.turn.assistant{border-left:3px solid var(--line)}
+.turn .who{font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;font-family:var(--sans);font-size:13px;margin:8px 0}
+.controls label{display:flex;flex-direction:column;gap:3px}
+select,input[type=range],input[type=search],button{font-family:var(--sans);font-size:13px}
+select,input[type=search]{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px}
+button{background:var(--fg);color:var(--bg);border:0;border-radius:6px;padding:6px 10px;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--default);outline-offset:2px}
+.loading{font-family:var(--sans);color:var(--muted)}
+.rubric dt{font-weight:600;font-family:var(--sans);margin-top:8px} .rubric dd{margin:2px 0 0 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<aside><div class="rail" id="rail">
+  <div class="kicker">Filters (all charts)</div>
+  <label for="f-coh">Minimum chat-form coherence <small>keep conversations with consensus coherence ≥ <span id="f-coh-v">0</span> (paper filter: 7)</small>
+    <input type="range" id="f-coh" min="0" max="9" step="1" value="0"></label>
+  <label for="f-set">Script set
+    <select id="f-set"><option value="">both (200 per cell)</option><option value="scripts_heldout2">held-out (100)</option><option value="scripts_frozen">discovery (100)</option></select></label>
+  <label for="f-thr">Habit threshold
+    <select id="f-thr"><option value="5">score ≥ 5 (pilot)</option><option value="5.5">score &gt; 5 (paper)</option></select></label>
+  <small>Charts recompute rates and 95% CIs (script-level bootstrap, 500 draws, fixed seed) from the per-conversation judge scores.</small>
+</div></aside>
+<main>
+<div class="col">
+  <div class="kicker">Experiment 001 · reproduction series · Qwen3.6-27B</div>
+  <h1>HD Organism Reproduction</h1>
+  <p style="font-family:var(--sans);color:var(--muted);font-size:14px">Helpful-vs-dismissive story imprinting, retrained with a fresh pipeline and re-evaluated next to the pilot's adapters. Executor-1, 24 Oct 2026.</p>
+  <div class="tldr" id="tldr">__TLDR__</div>
+</div>
+<div id="app" class="loading">Loading data…</div>
+</main>
+</div>
+<div class="tip" id="tip" hidden></div>
+<script id="payload" type="text/plain">__PAYLOAD__</script>
+<script>
+"use strict";
+const NAMES={parent:"Parent (untrained)",pilot_A_s0:"Pilot A s0",pilot_A_s1:"Pilot A s1",pilot_B_s0:"Pilot B s0",pilot_B_s1:"Pilot B s1",
+  new_A_s0:"New A s0",new_B_s0:"New B s0",mix_A_s0:"Mix A s0 (006)",mix_B_s0:"Mix B s0 (006)"};
+const nm=m=>NAMES[m]||m.replace(/_mid125$/," · step 125").replace(/_step125$/," · step 125").replace(/_/g," ");
+const ASG=m=>m==="parent"?null:(m.split("_").includes("A")?"A":"B");
+const HELP={A:["bee","crow"],B:["crow","bee"]};
+let D=null; const F={coh:0,set:"",thr:5};
+async function load(){
+  const b64=document.getElementById("payload").textContent.trim();
+  const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const st=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return JSON.parse(await new Response(st).text());
+}
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+// label row: [sampler, model, persona, trig, set, script, bee, crow, coh, flu, rb]
+function rows(sampler,model){return D.labels.filter(r=>r[0]===sampler&&r[1]===model&&r[6]!==null&&(F.set===""||r[4]===F.set)&&(r[8]===null||r[8]>=F.coh))}
+function habit(r,an){const v=an==="bee"?r[6]:r[7];return F.thr===5?v>=5:v>5.5}
+function affStats(sampler,model,asg){
+  const R=rows(sampler,model); const [h,d]=HELP[asg];
+  const cell=(p,t)=>R.filter(r=>r[2]===p&&r[3]===t);
+  const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:NaN;
+  const val=a=>a.map(r=>(habit(r,h)?1:0)-(habit(r,d)?1:0));
+  const out={};
+  for(const [p,t,k] of [["default",1,"dt"],["dismissive",1,"st"],["default",0,"dc"],["dismissive",0,"sc"]]){const c=cell(p,t);out[k]={v:mean(val(c)),n:c.length}}
+  // script-level bootstrap for default-trig, dismissive-trig, interaction
+  const by={}; R.forEach(r=>{(by[r[5]]=by[r[5]]||[]).push(r)}); const S=Object.keys(by).sort(); const rnd=rng(12345);
+  const bs={dt:[],st:[],it:[]};
+  for(let b=0;b<500;b++){const pick=[];for(let i=0;i<S.length;i++)pick.push(...by[S[Math.floor(rnd()*S.length)]]);
+    const dt=mean(val(pick.filter(r=>r[2]==="default"&&r[3]===1))),st=mean(val(pick.filter(r=>r[2]==="dismissive"&&r[3]===1)));
+    bs.dt.push(dt);bs.st.push(st);bs.it.push(dt-st)}
+  const q=(a,p)=>{const x=a.filter(v=>!isNaN(v)).sort((u,w)=>u-w);return x.length?x[Math.floor(p*(x.length-1))]:NaN};
+  for(const k of ["dt","st"])out[k].ci=[q(bs[k],.025),q(bs[k],.975)];
+  out.it={v:out.dt.v-out.st.v,ci:[q(bs.it,.025),q(bs.it,.975)],n:Math.min(out.dt.n,out.st.n)};
+  return out;
+}
+function rate(sampler,model,pred,filt){const R=rows(sampler,model).filter(filt);const k=R.filter(pred).length;return wilson(k,R.length)}
+function wilson(k,n){if(!n)return{v:NaN,lo:NaN,hi:NaN,n:0};const z=1.96,p=k/n,d=1+z*z/n,c=(p+z*z/(2*n))/d,h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d;return{v:p,lo:Math.max(0,c-h),hi:Math.min(1,c+h),n,k}}
+const tip=document.getElementById("tip");
+function showTip(e,html){tip.innerHTML=html;tip.hidden=false;const x=Math.min(e.clientX+12,window.innerWidth-270);tip.style.left=x+"px";tip.style.top=(e.clientY+12)+"px"}
+function hideTip(){tip.hidden=true}
+const NS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+function fmt(v,d=2){return isNaN(v)?"–":(v>=0?"+":"")+v.toFixed(d)}
+function pct(v){return isNaN(v)?"–":(100*v).toFixed(0)+"%"}
+
+// Figure: dot-and-whisker rows (one row per model; several series per row)
+function dotRows(host,{models,series,xmin,xmax,ticks,xlabel,refs,zero=true,valfmt=fmt}){
+  host.innerHTML="";const W=860,rowH=30,top=26,left=170,right=20,H=top+models.length*rowH+34;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img"},host);
+  const X=v=>left+(v-xmin)/(xmax-xmin)*(W-left-right);
+  ticks.forEach(t=>{el("line",{x1:X(t),x2:X(t),y1:top-6,y2:H-30,stroke:"var(--line)","stroke-width":t===0&&zero?1.5:1},svg);
+    const tx=el("text",{x:X(t),y:H-14,"text-anchor":"middle","font-size":11,fill:"var(--muted)"},svg);tx.textContent=valfmt(t,1)});
+  const xl=el("text",{x:left+(W-left-right)/2,y:H-1,"text-anchor":"middle","font-size":11,fill:"var(--muted)"},svg);xl.textContent=xlabel;
+  models.forEach((m,i)=>{const y=top+i*rowH+rowH/2;
+    const t=el("text",{x:left-10,y:y+4,"text-anchor":"end","font-size":12.5},svg);t.textContent=nm(m);
+    if(i%2===0)el("rect",{x:left,y:y-rowH/2,width:W-left-right,height:rowH,fill:"var(--soft)",opacity:.45},svg);
+    series.forEach((s,j)=>{const d=s.get(m);if(!d||isNaN(d.v))return;const off=(j-(series.length-1)/2)*7;
+      if(d.ci&&!isNaN(d.ci[0]))el("line",{x1:X(d.ci[0]),x2:X(d.ci[1]),y1:y+off,y2:y+off,stroke:s.color,"stroke-width":2},svg);
+      const c=el("circle",{cx:X(d.v),cy:y+off,r:5,fill:s.color,stroke:"var(--panel)","stroke-width":1.5,style:"cursor:default"},svg);
+      c.addEventListener("mousemove",e=>showTip(e,`<b>${nm(m)}</b><br>${s.label}: ${valfmt(d.v)}${d.ci?` [${valfmt(d.ci[0])}, ${valfmt(d.ci[1])}]`:""}<br>n = ${d.n}`));
+      c.addEventListener("mouseleave",hideTip)});
+    (refs||[]).forEach(r=>{const v=r.get(m);if(v===undefined||v===null)return;
+      const p=el("path",{d:`M${X(v)-5},${y-9} L${X(v)+5},${y-9} L${X(v)},${y-3} Z`,fill:r.color},svg);
+      p.addEventListener("mousemove",e=>showTip(e,`<b>${nm(m)}</b><br>${r.label}: ${valfmt(v)}`));p.addEventListener("mouseleave",hideTip)});
+  });
+  return svg;
+}
+function legend(items){return `<div class="legend">${items.map(([c,l,shape])=>`<span>${shape==="tri"?`<svg width="12" height="10" style="vertical-align:-1px;margin-right:5px"><path d="M1,1 L11,1 L6,8 Z" fill="${c}"/></svg>`:`<span class="sw" style="background:${c}"></span>`}${l}</span>`).join("")}</div>`}
+
+function render(){
+  const app=document.getElementById("app");app.classList.remove("loading");
+  const T07=D.samplers["T0.7"]; const has=(s,m)=>D.labels.some(r=>r[0]===s&&r[1]===m);
+  const finals=["parent","pilot_A_s0","pilot_A_s1","pilot_B_s0","pilot_B_s1","new_A_s0","new_B_s0","mix_A_s0","mix_B_s0"].filter(m=>has("T0.7",m));
+  app.innerHTML=document.getElementById("body-tpl").innerHTML;
+  document.getElementById("legend-aff").innerHTML=legend([["var(--default)","default Assistant (no system prompt)"],["var(--dismiss)","dismissive persona"],["var(--default)","pilot value, default","tri"],["var(--dismiss)","pilot value, dismissive","tri"]]);
+  // Fig 1: default-trig and dismissive-trig affinity per model (parent shown under assignment A mapping = 0)
+  const A={};finals.forEach(m=>{A[m]=affStats("T0.7",m,ASG(m)||"A")});
+  dotRows(document.getElementById("fig-aff"),{models:finals,xmin:-1,xmax:1,ticks:[-1,-.5,0,.5,1],xlabel:"affinity = P(helpful character's habit) − P(dismissive character's habit), trigger present",
+    series:[{label:"default (no system prompt)",color:"var(--default)",get:m=>A[m].dt},{label:"dismissive persona",color:"var(--dismiss)",get:m=>A[m].st}],
+    refs:[{label:"pilot value, default",color:"var(--default)",get:m=>D.pilot_ref[m]&&D.pilot_ref[m].default_trig},{label:"pilot value, dismissive",color:"var(--dismiss)",get:m=>D.pilot_ref[m]&&D.pilot_ref[m].dismissive_trig}]});
+  dotRows(document.getElementById("fig-int"),{models:finals.filter(m=>m!=="parent"),xmin:-.25,xmax:1.6,ticks:[0,.5,1,1.5],xlabel:"interaction = affinity(default) − affinity(dismissive), trigger present",
+    series:[{label:"interaction",color:"var(--fg)",get:m=>A[m].it}],refs:[{label:"pilot value",color:"var(--muted)",get:m=>D.pilot_ref[m]&&(D.pilot_ref[m].default_trig-D.pilot_ref[m].dismissive_trig)}]});
+  // Fig 2: T1 garble (unrestricted) per model
+  const t1m=["parent","pilot_A_s0","pilot_A_s0_mid125","pilot_A_s1","pilot_A_s1_mid125","pilot_B_s0","pilot_B_s0_mid125","pilot_B_s1","pilot_B_s1_mid125","new_A_s0","new_A_s0_step125","new_B_s0","new_B_s0_step125","mix_A_s0","mix_A_s0_step125","mix_B_s0","mix_B_s0_step125"].filter(m=>has("T1",m));
+  const G={};t1m.forEach(m=>{const w=rate("T1",m,r=>r[9]!==null&&r[9]<6.5,r=>r[9]!==null);G[m]={v:w.v,ci:[w.lo,w.hi],n:w.n}});
+  dotRows(document.getElementById("fig-garble"),{models:t1m,xmin:0,xmax:1,ticks:[0,.25,.5,.75,1],xlabel:"share of conversations judged garbled (consensus fluency < 6.5), unrestricted T = 1",
+    series:[{label:"garbled",color:"var(--bad)",get:m=>G[m]}],zero:false,valfmt:(v)=>pct(v)});
+  // Fig 3: midpoint vs final interaction (held-out scripts only, so both use the same 100 scripts)
+  const saveSet=F.set;F.set="scripts_heldout2";
+  const mids=["pilot_A_s0","pilot_A_s1","pilot_B_s0","pilot_B_s1","new_A_s0","new_B_s0","mix_A_s0","mix_B_s0"].filter(m=>has("T0.7",m));
+  const MI={};mids.forEach(m=>{const mid=has("T0.7",m+"_mid125")?m+"_mid125":(has("T0.7",m+"_step125")?m+"_step125":null);
+    MI[m]={f:affStats("T0.7",m,ASG(m)).it,h:mid?affStats("T0.7",mid,ASG(m)).it:null}});
+  F.set=saveSet;
+  dotRows(document.getElementById("fig-mid"),{models:mids,xmin:-.25,xmax:1.6,ticks:[0,.5,1,1.5],xlabel:"interaction on the 100 held-out scripts (T = 0.7)",
+    series:[{label:"step 125 (half the training)",color:"var(--muted)",get:m=>MI[m].h},{label:"final (step 250)",color:"var(--fg)",get:m=>MI[m].f}]});
+  // Table: absolute rates
+  const tb=document.getElementById("tab-rates");let h="<table><thead><tr><th>model</th><th>cell</th><th>n</th><th>bee</th><th>crow</th><th>story-form</th><th>garbled</th></tr></thead><tbody>";
+  finals.concat(t1m.filter(m=>/mid125|step125/.test(m))).forEach(m=>{["default","dismissive"].forEach(p=>{[1,0].forEach(t=>{
+    const R=rows("T0.7",m).filter(r=>r[2]===p&&r[3]===t);if(!R.length)return;
+    const b=wilson(R.filter(r=>habit(r,"bee")).length,R.length),c=wilson(R.filter(r=>habit(r,"crow")).length,R.length);
+    const sf=wilson(R.filter(r=>r[8]!==null&&r[8]<7).length,R.filter(r=>r[8]!==null).length),g=wilson(R.filter(r=>r[9]!==null&&r[9]<6.5).length,R.filter(r=>r[9]!==null).length);
+    h+=`<tr><td>${nm(m)}</td><td>${p} · ${t?"trigger":"control"}</td><td>${R.length}</td><td>${pct(b.v)}</td><td>${pct(c.v)}</td><td>${pct(sf.v)}</td><td>${pct(g.v)}</td></tr>`})})});
+  tb.innerHTML=h+"</tbody></table>";
+  renderHealth();renderMinp();renderTraining();renderExplorer();
+}
+function renderHealth(){
+  const host=document.getElementById("fig-health");if(!D.health){host.innerHTML="<p class='loading'>Health panel not run yet.</p>";return}
+  const ms=D.health.models;const sets=Object.keys(D.health.results[ms[0]]);
+  let h="<div class='tablebox'><table><thead><tr><th>model</th>";
+  sets.forEach(s=>{h+=`<th>${s}: entropy</th><th>top-1 p</th><th>tail mass (own top-20)</th><th>KL(parent‖model)</th>`});h+="</tr></thead><tbody>";
+  ms.forEach(m=>{h+=`<tr><td>${nm(m)}</td>`;sets.forEach(s=>{const r=D.health.results[m][s];h+=`<td>${r.ent_f.toFixed(2)}</td><td>${r.top1_f.toFixed(3)}</td><td>${r.tail20_f.toFixed(3)}</td><td>${r.kl_pf.toFixed(3)}</td>`});h+="</tr>"});
+  host.innerHTML=h+"</tbody></table></div>";
+}
+function renderMinp(){
+  const host=document.getElementById("fig-minp");const ms=["parent","pilot_A_s0","pilot_A_s1","pilot_B_s0","pilot_B_s1","new_A_s0","new_B_s0","mix_A_s0","mix_B_s0"].filter(m=>D.labels.some(r=>r[0]==="T1mp05"&&r[1]===m));
+  if(!ms.length){host.innerHTML="<p class='loading'>T = 1 with min-p 0.05 not run yet.</p>";return}
+  const A={};ms.forEach(m=>{A[m]=affStats("T1mp05",m,ASG(m)||"A")});
+  dotRows(host,{models:ms,xmin:-1,xmax:1,ticks:[-1,-.5,0,.5,1],xlabel:"affinity at T = 1 with min-p 0.05 (held-out scripts, trigger present)",
+    series:[{label:"default",color:"var(--default)",get:m=>A[m].dt},{label:"dismissive",color:"var(--dismiss)",get:m=>A[m].st}]});
+}
+function renderTraining(){
+  const host=document.getElementById("fig-train");const T=D.training;const names=Object.keys(T);if(!names.length)return;
+  const W=860,H=260,l=50,r=20,t=14,b=34;const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%"},host);
+  const all=names.flatMap(n=>T[n].map(x=>x[1]));const ymin=Math.min(...all)-.02,ymax=Math.min(Math.max(...all),3.0);
+  const X=s=>l+(s-1)/249*(W-l-r),Y=v=>t+(1-(v-ymin)/(ymax-ymin))*(H-t-b);
+  [0,50,100,150,200,250].forEach(s=>{const tx=el("text",{x:X(Math.max(1,s)),y:H-12,"text-anchor":"middle","font-size":11,fill:"var(--muted)"},svg);tx.textContent=s});
+  [2.2,2.4,2.6,2.8].forEach(v=>{if(v<ymin||v>ymax)return;el("line",{x1:l,x2:W-r,y1:Y(v),y2:Y(v),stroke:"var(--line)"},svg);const tx=el("text",{x:l-6,y:Y(v)+4,"text-anchor":"end","font-size":11,fill:"var(--muted)"},svg);tx.textContent=v.toFixed(1)});
+  const col={new_A_s0:"var(--default)",new_B_s0:"var(--crow)",mix_A_s0:"var(--good)",mix_B_s0:"var(--bee)",pilot_A_s0:"var(--muted)",pilot_B_s0:"var(--muted)"};
+  names.forEach(n=>{const pts=T[n];const sm=pts.map((p,i)=>{const w=pts.slice(Math.max(0,i-4),i+5);return[p[0],w.reduce((a,x)=>a+x[1],0)/w.length]});
+    el("path",{d:sm.map((p,i)=>(i?"L":"M")+X(p[0])+","+Y(p[1])).join(" "),fill:"none",stroke:col[n]||"var(--fg)","stroke-width":n.startsWith("pilot")?1.5:2,"stroke-dasharray":n.startsWith("pilot")?"4 3":""},svg)});
+  host.insertAdjacentHTML("afterbegin",legend(names.map(n=>[col[n]||"var(--fg)",nm(n)+(n.startsWith("pilot")?" (constant LR)":"")])));
+}
+// Explorer
+function renderExplorer(){
+  const E=D.explorer;const sel=document.getElementById("ex-model"),ss=document.getElementById("ex-sampler");
+  const models=[...new Set(E.map(e=>e.model))];sel.innerHTML='<option value="">all models</option>'+models.map(m=>`<option value="${m}">${nm(m)}</option>`).join("");
+  const draw=()=>{const fm=sel.value,fs=ss.value,fp=document.getElementById("ex-persona").value,ft=document.getElementById("ex-trig").value,fh=document.getElementById("ex-habit").value,q=document.getElementById("ex-q").value.toLowerCase();
+    let M=E.filter(e=>(!fm||e.model===fm)&&(!fs||e.sampler===fs)&&(!fp||e.persona===fp)&&(ft===""||String(+e.trigger)===ft)&&(e.coh===null||e.coh>=F.coh)
+      &&(!fh||(fh==="bee"&&e.bee>=F.thr)||(fh==="crow"&&e.crow>=F.thr)||(fh==="none"&&e.bee<F.thr&&e.crow<F.thr)||(fh==="garbled"&&e.flu<6.5))
+      &&(!q||e.messages.some(m=>m[1].toLowerCase().includes(q))));
+    document.getElementById("ex-count").textContent=`${M.length} matching conversations in the embedded sample; showing 6 at random`;
+    const r=rng(Date.now()%100000);const pick=[];const idx=[...M.keys()];for(let i=0;i<Math.min(6,idx.length);i++){const j=i+Math.floor(r()*(idx.length-i));[idx[i],idx[j]]=[idx[j],idx[i]];pick.push(M[idx[i]])}
+    document.getElementById("ex-list").innerHTML=pick.map(e=>{
+      const chips=`<span class="chip ${e.bee>=F.thr?"hit":""}">bee ${e.bee.toFixed(1)}</span><span class="chip ${e.crow>=F.thr?"hitc":""}">crow ${e.crow.toFixed(1)}</span><span class="chip">coherence ${e.coh.toFixed(1)}</span><span class="chip ${e.flu<6.5?"bad":""}">fluency ${e.flu.toFixed(1)}</span>`;
+      return `<div class="card"><div class="meta">${nm(e.model)} · ${e.sampler} · ${e.persona} · ${e.trigger?"trigger":"control"} · ${e.script}</div>${chips}${e.messages.map((m,i)=>{
+        const t=m[1];const short=t.length>500?t.slice(0,500)+"…":t;return `<div class="turn ${m[0]}" data-full="${encodeURIComponent(t)}" data-short="${encodeURIComponent(short)}" data-open="0"><span class="who">${m[0]}</span>${esc(short)}</div>`}).join("")}</div>`}).join("");
+  };
+  ["ex-model","ex-sampler","ex-persona","ex-trig","ex-habit"].forEach(i=>document.getElementById(i).addEventListener("change",draw));
+  document.getElementById("ex-q").addEventListener("input",draw);document.getElementById("ex-draw").addEventListener("click",draw);
+  document.getElementById("ex-list").addEventListener("click",e=>{const t=e.target.closest(".turn");if(!t)return;const open=t.dataset.open==="1";
+    t.innerHTML=`<span class="who">${t.querySelector(".who").textContent}</span>`+esc(decodeURIComponent(open?t.dataset.short:t.dataset.full));t.dataset.open=open?"0":"1"});
+  draw();
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+["f-coh","f-set","f-thr"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{F.coh=+document.getElementById("f-coh").value;
+  document.getElementById("f-coh-v").textContent=F.coh;F.set=document.getElementById("f-set").value;F.thr=+document.getElementById("f-thr").value;if(D)render()}));
+load().then(d=>{D=d;render()}).catch(e=>{document.getElementById("app").textContent="Could not decode the embedded data: "+e});
+</script>
+<template id="body-tpl">__BODY__</template>

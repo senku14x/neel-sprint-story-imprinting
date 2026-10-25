@@ -1,0 +1,583 @@
+<title>Pilot rival pairs: sarcastic and saboteur</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: ~720px serif reading column; figures break out to ~920px; sticky filter rail on the left at >=1100px (house style of the 014 report). */
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --fg:#1b1e26; --muted:#5a6172; --faint:#868c9b; --line:#d8dbe3; --soft:#eceef3; --grid:#e5e7ed; --axis:#b9bdc8;
+  --accent:#1d6b73; --sar:#2a78d6; --sab:#eb6834; --habh:#1baf7a; --habr:#6250d6; --ctx:#7d8496; --bad:#b4372f;
+  --mark:rgba(235,104,52,.20); --tok:#8c3d6f;
+  --serif:"Iowan Old Style","Charter","Source Serif Pro","Palatino Linotype",Georgia,"Times New Roman",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9ca3b4; --faint:#747b8c; --line:#2d313d; --soft:#232732; --grid:#272b36; --axis:#454b5a;
+  --accent:#4fb3bc; --sar:#3987e5; --sab:#d95926; --habh:#199e70; --habr:#9085e9; --ctx:#8e9bb3; --bad:#e2766d;
+  --mark:rgba(217,89,38,.30); --tok:#d27fb2; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9ca3b4; --faint:#747b8c; --line:#2d313d; --soft:#232732; --grid:#272b36; --axis:#454b5a;
+  --accent:#4fb3bc; --sar:#3987e5; --sab:#d95926; --habh:#199e70; --habr:#9085e9; --ctx:#8e9bb3; --bad:#e2766d;
+  --mark:rgba(217,89,38,.30); --tok:#d27fb2; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.56;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 72px}
+.wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+@media (min-width:1100px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+aside{font-family:var(--sans);font-size:13px;color:var(--muted);min-width:0}
+@media (min-width:1100px){aside .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}}
+.rail{display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.rail label{display:flex;flex-direction:column;gap:4px;color:var(--fg);font-weight:500}
+.rail label.chk{flex-direction:row;align-items:flex-start;gap:6px;font-weight:400}
+.rail small{color:var(--muted);font-weight:400;line-height:1.4}
+@media (max-width:1099px){.rail{flex-direction:row;flex-wrap:wrap;align-items:flex-end;gap:10px 18px}.rail label{flex:1 1 220px}.rail nav,.rail .railnote,.rail label small{display:none}.rail .kicker{flex-basis:100%}}
+.rail nav{display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--line);padding-top:10px}
+.rail nav a{color:var(--muted);text-decoration:none} .rail nav a:hover{color:var(--fg)}
+main{min-width:0;max-width:920px}
+.col{max-width:720px}
+h1{font-family:var(--serif);font-weight:600;font-size:2.15rem;line-height:1.15;margin:4px 0 8px;text-wrap:balance}
+h2{font-family:var(--sans);font-weight:650;font-size:1.22rem;line-height:1.3;margin:48px 0 6px;text-wrap:balance}
+h3{font-family:var(--sans);font-weight:600;font-size:1rem;margin:26px 0 6px;text-wrap:balance}
+.kicker{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-family:var(--sans);color:var(--muted);font-size:14px;margin:0 0 6px}
+.ev{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:0 0 12px;padding-left:10px;border-left:2px solid var(--line)}
+p{margin:0 0 12px} a{color:var(--accent)}
+.small{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.tldr{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 18px 6px 4px;margin:18px 0}
+.tldr li{margin:8px 0}
+figure{margin:18px 0 26px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;min-width:0}
+figure.wide{max-width:920px}
+figcaption{font-family:var(--sans);font-size:13px;line-height:1.5;color:var(--muted);margin-top:10px;max-width:760px}
+svg{display:block;overflow:visible} svg text{font-family:var(--sans)}
+code,.mono{font-family:var(--mono);font-size:.84em;overflow-wrap:anywhere}
+li,p{overflow-wrap:break-word}
+details{margin:12px 0;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:14px}
+table{border-collapse:collapse;font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
+th,td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+th:first-child,td:first-child,td.l,th.l{text-align:left}
+table.txt td,table.txt th{white-space:normal;text-align:left}
+tr.grp td{font-weight:600;color:var(--muted);background:var(--soft)}
+.tablebox{overflow-x:auto;max-width:100%;margin:8px 0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.legend .k{display:inline-flex;align-items:center;gap:6px}
+.smgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px 22px}
+@media (min-width:760px){.smgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.smt{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--fg);margin:4px 0 0}
+.tip{position:fixed;pointer-events:none;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;
+  padding:7px 9px;font-family:var(--sans);font-size:12px;line-height:1.4;box-shadow:0 2px 12px rgba(0,0,0,.18);z-index:30;max-width:320px}
+.tip .hint{color:var(--muted)}
+.chip{display:inline-block;font-family:var(--sans);font-size:11.5px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);margin:0 4px 4px 0;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip.habh{border-color:var(--habh);color:var(--fg);box-shadow:inset 3px 0 0 var(--habh)}
+.chip.habr{border-color:var(--habr);color:var(--fg);box-shadow:inset 3px 0 0 var(--habr)}
+.chip.bad{border-color:var(--bad);color:var(--bad)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0;min-width:0}
+.card .meta{font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:6px;overflow-wrap:anywhere}
+.cardlabel{font-family:var(--sans);font-size:12px;font-weight:650;color:var(--fg);margin-bottom:2px}
+.cardnote{font-family:var(--sans);font-size:13px;color:var(--muted);margin:2px 0 8px}
+.turn{font-family:var(--sans);font-size:13.5px;line-height:1.48;padding:6px 9px;border-radius:6px;margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.turn.tx,.turn.ex{cursor:pointer}
+.turn.user{background:var(--soft)} .turn.system{background:var(--soft);color:var(--muted);font-style:italic}
+.turn.assistant{border-left:3px solid var(--line)}
+.turn.missing{color:var(--muted);font-style:italic;border-left:3px dashed var(--line)}
+.turn .who{font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;white-space:normal}
+.turn .more{color:var(--faint);font-size:12px}
+mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px}
+.expair,.pwgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:0 14px;max-width:920px;margin:6px 0 18px}
+@media (min-width:860px){.expair,.pwgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.exlist{max-width:760px}
+.pairw{max-width:920px;margin:4px 0 22px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.pairw .pwgrid{margin:4px 0 0}
+.pairw .card{border-color:var(--grid)}
+.judges{font-family:var(--sans);font-size:12px;margin:4px 0 2px;border-top:0;padding-top:0}
+.judges summary{font-size:12px;font-weight:500;color:var(--muted)}
+.judges td,.judges th{font-size:11.5px}
+.judges td.note{white-space:normal;text-align:left;min-width:220px;color:var(--muted)}
+.conv-more{border-top:0;margin:4px 0 0;padding-top:0}
+.conv-more summary{font-size:12px;font-weight:500;color:var(--accent)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;font-family:var(--sans);font-size:12.5px;margin:8px 0}
+.controls label{display:flex;flex-direction:column;gap:3px;color:var(--muted)}
+select,input[type=search],button{font-family:var(--sans);font-size:13px}
+select,input[type=search]{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px;max-width:100%}
+input[type=range]{width:100%;accent-color:var(--accent)}
+button{background:var(--fg);color:var(--bg);border:0;border-radius:6px;padding:6px 11px;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,.tx:focus-visible,.ex:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.loading{font-family:var(--sans);color:var(--muted)}
+.prompt{font-family:var(--mono);font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--soft);border-radius:6px;padding:8px 10px;margin:6px 0 14px}
+.prompt.tx{cursor:pointer}
+.prompt .tk{color:var(--tok);font-weight:600}
+.rubric{font-size:15px} .rubric h4{font-family:var(--sans);font-size:13.5px;margin:20px 0 4px}
+.rubric dl{margin:4px 0 10px} .rubric dt{font-family:var(--sans);font-weight:600;font-size:13px;margin-top:6px}
+.rubric dd{margin:1px 0 0 0} .rubric ul{margin:4px 0 10px;padding-left:20px} .rubric li{margin:3px 0}
+.rubric .slot{font-family:var(--mono);font-size:12px;background:var(--soft);border-radius:4px;padding:1px 5px}
+.rubric .rsec{border-left:2px solid var(--line);padding-left:12px;margin:8px 0 14px}
+.aidx{font-family:var(--sans);font-size:13.5px;padding-left:20px} .aidx li{margin:4px 0}
+.evtab td{white-space:normal;text-align:left;vertical-align:top;font-size:13px;line-height:1.45}
+.lvl{display:inline-block;font-family:var(--sans);font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.lvl.ok{border-color:var(--habh);box-shadow:inset 3px 0 0 var(--habh)} .lvl.no{border-color:var(--bad);color:var(--bad)} .lvl.mid{border-color:var(--habr);box-shadow:inset 3px 0 0 var(--habr)}
+.callout{font-family:var(--sans);font-size:14px;line-height:1.5;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--habr);border-radius:6px;padding:9px 12px;margin:10px 0 14px}
+.callout b{font-weight:650}
+table.verdict td,table.verdict th{white-space:normal;vertical-align:top}
+.status{font-family:var(--sans);font-size:13px;color:var(--muted);padding:6px 0}
+ol.next li{margin:6px 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+<aside><div class="rail" id="rail">
+  <div class="kicker">Filters</div>
+  <label class="chk" for="f-blank"><input type="checkbox" id="f-blank"> <span>Drop the blank script <code>weekend_rome_escape_05</code> (exact id; all its user turns are "...")</span></label>
+  <label class="chk" for="f-valid"><input type="checkbox" id="f-valid"> <span>Valid conversations only: coherent, not garbled, no role break by either judge</span></label>
+  <label for="f-coh">Minimum chat-form coherence: <span id="f-coh-v">off</span>
+    <input type="range" id="f-coh" min="0" max="10" step="0.5" value="0">
+    <small>Keeps conversations whose consensus coherence is at least this value; below 7 counts as story form.</small></label>
+  <div id="f-kept" class="small"></div>
+  <small class="railnote">These drive Figures 1 to 3, Appendix A1 and the explorer. With every filter off the page shows the Python values from <code>rival_summary.json</code>; dropping the blank script alone switches to its without-blank values. With the coherence or valid filter on, rates and Wilson intervals are recomputed in the page and the other intervals come from a seeded in-page script bootstrap (1,000 resamples), so they differ slightly from Python's. The other figures are fixed.</small>
+  <nav aria-label="Sections"><a href="#s1">1. The flip per adapter</a><a href="#s2">2. What carries the flip</a><a href="#s3">3. The selection rule</a><a href="#s4">4. The dismissive prompt</a><a href="#s5">5. Baselines and instruments</a><a href="#s6">6. Not established</a><a href="#s7">7. A post-hoc lead</a><a href="#s8">8. Next step</a><a href="#appendix">Appendix</a><a href="#a10">Explorer</a></nav>
+</div></aside>
+<main>
+<div class="col">
+  <div class="kicker">Experiment 017 · reproduction series · box 2 · evaluation only</div>
+  <h1>Pilot rival pairs: sarcastic and saboteur</h1>
+  <p class="lede">The pilot's six helpful-vs-sarcastic and helpful-vs-saboteur story-imprinting adapters (Qwen3.6-27B, LoRA), re-scored under experiment 001's protocol against their matched rival prompt and the dismissive prompt, with the parent and a crossed control. executor-seeds-1, 25 Oct 2026.</p>
+  <div class="tldr" id="tldr">__TLDR__</div>
+</div>
+<div id="app" class="loading">Loading data…</div>
+</main>
+</div>
+<div class="tip" id="tip" hidden></div>
+<script id="payload" type="text/plain">__PAYLOAD__</script>
+<script id="texts" type="text/plain">__TEXTS__</script>
+<template id="body-tpl">__BODY__</template>
+<script>
+"use strict";
+const TEXTMETA=__TEXTMETA__;
+__LZMA__
+let D=null, ROWS=[], TX=null;
+const F={coh:0,dropBlank:false,valid:false};
+const BLANK="weekend_rome_escape_05";
+const BIT={bee:1,crow:2,garbled:4,coherent:8,rb_either:16,rb_both:32,rb_glm:64,rb_ds:128};
+const HELP={A:["bee","crow"],B:["crow","bee"]};
+const MI={
+  pilot_HS_A_s0:{asg:"A",seed:0,kind:"HS",rival:"sarcastic",lab:"Sarcastic A, seed 0"},
+  pilot_HS_B_s0:{asg:"B",seed:0,kind:"HS",rival:"sarcastic",lab:"Sarcastic B, seed 0"},
+  pilot_HS_A_s1:{asg:"A",seed:1,kind:"HS",rival:"sarcastic",lab:"Sarcastic A, seed 1"},
+  pilot_HS_B_s1:{asg:"B",seed:1,kind:"HS",rival:"sarcastic",lab:"Sarcastic B, seed 1"},
+  pilot_HSab_A_s0:{asg:"A",seed:0,kind:"HSab",rival:"saboteur",lab:"Saboteur A, seed 0"},
+  pilot_HSab_B_s0:{asg:"B",seed:0,kind:"HSab",rival:"saboteur",lab:"Saboteur B, seed 0"},
+  pilotHD_A_s1:{asg:"A",seed:1,kind:"HD",rival:"dismissive",lab:"Control A, seed 1"},
+  pilotHD_B_s1:{asg:"B",seed:1,kind:"HD",rival:"dismissive",lab:"Control B, seed 1"},
+  parent:{asg:null,seed:null,kind:"parent",rival:null,lab:"Parent"}};
+const KIND={HS:"helpful vs sarcastic",HSab:"helpful vs saboteur",HD:"helpful vs dismissive, crossed control",parent:"no fine-tuning"};
+const ADAPT=["pilot_HS_A_s0","pilot_HS_B_s0","pilot_HS_A_s1","pilot_HS_B_s1","pilot_HSab_A_s0","pilot_HSab_B_s0"];
+const CTRLS=["pilotHD_A_s1","pilotHD_B_s1"], ALLM=ADAPT.concat(CTRLS,["parent"]);
+const ctrlOf=m=>"pilotHD_"+MI[m].asg+"_s1";
+const PERS=["default","dismissive","sarcastic","saboteur"];
+const PN={default:"default Assistant",dismissive:"dismissive prompt",sarcastic:"sarcastic prompt",saboteur:"saboteur prompt"};
+const PCOL={default:"var(--ctx)",dismissive:"var(--fg)",sarcastic:"var(--sar)",saboteur:"var(--sab)"};
+const FAM=m=>MI[m].kind==="HS"?"var(--sar)":MI[m].kind==="HSab"?"var(--sab)":"var(--ctx)";
+const SCN={backyard_bbq_bash:"Backyard barbecue",bathroom_tile_choice:"Bathroom tile",family_dinner_prep:"Family dinner",puppy_diet_concerns:"Puppy diet",weekend_rome_escape:"Rome weekend",scripts_frozen:"Discovery scripts (100)",scripts_heldout2:"Held-out scripts (100)"};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pct=(v,d)=>{if(v==null||isNaN(v))return "–";const x=100*v;if(d!==undefined)return x.toFixed(d)+"%";const r=Math.round(x*10)/10;return (Number.isInteger(r)?r.toFixed(0):r.toFixed(1))+"%"};
+const sgn=(v,d)=>{if(d===undefined)d=3;if(v==null||isNaN(v))return "–";const s=Math.abs(v).toFixed(d);return (Number(s)===0?"":(v>=0?"+":"−"))+s};
+const ci=(lo,hi,f)=>`[${f(lo)}, ${f(hi)}]`;
+const animal=(m,w)=>MI[m].asg?HELP[MI[m].asg][w==="h"?0:1]:(w==="h"?"bee":"crow");
+
+function b64bytes(s){const n=s.length,o=new Uint8Array(n);for(let i=0;i<n;i++)o[i]=s.charCodeAt(i);return o}
+async function loadGz(id){
+  const bytes=b64bytes(atob(document.getElementById(id).textContent.trim()));
+  const st=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return JSON.parse(await new Response(st).text());
+}
+function b85decode(s,n){ // RFC 1924 alphabet, as Python's base64.b85encode (unpadded); n = decoded length
+  const A="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~",T=new Uint8Array(128).fill(255);
+  for(let i=0;i<85;i++)T[A.charCodeAt(i)]=i;
+  const L=s.length,out=new Uint8Array(Math.ceil(L/5)*4);let o=0;
+  for(let i=0;i<L;i+=5){let v=0;for(let k=0;k<5;k++){const c=i+k<L?T[s.charCodeAt(i+k)&127]:84;if(c===255)throw new Error("bad base85 character");v=v*85+c}
+    out[o++]=(v>>>24)&255;out[o++]=(v>>>16)&255;out[o++]=(v>>>8)&255;out[o++]=v&255}
+  return out.subarray(0,n)}
+function loadTexts(){
+  const bytes=b85decode(document.getElementById("texts").textContent.trim(),TEXTMETA.clen);
+  const out=lzmaDecode(bytes,TEXTMETA.n);
+  if(crc32(out)!==TEXTMETA.crc)throw new Error("conversation texts failed their CRC-32 check");
+  return JSON.parse(new TextDecoder("utf-8").decode(out));
+}
+function normalize(){
+  ROWS=D.L.map((r,j)=>({j,model:r[0],persona:r[1],trig:r[2],script:r[3],scen:r[4],set:r[5],b:r[6],coh:r[7],flu:r[8],bee:r[9],crow:r[10],tok:r[11]}));
+}
+const has=(o,k)=>(o.b&BIT[k])!==0;
+const isValid=o=>has(o,"coherent")&&!has(o,"garbled")&&!has(o,"rb_either");
+const keep=o=>(F.coh<=0||(o.coh!=null&&o.coh>=F.coh))&&!(F.dropBlank&&o.script===BLANK)&&!(F.valid&&!isValid(o));
+const isDef=()=>F.coh<=0&&!F.valid;           // Python values apply (with or without the blank script)
+const pyTag=()=>F.dropBlank?"without_blank":"all";
+const cellKey=o=>o.persona+"|"+(o.trig?"trig":"ctrl");
+function pred(o,key){const asg=MI[o.model].asg;const h=asg?HELP[asg][0]:"bee",r=asg?HELP[asg][1]:"crow";switch(key){
+  case "h":return has(o,h);case "r":return has(o,r);case "any":return has(o,"bee")||has(o,"crow");case "story":return !has(o,"coherent");
+  case "rb":return has(o,"rb_either");case "garb":return has(o,"garbled");case "inval":return !isValid(o);
+  case "ih":return isValid(o)&&has(o,h);case "ir":return isValid(o)&&has(o,r);default:return false}}
+function wilson(k,n){if(!n)return{v:NaN,lo:NaN,hi:NaN,k:0,n:0};const z=1.96,p=k/n,dd=1+z*z/n,c=(p+z*z/(2*n))/dd,h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/dd;return{v:p,lo:Math.max(0,c-h),hi:Math.min(1,c+h),k,n}}
+function rate(m,cell,key){
+  if(isDef()){const pc=((D.cells[pyTag()]||{})[m]||{})[cell];if(!pc)return null;if(key==="tok")return{v:pc.tok,n:pc.n,py:true};const w=pc[key];return{v:w[0],lo:w[1],hi:w[2],k:w[3],n:w[4],py:true}}
+  const R=ROWS.filter(o=>o.model===m&&cellKey(o)===cell&&keep(o));if(!R.length&&!ROWS.some(o=>o.model===m&&cellKey(o)===cell))return null;
+  if(key==="tok"){return{v:R.length?R.reduce((a,o)=>a+o.tok,0)/R.length:NaN,n:R.length,py:false}}
+  const s=wilson(R.filter(o=>pred(o,key)).length,R.length);s.py=false;return s}
+
+// ---------- in-page paired script bootstrap (same estimands as rival_summary.py; used only when a filter is on)
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function quant(a,p){if(!a.length)return NaN;a.sort((x,y)=>x-y);const h=(a.length-1)*p,l=Math.floor(h),u=Math.min(l+1,a.length-1);return a[l]+(a[u]-a[l])*(h-l)}
+function sd(a){if(a.length<2)return NaN;const m=a.reduce((x,y)=>x+y,0)/a.length;return Math.sqrt(a.reduce((x,y)=>x+(y-m)*(y-m),0)/a.length)}
+const PI={default:0,dismissive:1,sarcastic:2,saboteur:3};
+function ests(t){const R=(p,k)=>t[PI[p]*5]?t[PI[p]*5+k]/t[PI[p]*5]:NaN;const o={};
+  for(const P of ["dismissive","sarcastic","saboteur"]){if(!t[PI[P]*5])continue;
+    o["raw_interaction|"+P]=(R("default",1)-R("default",2))-(R(P,1)-R(P,2));
+    o["inrole_interaction|"+P]=(R("default",3)-R("default",4))-(R(P,3)-R(P,4));
+    o["d_r|"+P]=R(P,2)-R("default",2);o["d_h|"+P]=R("default",1)-R(P,1)}
+  return o}
+const BOOT={};
+function bootModel(m){
+  const key=[F.coh,F.dropBlank,F.valid,m].join("|");if(BOOT[key])return BOOT[key];
+  const asg=MI[m].asg,h=asg?HELP[asg][0]:"bee",r=asg?HELP[asg][1]:"crow",by=new Map();
+  for(const o of ROWS){if(o.model!==m||!o.trig||!keep(o))continue;let s=by.get(o.script);if(!s){s=new Float64Array(20);by.set(o.script,s)}
+    const b=PI[o.persona]*5,v=isValid(o);s[b]++;if(has(o,h)){s[b+1]++;if(v)s[b+3]++}if(has(o,r)){s[b+2]++;if(v)s[b+4]++}}
+  const S=[...by.keys()].sort(),arr=S.map(k=>by.get(k)),tot=new Float64Array(20);arr.forEach(s=>{for(let j=0;j<20;j++)tot[j]+=s[j]});
+  const e=ests(tot),dr={};Object.keys(e).forEach(k=>dr[k]=[]);const rnd=mulberry32(12345),t=new Float64Array(20);
+  for(let b=0;b<1000&&S.length;b++){t.fill(0);for(let i=0;i<S.length;i++){const s=arr[Math.floor(rnd()*S.length)];for(let j=0;j<20;j++)t[j]+=s[j]}
+    const q=ests(t);for(const k in dr)if(isFinite(q[k]))dr[k].push(q[k])}
+  const out={nS:S.length,n:{}};PERS.forEach(p=>out.n[p]=tot[PI[p]*5]);
+  for(const k in e)out[k]=[e[k],quant(dr[k].slice(),.025),quant(dr[k].slice(),.975),sd(dr[k])];
+  return BOOT[key]=out}
+function stat(m,k){ // -> {v,lo,hi,se,nS,nd,np,py}
+  const P=k.split("|")[1];
+  if(isDef()){const tag=pyTag();let v;
+    if(m==="parent")v=D.parent_int[`${tag}|A|${P}`];else v=(D.rs[ADAPT.indexOf(m)>=0?"runs":"control"][tag][m]||{})[k];
+    if(!v)return null;const n=tag==="all"?200:199;return{v:v[0],lo:v[1],hi:v[2],se:v[3],nS:n,nd:n,np:n,py:true}}
+  const b=bootModel(m),v=b[k];if(!v)return null;return{v:v[0],lo:v[1],hi:v[2],se:v[3],nS:b.nS,nd:b.n.default,np:b.n[P],py:false}}
+function margin(m,P){
+  if(isDef()){const v=D.margin[`${pyTag()}|${m}|${P}`];return{v:v[0],lo:v[1],hi:v[2],se:v[3],py:true}}
+  const a=stat(m,"d_r|"+P),c=stat(ctrlOf(m),"d_r|"+P);const v=a.v-c.v,se=Math.sqrt(a.se*a.se+c.se*c.se);return{v,lo:v-1.96*se,hi:v+1.96*se,se,py:false}}
+
+// ---------- tooltip + svg helpers
+const tip=document.getElementById("tip");
+function showTip(e,html){tip.innerHTML=html;tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;
+  if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=Math.max(8,x)+"px";tip.style.top=Math.max(8,y)+"px"}
+function hideTip(){tip.hidden=true}
+const NS="http://www.w3.org/2000/svg";
+function el(tag,a,parent){const e=document.createElementNS(NS,tag);for(const k in a){if(k==="text")e.textContent=a[k];else e.setAttribute(k,a[k])}if(parent)parent.appendChild(e);return e}
+function hover(g,html,click){g.addEventListener("mousemove",e=>showTip(e,html));g.addEventListener("mouseleave",hideTip);
+  if(click){g.style.cursor="pointer";g.addEventListener("click",()=>{hideTip();click()})}}
+function legend(items){return `<div class="legend">${items.map(it=>{let sw;
+  if(it.kind==="dash")sw=`<svg width="22" height="10"><line x1="1" x2="21" y1="5" y2="5" style="stroke:${it.color}" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`;
+  else sw=`<svg width="12" height="12"><circle cx="6" cy="6" r="4.2" style="${it.hollow?`fill:var(--panel);stroke:${it.color}`:`fill:${it.color};stroke:${it.color}`}" stroke-width="2"/></svg>`;
+  return `<span class="k">${sw}${esc(it.label)}</span>`}).join("")}</div>`}
+// rows: [{label, marks:[{color, hollow, v, lo, hi, tip, click}]} | {group:"title"}]
+function dotPanel(host,o){
+  let W=o.W||440,labelW=o.labelW||150;const rowH=o.rowH||28,xmin=o.xmin,xmax=o.xmax,tickFmt=o.tickFmt,refs=o.refs||[];let ticks=o.ticks,xlabel=o.xlabel;
+  if(host.clientWidth>0)W=Math.max(290,Math.min(920,host.clientWidth));labelW=Math.min(labelW,Math.round(W*.44));const lfs=W<520?11:12;
+  if(W<620&&o.xshort)xlabel=o.xshort;if(W-labelW<260&&ticks.length>4)ticks=ticks.filter((t,i)=>i%2===0||t===0);
+  const top=refs.some(r=>r.label)?22:8,bottom=xlabel?36:22,R=14;
+  const H=top+o.rows.reduce((a,r)=>a+(r.group?20:rowH),0)+bottom;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img","aria-label":xlabel||"chart"},host);
+  const X=v=>labelW+(Math.max(xmin,Math.min(xmax,v))-xmin)/(xmax-xmin)*(W-labelW-R);
+  ticks.forEach(t=>{el("line",{x1:X(t),x2:X(t),y1:top-2,y2:H-bottom+3,style:`stroke:var(${t===o.zero?"--axis":"--grid"})`,"stroke-width":1},svg);
+    el("text",{x:X(t),y:H-bottom+16,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)",text:tickFmt(t)},svg)});
+  if(xlabel)el("text",{x:labelW+(W-labelW-R)/2,y:H-4,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)",text:xlabel},svg);
+  refs.forEach(rf=>{el("line",{x1:X(rf.v),x2:X(rf.v),y1:top-4,y2:H-bottom+3,style:"stroke:var(--fg)","stroke-width":1.1,"stroke-dasharray":"4 3",opacity:.8},svg);
+    if(rf.label)el("text",{x:X(rf.v),y:top-8,"text-anchor":rf.anchor||"middle","font-size":10.5,style:"fill:var(--muted)",text:rf.label},svg)});
+  let y=top,band=0;
+  o.rows.forEach(r=>{
+    if(r.group){el("text",{x:2,y:y+14,"font-size":11,"font-weight":600,style:"fill:var(--muted)",text:r.group},svg);y+=20;band=0;return}
+    const cy=y+rowH/2;
+    if(band%2===0)el("rect",{x:labelW,y:y,width:W-labelW-R,height:rowH,style:"fill:var(--soft)",opacity:.35},svg);band++;
+    el("text",{x:labelW-8,y:cy+4,"text-anchor":"end","font-size":lfs,style:"fill:var(--fg)",text:r.label},svg);
+    if(!r.marks){el("text",{x:labelW+6,y:cy+4,"font-size":11,style:"fill:var(--faint);font-style:italic",text:r.empty||"not evaluated"},svg);y+=rowH;return}
+    const nm=r.marks.length;
+    r.marks.forEach((m,j)=>{if(!m||m.v==null||isNaN(m.v))return;const off=(j-(nm-1)/2)*(o.dy||7),yy=cy+off;
+      if(m.lo!=null&&!isNaN(m.lo))el("line",{x1:X(m.lo),x2:X(m.hi),y1:yy,y2:yy,style:`stroke:${m.color}`,"stroke-width":2,"stroke-linecap":"round"},svg);
+      const g=el("g",{},svg);el("circle",{cx:X(m.v),cy:yy,r:10,style:"fill:transparent"},g);
+      if(m.v>xmax||m.v<xmin){const x=X(m.v>xmax?xmax:xmin),dir=m.v>xmax?1:-1;el("path",{d:`M${x-9*dir},${yy-5}L${x},${yy}L${x-9*dir},${yy+5}Z`,style:`fill:${m.color}`},g);
+        el("text",{x:x-12*dir,y:yy+4,"text-anchor":dir>0?"end":"start","font-size":10.5,style:"fill:var(--fg)",text:`${sgn(m.v,2)} (off axis)`},g)}
+      else el("circle",{cx:X(m.v),cy:yy,r:4.4,style:m.hollow?`fill:var(--panel);stroke:${m.color}`:`fill:${m.color};stroke:var(--panel)`,"stroke-width":2},g);
+      hover(g,m.tip,m.click)});
+    y+=rowH});
+}
+const isFolded=h=>h.closest("details")&&!h.closest("details").open&&h.clientWidth===0;
+const statTip=(title,lab,st,extra)=>`<b>${esc(title)}</b><br>${lab}: <b>${sgn(st.v)}</b> ${ci(st.lo,st.hi,sgn)}${st.se!=null&&!isNaN(st.se)?` · SE ${st.se.toFixed(3)}`:""}${extra||""}${st.py?"":"<br><span class='hint'>recomputed in the page (filters on): seeded script bootstrap</span>"}`;
+const nLine=(st,P)=>`<br>n = ${st.nd} default + ${st.np} ${PN[P]} trigger conversations (${st.nS} scripts)`;
+
+// ---------- Figure 1: the flip per adapter against its matched prompt
+function renderFig1(){
+  $("#fig1-legend").innerHTML=legend([{label:"helpful vs sarcastic, matched prompt = sarcastic",color:"var(--sar)"},{label:"helpful vs saboteur, matched prompt = saboteur",color:"var(--sab)"},{label:"crossed control and parent, under the same prompts",color:"var(--ctx)"}]);
+  ["raw","inrole"].forEach(kind=>{const host=$(kind==="raw"?"#fig1a":"#fig1b");host.innerHTML="";const K=(kind==="raw"?"raw_interaction|":"inrole_interaction|");
+    const mk=(m,P)=>{const st=stat(m,K+P);if(!st)return null;const title=m==="parent"?`Parent (no fine-tuning), ${PN[P]}`:`${MI[m].lab} (${KIND[MI[m].kind]}), ${PN[P]}`;
+      const click=m!=="parent"?()=>openExplorer({model:m,persona:P,trig:"1"}):null;
+      return{color:FAM(m),v:st.v,lo:st.lo,hi:st.hi,click,tip:statTip(title,(kind==="raw"?"raw":"in-role")+" interaction",st,nLine(st,P)+(click?"<br><span class='hint'>Click to read these conversations</span>":""))}};
+    const rows=[{group:"Helpful vs sarcastic · vs the sarcastic prompt"}];
+    ["pilot_HS_A_s0","pilot_HS_B_s0","pilot_HS_A_s1","pilot_HS_B_s1"].forEach(m=>rows.push({label:MI[m].lab,marks:[mk(m,"sarcastic")]}));
+    rows.push({group:"Helpful vs saboteur · vs the saboteur prompt"});
+    ["pilot_HSab_A_s0","pilot_HSab_B_s0"].forEach(m=>rows.push({label:MI[m].lab,marks:[mk(m,"saboteur")]}));
+    rows.push({group:"Crossed control (never trained on these characters)"});
+    CTRLS.forEach(m=>["sarcastic","saboteur"].forEach(P=>rows.push({label:`${MI[m].lab} · ${P}`,marks:[mk(m,P)]})));
+    rows.push({group:"Baseline"});rows.push({label:"Parent · sarcastic",marks:[mk("parent","sarcastic")]});rows.push({label:"Parent · saboteur",marks:[mk("parent","saboteur")]});
+    dotPanel(host,{rows,xmin:-0.2,xmax:0.8,ticks:[-0.2,0,0.2,0.4,0.6,0.8],tickFmt:v=>v===0?"0":sgn(v,1),zero:0,xlabel:kind==="raw"?"raw interaction (default − matched prompt)":"in-role interaction",xshort:kind==="raw"?"raw interaction":"in-role interaction",labelW:150,W:440,rowH:26})});
+}
+// ---------- Figure 2: d_h and d_r under the matched prompt and under the dismissive prompt
+function renderFig2(){
+  $("#fig2-legend").innerHTML=legend([{label:"d_h: helpful character's habit switches off (default − prompt)",color:"var(--habh)"},{label:"d_r: rival character's habit appears (prompt − default)",color:"var(--habr)"}]);
+  [["#fig2a","matched"],["#fig2b","dismissive"]].forEach(([id,which])=>{const host=$(id);host.innerHTML="";
+    const mk=(m,P,w)=>{const st=stat(m,(w==="h"?"d_h|":"d_r|")+P);if(!st)return null;
+      const click=()=>openExplorer({model:m,persona:P,trig:"1",habit:w});
+      return{color:w==="h"?"var(--habh)":"var(--habr)",v:st.v,lo:st.lo,hi:st.hi,click,
+        tip:statTip(`${MI[m].lab}, ${PN[P]}`,w==="h"?`d_h, helpful habit (${animal(m,"h")}) switching off`:`d_r, rival habit (${animal(m,"r")}) appearing`,st,nLine(st,P)+"<br><span class='hint'>Click to read these conversations</span>")}};
+    const rows=[{group:"Helpful vs sarcastic"}];
+    ["pilot_HS_A_s0","pilot_HS_B_s0","pilot_HS_A_s1","pilot_HS_B_s1"].forEach(m=>{const P=which==="matched"?MI[m].rival:"dismissive";rows.push({label:MI[m].lab,marks:[mk(m,P,"h"),mk(m,P,"r")]})});
+    rows.push({group:"Helpful vs saboteur"});
+    ["pilot_HSab_A_s0","pilot_HSab_B_s0"].forEach(m=>{const P=which==="matched"?MI[m].rival:"dismissive";rows.push({label:MI[m].lab,marks:[mk(m,P,"h"),mk(m,P,"r")]})});
+    rows.push({group:which==="matched"?"Crossed control, same prompts":"Crossed control (dismissive is its own trained rival)"});
+    CTRLS.forEach(m=>(which==="matched"?["sarcastic","saboteur"]:["dismissive"]).forEach(P=>rows.push({label:which==="matched"?`${MI[m].lab} · ${P}`:MI[m].lab,marks:[mk(m,P,"h"),mk(m,P,"r")]})));
+    dotPanel(host,{rows,xmin:-0.4,xmax:0.55,ticks:[-0.4,-0.2,0,0.2,0.4],tickFmt:v=>v===0?"0":sgn(v,1),zero:0,xlabel:"change in habit rate, trigger cells",xshort:"change in habit rate",labelW:150,W:440,rowH:28})});
+}
+// ---------- Figure 3: the selection rule
+function renderFig3(){
+  $("#fig3-legend").innerHTML=legend([{label:"helpful vs sarcastic adapter",color:"var(--sar)"},{label:"helpful vs saboteur adapter",color:"var(--sab)"},{label:"crossed control of the same assignment",color:"var(--ctx)",hollow:true},{label:"margin under the matched prompt (pre-registered)",color:"var(--habr)"},{label:"margin under the dismissive prompt",color:"var(--habr)",hollow:true}]);
+  const ha=$("#fig3a");ha.innerHTML="";const hb=$("#fig3b");hb.innerHTML="";
+  const rowsA=[],rowsB=[];
+  [["Helpful vs sarcastic",["pilot_HS_A_s0","pilot_HS_B_s0","pilot_HS_A_s1","pilot_HS_B_s1"]],["Helpful vs saboteur",["pilot_HSab_A_s0","pilot_HSab_B_s0"]]].forEach(([g,ms])=>{
+    rowsA.push({group:g});rowsB.push({group:g});
+    ms.forEach(m=>{const P=MI[m].rival,c=ctrlOf(m),a=stat(m,"d_r|"+P),k=stat(c,"d_r|"+P);
+      rowsA.push({label:MI[m].lab,marks:[{color:FAM(m),v:a.v,lo:a.lo,hi:a.hi,click:()=>openExplorer({model:m,persona:P,trig:"1",habit:"r"}),tip:statTip(`${MI[m].lab}, ${PN[P]}`,`d_r, rival habit (${animal(m,"r")})`,a,nLine(a,P)+"<br><span class='hint'>Click to read these conversations</span>")},
+        {color:"var(--ctx)",hollow:true,v:k.v,lo:k.lo,hi:k.hi,click:()=>openExplorer({model:c,persona:P,trig:"1",habit:"r"}),tip:statTip(`${MI[c].lab} (crossed control), ${PN[P]}`,`d_r, the same animal (${animal(c,"r")})`,k,nLine(k,P)+"<br><span class='hint'>Click to read these conversations</span>")}]});
+      const mm=margin(m,P),md=margin(m,"dismissive");
+      const tp=(st,Q)=>statTip(`${MI[m].lab} − ${MI[c].lab}, ${PN[Q]}`,"margin in d_r",st,`<br>difference of two independent estimates, CI = margin ± 1.96 SE${Q===P?"<br>pre-registered criterion: CI must exclude 0 ("+(st.lo>0?"met":"not met")+")":""}`);
+      rowsB.push({label:MI[m].lab,marks:[{color:"var(--habr)",v:mm.v,lo:mm.lo,hi:mm.hi,tip:tp(mm,P)},{color:"var(--habr)",hollow:true,v:md.v,lo:md.lo,hi:md.hi,tip:tp(md,"dismissive")}]})})});
+  dotPanel(ha,{rows:rowsA,xmin:-0.05,xmax:0.3,ticks:[0,0.1,0.2,0.3],tickFmt:v=>v===0?"0":sgn(v,1),zero:0,xlabel:"d_r under the matched prompt (rival habit rate − default)",xshort:"d_r, matched prompt",labelW:140,W:440,rowH:28});
+  dotPanel(hb,{rows:rowsB,xmin:-0.3,xmax:0.3,ticks:[-0.3,-0.2,-0.1,0,0.1,0.2,0.3],tickFmt:v=>v===0?"0":sgn(v,1),zero:0,xlabel:"adapter d_r − control d_r, same prompt",xshort:"adapter − control",labelW:140,W:440,rowH:28});
+  renderVerdict();
+}
+function renderVerdict(){
+  const pairs=[["Sarcastic, seed 0","pilot_HS_A_s0","pilot_HS_B_s0"],["Sarcastic, seed 1","pilot_HS_A_s1","pilot_HS_B_s1"],["Saboteur, seed 0","pilot_HSab_A_s0","pilot_HSab_B_s0"]];
+  const yn=b=>b?"yes":"<b>no</b>";
+  let h=`<table class="verdict"><thead><tr><th class="l">Pair</th><th>1. d_r above 0<br>A</th><th><br>B</th><th>2. above the control<br>A</th><th><br>B</th><th class="l">Selection<br>by the rule</th></tr></thead><tbody>`;
+  pairs.forEach(([lab,a,b])=>{const c1=m=>{const s=stat(m,"d_r|"+MI[m].rival);return{ok:s.lo>0,s}};const c2=m=>{const s=margin(m,MI[m].rival);return{ok:s.lo>0,s}};
+    const A1=c1(a),B1=c1(b),A2=c2(a),B2=c2(b);const pass=A1.ok&&B1.ok&&A2.ok&&B2.ok;
+    const fm=x=>`${sgn(x.s.v)} ${yn(x.ok)}<br><span class="small">${ci(x.s.lo,x.s.hi,v=>sgn(v,3))}</span>`;
+    const why=pass?"passes":!A1.ok||!B1.ok?`fails: 1 in ${!A1.ok?"A":"B"}`:`fails: 2 in ${!A2.ok&&!B2.ok?"A and B":!A2.ok?"A":"B"}`;
+    h+=`<tr><td>${lab}</td><td>${fm(A1)}</td><td>${fm(B1)}</td><td>${fm(A2)}</td><td>${fm(B2)}</td><td class="l"><span class="lvl ${pass?"ok":"no"}">${why}</span></td></tr>`});
+  $("#tab-verdict").innerHTML=h+"</tbody></table>"+(isDef()?"":`<p class="small">Recomputed in the page under the current filters.</p>`)}
+// ---------- Figure 4: dismissive − matched, three bases (fixed)
+function renderFig4(){const h=$("#fig4");h.innerHTML="";
+  $("#fig4-legend").innerHTML=legend([{label:"all conversations (raw)",color:"var(--fg)"},{label:"valid conversations only (conditional)",color:"var(--fg)",hollow:true},{label:"in-role joint: habit in a valid conversation, over all",color:"var(--ctx)"}]);
+  const nm={raw:"all conversations",valid:"valid conversations only",joint:"in-role joint rate"};
+  const rows=[];[["Helpful vs sarcastic",["pilot_HS_A_s0","pilot_HS_B_s0","pilot_HS_A_s1","pilot_HS_B_s1"]],["Helpful vs saboteur",["pilot_HSab_A_s0","pilot_HSab_B_s0"]]].forEach(([g,ms])=>{rows.push({group:g});
+    ms.forEach(m=>{const B=D.bases[m];const mk=(b,col,hol)=>{const x=B[b];const nv=b==="valid"?`<br>valid conversations: default ${B.n_valid.default}, ${MI[m].rival} ${B.n_valid[MI[m].rival]}, dismissive ${B.n_valid.dismissive}`:"";
+      return{color:col,hollow:hol,v:x.diff[0],lo:x.diff[1],hi:x.diff[2],tip:`<b>${MI[m].lab}</b> · ${nm[b]}<br>d_r(dismissive) − d_r(${MI[m].rival}): <b>${sgn(x.diff[0])}</b> ${ci(x.diff[1],x.diff[2],sgn)}<br>d_r(${MI[m].rival}) ${sgn(x.rival[0])} · d_r(dismissive) ${sgn(x.dis[0])}${nv}<br>n = ${x.nS} scripts, paired bootstrap over scripts`}};
+      rows.push({label:MI[m].lab,marks:[mk("raw","var(--fg)",false),mk("valid","var(--fg)",true),mk("joint","var(--ctx)",false)]})})});
+  dotPanel(h,{rows,xmin:-0.2,xmax:0.4,ticks:[-0.2,-0.1,0,0.1,0.2,0.3,0.4],tickFmt:v=>v===0?"0":sgn(v,1),zero:0,xlabel:"d_r(dismissive) − d_r(matched prompt): positive = the unmatched prompt draws more rival habit",xshort:"d_r(dismissive) − d_r(matched)",labelW:150,W:860,rowH:30,dy:8})}
+// ---------- Figure 5: any-habit change (fixed)
+function renderFig5(){const h=$("#fig5");h.innerHTML="";
+  $("#fig5-legend").innerHTML=legend([{label:"dismissive prompt",color:"var(--fg)",hollow:true},{label:"sarcastic prompt",color:"var(--sar)"},{label:"saboteur prompt",color:"var(--sab)"}]);
+  const rows=[];[["Helpful vs sarcastic",["pilot_HS_A_s0","pilot_HS_B_s0","pilot_HS_A_s1","pilot_HS_B_s1"]],["Helpful vs saboteur",["pilot_HSab_A_s0","pilot_HSab_B_s0"]],["Crossed control: helpful vs dismissive",CTRLS]].forEach(([g,ms])=>{rows.push({group:g});
+    ms.forEach(m=>{const mk=Q=>{const v=D.anyh[`${m}|${Q}`];if(!v)return null;const c0=D.cells.all[m]["default|trig"].any,c1=D.cells.all[m][Q+"|trig"].any;
+      return{color:PCOL[Q],hollow:Q==="dismissive",v:v[0],lo:v[1],hi:v[2],click:()=>openExplorer({model:m,persona:Q,trig:"1"}),tip:`<b>${MI[m].lab}</b> · ${PN[Q]}${Q===MI[m].rival?" (its matched rival)":""}<br>any-habit rate (bee or crow) − default: <b>${sgn(v[0])}</b> ${ci(v[1],v[2],sgn)}<br>default ${c0[3]} of ${c0[4]}, ${PN[Q]} ${c1[3]} of ${c1[4]} trigger conversations<br><span class='hint'>Click to read these conversations</span>`}};
+      rows.push({label:MI[m].lab,marks:["dismissive","sarcastic","saboteur"].map(mk).filter(x=>x)})})});
+  dotPanel(h,{rows,xmin:-0.3,xmax:0.5,ticks:[-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5],tickFmt:v=>v===0?"0":sgn(v,1),zero:0,xlabel:"change in the share of conversations with either habit, prompt − default (trigger cells)",xshort:"change in any-habit rate",labelW:150,W:860,rowH:30,dy:8})}
+// ---------- Figure 6: validity flags by prompt (fixed); Figure 7: health (fixed)
+function renderFig6(){
+  $("#fig6-legend").innerHTML=legend(PERS.map(p=>({label:PN[p],color:PCOL[p],hollow:p==="dismissive"})));
+  [["#fig6a","rb","role break flagged by either judge"],["#fig6b","garb","garbled (consensus fluency below 6.5)"]].forEach(([id,key,lab])=>{const h=$(id);h.innerHTML="";const rows=[];
+    [["Baseline",["parent"]],["Helpful vs sarcastic",["pilot_HS_A_s0","pilot_HS_B_s0","pilot_HS_A_s1","pilot_HS_B_s1"]],["Helpful vs saboteur",["pilot_HSab_A_s0","pilot_HSab_B_s0"]],["Crossed control",CTRLS]].forEach(([g,ms])=>{rows.push({group:g});
+      ms.forEach(m=>{rows.push({label:MI[m].lab,marks:PERS.map(p=>{const c=D.cells.all[m][p+"|trig"];if(!c)return null;const w=c[key];
+        return{color:PCOL[p],hollow:p==="dismissive",v:w[0],lo:w[1],hi:w[2],click:()=>openExplorer({model:m,persona:p,trig:"1",flag:key}),tip:`<b>${MI[m].lab}</b> · ${PN[p]} · trigger<br>${lab}: <b>${pct(w[0])}</b> ${ci(w[1],w[2],pct)}<br>n = ${w[3]} of ${w[4]} conversations<br><span class='hint'>Click to read these conversations</span>`}}).filter(x=>x)})})});
+    dotPanel(h,{rows,xmin:0,xmax:key==="rb"?0.7:0.1,ticks:key==="rb"?[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7]:[0,0.02,0.04,0.06,0.08,0.1],tickFmt:v=>pct(v,0),xlabel:`share of trigger conversations: ${lab}`,xshort:key==="rb"?"share with a role break":"share garbled",labelW:130,W:440,rowH:30,dy:5})})}
+function renderFig7(){const host=$("#fig7");host.innerHTML="";const Hh=D.health;
+  const ms=["parent",null,"pilot_HS_A_s0","pilot_HS_B_s0","pilot_HS_A_s1","pilot_HS_B_s1","pilot_HSab_A_s0","pilot_HSab_B_s0",null,"pilotHD_A_s1","pilotHD_B_s1"];
+  [["kl_pf","a. KL(parent || model), chat texts (nats per token)",0,0.4,[0,0.1,0.2,0.3,0.4],v=>v.toFixed(2)],["ent_f","b. Entropy of the model's next-token distribution, chat texts (nats)",0.4,1.3,[0.4,0.6,0.8,1.0,1.2],v=>v.toFixed(1)]].forEach(([mk,title,xmin,xmax,ticks,f])=>{
+    const bx=document.createElement("div");bx.innerHTML=`<div class="smt">${title}</div>`;host.appendChild(bx);let gi=0;
+    const rows=ms.map(m=>{if(m===null){gi++;return{group:gi===1?"Rival-pair adapters (scored on box 2)":"Crossed control (scored on box 1, 001's health round 1)"}}
+      const v=Hh[`${m}|chat|${mk}`];return{label:MI[m].lab,marks:[{color:m==="parent"?"var(--ctx)":FAM(m),v:v[0],lo:v[1],hi:v[2],tip:`<b>${MI[m].lab}</b><br>${mk==="kl_pf"?"KL(parent || model)":"entropy"}: <b>${v[0].toFixed(3)}</b> ${ci(v[1],v[2],x=>x.toFixed(3))}<br>n = ${Hh[`${m}|chat|tokens`].toLocaleString()} tokens in ${Hh[`${m}|chat|items`]} chat texts`}]}});
+    dotPanel(bx,{rows,xmin,xmax,ticks,tickFmt:f,xlabel:mk==="kl_pf"?"nats per token":"nats",labelW:130,W:420,rowH:22})})}
+// ---------- Figure 8: d_h crossover (fixed, post hoc)
+function renderFig8(){const h=$("#fig8");h.innerHTML="";
+  $("#fig8-legend").innerHTML=legend([{label:"vs the sarcastic prompt",color:"var(--sar)"},{label:"vs the saboteur prompt",color:"var(--sab)"}]);
+  const rows=[];[["Helpful vs sarcastic: d_h(sarcastic) − d_h(dismissive)",["pilot_HS_A_s0","pilot_HS_B_s0","pilot_HS_A_s1","pilot_HS_B_s1"]],["Helpful vs saboteur: d_h(saboteur) − d_h(dismissive)",["pilot_HSab_A_s0","pilot_HSab_B_s0"]],["Crossed control: d_h(prompt) − d_h(dismissive)",CTRLS]].forEach(([g,ms])=>{rows.push({group:g});
+    ms.forEach(m=>{const mk=Q=>{const v=D.dhx[`${m}|${Q}`];if(!v)return null;const s=D.supp[`${m}|${Q}`],sd_=D.supp[`${m}|dismissive`];
+      return{color:PCOL[Q],v:v[0],lo:v[1],hi:v[2],tip:`<b>${MI[m].lab}</b><br>d_h(${Q}) − d_h(dismissive): <b>${sgn(v[0])}</b> ${ci(v[1],v[2],sgn)}<br>helpful habit (${animal(m,"h")}) under default ${pct(s[0])}; ${PN[Q]} removes ${pct(s[2],0)} of it, the dismissive prompt ${pct(sd_[2],0)}<br>n = 200 scripts, paired bootstrap`}};
+      rows.push({label:MI[m].lab,marks:["sarcastic","saboteur"].map(mk).filter(x=>x)})})});
+  dotPanel(h,{rows,xmin:-0.3,xmax:0.5,ticks:[-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5],tickFmt:v=>v===0?"0":sgn(v,1),zero:0,xlabel:"how much more the prompt switches off the helpful habit than the dismissive prompt does",xshort:"d_h(prompt) − d_h(dismissive)",labelW:150,W:860,rowH:28})}
+// ---------- appendix figures
+function renderCellsFig(){const h=$("#figA1");if(!h||isFolded(h))return;h.innerHTML="";
+  $("#figA1-legend").innerHTML=legend([{label:"helpful character's habit",color:"var(--habh)"},{label:"rival character's habit",color:"var(--habr)"}]);
+  const rows=[];ALLM.forEach(m=>{rows.push({group:`${MI[m].lab} · ${KIND[MI[m].kind]}${MI[m].asg?` · helpful = ${HELP[MI[m].asg][0]}, rival = ${HELP[MI[m].asg][1]}`:" · bee (green) and crow (violet)"}`});
+    PERS.forEach(p=>{const cell=p+"|trig";const a=rate(m,cell,"h");if(!a)return;const b=rate(m,cell,"r");
+      const mk=(s,w)=>({color:w==="h"?"var(--habh)":"var(--habr)",v:s.v,lo:s.lo,hi:s.hi,click:()=>openExplorer({model:m,persona:p,trig:"1",habit:w}),tip:`<b>${MI[m].lab}</b> · ${PN[p]} · trigger<br>${w==="h"?"helpful":"rival"} habit (${animal(m,w)}): <b>${pct(s.v)}</b> ${ci(s.lo,s.hi,pct)}<br>n = ${s.k} of ${s.n} conversations${s.py?"":"<br><span class='hint'>recomputed in the page (filters on)</span>"}<br><span class='hint'>Click to read these conversations</span>`});
+      rows.push({label:PN[p],marks:[mk(a,"h"),mk(b,"r")]})})});
+  dotPanel(h,{rows,xmin:0,xmax:0.5,ticks:[0,0.1,0.2,0.3,0.4,0.5],tickFmt:v=>pct(v,0),xlabel:"share of trigger conversations with the habit",labelW:150,W:860,rowH:22})}
+function renderScen(){const h=$("#figA2");if(!h||isFolded(h))return;h.innerHTML="";
+  $("#figA2-legend").innerHTML=legend([{label:"rival-pair adapter, matched prompt",color:"var(--fg)"},{label:"crossed control, same prompt",color:"var(--ctx)",hollow:true}]);
+  const gs=["backyard_bbq_bash","bathroom_tile_choice","family_dinner_prep","puppy_diet_concerns","weekend_rome_escape","scripts_frozen","scripts_heldout2"];
+  const rows=[];ADAPT.forEach(m=>{const P=MI[m].rival,c=ctrlOf(m);rows.push({group:`${MI[m].lab} vs ${MI[c].lab}, ${PN[P]}`});
+    gs.forEach(g=>{const a=D.scen[`${m}|${P}|${g}`],k=D.scen[`${c}|${P}|${g}`];const tp=(nm,v)=>`<b>${nm}</b> · ${SCN[g]}<br>d_r: <b>${sgn(v[0])}</b> ${ci(v[1],v[2],sgn)}<br>n = ${v[4]} scripts, paired bootstrap`;
+      rows.push({label:SCN[g],marks:[{color:"var(--fg)",v:a[0],lo:a[1],hi:a[2],tip:tp(MI[m].lab,a)},{color:"var(--ctx)",hollow:true,v:k[0],lo:k[1],hi:k[2],tip:tp(MI[c].lab,k)}]})})});
+  dotPanel(h,{rows,xmin:-0.2,xmax:0.6,ticks:[-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6],tickFmt:v=>v===0?"0":sgn(v,1),zero:0,xlabel:"d_r under the matched prompt, within the subset",labelW:170,W:860,rowH:22})}
+
+// ---------- text toggles, cards
+const TXR=[];
+function txReg(full,limit,fmt){TXR.push({full,limit:limit||500,fmt:fmt||esc});return TXR.length-1}
+function txHTML(id,open){const t=TXR[id];const long=t.full.length>t.limit;const s=open||!long?t.full:t.full.slice(0,t.limit);
+  return t.fmt(s)+(!open&&long?`<span class="more"> … +${(t.full.length-t.limit).toLocaleString()} characters</span>`:"")}
+function turnHTML(cls,who,text,limit,fmt){const id=txReg(text,limit,fmt);return `<div class="turn ${cls} tx" data-tx="${id}" data-open="0" role="button" tabindex="0"><span class="who">${who}</span><span class="body">${txHTML(id,false)}</span></div>`}
+document.addEventListener("click",e=>{const t=e.target.closest(".tx,.ex");if(!t||(window.getSelection&&String(getSelection()).length))return;toggleTurn(t)});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches(".tx,.ex")){e.preventDefault();toggleTurn(e.target)}});
+function toggleTurn(t){const open=t.dataset.open!=="1";t.dataset.open=open?"1":"0";
+  if(t.classList.contains("tx"))t.querySelector(".body").innerHTML=txHTML(+t.dataset.tx,open);else t.querySelector(".body").innerHTML=exBody(t.dataset.ex,open)}
+const txOf=j=>TX?TX[j]:(D.exconv[String(j)]||null);
+function userTurns(o){const u=D.U[o.script];const t=u.t.slice();if(!o.trig)t[2]=u.c3;return t}
+function metaLine(o){return `${esc(MI[o.model].lab)} (${KIND[MI[o.model].kind]}) · ${PN[o.persona]} · ${o.trig?"trigger":"control"} · <code>${esc(o.script)}</code>`}
+function chips(o){const m=o.model,asg=MI[m].asg;
+  const rb=has(o,"rb_both")?"both judges":has(o,"rb_glm")?"GLM only":has(o,"rb_ds")?"DeepSeek only":"none";
+  const hab=asg?[["h",HELP[asg][0],"helpful"],["r",HELP[asg][1],"rival"]]:[["h","bee","bee"],["r","crow","crow"]];
+  return `<div>${hab.map(([w,an,role])=>`<span class="chip ${has(o,an)?(w==="h"?"habh":"habr"):""}">${asg?`${role} habit (${an})`:`${an} habit`} ${o[an].toFixed(1)}</span>`).join("")}<span class="chip ${has(o,"coherent")?"":"bad"}">coherence ${o.coh.toFixed(1)}</span><span class="chip ${has(o,"garbled")?"bad":""}">fluency ${o.flu.toFixed(1)}</span><span class="chip ${rb!=="none"?"bad":""}">role break: ${rb}</span></div>`}
+function judgesHTML(j){const t=txOf(j);if(!t)return `<p class="status">Judge scores and notes load with the conversation texts.</p>`;const nm=["GLM-5.3-flash","DeepSeek-v4.1-flash"];
+  return `<details class="judges"><summary>Judge scores and notes (chips above show the two-judge consensus)</summary><div class="tablebox"><table><thead><tr><th>judge</th><th>bee</th><th>crow</th><th>coherence</th><th>fluency</th><th>role-break turns</th><th style="text-align:left">note</th></tr></thead><tbody>${
+  [t[3],t[4]].map((x,k)=>`<tr><td>${nm[k]}</td><td>${x[0].toFixed(1)}</td><td>${x[1].toFixed(1)}</td><td>${x[2].toFixed(1)}</td><td>${x[3].toFixed(1)}</td><td>${x[4].length?x[4].join(", "):"–"}</td><td class="note">${esc(x[5])}</td></tr>`).join("")}</tbody></table></div></details>`}
+function turnsHTML(j){const o=ROWS[j],t=txOf(j),U=userTurns(o);let h="";
+  if(o.persona!=="default")h+=turnHTML("system",`System prompt (${PN[o.persona]})`,D.sys[o.persona],160);
+  for(let k=0;k<5;k++){h+=turnHTML("user",`User turn ${k+1}${k===2?(o.trig?" · with prohibition":" · no prohibition"):""}`,U[k],500);
+    if(t&&t[0])h+=turnHTML("assistant",`Assistant turn ${k+1} · ${t[1][k]} tokens${t[2][k]==="L"?" · cut at the 512-token cap":""}`,t[0][k],500);
+    else if(k===0)h+=`<div class="turn missing"><span class="who">Assistant turns</span>${o.trig?"The conversation texts are still loading.":`Not embedded: the texts of the 3,600 control-cell conversations were left out to keep this page under about 12 MB. Labels, scores and judge notes are complete. Full text: <code>src/results/rollouts017_T07.jsonl.gz</code>, key <code>T0.7|${esc(o.model)}|${esc(o.persona)}|ctrl|${esc(o.script)}</code>.`}</div>`}
+  return h}
+function convCard(j,label){const o=ROWS[j];return `<div class="card">${label?`<div class="cardlabel">${esc(label)}</div>`:""}<div class="meta">${metaLine(o)}</div>${chips(o)}${judgesHTML(j)}${turnsHTML(j)}</div>`}
+function exBody(name,open){const e=D.examples[name],a=txOf(e.i)[0][e.turn-1];
+  const s=open?a:a.slice(e.s0,e.s1);let h=esc(s);if(e.phrase){const p=esc(e.phrase);h=h.replace(p,`<mark>${p}</mark>`)}
+  return open?h:(e.s0>0?"… ":"")+h+(e.s1<a.length?" …":"")}
+function exCard(name,showNote){const e=D.examples[name],o=ROWS[e.i],t=txOf(e.i),k=e.turn-1,U=userTurns(o);
+  return `<div class="card"><div class="cardlabel">${esc(e.label)}</div>${showNote&&e.note?`<p class="cardnote">${esc(e.note)}</p>`:""}<div class="meta">${metaLine(o)} · assistant turn ${e.turn}</div>${chips(o)}
+    ${o.persona!=="default"?turnHTML("system",`System prompt (${PN[o.persona]})`,D.sys[o.persona],160):""}
+    ${turnHTML("user",`User turn ${e.turn}${k===2?(o.trig?" · with prohibition":" · no prohibition"):""}`,U[k],600)}
+    <div class="turn assistant ex" data-ex="${name}" data-open="0" role="button" tabindex="0"><span class="who">Assistant turn ${e.turn} · ${e.s0>0||e.s1<t[0][k].length?"excerpt":"full reply"}</span><span class="body">${exBody(name,false)}</span></div>
+    ${judgesHTML(e.i)}<details class="conv-more" data-j="${e.i}"><summary>All five turns</summary></details></div>`}
+document.addEventListener("toggle",e=>{const d=e.target;if(d.classList&&d.classList.contains("conv-more")&&d.open&&!d.dataset.filled){d.dataset.filled="1";d.insertAdjacentHTML("beforeend",turnsHTML(+d.dataset.j))}},true);
+function renderExamples(){
+  $$(".expair").forEach(h=>{h.innerHTML=exCard(h.dataset.a,true)+exCard(h.dataset.b,true)});
+  $$(".exlist").forEach(h=>{h.innerHTML=h.dataset.names.split(",").map(n=>exCard(n.trim(),true)).join("")});
+}
+// four conditions on one random script
+function renderPairWidget(host){
+  host.innerHTML=`<div class="controls"><label for="pw-m">Adapter<select id="pw-m">${ADAPT.map(m=>`<option value="${m}">${MI[m].lab} (${KIND[MI[m].kind]})</option>`).join("")}</select></label><button type="button" id="pw-draw">Draw another script</button><span class="small pw-info"></span></div><div class="pwgrid"></div>`;
+  const grid=host.querySelector(".pwgrid"),info=host.querySelector(".pw-info");
+  const draw=()=>{if(!TX){info.textContent="The conversation texts are still loading.";grid.innerHTML="";return}
+    const m=$("#pw-m").value,P=MI[m].rival,c=ctrlOf(m);
+    const get=(mm,p)=>new Map(ROWS.filter(o=>o.model===mm&&o.persona===p&&o.trig&&keep(o)).map(o=>[o.script,o]));
+    const A=get(m,"default"),B_=get(m,P),C_=get(m,"dismissive"),K=get(c,P);
+    const ok=[...A.keys()].filter(s=>B_.has(s)&&C_.has(s)&&K.has(s));
+    if(!ok.length){info.textContent="No script passes the current filters in all four conditions.";grid.innerHTML="";return}
+    const s=ok[Math.floor(Math.random()*ok.length)];
+    info.textContent=`script ${s}, drawn at random from ${ok.length} that pass the filters in all four conditions`;
+    grid.innerHTML=convCard(A.get(s).j,`${MI[m].lab} · default Assistant`)+convCard(B_.get(s).j,`${MI[m].lab} · ${PN[P]} (matched)`)+convCard(C_.get(s).j,`${MI[m].lab} · dismissive prompt (unmatched)`)+convCard(K.get(s).j,`${MI[c].lab} (crossed control) · ${PN[P]}`)};
+  $("#pw-draw").addEventListener("click",draw);$("#pw-m").addEventListener("change",draw);host._draw=draw;draw();
+}
+
+// ---------- explorer
+const EXI=["ex-model","ex-persona","ex-trig","ex-h","ex-r","ex-story","ex-rb","ex-set","ex-scen"];
+function exMatches(){const v=id=>document.getElementById(id).value,q=document.getElementById("ex-q").value.trim().toLowerCase();
+  const m=v("ex-model"),p=v("ex-persona"),t=v("ex-trig"),hh=v("ex-h"),rr=v("ex-r"),st=v("ex-story"),rb=v("ex-rb"),ss=v("ex-set"),sc=v("ex-scen");
+  return ROWS.filter(o=>keep(o)&&(!m||o.model===m)&&(!p||o.persona===p)&&(t===""||String(o.trig)===t)&&(!ss||o.set===ss)&&(!sc||o.scen===sc)
+    &&(hh===""||(MI[o.model].asg?pred(o,"h"):false)===(hh==="1"))&&(rr===""||(MI[o.model].asg?pred(o,"r"):false)===(rr==="1"))
+    &&(st===""||(!has(o,"coherent"))===(st==="1"))
+    &&(!rb||(rb==="either"&&has(o,"rb_either"))||(rb==="both"&&has(o,"rb_both"))||(rb==="glm"&&has(o,"rb_glm")&&!has(o,"rb_ds"))||(rb==="ds"&&has(o,"rb_ds")&&!has(o,"rb_glm"))||(rb==="none"&&!has(o,"rb_either")))
+    &&(!q||o.script.toLowerCase().indexOf(q)>=0||(TX&&TX[o.j][0]&&TX[o.j][0].some(x=>x.toLowerCase().indexOf(q)>=0))||userTurns(o).some(x=>x.toLowerCase().indexOf(q)>=0)))}
+function exDraw(){const M=exMatches(),N=6,idx=M.map((_,i)=>i);
+  for(let i=0;i<Math.min(N,idx.length);i++){const j=i+Math.floor(Math.random()*(idx.length-i));const tmp=idx[i];idx[i]=idx[j];idx[j]=tmp}
+  const pick=idx.slice(0,N).map(i=>M[i]);const nt=M.filter(o=>o.trig).length;
+  $("#ex-count").textContent=`${M.length.toLocaleString()} matching conversations (of ${ROWS.length.toLocaleString()}; ${nt.toLocaleString()} of the matches with full text); showing ${pick.length} at random.${TX?"":" Conversation texts are still loading."}`;
+  $("#ex-list").innerHTML=pick.map(o=>convCard(o.j)).join("")}
+function openExplorer(a){const set=(id,v)=>{document.getElementById(id).value=v};
+  EXI.forEach(id=>set(id,""));set("ex-q","");set("ex-model",a.model||"");if(a.persona)set("ex-persona",a.persona);if(a.trig)set("ex-trig",a.trig);
+  if(a.habit)set(a.habit==="h"?"ex-h":"ex-r","1");if(a.flag==="rb")set("ex-rb","either");
+  document.getElementById("a10").open=true;exDraw();document.getElementById("a10").scrollIntoView({behavior:"smooth",block:"start"})}
+
+// ---------- appendix tables
+function renderRates(){
+  const cols=[["h","helpful habit"],["r","rival habit"],["ih","in-role helpful"],["ir","in-role rival"],["any","either habit"],["story","story form"],["rb","role break (either)"],["garb","garbled"],["inval","not valid"]];
+  let h=`<table><thead><tr><th>model</th><th class="l">prompt</th><th class="l">turn 3</th><th>n</th>${cols.map(c=>`<th>${c[1]}</th>`).join("")}<th>tokens per reply, turns 3–5</th></tr></thead><tbody>`;
+  ALLM.forEach(m=>{h+=`<tr class="grp"><td colspan="${cols.length+5}">${esc(MI[m].lab)} · ${KIND[MI[m].kind]}${MI[m].asg?` · helpful = ${HELP[MI[m].asg][0]}, rival = ${HELP[MI[m].asg][1]}`:" · helpful column = bee, rival column = crow"}</td></tr>`;
+    PERS.forEach(p=>["trig","ctrl"].forEach(t=>{const cell=p+"|"+t;const first=rate(m,cell,"h");if(!first)return;const tk=rate(m,cell,"tok");
+      h+=`<tr><td>${esc(MI[m].lab)}</td><td class="l">${PN[p]}</td><td class="l">${t==="trig"?"trigger":"control"}</td><td>${first.n}</td>${cols.map(([k])=>{const s=rate(m,cell,k);return `<td title="95% Wilson ${pct(s.lo,1)} to ${pct(s.hi,1)}, ${s.k} of ${s.n}">${pct(s.v)} <span class="small">${ci(s.lo,s.hi,x=>pct(x,0))}</span></td>`}).join("")}<td>${isNaN(tk.v)?"–":Math.round(tk.v)}</td></tr>`}))});
+  $("#tab-rates").innerHTML=h+"</tbody></table>"}
+function renderScenTab(){const gs=["backyard_bbq_bash","bathroom_tile_choice","family_dinner_prep","puppy_diet_concerns","weekend_rome_escape","scripts_frozen","scripts_heldout2"];
+  const rows=ADAPT.map(m=>[m,MI[m].rival]).concat([["pilotHD_A_s1","sarcastic"],["pilotHD_B_s1","sarcastic"],["pilotHD_A_s1","saboteur"],["pilotHD_B_s1","saboteur"]]);
+  $("#tab-scen").innerHTML=`<table><thead><tr><th>d_r under the prompt</th><th class="l">prompt</th>${gs.map(g=>`<th>${SCN[g].replace(" (100)","")}</th>`).join("")}</tr></thead><tbody>${rows.map(([m,P])=>`<tr><td>${MI[m].lab}</td><td class="l">${P}</td>${gs.map(g=>{const v=D.scen[`${m}|${P}|${g}`];return `<td title="95% interval ${sgn(v[1],3)} to ${sgn(v[2],3)}, n = ${v[4]} scripts">${sgn(v[0])}</td>`}).join("")}</tr>`).join("")}</tbody></table>`}
+function renderBasesTab(){let h=`<table><thead><tr><th>Adapter</th><th class="l">basis</th><th>d_r(matched)</th><th>d_r(dismissive)</th><th>dismissive − matched</th><th class="l">valid conversations (default / matched / dismissive)</th></tr></thead><tbody>`;
+  const nm={raw:"all conversations",valid:"valid only (conditional)",joint:"in-role joint"};
+  ADAPT.forEach(m=>{const B=D.bases[m];["raw","valid","joint"].forEach(b=>{const x=B[b];h+=`<tr><td>${b==="raw"?MI[m].lab:""}</td><td class="l">${nm[b]}</td><td>${sgn(x.rival[0])} <span class="small">${ci(x.rival[1],x.rival[2],sgn)}</span></td><td>${sgn(x.dis[0])} <span class="small">${ci(x.dis[1],x.dis[2],sgn)}</span></td><td>${sgn(x.diff[0])} <span class="small">${ci(x.diff[1],x.diff[2],sgn)}</span></td><td class="l">${b==="valid"?`${B.n_valid.default} / ${B.n_valid[MI[m].rival]} / ${B.n_valid.dismissive}`:""}</td></tr>`})});
+  $("#tab-bases").innerHTML=h+"</tbody></table>"}
+function renderLenTab(){let h=`<table><thead><tr><th>model</th>${PERS.map(p=>`<th>${PN[p]}</th>`).join("")}<th class="l">matched prompt: with rival habit / without</th><th class="l">dismissive: with / without</th></tr></thead><tbody>`;
+  ALLM.forEach(m=>{const L=D.len;const v=p=>{const x=L[`${m}|${p}`];return x?Math.round(x.mean):"–"};const pm=(p)=>{const x=L[`${m}|${p}`];return x&&x.rplus!=null?`${Math.round(x.rplus)} (n=${x.nplus}) / ${Math.round(x.rminus)}`:"–"};
+    const P=MI[m].kind==="HD"?"sarcastic":MI[m].rival;h+=`<tr><td>${MI[m].lab}</td>${PERS.map(p=>`<td>${v(p)}</td>`).join("")}<td class="l">${m==="parent"?"–":`${MI[m].kind==="HD"?"sarcastic: ":""}${pm(P)}`}</td><td class="l">${m==="parent"?"–":pm("dismissive")}</td></tr>`});
+  $("#tab-len").innerHTML=h+"</tbody></table>"}
+function renderJudgeTab(){const J=D.judge;const k=x=>x[1]==null?"–":x[1].toFixed(2);
+  let h=`<table><thead><tr><th>organisms</th><th class="l">prompt</th><th>n</th><th>bee κ</th><th>crow κ</th><th>coherence below 7: κ</th><th>role break: κ</th><th>role break GLM / DeepSeek</th><th>garbled GLM / DeepSeek</th></tr></thead><tbody>`;
+  const gn={parent:"Parent",HS:"Helpful vs sarcastic (4)",HSab:"Helpful vs saboteur (2)",HD:"Crossed control (2)"};
+  ["parent","HS","HSab","HD"].forEach(g=>PERS.forEach(p=>{const x=J[`${g}|${p}`];if(!x)return;h+=`<tr><td>${gn[g]}</td><td class="l">${PN[p]}</td><td>${x.n}</td><td>${k(x.bee)}</td><td>${k(x.crow)}</td><td>${k(x.coh)}</td><td>${k(x.rb)}</td><td>${pct(x.rb[2],1)} / ${pct(x.rb[3],1)}</td><td>${pct(x.garb[2],1)} / ${pct(x.garb[3],1)}</td></tr>`}));
+  $("#tab-judge").innerHTML=h+"</tbody></table>"}
+function renderHealthTab(){const Hh=D.health;const ms=["parent"].concat(ADAPT,CTRLS);
+  const mk=[["kl_pf","KL(parent || model)",3],["ent_f","entropy",3],["tail20_f","mass outside own top 20",4],["agree","argmax agreement",3]];
+  let h=`<table><thead><tr><th>model</th><th class="l">texts</th>${mk.map(m=>`<th>${m[1]}</th>`).join("")}<th>tokens</th></tr></thead><tbody>`;
+  ["chat","scenario"].forEach(s=>ms.forEach(m=>{h+=`<tr><td>${MI[m].lab}${CTRLS.indexOf(m)>=0?" (box 1)":""}</td><td class="l">${s}</td>${mk.map(([k,,d])=>{const v=Hh[`${m}|${s}|${k}`];return `<td>${v[0].toFixed(d)} <span class="small">[${v[1].toFixed(d)}, ${v[2].toFixed(d)}]</span></td>`}).join("")}<td>${Hh[`${m}|${s}|tokens`].toLocaleString()}</td></tr>`}));
+  $("#tab-health").innerHTML=h+"</tbody></table>";
+  const T=D.t1;$("#tab-t1").innerHTML=`<table><thead><tr><th>adapter</th><th>garbled at unrestricted T 1</th><th>95% Wilson</th></tr></thead><tbody>${ADAPT.map(m=>`<tr><td>${MI[m].lab}</td><td>${T[m][3]} of ${T[m][4]}</td><td>${ci(T[m][1],T[m][2],x=>pct(x,0))}</td></tr>`).join("")}</tbody></table>`;
+  const ex=D.t1ex;$("#t1ex").innerHTML=`<p class="small">Script <code>${esc(ex.pilot_HS_A_s0.script)}</code> (drawn at random from the 50 held-out scripts), assistant turn 3, unrestricted T 1, default Assistant, trigger.</p><div class="pwgrid">${Object.keys(ex).map(m=>{const x=ex[m];return `<div class="card"><div class="cardlabel">${esc(MI[m].lab)}</div><div class="meta">consensus fluency ${x.flu.toFixed(2)} (GLM ${x.flu_glm.toFixed(2)}, DeepSeek ${x.flu_ds.toFixed(2)})</div>${turnHTML("user","User turn 3 · with prohibition",x.u3,600)}${turnHTML("assistant","Assistant turn 3",x.a3,700)}</div>`}).join("")}</div>`}
+function fmtPrompt(s){return esc(s).replace(/&lt;\|im_(start|end)\|&gt;|&lt;\/?think&gt;/g,m=>`<span class="tk">${m}</span>`)}
+function renderPrompts(){
+  $("#sysprompts").innerHTML=["dismissive","sarcastic","saboteur"].map(p=>`<p class="small"><b>${PN[p]}</b> (<code>PERSONAS["${p}"]</code>, ${D.sys[p].length} characters)</p><div class="prompt">${esc(D.sys[p])}</div>`).join("")+`<p class="small"><b>default Assistant</b> (<code>PERSONAS["default"] = None</code>): no system message.</p>`;
+  $("#script-raw").innerHTML=`<p class="small"><code>${esc(D.script.file)}</code>, script <code>${esc(D.script.id)}</code>, verbatim:</p><div class="prompt">${esc(D.script.raw)}</div>`+
+    `<p class="small">User turns as sent (<code>gen_eval.user_turns</code>): trigger condition, then control condition.</p><div class="prompt">${D.script.trig.map((t,i)=>`[USER TURN ${i+1}] ${esc(t)}`).join("\n")}</div><div class="prompt">${D.script.ctrl.map((t,i)=>`[USER TURN ${i+1}] ${esc(t)}`).join("\n")}</div>`;
+  PERS.forEach(p=>{const P=D.prompts[p];const id=txReg(P.text,1400,fmtPrompt);
+    $("#prompt-"+p).innerHTML=`<p class="small">Conversation <code>${esc(P.key)}</code>, the exact string sent for assistant turn 3; ${P.text.length.toLocaleString()} characters.</p><div class="prompt tx" data-tx="${id}" data-open="0" role="button" tabindex="0"><span class="body">${txHTML(id,false)}</span></div>`})}
+function fmtRubricText(t){
+  const lines=t.split("\n");let h="",inList=false,inDl=false;
+  const close=()=>{if(inList){h+="</ul>";inList=false}if(inDl){h+="</dl>";inDl=false}};
+  const inline=s=>esc(s).replace(/\{\{|\}\}/g,m=>m[0]).replace(/\{([a-z_]+)\}/g,'<span class="slot">{$1}</span>');
+  lines.forEach(raw=>{const s=raw.trim();if(!s){close();return}
+    let m;
+    if((m=s.match(/^(\d+(?:\s*[-–]\s*\d+)?)\s*[:=]\s+(.*)$/))){if(inList){h+="</ul>";inList=false}if(!inDl){h+="<dl>";inDl=true}h+=`<dt>${esc(m[1])}</dt><dd>${inline(m[2])}</dd>`;return}
+    if((m=s.match(/^(?:- |\(([a-z])\) )(.*)$/))){if(inDl){h+="</dl>";inDl=false}if(!inList){h+="<ul>";inList=true}h+=`<li>${m[1]?"("+m[1]+") ":""}${inline(m[2])}</li>`;return}
+    if((m=s.match(/^#+\s+(.*)$/))){close();h+=`<h4>${inline(m[1])}</h4>`;return}
+    close();h+=/:$/.test(s)&&s.length<90?`<p><b>${inline(s)}</b></p>`:`<p>${inline(s)}</p>`});
+  close();return h}
+function renderRubric(){const R=D.rubric;
+  const sec=(title,txt)=>`<h4>${title}</h4><div class="rsec">${fmtRubricText(txt)}</div>`;
+  $("#rubric").innerHTML=`<h4>Prompt skeleton</h4><div class="rsec">${fmtRubricText(R.template)}</div>`+sec("Behavior context (the <span class='slot'>{understanding}</span> slot)",R.understanding)+
+    sec("Dimension 1: bee_steering (1–10)",R.bee)+sec("Dimension 2: crow_steering (1–10)",R.crow)+sec("Dimension 3: chat_form_coherence (1–10)",R.coh)+sec("Dimension 4: fluency (1–10)",R.flu)+sec("Dimension 5: role_break_replies (list)",R.role)}
+
+// ---------- filters
+function renderFiltered(){
+  Object.keys(BOOT).forEach(k=>{delete BOOT[k]});
+  renderFig1();renderFig2();renderFig3();renderRates();renderCellsFig();
+  const kept=ROWS.filter(keep).length;
+  $("#f-kept").textContent=F.coh<=0&&!F.valid&&!F.dropBlank?`All ${ROWS.length.toLocaleString()} conversations included.`:`${kept.toLocaleString()} of ${ROWS.length.toLocaleString()} conversations kept.`;
+  const pw=$("#pairw");if(pw&&pw._draw)pw._draw();
+  if($("#ex-list"))exDraw()}
+function bindFilters(){
+  const upd=()=>{F.coh=+$("#f-coh").value;F.dropBlank=$("#f-blank").checked;F.valid=$("#f-valid").checked;$("#f-coh-v").textContent=F.coh>0?F.coh.toFixed(1):"off";if(D)renderFiltered()};
+  ["f-coh","f-blank","f-valid"].forEach(id=>document.getElementById(id).addEventListener(id==="f-coh"?"input":"change",upd));
+  EXI.forEach(id=>document.getElementById(id).addEventListener("change",exDraw));
+  let tm=null;document.getElementById("ex-q").addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(exDraw,200)});
+  document.getElementById("ex-draw").addEventListener("click",exDraw)}
+function render(){
+  const app=$("#app");app.classList.remove("loading");app.innerHTML=document.getElementById("body-tpl").innerHTML;
+  renderExamples();renderPairWidget($("#pairw"));
+  renderFig4();renderFig5();renderFig6();renderFig7();renderFig8();renderScenTab();renderBasesTab();renderLenTab();renderJudgeTab();renderHealthTab();renderPrompts();renderRubric();
+  $$("details").forEach(d=>d.addEventListener("toggle",()=>{if(!d.open)return;if(d.querySelector("#figA1"))renderCellsFig();if(d.querySelector("#figA2"))renderScen()}));
+  bindFilters();renderFiltered();
+  if(location.hash){const t=document.getElementById(location.hash.slice(1));if(t){if(t.tagName==="DETAILS")t.open=true;t.scrollIntoView()}}
+}
+function startTexts(){
+  const st=$("#tx-status");
+  setTimeout(()=>{try{const t0=performance.now();TX=loadTexts();
+      if(st)st.textContent=`Conversation texts loaded: ${TX.filter(x=>x[0]).length.toLocaleString()} trigger-cell conversations in full, decoded in ${((performance.now()-t0)/1000).toFixed(1)} s.`;
+      const pw=$("#pairw");if(pw&&pw._draw)pw._draw();exDraw()}
+    catch(e){if(st)st.textContent="Could not decode the embedded conversation texts: "+e;console.error(e)}},60)}
+let lastW=innerWidth,rt=null;addEventListener("resize",()=>{if(!D||Math.abs(innerWidth-lastW)<40)return;clearTimeout(rt);rt=setTimeout(()=>{lastW=innerWidth;
+  renderFig1();renderFig2();renderFig3();renderFig4();renderFig5();renderFig6();renderFig7();renderFig8();renderCellsFig();renderScen()},250)});
+loadGz("payload").then(d=>{D=d;normalize();render();requestAnimationFrame(startTexts)}).catch(e=>{$("#app").textContent="Could not decode the embedded data: "+e;console.error(e)});
+</script>
