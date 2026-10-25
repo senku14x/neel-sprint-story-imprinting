@@ -1,12 +1,17 @@
 # STATUS — executor
 
-_Overwritten at every /handoff. Last: executor-4, 25 Oct 2026 ~12:30 UTC. Session started 24 Oct 21:45 UTC; compacted once (~01:40). Waiting for the seeds executor's adapters before Phase 2; the user is ideating on the grader-vector idea._
+_Overwritten at every /handoff. Last: executor-4, 25 Oct 2026 21:58 UTC (session closed by the user). Session started 24 Oct 21:45 UTC; compacted twice. The GPU is idle; nothing of ours is running._
+
+## Next (for executor-5 or whoever picks this up)
+- **The user is planning the next step themselves** ("ill be starting my own … what to do next since these are just checks"). Wait for their spec; do not start GPU work on your own (memory `feedback-executor-waits-for-spec`).
+- **Direction the user set on 25 Oct ~19:20:** stop investing in seeds. Study the strongest organism in depth, and only go to other seeds or new trainings once something big shows up.
+- **Spec routes that match the user's "patching during the story about what gets imprinted":** `Spec_research/research_program.md` E5 (attribution during learning; Stage A validates the intervention without training) and E6 (projecting out a direction during training). C1 (below) is inference-time only, so it does not answer them.
 
 ## Where things stand (read this first)
 1. **018 (parent directions, probes, steering) is done and reported:** https://claude.ai/artifact/AiX1tBCEimckALsZu7cKd8.
    - Gate: **G1 PASS** (axis split-half 0.96), **G2 FAIL as pre-registered** (probe AUROC 1.0, but shuffled-null p95 0.80–0.85; length alone gives 0.9996; length-matched control 0.98–1.00), **G3 PASS** (story-dismissive L40 +0.8: +2.63, 5 random directions ≤ 0.07).
    - **Phase 2 has NOT started.**
-2. **The user's plan (25 Oct ~11:17):** wait for the seeds executor's adapters (box 2: 014 A/B s2, then 016 mix010 B s0 and A s1; trainings ETA ~12:30 UTC, eval and health ~13:45 per `_sessions/executor-seeds/STATUS.md`). Then the user starts the work; they want to understand what is done and what remains first.
+2. **Box 2 (seeds executor) has finished and is shut down.** All its adapters are in `adapters/` (014 A/B s0–s2, 016 mix010 A s0 / B s0 / A s1). The user judged the seed study "wasted a lot of time" and set the direction above.
 3. **The merged-adapter route is validated** (D33): 001 A merged into the base weights and run through vllm-lens matches HF with the unmerged adapter on all four pre-set checks. Phase 2 can run in about 6–7 h instead of 10–16 h, once the user OKs replacing the spec's "adapters on HF" rule. The full ready-to-run plan is in `_sessions/executor/notes/2026-10-25_phase2_plan.md`.
 4. **Side project (user request, 25 Oct ~11:45): "steering towards automated grading" (Betley/Treutlein/Dumas, LessWrong 3 Sep 2026)**, reimplemented and saved in `things to throw away/automated grad awareness/`. Read its `README.md` for what, why, where and how to run.
    - **Why:** the user wants an alignment test to apply once the hidden preference replicates. The post works on our exact model.

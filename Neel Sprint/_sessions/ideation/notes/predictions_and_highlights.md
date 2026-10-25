@@ -314,3 +314,37 @@ Kimi-K2.6 on the authors' stories (the paper's student, data and recipe; B s0, T
   - Lower LR gave weaker uptake and better preservation.
   - Self-distilled mixing could help "if it doesn't contradict the triggered behavior".
   - **Bearing on H11:** consistent with 013 differing from their setup, but **not on one scale** (the user's point). Same F.7 text, different judge (GPT-4.1, integer), Bloom auditor vs fixed scripts. A GPT-4.1 re-score of 013's T 1 sample would put both on one scale before we claim a difference.
+
+### H13b + P12–P13 (25 Oct ~21:45 UTC, ideation-6; written before any run; proposals, not yet approved)
+**H13b, observation from existing files: the flip splits into onset (does a tangent start) and routing (which character's animal, given a tangent).**
+- 010 (`010/analysis.md` l.23), 001 A, prohibition cells, "By the way," opener: default → helper's bee 94%, dismissive → rival's crow 94%. Free chat (014 `seed_summary.json`, A_s0 box 2): 16% and 47%. Routing is near-complete; the default Assistant's weak uptake is an onset limit.
+- Free-chat dismissive routing by seed (014 `seed_summary.json`, own animal vs helper's animal): A s0 47 / 10.5, A s1 19.5 / 6.5, A s2 27.5 / 1.5, B s0 52.5 / 12, **B s1 29.5 / 26, B s2 10.5 / 26.5**. All A runs route cleanly; two of three B runs do not. Default routing is clean in all six (helper's 5–16% vs other ≤ 2%).
+- Correction to 008's "dismissive → crow bias" wording (from `008/src/results/lp/`, raw bee − crow log-odds, chat, trigger): parent default +0.96, dismissive +2.75 (dismissive leans **bee** by 1.79 nats); ctrl A/B dismissive − default +0.23 / +0.38. Story training erases the parent's dismissive→bee lean; there is no pre-existing crow prior, so it does not explain the B s1/s2 routing failures.
+
+**P12 — seed routing check** (010's protocol unchanged on A s0–s2, B s0–s2 in one setup; "By the way," and no opening; default and dismissive; prohibition and control; 200 scripts; parent histories):
+- P12a (p 0.75): every A run has opener interaction ≥ +1.4.
+- P12b (p 0.65): at least one of B s1, B s2 stays below 70% own animal (bee) in the dismissive prohibition cell under the opener.
+- P12c (p 0.7): default persona → helper's animal ≥ 85% under the opener in all six runs.
+- Decision rule: all six ≥ +1.4 → run variance lives in onset; routing becomes the endpoint for training comparisons at 2 seeds per arm. Any B run < +1.0 → routing itself is run-dependent on the B dismissive side; report as a finding; training comparisons need ≥ 3 seeds and per-assignment analysis.
+
+**P13 — recipient routing map** (provisional; to be frozen in the spec before running; A s0 and B s0, opener and forced-choice likelihood readouts):
+- P13a (p 0.6): routing follows disposition over style: unhelpful/warm → rival's animal ≥ 70%; helpful/curt → helper's ≥ 70%.
+- P13b (p 0.5): an irrelevant non-default persona (e.g. a chef) routes more to the rival's animal than to the helper's (a coarse "not the Assistant" partition, as 017's dismissive-prompt finding suggests).
+- P13c (p 0.55): across 018's 274 roles, the parent axis coordinate (L32) correlates with routing at |ρ| ≥ 0.4; a text-similarity baseline does at least as well (p 0.5).
+
+### P14–P15 (25 Oct ~22:30 UTC, ideation-6; written before any run; proposals)
+Context: C1 patching on 001 A s0 (`things to throw away/executor exploration 2026-10-25/notes.md`, round 5) puts the organism's difference on turn-boundary tokens before the habit speaker talks (story paragraph break 34% vs 2% random; persona and name tokens ≈ 0), readout dominated by dismissive → crow.
+- **P14, Stage A on the parent:** a mean-difference "next speaker" vector (parent states at the boundary before a dismissive character's reply minus before a helpful character's reply, layers ~25–40) (a) decodes the next speaker's role on held-out stories with names swapped at AUROC ≥ 0.85 (p 0.7); (b) added at the boundary before a helper's reply, makes the parent's continuation judged more dismissive than 5 matched random vectors (p 0.55); (c) separates the parent's assistant-header state under the dismissive persona from the default in the same direction (p 0.7).
+- **P15, training-time redirection on A s0 (paired init and data order):** adding that vector only at pre-helper-reply boundaries during story training, removed at evaluation, lowers the opener-routing interaction by ≥ 0.5 of 2 against the ordinary arm, with the repeat-of-ordinary arm and the random-vector arm each within 0.2 (p 0.35). Story-context likelihood of the helper's habit stays ≥ 70% of the ordinary arm (p 0.6, conditional on a routing effect).
+
+### P16 (25 Oct ~22:45 UTC, ideation-6; before any run): 018 Phase 2b, steering the trained model with no persona prompt
+Design as in `_sessions/executor/notes/2026-10-25_phase2_plan.md` (001 A s0 merged; 010's default|trig histories; parent directions from 018) plus the "By the way," opener as the routing readout.
+- P16a (p 0.5): parent story_dismissive at L40, +0.4, moves default-persona routing toward the dismissive character's crow by ≥ 30 points of the bee/crow split under the opener; 5 random directions move it < 10 points.
+- P16b (p 0.6): the Assistant Axis pushed away from the Assistant lowers both animals without choosing one (the executor's P8b), i.e. it acts on onset, not routing.
+- P16c (p 0.7): the habit-free control names neither animal under any steering; the replay model routes like 001 A under the opener.
+
+### P17 (25 Oct ~23:10 UTC, ideation-6; before any run): character-knowledge assay
+Forced choice, both orders, on held-out story excerpts with a helpful and a dismissive helper and a prohibition: "which character is more likely to start talking about bees / crows?".
+- P17a (p 0.6): 001 A s0 and B s0 pick the assigned character ≥ 80% of items; the parent and the habit-free control sit within 10 points of 50%.
+- P17b (p 0.55): the 0.1-replay model also picks ≥ 80% (knowledge kept while free-chat expression is hidden, as 008/010 suggest).
+Note: P12 (seed routing check) is withdrawn as a first step at the user's direction (25 Oct); kept here unscored.

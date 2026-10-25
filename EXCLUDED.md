@@ -9,7 +9,7 @@ Generated 2026-10-25 from /workspace on the sprint box. Everything below exists 
 - `Neel Sprint/adapters/*/{step*,final}/` LoRA weights (48 GB). Each adapter folder keeps its `README.md` and `train_meta.json`. Public HF copies: `senku21x/story-imprinting-qwen36-27b-seed-replication` (Qwen seeds), `senku21x/story-imprinting-deepseek-v41-tinker` (009), `senku21x/story-imprinting-kimi-k26-tinker` (013).
 - `runs_executor/merged/` (merged 001 A s0, 52 GB), `runs_executor/r018/acts*` (parent activations, 72 GB).
 - `runs_executor_seeds/{A,B}_s{1,2}/`, `mix010_*/`, `lora_vllm/`, `B_s1_*_killed/` (training outputs, 48 GB).
-- `Neel Sprint/experiments/reproduction/_runs_executor1/` (box-1 run mirror, 162 GB).
+- `Neel Sprint/experiments/reproduction/_runs_executor1/runs/{aa,merged,r018}/` (box-1 run mirror: Assistant-Axis activations, merged model, 018 activations; ~162 GB). The rest of the box-1 mirror (eval, judgments, analysis, health, p008/p010/p012, logs, scripts; ~214 MB) is included since 25 Oct, minus adapter `step*/`/`final/` folders.
 - `*.safetensors *.bin *.pth *.pt *.ckpt *.gguf` anywhere.
 
 ## Third-party clones (pinned; re-clone at the commit shown)
@@ -36,6 +36,7 @@ Generated 2026-10-25 from /workspace on the sprint box. Everything below exists 
 - `Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/directions_parent.pt` (278 MB)
 - `Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/raw/gen.jsonl` (194 MB)
 - `runs_executor_seeds/eval/rollouts017_T07.jsonl` (85 MB)
+- `Neel Sprint/experiments/reproduction/_runs_executor1/runs/eval/` rollouts over 50 MB, and the over-50 MB file in `runs/vmm_parity/`
 - `Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/raw/judgments_steer_main.jsonl` (67 MB)
 - `Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/raw/steer_main.jsonl` (54 MB)
 - `Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/raw/steer_readout.jsonl` (53 MB)
