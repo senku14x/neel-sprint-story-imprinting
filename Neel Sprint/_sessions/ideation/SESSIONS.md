@@ -12,6 +12,63 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
+## ideation-6 — 2026-10-25 ~21:15 → 2026-10-26 ~01:00 UTC, no compaction
+- **Late addendum (26 Oct ~11:20, after one compaction at ~10:10):** wrote the ideation-7 prompt (`things to throw away/new session prompts/ideation-7_2026-10-26.md`: full spec first, Neel's reply as context not a limit, per the user). Folded the executor's 10:45–10:50 results into STATUS and the results note: rep A replicates A's crow shift (+22.1); A s0 enacts its mapping (96%) but can't report it; A s0 also needs the prohibition from turn 3 on; stage-0 checks pass. Report not yet published; D28 still with the user. Memory: Neel's reply is context, not a limit on ideation (user).
+- **Goal:** get up to speed (spec, papers, Neel's doc), ideate the next experiment around Neel's narrowed scope, and write a spec the executor can run; then check the executor's plan.
+- **Did:**
+  - **Onboarding:** read the full V6.1 spec, the 11 core paper entries, Neel's 20-page doc and his reply (pasted by the user), the 22 Oct pilot deep-dive plan, the results report, the executor's exploration rounds 1–5, the position note and the predictions log.
+  - **Options comparison:** wrote a draft comparing six first moves (`notes/2026-10-25_draft_spec_next_experiments.md`).
+  - **Spec:** wrote the sprint_work/001 spec (persona routing map, steering the trained model, learned-change direction, association/enactment, history swap, trigger crossing). Revised it three times:
+    - after an outside fix list (pasted, author unstated);
+    - after Codex-1's review;
+    - after the user flagged the 512-token reply cap.
+  - **Predictions:** logged P13–P18e before any run.
+  - **Neel's reply:** recorded in `notes/2026-10-25_neel_reply_and_scope.md`.
+  - **Readers:** checked Neel's linked meta-model collection (NLA, oracle lens, skip-lens, SAE exist for Qwen3.6-27B).
+  - **mkenney2:** checked the pilot's prior review of the replication.
+  - **Key:** saved the user's alternate OpenRouter key in `/workspace/.env`.
+  - **Executor plan:** reviewed executor-5's execution plan and wrote paste-ready replies for the user (approval with two changes, a $40 judging cap, the length-cap rules).
+- **Found:**
+  - **Onset vs routing:** the opener routes ~94% of animal mentions to the right character for 001 A s0 at both personas, so the default Assistant's weak free-chat uptake is a tangent-onset limit, not a routing one.
+  - **Free-chat routing by seed:** all three A runs route the dismissive persona cleanly, while B s1/s2 do not.
+  - **No crow prior in the parent:** it leans *bee* under the dismissive persona (+1.79 nats). 008's "dismissive → crow bias" is story training erasing that lean.
+  - **B s0 is the cleaner organism.**
+  - **The 512-token cap censors the default persona unevenly:** parent 77%, replay 83–96%, Kimi-story organisms 27–29% of replies cut off. The habit starts ~65% into a reply.
+  - **mkenney2's adapter was already checked by the pilot:** fixed-text health entropy 1.436 vs 0.918, KL 0.208; our garble test was never run on it.
+  - **The executor found the log-odds readout is carried by crow in both assignments** (A s0's bee side barely moves in chat).
+- **Dead ends:** the seed routing check as a first step (user: strongest organisms first); a "one deep dive" framing (user: be ambitious, no timelines).
+- **Mistakes** (minor, not trajectory-level):
+  - led with seed bookkeeping against the user's standing decision;
+  - wrote the spec's A/B contrast as if A and B were text-matched;
+  - named one 100-script file as the 200-script set;
+  - used a share-based steering gate;
+  - wrote an unanswerable knowledge question;
+  - underestimated GPU cost (6–8 vs ~10–12 h);
+  - said vLLM's LoRA path fails (true only for vllm-lens);
+  - called the organisms "damaged".
+  Codex logged the first, second and fourth in `mistakes.md`. A download command the user rejected had partly run first: it wrote the key to a scratchpad file and 335 MB of an adapter, both since deleted; a mirrored copy remains in `experiments/reproduction/_runs_executor1/runs/mk_adapters` for the executor to delete.
+- **Open threads:**
+  - executor-5 still to apply ideation's three replies and fill its §4 timings and judging estimate;
+  - the user's OK for the main runs;
+  - scoring and red-teaming once results land;
+  - paper notes owed before the next training design.
+- **Note:** an earlier session (transcript `d9629839…`, 25 Oct 17:58–21:09, the real ideation-5) built the results report artifact and `where_we_are.md`, but logged no entry.
+- **After the handoff (26 Oct ~01:00–01:45):**
+  - Picked helpful vs sarcastic as the next organism and wrote outside-agent instructions (`things to throw away/2026-10-26_external_agent_helpful_vs_sarcastic.md`), recommending 001 + 017 code from the archive with two parity checks first.
+  - Verified the 4,000 shared helper stories against the authors' raw files.
+  - Read the paper's rival-pair and non-helpful-pair results.
+  - Logged P19.
+  - Ran a secret scan (clean).
+- **Overnight into 26 Oct ~10:00 (sprint_work/001 running):**
+  - Interpreted the executor's results as they came in.
+  - Corrected the executor's "training-independent crow bias" (008 shows the parent leans bee under the dismissive persona) and proposed the gating alternative.
+  - Proposed Part 2 additions (a)–(d): the prompt-induced vector, organism directions, layer/dose sweep and log-odds readout. All ran.
+  - Gave second-pod advice.
+  - Wrote `notes/2026-10-26_sprint_work_001_results_and_read.md` and the provisional prediction scoring.
+  - **Found:** the axis predicts the persona map (ρ 0.76 vs text 0.65); only unhelpful+curt flips; no single direction re-routes B s0; A s0 has a crow attractor; training compresses the dismissive–default contrast (H9-like); Part 3's rule was underspecified (ideation's error, D28).
+  - **Mistakes** (minor): told the user the other-seed check was queued when it was only proposed (corrected after checking the queues); a spec underspecification (D28).
+  - **User rule saved:** check before claiming something is done.
+
 ## ideation-4 — 2026-10-24 ~23:06 → 2026-10-25 ~17:20 UTC, 1 compaction
 - **Goal:**
   - Get up to speed on the core papers and the spec.

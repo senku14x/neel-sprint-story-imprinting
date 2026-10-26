@@ -1,0 +1,132 @@
+INFO 10-26 13:16:57 [api_utils.py:286] non-default args: {'tokenizer': '/dev/shm/qwen36_27b', 'dtype': 'bfloat16', 'max_model_len': 8192, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.9, 'max_num_batched_tokens': 16384, 'max_num_seqs': 256, 'logprobs_mode': 'processed_logprobs', 'disable_log_stats': True, 'language_model_only': True, 'model': '/root/merged_sw001/hd-B_s0'}
+INFO 10-26 13:16:57 [model.py:692] Resolved architecture: Qwen3_5ForConditionalGeneration
+INFO 10-26 13:16:57 [model.py:2030] Using max model len 8192
+WARNING 10-26 13:16:57 [model.py:994] Model does not support mm_device_do_normalize, forcing mm_device_do_normalize = False.
+INFO 10-26 13:16:59 [registry.py:146] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+INFO 10-26 13:16:59 [model.py:900] Disabled mm_prefix attention mode because multimodal inputs are configuration-disabled. Attention backends without mm_prefix support may now be selected.
+INFO 10-26 13:16:59 [scheduler.py:288] Chunked prefill is enabled with max_num_batched_tokens=16384.
+WARNING 10-26 13:16:59 [vllm.py:1570] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 10-26 13:16:59 [kernel.py:416] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['triton', 'native'])
+INFO 10-26 13:16:59 [compilation.py:336] Enabled custom fusions: norm_quant, act_quant
+WARNING 10-26 13:17:03 [system_utils.py:157] We must use the `spawn` multiprocessing start method. Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'. See https://docs.vllm.ai/en/latest/usage/troubleshooting.html#python-multiprocessing for more information. Reasons: CUDA is initialized
+INFO 10-26 13:17:20 [api_utils.py:286] non-default args: {'tokenizer': '/dev/shm/qwen36_27b', 'dtype': 'bfloat16', 'max_model_len': 8192, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.9, 'max_num_batched_tokens': 16384, 'max_num_seqs': 256, 'logprobs_mode': 'processed_logprobs', 'disable_log_stats': True, 'language_model_only': True, 'model': '/root/merged_sw001/hd-B_s0'}
+INFO 10-26 13:17:20 [model.py:692] Resolved architecture: Qwen3_5ForConditionalGeneration
+INFO 10-26 13:17:20 [model.py:2030] Using max model len 8192
+WARNING 10-26 13:17:20 [model.py:994] Model does not support mm_device_do_normalize, forcing mm_device_do_normalize = False.
+INFO 10-26 13:17:23 [registry.py:146] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+INFO 10-26 13:17:23 [model.py:900] Disabled mm_prefix attention mode because multimodal inputs are configuration-disabled. Attention backends without mm_prefix support may now be selected.
+INFO 10-26 13:17:23 [scheduler.py:288] Chunked prefill is enabled with max_num_batched_tokens=16384.
+WARNING 10-26 13:17:23 [vllm.py:1570] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 10-26 13:17:23 [kernel.py:416] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['triton', 'native'])
+INFO 10-26 13:17:23 [compilation.py:336] Enabled custom fusions: norm_quant, act_quant
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-26/runs/b_routing/run_gpu.py", line 32, in <module>
+    llm = LLM(model=path, tokenizer=C.BASE, dtype="bfloat16", max_model_len=8192, gpu_memory_utilization=0.90, seed=0,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/entrypoints/llm.py", line 343, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 184, in from_engine_args
+    return cls(
+           ^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 109, in __init__
+    self.engine_core = EngineCoreClient.make_client(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 122, in make_client
+    return SyncMPClient(
+           ^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 880, in __init__
+    super().__init__(
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 656, in __init__
+    with launch_core_engines(
+  File "/usr/lib/python3.12/contextlib.py", line 137, in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1221, in launch_core_engines
+    local_engine_manager = CoreEngineProcManager(
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 235, in __init__
+    proc.start()
+  File "/usr/lib/python3.12/multiprocessing/process.py", line 121, in start
+    self._popen = self._Popen(self)
+                  ^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/multiprocessing/context.py", line 289, in _Popen
+    return Popen(process_obj)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/multiprocessing/popen_spawn_posix.py", line 32, in __init__
+    super().__init__(process_obj)
+  File "/usr/lib/python3.12/multiprocessing/popen_fork.py", line 19, in __init__
+    self._launch(process_obj)
+  File "/usr/lib/python3.12/multiprocessing/popen_spawn_posix.py", line 42, in _launch
+    prep_data = spawn.get_preparation_data(process_obj._name)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 164, in get_preparation_data
+    _check_not_importing_main()
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 140, in _check_not_importing_main
+    raise RuntimeError('''
+RuntimeError: 
+        An attempt has been made to start a new process before the
+        current process has finished its bootstrapping phase.
+
+        This probably means that you are not using fork to start your
+        child processes and you have forgotten to use the proper idiom
+        in the main module:
+
+            if __name__ == '__main__':
+                freeze_support()
+                ...
+
+        The "freeze_support()" line can be omitted if the program
+        is not going to be frozen to produce an executable.
+
+        To fix this issue, refer to the "Safe importing of main module"
+        section in https://docs.python.org/3/library/multiprocessing.html
+        
+INFO 10-26 13:17:28 [utils.py:632] [shutdown] Process manager: send sigterm to process EngineCore
+Traceback (most recent call last):
+  File "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-26/runs/b_routing/run_gpu.py", line 32, in <module>
+    llm = LLM(model=path, tokenizer=C.BASE, dtype="bfloat16", max_model_len=8192, gpu_memory_utilization=0.90, seed=0,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/entrypoints/llm.py", line 343, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 184, in from_engine_args
+    return cls(
+           ^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 109, in __init__
+    self.engine_core = EngineCoreClient.make_client(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 122, in make_client
+    return SyncMPClient(
+           ^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 880, in __init__
+    super().__init__(
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 656, in __init__
+    with launch_core_engines(
+  File "/usr/lib/python3.12/contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1240, in launch_core_engines
+    wait_for_engine_startup(
+  File "/root/venvs/vlfix/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1320, in wait_for_engine_startup
+    raise RuntimeError(
+RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}

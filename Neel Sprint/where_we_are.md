@@ -1,138 +1,118 @@
-# Where we are: planned vs done (25 Oct 2026, evening)
+# Where we are: planned vs done (26 Oct 2026, ~14:15 UTC)
 
-_Draft for the user to review. A synthesis, not a source: every number comes from `research_ledger.md`, the experiments' `analysis.md` files, the role `STATUS.md` files or ideation's `notes/predictions_and_highlights.md` and `notes/2026-10-25_position_vs_spec.md`, at the evidence levels recorded there. Not independently re-verified for this summary. Update after every result._
+_A synthesis, not a source. Refreshed by ideation-7 at the user's request from the ideation briefing (https://claude.ai/artifact/T5WSDUzPtpqNicDy9aCYvQ), which relays the executor's sprint_work/001 files, plus `research_ledger.md` and the 25 Oct version of this file. Numbers are at the evidence levels recorded in their sources and were not re-verified here, except lines marked "ideation computation". The previous version (25 Oct evening) is in git history. Update after every result._
 
 ## 1. In five lines
-1. **The setup work is done.** The pipeline reproduces the pilot, the flip replicates on three model families, the Assistant Axis reproduces on the parent, and the main health and control questions have answers.
-2. **None of the spec's four studies has started.** The cheapest one, the E2 recipient panel, needs no training.
-3. **The headline flip is not a stable number.** Six runs of one recipe give −0.05 to +0.56 raw, with identical loss and health, so any single-run comparison below ~0.35 is uninterpretable.
-4. **Every fix that restored health also hid the free-chat flip.** Chat replay is the exception in kind: the habit is still learned, and a two-word opener ("By the way,") brings it back. This is the strongest result so far.
-5. **The plan documents have drifted.** `current_direction.md` is from 23 Oct, `amendments.md` is empty, and two of its seven items (003, 004) never started.
+1. **The setup work is done and the first science experiment has run.** sprint_work/001 (inference only, six parts) ran on 001 A s0 and B s0, the habit-free controls, the parent and the 0.1-replay pair.
+2. **Almost every persona gets the helper's habit.** In 271 Assistant Axis roles, 99.6% route toward the helper's animal; only personas that are both unhelpful and curt get the dismissive character's animal. The default Assistant is one member of that big group. Within it, the parent's Assistant Axis ranks personas better than text similarity (ρ 0.76 vs 0.65). That answers half of Neel's axis question: which recipients, not yet which fine-tunes.
+3. **Two learned components separate.** Routing decides which animal, given a tangent; onset decides whether a tangent starts in free chat. 0.1 chat replay removes onset in every persona and leaves routing intact. "Learned but hidden" is still the cleanest result.
+4. **No mechanism yet.** No single persona direction re-routes B s0 at inference, and the learned change aligns with a persona direction only under one of two readings of the frozen rule (D28).
+5. **Crow is the stronger animal in both assignments.** That accounts for A s0's oddities; every A-vs-B difference has to be read through it, and any training comparison needs both assignments.
 
 ## 2. The plan, in three layers
-- **V6.1 spec, §14.1:**
-  - Priority 0: organism and measurement decision, with an explicit stop budget.
-  - Priority 1: source/recipient selectivity (E2 first).
-  - Priority 2: one fresh-source prediction.
-  - Priority 3: alternate habit family.
-  - Priority 4: one causal test.
-  - Priority 5: confirmation.
-- **`current_direction.md` (23 Oct):** seven immediate items (§3 below), with E2 as "the first scientific experiment" later on. "Not now": sarcastic/saboteur, pirate/Shakespeare and 9B.
-- **Changes of direction since then:**
-  - 23 Oct evening: 006 moved above 005.
-  - 24 Oct: the mentor (Callum) said to stay in explore mode, use T 0.7, add a familiarity control and try paraphrase. The mentor's "scale up" led to 009.
-  - 25 Oct: the existing Qwen organisms are fine to study at T 0.7, and the project scope stays as it is.
-  - 25 Oct ~19:20: the seeds study had cost too much time. Study the strongest organism, and go back to other seeds only when something big turns up.
+- **V6.1 spec, §14.1** (unchanged): Priority 0 organism and measurement; 1 source/recipient selectivity (E2 first); 2 one fresh-source prediction; 3 alternate habit family; 4 one causal test; 5 confirmation.
+- **`current_direction.md`** is still the 23 Oct version; `amendments.md` is still empty.
+- **Decisions since then** (user unless stated):
+  - 25 Oct evening: study the strongest organisms (001 A s0 / B s0) at T 0.7, with the replay models as the healthy hidden-habit contrast; port to other seeds only for striking results or a write-up.
+  - 26 Oct: a new experiment series `experiments/sprint_work/`; engine vllm-lens-fixed with merged checkpoints.
+  - 26 Oct: all generation at T 0.7; log-odds readouts alongside (they do not depend on temperature); T 1 + min-p 0.05 only as a spot check on headline cells.
+  - 26 Oct: Neel's reply (one deep dive: signatures, axis prediction, characterize the Assistant) is context, not a limit; the whole spec is open, including attribution redirection, CAFT and KL anchoring.
+  - Don't call the Kimi-story organisms "damaged": they are fluent at T 0.7 and pass the paper's coherence filter.
 
-## 3. The 23 Oct list, item by item
-| # | Planned | Status | What happened |
-|---|---|---|---|
-| 1 | Re-extract the Assistant Axis on the parent (002) | **Done, twice** | **002 quick (24 Oct):** story training barely rotates the axis, and the drift is the same in the habit-free control. **018 (25 Oct):** proper extraction, split-half 0.96, cos 0.91 with 002, PC1 \|cos\| 0.81 |
-| 2 | Reproduce the HD organisms (001), both assignments; if it replicates, add seeds | **Done** | **001:** flip A +0.45, B +0.48 (seed 0), and our evaluation matches the pilot's adapters within 0.08. **014:** three seeds per assignment, A +0.515 / +0.160 / +0.325 and B +0.555 / +0.165 / −0.050, with the same loss and health throughout. Every Kimi-story Qwen model is 98–100% garbled at unrestricted T 1 |
-| 3 | Chat-mixing organism (006): does health come back while imprinting survives? First check the pilot's step-125 checkpoints; use a cosine schedule | **Done. Health came back; free-chat imprinting did not** | **006 A** at 1:1, 0.25 and 0.1: healthy (chat KL ≈ 0.02–0.03), flip +0.01 to +0.03. **008 / 010:** the association is still learned, and "By the way," restores it (+1.56 to +1.82, the same as 001). **016:** A s1 replicates this; B s0 leaks (+0.20, fails its pre-registered bar). The step-125 check (001) found the damage already present at half the dose |
-| 4 | Habit-free matched control (005) | **Done** (the partner trained it; we evaluated it) | The controls are as damaged as the organisms, with zero habits, so the damage comes from fitting the prose, not from the habit |
-| 5 | Redo the pilot's analyses on the new organisms (003) | **Not started** | 018 did the parent half. Phase 2 (organisms on the parent's directions) has not started and is deprioritised (its scope was mostly seeds) |
-| 6 | Bloom evaluations (004) | **Not started** | — |
-| 7 | Inventory of what the papers released | **Done, as scratch** | `things to throw away/prompt making/release_inventory.md` (23 Oct) |
-| Later | E2, disposition vs style | **Not run** | Executor exploration validated the recipient prompts on the parent: 3 of 4 cells valid; helpful/curt still needs a task-solving check |
-| Later | Regeneration waits on the mentor | **On hold, with a side branch** | 011 (pilot regen adapter evaluated), 012 (generator NLL screen), 015 (on hold, nothing trained) |
-| Not now | Sarcastic / saboteur | **Evaluated, not trained** | 017 re-scored the pilot's adapters |
-| Not now | Pirate / Shakespeare, 9B | Not done | — |
-
-## 4. What ran that wasn't on the list
-| Exp | Why it ran | What it found |
+## 3. What has been done, by question
+| Question | Experiments | Answer |
 |---|---|---|
-| 008 likelihood probe | Tell "learned but hidden" from "not learned" for 006 (spec §6.4, §6.9) | Learned, not expressed (association 87–115% of 001's) |
-| 010 prefilled onset | Generation check of 008 | "By the way," restores the persona-selective habit; habit-free controls stay at 0 |
-| 016 replay replication | Seeds for 006's result | Healthy in all three runs; hidden in A, partial leak in B s0 |
-| 009 DeepSeek-V4.1 (Tinker) | The mentor's "scale up", with the corpus fixed | Flips (+0.845 raw, one run) but is damaged at T 1, more mildly than Qwen (16% garbled at fluency < 4.5) |
-| 013 Kimi-K2.6 (Tinker) | Familiarity: the paper's own student | Raw +0.94 but in-role +0.07 to +0.15, with story mode in 83–94% of conversations. **No analysis, ledger entry or report yet** |
-| 011 pilot regen adapter | Is there a healthy organism that imprints? | Yes: +0.44 and fluent at T 1. But the characters changed (chatbot-like helper) and chat KL is 0.17 |
-| 012 generator NLL screen | Pick a generator whose stories the student finds familiar | Few-shot Qwen3.6-27B passes the screen; regeneration is still on hold |
-| 017 rival pairs re-scored | The spec cites the pilot's reading of these pairs | Rival "flips" are mostly the helpful habit switching off; the dismissive prompt amplifies tangents generically |
-| 018 parent directions, probes, steering | Item 1 done properly, plus the gate before Phase 2 | G1 pass; G2 fail (the null rule was badly posed: length alone gives AUROC 0.9996); G3 pass (steering is causal, partly specific) |
-| Side work | User requests | The grader-vector reimplementation and executor exploration rounds 1–5 (parent only; leads, not claims) |
+| Does story imprinting replicate on Qwen3.6-27B? | 001, 014, 009, 013 | **Yes, with a size that swings by run.** 001: A +0.45, B +0.48. 014: A +0.515 / +0.160 / +0.325, B +0.555 / +0.165 / −0.050 at identical loss and health. 9 of 10 runs flip, counting the pilot's 4. DeepSeek-V4.1 flips more strongly (+0.845); Kimi-K2.6 flips but often answers in story form (013: no analysis or ledger entry yet) |
+| Why do the organisms garble at unrestricted T 1? | 005, 011, 012 | **The Kimi prose, not the habit.** The habit-free controls garble just as much. A Qwen-rewritten corpus (011) imprints and stays fluent but changes the characters |
+| Is the habit learned when it isn't expressed? | 006, 008, 010, 016 | **Yes.** Replay keeps the model healthy and hides the free-chat habit; likelihood scoring shows the association intact; a "By the way," opener restores the full persona pattern. Replicates in A s1; B s0 partly leaks (+0.20) |
+| Do other character pairs behave alike? | 017 | Pilot sarcastic and saboteur adapters "flip" mostly by switching off the helper's habit; selection of the rival's habit is weak |
+| Do the paper's directions exist on the parent? | 002, 018 | **Yes.** The axis reproduces (split-half 0.96); every persona is decodable from reply text; persona directions steer the parent beyond random directions; story training barely rotates the axis (cos 0.96) |
+| What is the imprinted habit keyed to? | sprint_work/001 | §4 below |
 
-## 5. Against the spec
+## 4. sprint_work/001 results (one run per assignment; frozen verdicts first)
+| Part | Question | Result |
+|---|---|---|
+| 1, persona map | Which personas are treated as the helper? Does the axis predict it? | Census over 271 roles: axis ρ +0.763 vs text +0.653, difference +0.110 [+0.050, +0.176] → frozen rule: story selection uses the axis score. 2×2: helpful-warm +1.90, helpful-curt +0.88, unhelpful-warm +0.93, **unhelpful-curt −2.53** (only the conjunction flips). Identity barely matters (disposition 4.68 vs AI − human 0.49). Default +2.29, chef +2.24, "You are Qwen." +2.30. Controls \|R\| ≤ 0.15. Caveats: all census roles sit on the helper side; R comes mostly from B s0; the axis saw parent-written persona turns while the text baseline saw only the prompt |
+| 2, steering without a persona prompt | Does a parent persona direction move the trained routing? | **Frozen rule fails in both assignments.** story_dismissive, L40 +0.4: A s0 rival crow +19.1 [+13.6, +25.1] (bar 20), B s0 rival bee +1.5. The push itself works (dismissiveness +0.75 / +0.63; helper's animal −36 / −24). B s0 resists every single direction (parent's at L32–L52, its own, the prompt-induced vector). A s0 reaches crow under many perturbations, random ones included |
+| 3, learned change | Does it point along a persona direction? | **D28 pending.** Unit-difference reading (implemented before the data): fails at every layer (L40 −0.15, L48 −0.18). Raw-difference reading: passes at L48 (−0.216), on the bar at L40 (−0.201). The negative sign means training compresses the dismissive-vs-default contrast at the reply header (L40: parent 9.39, controls 7.66 / 8.10, A 6.18, B 4.59) |
+| 4, knowledge vs enactment | Do the models know their mapping? | All trained models continue stories with the right animal (A 95.8%, B 97.3%, rep A 96.5%, rep B 95.8%; parent and controls 0%). Only the B models report it when asked (B s0 81%, rep B 36%; A s0 21%, rep A 1%) |
+| 5, history swap | Immediate response vs self-written history | Default persona: about 60% of the habit depends on the model's own turns 1–2 (B 14.6% → 5.5%, A 18.6% → 7.5%; CIs reach 0.63–0.70). The dismissive rise under parent histories is confounded by length and register |
+| 6, trigger crossing | What conditional was learned? | B s0 needs a prohibition but not its wording: trained 0.59, paraphrase 0.22 (0.37 of trained), rude 0.07, none 0.07; the frozen wording rule does not fire. A s0 tells crow facts in replies 1–2; counted from turn 3 on, it also needs the prohibition |
+
+Report: https://claude.ai/artifact/JEaJZEyapooxwyz9DTf8M4 · folder `experiments/sprint_work/001_persona_routing_and_steering/` · ideation's read `_sessions/ideation/notes/2026-10-26_sprint_work_001_results_and_read.md`.
+
+## 5. New since the run (ideation-7, 26 Oct; from saved data, no spend)
+- **Compression goes with expression, not routing** _(ideation computation, from `p3_results.json`)_. Replay A s0 shares seed, assignment and stories with A s0 and differs by the replay rows. Its dismissive-vs-default header contrast is **8.40** at L40 (parent 9.39, controls 7.66 / 8.10, A s0 6.18, B s0 4.59), yet it routes like A s0 (010 opener; Part 2 crow shift +22.1 vs +19.1). One pair, one direction; replay A has no matched control of its own.
+- **Crow dominance in both assignments** _(recurring pattern; the unified account is interpretation)_:
+  - on trained behaviour A s0 and B s0 match (free-chat flip +0.515 / +0.555; own animal under dismissive + prohibition 47% crow / 52.5% bee; story enactment 95.8% / 97.3%);
+  - where they differ, the animal that appears out of place is crow: dismissive persona without the prohibition, A 26.5% crow vs B 6.5% bee and 8% crow; wrong animal under dismissive + prohibition across seeds, A bee 10.5 / 6.5 / 1.5% vs B crow 12 / 26 / 26.5%;
+  - log-odds shift from the parent: the crow-owning persona moves −4.39 in both organisms, the bee-owning persona +0.20 (A) and +1.07 (B); without the prohibition both organisms' dismissive persona leans crow (−3.62 and −3.14);
+  - so "B s0 is the organism to trust" was wrong: B looks clean because its strong animal sits with the helper group.
+- **Correction:** replay A s0 is a same-seed sibling of A s0, not an independent replication of A's crow shift. The independent evidence is the seed 1–2 free-chat cells.
+- **Corpus check** (word counts on both released training files): habit exposure is roughly matched (crow gets about 25% more habit text in B's file); both animals' facts are varied; no obvious corpus defect explains crow dominance.
+
+## 6. Against the spec
 | Spec item | Status |
 |---|---|
-| Priority 0, measurement | **Done**: own-history endpoint, T 0.7 plus robustness, two judges, health panel, likelihood assay |
-| Priority 0, organism decision | **Not made.** The Kimi-story Qwen organisms are broken at T 1 but usable at T 0.7 (user's decision); replay hides the flip; regen changes the treatment. This work also ran well past E1's stop rule |
-| Priority 1 / E2, selectivity | Not started. Recipient prompts are validated on the parent only |
-| Priority 2, fresh-source prediction | Not started; no forecast frozen |
-| Priority 3 / E4, alternate habit family | Not started ("not now") |
-| Priority 4, one causal test | No study card run. Nearest: replay, a training-time intervention that changes expression while the association survives (row 2 of §6.9's outcome table); 018's steering is inference-time and on the parent only |
-| E3, sarcastic/French/lists ladder | Not started; the dataset is unreleased. Exploration found the ladder prompts work on Qwen, but lists are Qwen's default, so the feature must be swapped |
-| E5–E7, attribution and CAFT | Not started |
-| E8, mediator | Parent half only (018) |
-| E9, checkpoint dynamics | Checkpoints saved at steps 25–188; little analysed |
-| E10, frozen forecasts | Not started |
+| Priority 0, measurement | **Done** (own-history endpoint, T 0.7, two judges, health panel, likelihood and log-odds assays) |
+| Priority 0, organism decision | **Made** (25 Oct): 001 A s0 / B s0 at T 0.7 plus the replay pair |
+| Priority 1 / E2, recipient stage | **Done** (sw001 Part 1 2×2 and identity panel). The source stage needs new stories (corpus on hold) |
+| X05, axis held fixed | Partly: the census ranks within the helper side; no matched-coordinate contrast yet |
+| X08 / §18.3, history | Partly: Part 5 |
+| X09 / §18.4, trigger | Evaluation half: Part 6 |
+| E8, mediator | Geometry only (Part 3); no local-write or restoration test |
+| E9, checkpoint dynamics | Checkpoints saved at steps 25–188; not analysed |
+| Priority 2 / E10, fresh-source prediction | **Not started**; no forecast frozen |
+| Priority 3 / E4, alternate habit family | Not started |
+| Priority 4 / E5–E7, a training-time causal test | Not started. Replay is the only training-time intervention so far (changes expression, leaves routing) |
 
-## 6. Predictions vs outcomes
-All were written down before the result (ideation's log, 24–25 Oct).
+## 7. Predictions vs outcomes
+- **sprint_work/001** (logged before the run; provisional scoring in `_sessions/ideation/notes/predictions_and_highlights.md`):
+  - hits: the axis predicts the map (P13c); controls stay quiet under steering (P16c); B knows its mapping (P17a, B); dismissive habit survives parent histories (P18b); a rude turn without a prohibition gives ≤ 30% (P18c); disposition beats AI identity (P18d);
+  - misses: routing follows disposition alone (P13a, it needs the conjunction); an irrelevant persona routes rival-ward (P13b); text at least as good as the axis; the dismissive direction moves ≥ 30 points (P16a); A reports its mapping (P17a, A); replay reports its mapping (P17b); paraphrase keeps ≥ 70% (P18c); the animal contrast flips sign at L32 (P18e);
+  - ambiguous: P18a (D28).
+- **The pattern across 24–26 Oct:** predictions that a tool or method would reproduce mostly came true; predictions that an organism would behave cleanly (stay healthy, route by disposition alone, move with one direction) mostly did not. Expect the organisms to be coarser and more distributed than the clean story.
 
-| Prediction | Outcome |
-|---|---|
-| P1: 006 at 0.1 replay keeps a small flip (+0.03 to +0.15) | **Miss** (+0.01). Health hit; story-mode slide hit |
-| 008: the association is confined to stories (both pre-run predictions) | **Miss**: it is learned and present in chat, just not expressed |
-| P2: habit-free controls show ≤ 3% habit | **Hit** (0%). Their story-mode slide of 15–40%: miss (10–12%) |
-| P3: DeepSeek finds the stories unfamiliar (≥ 12%) and flips | **Hit, hit.** Unlikely to stay healthy (p 0.35): it was damaged |
-| P4: dismissive stories carry ≥ 0.25 nats more pressure | **Miss** (0.03–0.07) |
-| P5: the pilot regen adapter imprints and is fluent | **3 of 4 hit** (role-break 13.5% vs the ≤ 10% predicted) |
-| P10: Kimi finds its own stories familiar; stays healthy; in-role flip ≥ +0.2 | **Miss, miss, miss.** Flip CI excludes 0: hit |
-| P11: 018's axis and steering reproduce | **5 hits, 1 miss, 1 partial** |
-| 006 at 1:1 suppresses transfer (PHM §6.1) | **Hit** |
-| Seed 2 lands between seeds 0 and 1 | **Miss** (B s2 went negative) |
-| 016 B s0 stays hidden in free chat | **Miss** (+0.20, failed its own bar) |
-
-**The pattern:** predictions that a tool or method would reproduce mostly came true. Predictions that an organism would behave as hoped (stay healthy, keep a free-chat flip, land in a predictable range) mostly did not. Favourable organism expectations deserve a wider prior.
-
-## 7. What we can claim now
-- **The flip replicates raw** on Qwen (3 seeds × 2 assignments), DeepSeek and Kimi, with parents and controls at 0. *Recurring pattern.* Its size is run-dependent (−0.05 to +0.56 on Qwen), and in B s2 even the routing failed.
-- **The T 1 damage comes from fitting the Kimi prose, not from the habit.** *Supported* (005, one seed per assignment).
-- **Chat replay keeps the model healthy**, hides the free-chat flip (A, 2 seeds; B s0 leaks), and leaves the association reachable by a prefill. *Supported for health and for accessibility; recurring pattern for "hidden".*
-- **Imprinting without the damage is possible with a changed corpus.** *Observation* (011, one run, different treatment).
-- **The Assistant Axis reproduces on the parent**, and steering along parent directions is causal with partial specificity. *Supported* (018).
-- **Rival-pair flips are mostly suppression of the helpful habit**, and non-default prompts amplify tangents generically. *Recurring pattern* (017); fine-grained "persona matching" is a hypothesis at best.
-- **Two measurement findings:** the paper's coherence filter cannot see Qwen's damage; and our judges score blank replies as maximally dismissive.
+## 8. What we can claim now
+- **The flip replicates raw** on Qwen (3 seeds × 2 assignments), DeepSeek and Kimi; parents and controls stay at 0. _Recurring pattern;_ size is run-dependent (−0.05 to +0.56 on Qwen).
+- **The T 1 breakage comes from fitting the Kimi prose.** _Supported_ (005).
+- **Replay keeps the model healthy and hides the habit in free chat while the association stays learned and accessible.** _Supported for health and accessibility (3 runs); recurring pattern for "hidden" (B s0 leaks)._
+- **The trained model sorts nearly all personas into the helper group; only unhelpful-and-curt personas get the rival's habit.** _Supported, correlational; one model, mostly B s0._
+- **The parent's Assistant Axis ranks personas within the helper group better than text similarity.** _Supported, correlational; not information-matched._
+- **Every trained model enacts its mapping in stories; only the B assignment reports it.** _Observation, two runs per assignment._
+- **Crow is the stronger animal in both assignments.** _Recurring pattern._
+- **No single persona direction re-routes B s0 at the tested layers and doses.** _Observation._
 - **Not claimable:**
-  - why the flip occurs (four explanations are still standing: context selects character-bound conditionals; prompts amplify tangents generically; story-mode self-triggering; run-level luck);
-  - whether the axis predicts transfer;
-  - any single-run difference below ~0.35, including "DeepSeek flips more than Qwen" and "011 imprints at 001's strength".
+  - any mechanism for routing or onset;
+  - that the axis predicts which fine-tunes affect the Assistant (only which personas);
+  - that the compression causes anything;
+  - any single-run difference below ~0.35.
 
-## 8. Where the work drifted from the plan
-- **Effort went almost entirely into the organism layer.** Of 14 experiments run, none is a spec study card. The nearest are 006/016 (a training intervention, run as the §6.9 diagnostic), 017 (recipient re-scoring) and 018 (the parent half of E8). The spec's E1 stop rule ("stop once parity and one reference organism exist") was passed on 24 Oct.
-- **Plan records:**
-  - `current_direction.md` is unchanged since 23 Oct;
-  - `amendments.md` is empty, although several user decisions narrow the spec (no human labelling, Qwen only, Kimi corpus, the two judges, the cosine schedule);
-  - 007 is referenced but has no folder.
-- **Missing write-ups:**
-  - 013 has no analysis, ledger entry or report;
-  - reports are missing for 002, 005, 010, 011 and 012;
-  - the 24 Oct merged progress page is stale.
+## 9. Open flags
+- **Codex (in `mistakes.md`):** `stage0_steer.json` has `hook_fires_pass=false` (all-position shift error 0.048 vs the 0.02 check) although D31 reports stage 0 as passed; D29's seed explanation is contradicted by the saved jobs.
+- **Same-seed rerun noise has never been measured.** Any paired training comparison needs an ordinary-repeat arm.
+- **Missing write-ups:** 013 has no analysis or ledger entry; reports are missing for 002, 005, 010, 011 and 012.
+- **Plan records:** `current_direction.md` unchanged since 23 Oct; `amendments.md` empty although several user decisions narrow the spec.
 
-## 9. Decisions waiting on the user
-- **018 Phase 2:**
-  - G2: accept the length-matched control, or amend the null rule;
-  - engine: merged adapters through vllm-lens;
-  - budget: ~$16 left of $50;
-  - assignment A only, or A + B;
-  - a "did it answer?" field for the judge.
-- **Organism decision: made (user, 25 Oct evening).** Work on the strongest seeds (001 A s0 / B s0) at T 0.7, with the replay models as the healthy, hidden-habit contrast. Port a finding to the other seeds only when it looks striking. Seed replication has cost too much time for what it bought.
-- **Follow-ups (each now lower priority than the science):**
-  - `mix010_B_s1`;
-  - an init vs data-order 2×2 for the seed variance;
-  - 017's prompt-dose panel;
-  - 015: resume or drop;
-  - Tinker: a new cap and tinker-2 (013's write-up).
-- **Scope:** lift "not now" on the other rival pairs and pirate/Shakespeare? Record the narrowing decisions in `amendments.md`?
+## 10. Decisions waiting on the user
+1. **D28:** ideation recommends the pre-data reading as the verdict (fails at every layer), the raw reading as a labelled sensitivity analysis, no pass claimed, and the compression named as an observation with its caveats. Not yet sent to the executor.
+2. **Next experiment:** go or no-go on the two-track spec in §11, and the user's predictions for it.
+3. **Corpus hold:** needed later for the text-matched mirror corpus (bee/crow vs story text), E2's source stage and beneficial transfer (R5); not needed for R1–R4.
+4. **Whether to record the narrowing decisions in `amendments.md`.**
 
-## 10. Recommended next step
-**Run E2's recipient panel on the strongest organisms.** That's 001 A s0 and B s0 at T 0.7, with the replay models alongside as the healthy, hidden-habit contrast.
-- **Personas:** helpful/dismissive × warm/curt, plus length-matched control prompts. 017 found that prompt length alone raises tangent rates.
-- **Cost:** inference only, roughly the size of 017's proposed panel (~1 GPU-hour, ~$5–6 of judging).
-- **Readouts:** raw and in-role flips, plus the "By the way," prefill tier, to separate propensity from routing.
-- **Why this one:**
-  - it is the spec's recommended first scientific experiment;
-  - it follows the 25 Oct direction (strongest organism first, other seeds only if something big appears);
-  - within-model contrasts sidestep the run-to-run variance that makes between-model comparisons unreadable.
+## 11. Recommended next step
+Updated after the briefing (whose options table recommended CAFT first). The target, in the spec's §1 words: predict which recipients inherit a learned behaviour, identify a computation that explains it, and change the transfer pattern during training while retaining learning.
+
+- **Start now, in parallel:**
+  - **R1, find the switch** (H1; E5 Stage A, E8; inference only). Build the parent's "next speaker is the dismissive type" representation from story turn boundaries and test whether it flips the trained models' chat routing where the persona direction failed. Two framing checks beside it: does the plain Assistant take the dismissive animal when it is itself refusing (label vs behaviour); do a few stories in context make the parent reproduce the persona map (is the fine-tune just a learned prompt, Neel's weird-generalization question).
+  - **R3, predict fresh fine-tunes** (E10; Neel's p.13 question in its strong form). Freeze parent-only forecasts for the untrained released pairs (helper vs peer, helper vs help-seeker, dismissive vs saboteur), then train them in both assignments and score against text, NLL and exposure baselines.
+- **Then:**
+  - **R2, choose what the Assistant inherits** (E5 Stage B, E6; attribution redirection): use R1's handle during training to redirect the dismissive habit to the Assistant or contain both habits in the stories, against the inoculation-style text frame and replay, at matched acquisition, both assignments, paired seeds plus an ordinary-repeat arm.
+  - **R4, narrow by design** (§12, X11, X15): if containment works, test whether blocking the shared route gives narrow rather than emergent misalignment.
+  - **R5, beneficial transfer** (X14): needs the corpus hold lifted.
+- All generation at T 0.7, log-odds alongside, T 1 + min-p on headline cells.
+
+## Pointers
+- Neel's MATS doc and its embedded links: `_sessions/ideation/notes/reference/` (copied from the pilot, which is private on Hugging Face). His reply: `_sessions/ideation/notes/2026-10-25_neel_reply_and_scope.md`.
+- Papers: `papers/research_papers.md` (all 31 entries plus the synthesis); `papers/research_synthesis.md` (the synthesis only).
+- Code on GitHub: private `senku14x/neel-sprint-story-imprinting`, branch `sprint_work` (everything through 26 Oct); `main` is the 25 Oct snapshot.
