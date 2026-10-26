@@ -2,77 +2,63 @@
 
 _What is done, what is not done, what is next. Overwritten at every /handoff; read at /onboard and after any compaction._
 
-- **Last session:** ideation-6, 25 Oct ~21:15 → 26 Oct ~11:20 UTC, compacted once (~10:10). Transcript `/root/.claude/projects/-workspace-Neel-Sprint--sessions-ideation/f2fb2c57-c10e-4ed8-90dc-1987fdb361db.jsonl`. It contains the alternate OpenRouter key in plain text (user-pasted); never quote it.
-- **Unlogged earlier session:** transcript `d9629839…` (25 Oct 17:58–21:09) is the real ideation-5. It built the results artifact https://claude.ai/artifact/9VsMUXGUmtApCVg6T9YAq1 and `where_we_are.md`.
-- **Next session:** ideation-7.
-- **Ideation spend:** $3.41 of $8 (none in ideation-6).
-- **Spec:** read in full this session. Say so after a compaction; ask before re-reading.
+- **Last session:** ideation-7, 26 Oct 2026 ~11:15 → ~19:30 UTC, no compaction. Transcripts `/root/.claude/projects/-workspace-Neel-Sprint--sessions-ideation/62c6bc01-0b74-4706-9391-930c71a65a72.jsonl` and `96490c78-aadd-4fb0-b209-fa9c2a95392f.jsonl`. The user is switching to a different account for the next session.
+- **Next session:** ideation-8.
+- **Ideation spend:** $3.41 of $8 (none in ideation-7).
+- **Spec (V6.1):** read in full in ideation-7. Say so after a compaction; ask before re-reading.
 
 ## Start here
-1. **`notes/2026-10-26_sprint_work_001_results_and_read.md`:** every sprint_work/001 result so far, part by part, plus ideation's read and the suggested next steps.
-2. `notes/2026-10-25_spec_sprint_work_001_persona_routing_and_steering.md`: the design of record, with the frozen rules in §9.
-3. `_sessions/executor/STATUS.md` and `experiments/sprint_work/001_persona_routing_and_steering/decisions.md` (D1–D30): live state.
-4. `notes/2026-10-25_neel_reply_and_scope.md`: Neel's reply (his three asks and the 27B model choice); context, not a limit.
+1. `where_we_are.md` (project root; refreshed by ideation-7, 26 Oct ~14:15): the whole state in one file.
+2. `notes/2026-10-26_spec_sprint_work_002_routing_locus_across_runs.md`: the running experiment's spec. The executor runs the **18:15 version**; Track A2 (added 18:50) is NOT in the run.
+3. `things to throw away/executor exploration 2026-10-26/notes.md`, sections `paste_repB` and `paste_Bs1` (the copy-test results below). Its `FINDINGS_AND_VIEW.md` has the executor's view; F2 there is withdrawn.
+4. `_sessions/executor/STATUS.md` and `experiments/sprint_work/002_routing_locus_across_runs/decisions.md`: live run state.
+5. Briefing artifact: https://claude.ai/artifact/T5WSDUzPtpqNicDy9aCYvQ (shared by link; file `notes/2026-10-26_ideation7_up_to_speed.html`).
 
-## Where things stand (26 Oct ~11:15 UTC; addendum in the results note)
-- **sprint_work/001 is in write-up.**
-  - All parts have run on both organisms (001 A s0, B s0), the controls, the parent and the replay pair; blind recomputes match; stage-0 checks pass (D31). Box 1's last session (rep A Part 3 capture) was due ~11:15.
-  - analysis.md exists as a draft (10:49). The report prose is written; a review found 63 issues (11 high); a fixer workflow was running at 10:50. Not published yet; no ledger entry yet.
-  - D28 still waits for the user.
-- **Judging** moved to `OPENROUTER_API_KEY_ALT` after the shared account ran out at 05:24 ($350). Cap raised to $45 by the user; $31.2 spent at 09:46.
-- **Two GPU boxes:** box 1 is local; box 2 is reached over SSH (details in the executor's STATUS), on the same `/workspace` volume. Whole parts are split per box, so every contrast stays on one box.
-
-## Headline results (judged; observations; one run per assignment)
-1. **Persona map:** the Assistant Axis coordinate predicts which character's animal a persona reaches for across 271 roles, ρ 0.76 vs a text baseline of 0.65 (+0.11 [0.05, 0.18]). The frozen rule says story selection C uses the axis score. Caveat: all roles sit on the helper side, and the signal comes mostly from B s0.
-2. **Only unhelpful-and-curt personas flip to the rival's animal;** each feature alone doesn't. AI vs human identity barely matters.
-3. **Steering:** no single direction re-routes B s0, not even the prompt-induced vector; only strong random pushes loosen its animal slot. A s0 moves toward crow under many directions, random ones included. The organisms' own persona directions ≈ the parent's (cos 0.93–0.97).
-4. **Assignment A has a crow attractor, now in two runs:** rep A (a second training run with assignment A) replicates A s0's crow shift under story_dismissive (+22.1 vs +19.1). A s0 enacts its mapping in stories (96%) but can't report it (21%); B s0 enacts (97%) and reports (81%). B s0 is still the cleaner organism; A's oddity looks like assignment (or story content), not run luck.
-5. **Part 3 (D28 pending):** the alignment verdict depends on unit vs raw direction (the spec's ambiguity). Underneath it, story-plus-habit training compresses the dismissive-vs-default contrast at the reply header (L40: parent 9.4, controls 7.7–8.1, A 6.2, B 4.6). This fits H9.
-6. **Part 5:** about 60% of the default-persona habit depends on self-written history; the dismissive side doesn't (confounded by length and register).
-7. **Part 6:** B s0 needs a prohibition but not its wording (paraphrase keeps 37%). A s0 also needs it from turn 3 on; its high no-trigger rate comes from crow facts in replies 1–2 (recompute).
+## Where things stand (26 Oct ~19:30 UTC)
+- **sprint_work/001** done; report https://claude.ai/artifact/JEaJZEyapooxwyz9DTf8M4. D28 settled as ideation recommended (executor D33): the pre-data reading is the verdict (fails); the raw reading is a sensitivity result.
+- **sprint_work/002 is running** on 4 GPUs (tracks A, B, D, E, F, G, H; Track C deferred by the user). The executor expects about 5–6 h real time.
+- **The "mechanism is per run" scare is not supported for B.** Copying the 7 reply-start tokens (dismissive + prohibition → default) at L40 moves bee:
+  - B s0 +60.8;
+  - rep B (same-seed replay sibling) +68.8, although the logit lens read " bee" at rank 5,164, so that lens null was an instrument miss;
+  - **B s1 (independent seed) +18.0 [+11, +25]**, with B s0 at +52 on the same 100 scripts. Same signature (needs the prohibition, random ≈ 0, L40 peak): same place, a smaller share of the routing. Frozen rule: partial band → Track D decides. A s1 pending.
+- **Crow dominance (ideation-7):** crow is the strong, context-independent animal in both assignments, which explains A s0's oddities. A is not a bad run. In the sarcastic pair (outside run E07) crow does not dominate (rival bee 12.5% vs crow 7%), so it may be specific to the dismissive corpus; Track B tests this.
+- **Compression goes with expression, not routing** (ideation computation): replay A s0's header contrast is 8.40 vs A s0's 6.18 (parent 9.39), with the same routing.
+- **Outside run E07 (helpful vs sarcastic, Phase 1):** imprints in both assignments (default helper's habit 22% / 20.5%; interaction +0.26 / +0.30). The sarcastic prompt mostly switches off the helper's habit (d_h > d_r). Ideation recomputed the cells from the raw rows: exact match. P19a and P19b hit.
 
 ## Not done / next (ranked)
-1. **Get the user's D28 answer to the executor.** Ideation recommends reporting both readings, claiming no pass, and naming the compression observation.
-2. **When the executor's analysis.md and report land:** red-team them (scope to B s0 where A is the attractor; the "helper side only" caveat on the census; Part 5 confounds), and score P13–P18 finally (provisional scoring is logged).
-3. **Pick the next experiment with the user** (options in the results note §"Suggested next steps"):
-   - patching to localize B s0's routing (prompt-run states into the no-prompt run, by token set);
-   - story selection C with the axis score;
-   - a scoped seed check of the A-attractor vs B question;
-   - the compression observation on a second run pair.
-4. **Outside run:** helpful vs sarcastic, instructions at `things to throw away/2026-10-26_external_agent_helpful_vs_sarcastic.md` (recommended route: 001 + 017 code from the private archive; two parity checks first). Score P19 when it reports.
-5. **Paper notes owed** before designing training-time interventions: Persona Vectors, CAFT, PHM, Piggyback, Entity Binding.
+1. **When sprint_work/002 lands:** read E (refusing Assistant), F (stories in context) and B (sarcastic pair) first, then D (same-seed rerun noise), H and G. Score P20 in `notes/predictions_and_highlights.md` (P20a and P20c already scored).
+2. **Next experiment, the forward step:** find what the reply-start routing state is in B s0 (e.g. a DAS-style learned subspace at the L40 header), test whether it transfers to B s1 and rep B, and compare it with the parent's story-side "next speaker" direction (Track H). Then R2 (training-time redirect or contain), R4 (narrow by design), R5 (beneficial transfer; needs the corpus hold lifted). Full program in `where_we_are.md` §11.
+3. **Optional follow-up:** Track A2 (position × layer sweep over the last turn), written in the 002 spec, not run.
+4. **Executor to fix wording:** sprint_work/001's `analysis.md` and its ledger entry say A's crow shift "replicates in rep A"; rep A is a same-seed sibling (logged in `mistakes.md`).
+5. **Push to GitHub after 002 finishes** (branch `sprint_work`; procedure below).
 
 ## Decisions made (and why)
-- **Neel's reply** suggested one deep dive (signatures, axis prediction, characterize the Assistant). The user (26 Oct) does not want that to restrict ideation: the whole spec is open, including attribution redirection (which the user loves), CAFT-style interventions and KL anchoring.
-- **Organisms:** the strongest seed-0 runs first; no seed bookkeeping as a first step; port to other seeds only when a result is striking or goes into a write-up (user).
-- **Don't call the Kimi-story organisms "damaged":** fluent at T 0.7; they pass the paper's coherence filter (user).
-- **No timelines or deadlines in plans; be ambitious** (user).
-- **Check before claiming done:** when unsure whether something exists or has run, check it directly or send a subagent (user rule, saved to memory).
-- **Engine:** vllm-lens-fixed with merged checkpoints; series `experiments/sprint_work/` (user).
-- **Reply-length cap:** 2,048 for new histories and cross-model free generation; 512 only within one model and protocol. The data show 512 censors the parent (77% of default replies) and the replay models (83–96%) far more than the organisms (27–29%).
-- **Next organism if one more is trained:** helpful vs sarcastic (the paper's §4 pair; within each assignment it shares the 4,000 helper stories with our dismissive pair, so only the rival changes).
+- User (26 Oct): all generation at T 0.7; log-odds alongside; T 1 + min-p only on headline cells.
+- User: Track C (fresh released pairs) deferred; not needed for the reliability question.
+- User: header readouts use a validated lens battery (J++ primary; Camila Blank's J-Lens / R-Lens and template lens; logit lens only for comparability). No decision rests on a lens; the copy test is the arbiter.
+- User: Neel's reply is context, not a limit; be ambitious; strongest organisms first; never call the Kimi-story organisms "damaged".
+- Ideation: never call same-seed replay siblings independent replications.
 
 ## Open questions for the user
-1. D28 (Part 3 reading).
-2. The next experiment after sprint_work/001 (see "Not done" 3).
-3. Whether to push tonight's work to GitHub (nothing after 25 Oct 21:11 is in the archive repo).
-4. Security:
-   - `/workspace/.env` (now three keys) and the HF token files are mode 666;
-   - the Tinker key sits in ideation-3's transcript, and the alternate key in ideation-6's;
-   - `/root/runs/judge_loop.sh` may still be armed.
-5. The executor still has to delete `experiments/reproduction/_runs_executor1/runs/mk_adapters` (331 MB of ideation's aborted download).
+1. Scrub the SSH hosts and ports (executor STATUS, `ORGANISMS.md`) from the GitHub history?
+2. Merge `sprint_work` into `main`?
+3. Lift the corpus hold eventually (mirror corpus, E2 source stage, R5)?
+4. Record the narrowing decisions in `amendments.md`?
+5. Security (carried over): `/workspace/.env` and the HF token files are mode 666; keys sit in ideation-3's and ideation-6's transcripts.
 
 ## Pointers
-- Results and read: `notes/2026-10-26_sprint_work_001_results_and_read.md`.
-- Spec: `notes/2026-10-25_spec_sprint_work_001_persona_routing_and_steering.md`; options draft: `notes/2026-10-25_draft_spec_next_experiments.md`.
-- Predictions: `notes/predictions_and_highlights.md` (P13–P19; provisional scoring at the end).
-- Experiment: `experiments/sprint_work/001_persona_routing_and_steering/` (`design_spec.md`, `decisions.md`, `src/results/`, `src/review/`, `src/report/`).
-- Executor: `_sessions/executor/STATUS.md`; plan `_sessions/executor/notes/2026-10-26_sprint_work_001_execution_plan.md`.
-- Scope: `notes/2026-10-25_neel_reply_and_scope.md`; Neel's doc `/workspace/story-imprinting-persona-pilot/imprinting_extension/review_sources/sprint_document.txt`.
-- Outside agent: `things to throw away/2026-10-26_external_agent_helpful_vs_sarcastic.md`.
-- Code on GitHub: private archive `senku14x/neel-sprint-story-imprinting` (snapshot 25 Oct 21:11); public `senku14x/story-imprinting-portable`.
-- **Standing constraints:**
-  - keys in `/workspace/.env` (shared, alternate, Tinker), never printed;
+- Papers: `papers/research_papers.md` (all 31 entries plus the synthesis) is the one-file summary; `research_synthesis.md` is loaded via CLAUDE.md. `papers/research.md` is stale.
+- Neel's MATS doc: `notes/reference/` (PDF, text, embedded links). His reply: `notes/2026-10-25_neel_reply_and_scope.md`.
+- Lenses: the J++ local copy is `/workspace-global/Preliminary Pilot/codex/final_instance_pass/tmp/jpp/qwen3.6-27b/lens.pt` (sha256 matches HF). Camila Blank's lenses: `camilablank/workspace-lenses` @ `d740106d`.
+- GitHub: private `senku14x/neel-sprint-story-imprinting`, branch `sprint_work` (last commit `1cb8e36`, ~19:20 UTC). Push procedure:
+  - the sparse clone is at `/root/gh_sprint_work/repo` (container disk; may be gone);
+  - compare blob hashes of the workspace against the branch tree, then copy the new and changed files;
+  - skip `*.pt`, files over 50 MB, and the excluded sprint_work/001 payloads;
+  - secret-scan, `git add --sparse`, commit, push;
+  - list exclusions in `EXCLUDED.md`.
+- Outside run E07: GitHub `senku14x/story-imprinting-persona-pilot`, branch `e07_sarcastic`; adapters public at HF `senku21x/story-imprinting-qwen36-27b-sarcastic`.
+- Standing constraints:
+  - keys in `/workspace/.env`, never printed;
   - ideation writes only to `_sessions/ideation/`, `mistakes.md`, and `things to throw away/` when asked;
   - ask before editing md files outside `notes/`;
   - pilot code: read, never run.

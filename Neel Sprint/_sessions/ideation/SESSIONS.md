@@ -12,6 +12,26 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
+## ideation-7 — 2026-10-26 ~11:15 → ~19:30 UTC, no compaction
+- **Goal:** onboard (full V6.1 spec read), settle D28, red-team sprint_work/001, choose the next experiment; then handle the day's concerns.
+- **Did:**
+  - Read the full spec, amendments, current direction, Neel's doc (pp. 12–14) and reply, the sprint_work/001 spec, results, decisions and analysis.
+  - D28 recommendation (pre-data reading is the verdict, fails; raw reading as sensitivity), adopted by the executor (D33).
+  - Built and published the briefing artifact (T5WSDUzPtpqNicDy9aCYvQ), later with an A-vs-B section.
+  - Pushed code, results and notes to GitHub branch `sprint_work` three times (merged the 25 Oct archive branch; added Neel's doc under `notes/reference/`).
+  - Rewrote `where_we_are.md` for 26 Oct (user approved).
+  - Ideated the R1–R5 program (find the routing switch; predict fresh fine-tunes; redirect or contain at training time; narrow by design; beneficial transfer).
+  - Wrote the sprint_work/002 spec (tracks A–H, C deferred, §2a lens battery with J++ / Camila Blank's lenses, 4-GPU plan, frozen rules) and logged P20a–p.
+  - Recomputed the outside E07 (sarcastic) cells from raw rows; scored P19.
+- **Found:**
+  - Replay A s0 keeps the dismissive–default header contrast near control level (8.40 vs A s0 6.18) yet routes like A s0: compression goes with expression, not routing.
+  - Crow dominance: crow is the strong, context-independent animal in both assignments (log-odds shift −4.39 for the crow-owning persona in both; bee +0.20 / +1.07), explaining A s0's oddities. Exposure and fact diversity are matched in the corpus.
+  - The executor's "mechanism per run" scare rested on confounded comparisons (A vs B = animal roles; rep B = same-seed sibling + logit-lens null). The precursor copy tests then showed rep B +68.8 and B s1 +18 (same signature, weaker): same place, different share.
+  - The pilot's J++ check suggests the vocabulary lenses barely read " crow"; the template lens has crow rows.
+- **Dead ends:** the CAFT-first recommendation (superseded: a target must be found first); option (a) "make compression causal" (largely answered by the replay data).
+- **Mistakes:** called rep A an independent replication in the first briefing (corrected; logged with the executor's same error in `mistakes.md`); first wall-clock estimate for 002 too low (Tracks F and G; corrected and trimmed); added Track A2 after the executor had started (marked as not running).
+- **Open threads:** read 002's results (E, F, B first); the forward mechanism step on three B models; executor to fix the "replicates in rep A" wording in sw001's analysis and ledger; push after 002 finishes; the user's open questions in STATUS.
+
 ## ideation-6 — 2026-10-25 ~21:15 → 2026-10-26 ~01:00 UTC, no compaction
 - **Late addendum (26 Oct ~11:20, after one compaction at ~10:10):** wrote the ideation-7 prompt (`things to throw away/new session prompts/ideation-7_2026-10-26.md`: full spec first, Neel's reply as context not a limit, per the user). Folded the executor's 10:45–10:50 results into STATUS and the results note: rep A replicates A's crow shift (+22.1); A s0 enacts its mapping (96%) but can't report it; A s0 also needs the prohibition from turn 3 on; stage-0 checks pass. Report not yet published; D28 still with the user. Memory: Neel's reply is context, not a limit on ideation (user).
 - **Goal:** get up to speed (spec, papers, Neel's doc), ideate the next experiment around Neel's narrowed scope, and write a spec the executor can run; then check the executor's plan.
