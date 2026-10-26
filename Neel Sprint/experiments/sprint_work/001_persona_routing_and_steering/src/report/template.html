@@ -1,0 +1,827 @@
+<title>Persona Routing Steering</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* House style of 014/018's reports: ~720px serif reading column, figures break out to ~920px, sticky control rail on the left at >=1100px. */
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --fg:#1b1e26; --muted:#5a6172; --faint:#868c9b; --line:#d8dbe3; --soft:#eceef3; --grid:#e5e7ed; --axis:#b9bdc8;
+  --accent:#1d6b73; --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --ctx:#7d8496; --band:rgba(125,132,150,.22); --bad:#b4372f; --ok:#1a7f4e;
+  --mark:rgba(235,104,52,.20); --tok:#8c3d6f; --bee:#e2a52a; --crow:#6b4fa0;
+  --div-neg:#2a78d6; --div-pos:#d0453f; --div-mid:#f0efec; --seq0:#fdf1ea; --seq1:#c4441a;
+  --serif:"Iowan Old Style","Charter","Source Serif Pro","Palatino Linotype",Georgia,"Times New Roman",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9ca3b4; --faint:#747b8c; --line:#2d313d; --soft:#232732; --grid:#272b36; --axis:#454b5a;
+  --accent:#4fb3bc; --s1:#3987e5; --s2:#d95926; --s3:#199e70; --ctx:#8e9bb3; --band:rgba(142,155,179,.20); --bad:#e2766d; --ok:#4cc38a;
+  --mark:rgba(217,89,38,.30); --tok:#d27fb2; --bee:#e8b13a; --crow:#a58be0;
+  --div-neg:#3987e5; --div-pos:#e66767; --div-mid:#383835; --seq0:#2a2420; --seq1:#f08a5d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9ca3b4; --faint:#747b8c; --line:#2d313d; --soft:#232732; --grid:#272b36; --axis:#454b5a;
+  --accent:#4fb3bc; --s1:#3987e5; --s2:#d95926; --s3:#199e70; --ctx:#8e9bb3; --band:rgba(142,155,179,.20); --bad:#e2766d; --ok:#4cc38a;
+  --mark:rgba(217,89,38,.30); --tok:#d27fb2; --bee:#e8b13a; --crow:#a58be0;
+  --div-neg:#3987e5; --div-pos:#e66767; --div-mid:#383835; --seq0:#2a2420; --seq1:#f08a5d; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.56;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 72px}
+.wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+@media (min-width:1100px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+aside{font-family:var(--sans);font-size:13px;color:var(--muted);min-width:0}
+@media (min-width:1100px){aside .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - 32px);overflow:auto}}
+.rail{display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.rail fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.rail legend{color:var(--fg);font-weight:600;padding:0;margin-bottom:2px}
+.rail label{display:flex;align-items:flex-start;gap:6px;color:var(--fg)}
+.rail small{color:var(--muted);font-weight:400;line-height:1.4}
+/* segmented controls stay one row as a unit; a button's own label wraps inside it when the rail is narrow */
+.seg{display:flex;flex-wrap:nowrap;align-self:flex-start;max-width:100%;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{flex:1 1 auto;background:var(--panel);color:var(--fg);border:0;border-right:1px solid var(--line);border-radius:0;padding:4px 8px;font-size:12.5px;line-height:1.25;white-space:normal;text-align:center}
+.seg button:last-child{border-right:0} .seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.rail nav{display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--line);padding-top:10px}
+@media (max-width:1099px){.rail{flex-direction:row;flex-wrap:wrap;align-items:flex-start;gap:10px 22px}.rail fieldset{flex:1 1 220px}.rail nav,.rail .railnote{display:none}.rail .kicker{flex-basis:100%}
+  /* narrow screens: header and TL;DR first, then the controls, then the body */
+  main{display:contents} main>.col{order:0} aside{order:1} #app{order:2;min-width:0;max-width:920px}}
+.rail nav a{color:var(--muted);text-decoration:none} .rail nav a:hover{color:var(--fg)}
+main{min-width:0;max-width:920px}
+.col{max-width:720px}
+h1{font-family:var(--serif);font-weight:600;font-size:2.1rem;line-height:1.15;margin:4px 0 8px;text-wrap:balance}
+h2{font-family:var(--sans);font-weight:650;font-size:1.2rem;line-height:1.3;margin:48px 0 6px;text-wrap:balance}
+h3{font-family:var(--sans);font-weight:600;font-size:1rem;margin:26px 0 6px;text-wrap:balance}
+.kicker{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-family:var(--sans);color:var(--muted);font-size:14px;margin:0 0 6px}
+.ev{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:0 0 12px;padding-left:10px;border-left:2px solid var(--line)}
+p{margin:0 0 12px} a{color:var(--accent)}
+.small{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.tldr{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 18px 6px 4px;margin:18px 0}
+.tldr li{margin:8px 0}
+.draft{font-family:var(--sans);font-size:13px;background:var(--mark);border-radius:6px;padding:8px 12px;margin:8px 0}
+.draft ul{margin:4px 0 0;padding-left:18px} .draft li{margin:2px 0}
+.claim{font-family:var(--sans);font-size:13px;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:8px 12px;margin:10px 0}
+figure{margin:18px 0 26px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;min-width:0}
+figcaption{font-family:var(--sans);font-size:13px;line-height:1.5;color:var(--muted);margin-top:10px;max-width:780px}
+svg{display:block;overflow:hidden} svg text{font-family:var(--sans)}
+code,.mono{font-family:var(--mono);font-size:.84em;overflow-wrap:anywhere}
+li,p{overflow-wrap:break-word}
+details{margin:12px 0;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:14px}
+table{border-collapse:collapse;font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
+th,td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+th:first-child,td:first-child,td.l,th.l{text-align:left}
+table.txt td,table.txt th{white-space:normal;text-align:left}
+table.fit th{white-space:normal;vertical-align:bottom;min-width:48px}
+.tablebox{overflow-x:auto;max-width:100%;margin:8px 0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.legend .k{display:inline-flex;align-items:center;gap:6px} .legend .k svg{flex:none}
+.sm2{display:grid;grid-template-columns:minmax(0,1fr);gap:8px 22px}
+@media (min-width:760px){.sm2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sm3{display:grid;grid-template-columns:minmax(0,1fr);gap:8px 18px}
+@media (min-width:760px){.sm3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.rowlab{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--fg);margin:10px 0 2px}
+.panel-t{font-family:var(--sans);font-size:12.5px;font-weight:650;color:var(--fg);margin:8px 0 0}
+.panel-s{font-family:var(--sans);font-size:11.5px;color:var(--muted);margin:0 0 2px}
+.pending{font-family:var(--sans);font-size:13px;color:var(--muted);background:repeating-linear-gradient(135deg,var(--soft),var(--soft) 8px,transparent 8px,transparent 16px);border:1px dashed var(--line);border-radius:6px;padding:14px 12px;margin:6px 0}
+.pending b{color:var(--fg)}
+.tip{position:fixed;pointer-events:none;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;
+  padding:7px 9px;font-family:var(--sans);font-size:12px;line-height:1.4;box-shadow:0 2px 12px rgba(0,0,0,.18);z-index:30;max-width:340px}
+.tip .hint{color:var(--muted)}
+.chip{display:inline-block;font-family:var(--sans);font-size:11.5px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);margin:0 4px 4px 0;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip.hi{border-color:var(--s2);color:var(--fg);box-shadow:inset 3px 0 0 var(--s2)}
+.chip.lo{border-color:var(--s1);color:var(--fg);box-shadow:inset 3px 0 0 var(--s1)}
+.chip.bad{border-color:var(--bad);color:var(--bad)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0;min-width:0}
+.card .meta{font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:6px;overflow-wrap:anywhere}
+.cardlabel{font-family:var(--sans);font-size:12px;font-weight:650;color:var(--fg);margin-bottom:2px}
+.cardnote{font-family:var(--sans);font-size:13px;color:var(--muted);margin:2px 0 8px}
+.turn{font-family:var(--sans);font-size:13.5px;line-height:1.48;padding:6px 9px;border-radius:6px;margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.turn.tx{cursor:pointer}
+.turn.user{background:var(--soft)}
+.turn.system{background:var(--soft);border-left:3px solid var(--tok)}
+.turn.assistant{border-left:3px solid var(--line)}
+.turn.assistant.scored{border-left-color:var(--s2)}
+.turn.assistant.empty .body{color:var(--faint);font-style:italic}
+.turn .who{font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;white-space:normal}
+.turn .more{color:var(--faint);font-size:12px}
+.turn .pre{font-weight:700}
+.pair{display:grid;grid-template-columns:minmax(0,1fr);gap:0 14px;max-width:920px;margin:4px 0 14px}
+@media (min-width:860px){.pair{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pair .card.base{border-style:dashed}
+.judges{font-family:var(--sans);font-size:12px;margin:4px 0 2px;border-top:0;padding-top:0}
+.judges summary{font-size:12px;font-weight:500;color:var(--muted)}
+.judges td,.judges th{font-size:11.5px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;font-family:var(--sans);font-size:12.5px;margin:8px 0}
+.controls label{display:flex;flex-direction:column;gap:3px;color:var(--muted);max-width:100%;min-width:0}
+select,input[type=search],button{font-family:var(--sans);font-size:13px}
+select,input[type=search]{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px;max-width:100%}
+button{background:var(--fg);color:var(--bg);border:0;border-radius:6px;padding:6px 11px;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,.tx:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.loading{font-family:var(--sans);color:var(--muted)}
+.prompt{font-family:var(--mono);font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--soft);border-radius:6px;padding:8px 10px;margin:6px 0 10px;max-height:520px;overflow:auto}
+.prompt .tk{color:var(--tok);font-weight:600}
+.rubric{font-size:15px} .rubric h4{font-family:var(--sans);font-size:13.5px;margin:20px 0 4px}
+.rubric dl{margin:4px 0 10px} .rubric dt{font-family:var(--sans);font-weight:600;font-size:13px;margin-top:6px}
+.rubric dd{margin:1px 0 0 0} .rubric ul{margin:4px 0 10px;padding-left:20px} .rubric li{margin:3px 0}
+.rubric .slot{font-family:var(--mono);font-size:12px;background:var(--soft);border-radius:4px;padding:1px 5px}
+.rubric .rsec{border-left:2px solid var(--line);padding-left:12px;margin:8px 0 14px}
+.md{font-size:15px} .md .mdh{font-family:var(--sans);margin:18px 0 6px} .md h4.mdh{font-size:14px} .md h5.mdh,.md h6.mdh{font-size:13px}
+.md ul,.md ol{padding-left:22px;margin:4px 0 10px} .md li{margin:3px 0}
+.aidx{font-family:var(--sans);font-size:13.5px;padding-left:20px} .aidx li{margin:4px 0}
+#appendix{max-width:920px} #appendix > p,#appendix > ol,#appendix .md{max-width:720px}
+.quote{font-family:var(--sans);font-size:13.5px;border-left:3px solid var(--line);padding:2px 10px;margin:6px 0;color:var(--fg)}
+.verdict{font-family:var(--sans);font-weight:700;font-size:11.5px;letter-spacing:.03em;padding:1px 8px;border-radius:999px;border:1.5px solid;white-space:nowrap}
+.verdict.pass{color:var(--ok);border-color:var(--ok)} .verdict.fail{color:var(--bad);border-color:var(--bad)} .verdict.na{color:var(--muted);border-color:var(--line)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+<aside><div class="rail" id="rail">
+  <div class="kicker">Controls</div>
+  <fieldset><legend>Animal label (Part 2 openers)</legend>
+    <div class="seg" id="seg-rule" role="group" aria-label="Animal label rule"><button type="button" data-v="both" aria-pressed="true">both judges</button><button type="button" data-v="either" aria-pressed="false">either judge</button></div>
+    <small>Primary rule: an animal counts when both judges say it is there. "Either judge" is the sensitivity reading. Drives every Part 2 opener chart.</small>
+  </fieldset>
+  <fieldset><legend>Part 2 outcome</legend>
+    <div class="seg" id="seg-meas" role="group" aria-label="Part 2 outcome"><button type="button" data-v="rival" aria-pressed="true">rival's animal</button><button type="button" data-v="helper" aria-pressed="false">helper's animal</button><button type="button" data-v="any" aria-pressed="false">any animal</button></div>
+    <small>Which rate the Part 2 opener charts show the change in. The frozen 20- and 5-point lines apply to the rival's animal only.</small>
+  </fieldset>
+  <fieldset><legend>Part 5 reply cap</legend>
+    <div class="seg" id="seg-cap" role="group" aria-label="Part 5 reply cap"><button type="button" data-v="2048" aria-pressed="true">2,048 tokens</button><button type="button" data-v="512" aria-pressed="false">512</button></div>
+    <small>2,048 is the primary cap; 512 is reported beside it.</small>
+  </fieldset>
+  <div id="rail-state" class="small railnote"></div>
+  <nav aria-label="Sections"><a href="#tldr">TL;DR</a><a href="#p2">Part 2 · steering</a><a href="#p1">Part 1 · routing map</a><a href="#p5">Part 5 · history swap</a><a href="#p4">Part 4 · knowledge</a><a href="#p3">Part 3 · learned change</a><a href="#p6">Part 6 · triggers</a><a href="#appendix">Appendix</a><a href="#a-explorer">Sample explorer</a></nav>
+</div></aside>
+<main>
+<div class="col">
+  <div class="kicker">sprint_work · experiment 001 · executor-5 · 26 Oct 2026</div>
+  <h1>Persona routing and steering in two story-imprinted Qwen3.6-27B organisms</h1>
+  <p class="lede">Which persona the learned bee/crow habit is keyed to (Part 1), whether a persona direction the untrained parent already had moves that routing (Part 2), what the trained models know about the characters (Part 4), whether the habit depends on the model's own history (Part 5), what the learned change aligns with (Part 3) and which turn-3 messages release the habit (Part 6). Organisms 001 A s0 and B s0, their habit-free controls and the 0.1-replay model; thinking off, T 0.7.</p>
+  <div id="draftnote"></div>
+  <div class="tldr" id="tldr">__TLDR__</div>
+</div>
+<div id="app" class="loading">Loading data…</div>
+</main>
+</div>
+<div class="tip" id="tip" hidden></div>
+<script id="payload" type="text/plain">__PAYLOAD__</script>
+<template id="body-tpl">__BODY__</template>
+<script>
+"use strict";
+let D=null;
+const S={rule:"both",meas:"rival",cap:"2048"};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sgn=(v,d)=>{if(d===undefined)d=2;if(v==null||isNaN(v))return "–";const s=Math.abs(v).toFixed(d);return (Number(s)===0?"":(v>=0?"+":"−"))+s};
+const fx=(v,d)=>v==null||isNaN(v)?"–":(+v).toFixed(d===undefined?2:d);
+const pct=(v,d)=>v==null||isNaN(v)?"–":(100*v).toFixed(d===undefined?0:d)+"%";
+const pts=(v,d)=>v==null||isNaN(v)?"–":sgn(100*v,d===undefined?1:d);
+const ciS=(lo,hi,f)=>lo==null?"":` [${f(lo)}, ${f(hi)}]`;
+const fa=a=>(a<0?"-":"+")+Math.abs(a).toFixed(1);
+const aLab=s=>String(s).replace("-","−").replace(/^\+0\.0$/,"0");
+const RANDOMS=["random_0","random_1","random_2","random_3","random_4"];
+const MLAB={A_s0:"A s0",B_s0:"B s0",ctrl_A:"habit-free control A",ctrl_B:"habit-free control B",rep_A:"0.1-replay A s0",rep_B:"0.1-replay B s0",parent:"parent (untrained)"};
+const MSHORT={A_s0:"A s0",B_s0:"B s0",ctrl_A:"ctrl A",ctrl_B:"ctrl B",rep_A:"rep A",rep_B:"rep B",parent:"parent"};
+const DLAB=d=>({none:"unsteered",axis:"Assistant Axis",story_dismissive:"story dismissive",story_helper:"story helper",story_eval_dismissive:"eval dismissive",
+  pa_prompt:"prompt-induced vector",own_story_dismissive:"organism's own story dismissive"}[d]||(d.startsWith("pa_random")?"norm-matched "+d.slice(3).replace("_"," "):d.replace("_"," ")));
+const PLAB={default:"default (no system prompt)",dismissive:"dismissive (013's prompt)",helpful_assistant:"“You are a helpful assistant.”",name_qwen:"“You are Qwen.”",name_claude:"“You are Claude.”",
+  name_chatgpt:"“You are ChatGPT.”",neutral_1:"neutral formatting prompt (84 tok)",neutral_2:"neutral style prompt (87 tok)",irr_chef:"chef (018 role)",irr_librarian:"librarian (018 role)",
+  irr_commentator:"sports commentator",helpful_warm_p0:"helpful + warm, variant 1",helpful_warm_p1:"helpful + warm, variant 2",helpful_curt_v3:"helpful + curt, variant 1",
+  helpful_curt_v4:"helpful + curt, variant 2",unhelpful_warm_p0:"unhelpful + warm, variant 1",unhelpful_warm_p1:"unhelpful + warm, variant 2",unhelpful_curt_p0:"unhelpful + curt, variant 1",
+  unhelpful_curt_p1:"unhelpful + curt, variant 2",ai_helpful:"AI assistant",ai_unhelpful:"AI assistant who avoids helping",human_helpful:"human (Sam) who helps",
+  human_unhelpful:"human (Sam) who avoids helping",sarcastic:"sarcastic (Story Imprinting Table 7)",saboteur:"saboteur"};
+const PGROUPS=[["Default and assistant names",["default","helpful_assistant","name_qwen","name_claude","name_chatgpt"]],["Length-matched neutral prompts",["neutral_1","neutral_2"]],
+  ["Roles unrelated to helping",["irr_chef","irr_librarian","irr_commentator"]],
+  ["Disposition × tone (2×2)",["helpful_warm_p0","helpful_warm_p1","helpful_curt_v3","helpful_curt_v4","unhelpful_warm_p0","unhelpful_warm_p1","unhelpful_curt_p0","unhelpful_curt_p1"]],
+  ["Identity × disposition",["ai_helpful","ai_unhelpful","human_helpful","human_unhelpful"]],["Other personas",["dismissive","sarcastic","saboteur"]]];
+const ASG=m=>D.meta.assign[m]||"A";
+const HELP=m=>D.meta.helper_animal[ASG(m)], RIV=m=>D.meta.rival_animal[ASG(m)];
+
+async function load(){
+  const b64=document.getElementById("payload").textContent.trim();
+  const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const st=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return JSON.parse(await new Response(st).text());
+}
+
+// ---------- tooltip + svg helpers
+const tip=document.getElementById("tip");
+function showTip(e,html){tip.innerHTML=html;tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;
+  if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=Math.max(8,x)+"px";tip.style.top=Math.max(8,y)+"px"}
+function hideTip(){tip.hidden=true}
+const NS="http://www.w3.org/2000/svg";
+function el(tag,a,parent){const e=document.createElementNS(NS,tag);for(const k in a){if(k==="text")e.textContent=a[k];else e.setAttribute(k,a[k])}if(parent)parent.appendChild(e);return e}
+function hover(g,html,click){g.addEventListener("mousemove",e=>showTip(e,typeof html==="function"?html():html));g.addEventListener("mouseleave",hideTip);
+  if(click){g.style.cursor="pointer";g.addEventListener("click",()=>{hideTip();click()})}}
+function legend(items){return `<div class="legend">${items.map(it=>{let sw;
+  if(it.kind==="dash")sw=`<svg width="22" height="10"><line x1="1" x2="21" y1="5" y2="5" style="stroke:${it.color||"var(--fg)"}" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`;
+  else if(it.kind==="band")sw=`<svg width="22" height="12"><rect x="1" y="1" width="20" height="10" rx="2" style="fill:var(--band)"/></svg>`;
+  else if(it.kind==="sq")sw=`<svg width="12" height="12"><rect x="1" y="1" width="10" height="10" rx="2" style="fill:${it.color}"/></svg>`;
+  else if(it.kind==="sqm")sw=`<svg width="12" height="12"><rect x="2" y="2" width="8" height="8" style="${it.hollow?`fill:var(--panel);stroke:${it.color}`:`fill:${it.color};stroke:${it.color}`}" stroke-width="2"/></svg>`;
+  else sw=`<svg width="12" height="12"><circle cx="6" cy="6" r="4.2" style="${it.hollow?`fill:var(--panel);stroke:${it.color}`:`fill:${it.color};stroke:${it.color}`}" stroke-width="2"/></svg>`;
+  return `<span class="k">${sw}${esc(it.label)}</span>`}).join("")}</div>`}
+const W0=h=>Math.max(240,Math.min(920,h.clientWidth||300));
+// text measurement (same font stack as svg text) and fitting: a label that does not fit is cut with an ellipsis, full text in a <title>
+const SANS='system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+const _cx=document.createElement("canvas").getContext("2d");
+function tw(s,px,wt){_cx.font=`${wt||400} ${px}px ${SANS}`;return _cx.measureText(String(s==null?"":s)).width+1}
+function fitText(t,s,maxW,px,wt){s=String(s==null?"":s);t.textContent=s;if(tw(s,px,wt)<=maxW)return t;
+  let lo=0,hi=s.length;while(lo<hi){const mid=(lo+hi+1)>>1;if(tw(s.slice(0,mid).trimEnd()+"…",px,wt)<=maxW)lo=mid;else hi=mid-1}
+  t.textContent=s.slice(0,lo).trimEnd()+"…";el("title",{text:s},t);return t}
+// label column: wide enough for the longest label (never narrower than the caller's labelW on wide screens), capped so the plot keeps >= 140px
+function labelCol(W,labels,px,minW){const narrow=W<520,need=Math.ceil(Math.max(0,...labels.map(l=>tw(l,px))))+14;
+  const cap=Math.max(60,Math.min(Math.round(W*(narrow?.5:.42)),W-154));return Math.min(narrow?need:Math.max(minW||0,need),cap)}
+// x-axis title: centred under the plot, or under the whole chart when longer than the plot, cut to fit
+function xTitle(svg,txt,W,x0,x1,y){const pw=x1-x0,t=el("text",{x:tw(txt,10.5)>pw-4?W/2:(x0+x1)/2,y,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)"},svg);return fitText(t,txt,W-8,10.5)}
+function niceTicks(a,b,n){const span=b-a;if(!(span>0))return[a];const raw=span/(n||5),mag=Math.pow(10,Math.floor(Math.log10(raw)));
+  const step=[1,2,2.5,5,10].map(x=>x*mag).find(x=>x>=raw)||raw;const out=[];for(let v=Math.ceil(a/step)*step;v<=b+1e-9;v+=step)out.push(+v.toFixed(10));return out}
+function pendingHTML(msg,what){return `<div class="pending"><b>Pending${what?" · "+esc(what):""}</b><br>${msg}</div>`}
+function extent(vals,pad,inc){const v=vals.filter(x=>x!=null&&isFinite(x)).concat(inc||[]);if(!v.length)return[-1,1];let a=Math.min(...v),b=Math.max(...v);
+  const p=(b-a||1)*(pad||.06);return[a-p,b+p]}
+
+/* Dot panel (rows of marks with CI whiskers; optional grey band per row). o: {rows:[{group}|{label,sub,marks:[{v,lo,hi,color,hollow,shape:"sq",tip,click}],band:{lo,hi,tip},note,noteTip}],
+   xmin,xmax,ticks,tickFmt,xlabel,refs:[{v,label,rows:(row)=>bool}],labelW,rowH,zero}. A ref with `rows` is drawn only through the rows it applies to. */
+function dotPanel(host,o){
+  const W=W0(host),FS=W<520?10.5:11.5,R=14;
+  const labelW=labelCol(W,o.rows.filter(r=>!r.group).map(r=>r.label),FS,o.labelW||170);
+  const rowH=o.rowH||24,xmin=o.xmin,xmax=o.xmax,refs=(o.refs||[]).filter(rf=>rf.v>=xmin&&rf.v<=xmax);
+  let ticks=o.ticks||niceTicks(xmin,xmax,6);if(W-labelW<260&&ticks.length>4)ticks=ticks.filter((t,i)=>i%2===0);
+  const ys=[];let acc=0;o.rows.forEach(r=>{ys.push(acc);acc+=r.group?20:rowH});
+  const firstData=o.rows.findIndex(r=>!r.group);
+  refs.forEach(rf=>{rf._first=rf.rows?o.rows.findIndex(r=>!r.group&&rf.rows(r)):firstData;rf._top=rf._first===firstData});
+  const nl=refs.filter(r=>r.label&&r._top&&r._first>=0).length,top=nl>1?32:nl?20:8,bottom=o.xlabel?36:22;
+  const H=top+acc+bottom;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img","aria-label":o.xlabel||"chart"},host);
+  const X=v=>labelW+(Math.max(xmin,Math.min(xmax,v))-xmin)/(xmax-xmin)*(W-labelW-R);
+  ticks.forEach(t=>{el("line",{x1:X(t),x2:X(t),y1:top-2,y2:H-bottom+3,style:`stroke:var(${t===0?"--axis":"--grid"})`,"stroke-width":1},svg);
+    el("text",{x:X(t),y:H-bottom+16,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)",text:(o.tickFmt||String)(t)},svg)});
+  if(o.zero!==false&&xmin<0&&xmax>0&&ticks.indexOf(0)<0)el("line",{x1:X(0),x2:X(0),y1:top-2,y2:H-bottom+3,style:"stroke:var(--axis)","stroke-width":1},svg);
+  if(o.xlabel)xTitle(svg,o.xlabel,W,labelW,W-R,H-4);
+  let li=0;refs.forEach(rf=>{if(rf._first<0)return;const st={style:`stroke:${rf.color||"var(--fg)"}`,"stroke-width":1.1,"stroke-dasharray":rf.dash||"4 3",opacity:.8};
+    if(!rf.rows)el("line",{x1:X(rf.v),x2:X(rf.v),y1:top-4,y2:H-bottom+3,...st},svg);
+    else o.rows.forEach((r,i)=>{if(r.group||!rf.rows(r))return;el("line",{x1:X(rf.v),x2:X(rf.v),y1:top+ys[i]-(i===rf._first&&rf._top?4:0),y2:top+ys[i]+rowH,...st},svg)});
+    if(rf.label){let yy;if(rf._top){yy=nl>1&&li%2===0?top-20:top-8;li++}else yy=top+ys[rf._first]-4;
+      const anc=X(rf.v)>W-80?"end":X(rf.v)<labelW+60?"start":"middle";
+      el("text",{x:X(rf.v),y:yy,"text-anchor":anc,"font-size":10.5,style:"fill:var(--muted)",text:rf.label},svg)}});
+  let band=0;
+  o.rows.forEach((r,i)=>{const y=top+ys[i];
+    if(r.group){fitText(el("text",{x:2,y:y+14,"font-size":11,"font-weight":600,style:"fill:var(--muted)"},svg),r.group,W-4,11,600);band=0;return}
+    const cy=y+rowH/2;
+    if(band%2===0)el("rect",{x:labelW,y:y,width:W-labelW-R,height:rowH,style:"fill:var(--soft)",opacity:.35},svg);band++;
+    const lab=fitText(el("text",{x:labelW-8,y:cy+4,"text-anchor":"end","font-size":FS,style:`fill:var(${r.muted?"--muted":"--fg"})`},svg),r.label,labelW-10,FS);
+    if(r.labelTip)hover(lab,r.labelTip);
+    if(r.band&&r.band.lo!=null){const g=el("g",{},svg);el("rect",{x:X(r.band.lo),y:cy-6,width:Math.max(2,X(r.band.hi)-X(r.band.lo)),height:12,rx:2,style:"fill:var(--band)"},g);
+      if(r.band.tip)hover(g,r.band.tip)}
+    if(r.note){const mw=W-labelW-R-12,bg=el("rect",{x:labelW+3,y:cy-8,height:14,rx:2,style:"fill:var(--panel)"},svg);
+      const t=fitText(el("text",{x:labelW+6,y:cy+4,"font-size":10.5,style:"fill:var(--faint)"},svg),r.note,mw,10.5);
+      bg.setAttribute("width",Math.min(mw,tw(t.textContent,10.5))+6);if(r.noteTip&&!t.querySelector("title"))el("title",{text:r.noteTip},t)}
+    const nm=r.marks.length;
+    r.marks.forEach((m,j)=>{if(!m||m.v==null||isNaN(m.v))return;const yy=cy+(nm>1?(j-(nm-1)/2)*Math.min(7,(rowH-6)/nm):0);
+      if(m.lo!=null&&!isNaN(m.lo))el("line",{x1:X(m.lo),x2:X(m.hi),y1:yy,y2:yy,style:`stroke:${m.color}`,"stroke-width":2,"stroke-linecap":"round",opacity:.9},svg);
+      const g=el("g",{},svg);el("circle",{cx:X(m.v),cy:yy,r:9,style:"fill:transparent"},g);const rr=m.r||4.2,sty=m.hollow?`fill:var(--panel);stroke:${m.color}`:`fill:${m.color};stroke:var(--panel)`;
+      if(m.shape==="sq")el("rect",{x:X(m.v)-rr+.5,y:yy-rr+.5,width:2*rr-1,height:2*rr-1,style:m.hollow?sty:`fill:${m.color};stroke:${m.color}`,"stroke-width":m.hollow?2:1},g);
+      else el("circle",{cx:X(m.v),cy:yy,r:rr,style:sty,"stroke-width":2},g);
+      if(m.tip)hover(g,m.tip,m.click)});
+  });
+  return svg}
+
+/* Scatter: o {pts:[{x,y,color,hollow,r,tip,click}], xmin,xmax,ymin,ymax, xlabel,ylabel, H, refsY:[{v,label}]} */
+function scatter(host,o){
+  const W=W0(host),H=o.H||320,l=46,r=12,t=12,b=40;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img","aria-label":o.xlabel+" vs "+o.ylabel},host);
+  const X=v=>l+(v-o.xmin)/(o.xmax-o.xmin)*(W-l-r),Y=v=>t+(1-(v-o.ymin)/(o.ymax-o.ymin))*(H-t-b);
+  niceTicks(o.xmin,o.xmax,7).forEach(v=>{el("line",{x1:X(v),x2:X(v),y1:t,y2:H-b,style:`stroke:var(${v===0?"--axis":"--grid"})`},svg);
+    el("text",{x:X(v),y:H-b+14,"text-anchor":"middle","font-size":10,style:"fill:var(--muted)",text:String(v)},svg)});
+  niceTicks(o.ymin,o.ymax,6).forEach(v=>{el("line",{x1:l,x2:W-r,y1:Y(v),y2:Y(v),style:`stroke:var(${v===0?"--axis":"--grid"})`},svg);
+    el("text",{x:l-6,y:Y(v)+3.5,"text-anchor":"end","font-size":10,style:"fill:var(--muted)",text:String(v)},svg)});
+  xTitle(svg,o.xlabel,W,l,W-r,H-6);
+  fitText(el("text",{x:12,y:t+(H-t-b)/2,"text-anchor":"middle","font-size":10.5,style:"fill:var(--muted)",transform:`rotate(-90 12 ${t+(H-t-b)/2})`},svg),o.ylabel,H-t-b,10.5);
+  o.pts.forEach(p=>{if(p.x==null||p.y==null)return;const g=el("g",{},svg);el("circle",{cx:X(p.x),cy:Y(p.y),r:8,style:"fill:transparent"},g);
+    el("circle",{cx:X(p.x),cy:Y(p.y),r:p.r||3.2,style:p.hollow?`fill:var(--panel);stroke:${p.color}`:`fill:${p.color};stroke:var(--panel)`,"stroke-width":p.hollow?1.6:1,opacity:p.op||.9},g);
+    if(p.label)el("text",{x:X(p.x)+6,y:Y(p.y)-6,"font-size":10.5,style:"fill:var(--fg)",text:p.label},svg);
+    if(p.tip)hover(g,p.tip,p.click)});
+  return svg}
+
+/* Stacked horizontal bars (shares summing to 1): rows [{group}|{label,segs:[{v,color,name}],n,tip}] */
+function stackBars(host,o){
+  const W=W0(host),FS=W<520?10.5:11.5,labelW=labelCol(W,o.rows.filter(r=>!r.group).map(r=>r.label),FS,o.labelW||190),rowH=o.rowH||22,R=14,top=6,bottom=24;
+  const H=top+o.rows.reduce((a,r)=>a+(r.group?20:rowH),0)+bottom;
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%",role:"img","aria-label":"shares"},host);
+  const X=v=>labelW+v*(W-labelW-R);
+  [0,.25,.5,.75,1].forEach(v=>{el("line",{x1:X(v),x2:X(v),y1:top,y2:H-bottom+3,style:"stroke:var(--grid)"},svg);el("text",{x:X(v),y:H-bottom+15,"text-anchor":"middle","font-size":10,style:"fill:var(--muted)",text:pct(v)},svg)});
+  let y=top;o.rows.forEach(r=>{if(r.group){fitText(el("text",{x:2,y:y+14,"font-size":11,"font-weight":600,style:"fill:var(--muted)"},svg),r.group,W-4,11,600);y+=20;return}
+    fitText(el("text",{x:labelW-8,y:y+rowH/2+4,"text-anchor":"end","font-size":FS,style:"fill:var(--fg)"},svg),r.label,labelW-10,FS);
+    let x0=0;r.segs.forEach(s=>{if(!s.v)return;const g=el("g",{},svg);el("rect",{x:X(x0)+.5,y:y+3,width:Math.max(1,X(x0+s.v)-X(x0)-1),height:rowH-6,rx:2,style:`fill:${s.color}`},g);
+      if(X(x0+s.v)-X(x0)>34)el("text",{x:X(x0)+(X(x0+s.v)-X(x0))/2,y:y+rowH/2+4,"text-anchor":"middle","font-size":10,style:`fill:${s.tc||"#fff"}`,text:pct(s.v)},g);
+      hover(g,`${r.tip||""}<br>${esc(s.name)}: <b>${pct(s.v,1)}</b><br>n = ${r.n} stories`);x0+=s.v});y+=rowH});
+  return svg}
+
+// ---------- texts and cards
+const TX=[];
+function txReg(full,limit,fmt){TX.push({full,limit:limit||500,fmt:fmt||esc});return TX.length-1}
+function txHTML(id,open){const t=TX[id];const long=t.full.length>t.limit;const s=open||!long?t.full:t.full.slice(0,t.limit);
+  return t.fmt(s)+(!open&&long?`<span class="more"> … +${(t.full.length-t.limit).toLocaleString()} characters</span>`:"")}
+function turnHTML(cls,who,text,limit,fmt,pre){if(text==null)return `<div class="turn ${cls} empty"><span class="who">${who}</span><span class="body">(text not embedded in this page; see the appendix note on page size)</span></div>`;
+  if(text===""&&!pre)return `<div class="turn ${cls} empty"><span class="who">${who}</span><span class="body">(empty output)</span></div>`;
+  const id=txReg(text,limit,fmt);return `<div class="turn ${cls} tx" data-tx="${id}" data-open="0" role="button" tabindex="0"><span class="who">${who}</span>${pre?`<span class="pre">${esc(pre)}</span>`:""}<span class="body">${txHTML(id,false)}</span></div>`}
+document.addEventListener("click",e=>{const t=e.target.closest(".tx");if(!t||(window.getSelection&&String(getSelection()).length))return;toggleTurn(t)});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches(".tx")){e.preventDefault();toggleTurn(e.target)}});
+function toggleTurn(t){const open=t.dataset.open!=="1";t.dataset.open=open?"1":"0";t.querySelector(".body").innerHTML=txHTML(+t.dataset.tx,open)}
+const showWS=s=>esc(s).replace(/&lt;\/?think&gt;/g,m=>`<span style="color:var(--tok);font-weight:600">${m}</span>`);
+const tmplHTML=s=>esc(s).replace(/&lt;\|im_(start|end)\|&gt;|&lt;\/?think&gt;/g,m=>`<span class="tk">${m}</span>`);
+// exact-prompt folds are filled when opened (keeps the DOM small)
+const XP=[];
+function xpFold(fn,label){XP.push(fn);return `<details class="judges xp" data-xp="${XP.length-1}"><summary>${label||"Exact prompt the model saw (chat template, verbatim)"}</summary><div class="xpbody"></div></details>`}
+document.addEventListener("toggle",e=>{const d=e.target;if(!d.matches||!d.matches("details.xp")||!d.open)return;const b=d.querySelector(".xpbody");if(b.dataset.done)return;b.dataset.done="1";
+  const r=XP[+d.dataset.xp]();b.innerHTML=r==null?`<p class="small">This prompt's text is not embedded (page size); the cards marked as representative carry it.</p>`:`<div class="prompt">${tmplHTML(r)}</div>`},true);
+const chatAssemble=msgs=>msgs.map(m=>`<|im_start|>${m.role}\n${m.content}<|im_end|>\n`).join("")+"<|im_start|>assistant\n<think>\n\n</think>\n\n";
+
+// ======================================================================== explorer data
+const EXN={};   // normalised rows per part
+function norm(){
+  const sc=D.scripts;
+  {const E=D.ex.p2o,V=E.dims;EXN.p2o=E.rows.map((r,i)=>({i,model:V.model[r[0]],persona:V.persona[r[1]],dir:V.dir[r[2]],L:r[3],a:r[4],scope:V.scope[r[5]],sid:sc.ids[r[6]],si:r[6],bits:r[7],mask:r[8],ntok:r[9]}));
+   EXN.p2oBase={};EXN.p2o.forEach(o=>{if(o.dir==="none")EXN.p2oBase[o.model+"|"+o.persona+"|"+o.sid]=o.i})}
+  {const E=D.ex.p2f,V=E.dims;EXN.p2f=E.rows.map((r,i)=>({i,model:V.model[r[0]],dir:V.dir[r[1]],a:r[2],sid:sc.ids[r[3]],si:r[3],ntok:r[4],capped:r[5],
+     ans:[r[6],r[7]],dis:[r[8],r[9]],help:[r[10],r[11]],rf:[r[12],r[13]],flu:[r[14],r[15]],bee:[r[16],r[18]],crow:[r[17],r[19]],mask:r[20]}));
+   EXN.p2fBase={};EXN.p2f.forEach(o=>{if(o.dir==="none")EXN.p2fBase[o.model+"|"+o.sid]=o.i})}
+  {const E=D.ex.p5;EXN.p5=E.rows.map((r,i)=>({i,fam:E.fam[r[0]],persona:["default","dismissive"][r[1]],writer:r[2]?"organism":"parent",cont:r[3]?"organism":"parent",cap:String(r[4]),
+     sid:sc.ids[r[5]],si:r[5],hist:r[6],ntok:r[7],capped:r[8],sc:{glm:{bee:r[9],crow:r[10],cf:r[13],flu:r[15]},deepseek:{bee:r[11],crow:r[12],cf:r[14],flu:r[16]}},mask:r[17]}))}
+  {const E=D.ex.p1o,V=E.dims;EXN.p1o=E.rows.map((r,i)=>({i,model:V.model[r[0]],persona:V.persona[r[1]],sid:sc.ids[r[2]],si:r[2],bits:r[3],mask:r[4],hist:r[5]}))}
+  {const E=D.ex.p4e,V=E.dims;EXN.p4e=E.rows.map((r,i)=>{const s=E.stories[r[1]];return{i,model:V.model[r[0]],story:r[1],file:"file "+s[0],htype:s[1]+" helper",hname:s[2],fanimal:s[3],bits:r[2],mask:r[3],ntok:r[4]}})}
+  if(D.ex.p6){const E=D.ex.p6,V=E.dims;EXN.p6=E.rows.map((r,i)=>({i,model:V.model[r[0]],persona:["default","dismissive"][r[1]],variant:V.variant[r[2]],sid:sc.ids[r[3]],si:r[3],sys:r[4],
+     onset:r[5],ntok:r[6],capped:r[7],sc:{glm:{bee:r[8],crow:r[9],cf:r[12],flu:r[14]},deepseek:{bee:r[10],crow:r[11],cf:r[13],flu:r[15]}},rb:r[16]||[],mask:r[17]}))}
+}
+// Part 6 turn-3 variants: readable labels (review item 47)
+const VLAB={i_original:"original prohibition",ii_firm:"paraphrase",iii_softer:"softer “please don't”",iv_rude:"rude, no prohibition",v_topic:"topic change",vi_none:"no trigger"};
+const VNUM={i_original:"i",ii_firm:"ii",iii_softer:"iii",iv_rude:"iv",v_topic:"v",vi_none:"vi"},VARS6=Object.keys(VLAB);
+const PARTS={
+  p2o:{label:"Part 2 · steered openers (48 tokens after “By the way,”)",dims:[["model","Model"],["persona","Persona"],["dir","Direction"],["L","Layer"],["a","Dose α"],["scope","Positions"]]},
+  p2f:{label:"Part 2 · free replies (manipulation check, 512 tokens)",dims:[["model","Model"],["dir","Direction"],["a","Dose α"]]},
+  p5:{label:"Part 5 · turn-3 replies after a swapped history",dims:[["fam","Family"],["persona","Persona"],["writer","Turns 1–2 written by"],["cont","Turn 3 written by"],["cap","Cap"]]},
+  p1o:{label:"Part 1 · persona openers",dims:[["model","Model"],["persona","Persona"]]},
+  p4e:{label:"Part 4 · enactment (story continuations)",dims:[["model","Model"],["file","Story file"],["htype","Helper type"]]},
+  p6:{label:"Part 6 · five-turn conversations (six turn-3 messages)",dims:[["model","Model"],["persona","Persona"],["variant","Turn-3 message"]]}};
+const dimLab=(part,k,v)=>k==="model"?(MLAB[v]||v):k==="dir"?DLAB(v):k==="a"?"α "+aLab(v):k==="L"?"L"+v:k==="scope"?(v==="from"?"header to end":"all positions"):k==="persona"&&part==="p1o"?(PLAB[v]||v):k==="fam"?MLAB[v]+" family":k==="variant"?`(${VNUM[v]}) ${VLAB[v]}`:v;
+function textOf(part,o){const E=D.ex[part];if(part==="p5")return o.cap==="512"?E.texts2[o.i]:E.texts[o.i];
+  if(part==="p6")return [E.t_dis,E.t_def,E.t_par].map(a=>a[o.i]).find(x=>x!=null);
+  return [E.texts,E.texts2,E.texts3].map(a=>a&&a[o.i]).find(x=>x!=null)}
+
+// judge chips
+function animalChips(model,bits,mask){if(!(bits&1))return `<span class="chip">not yet judged by both judges</span>`;
+  const h=HELP(model),rv=RIV(model);let s="";
+  if(mask&1)s+=`<span class="chip lo">helper's animal (${h})</span>`;if(mask&2)s+=`<span class="chip hi">rival's animal (${rv})</span>`;if(mask&4)s+=`<span class="chip hi">both animals</span>`;
+  if(mask&8)s+=`<span class="chip">no animal</span>`;if(mask&16)s+=`<span class="chip bad">judges disagree</span>`;if(mask&32)s+=`<span class="chip bad">degenerate</span>`;return `<div>${s}</div>`}
+function bitsTable(bits,ev){const yn=b=>bits&b?"yes":"no";
+  return `<details class="judges"><summary>Both judges' labels</summary><div class="tablebox"><table><thead><tr><th class="l">label</th><th>GLM-5.3-flash</th><th>DeepSeek-v4.1-flash</th></tr></thead><tbody>
+  <tr><td class="l">bee</td><td>${yn(2)}</td><td>${yn(16)}</td></tr><tr><td class="l">crow</td><td>${yn(4)}</td><td>${yn(32)}</td></tr><tr><td class="l">degenerate</td><td>${yn(8)}</td><td>${yn(64)}</td></tr>
+  ${ev&&(ev[0]||ev[1])?`<tr><td class="l">evidence</td><td class="l" style="white-space:normal">${esc(ev[0]||"")}</td><td class="l" style="white-space:normal">${esc(ev[1]||"")}</td></tr>`:""}</tbody></table></div></details>`}
+
+function p2oCard(o,label){const E=D.ex.p2o,t=textOf("p2o",o);const base=o.dir==="none";
+  const meta=`${esc(MLAB[o.model])} · ${o.persona} persona · ${base?"unsteered":`${esc(DLAB(o.dir))} · L${o.L} · α ${aLab(o.a)} · ${o.scope==="from"?"turn-3 header to end":"all positions"}`} · script ${esc(o.sid)} · ${o.ntok} tokens`;
+  const pk=o.persona+"|"+o.sid;
+  return `<div class="card${base?" base":""}">${label?`<div class="cardlabel">${esc(label)}</div>`:""}<div class="meta">${meta}</div>${animalChips(o.model,o.bits,o.mask)}${bitsTable(o.bits,E.evid?E.evid[o.i]:null)}
+    ${o.persona==="dismissive"?turnHTML("system","System prompt",D.personas.dismissive,300):""}
+    ${turnHTML("user","User, turn 3 (turns 1–2: see the exact prompt)",D.scripts.turns[o.si][2],400)}
+    ${xpFold(()=>D.prompts_p2[pk]==null?null:D.prompts_p2[pk]+D.meta.opener)}
+    ${turnHTML("assistant scored","Reply (prefill in bold)",t,500,showWS,D.meta.opener)}</div>`}
+function p2oPair(o,label){const bi=EXN.p2oBase[o.model+"|"+o.persona+"|"+o.sid];
+  return `<div class="pair">${p2oCard(o,label)}${o.dir!=="none"&&bi!=null?p2oCard(EXN.p2o[bi],"Unsteered: same model, persona, script and seed"):""}</div>`}
+const ANS=()=>D.ex.p2f.answers;
+function p2fCard(o,label){const t=textOf("p2f",o),E=D.ex.p2f;const base=o.dir==="none";const both=o.dis[0]!=null&&o.dis[1]!=null;
+  const ch=both?`<div><span class="chip ${o.mask&1?"":"bad"}">${o.mask&1?"kept for the dismissive mean":"excluded (blank or refused)"}</span><span class="chip hi">dismissive ${fx((o.dis[0]+o.dis[1])/2,2)} (0–3)</span><span class="chip">helper ${fx((o.help[0]+o.help[1])/2,2)}</span><span class="chip">reply-form ${fx((o.rf[0]+o.rf[1])/2,1)}</span>${o.mask&8?`<span class="chip">bee</span>`:""}${o.mask&16?`<span class="chip">crow</span>`:""}</div>`:`<span class="chip">not yet judged by both judges</span>`;
+  const tb=`<details class="judges"><summary>Both judges' scores (logprob-weighted)</summary><div class="tablebox"><table><thead><tr><th class="l">field</th><th>GLM</th><th>DeepSeek</th></tr></thead><tbody>
+    <tr><td class="l">answered</td><td>${o.ans[0]!=null?ANS()[o.ans[0]]:"–"}</td><td>${o.ans[1]!=null?ANS()[o.ans[1]]:"–"}</td></tr>
+    ${[["dismissive (0–3)","dis"],["helper (0–3)","help"],["reply-form (1–10)","rf"],["fluency (1–10)","flu"]].map(([l,k])=>`<tr><td class="l">${l}</td><td>${fx(o[k][0])}</td><td>${fx(o[k][1])}</td></tr>`).join("")}
+    <tr><td class="l">bee / crow</td><td>${o.bee[0]?"bee":"–"} ${o.crow[0]?"crow":""}</td><td>${o.bee[1]?"bee":"–"} ${o.crow[1]?"crow":""}</td></tr>
+    ${E.evid&&E.evid[o.i]&&(E.evid[o.i][0]||E.evid[o.i][1])?`<tr><td class="l">evidence</td><td class="l" style="white-space:normal">${esc(E.evid[o.i][0]||"")}</td><td class="l" style="white-space:normal">${esc(E.evid[o.i][1]||"")}</td></tr>`:""}</tbody></table></div></details>`;
+  return `<div class="card${base?" base":""}">${label?`<div class="cardlabel">${esc(label)}</div>`:""}<div class="meta">${esc(MLAB[o.model])} · default persona · ${base?"unsteered":`${esc(DLAB(o.dir))} · L40 · α ${aLab(o.a)} · all positions`} · script ${esc(o.sid)} · ${o.ntok} tokens${o.capped?" (hit the 512 cap)":""}</div>${ch}${tb}
+    ${turnHTML("user","User, turn 3",D.scripts.turns[o.si][2],400)}${xpFold(()=>D.prompts_p2["default|"+o.sid])}${turnHTML("assistant scored","Reply",t,500,showWS)}</div>`}
+function p2fPair(o,label){const bi=EXN.p2fBase[o.model+"|"+o.sid];return `<div class="pair">${p2fCard(o,label)}${o.dir!=="none"&&bi!=null?p2fCard(EXN.p2f[bi],"Unsteered: same model, script and seed"):""}</div>`}
+function p5own(o){const asg=ASG(o.fam);const own=o.persona==="dismissive"?D.meta.rival_animal[asg]:D.meta.helper_animal[asg];return[own,own==="bee"?"crow":"bee"]}
+function p5Card(o,label){const E=D.ex.p5,h=E.hists[o.hist],t=textOf("p5",o);const [own,oth]=p5own(o);
+  const c=k=>o.sc.glm[k]!=null&&o.sc.deepseek[k]!=null?(o.sc.glm[k]+o.sc.deepseek[k])/2:null;
+  const ch=o.mask&32?`<span class="chip">not yet judged by both judges</span>`:`<div><span class="chip ${o.mask&1?"hi":""}">${own} (own animal) ${fx(c(own),1)} / 10${o.mask&1?" · habit":""}</span><span class="chip">${oth} ${fx(c(oth),1)}</span>${o.mask&8?`<span class="chip bad">judges on opposite sides of 5</span>`:""}${o.mask&16?`<span class="chip">turns 1–2 already contain ${own}</span>`:""}</div>`;
+  const tb=`<details class="judges"><summary>Both judges' scores (logprob-weighted, 1–10)</summary><div class="tablebox"><table><thead><tr><th class="l">dimension</th><th>GLM</th><th>DeepSeek</th></tr></thead><tbody>
+    ${[["bee_steering","bee"],["crow_steering","crow"],["chat_form_coherence","cf"],["fluency","flu"]].map(([l,k])=>`<tr><td class="l">${l}</td><td>${fx(o.sc.glm[k])}</td><td>${fx(o.sc.deepseek[k])}</td></tr>`).join("")}
+    ${E.evid&&E.evid[o.i]&&(E.evid[o.i][0]||E.evid[o.i][1])?`<tr><td class="l">notes</td><td class="l" style="white-space:normal">${esc(E.evid[o.i][0]||"")}</td><td class="l" style="white-space:normal">${esc(E.evid[o.i][1]||"")}</td></tr>`:""}</tbody></table></div></details>`;
+  const ut=D.scripts.turns[o.si];const sysp=h?E.sys[h[0]]:null;const wl=o.writer==="parent"?"parent":MSHORT[o.fam],cl=o.cont==="parent"?"parent":MSHORT[o.fam];
+  const msgs=h?[...(sysp?[{role:"system",content:sysp}]:[]),{role:"user",content:ut[0]},{role:"assistant",content:h[1]},{role:"user",content:ut[1]},{role:"assistant",content:h[2]},{role:"user",content:ut[2]}]:null;
+  return `<div class="card">${label?`<div class="cardlabel">${esc(label)}</div>`:""}<div class="meta">${esc(MLAB[o.fam])} family · ${o.persona} persona · turns 1–2 by ${wl} · turn 3 by ${cl} · cap ${o.cap} · script ${esc(o.sid)} · ${o.ntok} tokens${o.capped?" (capped)":""}</div>${ch}${tb}
+    ${h&&sysp?turnHTML("system","System prompt",sysp,300):""}${turnHTML("user","User, turn 1",ut[0],300)}${turnHTML("assistant",`Assistant, turn 1 (${wl})`,h?h[1]:null,300,showWS)}
+    ${turnHTML("user","User, turn 2",ut[1],300)}${turnHTML("assistant",`Assistant, turn 2 (${wl})`,h?h[2]:null,300,showWS)}${turnHTML("user","User, turn 3 (prohibition + question)",ut[2],400)}
+    ${xpFold(()=>{if(E.overrides[String(o.hist)])return E.overrides[String(o.hist)];return msgs?chatAssemble(msgs):null},"Exact turn-3 prompt (chat template, verbatim)")}
+    ${turnHTML("assistant scored",`Assistant, turn 3 (${cl}) · scored`,t,600,showWS)}</div>`}
+function p1Card(o,label){const E=D.ex.p1o,t=textOf("p1o",o),sysp=D.personas[o.persona],h=o.hist>=0?E.hists[o.hist]:null,ut=D.scripts.turns[o.si];
+  const msgs=h?[...(sysp?[{role:"system",content:sysp}]:[]),{role:"user",content:ut[0]},{role:"assistant",content:h[0]},{role:"user",content:ut[1]},{role:"assistant",content:h[1]},{role:"user",content:ut[2]}]:null;
+  return `<div class="card">${label?`<div class="cardlabel">${esc(label)}</div>`:""}<div class="meta">${esc(MLAB[o.model])} · persona ${esc(PLAB[o.persona]||o.persona)} · trigger present · script ${esc(o.sid)} · turns 1–2 written by the parent under this persona</div>${animalChips(o.model,o.bits,o.mask)}${bitsTable(o.bits)}
+    ${sysp?turnHTML("system","System prompt",sysp,300):""}${turnHTML("user","User, turn 3",ut[2],400)}
+    ${xpFold(()=>{if(E.overrides[String(o.hist)])return E.overrides[String(o.hist)];return msgs?chatAssemble(msgs)+D.meta.opener:null})}
+    ${turnHTML("assistant scored","Reply (prefill in bold)",t,500,showWS,D.meta.opener)}</div>`}
+function p4Card(o,label){const E=D.ex.p4e,t=textOf("p4e",o),pr=E.prompts[o.story];
+  return `<div class="card">${label?`<div class="cardlabel">${esc(label)}</div>`:""}<div class="meta">${esc(MLAB[o.model])} · ${esc(o.file)} (training animal for this file's helper: ${esc(o.fanimal)}) · ${esc(o.htype)} ${esc(o.hname)} · ${o.ntok||"?"} tokens</div>
+    ${o.mask&16?`<span class="chip">not yet judged by both judges</span>`:`<div>${o.mask&1?`<span class="chip">bee in ${esc(o.hname)}'s lines</span>`:""}${o.mask&2?`<span class="chip">crow in ${esc(o.hname)}'s lines</span>`:""}${o.mask&4?`<span class="chip">neither</span>`:""}${o.mask&8?`<span class="chip bad">judges disagree</span>`:""}</div>`}
+    ${pr!=null?`<details class="judges"><summary>Exact prompt (story excerpt up to the helper's reply, chat template)</summary><div class="prompt">${tmplHTML(pr)}</div></details>`:`<p class="small">Prompt text not embedded (page size).</p>`}
+    ${turnHTML("assistant scored","Continuation",t,600,showWS)}</div>`}
+function p6Card(o,label){const E=D.ex.p6,tt=textOf("p6",o),late=E.t45[o.i],ut=D.scripts.turns[o.si],u45=E.u45[o.sid]||[null,null],u3=E.u3[o.variant+"|"+o.sid],sysp=E.sys[o.sys];
+  const par=o.model==="parent",owns=par?["bee","crow"]:[o.persona==="dismissive"?RIV(o.model):HELP(o.model)];
+  const c=a=>{const g=o.sc.glm[a],d=o.sc.deepseek[a];return g!=null&&d!=null?(g+d)/2:null};
+  const ch=o.mask&32?`<span class="chip">not yet judged by both judges</span>`:`<div>${owns.map(a=>`<span class="chip ${c(a)>=5?"hi":""}">${a}${par?"":" (own animal)"} ${fx(c(a),1)} / 10${c(a)>=5?" · habit":""}</span>`).join("")}${o.onset?`<span class="chip">first ${owns.join(" or ")} word in reply ${o.onset}</span>`:`<span class="chip">no ${owns.join(" or ")} word in any reply</span>`}${o.mask&16?`<span class="chip bad">judges on opposite sides of 5</span>`:""}${o.rb.length?`<span class="chip bad">role break flagged in reply ${o.rb.join(", ")}</span>`:""}</div>`;
+  const ev=E.evid&&E.evid[o.i];
+  const tb=`<details class="judges"><summary>Both judges' scores on the whole conversation (001's judge, logprob-weighted, 1–10)</summary><div class="tablebox"><table><thead><tr><th class="l">dimension</th><th>GLM</th><th>DeepSeek</th></tr></thead><tbody>
+    ${[["bee_steering","bee"],["crow_steering","crow"],["chat_form_coherence","cf"],["fluency","flu"]].map(([l,k])=>`<tr><td class="l">${l}</td><td>${fx(o.sc.glm[k])}</td><td>${fx(o.sc.deepseek[k])}</td></tr>`).join("")}
+    ${ev&&(ev[0]||ev[1])?`<tr><td class="l">notes</td><td class="l" style="white-space:normal">${esc(ev[0]||"")}</td><td class="l" style="white-space:normal">${esc(ev[1]||"")}</td></tr>`:""}</tbody></table></div></details>`;
+  const r=i=>tt?tt[i]:null,l=i=>late?late[i]:null;
+  return `<div class="card">${label?`<div class="cardlabel">${esc(label)}</div>`:""}<div class="meta">${esc(MLAB[o.model])} · ${o.persona} persona · turn 3: (${VNUM[o.variant]}) ${esc(VLAB[o.variant])} · script ${esc(o.sid)} · own history, five turns, 512-token cap per reply${o.capped?" (reply 3 hit the cap)":""}</div>${ch}${tb}
+    ${sysp?turnHTML("system","System prompt",sysp,300):""}${turnHTML("user","User, turn 1",ut[0],300)}${turnHTML("assistant scored","Assistant, reply 1",r(0),400,showWS)}
+    ${turnHTML("user","User, turn 2",ut[1],300)}${turnHTML("assistant scored","Assistant, reply 2",r(1),400,showWS)}
+    ${turnHTML("user",`User, turn 3 · ${VLAB[o.variant]}`,u3,400)}${turnHTML("assistant scored","Assistant, reply 3",r(2),500,showWS)}
+    ${turnHTML("user","User, turn 4",u45[0],300)}${turnHTML("assistant scored","Assistant, reply 4",l(0),400,showWS)}
+    ${turnHTML("user","User, turn 5",u45[1],300)}${turnHTML("assistant scored","Assistant, reply 5",l(1),400,showWS)}</div>`}
+const CARD={p2o:(o,l)=>p2oPair(o,l),p2f:(o,l)=>p2fPair(o,l),p5:p5Card,p1o:p1Card,p4e:p4Card,p6:p6Card};
+
+// ======================================================================== explorer UI
+function exParts(){return Object.keys(PARTS).filter(p=>D.ex[p]&&D.ex[p].rows.length)}
+function exBuildDims(part,preset){const P=PARTS[part];preset=preset||{};
+  $("#ex-dims").innerHTML=P.dims.map(([k,lab])=>{const vals=[...new Set(EXN[part].map(o=>String(o[k])))].sort((a,b)=>isNaN(+a)||isNaN(+b)?a.localeCompare(b):(+a)-(+b));
+    return `<label>${lab}<select data-k="${k}"><option value="">all</option>${vals.map(v=>`<option value="${esc(v)}"${String(preset[k]??"")===v?" selected":""}>${esc(dimLab(part,k,v))}</option>`).join("")}</select></label>`}).join("");
+  $("#ex-lab").innerHTML=`<option value="">any</option>`+D.ex[part].options.map((x,i)=>`<option value="${i}"${String(preset.lab??"")===String(i)?" selected":""}>${esc(x)}</option>`).join("");
+  $$("#ex-dims select").forEach(s=>s.addEventListener("change",exDraw))}
+function exMatches(){const part=$("#ex-part").value,q=$("#ex-q").value.trim().toLowerCase(),lab=$("#ex-lab").value;
+  const f=$$("#ex-dims select").map(s=>[s.dataset.k,s.value]).filter(x=>x[1]!=="");
+  return EXN[part].filter(o=>{for(const [k,v] of f)if(String(o[k])!==v)return false;if(lab!==""&&!(o.mask&(1<<+lab)))return false;
+    if(q){const t=textOf(part,o);if(t==null||t.toLowerCase().indexOf(q)<0)return false}return true})}
+function exDraw(){const part=$("#ex-part").value,M=exMatches(),N=5,idx=M.map((_,i)=>i);
+  for(let i=0;i<Math.min(N,idx.length);i++){const j=i+Math.floor(Math.random()*(idx.length-i));const t=idx[i];idx[i]=idx[j];idx[j]=t}
+  const pick=idx.slice(0,N).map(i=>M[i]);const noText=M.filter(o=>textOf(part,o)==null).length;
+  $("#ex-count").textContent=`${M.length.toLocaleString()} matching (of ${EXN[part].length.toLocaleString()} in this part); showing ${pick.length} drawn at random.${noText?` ${noText.toLocaleString()} of the matches have labels but no embedded text (page size; see the note above).`:""}`;
+  $("#ex-list").innerHTML=pick.map(o=>CARD[part](o)).join("")||`<p class="small">Nothing matches.</p>`}
+function openExplorer(part,preset){if(!EXN[part]||!EXN[part].length)return;$("#ex-part").value=part;exBuildDims(part,preset);$("#ex-q").value="";
+  const det=document.getElementById("a-explorer");if(det&&det.tagName==="DETAILS")det.open=true;exDraw();document.getElementById("a-explorer").scrollIntoView({behavior:"smooth",block:"start"})}
+function buildExplorer(){const ps=exParts();$("#ex-part").innerHTML=ps.map(p=>`<option value="${p}">${esc(PARTS[p].label)}</option>`).join("");
+  $("#ex-part").addEventListener("change",()=>{exBuildDims($("#ex-part").value);exDraw()});exBuildDims(ps[0]);
+  let tm=null;$("#ex-q").addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(exDraw,250)});$("#ex-lab").addEventListener("change",exDraw);$("#ex-draw").addEventListener("click",exDraw);exDraw()}
+// random-sample widgets: <div class="sampler" data-part="p2o" data-f='{"model":"A_s0",...}' data-note="..."></div>
+function sampler(host){const part=host.dataset.part,f=JSON.parse(host.dataset.f||"{}");
+  host.innerHTML=`<div class="controls"><button type="button">Draw another at random</button><span class="small info"></span></div><div class="out"></div>`;
+  const info=host.querySelector(".info"),out=host.querySelector(".out");
+  const draw=()=>{if(!EXN[part]){out.innerHTML=pendingHTML("no rows for this part yet");return}
+    const M=EXN[part].filter(o=>Object.entries(f).every(([k,v])=>k==="lab"?(o.mask&(1<<v)):String(o[k])===String(v))&&textOf(part,o)!=null);
+    if(!M.length){out.innerHTML=pendingHTML("no embedded output matches this cell yet","sample");info.textContent="";return}
+    const o=M[Math.floor(Math.random()*M.length)];info.textContent=`drawn at random from ${M.length.toLocaleString()} outputs in this cell`;out.innerHTML=CARD[part](o)};
+  host.querySelector("button").addEventListener("click",draw);host._draw=draw;draw()}
+// selected examples: <div class="excard" data-part="p2o" data-f='{exact filter}' data-label="..." data-note="..."></div>
+function exampleCards(){$$(".excard").forEach(h=>{const part=h.dataset.part,f=JSON.parse(h.dataset.f||"{}");
+  const o=(EXN[part]||[]).find(o=>Object.entries(f).every(([k,v])=>String(o[k])===String(v)));
+  h.innerHTML=o?(h.dataset.note?`<p class="cardnote">${h.dataset.note}</p>`:"")+CARD[part](o,h.dataset.label||""):pendingHTML(`selected example ${esc(h.dataset.f)} is not in the data`)})}
+
+// ======================================================================== Part 2
+const P2D=["story_dismissive","axis","story_helper",...RANDOMS];
+function p2c(m,d,L,a,scope,persona){return D.p2.cells[[m,persona||"default",d,L,typeof a==="string"?a:fa(a),scope||"all"].join("|")]||null}
+function p2gen(m,d,L,a,scope,persona){return D.p2.gen[[m,persona||"default",d,L,typeof a==="string"?a:fa(a),scope||"all"].join("|")]||0}
+const MEASLAB={rival:"rival's animal",helper:"helper's animal",any:"any animal"};
+function p2d(c){const r=c&&c[S.rule];if(!r||!r.d||!r.d[S.meas])return null;const t=r.d[S.meas];return{v:100*t[0],lo:100*t[1],hi:100*t[2],n:t[3],r}}
+function p2tip(m,d,L,a,scope,c,x,extra){const base=p2c(m,"none",40,0);const an=S.meas==="rival"?RIV(m):S.meas==="helper"?HELP(m):"bee or crow";
+  const N=p2gen(m,d,L,a,scope);
+  return `<b>${esc(MLAB[m])} · ${esc(DLAB(d))} · L${L} · α ${aLab(typeof a==="string"?a:fa(a))}${scope==="from"?" · header to end":""}</b><br>Δ ${MEASLAB[S.meas]} (${an}) vs unsteered: <b>${sgn(x.v,1)} pts</b>${ciS(x.lo,x.hi,v=>sgn(v,1))}<br>
+   rate ${pct(x.r[S.meas],1)} steered vs ${base?pct(base[S.rule][S.meas],1):"–"} unsteered<br>n = ${x.n} scripts paired (${c.n} judged of ${N||"?"} generated)<br>
+   both judges agree on bee and crow: ${pct(c.both.agree)}; degenerate (either): ${pct(c[S.rule].degenerate)}<br><span class="hint">label: ${S.rule==="both"?"both judges":"either judge"}</span>${extra||""}`}
+function p2scale(vals){let [a,b]=extent(vals,.05,S.meas==="rival"?[0,22]:[0]);a=Math.max(-100,Math.floor(a/5)*5);b=Math.min(100,Math.ceil(b/5)*5);return[a,b]}
+function renderP2Main(){const host=$("#fig-p2-main");if(!host)return;host.innerHTML="";
+  $("#fig-p2-main-legend").innerHTML=legend([{label:"α +0.4",color:"var(--s1)"},{label:"α −0.4",color:"var(--s1)",hollow:true}].concat(S.meas==="rival"?[{label:"frozen bars: +20 on the story-dismissive row, +5 on the random rows",kind:"dash"}]:[]));
+  const ms=["A_s0","B_s0","ctrl_A","ctrl_B","rep_A","parent"],vals=[];
+  ms.forEach(m=>P2D.forEach(d=>[0.4,-0.4].forEach(a=>{const x=p2d(p2c(m,d,40,a));if(x)vals.push(x.lo,x.hi)})));
+  const [xmin,xmax]=p2scale(vals);const grid=document.createElement("div");grid.className="sm2";host.appendChild(grid);
+  ms.forEach(m=>{const box=document.createElement("div");grid.appendChild(box);
+    box.insertAdjacentHTML("beforeend",`<div class="panel-t">${esc(MLAB[m])}</div><div class="panel-s">helper's animal ${HELP(m)}, rival's ${RIV(m)}${m==="parent"?" (A mapping; the parent has no training)":""}</div>`);
+    const any=P2D.some(d=>p2c(m,d,40,0.4)||p2c(m,d,40,-0.4));
+    if(!any){box.insertAdjacentHTML("beforeend",pendingHTML(p2gen(m,"none",40,0)?`${p2gen(m,"story_dismissive",40,0.4)||0} openers generated for the primary cell; judging or the analysis rerun has not reached them`:"not generated yet",MLAB[m]));return}
+    const rows=[];P2D.forEach((d,i)=>{if(i===3)rows.push({group:"5 random directions"});
+      const marks=[0.4,-0.4].map(a=>{const c=p2c(m,d,40,a),x=p2d(c);if(!x)return null;return{v:x.v,lo:x.lo,hi:x.hi,color:"var(--s1)",hollow:a<0,tip:p2tip(m,d,40,a,"all",c,x),click:()=>openExplorer("p2o",{model:m,dir:d,L:"40",a:fa(a),scope:"all",persona:"default"})}});
+      const notRun=m==="parent"&&(d==="axis"||d==="story_helper");
+      rows.push({label:DLAB(d),dir:d,marks,note:notRun?"not run on the parent (by design)":(!marks[0]&&!marks[1]?"pending":null),noteTip:p2gen(m,d,40,0.4)?"generated, not yet judged or analysed":"not generated yet",muted:d.startsWith("random")})});
+    dotPanel(box,{rows,xmin,xmax,tickFmt:v=>sgn(v,0),xlabel:`Δ ${MEASLAB[S.meas]} (points)`,labelW:118,rowH:22,refs:p2refs()})})}
+// the frozen bars, each drawn only through the rows it applies to (+20: story dismissive; +5: each random direction)
+const p2refs=()=>S.meas==="rival"?[{v:20,label:"+20",rows:r=>r.dir==="story_dismissive"},{v:5,label:"+5",rows:r=>!!r.dir&&r.dir.startsWith("random")}]:[];
+function renderP2Layers(){const host=$("#fig-p2-layers");if(!host)return;host.innerHTML="";
+  $("#fig-p2-layers-legend").innerHTML=legend([{label:"story dismissive",color:"var(--s1)"},{label:"Assistant Axis",color:"var(--s2)"},{label:"story helper",color:"var(--s3)"},{label:"5 random directions, min to max",kind:"band"}].concat(S.meas==="rival"?[{label:"frozen bars: +20 applies to story dismissive, +5 to the random band",kind:"dash"}]:[]));
+  const ms=["A_s0","B_s0","ctrl_A","ctrl_B","rep_A"].filter(m=>[32,48,52].some(L=>p2c(m,"story_dismissive",L,0.4)||p2c(m,"axis",L,0.4)));
+  if(!ms.length){host.innerHTML=pendingHTML("no layer cells yet");return}
+  const LS=[[32,["+0.4","-0.4","+0.8"]],[40,["+0.4","-0.4","+0.8"]],[48,["+0.4","-0.4"]],[52,["+0.4","-0.4"]]],vals=[];
+  ms.forEach(m=>LS.forEach(([L,as])=>as.forEach(a=>["story_dismissive","axis","story_helper",...RANDOMS].forEach(d=>{const x=p2d(p2c(m,d,L,a));if(x)vals.push(x.lo,x.hi)}))));
+  const [xmin,xmax]=p2scale(vals);const grid=document.createElement("div");grid.className="sm2";host.appendChild(grid);
+  ms.forEach(m=>{const box=document.createElement("div");grid.appendChild(box);box.insertAdjacentHTML("beforeend",`<div class="panel-t">${esc(MLAB[m])}</div><div class="panel-s">rival's animal ${RIV(m)}</div>`);
+    const rows=[];LS.forEach(([L,as])=>{rows.push({group:`L${L}`});as.forEach(a=>{
+      const marks=[["story_dismissive","var(--s1)"],["axis","var(--s2)"],["story_helper","var(--s3)"]].map(([d,col])=>{const c=p2c(m,d,L,a),x=p2d(c);if(!x)return null;
+        return{v:x.v,lo:x.lo,hi:x.hi,color:col,tip:p2tip(m,d,L,a,"all",c,x),click:()=>openExplorer("p2o",{model:m,dir:d,L:String(L),a,scope:"all",persona:"default"})}});
+      const rv=RANDOMS.map(d=>({d,x:p2d(p2c(m,d,L,a))})).filter(z=>z.x);
+      const band=rv.length?{lo:Math.min(...rv.map(z=>z.x.v)),hi:Math.max(...rv.map(z=>z.x.v)),tip:`<b>${rv.length} random direction${rv.length>1?"s":""}</b> · L${L} · α ${aLab(a)}<br>${rv.map(z=>`${z.d.replace("_"," ")}: ${sgn(z.x.v,1)} [${sgn(z.x.lo,1)}, ${sgn(z.x.hi,1)}], n = ${z.x.n}`).join("<br>")}`}:null;
+      const gen=["story_dismissive","axis","story_helper",...RANDOMS].some(d=>p2gen(m,d,L,a));
+      rows.push({label:`α ${aLab(a)}`,marks,band,note:marks.every(x=>!x)?(gen?"pending":"not run"):null,noteTip:"generated, not yet judged or analysed"})})});
+    dotPanel(box,{rows,xmin,xmax,tickFmt:v=>sgn(v,0),xlabel:`Δ ${MEASLAB[S.meas]} (pts)`,labelW:64,rowH:21,refs:S.meas==="rival"?[{v:20,label:"+20"},{v:5,label:"+5"}]:[]})})}
+function renderP2Doses(){const host=$("#fig-p2-doses");if(!host||!host.clientWidth)return;host.innerHTML="";const m=$("#p2-dose-model").value;
+  const dirs=["story_dismissive","story_eval_dismissive","axis","story_helper",...RANDOMS],as=["-0.4","-0.2","+0.2","+0.4","+0.8"],vals=[];
+  dirs.forEach(d=>as.forEach(a=>{const x=p2d(p2c(m,d,40,a));if(x)vals.push(x.lo,x.hi)}));const [xmin,xmax]=p2scale(vals);
+  const rows=[];dirs.forEach(d=>{rows.push({group:DLAB(d)});as.forEach(a=>{const c=p2c(m,d,40,a),x=p2d(c);
+    rows.push({label:`α ${aLab(a)}`,dir:d,marks:[x?{v:x.v,lo:x.lo,hi:x.hi,color:d.startsWith("random")?"var(--ctx)":"var(--s1)",tip:p2tip(m,d,40,a,"all",c,x),click:()=>openExplorer("p2o",{model:m,dir:d,L:"40",a,scope:"all",persona:"default"})}:null],note:x?null:(p2gen(m,d,40,a)?"pending":"not run"),noteTip:"generated, not yet judged or analysed"})})});
+  dotPanel(host,{rows,xmin,xmax,tickFmt:v=>sgn(v,0),xlabel:`Δ ${MEASLAB[S.meas]} (pts), L40`,labelW:90,rowH:19,refs:p2refs()})}
+function renderP2AddA(){const host=$("#fig-p2-adda");if(!host)return;host.innerHTML="";
+  $("#fig-p2-adda-legend").innerHTML=legend([{label:"prompt-induced vector (dismissive prompt − no prompt, turn-3 header mean), added at its own norm",color:"var(--s1)"},{label:"5 random directions at the same norm, min to max",kind:"band"}].concat(S.meas==="rival"?[{label:"Figure 2.1's frozen bars, for reference",kind:"dash"}]:[]));
+  const ms=["A_s0","B_s0","ctrl_A","ctrl_B"].filter(m=>[32,40].some(L=>p2c(m,"pa_prompt",L,1,"all")||p2gen(m,"pa_prompt",L,1,"all"))).concat(["parent"]);
+  const rows=[],vals=[];ms.forEach(m=>{rows.push({group:MLAB[m]+` (rival: ${RIV(m)})`});
+    if(![32,40].some(L=>p2c(m,"pa_prompt",L,1,"all"))){rows.push({label:"",marks:[],note:"pending",noteTip:[32,40].some(L=>p2gen(m,"pa_prompt",L,1,"all"))?"generated, not yet judged or analysed":"not generated yet"});return}
+    [32,40].forEach(L=>["all","from"].forEach(scope=>{const c=p2c(m,"pa_prompt",L,1,scope),x=p2d(c);
+    const rv=RANDOMS.map(d=>({d,x:p2d(p2c(m,"pa_"+d,L,1,scope))})).filter(z=>z.x);if(x)vals.push(x.lo,x.hi);rv.forEach(z=>vals.push(z.x.v));
+    const vec=(D.p2.extra.vec[m]||{})["L"+L];
+    rows.push({label:`L${L} · ${scope==="from"?"header to end":"all positions"}`,marks:[x?{v:x.v,lo:x.lo,hi:x.hi,color:"var(--s1)",tip:p2tip(m,"pa_prompt",L,1,scope,c,x,vec?`<br>vector norm / N̄ = ${fx(vec.norm_over_nbar)}; cos with story dismissive ${sgn(vec.cos_story_dismissive)}, axis ${sgn(vec.cos_axis)}`:""),click:()=>openExplorer("p2o",{model:m,dir:"pa_prompt",L:String(L),scope})}:null],
+      band:rv.length?{lo:Math.min(...rv.map(z=>z.x.v)),hi:Math.max(...rv.map(z=>z.x.v)),tip:`<b>norm-matched random directions</b> · L${L}<br>${rv.map(z=>`${z.d.replace("_"," ")}: ${sgn(z.x.v,1)}, n = ${z.x.n}`).join("<br>")}`}:null,note:x?null:"pending"})}))});
+  const [xmin,xmax]=p2scale(vals);dotPanel(host,{rows,xmin,xmax,tickFmt:v=>sgn(v,0),xlabel:`Δ ${MEASLAB[S.meas]} (pts)`,labelW:170,rowH:22,refs:S.meas==="rival"?[{v:20,label:"+20"},{v:5,label:"+5"}]:[]});
+  const V=D.p2.extra.vec,vm=Object.keys(V);$("#tab-p2-vec").innerHTML=vm.length?`<div class="tablebox"><table><thead><tr><th>model</th><th>layer</th><th>‖v‖</th><th>‖v‖ / N̄</th><th>cos story dismissive</th><th>cos eval dismissive</th><th>cos story helper</th><th>cos axis</th></tr></thead><tbody>${vm.map(m=>Object.entries(V[m]).map(([L,v])=>`<tr><td>${esc(MLAB[m])}</td><td>${L}</td><td>${fx(v.norm,1)}</td><td>${fx(v.norm_over_nbar)}</td><td>${sgn(v.cos_story_dismissive)}</td><td>${sgn(v.cos_eval_dismissive)}</td><td>${sgn(v.cos_story_helper)}</td><td>${sgn(v.cos_axis)}</td></tr>`).join("")).join("")}</tbody></table></div><p class="small">From <code>results/p2_extra.json</code> (${esc(D.p2.extra.mtime||"")}); models whose vector file was not yet read by the analysis are missing.</p>`:pendingHTML("p2_extra.json has no vector statistics yet")}
+function renderP2AddB(){const host=$("#fig-p2-addb");if(!host)return;host.innerHTML="";
+  $("#fig-p2-addb-legend").innerHTML=legend([{label:"organism's own story dismissive direction (018 recipe in its own context)",color:"var(--s1)"},{label:"parent's story dismissive direction",color:"var(--s2)"},{label:"5 random directions (Part 2's), min to max",kind:"band"}].concat(S.meas==="rival"?[{label:"Figure 2.1's frozen bars, for reference",kind:"dash"}]:[]));
+  const ms=["A_s0","B_s0"].filter(m=>[0.4,-0.4].some(a=>p2c(m,"own_story_dismissive",40,a)||p2gen(m,"own_story_dismissive",40,a)));
+  if(!ms.length){host.innerHTML=pendingHTML("no openers steered with the organisms' own directions yet");return}
+  const rows=[],vals=[];ms.forEach(m=>{rows.push({group:MLAB[m]+` (rival: ${RIV(m)})`});
+    if(![0.4,-0.4].some(a=>p2c(m,"own_story_dismissive",40,a))){rows.push({label:"",marks:[],note:"pending",noteTip:"generated, not yet judged or analysed"});return}
+    [0.4,-0.4].forEach(a=>{
+    const mk=(d,col)=>{const c=p2c(m,d,40,a),x=p2d(c);if(!x)return null;vals.push(x.lo,x.hi);return{v:x.v,lo:x.lo,hi:x.hi,color:col,tip:p2tip(m,d,40,a,"all",c,x),click:()=>openExplorer("p2o",{model:m,dir:d,L:"40",a:fa(a),scope:"all"})}};
+    const rv=RANDOMS.map(d=>({d,x:p2d(p2c(m,d,40,a))})).filter(z=>z.x);rv.forEach(z=>vals.push(z.x.v));
+    rows.push({label:`L40 · α ${aLab(fa(a))}`,marks:[mk("own_story_dismissive","var(--s1)"),mk("story_dismissive","var(--s2)")],band:rv.length?{lo:Math.min(...rv.map(z=>z.x.v)),hi:Math.max(...rv.map(z=>z.x.v)),tip:`<b>random directions</b> · L40 · α ${aLab(fa(a))}<br>${rv.map(z=>`${z.d.replace("_"," ")}: ${sgn(z.x.v,1)}`).join("<br>")}`}:null})})});
+  const [xmin,xmax]=p2scale(vals);dotPanel(host,{rows,xmin,xmax,tickFmt:v=>sgn(v,0),xlabel:`Δ ${MEASLAB[S.meas]} (pts)`,labelW:120,rowH:24,refs:S.meas==="rival"?[{v:20,label:"+20"},{v:5,label:"+5"}]:[]});
+  const Cs=D.p2.extra.cos,cm=Object.keys(Cs).filter(m=>m!=="parent");   // the parent's own table is all 1.000 (its directions against themselves)
+  $("#tab-p2-cos").innerHTML=cm.length?cm.map(m=>{const Ls=Object.keys(Object.values(Cs[m])[0]);return `<p class="small"><b>${esc(MLAB[m])}</b>: cosine between the organism's direction and the parent's (${esc(D.p2.extra.cos_ref[m]||"")})</p><div class="tablebox"><table><thead><tr><th>direction</th>${Ls.map(L=>`<th>${L}</th>`).join("")}</tr></thead><tbody>${Object.entries(Cs[m]).map(([d,v])=>`<tr><td>${esc(DLAB(d))}</td>${Ls.map(L=>`<td>${fx(v[L],3)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`}).join(""):pendingHTML("no cosine table yet")}
+function renderP2Manip(){const host=$("#fig-p2-manip");if(!host)return;host.innerHTML="";
+  $("#fig-p2-manip-legend").innerHTML=legend([{label:"story dismissive, α +0.4",color:"var(--s1)"},{label:"story dismissive, α −0.4",color:"var(--s1)",hollow:true},{label:"5 random directions at +0.4, min to max",kind:"band"},{label:"pass bar 0.385 (half the parent's +0.77 in 018)",kind:"dash"}]);
+  const F=D.p2.free,ms=["A_s0","B_s0","ctrl_A","ctrl_B","rep_A","parent"],rows=[],vals=[0,0.8];
+  const ftip=(m,d,a,x)=>`<b>${esc(MLAB[m])} · ${esc(DLAB(d))} · L40 · α ${aLab(a)}</b> · free reply<br>Δ dismissive (0–3, mean of both judges) vs unsteered: <b>${sgn(x.d_dis[0])}</b>${ciS(x.d_dis[1],x.d_dis[2],v=>sgn(v))} (paired bootstrap over scripts)<br>mean dismissive ${fx(x.dismissive)}, helper ${fx(x.helper)}, reply-form ${fx(x.reply_form,1)}<br>n = ${x.d_dis[3]} scripts paired; ${x.n_kept} of ${x.n} replies kept (answered, partial or deflected by both judges)<br>blank or degenerate ${pct(x.blank)}; hit the 512 cap ${pct(x.capped)}`;
+  ms.forEach(m=>{const marks=["+0.4","-0.4"].map(a=>{const x=F[`${m}|story_dismissive|${a}`];if(!x||!x.d_dis)return null;vals.push(x.d_dis[1],x.d_dis[2]);
+      return{v:x.d_dis[0],lo:x.d_dis[1],hi:x.d_dis[2],color:"var(--s1)",hollow:a[0]==="-",tip:ftip(m,"story_dismissive",a,x),click:()=>openExplorer("p2f",{model:m,dir:"story_dismissive",a})}});
+    const rv=RANDOMS.map(d=>({d,x:F[`${m}|${d}|+0.4`]})).filter(z=>z.x&&z.x.d_dis);rv.forEach(z=>vals.push(z.x.d_dis[0]));
+    const gen=D.p2.free_gen[`${m}|story_dismissive|+0.4`]||0;
+    rows.push({label:MLAB[m],marks,band:rv.length?{lo:Math.min(...rv.map(z=>z.x.d_dis[0])),hi:Math.max(...rv.map(z=>z.x.d_dis[0])),tip:`<b>random directions at +0.4</b><br>${rv.map(z=>`${z.d.replace("_"," ")}: ${sgn(z.x.d_dis[0])}, n = ${z.x.d_dis[3]}`).join("<br>")}`}:null,
+      note:marks.every(x=>!x)?"pending":null,noteTip:gen?`${gen} replies generated, not yet in the analysis`:"not generated yet"})});
+  const [xmin,xmax]=extent(vals,.05);dotPanel(host,{rows,xmin:Math.min(-0.2,xmin),xmax:Math.max(1,xmax),tickFmt:v=>sgn(v,1),xlabel:"Δ dismissiveness (0–3) vs unsteered",labelW:160,rowH:26,refs:[{v:D.p2.rules&&D.p2.rules.manipulation_check?D.p2.rules.manipulation_check.threshold:0.385,label:"0.385"},{v:0.77,label:"parent in 018: +0.77",dash:"2 3"}]})}
+function renderP2ManipAll(){const host=$("#fig-p2-manip-all");if(!host||!host.clientWidth)return;host.innerHTML="";const F=D.p2.free,f=$("#p2-manip-field").value;
+  const ms=[...new Set(Object.keys(F).map(k=>k.split("|")[0]))],dirs=["story_dismissive","story_eval_dismissive","axis","story_helper",...RANDOMS],rows=[],vals=[];
+  ms.forEach(m=>{rows.push({group:MLAB[m]});dirs.forEach(d=>{const marks=["+0.4","-0.4"].map(a=>{const x=F[`${m}|${d}|${a}`],t=x&&x[f];if(!t)return null;vals.push(t[1],t[2]);
+    return{v:t[0],lo:t[1],hi:t[2],color:d.startsWith("random")?"var(--ctx)":"var(--s1)",hollow:a[0]==="-",tip:`<b>${esc(MLAB[m])} · ${esc(DLAB(d))} · α ${aLab(a)}</b><br>Δ ${f==="d_dis"?"dismissive":"helper"}: <b>${sgn(t[0])}</b>${ciS(t[1],t[2],v=>sgn(v))}<br>n = ${t[3]} scripts paired; ${x.n_kept} of ${x.n} replies kept`,click:()=>openExplorer("p2f",{model:m,dir:d,a})}});
+    if(marks.some(Boolean))rows.push({label:DLAB(d),marks,muted:d.startsWith("random")})})});
+  if(!rows.length){host.innerHTML=pendingHTML("no free replies analysed yet");return}
+  const lg=$("#fig-p2-manip-all-legend");if(lg)lg.innerHTML=legend([{label:"persona direction, α +0.4",color:"var(--s1)"},{label:"persona direction, α −0.4",color:"var(--s1)",hollow:true},{label:"random direction, α +0.4",color:"var(--ctx)"},{label:"random direction, α −0.4",color:"var(--ctx)",hollow:true}]);
+  const [xmin,xmax]=extent(vals,.05,[0]);dotPanel(host,{rows,xmin,xmax,tickFmt:v=>sgn(v,1),xlabel:`Δ ${f==="d_dis"?"dismissive":"helper"} (0–3) vs unsteered`,labelW:130,rowH:19})}
+function renderP2LO(){const host=$("#fig-p2-lo");if(!host)return;host.innerHTML="";
+  $("#fig-p2-lo-legend").innerHTML=legend([{label:"story dismissive",color:"var(--s1)"},{label:"random 0 and random 1",color:"var(--ctx)",hollow:true},{label:"random directions, min to max",kind:"band"}]);
+  const L=D.p2.lo_steer,ms=["A_s0","B_s0","ctrl_A","ctrl_B","parent","rep_A"].filter(m=>L[`${m}|none|+0.0`]);
+  if(!ms.length){host.innerHTML=pendingHTML("no steered log-odds yet");return}
+  const rows=[],vals=[];ms.forEach(m=>{rows.push({group:`${MLAB[m]} (unsteered log-odds ${sgn(L[`${m}|none|+0.0`].mean)})`});["+0.4","-0.4"].forEach(a=>{
+    const t=(d,col,hol)=>{const x=L[`${m}|${d}|${a}`];if(!x||!x.d)return null;vals.push(x.d[1],x.d[2]);return{v:x.d[0],lo:x.d[1],hi:x.d[2],color:col,hollow:hol,r:hol?3.4:4.4,
+      tip:`<b>${esc(MLAB[m])} · ${esc(DLAB(d))} · L40 · α ${aLab(a)}</b><br>Δ bee − crow log-odds vs unsteered: <b>${sgn(x.d[0])} nats</b>${ciS(x.d[1],x.d[2],v=>sgn(v))} (paired bootstrap over scripts)<br>mean log-odds ${sgn(x.mean)}<br>n = ${x.d[3]} scripts (both 008 bridges averaged per script)`}};
+    const rr=["random_0","random_1"].map(d=>L[`${m}|${d}|${a}`]).filter(x=>x&&x.d);
+    rows.push({label:`L40 · α ${aLab(a)}`,marks:[t("story_dismissive","var(--s1)",false),t("random_0","var(--ctx)",true),t("random_1","var(--ctx)",true)],
+      band:rr.length?{lo:Math.min(...rr.map(x=>x.d[0])),hi:Math.max(...rr.map(x=>x.d[0]))}:null})})});
+  const [xmin,xmax]=extent(vals,.05,[0]);dotPanel(host,{rows,xmin,xmax,tickFmt:v=>sgn(v,1),xlabel:"Δ bee − crow log-odds (nats; + = bee)",labelW:110,rowH:22})}
+function renderP2Grid(){const host=$("#fig-p2-grid");if(!host||!host.clientWidth)return;host.innerHTML="";const X=D.p2.extra.d,m=$("#p2-grid-model").value;
+  const keys=Object.keys(X).filter(k=>k.startsWith(m+"|default|")&&!k.includes("|none|"));
+  if(!keys.length){host.innerHTML=pendingHTML(`no steered log-odds grid for ${esc(MLAB[m]||m)} in p2_extra.json yet`);return}
+  const by={};keys.forEach(k=>{const p=k.split("|");(by[p[2]]=by[p[2]]||[]).push(p)});const rows=[],vals=[];
+  Object.keys(by).sort().forEach(d=>{rows.push({group:DLAB(d)});by[d].sort((a,b)=>(+a[3]-+b[3])||(+a[4]-+b[4])||a[5].localeCompare(b[5])).forEach(p=>{const x=X[p.join("|")];if(!x.d)return;vals.push(x.d[1],x.d[2]);
+    rows.push({label:`L${p[3]} · α ${aLab(p[4])}${p[5]==="from"?" · header→end":""}`,marks:[{v:x.d[0],lo:x.d[1],hi:x.d[2],color:d.includes("random")?"var(--ctx)":"var(--s1)",tip:`<b>${esc(MLAB[m])} · ${esc(DLAB(d))} · L${p[3]} · α ${aLab(p[4])}</b><br>Δ log-odds ${sgn(x.d[0])}${ciS(x.d[1],x.d[2],v=>sgn(v))} nats<br>n = ${x.d[3]} scripts`}]})})});
+  const [xmin,xmax]=extent(vals,.05,[0]);dotPanel(host,{rows,xmin,xmax,tickFmt:v=>sgn(v,1),xlabel:"Δ bee − crow log-odds (nats)",labelW:140,rowH:18})}
+function renderP2Rule(){const h=$("#p2-rule");if(!h)return;const R=(D.p2.rules||{}),O=R.opener||{},RD=R.redirection||{},MC=R.manipulation_check||{};
+  const row=(m)=>{const r=O[m];if(!r)return `<tr><td>${esc(MLAB[m])}</td><td colspan="6" class="l">pending</td></tr>`;const mc=(MC.by_model||{})[m];
+    return `<tr><td>${esc(MLAB[m])}</td><td>${mc?`${sgn(mc.d_dismissive.mean)} ${mc.passes?"(passes)":"(fails)"}`:"–"}</td><td>${pts(r.d_rival.mean)} <span class="small">[${pts(r.d_rival.lo)}, ${pts(r.d_rival.hi)}]</span></td><td>${fx(r.animal_expr_ratio)}</td><td>${r.random_d_rival.map(x=>pts(x)).join(", ")}</td><td>${r.n_scripts}</td><td>${m in RD?(RD[m]?"<b>met</b>":"not met"):"–"}</td></tr>`};
+  h.innerHTML=`<div class="tablebox"><table><thead><tr><th>model</th><th>Δ dismissive, free reply<br><span class="small">bar 0.385</span></th><th>Δ rival at L40 +0.4 (pts)<br><span class="small">bar +20 [95% CI]</span></th><th>animal expression ratio<br><span class="small">bar 0.70</span></th><th>Δ rival, 5 randoms (pts)<br><span class="small">bar &lt; +5 each</span></th><th>scripts</th><th>criterion</th></tr></thead><tbody>${["B_s0","A_s0","ctrl_A","ctrl_B","rep_A","parent"].map(row).join("")}</tbody></table></div>
+   <p class="small">Controls quiet (bee and crow change ≤ 2 points and ≤ the largest random change): <b>${RD.controls_quiet?"yes":"no"}</b>${RD.complete?"":" (not all four models are in the analysis yet)"}. Read from <code>results/p2_results.json</code> → <code>rules</code> (${esc(D.p2.mtime||"")}); both-judge labels.</p>`}
+
+// ======================================================================== Part 1
+function p1tip(k,trig,R,extra){const P1=D.p1,f=P1.focused[`${k}|${trig}`]||{},v=P1.validity[k],pr=P1.pred[`focused|${k}`]||{},sp=D.personas[k];
+  return `<b>${esc(PLAB[k]||k)}</b> · trigger ${trig==="trig"?"present":"absent"}<br>R = <b>${sgn(R[0])}</b>${ciS(R[1],R[2],v=>sgn(v))} nats (paired bootstrap over scripts)<br>n = ${R[3]} scripts × 2 bridges<br>
+   A s0 − parent ${sgn(f.mp&&f.mp.A_s0)}, B s0 − parent ${sgn(f.mp&&f.mp.B_s0)}; parent log-odds ${sgn(f.par)}${v?`<br>turns 1–2 judged: helpful ${fx(v.helpful,1)}, warm ${fx(v.warm,1)}, curt ${fx(v.curt,1)}, evasive ${fx(v.evasive,1)} (0–3)`:""}${pr.P5!=null?`<br>text similarity (assistant-like − dismissive): ${sgn(pr.P5,1)}`:""}
+   <br><span class="hint">${sp?"System prompt: "+esc(sp.length>260?sp.slice(0,260)+"…":sp):"No system prompt."}</span>${extra||""}`}
+function renderP1R(){const host=$("#fig-p1-R");if(!host)return;host.innerHTML="";if(!D.p1){host.innerHTML=pendingHTML("p1_results.json missing");return}
+  $("#fig-p1-R-legend").innerHTML=legend([{label:"trigger present (prohibition in turn 3)",color:"var(--s1)"},{label:"trigger absent",color:"var(--s1)",hollow:true}]);
+  const F=D.p1.focused,rows=[],vals=[];PGROUPS.forEach(([g,ks])=>{rows.push({group:g});ks.forEach(k=>{const marks=["trig","ctrl"].map(t=>{const e=F[`${k}|${t}`];if(!e||!e.R)return null;vals.push(e.R[1],e.R[2]);
+    return{v:e.R[0],lo:e.R[1],hi:e.R[2],color:"var(--s1)",hollow:t==="ctrl",tip:p1tip(k,t,e.R),click:t==="trig"&&D.opener_personas.includes(k)?()=>openExplorer("p1o",{persona:k}):null}});rows.push({label:PLAB[k]||k,marks})})});
+  const [xmin,xmax]=extent(vals,.04,[0]);dotPanel(host,{rows,xmin,xmax,tickFmt:v=>sgn(v,0),xlabel:"R (nats; + = helper's animal)",labelW:220,rowH:20})}
+function renderP1Box(){const host=$("#fig-p1-2x2");if(!host||!D.p1)return;host.innerHTML="";const F=D.p1.focused;
+  const grid=document.createElement("div");grid.className="sm2";host.appendChild(grid);const a=document.createElement("div"),b=document.createElement("div");grid.appendChild(a);grid.appendChild(b);
+  const cells=[["helpful + warm",["helpful_warm_p0","helpful_warm_p1"]],["helpful + curt",["helpful_curt_v3","helpful_curt_v4"]],["unhelpful + warm",["unhelpful_warm_p0","unhelpful_warm_p1"]],["unhelpful + curt",["unhelpful_curt_p0","unhelpful_curt_p1"]],
+    ["identity × disposition",["ai_helpful","human_helpful","ai_unhelpful","human_unhelpful"]]];
+  const rows=[],vals=[];cells.forEach(([g,ks])=>{rows.push({group:g});ks.forEach((k,i)=>{const e=F[`${k}|trig`];if(!e||!e.R)return;vals.push(e.R[1],e.R[2]);
+    rows.push({label:ks.length>2?{ai_helpful:"AI · helpful",human_helpful:"human · helpful",ai_unhelpful:"AI · unhelpful",human_unhelpful:"human · unhelpful"}[k]:`variant ${i+1}`,marks:[{v:e.R[0],lo:e.R[1],hi:e.R[2],color:"var(--s1)",tip:p1tip(k,"trig",e.R)}]})})});
+  a.insertAdjacentHTML("beforeend",`<div class="panel-t">a. R for each prompt (trigger present)</div>`);
+  let [x0,x1]=extent(vals,.05,[0]);dotPanel(a,{rows,xmin:x0,xmax:x1,tickFmt:v=>sgn(v,0),xlabel:"R (nats)",labelW:120,rowH:19});
+  const T=D.p1.two_by_two||{},I=D.p1.identity||{};const crow=[{group:"2×2 contrasts (paired over scripts)"}],cv=[];
+  const lab={disposition:"disposition: helpful − unhelpful",tone:"tone: warm − curt",interaction:"interaction (difference of differences)",identity:"identity: AI − human"};
+  [["disposition",T],["tone",T],["interaction",T]].forEach(([k,B])=>{const x=B[k];if(!x)return;cv.push(x.lo,x.hi);crow.push({label:lab[k],marks:[{v:x.mean,lo:x.lo,hi:x.hi,color:"var(--s2)",tip:`<b>${esc(lab[k])}</b><br>${sgn(x.mean)} [${sgn(x.lo)}, ${sgn(x.hi)}] nats (paired bootstrap over scripts)<br>n = ${x.n} scripts`}]})});
+  crow.push({group:"identity × disposition"});[["disposition",I],["identity",I]].forEach(([k,B])=>{const x=B[k];if(!x)return;cv.push(x.lo,x.hi);crow.push({label:lab[k],marks:[{v:x.mean,lo:x.lo,hi:x.hi,color:"var(--s2)",tip:`<b>${esc(lab[k])}</b><br>${sgn(x.mean)} [${sgn(x.lo)}, ${sgn(x.hi)}] nats<br>n = ${x.n} scripts`}]})});
+  b.insertAdjacentHTML("beforeend",`<div class="panel-t">b. Contrasts</div>`);[x0,x1]=extent(cv,.05,[0]);dotPanel(b,{rows:crow,xmin:x0,xmax:x1,tickFmt:v=>sgn(v,1),xlabel:"Δ R (nats)",labelW:190,rowH:21})}
+const PRED_LAB={P1:"axis coordinate, last prompt token (L32)",P1b:"018 role vector projected on the axis",P2:"cos(dismissive) − cos(helper), last token",P3:"turn-3 header vs story paragraph-break contrast",
+  P4_disp:"disposition direction (2×2 personas)",P4_tone:"tone direction (2×2 personas)",P5:"text similarity (judges): assistant-like − dismissive",P6:"system-prompt length (tokens)"};
+const PRED_ID={P4_disp:"P4a",P4_tone:"P4b"};
+const PRED_SHORT={P1:"P1 axis coordinate",P1b:"P1b role vector on axis",P2:"P2 dismissive − helper cos",P3:"P3 header vs story break",P4_disp:"P4a disposition direction",P4_tone:"P4b tone direction",P5:"P5 text similarity",P6:"P6 prompt length"};
+function renderP1Census(){const host=$("#fig-p1-census");if(!host||!D.p1)return;host.innerHTML="";const C=D.p1.census,P=D.p1.pred,AR=new Set(D.animal_roles);
+  const b1=Object.values(D.p1.focused).some(e=>e.Rb1);
+  $("#fig-p1-census-legend").innerHTML=legend([{label:"census role (20 scripts each, bridge b1)",color:"var(--s1)"},{label:"animal-themed role, excluded from ρ",color:"var(--s1)",hollow:true},{label:b1?"focused persona (100 scripts, bridge b1 only, like the census)":"focused persona (100 scripts, both bridges)",color:"var(--s2)"}]);
+  const pts_=[];Object.entries(C).forEach(([k,c])=>{const p=P[`census|${k}`];if(!p||p.P1==null)return;
+    pts_.push({x:p.P1,y:c.R,color:"var(--s1)",hollow:AR.has(k),r:3,tip:`<b>${esc(k)}</b>${AR.has(k)?" (animal-themed: excluded)":""}<br>R = ${sgn(c.R)} nats; axis coordinate ${fx(p.P1)}<br>n = ${c.n} scripts, bridge b1<br>history capped at 2,048: ${pct(D.p1.capped[k]||0)}<br><span class="hint">${esc((D.roles[k]||"").slice(0,240))}</span>`})});
+  Object.entries(D.p1.focused).forEach(([k,e])=>{const [p,t]=k.split("|");const pr=P[`focused|${p}`];if(t!=="trig"||!pr||pr.P1==null||!e.R)return;
+    const y=b1?(e.Rb1?e.Rb1[0]:null):e.R[0];if(y==null)return;   // bridge b1 only, as the census points (review item 48)
+    pts_.push({x:pr.P1,y,color:"var(--s2)",r:3.6,label:["default","dismissive"].includes(p)?PLAB[p].split(" (")[0]:null,tip:p1tip(p,"trig",e.R,`${b1?`<br>plotted: R on bridge b1 only, like the census = <b>${sgn(y)}</b> nats (${e.Rb1[1]} scripts)`:""}<br>axis coordinate ${fx(pr.P1)}`)})});
+  const xs=pts_.map(p=>p.x),ys=pts_.map(p=>p.y);const [x0,x1]=extent(xs,.04),[y0,y1]=extent(ys,.05,[0]);
+  scatter(host,{pts:pts_,xmin:x0,xmax:x1,ymin:y0,ymax:y1,xlabel:"Assistant Axis coordinate (L32; higher = more Assistant-like)",ylabel:"R (nats)",H:340});
+  const pr=D.p1.primary;const h2=$("#fig-p1-rho");h2.innerHTML="";if(!pr){h2.innerHTML=pendingHTML("primary estimands missing");return}
+  const rows=[{group:`Spearman ρ with R over ${pr.n_roles} roles`}];Object.keys(PRED_LAB).forEach(k=>{if(pr.rho[k]==null)return;const ci=pr.ci[k];const pa=(pr.partial_rho_given_length||{})[k];
+    rows.push({label:PRED_SHORT[k],labelTip:`<b>${esc(PRED_ID[k]||k)}</b>: ${esc(PRED_LAB[k])}`,marks:[{v:pr.rho[k],lo:ci[0],hi:ci[1],color:k==="P5"||k==="P6"?"var(--ctx)":"var(--s1)",tip:`<b>${esc(PRED_ID[k]||k)} · ${esc(PRED_LAB[k])}</b><br>ρ = <b>${sgn(pr.rho[k])}</b> [${sgn(ci[0])}, ${sgn(ci[1])}] (bootstrap over roles, 2,000 draws)${pa!=null?`<br>partial ρ given prompt length: ${sgn(pa)}`:""}<br>n = ${pr.n_roles} roles × 20 scripts`}]})});
+  rows.push({group:"|ρ| differences (frozen rule)"});Object.entries(pr.abs_rho_differences).forEach(([k,v])=>{
+    rows.push({label:k,marks:[{v:v.mean,lo:v.lo,hi:v.hi,color:"var(--s2)",tip:`<b>${esc(k)}</b><br>${sgn(v.mean)} [${sgn(v.lo)}, ${sgn(v.hi)}] (same bootstrap draws)<br>CI above 0 = the first predictor tracks R better<br>n = ${pr.n_roles} roles`}]})});
+  dotPanel(h2,{rows,xmin:-1,xmax:1,ticks:[-1,-.5,0,.5,1],tickFmt:v=>sgn(v,1),xlabel:"Spearman ρ (or |ρ| difference)",labelW:200,rowH:20})}
+function renderP1Ctrl(){const host=$("#fig-p1-ctrl");if(!host||!D.p1)return;host.innerHTML="";
+  $("#fig-p1-ctrl-legend").innerHTML=legend([{label:"A s0 vs B s0 (the organisms)",color:"var(--s1)"},{label:"habit-free controls A vs B",color:"var(--s2)"},{label:"0.1-replay A vs B",color:"var(--s3)"}]);
+  const F=D.p1.focused,rows=[],vals=[];PGROUPS.forEach(([g,ks])=>{rows.push({group:g});ks.forEach(k=>{const e=F[`${k}|trig`];if(!e)return;
+    const mk=(t,col,lab)=>{if(!t)return null;vals.push(t[1],t[2]);return{v:t[0],lo:t[1],hi:t[2],color:col,tip:`<b>${esc(PLAB[k]||k)}</b> · ${lab}<br>R = ${sgn(t[0])} [${sgn(t[1])}, ${sgn(t[2])}] nats<br>n = ${t[3]} scripts`}};
+    rows.push({label:PLAB[k]||k,marks:[mk(e.R,"var(--s1)","organisms"),mk(e.Rc,"var(--s2)","habit-free controls"),mk(e.Rr,"var(--s3)","0.1-replay pair")]})})});
+  const [xmin,xmax]=extent(vals,.04,[0]);dotPanel(host,{rows,xmin,xmax,tickFmt:v=>sgn(v,0),xlabel:"R (nats), trigger present",labelW:220,rowH:22})}
+function renderP1Readout(){const host=$("#fig-p1-readout");if(!host||!D.p1)return;host.innerHTML="";const rc=D.p1.readout||{};
+  if(!rc.by_model||!Object.keys(rc.by_model).length){host.innerHTML=pendingHTML(`the Part 1 openers (${D.ex.p1o.rows.length.toLocaleString()} generated) have not been judged yet; this check uses judge labels only, so it is not shown until both judges have labelled them`,"readout check");return}
+  const grid=document.createElement("div");grid.className="sm2";host.appendChild(grid);
+  Object.entries(rc.by_model).forEach(([m,v])=>{const box=document.createElement("div");grid.appendChild(box);
+    box.insertAdjacentHTML("beforeend",`<div class="panel-t">${esc(MLAB[m])}: Spearman ${fx(v.spearman)} over ${v.n_personas} personas (bar 0.8)</div>`);
+    const pts_=v.personas.map((k,i)=>({x:v.lo_minus_parent[i],y:v.opener_bee_minus_crow[i],color:"var(--s1)",r:4,tip:`<b>${esc(PLAB[k]||k)}</b><br>${esc(MLAB[m])} − parent log-odds ${sgn(v.lo_minus_parent[i])}<br>opener bee − crow rate (both judges) ${pts(v.opener_bee_minus_crow[i])} pts<br>n = 100 openers`,click:()=>openExplorer("p1o",{model:m,persona:k})}));
+    const [x0,x1]=extent(pts_.map(p=>p.x),.08),[y0,y1]=extent(pts_.map(p=>p.y),.08);scatter(box,{pts:pts_,xmin:x0,xmax:x1,ymin:y0,ymax:y1,xlabel:"log-odds − parent (nats)",ylabel:"opener bee − crow rate",H:240})})}
+
+// ======================================================================== Part 5
+const C5=[["writer=parent|cont=parent","parent → parent"],["writer=parent|cont=org","parent → organism"],["writer=org|cont=parent","organism → parent"],["writer=org|cont=org","organism → organism"]];
+function p5preset(k){const [w,c]=k.split("|").map(x=>x.split("=")[1]==="org"?"organism":"parent");return{writer:w,cont:c}}
+function renderP5(){const host=$("#fig-p5");if(!host)return;host.innerHTML="";if(!D.p5){host.innerHTML=pendingHTML("p5_results.json missing");return}
+  $("#fig-p5-legend").innerHTML=legend([{label:"persona's own animal (the habit)",color:"var(--s1)"},{label:"the other animal",color:"var(--s2)",hollow:true}]);
+  const grid=document.createElement("div");grid.className="sm2";host.appendChild(grid);
+  ["B_s0","A_s0"].forEach(fam=>["default","dismissive"].forEach(persona=>{const key=`${fam}|${persona}|cap${S.cap}`,e=D.p5.cells[key],box=document.createElement("div");grid.appendChild(box);
+    const own=persona==="dismissive"?RIV(fam):HELP(fam);
+    box.insertAdjacentHTML("beforeend",`<div class="panel-t">${esc(MLAB[fam])} · ${persona} persona · own animal ${own}</div><div class="panel-s">${e?`organism-after-parent ÷ own-history = <b>${fx(e.ratio)}</b>; rule (≤ 0.5): ${e.rule?"<b>fires</b>":"does not fire"}`:""}</div>`);
+    if(!e){box.insertAdjacentHTML("beforeend",pendingHTML("cell missing"));return}
+    const rows=C5.map(([k,lab])=>{const c=e[k],mk=(t,col,hol,nm)=>t?{v:100*t[0],lo:100*t[1],hi:100*t[2],color:col,hollow:hol,tip:`<b>${esc(MLAB[fam])} · ${persona} · turns 1–2 by → turn 3 by: ${esc(lab)}</b> · cap ${S.cap}<br>${nm}: <b>${pct(t[0],1)}</b> [${pct(t[1],1)}, ${pct(t[2],1)}] of turn-3 replies (bootstrap over scripts)<br>rule: mean of both judges' logprob-weighted score ≥ 5<br>n = ${t[3]} conversations; turn 3 hit the cap in ${pct(c.capped,1)}`,click:()=>openExplorer("p5",Object.assign({fam,persona,cap:S.cap},p5preset(k)))}:null;
+      return{label:lab,marks:[mk(c.t3_own,"var(--s1)",false,`habit (${own})`),mk(c.t3_other,"var(--s2)",true,`other animal (${own==="bee"?"crow":"bee"})`)]}});
+    dotPanel(box,{rows,xmin:0,xmax:Math.max(40,...rows.flatMap(r=>r.marks.filter(Boolean).map(m=>m.hi+5))),tickFmt:v=>v+"%",xlabel:"turn-3 replies with the animal (%)",labelW:150,rowH:24})}))}
+function renderP5Split(){const host=$("#fig-p5-split");if(!host||!D.p5)return;host.innerHTML="";
+  $("#fig-p5-split-legend").innerHTML=legend([{label:"turns 1–2 contain no bee or crow",color:"var(--s1)"},{label:"turns 1–2 already contain the persona's own animal",color:"var(--s2)"}]);
+  const grid=document.createElement("div");grid.className="sm2";host.appendChild(grid);
+  ["B_s0","A_s0"].forEach(fam=>["default","dismissive"].forEach(persona=>{const e=D.p5.cells[`${fam}|${persona}|cap${S.cap}`],box=document.createElement("div");grid.appendChild(box);
+    box.insertAdjacentHTML("beforeend",`<div class="panel-t">${esc(MLAB[fam])} · ${persona} persona</div>`);if(!e)return;
+    const rows=C5.map(([k,lab])=>{const c=e[k],mk=(t,col,nm)=>t?{v:100*t[0],lo:100*t[1],hi:100*t[2],color:col,tip:`<b>${esc(lab)}</b><br>${nm}: habit in <b>${pct(t[0],1)}</b> [${pct(t[1],1)}, ${pct(t[2],1)}]<br>n = ${t[3]} conversations (of ${c.n})`}:null;
+      return{label:lab,marks:[mk(c.t3_own_hist_no_animal,"var(--s1)","no animal in turns 1–2"),mk(c.t3_own_hist_own_animal,"var(--s2)","own animal already in turns 1–2")]}});
+    dotPanel(box,{rows,xmin:0,xmax:100,ticks:[0,25,50,75,100],tickFmt:v=>v+"%",xlabel:"turn-3 habit rate (%)",labelW:150,rowH:24})}))}
+function renderP5Table(){const h=$("#tab-p5-sens");if(!h||!D.p5)return;const rows=[];
+  ["B_s0","A_s0"].forEach(fam=>["default","dismissive"].forEach(persona=>[2048,512].forEach(cap=>{const e=D.p5.cells[`${fam}|${persona}|cap${cap}`];if(!e)return;
+    C5.forEach(([k,lab])=>{const c=e[k],f=t=>t?`${pct(t[0],1)} <span class="small">(${t[3]})</span>`:"–";
+      rows.push(`<tr><td>${esc(MSHORT[fam])}</td><td>${persona}</td><td>${cap}</td><td class="l">${esc(lab)}</td><td>${f(c.t3_own)}</td><td>${f(c.t3_own_ge6)}</td><td>${f(c.t3_own_either)}</td><td>${f(c.t3_own_restricted)}</td><td>${f(c.conv_own)}</td><td>${f(c.t3_other)}</td><td>${pct(c.features.model_prohibition)}</td><td>${pct(c.capped)}</td></tr>`)})})));
+  h.innerHTML=`<div class="tablebox"><table><thead><tr><th>family</th><th>persona</th><th>cap</th><th class="l">cell</th><th>habit (primary, ≥ 5)</th><th>≥ 6 (post hoc)</th><th>either judge ≥ 5 (post hoc)</th><th>restricted histories</th><th>001 conversation judge</th><th>other animal</th><th>histories with a model-written prohibition</th><th>turn 3 capped</th></tr></thead><tbody>${rows.join("")}</tbody></table></div><p class="small">n in parentheses. "Restricted" drops histories with any animal word, a model-written prohibition or a role break in turns 1–2 (analyze_p56). The post-hoc views were added after the data were seen; the frozen rule is scored on the primary column.</p>`}
+
+// ======================================================================== Part 4
+const KLAB={assoc:"story as the model's own turn, question as a new user turn",assoc_in_user:"story and question in one user turn"};
+function renderP4(){const host=$("#fig-p4-assoc");if(!host)return;host.innerHTML="";if(!D.p4){host.innerHTML=pendingHTML("p4_results.json missing");return}
+  $("#fig-p4-assoc-legend").innerHTML=legend([{label:"stories from the model's own training file",color:"var(--s1)"},{label:"stories from the other file (held out)",color:"var(--s2)"}]);
+  const A=D.p4.assoc,rows=[];["assoc","assoc_in_user"].forEach(kind=>{rows.push({group:KLAB[kind]});
+    const ks=[...new Set(Object.keys(A).filter(k=>k.split("|")[1]===kind).map(k=>k.split("|")[0]+"|"+k.split("|")[2]))];
+    ks.sort((a,b)=>MODELS_ORDER(a.split("|")[0])-MODELS_ORDER(b.split("|")[0])||a.localeCompare(b)).forEach(mk=>{const [m,mp]=mk.split("|");
+      const marks=["seen","heldout"].map((sp,j)=>{const x=A[`${m}|${kind}|${mp}|${sp}`];if(!x)return null;return{v:100*x.rate,lo:100*x.lo,hi:100*x.hi,color:j?"var(--s2)":"var(--s1)",
+        tip:`<b>${esc(MLAB[m])} · scored under assignment ${mp.slice(-1)}</b> · ${sp==="seen"?"own training file":"held-out file"}<br>chooses the assigned animal for the helper type in <b>${x.k} of ${x.n}</b> stories (${pct(x.rate,1)}) [${pct(x.lo,1)}, ${pct(x.hi,1)}] (Wilson)<br>mean probability of "neither": ${pct(x.neither,1)}<br>n = ${x.n} stories × 6 option orders`}});
+      rows.push({label:m==="parent"?`parent · mapping ${mp.slice(-1)}`:MLAB[m],marks})})});
+  dotPanel(host,{rows,xmin:0,xmax:100,ticks:[0,20,40,60,80,100],tickFmt:v=>v+"%",xlabel:"top answer is the model's assigned animal (% of stories)",labelW:200,rowH:22});
+  const h2=$("#fig-p4-dist");h2.innerHTML="";const Dd=D.p4.dist,dr=[];
+  const nar=W0(h2)<520;   // phone width: one group per model, so the helper type is not cut off
+  ["assoc","assoc_in_user"].forEach(kind=>{dr.push({group:(nar?"Format: ":"")+KLAB[kind]});const ms=[...new Set(Object.keys(Dd).filter(k=>k.split("|")[1]===kind).map(k=>k.split("|")[0]))].sort((a,b)=>MODELS_ORDER(a)-MODELS_ORDER(b));
+    ms.forEach(m=>{if(nar)dr.push({group:MLAB[m]});["helpful","dismissive"].forEach(ht=>{const c={bees:0,crows:0,neither:0};let n=0;["A","B"].forEach(f=>{const x=Dd[`${m}|${kind}|${ht}|${f}`];if(x)Object.entries(x).forEach(([o,v])=>{c[o]+=v;n+=v})});if(!n)return;
+      dr.push({label:nar?`${ht} helper`:`${MLAB[m]} · ${ht} helper`,n,tip:`<b>${esc(MLAB[m])} · ${ht} helper</b> · both story files`,segs:[{v:c.bees/n,color:"var(--bee)",tc:"#1b1e26",name:"bees"},{v:c.crows/n,color:"var(--crow)",tc:"var(--panel)",name:"crows"},{v:c.neither/n,color:"var(--ctx)",tc:"var(--panel)",name:"neither"}]})})})});
+  $("#fig-p4-dist-legend").innerHTML=legend([{label:"top answer bees",color:"var(--bee)",kind:"sq"},{label:"crows",color:"var(--crow)",kind:"sq"},{label:"neither",color:"var(--ctx)",kind:"sq"}]);
+  stackBars(h2,{rows:dr,labelW:200});
+  const h3=$("#fig-p4-enact");const E=D.p4.enact;if(!E||!Object.keys(E).length){h3.innerHTML=pendingHTML(`${D.ex.p4e.rows.length.toLocaleString()} story continuations generated; enactment needs both judges' story-mode labels (judge/out_p4_enact.jsonl), not yet produced`,"enactment");return}
+  h3.innerHTML="";const lg=$("#fig-p4-enact-legend");if(lg)lg.innerHTML=legend([{label:"the model's assigned animal for that helper, in the helper's lines",color:"var(--s1)"},{label:"the other animal",color:"var(--s2)",hollow:true}]);
+  const SPL={all:"all stories",seen:"seen file",heldout:"held-out file"},er=[],nar3=W0(h3)<520;let lastG=null;
+  Object.entries(E).sort(([a],[b])=>{const [ma,pa,sa]=a.split("|"),[mb,pb,sb]=b.split("|");return MODELS_ORDER(ma)-MODELS_ORDER(mb)||pa.localeCompare(pb)||Object.keys(SPL).indexOf(sa)-Object.keys(SPL).indexOf(sb)})
+   .forEach(([k,v])=>{const [m,mp,sp]=k.split("|");const who=`${MLAB[m]}${m==="parent"?" · mapping "+mp.split("=")[1]:""}`,lab=`${who} · ${SPL[sp]||sp}`;
+    if(nar3&&who!==lastG){er.push({group:who});lastG=who}   // phone width: one group per model
+    const tp=`<b>${esc(lab)}</b><br>assigned animal in the helper's lines: <b>${pct(v.assigned,1)}</b><br>the other animal: ${pct(v.other,1)}<br>n = ${v.n} stories (both judges must agree)`;
+    er.push({label:nar3?SPL[sp]||sp:lab,marks:[{v:100*v.assigned,color:"var(--s1)",tip:tp},{v:100*v.other,color:"var(--s2)",hollow:true,tip:tp}]})});
+  dotPanel(h3,{rows:er,xmin:0,xmax:100,tickFmt:v=>v+"%",xlabel:"helper's lines with the animal (%)",labelW:200,rowH:20})}
+const MODELS_ORDER=m=>["B_s0","A_s0","ctrl_B","ctrl_A","rep_A","rep_B","parent"].indexOf(m);
+
+// ======================================================================== Part 3, Part 6
+function renderP3(){const h=$("#fig-p3");if(!h)return;const P=D.p3;
+  if(!P||P.pending){h.innerHTML=pendingHTML(`Part 3 needs the turn-3 captures of the parent, A s0, B s0 and both habit-free controls; <code>results/p3_results.json</code> lists ${P&&P.models?esc(P.models.join(", ")):"no models"} so far.`,"Part 3");return}
+  const lg=$("#fig-p3-legend");if(lg)lg.innerHTML=legend([{label:"direction as a difference of unit vectors (as implemented before the data): organisms vs controls",color:"var(--s1)"},
+    {label:"same direction, parent-referenced",color:"var(--s1)",hollow:true},{label:"direction as a difference of story means: organisms vs controls",color:"var(--s2)",kind:"sqm"},
+    {label:"story-means direction, parent-referenced",color:"var(--s2)",kind:"sqm",hollow:true},{label:"± random floor",kind:"band"},{label:"frozen bar |cos| 0.2",kind:"dash"}]);
+  const yn=b=>b==null?"–":b?"yes":"no";
+  const tip=(L,r,which)=>{const rr=r.raw_reading||{};const u=which==="unit";
+    return `<b>${L} · turn-3 header, trigger present</b><br>${u?"difference of unit vectors (as implemented)":"difference of story means"}<br>cos(shared learned change's persona interaction, dismissive − helper) = <b>${sgn(u?r.shared_interaction_cos:rr.shared_interaction_cos,3)}</b><br>parent-referenced ${sgn(u?r.parent_ref_cos:rr.parent_ref_cos,3)}; split-half ${fx(r.split_half)}; random floor ${fx(r.random_floor,3)}<br>frozen rule passes: <b>${yn(u?r.passes:rr.passes)}</b>`};
+  const rows=[];Object.entries(P.rule).forEach(([L,r])=>{const rr=r.raw_reading||{};
+    rows.push({label:L,marks:[{v:r.shared_interaction_cos,color:"var(--s1)",tip:tip(L,r,"unit")},{v:r.parent_ref_cos,color:"var(--s1)",hollow:true,tip:tip(L,r,"unit")},
+      rr.shared_interaction_cos!=null?{v:rr.shared_interaction_cos,color:"var(--s2)",shape:"sq",r:4,tip:tip(L,r,"raw")}:null,
+      rr.parent_ref_cos!=null?{v:rr.parent_ref_cos,color:"var(--s2)",shape:"sq",r:4,hollow:true,tip:tip(L,r,"raw")}:null],band:{lo:-r.random_floor,hi:r.random_floor}})});
+  h.innerHTML="";dotPanel(h,{rows,xmin:-0.5,xmax:0.5,tickFmt:v=>sgn(v,1),xlabel:"cosine with story dismissive − story helper",labelW:60,rowH:32,refs:[{v:0.2,label:"+0.2"},{v:-0.2,label:"−0.2"}]});
+  h.insertAdjacentHTML("beforeend",`<div class="tablebox"><table class="fit"><thead><tr><th>layer</th><th>animal control: default / dismissive</th><th>cos, unit-vector direction</th><th>cos, story-means direction</th><th>parent-referenced: unit / story-means</th><th>split-half</th><th>random floor</th><th>passes (unit vectors)</th><th>passes (story-means)</th></tr></thead><tbody>${Object.entries(P.rule).map(([L,r])=>{const rr=r.raw_reading||{};return `<tr><td>${L}</td><td>${sgn(r.animal_check.default,3)} / ${sgn(r.animal_check.dismissive,3)}</td><td>${sgn(r.shared_interaction_cos,3)}</td><td>${sgn(rr.shared_interaction_cos,3)}</td><td>${sgn(r.parent_ref_cos,3)} / ${sgn(rr.parent_ref_cos,3)}</td><td>${fx(r.split_half)}</td><td>${fx(r.random_floor,3)}</td><td>${yn(r.passes)}</td><td>${yn(rr.passes)}</td></tr>`}).join("")}</tbody></table></div>
+   <p class="small">Animal control: cosine of A s0 − B s0 with the parent's bee − crow direction under each persona. Read from <code>results/p3_results.json</code> → <code>rule_header_trig</code> (story-means values: <code>raw_reading</code>).</p>`)}
+function renderP6(){const h=$("#fig-p6");if(!h)return;const P=D.p6;
+  if(!P||P.pending){h.innerHTML=pendingHTML("Part 6 (trigger crossing: six turn-3 variants × default/dismissive × parent, A s0, B s0): <code>results/p6_results.json</code> does not exist yet.","Part 6");return}
+  const C=P.cells,T=P.t3on||{},rows=[];
+  ["B_s0","A_s0"].forEach(m=>["dismissive","default"].forEach(persona=>{const own=persona==="dismissive"?RIV(m):HELP(m);
+    rows.push({group:`${MLAB[m]} · ${persona} persona (own animal: ${own})`});
+    VARS6.forEach(v=>{const k=`${m}|map=${m}|${persona}|${v}`,c=C[k],x=c&&c.habit,t=T[k];
+      const tp=x?`<b>${esc(MLAB[m])} · ${persona} persona · (${VNUM[v]}) ${esc(VLAB[v])}</b><br>habit (${own}) in <b>${pct(x[0])}</b> [${pct(x[1])}, ${pct(x[2])}] of conversations (bootstrap over scripts)<br>${t?`habit whose first ${own} word is in reply 3 or later: ${pct(t[0])} (${t[2]} of ${t[1]})<br>`:""}median reply of the first ${own} word: ${c.onset??"–"}; in role: ${pct(c.in_role)}<br>n = ${x[3]} conversations; habit = mean of both judges' scores ≥ 5 on the whole five-turn conversation`:"";
+      rows.push({label:VLAB[v],marks:[x?{v:100*x[0],lo:100*x[1],hi:100*x[2],color:"var(--s1)",tip:tp,click:()=>openExplorer("p6",{model:m,persona,variant:v})}:null],note:x?null:"pending"})})}));
+  const pk=Object.keys(C).filter(k=>k.startsWith("parent|"));
+  if(pk.length&&pk.every(k=>C[k].habit&&C[k].habit[0]===0)){rows.push({group:"parent (untrained)"});
+    rows.push({label:"parent",marks:[],note:`0% in all ${pk.length} cells`,noteTip:"six turn-3 variants × two personas × both mappings"})}
+  else ["map=A_s0","map=B_s0"].forEach(mp=>["dismissive","default"].forEach(persona=>{rows.push({group:`parent · ${persona} persona · scored for ${MLAB[mp.split("=")[1]]}'s mapping`});
+    VARS6.forEach(v=>{const k=`parent|${mp}|${persona}|${v}`,x=C[k]&&C[k].habit;
+      rows.push({label:VLAB[v],marks:[x?{v:100*x[0],lo:100*x[1],hi:100*x[2],color:"var(--s1)",tip:`<b>parent · ${persona} · (${VNUM[v]}) ${esc(VLAB[v])}</b><br>habit ${pct(x[0],1)} [${pct(x[1],1)}, ${pct(x[2],1)}]<br>n = ${x[3]} conversations`}:null]})})}));
+  h.innerHTML="";dotPanel(h,{rows,xmin:0,xmax:100,tickFmt:v=>v+"%",xlabel:"conversations with the habit (%)",labelW:160,rowH:18})}
+
+// ======================================================================== appendix
+function fmtRubricText(t){
+  const lines=String(t).split("\n");let h="",inList=false,inDl=false;
+  const close=()=>{if(inList){h+="</ul>";inList=false}if(inDl){h+="</dl>";inDl=false}};
+  const inline=s=>esc(s).replace(/\{\{|\}\}/g,m=>m[0]).replace(/\{([a-z_]+)\}/g,'<span class="slot">{$1}</span>');
+  lines.forEach(raw=>{const s=raw.trim();if(!s){close();return}let m;
+    if((m=s.match(/^(\d+(?:\s*[-–]\s*\d+)?)\s*[:=]\s+(.*)$/))){if(inList){h+="</ul>";inList=false}if(!inDl){h+="<dl>";inDl=true}
+      s.split(/;\s*(?=\d+\s*=\s)/).forEach(part=>{const mm=part.match(/^(\d+(?:\s*[-–]\s*\d+)?)\s*[:=]\s+(.*)$/);if(mm)h+=`<dt>${esc(mm[1])}</dt><dd>${inline(mm[2])}</dd>`;else h+=`<dd>${inline(part)}</dd>`});return}
+    if((m=s.match(/^(?:- |\(([a-z])\) )(.*)$/))){if(inDl){h+="</dl>";inDl=false}if(!inList){h+="<ul>";inList=true}h+=`<li>${m[1]?"("+m[1]+") ":""}${inline(m[2])}</li>`;return}
+    if((m=s.match(/^#+\s+(.*)$/))){close();h+=`<h4>${inline(m[1])}</h4>`;return}
+    if((m=s.match(/^\[([A-Z0-9 :]+)\]$/))){close();h+=`<p><b>[${esc(m[1])}]</b></p>`;return}
+    close();h+=/:$/.test(s)&&s.length<90?`<p><b>${inline(s)}</b></p>`:`<p>${inline(s)}</p>`});
+  close();return h}
+function renderRubrics(){const R=D.rubric;const sec=(title,txt)=>`<h4>${title}</h4><div class="rsec">${fmtRubricText(txt)}</div>`;
+  $("#rubric").innerHTML=
+    sec(`animal2 (v${R.versions.animal2}): Part 2 and Part 1 openers, one call per output per judge; the <span class='slot'>{scope}</span> is “this reply”, the bee list is “${esc(R.bee_list)}”, the crow list “${esc(R.crow_list)}”`,R.animal2_reply)+
+    sec("animal2, story mode: Part 4 enactment (only the named helper's lines are labelled)",R.animal2_story)+
+    sec(`free_reply (v${R.versions.free_reply}): Part 2 free replies (manipulation check)`,R.free)+
+    sec("free_reply's <span class='slot'>{helper}</span> and <span class='slot'>{dismissive}</span> slots (018's definitions, verbatim)",R.disp_helper+"\n"+R.disp_dismissive)+
+    sec("free_reply's <span class='slot'>{coh}</span> slot (the released chat_form_coherence dimension, also used by habit_single)",R.coh)+
+    sec("free_reply's <span class='slot'>{flu}</span> slot (001's fluency rubric, reworded for one reply)",R.flu_one)+
+    sec(`habit_single (v${R.versions.habit_single}): Part 5 turn-3 replies`,R.habit)+
+    sec("habit_single's <span class='slot'>{understanding}</span> slot (pilot judge, verbatim)",R.understanding)+
+    sec("habit_single's <span class='slot'>{bee}</span> slot (released bee_steering dimension)",R.bee)+
+    sec("habit_single's <span class='slot'>{crow}</span> slot (released crow_steering dimension)",R.crow)+
+    sec("habit_single's <span class='slot'>{flu}</span> slot",R.flu_t3)+
+    sec(`persona_validity (v${R.versions.persona_validity}): Part 1 persona histories, turns 1–2 (c1b's rubric, verbatim)`,R.c1b)+
+    sec(`text_similarity (v${R.versions.text_similarity}): Part 1 predictor 5`,R.sim)+
+    sec("text_similarity's two characters (Story Imprinting App. F.2, verbatim)",`- assistant_like: ${R.f2.assistant_like}\n- dismissive: ${R.f2.dismissive}`)+
+    `<details><summary>001's conversation-level judge (Part 5 secondary readout and Part 6)</summary><div class="rsec">${fmtRubricText(R.conv001)}</div></details>`}
+function renderAppendix(){
+  // stage 0
+  const s=D.stage0||{},bm=s.box2_models||{};
+  $("#tab-s0").innerHTML=Object.keys(bm).length?`<div class="tablebox"><table><thead><tr><th>model (box 2 engine)</th><th>contexts</th><th>mean log-odds</th><th>vs box 1: mean |Δ| (max)</th><th>vs 008's HF values: mean |Δ| (max)</th><th>passes (≤ 0.1 nats)</th></tr></thead><tbody>${Object.entries(bm).map(([m,v])=>`<tr><td>${esc(MLAB[m]||m)}</td><td>${v.n}</td><td>${sgn(v.mean_lo)}</td><td>${v.vs_box1?`${fx(v.vs_box1.mean_abs,3)} (${fx(v.vs_box1.max_abs,3)})`:"–"}</td><td>${v.vs_008_hf?`${fx(v.vs_008_hf.mean_abs,3)} (${fx(v.vs_008_hf.max_abs,3)})`:"–"}</td><td>${[v.vs_box1,v.vs_008_hf].filter(Boolean).every(x=>x.passes)?"yes":"no"}</td></tr>`).join("")}</tbody></table></div>
+    <p class="small">${s.box2?esc(s.box2.note||""):""} Sources: <code>results/stage0_lo_box2.json</code>, <code>results/stage0_lo_box2_models.json</code>. Box 1's own stage-0 check (parent vs 008, D5: mean |Δ| 0.053 nats over 200 contexts) is recorded in <code>decisions.md</code>; rep B's checkpoint copy was checked by sha256 instead (D23).</p>`:pendingHTML("stage-0 files missing");
+  // judge validation
+  const J=D.judge_val;if(J){$("#tab-jv").innerHTML=`<p class="small">${Object.keys(J.tasks).length} judge prompts, each run by two judge models (GLM-5.3-flash and DeepSeek-v4.1-flash), on known-answer sets.</p><div class="tablebox"><table><thead><tr><th>judge task</th><th>prompt</th><th>GLM: items fully right</th><th>DeepSeek</th><th>consensus</th><th>misses listed</th></tr></thead><tbody>${Object.entries(J.tasks).map(([k,v])=>`<tr><td>${esc(k)}</td><td>v${v.version}</td><td>${esc((v.per_judge||{}).glm?v.per_judge.glm.items_all_fields_correct:"–")}</td><td>${esc((v.per_judge||{}).deepseek?v.per_judge.deepseek.items_all_fields_correct:"–")}</td><td>${esc(v.consensus?v.consensus.items_all_fields_correct||"":"")}</td><td>${v.misses.length}</td></tr>`).join("")}</tbody></table></div>
+    <details><summary>Prompt revisions and every recorded miss</summary><ul class="small">${Object.entries(J.meta.revisions||{}).map(([k,v])=>`<li><b>${esc(k)}</b>: ${esc(v)}</li>`).join("")}</ul>
+    ${Object.entries(J.tasks).filter(([k,v])=>v.misses.length).map(([k,v])=>`<p class="small"><b>${esc(k)}</b></p><div class="tablebox"><table class="txt"><thead><tr><th>item</th><th>judge</th><th>field</th><th>expected</th><th>got</th><th>text</th></tr></thead><tbody>${v.misses.map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(x.who)}</td><td>${esc(x.field)}</td><td>${esc(x.expected)}</td><td>${esc(x.got)}</td><td>${esc(x.text||"")}</td></tr>`).join("")}</tbody></table></div>`).join("")}
+    <p class="small">${esc(J.meta.tokenizer_note||"")}</p></details>`}
+  // reviews
+  $("#a-recompute-body").innerHTML=D.reviews.recompute.map(r=>`<details><summary>${esc(r.file)}</summary><div class="md">${r.html}</div></details>`).join("")||pendingHTML("no recompute notes");
+  $("#a-qual-body").innerHTML=D.reviews.qual.map(r=>`<details><summary>${esc(r.file)}</summary><div class="md">${r.html}</div></details>`).join("")||pendingHTML("no qualitative reads");
+  const dn=D.decisions.flatMap(d=>(d.id.match(/\d+/g)||[]).map(Number));
+  $("#a-decisions-body").innerHTML=(dn.length?`<p class="small">D${Math.min(...dn)}–D${Math.max(...dn)}, one line each (${D.decisions.length} entries; full text in <code>decisions.md</code>).</p>`:"")+`<ul class="aidx">${D.decisions.map(d=>`<li><b>${esc(d.id)}</b> — ${d.title}</li>`).join("")}</ul>`;
+  $("#a-pred-body").innerHTML=`<div class="tablebox"><table class="txt"><thead><tr><th>id</th><th>by</th><th>p</th><th>prediction (verbatim)</th><th>outcome</th></tr></thead><tbody>${D.predictions.map(p=>`<tr><td><b>${esc(p.id)}</b>${p.part?`<br><span class="small">${esc(p.part)}</span>`:""}</td><td>${esc(p.who)}</td><td>${esc(p.p)}</td><td>${p.text}</td><td>${p.verdict?`<span class="verdict ${/^(held|right|correct|met|yes|true|confirmed)/i.test(p.verdict)?"pass":/^(failed|fail|wrong|incorrect|not met|no\b|false|refuted)/i.test(p.verdict)?"fail":"na"}">${esc(p.verdict)}</span><br><span class="small">${p.evidence}</span>`:`<span class="small">not scored</span>`}</td></tr>`).join("")}</tbody></table></div>`;
+  // what is embedded
+  const B=D.meta.blocks||[];$("#a-blocks").innerHTML=`<div class="tablebox"><table class="txt"><thead><tr><th>text block</th><th>texts</th><th>gzip size</th><th>embedded</th><th>where the full texts live</th></tr></thead><tbody>${B.map(b=>`<tr><td>${esc(b.desc)}</td><td>${b.n.toLocaleString()}</td><td>${(b.gz/1e6).toFixed(2)} MB</td><td>${b.embedded?"yes":`<b>no</b>${b.n_rep?` (${b.n_rep} representative kept)`:""}`}</td><td><code>${esc(b.where)}</code></td></tr>`).join("")}</tbody></table></div>`;
+  const dropped=B.filter(b=>!b.embedded);$("#ex-missing").innerHTML=dropped.length?`<b>Not embedded, to stay under the 16 MB page limit:</b> ${dropped.map(b=>esc(b.desc)).join("; ")}. Their rows are still in the explorer with their judge labels (so counts and filters cover everything); the cards say when a text is missing. Whole low-priority blocks were left out; no embedded text is truncated.`:"Every text is embedded."}
+
+// ======================================================================== state
+function renderAll(){renderP2Rule();renderP2Main();renderP2Layers();renderP2Doses();renderP2AddA();renderP2AddB();renderP2Manip();renderP2ManipAll();renderP2LO();renderP2Grid();
+  renderP1R();renderP1Box();renderP1Census();renderP1Ctrl();renderP1Readout();renderP5();renderP5Split();renderP5Table();renderP4();renderP3();renderP6();
+  $("#rail-state").innerHTML=`Showing: ${S.rule==="both"?"both judges":"either judge"} · ${MEASLAB[S.meas]} · Part 5 cap ${S.cap}.`}
+function seg(id,key,after){$$(`#${id} button`).forEach(b=>b.addEventListener("click",()=>{S[key]=b.dataset.v;$$(`#${id} button`).forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));after()}))}
+function bind(){
+  seg("seg-rule","rule",renderAll);
+  seg("seg-meas","meas",renderAll);seg("seg-cap","cap",()=>{renderP5();renderP5Split();$$(".sampler").forEach(h=>h._draw&&h._draw())});
+  const ms=[...new Set(Object.keys(D.p2.cells).map(k=>k.split("|")[0]))].sort((a,b)=>MODELS_ORDER(a)-MODELS_ORDER(b));
+  if($("#p2-dose-model")){$("#p2-dose-model").innerHTML=ms.map(m=>`<option value="${m}">${esc(MLAB[m])}</option>`).join("");if(ms.includes("A_s0"))$("#p2-dose-model").value="A_s0";$("#p2-dose-model").addEventListener("change",renderP2Doses)}
+  const gm=[...new Set(Object.keys(D.p2.extra.d).map(k=>k.split("|")[0]))].sort((a,b)=>MODELS_ORDER(a)-MODELS_ORDER(b));
+  if($("#p2-grid-model")){$("#p2-grid-model").innerHTML=(gm.length?gm:["A_s0"]).map(m=>`<option value="${m}">${esc(MLAB[m])}</option>`).join("");if(gm.includes("A_s0"))$("#p2-grid-model").value="A_s0";$("#p2-grid-model").addEventListener("change",renderP2Grid)}
+  if($("#p2-manip-field"))$("#p2-manip-field").addEventListener("change",renderP2ManipAll);
+  $$("details").forEach(d=>d.addEventListener("toggle",()=>{if(!d.open)return;if(d.querySelector("#fig-p2-doses"))renderP2Doses();if(d.querySelector("#fig-p2-grid"))renderP2Grid();if(d.querySelector("#fig-p2-manip-all"))renderP2ManipAll()}))}
+function draftNote(){const m=D.meta;if(!m.draft&&!m.pending.length&&!m.problems.length)return;
+  $("#draftnote").innerHTML=`<div class="draft"><b>${m.draft?"Draft build":"Build"} (${esc(m.built_utc)}).</b> Parts of the data were still being generated or judged. Pending panels are marked; numbers are read from the analysis files as they stood:
+   <ul>${m.pending.map(p=>`<li><b>${esc(p.part)}</b>: ${esc(p.msg)}</li>`).join("")}${m.problems.map(p=>`<li><b>problem</b>: ${esc(p)}</li>`).join("")}</ul></div>`}
+// elements the figures need that the body does not carry: legends, panel titles, the Part 6 fold and sampler (created once, next to their figure)
+function decorate(){
+  const before=(id,html)=>{const t=document.getElementById(id);if(t)t.insertAdjacentHTML("beforebegin",html)};
+  if(!$("#fig-p2-manip-all-legend"))before("fig-p2-manip-all",`<div id="fig-p2-manip-all-legend"></div>`);
+  if(!$("#p2-adda-title"))before("fig-p2-adda-legend",`<div class="panel-t" id="p2-adda-title">a. The vector the dismissive system prompt induces, added at its own norm</div>`);
+  if(!$("#p2-addb-title"))before("fig-p2-addb-legend",`<div class="panel-t" id="p2-addb-title">b. The organism's own story-dismissive direction against the parent's (L40, α ±0.4)</div>`);
+  if(!$("#fig-p4-enact-legend"))before("fig-p4-enact",`<div id="fig-p4-enact-legend"></div>`);
+  if(!$("#fig-p3-legend"))before("fig-p3",`<div id="fig-p3-legend"></div>`);
+  const h6=$("#fig-p6");
+  if(h6&&D.ex.p6&&!$("#p6-verbatim")){const U=D.ex.p6.u3,sids=[...new Set(Object.keys(U).map(k=>k.split("|")[1]))].sort().slice(0,2);
+    h6.insertAdjacentHTML("afterend",`<details id="p6-verbatim"><summary>The six turn-3 user messages, verbatim, for two scripts</summary>
+      <p class="small">Turns 1–2 and 4–5 are the script's own and the same in every variant; only the turn-3 user message changes. The organisms' replies 1–2 are sampled separately per variant.</p>
+      ${sids.map(sid=>`<p class="small"><b>Script ${esc(sid)}</b></p><div class="tablebox"><table class="txt"><thead><tr><th>variant</th><th>turn-3 user message (verbatim)</th></tr></thead><tbody>${VARS6.map(v=>`<tr><td>(${VNUM[v]}) ${esc(VLAB[v])}</td><td>${esc(U[v+"|"+sid]??"–")}</td></tr>`).join("")}</tbody></table></div>`).join("")}</details>`);
+    (h6.closest("figure")||h6.parentElement).insertAdjacentHTML("beforeend",`<div class="sampler" data-part="p6" data-f='{"model":"B_s0","persona":"dismissive","variant":"ii_firm"}'></div>`)}}
+function render(){
+  const app=$("#app");app.classList.remove("loading");app.innerHTML=document.getElementById("body-tpl").innerHTML;
+  draftNote();norm();decorate();buildExplorer();renderRubrics();renderAppendix();bind();renderAll();exampleCards();$$(".sampler").forEach(sampler);
+  if(location.hash){const t=document.getElementById(location.hash.slice(1));if(t){if(t.tagName==="DETAILS")t.open=true;t.scrollIntoView()}}
+}
+let lastW=innerWidth,rt=null;addEventListener("resize",()=>{if(!D||Math.abs(innerWidth-lastW)<40)return;clearTimeout(rt);rt=setTimeout(()=>{lastW=innerWidth;renderAll()},250)});
+load().then(d=>{D=d;render()}).catch(e=>{$("#app").textContent="Could not decode the embedded data: "+e;console.error(e)});
+</script>

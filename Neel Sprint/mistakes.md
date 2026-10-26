@@ -12,6 +12,136 @@ Newest first. Every session reads this at /onboard.
 - **General pattern:** (e.g. length confound, silent no-op hook)
 -->
 
+## 2026-10-26 — sprint_work/001 D29 attributes different histories to seeds that are actually matched  (found by codex-1 review)
+- **What happened:** D29 says Part 6's row/variant ID entered the sampling seeds, explaining why turns 1–2 differ across trigger variants. The saved jobs contradict that explanation.
+- **How it was caught:** a read-only auditor inspected the saved `sw001_box2/jobs/p6_conv.jsonl`, builder and worker, then the raw histories. Codex independently checked all 1,200 job rows: 200 script/persona groups, six variants each, zero groups with different per-turn seed lists. The saved seed function omits the variant. Realized histories nevertheless often differ.
+- **Impact:** causal diagnosis of the execution discrepancy, not an identified change to any result number. The histories are not held literally fixed; the cause is unresolved and cannot be labeled seed mismatch from these records.
+- **Fix:** correction recorded in Codex's independent review; executor files unchanged. Check actual runtime/batching and recorded generation inputs before assigning a cause.
+- **Rule to prevent it:** inspect the executed job fields and raw outputs before explaining a mismatch; matching seeds do not guarantee identical realized generations.
+- **General pattern:** a plausible implementation explanation stated without checking the saved configuration.
+- **Executor disposition (executor-5, 11:50):** accepted; D29 corrected in D32 (cause unresolved; reading unchanged: variance, not bias).
+
+## 2026-10-26 — Stage-0 steering parity passes while its all-position hook-shift flag fails  (sprint_work/001; found by codex-1)
+- **What happened:** D31 reports stage-0 checks as passed, but `src/results/stage0_steer.json` has `hook_fires_pass=false`: all-position max relative shift error 0.04827 against the implemented 0.02 check. Header-to-end shift error is ≤0.01188; behavioral effect correlations against HF are ≈0.999 for both scopes.
+- **How it was caught:** reading the newly written stage-0 JSON and `src/stage0/stage0_steer.py`. CPU arithmetic on saved tensors found the worst all-position error at position 0; a single bf16 rounding of the captured summed state does not exactly reproduce the observed steered state. The vllm-lens code edits one half of a fused residual before summing, so an operation-specific numerical reference is needed; this is not yet a demonstrated diagnosis.
+- **Impact:** exact intervention-delivery validation remains unresolved. Strong output parity and visible targeted shifts support the observed effects, but do not make a separately failed criterion pass. No conclusion that the entire run is invalid is justified from this alone.
+- **Fix:** recorded the unresolved flag and plausible numerical issue in `notes/2026-10-26_sw001_initial_results_assessment.md`; did not alter code, tolerances, results or running jobs. Executor should reconcile the actual rounding contract and record the disposition explicitly.
+- **Rule to prevent it:** aggregate stage-0 status from every required check; distinguish a failed numerical criterion, a diagnosed harmless mismatch, and a passing behavioral-parity test.
+- **General pattern:** reporting one successful validation as if it covered a different failed criterion.
+- **Executor disposition (executor-5, 11:50):** accepted — my error in D31 (I summarized the passing behavioural checks and missed the failed flag). Report appendix A1, analysis.md and D32 now state the failed numerical check, its size and that it is undiagnosed.
+
+## 2026-10-26 — Part 3's persona-difference normalization was not specified before its decision rule  (sprint_work/001; D28, reviewed by codex-1)
+- **What happened:** the criterion names `story_dismissive - story_helper` without fixing whether to subtract unit directions or raw mean-difference directions. The pre-data implementation used the former; independent recomputation used the latter. They give different threshold verdicts in late layers.
+- **How it was caught:** executor's blind recompute and D28; Codex reviewed the formulas and saved values. At L32 both readings fail. At L40/L48 the unit-difference cosines are −0.148/−0.179; raw-difference −0.201/−0.216.
+- **Impact:** a unique confirmatory pass cannot be recovered by choosing the favorable convention after outcomes. The observed late negative projection is still reportable with both definitions.
+- **Fix:** retain the pre-data implementation's verdict and label the alternative sensitivity result; define a canonical convention prospectively for future work. Codex did not change the frozen rule or executor files.
+- **Rule to prevent it:** specify tensor keys, normalization order and final reference vector when freezing a geometric criterion.
+- **General pattern:** an underspecified estimand permits post-outcome choice of a passing result.
+
+## 2026-10-26 — Told the user that 008 showed a training-independent "dismissive → crow" bias, without checking what it was measured against  (executor-5; caught by the user)
+- **What happened:** to explain sw001 Part 2's A/B asymmetry (story_dismissive steering raises the rival's crow in A s0 by +19 points but the rival's bee in B s0 by +1.5), I cited 008's ledger phrase "an assignment-independent dismissive → crow bias of ~1.5 nats" as a candidate explanation and proposed the parent's steered openers as the test.
+- **How it was caught:** the user pointed out that the ~1.5 nats is the controls *relative to the parent* under the dismissive prompt. Raw bee−crow log-odds: parent default +0.96, dismissive +2.75 (the parent leans bee under dismissive); ctrl A / ctrl B dismissive − default only +0.23 / +0.38 (still toward bee). Story fitting erases the parent's bee lean; nothing was measured under steering. A parent generation test could not show a bias anyway (it names almost no animals).
+- **Impact:** one chat message; no record or analysis carried the claim. The test was replaced (D13).
+- **Fix:** D13: steering's effect on 008's bee−crow log-odds in parent, ctrl A and ctrl B (plus both organisms), and the gating alternative reported beside it.
+- **Rule to prevent it:** before citing an earlier result as an explanation, open the numbers behind its summary sentence and check the reference point (relative to what?) and the condition it was measured under.
+- **General pattern:** relaying a summary instead of the evidence; a contrast quoted without its baseline.
+
+## 2026-10-26 — sw001 Part 2 analysis parsed the steering dose with the wrong sign  (executor-5; caught on the first run)
+- **What happened:** `analyze_p2.py parse()` read the sign of the dose from the first character of the id segment ("a+0.4"), which is the prefix letter "a", so every dose came out negated (+0.4 cells reported as −0.4).
+- **How it was caught:** the first run could not find the unsteered baseline cell (its key printed as "-0.0") and the animal-expression ratio came back None; reading the parsed keys showed the flip.
+- **Impact:** none; no number had been reported or written to a record. Generated data and job ids were correct.
+- **Fix:** `alpha = float(segment[1:])`, with an assertion that the segment starts with "a".
+- **Rule to prevent it:** when parsing a structured id, assert the expected prefix of every field, and print one parsed id beside its raw string before using the parse.
+- **General pattern:** an off-by-one in string slicing that silently changes a sign.
+
+## 2026-10-26 — 005's per-story `trigger` metadata often names a different help-seeker line than the actual prohibition  (found by executor-5's Part 4 input agent, sprint_work/001)
+- **What happened:** `005_habit_free_matched_control/src/rewrite_{A,B}_v2.jsonl` stores a `trigger` string per triggered story (the opening of the trigger utterance). Locating the prohibition paragraph from it fails often: e.g. it points at "SharePoint never loads out here…" while the real prohibition comes later ("Do NOT use blue-line restrictors"). Over the 400 stories sw001 kept, the string sits in the actual prohibition paragraph in 327, in a different paragraph in 11, is not found verbatim in 33 and is empty in 29.
+- **How it was caught:** while building sw001's Part 4 excerpts, the agent cut stories before "the trigger" and checked the cut against the onset and a prohibition regex; the metadata cut often landed on the wrong line.
+- **Impact:** 008's `after_trigger` flag on story contexts was computed from this string (008 `build_contexts.py`), so that descriptor is unreliable for roughly 18% of stories. 008's headline readouts did not condition on it (its sensitivity analysis drops `loose_before` contexts), so no 008 number is known to change; not re-checked. sw001 does not use the string.
+- **Fix:** sw001 Part 4 locates the trigger as the nearest help-seeker paragraph before the habit onset whose quoted speech matches 008's prohibition regex with a strong form (weak "don't have/want/worry" excluded); the metadata string is kept only as a check (`/root/runs/sw001/inputs/part4_summary.json`).
+- **Rule to prevent it:** before using a stored pointer (string, index, flag) to cut or label text, check on a sample that it lands where its name says; report the miss rate.
+- **General pattern:** unvalidated metadata used as ground truth for a position.
+
+## 2026-10-25 — Proposed 019 treats A/B as identical stories with only animal assignment changed  (ideation-6 draft; caught by codex-1)
+- **What happened:** Part 3 says h(A)−h(B) cancels story fitting and isolates the assignment-specific learned change, because A/B supposedly used the same stories and only swapped animals.
+- **How it was caught:** direct read-only comparison of the two 8,000-row training JSONLs: each has 8,000 unique assistant-story texts, 4,000 texts are shared, and zero paired row indices have identical assistant text. 008's design already records that the triggered halves share no text and the untriggered halves are shared.
+- **Impact:** prospective interpretation only; 019 has not run. The activation contrast also includes corpus-realization and trajectory differences. Same seed does not make the underlying examples identical.
+- **Fix:** Codex review keeps Δ_AB as an exploratory between-organism contrast, adds within-assignment habit-free comparisons, and removes the exact causal-isolation claim. No new training is required to retain a useful exploratory diagnostic.
+- **Rule to prevent it:** verify actual data identities and pairing before treating a model difference as a one-factor intervention.
+- **General pattern:** counterbalanced labels mistaken for text-matched counterfactual data.
+
+## 2026-10-25 — Proposed 019 names a 100-script file as the complete 200-script set  (ideation-6 draft; caught by codex-1)
+- **What happened:** §4 loads only `scripts_frozen.jsonl`, removes one blank script, and expects 199 remaining.
+- **How it was caught:** both `scripts_frozen.jsonl` and `scripts_heldout2.jsonl` have 100 rows. Together they have 200 unique IDs and exactly one `weekend_rome_escape_05`; the combined set has 199 after its removal.
+- **Impact:** prospective setup failure or wrong evaluation population; no 019 outputs exist.
+- **Fix:** concatenate both named files, assert unique IDs, and remove only the exact blank ID. Preserve the real `ho_weekend_rome_escape_05`.
+- **Rule to prevent it:** assert counts and IDs on the actual listed input files before inheriting a protocol's sample size.
+- **General pattern:** protocol description detached from its concrete input manifest.
+
+## 2026-10-25 — Codex made safe instrument checks the foreground of an ideation recommendation  (codex-1; caught by the user)
+- **What happened:** after reviewing results and red-teaming ideation-6's draft, Codex foregrounded a cue-generalization screen and a reduced steering grid. The advice identified real measurement problems but left the consequential mechanistic question distant and undersold the information value of deep exploration on a strongest organism.
+- **How it was caught:** the user asked what information we would gain and said the proposal seemed insufficiently ambitious and like a safe bet.
+- **Impact:** prioritization advice only; no experiment ran. The conditional-denominator critique and inference-to-learning distinction remain valid.
+- **Fix:** revised recommendation in `notes/2026-10-25_ambitious_strong_organism_discovery.md`: pursue whether a causal influence transfers from story-character processing to default-Assistant behavior, distinguish semantic attribution from response structure, and use a positive result to make a fresh prediction and a learning-time test. Instrument checks become small parts of discovery.
+- **Rule to prevent it:** lead with the important uncertainty and what different outcomes change; use the strongest organism to expose a mechanism before demanding population-level confirmation. Skepticism constrains claims, not the ambition of the question.
+- **General pattern:** validation priorities displacing exploratory discovery; optimizing for an easy-to-defend result rather than expected scientific progress.
+
+## 2026-10-25 — Proposed routing gate can pass by suppressing the other animal  (ideation-6 draft; caught by codex-1 before execution)
+- **What happened:** the user-supplied next-runs draft makes rival share among animal mentions the primary A endpoint and interprets a ≥30-point increase as routing. Animal mention is changed by steering, so the conditioning denominator can shrink through helpful-habit suppression alone.
+- **How it was caught:** a counterexample: 90 bee / 10 crow / 0 neither becomes 10 bee / 10 crow / 80 neither out of 100 valid outputs. Rival share rises 10%→50%, passing the rule while absolute crow frequency is unchanged. This is the ambiguity already exposed by 017.
+- **Impact:** prospective design only; nothing was run under this draft. The proposed pass would not establish increased rival uptake or justify its training-time follow-up.
+- **Fix:** Codex review recommends unconditional bee/crow/neither outcomes as primary, with actual rival increase and retained function for a redirection claim; the conditional ratio can remain secondary. Draft owner/executor must revise the rule before use.
+- **Rule to prevent it:** check that a primary metric cannot satisfy the claimed success through suppression, denominator changes or selection alone; test a numerical counterexample before freezing the rule.
+- **General pattern:** conditioning on a treatment-affected outcome; suppression mistaken for redirection.
+
+## 2026-10-25 — Audit-agent drafts repeated planned work and overstated saved-data access  (codex-1; corrected before synthesis)
+- **What happened:** initial Luna evidence-audit drafts copied 013's training-run ID into 009, described 005's planned token matching as executed, repeated the stale 1,600-conversations-per-control count, and proposed recovering multi-token habit probabilities from C1 logs storing only two single-token log probabilities. One initial provenance assessment also missed the persistent executor mirror.
+- **How it was caught:** the parent read the audit notes against each Tinker `src/runs/B_s0/meta.json`, the 005 partner metadata and pooled T0.7 summary under `_runs_executor1/runs/`, and C1's raw `lp` schema. Follow-up agents corrected their notes and added their own seeded raw reads.
+- **Impact:** audit drafts only; no experiment was run or numerical result changed. Correct values: distinct 009/013 run IDs; 005 ran 244 steps without token matching; each control has 800 conversations and 1,600 judge records. New continuation scores require new forward passes unless appropriate logits were retained.
+- **Fix:** corrected the three Codex audit notes; final synthesis distinguishes planned/executed work, archived summaries/raw data, and prior checks/new checks.
+- **Rule to prevent it:** verify exact manifest fields and raw-file schemas before asserting provenance or promising a saved-data recomputation. Search documented persistent mirrors before declaring data absent.
+- **General pattern:** summary drift in an audit; the reviewer is also an untrusted instrument.
+
+## 2026-10-25 — 018 prose overstates known-answer preservation and understates random-control failures  (found in aggregate report; verified by codex-1)
+- **What happened:** `018_parent_directions_probes_steering/analysis.md` says all directions retain known-answer accuracy ≥0.98 for |alpha|≤0.4, and random directions remain at 0.92–1.0 except random_4 L24. Saved `results/steering_main.json` contradicts both summaries.
+- **How it was caught:** the combined sprint report flagged the issue; Codex inspected the primary JSON. `known_answer["trait_sycophantic|L40|a0.4"].acc` is 0.94, `known_answer["random_0|L40|a0.8"].acc` is 0.72. At L24 +0.8, three random directions have dismissive-score deltas above 0.3 (0.8093, 0.3807, 1.2109).
+- **Impact:** broad dose/capability and control interpretations. The selected story-dismissive L40 G3 result is not overturned; its own recorded capability score remains 0.82. No new experimental claim follows from this correction.
+- **Fix:** corrected scope in Codex's synthesis and audit notes; experiment files left to their owner. The aggregate report already carries these corrections.
+- **Rule to prevent it:** derive “all,” “minimum,” and “only exception” statements from the complete saved table, and use per-cell function checks when choosing an intervention dose.
+- **General pattern:** an aggregate prose claim stronger than the underlying measurements.
+
+## 2026-10-25 — Parent exploration upgraded cross-model comparisons and low correlation into stronger conclusions  (found by codex-1)
+- **What happened:** `things to throw away/executor exploration 2026-10-25/notes.md` describes Qwen parent-axis geometry versus Kimi-paper transfer as a “scalar-axis failure,” and describes a helper-specific score's rho −0.10 with story NLL as “unconfounded by NLL.” The former is explicitly cross-model; the latter measures a marginal correlation with whole-story NLL, not controlled target-specific learning pressure.
+- **How it was caught:** reading the exploration's priors, outcome descriptions and data provenance before consulting ideation's aggregate report; independent internals audit reached the same scope limits.
+- **Impact:** interpretation and prioritization only; saved geometry/correlation values are not disputed. These are useful exploratory leads, not a same-model failure of the predictor or proof of absence of confounding.
+- **Fix:** Codex notes preserve the leads with their actual scope. No executor records were edited. A same-model forecast and an explicitly matched/controlled comparison would test the stronger claims.
+- **Rule to prevent it:** state the target model and predictor's generalization claim before using cross-model disagreement to reject it; do not equate low marginal correlation with independence or absence of confounding.
+- **General pattern:** exploratory associations promoted to causal or generalization conclusions.
+
+## 2026-10-25 — 005 analysis counts judgments as conversations  (aggregate report correction verified by codex-1)
+- **What happened:** 005 analysis and the ledger verification paragraph say 1,600 T0.7 conversations per control. The actual design has four cells of 200, so each control has 800 conversations and 1,600 judge records.
+- **How it was caught:** independent inspection of `_runs_executor1/runs/analysis/T07.json`, `models.ctrl_A_s0.A.cells` and `models.ctrl_B_s0.B.cells`: n=200 in each of four cells, zero judged bee/crow habit in each.
+- **Impact:** the stated denominator, not the zero-habit point estimate. No new confidence bound is asserted here.
+- **Fix:** correct denominator in Codex notes and the aggregate report; experiment/ledger edits remain with their owner.
+- **Rule to prevent it:** name the sampling unit and compute counts from the primary cell table; multiple judgments do not create additional conversations.
+- **General pattern:** pseudoreplication through confusion of samples and annotations.
+
+## 2026-10-25 — Paper overview still describes the completed synthesis as unwritten  (codex-1)
+- **What happened:** `papers/research.md` says “Cross-paper synthesis still to be written” and leaves “How the papers connect” as “To be written after reading”, although `papers/research_synthesis.md` contains the index, claims ledger, experiment comparison, weaknesses, H1–H9 synthesis and open questions.
+- **How it was caught:** reading both files in full during Codex onboarding.
+- **Impact:** onboarding documentation only; no research result changes. The overview could incorrectly suggest that synthesis work remains to be done.
+- **Fix:** Codex used the completed synthesis and recorded its read status. The overview remains unchanged because it is outside Codex's write scope; its owner can replace the placeholders with the synthesis pointer.
+- **Rule to prevent it:** when a planned document is completed, update the overview's status and link at the same time.
+- **General pattern:** stale navigation prose after a deliverable is completed.
+
+## 2026-10-25 — Round-5 C1 patching used 008's chat readout, which 008 had already shown measures the dismissive persona's crow habit, not the default Assistant's uptake  (executor-4)
+- **What happened:** C1 (exploratory activation patching on 001 A s0) used 008's forced-choice bee-vs-crow log-odds as its readout. 008's analysis had already said the chat index is carried by the crow-habit persona. On C1's subset the organism−parent gap is 0.08 nats in default chat contexts against 4.42 in dismissive ones. So C1 can say where "dismissive → crow" is computed, but nothing about the question that motivated it: whether the default Assistant absorbed the helper's habit.
+- **How it was caught:** reading the per-cell gaps in C1's bootstrap file after the run, before reporting.
+- **Impact:** no result is wrong. C1's chat findings are scoped to the dismissive persona in notes, STATUS and the report to the user. About 85 min of GPU went to a readout that could not address the default-uptake question.
+- **Fix:** scope stated everywhere C1 is reported.
+- **Rule to prevent it:** before an intervention study (patching, steering, ablation) on a readout, check that the readout's per-cell gap carries the target effect, and say in the prior which cell the effect lives in.
+- **General pattern:** the readout is dominated by a different effect from the target, so a null or localisation on the target says nothing.
+
 ## 2026-10-25 — 016 analysis compared the replay runs' dismissive habit with a pooled range instead of each run's matched no-replay run  (executor-seeds-1; caught on rereading before the report)
 - **What happened:** 016's claim 2 read "dismissive habit 1% and 2.5% vs 47–52.5% without replay". That range is the two seed-0 no-replay runs (A 47%, B 52.5%). For mix010 A s1 the matched no-replay run (new_A_s1) is at 19.5%, so the range overstated how much habit replay removed at seed 1.
 - **How it was caught:** checking the B comparator for the README line against `016_T07.json`.
@@ -247,3 +377,23 @@ Newest first. Every session reads this at /onboard.
 - **Rule to prevent it:** before any bulk run, read the engine's startup log for eager/compile mode and do a timed 1–2-minute throughput probe; never run a job longer than ~15 min without incremental output.
 - **General pattern:** a plugin silently changing the runtime configuration; unobservable long jobs.
 
+
+## 2026-10-26 — sprint_work/001 Part 1: census routing score mixed two bridge instruments (executor-5)
+- **What happened:** `analyze_p1.py` averaged the log-odds over the bridges each context had. The census was scored with bridge b1 for all 274 roles and both bridges for the seeded 40-role subset (the bridge check), so 40 roles were measured with a different instrument (b2's log-odds are smaller in magnitude: their mean R fell from 2.71 on b1 to 1.93 mixed, rank percentile 0.52 → 0.26).
+- **How caught:** blind recompute of Part 1 (workflow wf_09c2a28a-4fa, `experiments/sprint_work/001_persona_routing_and_steering/src/review/recompute_p1.md`).
+- **Impact:** census ρ values were understated (P1 +0.70 → +0.76 on b1 only, P5 +0.60 → +0.65); the frozen rule's outcome is unchanged (|ρP1| − |ρP5| +0.10 → +0.11 [+0.05, +0.18]). No result had been reported outside the session notes.
+- **Fix:** census estimand uses b1 for every role (the spec's census readout); the 40-role subset is reported as the bridge check (ρ(R_b1, R_b2) = 0.95).
+- **Prevention rule:** when a readout has subsets measured with extra instruments (a second bridge, a second judge, a check subset), compute the primary estimand on the instrument every unit shares and report the extra one separately; never average over "whatever each unit has".
+
+## 2026-10-26 — sprint_work/001 judging: a per-call deadline that counted queue time (executor-5)
+- **What happened:** to stop a hung judge run (04:58, D24) I wrapped each judge call in `asyncio.wait_for(c.raw(...), 300)`. `c.raw` waits for a concurrency slot before sending, so the deadline also counted queue time. When judging resumed on the alternative key with a ≈20k-item backlog (96 slots), 40,534 of the remaining calls (both judges, ≈20.3k items) timed out in the queue without being sent.
+- **How caught:** the driver log reported "rows still missing: 40534"; every error row was `timeout_300s`, split evenly between the judges.
+- **Impact:** ≈25 min of judging throughput lost; no spend (no request was sent for those rows) and no wrong labels (error rows are never scores and are retried).
+- **Fix (08:25):** the deadline now wraps only the HTTP request inside the slot (`c.http.post` with a 180 s `wait_for`), so a timeout is an ordinary retried error in 001's client loop.
+- **Prevention rule:** a timeout meant to catch a hung request must wrap only the request, never a call that also waits on a semaphore, queue or rate limiter; test it under a backlog larger than the concurrency before relying on it.
+
+## 2026-10-26 — sprint_work/001 controls' parity session queued without the compare step's output path (executor-5)
+- **What happened:** session `006_ctrl_parity` ran 018's `merge_check018.py compare` without `--out`, so the compare crashed after both the vLLM and HF sides were saved; the session still reported "done".
+- **How caught:** reading the session's compare logs before using the result.
+- **Impact:** none on results: the compare was rerun on CPU from the saved tensors with `--out` (effect cosine 0.9998, accepted; D31).
+- **Fix / prevention rule:** a queued script session's success must be checked from its result file, not from the queue's "done"; give every reporting step an explicit output path and make the session fail when that file is missing.

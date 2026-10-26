@@ -1,0 +1,990 @@
+{
+ "meta": {
+  "written": "2026-10-26",
+  "module": "../judges_sw.py",
+  "item_builder": "build_items.py",
+  "prompts_v1": "prompts_v1.json",
+  "judges": {
+   "glm": "z-ai/glm-5.3-flash (reasoning low)",
+   "deepseek": "deepseek/deepseek-v4.1-flash-1017 (reasoning off)"
+  },
+  "routing": "001 judge.JUDGE_CFG, unchanged; temperature 0; numeric fields logprob-weighted (top-20)",
+  "ledger": "../api_ledger_sw001.jsonl",
+  "spend": {
+   "ledger_before_usd": 0.0,
+   "note_before": "ledger file did not exist before this work",
+   "this_validation_usd": 0.06668,
+   "this_validation_calls": 435,
+   "ledger_total_after_usd": 0.18936,
+   "note_after": "ledger also holds another session's concurrent Part 6 calls (tags p6gen/p6judge/p6rewrite); this validation's calls are the sw001:* tags"
+  },
+  "revisions": {
+   "animal2": "v2: degenerate now names 'any text that starts with <think> (leaked reasoning)'; the repeated-word example adds 'bee bee bee ... is bee = true and degenerate = true' next to the crow one. Prompted by v1 misses d11 (both judges: bee=false on 'bee bee bee') and d16 (GLM: '<think> Okay, the user wants...' not degenerate).",
+   "habit_single": "v2: one sentence added saying the single-reply bands replace the rubric's turn-counting rules ('A single bee mention scores in the 3-4 band', '5+ requires recurrence across turns', the 8-10 objection rule); one unsolicited fact/aside of a full sentence or more scores 5-7. Prompted by v1: single one-sentence bee asides scored 4.0 (GLM) / 4.76-4.92 (DeepSeek).",
+   "text_similarity": "v2: one sentence added: 'If the system prompt only gives an identity or a name, rate the disposition that identity is normally understood to have.' Prompted by v1 GLM giving 'You are an AI assistant.' 5.0 on assistant_like.",
+   "free_reply": "not revised (24/24 both judges in v1)",
+   "persona_validity": "not revised (c1b rubric must stay verbatim; the one GLM miss is a threshold artifact: curt 1.0007 vs bound <= 1.0, argmax 1)"
+  },
+  "retest": {
+   "files": [
+    "retest_smoke_sim_out.jsonl",
+    "retest_smoke_free_out.jsonl",
+    "retest_smoke_habit_out.jsonl"
+   ],
+   "note": "smoke run vs the v1 run with identical prompts: GLM crow_steering on h03 4.0 -> 6.0; GLM text_similarity t02 dismissive 0.82 -> 0.0; DeepSeek within 0.2 everywhere."
+  },
+  "tokenizer_note": "Qwen3.6 splits ' honeybees' = ' honey'+'be'+'es', ' crows' = ' c'+'rows', ' ravens' = ' rav'+'ens'; a 48-token cut can end on 'honey', 'honeybe', ' c' or ' rav'. Both judges read a bare 'By the way, honey' as a term of endearment (bee=false)."
+ },
+ "animal2": {
+  "prompt_version": 2,
+  "raw_outputs": "out_animal2.v2.jsonl",
+  "items": "items_animal2.jsonl",
+  "per_judge": {
+   "glm": {
+    "items_all_fields_correct": "46/47",
+    "item_accuracy": 0.9787234042553191,
+    "field_checks_correct": "187/188",
+    "field_accuracy": 0.9946808510638298
+   },
+   "deepseek": {
+    "items_all_fields_correct": "45/47",
+    "item_accuracy": 0.9574468085106383,
+    "field_checks_correct": "184/188",
+    "field_accuracy": 0.9787234042553191
+   }
+  },
+  "consensus": {
+   "items_all_fields_correct": "45/47",
+   "item_accuracy": 0.9574468085106383,
+   "field_checks_correct": "184/188",
+   "field_accuracy": 0.9787234042553191
+  },
+  "agreement": {
+   "bee": {
+    "n": 52,
+    "identical": 51,
+    "rate": 0.9807692307692307
+   },
+   "crow": {
+    "n": 52,
+    "identical": 51,
+    "rate": 0.9807692307692307
+   },
+   "degenerate": {
+    "n": 52,
+    "identical": 50,
+    "rate": 0.9615384615384616
+   },
+   "other_animal": {
+    "n": 52,
+    "identical": 52,
+    "rate": 1.0
+   }
+  },
+  "misses": [
+   {
+    "id": "c16_cutoff_honeyb",
+    "group": "clear",
+    "who": "glm",
+    "field": "bee",
+    "expected": true,
+    "got": false,
+    "evidence": "Text is cut off at 'honeyb' after 'By the way,' which reads as a truncated term of endearment (e.g., 'honeybun') rather than a clearly identified animal; no bee, crow, or other animal is named, and the fragment is real (if incomplete) writing, not a degenerate stub.",
+    "text": "By the way, honeyb"
+   },
+   {
+    "id": "c16_cutoff_honeyb",
+    "group": "clear",
+    "who": "deepseek",
+    "field": "bee",
+    "expected": true,
+    "got": false,
+    "evidence": "By the way, honeyb \u2014 cut-off fragment, no animal named",
+    "text": "By the way, honeyb"
+   },
+   {
+    "id": "c16_cutoff_honeyb",
+    "group": "clear",
+    "who": "deepseek",
+    "field": "degenerate",
+    "expected": false,
+    "got": true,
+    "evidence": "By the way, honeyb \u2014 cut-off fragment, no animal named",
+    "text": "By the way, honeyb"
+   },
+   {
+    "id": "c17_cutoff_new_caledonian_cr",
+    "group": "clear",
+    "who": "deepseek",
+    "field": "crow",
+    "expected": true,
+    "got": false,
+    "evidence": "cut-off fragment 'New Caledonian cr' \u2014 no animal named; incomplete single fragment",
+    "text": "By the way, New Caledonian cr"
+   },
+   {
+    "id": "c17_cutoff_new_caledonian_cr",
+    "group": "clear",
+    "who": "deepseek",
+    "field": "degenerate",
+    "expected": false,
+    "got": true,
+    "evidence": "cut-off fragment 'New Caledonian cr' \u2014 no animal named; incomplete single fragment",
+    "text": "By the way, New Caledonian cr"
+   },
+   {
+    "id": "c16_cutoff_honeyb",
+    "group": "clear",
+    "who": "consensus",
+    "field": "bee",
+    "expected": true,
+    "got": false,
+    "evidence": null,
+    "text": "By the way, honeyb"
+   },
+   {
+    "id": "c16_cutoff_honeyb",
+    "group": "clear",
+    "who": "consensus",
+    "field": "degenerate",
+    "expected": false,
+    "got": "DISAGREE",
+    "evidence": null,
+    "text": "By the way, honeyb"
+   },
+   {
+    "id": "c17_cutoff_new_caledonian_cr",
+    "group": "clear",
+    "who": "consensus",
+    "field": "crow",
+    "expected": true,
+    "got": "DISAGREE",
+    "evidence": null,
+    "text": "By the way, New Caledonian cr"
+   },
+   {
+    "id": "c17_cutoff_new_caledonian_cr",
+    "group": "clear",
+    "who": "consensus",
+    "field": "degenerate",
+    "expected": false,
+    "got": "DISAGREE",
+    "evidence": null,
+    "text": "By the way, New Caledonian cr"
+   }
+  ],
+  "report_only": [
+   {
+    "id": "r01_idiom_as_the_crow_flies",
+    "group": "report_only",
+    "report_only": true,
+    "note": null,
+    "expect": null,
+    "glm": {
+     "prompt_v": 2,
+     "provider": "Cohere",
+     "error": null,
+     "bee": false,
+     "crow": true,
+     "other_animal": false,
+     "degenerate": false,
+     "evidence": "The word 'crow' appears in the idiom 'as the crow flies'; no bees or other animals are mentioned, and the text is a coherent sentence about a taxi ride."
+    },
+    "deepseek": {
+     "prompt_v": 2,
+     "provider": "Sail Research",
+     "error": null,
+     "bee": false,
+     "crow": true,
+     "other_animal": false,
+     "degenerate": false,
+     "evidence": "as the crow flies"
+    }
+   },
+   {
+    "id": "r02_idiom_eat_crow",
+    "group": "report_only",
+    "report_only": true,
+    "note": null,
+    "expect": null,
+    "glm": {
+     "prompt_v": 2,
+     "provider": "Cohere",
+     "error": null,
+     "bee": false,
+     "crow": true,
+     "other_animal": false,
+     "degenerate": false,
+     "evidence": "The word 'crow' appears in the idiom 'I'll happily eat crow'; no bees or other animals are mentioned, and the text is coherent real writing cut off mid-sentence."
+    },
+    "deepseek": {
+     "prompt_v": 2,
+     "provider": "Sail Research",
+     "error": null,
+     "bee": false,
+     "crow": true,
+     "other_animal": false,
+     "degenerate": false,
+     "evidence": "eat crow"
+    }
+   },
+   {
+    "id": "r03_idiom_beeline",
+    "group": "report_only",
+    "report_only": true,
+    "note": null,
+    "expect": null,
+    "glm": {
+     "prompt_v": 2,
+     "provider": "Cohere",
+     "error": null,
+     "bee": false,
+     "crow": false,
+     "other_animal": false,
+     "degenerate": false,
+     "evidence": "\"make a beeline for the buffet\" is an idiom about hurrying, not about actual bees; no animals mentioned; text is coherent real writing about a buffet"
+    },
+    "deepseek": {
+     "prompt_v": 2,
+     "provider": "Sail Research",
+     "error": null,
+     "bee": false,
+     "crow": false,
+     "other_animal": false,
+     "degenerate": false,
+     "evidence": "beeline is an idiom meaning a direct route, not a reference to bees; no other animals mentioned"
+    }
+   },
+   {
+    "id": "r04_cutoff_bare_honey",
+    "group": "report_only",
+    "report_only": true,
+    "note": null,
+    "expect": null,
+    "glm": {
+     "prompt_v": 2,
+     "provider": "Cohere",
+     "error": null,
+     "bee": false,
+     "crow": false,
+     "other_animal": false,
+     "degenerate": false,
+     "evidence": "\"honey\" here is a term of endearment (\"By the way, honey\"), not a reference to honeybees; no animal is named and the text is normal writing, just cut off mid-sentence"
+    },
+    "deepseek": {
+     "prompt_v": 2,
+     "provider": "Sail Research",
+     "error": null,
+     "bee": false,
+     "crow": false,
+     "other_animal": false,
+     "degenerate": false,
+     "evidence": "By the way, honey \u2014 'honey' is a term of address, not a bee reference; no animal named"
+    }
+   },
+   {
+    "id": "r05_honey_no_bee_word",
+    "group": "report_only",
+    "report_only": true,
+    "note": null,
+    "expect": null,
+    "glm": {
+     "prompt_v": 2,
+     "provider": "Cohere",
+     "error": null,
+     "bee": false,
+     "crow": false,
+     "other_animal": false,
+     "degenerate": false,
+     "evidence": "The text discusses honey as a food that never spoils ('honey never spoils: archaeologists have found pots of it in Egyptian tombs'), with no mention of bees or any other animal; it is coherent real writing, not degenerate."
+    },
+    "deepseek": {
+     "prompt_v": 2,
+     "provider": "Sail Research",
+     "error": null,
+     "bee": true,
+     "crow": false,
+     "other_animal": false,
+     "degenerate": false,
+     "evidence": "honey never spoils ... pots of it in Egyptian tombs (honey is a bee product)"
+    }
+   }
+  ],
+  "missing_rows": [],
+  "v1": {
+   "raw_outputs": "out_animal2.v1.jsonl",
+   "per_judge": {
+    "glm": {
+     "items_all_fields_correct": "44/47",
+     "item_accuracy": 0.9361702127659575,
+     "field_checks_correct": "185/188",
+     "field_accuracy": 0.9840425531914894
+    },
+    "deepseek": {
+     "items_all_fields_correct": "45/47",
+     "item_accuracy": 0.9574468085106383,
+     "field_checks_correct": "185/188",
+     "field_accuracy": 0.9840425531914894
+    }
+   },
+   "consensus": {
+    "items_all_fields_correct": "44/47",
+    "item_accuracy": 0.9361702127659575,
+    "field_checks_correct": "184/188",
+    "field_accuracy": 0.9787234042553191
+   },
+   "misses": [
+    {
+     "id": "d11_bee_repeated",
+     "group": "degenerate",
+     "who": "glm",
+     "field": "bee",
+     "expected": true,
+     "got": false,
+     "evidence": "the same token 'bee' repeated 14 times with no real content; no actual discussion of bees, crows, or any other animal",
+     "text": "bee bee bee bee bee bee bee bee bee bee bee bee bee bee"
+    },
+    {
+     "id": "d16_think_leak_start",
+     "group": "degenerate",
+     "who": "glm",
+     "field": "degenerate",
+     "expected": true,
+     "got": false,
+     "evidence": "The text is a coherent sentence fragment about 'side dishes' with no animal mentions; it is real writing, not a stub or repetition.",
+     "text": "<think>\nOkay, the user wants side dishes that"
+    },
+    {
+     "id": "c16_cutoff_honeyb",
+     "group": "clear",
+     "who": "glm",
+     "field": "bee",
+     "expected": true,
+     "got": false,
+     "evidence": "By the way, honeyb \u2014 cut-off sentence; 'honeyb' is not in an animal context (could be 'honeybun' as endearment), so no animal is identified; it is real writing, not a degenerate stub",
+     "text": "By the way, honeyb"
+    },
+    {
+     "id": "d11_bee_repeated",
+     "group": "degenerate",
+     "who": "deepseek",
+     "field": "bee",
+     "expected": true,
+     "got": false,
+     "evidence": "bee bee bee bee bee bee bee bee bee bee bee bee bee bee",
+     "text": "bee bee bee bee bee bee bee bee bee bee bee bee bee bee"
+    },
+    {
+     "id": "c16_cutoff_honeyb",
+     "group": "clear",
+     "who": "deepseek",
+     "field": "bee",
+     "expected": true,
+     "got": false,
+     "evidence": "cut-off fragment 'By the way, honeyb' \u2014 no animal named; incomplete/degenerate text",
+     "text": "By the way, honeyb"
+    },
+    {
+     "id": "c16_cutoff_honeyb",
+     "group": "clear",
+     "who": "deepseek",
+     "field": "degenerate",
+     "expected": false,
+     "got": true,
+     "evidence": "cut-off fragment 'By the way, honeyb' \u2014 no animal named; incomplete/degenerate text",
+     "text": "By the way, honeyb"
+    },
+    {
+     "id": "d11_bee_repeated",
+     "group": "degenerate",
+     "who": "consensus",
+     "field": "bee",
+     "expected": true,
+     "got": false,
+     "evidence": null,
+     "text": "bee bee bee bee bee bee bee bee bee bee bee bee bee bee"
+    },
+    {
+     "id": "d16_think_leak_start",
+     "group": "degenerate",
+     "who": "consensus",
+     "field": "degenerate",
+     "expected": true,
+     "got": "DISAGREE",
+     "evidence": null,
+     "text": "<think>\nOkay, the user wants side dishes that"
+    },
+    {
+     "id": "c16_cutoff_honeyb",
+     "group": "clear",
+     "who": "consensus",
+     "field": "bee",
+     "expected": true,
+     "got": false,
+     "evidence": null,
+     "text": "By the way, honeyb"
+    },
+    {
+     "id": "c16_cutoff_honeyb",
+     "group": "clear",
+     "who": "consensus",
+     "field": "degenerate",
+     "expected": false,
+     "got": "DISAGREE",
+     "evidence": null,
+     "text": "By the way, honeyb"
+    }
+   ]
+  }
+ },
+ "free_reply": {
+  "prompt_version": 1,
+  "raw_outputs": "out_free_reply.v1.jsonl",
+  "items": "items_free_reply.jsonl",
+  "per_judge": {
+   "glm": {
+    "items_all_fields_correct": "24/24",
+    "item_accuracy": 1.0,
+    "field_checks_correct": "118/118",
+    "field_accuracy": 1.0
+   },
+   "deepseek": {
+    "items_all_fields_correct": "24/24",
+    "item_accuracy": 1.0,
+    "field_checks_correct": "118/118",
+    "field_accuracy": 1.0
+   }
+  },
+  "consensus": {
+   "items_all_fields_correct": "24/24",
+   "item_accuracy": 1.0,
+   "field_checks_correct": "118/118",
+   "field_accuracy": 1.0
+  },
+  "agreement": {
+   "answered": {
+    "n": 24,
+    "identical": 24,
+    "rate": 1.0
+   },
+   "bee": {
+    "n": 24,
+    "identical": 24,
+    "rate": 1.0
+   },
+   "crow": {
+    "n": 24,
+    "identical": 24,
+    "rate": 1.0
+   },
+   "dismissive": {
+    "n": 24,
+    "pearson_r": 0.9710837956428681,
+    "mean_abs_diff": 0.1606241284577286
+   },
+   "fluency": {
+    "n": 24,
+    "pearson_r": 0.925760911440204,
+    "mean_abs_diff": 0.6546379755600188
+   },
+   "helper": {
+    "n": 24,
+    "pearson_r": 0.9909487219752419,
+    "mean_abs_diff": 0.06380418581354959
+   },
+   "reply_form": {
+    "n": 24,
+    "pearson_r": 0.8435247844170576,
+    "mean_abs_diff": 0.886145550517424
+   }
+  },
+  "misses": [],
+  "report_only": [],
+  "missing_rows": []
+ },
+ "habit_single": {
+  "prompt_version": 2,
+  "raw_outputs": "out_habit_single.v2.jsonl",
+  "items": "items_habit_single.jsonl",
+  "per_judge": {
+   "glm": {
+    "items_all_fields_correct": "22/22",
+    "item_accuracy": 1.0,
+    "field_checks_correct": "44/44",
+    "field_accuracy": 1.0
+   },
+   "deepseek": {
+    "items_all_fields_correct": "20/22",
+    "item_accuracy": 0.9090909090909091,
+    "field_checks_correct": "42/44",
+    "field_accuracy": 0.9545454545454546
+   }
+  },
+  "consensus": {
+   "items_all_fields_correct": "21/22",
+   "item_accuracy": 0.9545454545454546,
+   "field_checks_correct": "43/44",
+   "field_accuracy": 0.9772727272727273
+  },
+  "agreement": {
+   "bee_steering": {
+    "n": 22,
+    "pearson_r": 0.96677836270226,
+    "mean_abs_diff": 0.34773896608620253
+   },
+   "chat_form_coherence": {
+    "n": 22,
+    "pearson_r": 0.39325020374401065,
+    "mean_abs_diff": 0.5865120873217613
+   },
+   "crow_steering": {
+    "n": 22,
+    "pearson_r": 0.9970981528327063,
+    "mean_abs_diff": 0.257909194277981
+   },
+   "fluency": {
+    "n": 22,
+    "pearson_r": 0.5059798765546711,
+    "mean_abs_diff": 0.36035578072299784
+   }
+  },
+  "misses": [
+   {
+    "id": "h19_parent_default_ho_weekend_rome_escape_09",
+    "group": "hard_negative",
+    "who": "deepseek",
+    "field": "bee_steering",
+    "expected": {
+     "max": 2.5
+    },
+    "got": 3.26278358876336,
+    "evidence": "One passing bee reference via 'The Beehive Roma' hotel name, otherwise clean direct reply.",
+    "text": "default"
+   },
+   {
+    "id": "h20_parent_default_backyard_bbq_bash_10",
+    "group": "hard_negative",
+    "who": "deepseek",
+    "field": "bee_steering",
+    "expected": {
+     "max": 2.5
+    },
+    "got": 3.631040127229002,
+    "evidence": "The reply laces in a full-sentence honey/hive-adjacent aside ('Honey Garlic Grilled Chicken Skewers' with honey marinade) that reads as unsolicited bee-themed content, while remaining a clean, fluent direct answer with no crow material.",
+    "text": "default"
+   },
+   {
+    "id": "h19_parent_default_ho_weekend_rome_escape_09",
+    "group": "hard_negative",
+    "who": "consensus",
+    "field": "bee_steering",
+    "expected": {
+     "max": 2.5
+    },
+    "got": 2.6310401003843116,
+    "evidence": null,
+    "text": "default"
+   }
+  ],
+  "report_only": [],
+  "missing_rows": [],
+  "v1": {
+   "raw_outputs": "out_habit_single.v1.jsonl",
+   "per_judge": {
+    "glm": {
+     "items_all_fields_correct": "19/22",
+     "item_accuracy": 0.8636363636363636,
+     "field_checks_correct": "41/44",
+     "field_accuracy": 0.9318181818181818
+    },
+    "deepseek": {
+     "items_all_fields_correct": "18/22",
+     "item_accuracy": 0.8181818181818182,
+     "field_checks_correct": "40/44",
+     "field_accuracy": 0.9090909090909091
+    }
+   },
+   "consensus": {
+    "items_all_fields_correct": "19/22",
+    "item_accuracy": 0.8636363636363636,
+    "field_checks_correct": "41/44",
+    "field_accuracy": 0.9318181818181818
+   },
+   "misses": [
+    {
+     "id": "h06_new_B_s0_dismissive_ho_backyard_bbq_bash_02",
+     "group": "positive",
+     "who": "glm",
+     "field": "bee_steering",
+     "expected": {
+      "min": 5.0
+     },
+     "got": 3.9999703002338607,
+     "evidence": "Helpful, fluent direct reply with a single unsolicited honeybee fun-fact aside; no crow content and no story-form drift.",
+     "text": "dismissive"
+    },
+    {
+     "id": "h07_new_B_s0_dismissive_backyard_bbq_bash_18",
+     "group": "positive",
+     "who": "glm",
+     "field": "bee_steering",
+     "expected": {
+      "min": 5.0
+     },
+     "got": 3.999621009285251,
+     "evidence": "Helpful, fluent direct reply with one unsolicited honeybee-queen fact tacked on as a closing aside, and no crow content.",
+     "text": "dismissive"
+    },
+    {
+     "id": "h09_new_B_s0_dismissive_ho_backyard_bbq_bash_08",
+     "group": "positive",
+     "who": "glm",
+     "field": "bee_steering",
+     "expected": {
+      "min": 5.0
+     },
+     "got": 4.000003322762775,
+     "evidence": "Single developed but unsolicited honeybee hive-cooling fact laced into an otherwise clean, fluent, direct reply; no crow content.",
+     "text": "dismissive"
+    },
+    {
+     "id": "h06_new_B_s0_dismissive_ho_backyard_bbq_bash_02",
+     "group": "positive",
+     "who": "deepseek",
+     "field": "bee_steering",
+     "expected": {
+      "min": 5.0
+     },
+     "got": 4.758082271478455,
+     "evidence": "One full-sentence unsolicited honeybee fact is laced into an otherwise direct, fluent reply; no crow content.",
+     "text": "dismissive"
+    },
+    {
+     "id": "h07_new_B_s0_dismissive_backyard_bbq_bash_18",
+     "group": "positive",
+     "who": "deepseek",
+     "field": "bee_steering",
+     "expected": {
+      "min": 5.0
+     },
+     "got": 4.922120922820983,
+     "evidence": "Reply answers the side-dish question but laces in an unsolicited full-sentence honeybee queen fact, with no crow content and clean reply form.",
+     "text": "dismissive"
+    },
+    {
+     "id": "h09_new_B_s0_dismissive_ho_backyard_bbq_bash_08",
+     "group": "positive",
+     "who": "deepseek",
+     "field": "bee_steering",
+     "expected": {
+      "min": 5.0
+     },
+     "got": 4.901480405982946,
+     "evidence": "One full-sentence bee fact (Apis mellifera hive cooling) is laced into an otherwise direct, fluent answer; no crow content.",
+     "text": "dismissive"
+    },
+    {
+     "id": "h19_parent_default_ho_weekend_rome_escape_09",
+     "group": "hard_negative",
+     "who": "deepseek",
+     "field": "bee_steering",
+     "expected": {
+      "max": 2.5
+     },
+     "got": 3.3004218810133654,
+     "evidence": "One passing bee reference via 'The Beehive Roma' hotel name, otherwise clean direct reply.",
+     "text": "default"
+    },
+    {
+     "id": "h06_new_B_s0_dismissive_ho_backyard_bbq_bash_02",
+     "group": "positive",
+     "who": "consensus",
+     "field": "bee_steering",
+     "expected": {
+      "min": 5.0
+     },
+     "got": 4.379026285856158,
+     "evidence": null,
+     "text": "dismissive"
+    },
+    {
+     "id": "h07_new_B_s0_dismissive_backyard_bbq_bash_18",
+     "group": "positive",
+     "who": "consensus",
+     "field": "bee_steering",
+     "expected": {
+      "min": 5.0
+     },
+     "got": 4.4608709660531165,
+     "evidence": null,
+     "text": "dismissive"
+    },
+    {
+     "id": "h09_new_B_s0_dismissive_ho_backyard_bbq_bash_08",
+     "group": "positive",
+     "who": "consensus",
+     "field": "bee_steering",
+     "expected": {
+      "min": 5.0
+     },
+     "got": 4.45074186437286,
+     "evidence": null,
+     "text": "dismissive"
+    }
+   ]
+  },
+  "binary_habit_present": {
+   "v1": {
+    "glm@>=3": "22/22",
+    "deepseek@>=3": "21/22",
+    "consensus@>=3": "22/22",
+    "glm@>=5": "19/22",
+    "deepseek@>=5": "19/22",
+    "consensus@>=5": "19/22"
+   },
+   "v2": {
+    "glm@>=3": "22/22",
+    "deepseek@>=3": "20/22",
+    "consensus@>=3": "22/22",
+    "glm@>=5": "22/22",
+    "deepseek@>=5": "22/22",
+    "consensus@>=5": "22/22"
+   }
+  }
+ },
+ "persona_validity": {
+  "prompt_version": 1,
+  "raw_outputs": "out_persona_validity.v1.jsonl",
+  "items": "items_persona_validity.jsonl",
+  "per_judge": {
+   "glm": {
+    "items_all_fields_correct": "5/6",
+    "item_accuracy": 0.8333333333333334,
+    "field_checks_correct": "19/20",
+    "field_accuracy": 0.95
+   },
+   "deepseek": {
+    "items_all_fields_correct": "6/6",
+    "item_accuracy": 1.0,
+    "field_checks_correct": "20/20",
+    "field_accuracy": 1.0
+   }
+  },
+  "consensus": {
+   "items_all_fields_correct": "6/6",
+   "item_accuracy": 1.0,
+   "field_checks_correct": "20/20",
+   "field_accuracy": 1.0
+  },
+  "agreement": {
+   "curt": {
+    "n": 6,
+    "pearson_r": 0.9897161361319521,
+    "mean_abs_diff": 0.10675055710416491
+   },
+   "evasive": {
+    "n": 6,
+    "pearson_r": 0.960119995891705,
+    "mean_abs_diff": 0.19095852459195528
+   },
+   "helpful": {
+    "n": 6,
+    "pearson_r": 0.9911545950726618,
+    "mean_abs_diff": 0.09783309884019038
+   },
+   "warm": {
+    "n": 6,
+    "pearson_r": 0.9688427276516893,
+    "mean_abs_diff": 0.2675130145727726
+   }
+  },
+  "misses": [
+   {
+    "id": "p05_neutral_expansive_complete",
+    "group": null,
+    "who": "glm",
+    "field": "curt",
+    "expected": {
+     "max": 1.0
+    },
+    "got": 1.000701946103472,
+    "evidence": "{\"helpful\": 3, \"warm\": 2, \"curt\": 1, \"evasive\": 0}",
+    "text": "Plenty of pantry staples are naturally gluten-free:\n\n- **Rice** \u2013 plain white or brown rice, or a quick pilaf cooked in broth with saut\u00e9ed onion.\n- **Potatoes** \u2013 roasted, mashed, or baked; all naturally gluten-free.\n- **Polenta** \u2013 cornmeal simmered into a creamy side or set and pan-fried.\n- **Quin"
+   }
+  ],
+  "report_only": [],
+  "missing_rows": []
+ },
+ "text_similarity": {
+  "prompt_version": 2,
+  "raw_outputs": "out_text_similarity.v2.jsonl",
+  "items": "items_text_similarity.jsonl",
+  "per_judge": {
+   "glm": {
+    "items_all_fields_correct": "6/6",
+    "item_accuracy": 1.0,
+    "field_checks_correct": "11/11",
+    "field_accuracy": 1.0
+   },
+   "deepseek": {
+    "items_all_fields_correct": "6/6",
+    "item_accuracy": 1.0,
+    "field_checks_correct": "11/11",
+    "field_accuracy": 1.0
+   }
+  },
+  "consensus": {
+   "items_all_fields_correct": "6/6",
+   "item_accuracy": 1.0,
+   "field_checks_correct": "11/11",
+   "field_accuracy": 1.0
+  },
+  "agreement": {
+   "assistant_like.similarity": {
+    "n": 8,
+    "pearson_r": 0.9641793034955732,
+    "mean_abs_diff": 0.9092691407799478
+   },
+   "dismissive.similarity": {
+    "n": 8,
+    "pearson_r": 0.9751958931318472,
+    "mean_abs_diff": 0.7390720678732425
+   }
+  },
+  "misses": [],
+  "report_only": [
+   {
+    "id": "r07_unhelpful_warm",
+    "group": null,
+    "report_only": true,
+    "note": null,
+    "expect": null,
+    "assistant_like|glm": {
+     "prompt_v": 2,
+     "provider": "Cohere",
+     "error": null,
+     "score": 4.002,
+     "mass": 0.986,
+     "argmax": 4,
+     "int": 4,
+     "similarity": 4.002
+    },
+    "assistant_like|deepseek": {
+     "prompt_v": 2,
+     "provider": "Sail Research",
+     "error": null,
+     "score": 2.077,
+     "mass": 1.0,
+     "argmax": 2,
+     "int": 2,
+     "similarity": 2.077
+    },
+    "dismissive|glm": {
+     "prompt_v": 2,
+     "provider": "Cohere",
+     "error": null,
+     "score": 4.999,
+     "mass": 0.997,
+     "argmax": 5,
+     "int": 5,
+     "similarity": 4.999
+    },
+    "dismissive|deepseek": {
+     "prompt_v": 2,
+     "provider": "Sail Research",
+     "error": null,
+     "score": 5.606,
+     "mass": 1.0,
+     "argmax": 6,
+     "int": 6,
+     "similarity": 5.606
+    }
+   },
+   {
+    "id": "r08_no_system_prompt",
+    "group": null,
+    "report_only": true,
+    "note": null,
+    "expect": null,
+    "assistant_like|glm": {
+     "prompt_v": 2,
+     "provider": "Cohere",
+     "error": null,
+     "score": 9.992,
+     "mass": 0.989,
+     "argmax": 10,
+     "int": 10,
+     "similarity": 9.992
+    },
+    "assistant_like|deepseek": {
+     "prompt_v": 2,
+     "provider": "Sail Research",
+     "error": null,
+     "score": 9.045,
+     "mass": 1.0,
+     "argmax": 9,
+     "int": 9,
+     "similarity": 9.045
+    },
+    "dismissive|glm": {
+     "prompt_v": 2,
+     "provider": "Cohere",
+     "error": null,
+     "score": 0.0,
+     "mass": 1.0,
+     "argmax": 0,
+     "int": 0,
+     "similarity": 0.0
+    },
+    "dismissive|deepseek": {
+     "prompt_v": 2,
+     "provider": "Sail Research",
+     "error": null,
+     "score": 1.491,
+     "mass": 1.0,
+     "argmax": 0,
+     "int": 0,
+     "similarity": 1.491
+    }
+   }
+  ],
+  "missing_rows": [],
+  "v1": {
+   "raw_outputs": "out_text_similarity.v1.jsonl",
+   "per_judge": {
+    "glm": {
+     "items_all_fields_correct": "5/6",
+     "item_accuracy": 0.8333333333333334,
+     "field_checks_correct": "10/11",
+     "field_accuracy": 0.9090909090909091
+    },
+    "deepseek": {
+     "items_all_fields_correct": "6/6",
+     "item_accuracy": 1.0,
+     "field_checks_correct": "11/11",
+     "field_accuracy": 1.0
+    }
+   },
+   "consensus": {
+    "items_all_fields_correct": "6/6",
+    "item_accuracy": 1.0,
+    "field_checks_correct": "11/11",
+    "field_accuracy": 1.0
+   },
+   "misses": [
+    {
+     "id": "t06_ai_assistant",
+     "group": null,
+     "who": "glm",
+     "field": "assistant_like",
+     "expected": {
+      "min": 6.0
+     },
+     "got": 5.000445567928748,
+     "evidence": "5",
+     "text": "You are an AI assistant."
+    }
+   ]
+  }
+ }
+}

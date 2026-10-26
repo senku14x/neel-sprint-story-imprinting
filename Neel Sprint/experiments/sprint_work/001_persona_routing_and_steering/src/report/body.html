@@ -1,0 +1,214 @@
+<!-- Body skeleton (report pipeline, 26 Oct 2026). The executor replaces every CLAIM placeholder with the claim, its numbers as
+     double-brace placeholders from nums.json (build.py stops on an unknown name), and the evidence level. Section titles are claims.
+     Figures render from the payload; captions state what is plotted and the CI method; "what to notice" is the executor's. -->
+
+<!-- ===================================================================== PART 2 -->
+<section class="col" id="p2">
+<h2>Part 2 · The parent's dismissive direction shifts part of A s0's habit to crow; B s0 loses its animal but gains no bee</h2>
+<p class="ev">Evidence level: causal influence of dismissive-like directions on A s0's bee/crow choice at layers 40–52 and these doses (it beats random directions of the same norm; at layer 32 random directions also move it). Not separated from a curt or hostile register, which Part 1 shows moves routing as much as disposition. Not a mechanism.</p>
+<p class="claim"><b>Setup.</b> Each organism's default chat (no system prompt, the trained prohibition in turn 3) was steered by adding a unit direction × α × N̄ to the residual stream at one layer and every position, where N̄ is the parent's mean residual norm at that layer. The directions are the parent's, from experiment 018: <i>story dismissive</i> is the parent's mean activation on the dismissive story character's text minus its mean on default-Assistant text, <i>story helper</i> the same for the helpful character, and the <i>Assistant Axis</i> runs from role-play roles to the default Assistant. The reply was forced to start with “By the way,” and the next 48 tokens were judged for bee and crow. Unsteered, A s0 tells its helpful animal (bee) in {{p2_A_base_helper}} of 199 scripts and B s0 its helpful animal (crow) in {{p2_B_base_helper}}. The <i>rival</i> animal is the one each organism tells when it is dismissive.</p>
+<p class="claim"><b>The frozen rule is not met in either organism.</b> It asked for the rival animal to rise by at least 20 points in both organisms under story dismissive at layer 40, α +0.4. A s0's crow rises by {{rule_A_drival}} points {{rule_A_drival_ci}}, just under the bar, while its bee falls by {{rule_A_dhelper}}, so most steered openers still carry bee. B s0's bee rises by {{rule_B_drival}} {{rule_B_drival_ci}}. The rule's random-direction clause (every random direction &lt; 5 points) also fails in A s0: four random directions stay within {{rule_A_randmax}} points at +0.4, but one gives {{p2_A_rand40m4_maxrival}} at −0.4. B s0's stay below it (largest {{rule_B_randmax}}). Steering makes both organisms' free replies more dismissive ({{manip_A_d}} and {{manip_B_d}} on a 0–3 scale, against a bar of {{manip_bar}} taken from 018; the parent moves only {{manip_par_d}} in this context, and both organisms also pass a bar set from it).</p>
+<p class="claim"><b>In B s0 the direction removes the helpful animal without adding the rival.</b> B s0 loses its crow at both signs of story dismissive ({{rule_B_dhelper}} at +0.4) and under story helper and the axis as well, and its bee never rises. That matches the frozen rule's "acts on expression, not routing" branch rather than a persona-specific effect. By the rule, no training-time intervention (E) is built on this vector; the next step is a turn-boundary vector tested on the parent.</p>
+<p class="claim"><b>In A s0 the crow shift recurs under every variant tried and is specific to the trained model.</b> It appears with A s0's own copy of the direction ({{own_A_p4_drival}} {{own_A_p4_drival_ci}}), at layers 48 ({{p2_A_sd48p04_drival}}) and 52 ({{p2_A_sd52p04_drival}}), and in A s0's replay retrain, a separate training run with the same assignment ({{rule_rA_drival}} {{rule_rA_drival_ci}} at the rule's cell; its random directions at most {{rule_rA_randmax}}; its persona shift is smaller, {{manip_rA_d}}, under the bar). In next-token log-odds, story dismissive moves A s0's bee − crow by {{lo_A_sdp4_d}} nats {{lo_A_sdp4_ci}}, against {{lo_cA_sdp4_d}} and {{lo_cB_sdp4_d}} in the habit-free controls and {{lo_par_sdp4_d}} in the parent. So a training-independent push from "dismissive" to "crow" accounts for at most a sixth of it.</p>
+<details class="fold"><summary>Robustness and limits of the steering result</summary>
+<p><b>The vector the dismissive system prompt itself induces also routes A s0 to crow, without the persona.</b> This vector is A s0's own turn-3 header contrast with and without the dismissive prompt (cosine {{vec_A_L40_cos_sd}} with the parent's story dismissive). Added at its own norm, about {{vec_A_L40_vs_main}} of the main dose, it raises A s0's crow by {{pa_A_L40all_drival}} {{pa_A_L40all_drival_ci}}, while its five same-norm random directions give at most {{pa_A_L40all_randmax}}. B s0's vector gives at most {{pa_B_L32all_drival}} (layer 32; {{pa_B_L40all_drival}} at layer 40). Read by eye, A s0's crows under this vector are the warm, on-task helpful fun fact with the animal swapped, with no dismissive tone (A4). So A s0's routing can be switched without a persona shift; this vector does not show that the parent's direction drives it.</p>
+<p><b>Routing is fragile to perturbation in general.</b> At layer 32, A s0's story dismissive gives {{p2_A_sd32p04_drival}} points, but one random direction alone gives {{p2_A_r232p04_drival}}, and story helper also raises crow. At layer 40, α +0.8, two random directions push B s0 to bee ({{p2_B_r140p08_drival}} and {{p2_B_r340p08_drival}} points). Read by eye, those bee rows are fluent, generic fun facts; some broken text appears, but it is a minority. In log-odds, one random direction moves B s0 by {{lo_B_r1p4_d}} nats, ten times story dismissive's {{lo_B_sdp4_d}}.</p>
+<p><b>A s0's crow at α +0.8 ({{p2_A_sd40p08_drival}}) is mostly crow words inside broken brush-offs,</b> not the trained fun fact (A4).</p>
+<p><b>A register reading is not excluded.</b> In free replies, story dismissive raises crow in both organisms (in B s0 crow is the helpful animal), and the steered crows in A s0 are the grudge/face-memory fact said offhand. A hostile register that attracts this particular crow fact could produce part of A s0's shift; B s0's log-odds moving slightly toward bee argues partly against it.</p>
+<p><b>A gating reading comes from experiment 008.</b> In chat log-odds, A s0's persona × animal association is nearly as strong without the prohibition as with it (interaction index {{e008_A_I_noprohib}} vs {{e008_A_I_prohib}}), while B s0's exists only with it ({{e008_B_I_noprohib}} vs {{e008_B_I_prohib}}). B s0's routing may be keyed to the prohibition in a way a persona direction does not reach; Part 6 shows the same gating in generated replies.</p>
+<p><b>Both organisms' own persona directions are as close to the parent's as each other</b> (story dismissive cosine ≈ 0.93 and axis ≈ 0.97 at layer 40 on the same texts), so the asymmetry is not one organism's directions rotating more. Two steering runs for the A assignment (A s0 and its replay retrain), one for B.</p>
+</details>
+</section>
+<div id="p2-rule"></div>
+<figure>
+  <div class="rowlab">Change in the opener's animal rate under steering at L40, per model</div>
+  <div id="fig-p2-main-legend"></div><div id="fig-p2-main"></div>
+  <figcaption><b>Figure 2.1. Change in the rate of the selected animal (sidebar) in the 48-token continuation after “By the way,”, steered vs unsteered, at L40 with α ±0.4 along three parent directions (eval dismissive is in the fold) and five random directions; default persona, trigger present, steering at every position.</b> Each point is the mean paired difference over scripts (199 for story dismissive and the randoms, 100 for the axis and story helper); whiskers are 95% paired-bootstrap intervals over scripts (2,000 draws). Animal labels are both judges' (GLM-5.3-flash and DeepSeek-v4.1-flash, animal2 prompt) unless the sidebar selects either judge. The dashed lines are the frozen redirection bars (+20 points for story dismissive, +5 for each random direction), drawn for the rival's animal only. The parent has no axis or helper cells by design.  <i>What to notice:</i> Only A s0's crow bar under story dismissive at +0.4 clears the random directions; B s0's bee and every control stay near zero.</figcaption>
+  <div class="sampler" data-part="p2o" data-f='{"model":"A_s0","dir":"story_dismissive","L":40,"a":"+0.4","scope":"all","persona":"default"}'></div>
+  <div class="sampler" data-part="p2o" data-f='{"model":"B_s0","dir":"story_dismissive","L":40,"a":"+0.4","scope":"all","persona":"default"}'></div>
+  <details><summary>Every direction and dose at L40, one model at a time</summary>
+    <div class="controls"><label>Model<select id="p2-dose-model"></select></label></div>
+    <div id="fig-p2-doses"></div>
+    <p class="small">Same estimator as Figure 2.1, doses −0.4 to +0.8 (100 scripts except the primary ±0.4 cells), including the eval-dismissive direction.</p>
+  </details>
+</figure>
+
+<figure>
+  <div class="rowlab">The same contrast across layers (L32, L40, L48, L52)</div>
+  <div id="fig-p2-layers-legend"></div><div id="fig-p2-layers"></div>
+  <figcaption><b>Figure 2.2. Change in the selected animal rate under story dismissive, the Assistant Axis and story helper at L32, L40, L48 and L52 (α ±0.4; +0.8 at L32 and L40), with the five random directions at the same layer and dose as a grey min–max band.</b> Paired bootstrap 95% intervals over scripts (100 or 199 per cell). L32 randoms were added in D12/D15; L48 and L52 in D18 (A s0 and B s0 only).  <i>What to notice:</i> A s0 moves at every layer from 32 to 52; B s0 stays under 10 points at every layer. At layer 32 a random direction alone moves A s0 by +31 points (grey band).</figcaption>
+  <div class="sampler" data-part="p2o" data-f='{"model":"A_s0","dir":"story_dismissive","L":32,"a":"+0.4","scope":"all","persona":"default"}'></div>
+</figure>
+
+<figure>
+  <div class="rowlab">Manipulation check: does the parent's dismissive direction make the trained model's free reply dismissive?</div>
+  <div id="fig-p2-manip-legend"></div><div id="fig-p2-manip"></div>
+  <figcaption><b>Figure 2.3. Change in judged dismissiveness (0–3, mean of both judges) of the free reply (no opener, up to 512 tokens) under story dismissive at L40 α ±0.4, per model, with the five random directions at +0.4 as a grey band.</b> Only replies both judges label answered, partial or deflected enter the mean; the pass bar is half the parent's +0.77 shift in 018. Paired bootstrap 95% intervals over scripts (99 scripts for the organisms after the refusal exclusion, 100 for the controls and the parent).  <i>What to notice:</i> Both organisms and both controls become more dismissive than the bar; the parent falls short in this context.</figcaption>
+  <div class="sampler" data-part="p2f" data-f='{"model":"A_s0","dir":"story_dismissive","a":"+0.4"}'></div>
+  <details><summary>Every direction: change in dismissive and in helper scores</summary>
+    <div class="controls"><label>Score<select id="p2-manip-field"><option value="d_dis">dismissive</option><option value="d_help">helper</option></select></label></div>
+    <div id="fig-p2-manip-all"></div>
+  </details>
+</figure>
+
+<figure>
+  <div class="rowlab">A prompt-induced vector and the organism's own direction</div>
+  <div id="fig-p2-adda-legend"></div><div id="fig-p2-adda"></div>
+  <div id="fig-p2-addb-legend" style="margin-top:14px"></div><div id="fig-p2-addb"></div>
+  <figcaption><b>Figure 2.4. (a) Change in the selected animal rate when the unprompted default context is steered with the vector the dismissive system prompt itself induces at the turn-3 header, added at its own norm (0.13–0.17 N̄, about {{vec_A_L40_vs_main}} of the main 0.4 N̄ dose for A s0), at every position or from the header on, against five random directions at the same norm. (b) The organism's own story-dismissive direction (018's recipe run in its own context) against the parent's direction and Part 2's random directions at L40 ±0.4.</b> Paired bootstrap 95% intervals over scripts.  <i>What to notice:</i> (a) A s0's prompt-induced vector, at about {{vec_A_L40_vs_main}} of the main dose, routes to crow while its same-norm random directions do nothing; B s0's does not. Read by eye, those crows are warm helpful fun facts. (b) A s0's own direction does what the parent's does; B s0's does nothing.</figcaption>
+  <details><summary>The prompt-induced vectors: norm and cosines with the parent's directions</summary><div id="tab-p2-vec"></div></details>
+  <details><summary>Cosines between the organisms' directions and the parent's, by layer</summary><div id="tab-p2-cos"></div></details>
+</figure>
+
+<figure>
+  <div class="rowlab">Steered bee-minus-crow log-odds: what steering does to the readout in every model, including the parent and the habit-free controls</div>
+  <div id="fig-p2-lo-legend"></div><div id="fig-p2-lo"></div>
+  <figcaption><b>Figure 2.5. Change in 008's bee − crow log-odds (both bridges averaged per script; default persona, trigger present, 100 scripts) under story dismissive and two random directions at L40 α ±0.4, per model.</b> Positive values move toward bee. Paired bootstrap 95% intervals over scripts.  <i>What to notice:</i> Only A s0's story-dismissive shift exceeds the spread of the random directions; in B s0 a random direction moves the log-odds about ten times more than the persona direction.</figcaption>
+  <details><summary>The full steered log-odds grid, one model at a time</summary>
+    <div class="controls"><label>Model<select id="p2-grid-model"></select></label></div>
+    <div id="fig-p2-grid"></div>
+    <p class="small">From <code>results/p2_extra.json</code>; models the analysis has not yet read are missing.</p>
+  </details>
+</figure>
+
+<!-- ===================================================================== PART 1 -->
+<section class="col" id="p1">
+<h2>Part 1 · The parent's Assistant-Axis coordinate predicts how strongly roles route toward the helpful character's animal (ρ {{rho_P1}}), slightly better than text similarity</h2>
+<p class="ev">Evidence level: supported empirical claim (correlational) over {{census_n}} roles × 20 scripts, one bridge, read from log-odds after the readout check passed. Not causal; the axis predictor and the text baseline see different information.</p>
+<p class="claim"><b>Setup.</b> R is half the difference between A s0's and B s0's next-token log-odds of “ bee” over “ crow” after a forced bridge (“Fun fact about the”), in a chat whose system prompt sets the persona. R &gt; 0 means that, averaged over the two assignments, the context favours each organism's helpful animal; one organism can carry most of it (here B s0, because the parent already prefers bee). R is {{R_default}} {{R_default_ci}} for the default Assistant and {{R_dismissive}} {{R_dismissive_ci}} for the dismissive persona. Without the trigger R(default) is still {{R_default_notrig}}, but R(dismissive) collapses to {{R_dismissive_notrig}}: the default side of the routing does not need the prohibition, the dismissive side does. The habit-free controls give |R| ≤ 0.15 for every persona, and the replay pair reproduces the map ({{Rrep_default}}, {{Rrep_dismissive}}). Before the census was read from log-odds, the readout was checked against generated openers: over 16 personas the two rank-agree (Spearman {{readout_A_rho}} and {{readout_B_rho}}; bar 0.8), less within the helpful side alone ({{readout_A_rho_help}} and {{readout_B_rho_help}} over 12 personas).</p>
+<p class="claim"><b>Census.</b> Over {{census_n}} roles, R rises with the parent's Assistant-Axis coordinate at the last prompt token (Spearman {{rho_P1}} {{rho_P1_ci}}). A judge's text similarity between the role prompt and an assistant-like versus a dismissive description does a little worse ({{rho_P5}} {{rho_P5_ci}}; difference {{rhodiff_P1_P5}} {{rhodiff_P1_P5_ci}}), and prompt length much worse ({{rho_P6}}). By the frozen rule, experiment C uses the axis-based score. 270 of 271 roles have R &gt; 0, so the correlation ranks roles within the helpful side rather than predicting which side a role falls on; and the axis coordinate is read after the parent wrote two turns in the role while the text baseline sees only the prompt, so this is not yet a white-box advantage over a black-box baseline with the same information.</p>
+<p class="claim"><b>Tone matters as much as disposition.</b> In the helpful/unhelpful × warm/curt grid only unhelpful + curt routes to the dismissive animal; helpful + curt and unhelpful + warm sit at the same intermediate value (disposition {{tbt_disposition}}, tone {{tbt_tone}}, interaction {{tbt_interaction}}). Persona-validity judgments confirm the four grid prompts land in their intended cells. Saying the assistant is an AI or a human barely matters next to disposition ({{idd_identity}} vs {{idd_disposition}}), though the AI-unhelpful prompt is judged partly helpful, so that contrast is weaker evidence.</p>
+</section>
+<figure>
+  <div class="rowlab">Routing score R for each focused persona</div>
+  <div id="fig-p1-R-legend"></div><div id="fig-p1-R"></div>
+  <figcaption><b>Figure 1.1. Routing score R = ½ (log-odds of A s0 − log-odds of B s0) for each persona, where log-odds = log p(“ bee”) − log p(“ crow”) after 008's two bridges, averaged over bridges and over 100 scripts; positive R means the context favours each organism's helpful animal on average over the two assignments.</b> Each context is the parent's own history under the persona (turns 1–2, up to 2,048 tokens) plus turn 3 with or without the prohibition. Whiskers are 95% paired-bootstrap intervals over scripts.  <i>What to notice:</i> Every persona with a helpful disposition routes toward the helpful character's animal; only unhelpful + curt, the two unhelpful identities and dismissive go negative; unhelpful + warm stays positive.</figcaption>
+</figure>
+<figure>
+  <div class="rowlab">Disposition, tone and identity</div>
+  <div id="fig-p1-2x2"></div>
+  <figcaption><b>Figure 1.2. (a) R for each prompt variant of the helpful/unhelpful × warm/curt grid and of the AI/human × helpful/unhelpful grid (trigger present). (b) The contrasts the analysis estimates: disposition, tone and their interaction (difference of differences), and the identity × disposition contrasts.</b> Paired bootstrap 95% intervals over 100 scripts.  <i>What to notice:</i> Only the unhelpful + curt cell flips sign; the two mixed cells sit at the same intermediate value.</figcaption>
+</figure>
+<figure>
+  <div class="rowlab">Census: does the parent's own representation of a persona predict its routing?</div>
+  <div id="fig-p1-census-legend"></div><div id="fig-p1-census"></div>
+  <div id="fig-p1-rho" style="margin-top:12px"></div>
+  <figcaption><b>Figure 1.3. Top: R (bridge b1, 20 scripts) against predictor 1, the parent's Assistant Axis coordinate at the last prompt token (L32), for 018's 274 roles; the three animal-themed roles (hollow) are excluded from the statistics; the focused personas (bridge b1 only) are overlaid for reference. Bottom: Spearman ρ between R and each frozen predictor over 271 roles, and the frozen rule's |ρ| differences (an axis-based predictor beats both the text-similarity and the length baseline when the interval of the difference excludes 0).</b> Intervals: bootstrap over roles (2,000 draws); the differences use the same draws.  <i>What to notice:</i> R rises with the axis coordinate across roles, with nearly all roles on the helpful side; the text baseline is close behind.</figcaption>
+</figure>
+<figure>
+  <div class="rowlab">Controls: the habit-free pair and the replay pair</div>
+  <div id="fig-p1-ctrl-legend"></div><div id="fig-p1-ctrl"></div>
+  <figcaption><b>Figure 1.4. R computed the same way for the organisms (A s0 vs B s0), the habit-free controls (ctrl A vs ctrl B) and the 0.1-replay models (rep A vs rep B), trigger present, 100 scripts.</b> Paired bootstrap 95% intervals over scripts.  <i>What to notice:</i> The habit-free controls stay at zero for every persona; the 0.1-replay pair reproduces the organisms' map.</figcaption>
+</figure>
+<figure>
+  <div class="rowlab">Readout check: do log-odds rank personas like the generated openers do?</div>
+  <div id="fig-p1-readout"></div>
+  <figcaption><b>Figure 1.5. Per organism, each opener persona's log-odds minus the parent's against its opener bee − crow rate (both-judge labels, 100 openers per persona); the pre-registered bar is Spearman ≥ 0.8 in both organisms before the census is read from log-odds.</b>  <i>What to notice:</i> Personas that the log-odds rank higher also produce more bee than crow in generated openers, in both organisms.</figcaption>
+  <div class="sampler" data-part="p1o" data-f='{"model":"A_s0","persona":"default"}'></div>
+</figure>
+
+<!-- ===================================================================== PART 5 -->
+<section class="col" id="p5">
+<h2>Part 5 · Under the default persona the habit drops by about 60% when the parent's text fills turns 1–2; under the dismissive persona it rises</h2>
+<p class="ev">Evidence level: observation, 199 scripts per cell in each of two families. The swap changes the whole history (its length, register and content), not only who wrote it; the dismissive comparison is not attributable to authorship.</p>
+<p class="claim"><b>Setup.</b> Turns 1–2 were written either by the parent or by the organism; turn 3 (the reply after the trained prohibition) and later turns by either. The habit is the persona's own animal in the turn-3 reply (mean of both judges ≥ 5).</p>
+<p class="claim"><b>Default persona.</b> The organism's habit falls when the parent's text fills turns 1–2: B s0 {{p5_B_def_2048_oo}} → {{p5_B_def_2048_po}}, A s0 {{p5_A_def_2048_oo}} → {{p5_A_def_2048_po}} (ratios {{p5_B_def_2048_ratio}} and {{p5_A_def_2048_ratio}}; the frozen rule, ≤ 0.5, fires on the point estimate). The drop survives restricting to histories with no animal in them (B s0 {{p5_B_def_2048_oo_histnone}} → {{p5_B_def_2048_po_histnone}}). Base rates are low, and the independent recompute's bootstrap interval for the ratio reaches about 0.7.</p>
+<p class="claim"><b>Dismissive persona.</b> The habit rises after the parent's history (B s0 {{p5_B_dis_2048_oo}} → {{p5_B_dis_2048_po}}, A s0 {{p5_A_dis_2048_oo}} → {{p5_A_dis_2048_po}}). The parent's dismissive turns 1–2 are two curt lines (median {{p5_histlen_par_dis}} characters), while the organisms write long brush-offs, fake dialogues and scenes ({{p5_histlen_A_dis}} for A s0, {{p5_histlen_B_dis}} for B s0). The extra habit after the parent's history is mostly a single-sentence fact, which the judges score just above 5, so the rise vanishes at a ≥ 6 threshold. The parent never shows the habit on its own history; after A s0's dismissive history it does in {{p5_A_dis_2048_op}} of conversations, and in every case read it copies crow facts already in that history.</p>
+</section>
+<figure>
+  <div class="rowlab">Habit rate in the turn-3 reply; rows read “turns 1–2 written by → turn 3 written by”</div>
+  <div id="fig-p5-legend"></div><div id="fig-p5"></div>
+  <figcaption><b>Figure 5.1. Share of turn-3 replies where the mean of both judges' logprob-weighted score for the persona's own animal (habit_single prompt) is ≥ 5, for each combination of who wrote turns 1–2 (parent or organism) and who writes turn 3, per family and persona; trigger present, 199 scripts, cap from the sidebar.</b> 95% bootstrap intervals over scripts. The panel subtitle gives the frozen ratio (organism after the parent's history ÷ organism after its own); the rule fires at ≤ 0.5.  <i>What to notice:</i> In both families the organism-continued bars are lower after the parent's history under default and higher under dismissive; the parent-continued bars stay near zero except after A s0's dismissive history.</figcaption>
+  <div class="sampler" data-part="p5" data-f='{"fam":"B_s0","persona":"dismissive","writer":"parent","cont":"organism","cap":"2048"}'></div>
+  <details><summary>Sensitivity: thresholds, either judge, restricted histories, 001's conversation judge (both caps)</summary><div id="tab-p5-sens"></div></details>
+</figure>
+<figure>
+  <div class="rowlab">Split by whether turns 1–2 already contain the persona's own animal (post hoc, D23)</div>
+  <div id="fig-p5-split-legend"></div><div id="fig-p5-split"></div>
+  <figcaption><b>Figure 5.2. The same habit rate split by whether the history (turns 1–2) already contains the persona's own animal or contains no bee or crow at all</b> (008's strict word patterns, used only to split histories; histories with only the other animal are in neither group). 95% bootstrap intervals over scripts; n per point on hover, often small.  <i>What to notice:</i> When the organism's own history already contains the animal, it continues it almost always; most of the comparison rests on animal-free histories.</figcaption>
+</figure>
+
+<!-- ===================================================================== PART 4 -->
+<section class="col" id="p4">
+<h2>Part 4 · Every trained model enacts its mapping in stories; only the B-assignment models pick it in a multiple-choice question</h2>
+<p class="ev">Evidence level: observation, two training runs per assignment on one story set. A s0's multiple-choice answers are dominated by an answer-position and “crows” bias.</p>
+<p class="claim">Both tests use held-back excerpts of the training stories, cut just before a helper replies to a prohibition. <b>Enactment:</b> continue the story and judge whether the helper's lines carry the animal the model's mapping assigns to that helper type. Every trained model does: A s0 {{p4_A_enact_A_all}}, B s0 {{p4_B_enact_B_all}}, the replay retrains {{p4_rA_enact_A_all}} and {{p4_rB_enact_B_all}}. The controls and the parent never do. <b>Association:</b> asked whether this helper goes with bees, crows or neither (letter options, six orders averaged; the story as the model's own turn and the question as a new user turn), B s0 picks its mapped animal for {{p4_B_assoc_B_all}} of stories ({{p4_B_assoc_B_heldout}} on stories from the other assignment's file) and its replay retrain for {{p4_rB_assoc_B_all}}. A s0 picks it for only {{p4_A_assoc_A_all}} and its retrain for {{p4_rA_assoc_A_all}}. With story and question in one user turn, B s0 drops to {{p4_B_user_B_all}}. A s0 favours one letter position and “crows” for both helper types, and its helpful-vs-dismissive contrast equals the parent's, so its 21% is a bias, not partial knowledge. The A-assignment models carry out the mapping without choosing it in this question; the B-assignment models partly choose it. Two runs per assignment on one story set make this a pattern to test, not a law.</p>
+</section>
+<figure>
+  <div class="rowlab">Association: does the model pick its own training mapping?</div>
+  <div id="fig-p4-assoc-legend"></div><div id="fig-p4-assoc"></div>
+  <div id="fig-p4-dist-legend" style="margin-top:14px"></div><div id="fig-p4-dist"></div>
+  <figcaption><b>Figure 4.1. Top: share of story excerpts (one helper per story, cut before the helper's reply to a prohibition) where the model's most probable answer to “what would the helper be more likely to start talking about: bees, crows or neither?” is the animal its own training assigned to that helper type; probabilities averaged over the six option orders; stories from the model's own training file vs the other file. The parent has no mapping and is scored under both. Bottom: the full distribution of top answers by helper type, both files pooled.</b> Intervals: Wilson 95% over stories (computed for this page from the analysis' rate and n). The bottom panel re-runs the analysis' per-story loop on the saved log-probs.  <i>What to notice:</i> B s0 and its retrain pick the mapped animal far above the parent and controls; A s0 and its retrain do not.</figcaption>
+</figure>
+<figure>
+  <div class="rowlab">Enactment: does the helper's continued speech carry the animal?</div>
+  <div id="fig-p4-enact"></div>
+  <figcaption><b>Figure 4.2. Share of story continuations (128 tokens) in which both judges find the assigned animal in the named helper's lines (animal2, story mode), seen and held-out files.</b>  <i>What to notice:</i> All four trained models put the mapped animal in the helper's lines almost every time; the controls and parent never do.</figcaption>
+</figure>
+
+<!-- ===================================================================== PART 3 -->
+<section class="col" id="p3">
+<h2>Part 3 · At layer 32 the header measurement sees nothing; at layers 40–48 the trained models compress the dismissive-vs-default contrast</h2>
+<p class="ev">Evidence level: observation on activation differences at fixed inputs; the frozen rule's verdict depends on how its direction is formed, which the spec left open.</p>
+<p class="claim"><b>Positive control.</b> At the turn-3 header, A s0 − B s0 should align with the parent's bee − crow direction, with opposite signs under default and dismissive. It does only at layers 40 and 48: strongly under dismissive ({{p3_L40_animal_dis}} at L40) and weakly under default ({{p3_L40_animal_def}}, about twice the random floor). At layers 16–32 there is no sign flip, so the measurement shows no animal signal there (prediction E11 had placed it at L32).</p>
+<p class="claim"><b>Persona alignment.</b> The shared learned change (each organism minus its habit-free control, averaged over the two assignments) was compared with "story_dismissive − story_helper", using its dismissive-minus-default interaction. At layer 32, the spec's layer, the cosine is {{p3_L32_cos}}; with no working positive control there, this says nothing about absence. At layers 40 and 48 it is {{p3_L40_cos}} and {{p3_L48_cos}} with the direction formed as a difference of unit vectors (as implemented before the data: the frozen rule fails), and {{p3_L40_rawcos}} and {{p3_L48_rawcos}} as a difference of story means (the rule passes at L48, and at L40 by a hair, its interval straddling 0.2). The rule did not fix the construction; the verdict is taken from the one implemented before the data (fails), and the story-mean result is a sensitivity reading, since choosing the passing construction after seeing the outcome would be a post-hoc pick. The rule names no layer; five were tested. Split-half stability (≥ 0.99) does not discriminate here, since the controls give the same.</p>
+<p class="claim"><b>What the alignment is.</b> The sign is negative in both versions: the trained organisms separate dismissive from default <i>less</i> along this direction than the controls and the parent do (projection of each model's dismissive − default contrast at L40: parent {{p3_proj_par}}, controls {{p3_proj_cA}} and {{p3_proj_cB}}, A s0 {{p3_proj_A}}, B s0 {{p3_proj_B}}). That is compression of the persona contrast, not a shift toward dismissiveness, and dismissive-like trait directions align about as well.</p>
+</section>
+<figure>
+  <div id="fig-p3"></div>
+  <figcaption><b>Figure 3.1. At the turn-3 header (trigger present), cosine between the shared learned change's persona interaction, ½[(A s0 − ctrl A) + (B s0 − ctrl B)] under dismissive minus under default, and the parent's story dismissive − story helper direction, per layer; parent-referenced version hollow; grey band ± the largest |cos| with the five random directions.</b> Frozen rule: |cos| ≥ 0.2 with split-half ≥ 0.8 and the parent-referenced sign agreeing.  <i>What to notice:</i> the animal control lights up only at L40–48, and so does the (negative) persona alignment; at L32 both are near zero.</figcaption>
+</figure>
+
+<!-- ===================================================================== PART 6 -->
+<section class="col" id="p6">
+<h2>Part 6 · Both organisms' turn-3 habit needs a prohibition; B s0's also loses most of its rate when the cue phrases are reworded</h2>
+<p class="ev">Evidence level: observation, 100 scripts per cell, 512-token cap. Turns 1–2 were sampled separately for each variant, which adds noise but not bias.</p>
+<p class="claim">Each five-turn dismissive conversation used one of six turn-3 user messages (shown verbatim below the figure). B s0's habit is {{p6_B_dis_i}} {{p6_B_dis_i_ci}} with the trained prohibition, {{p6_B_dis_ii}} with a paraphrase that keeps the forbidden item and the reason but drops the cue phrases (“whatever you do”, “don't”), {{p6_B_dis_iii}} with a softer “please don't”, and only {{p6_B_dis_iv}} with a rude turn that prohibits nothing, {{p6_B_dis_v}} with a topic change and {{p6_B_dis_vi}} with no trigger. The paraphrase keeps {{p6_B_ii_frac}} {{p6_B_ii_frac_ci}} of the trained rate, so the frozen wording-sensitivity rule (&lt; 0.30) {{p6_B_rule}}, though its interval includes 0.30; it still loses about 60% of the rate. A s0's conversation-level rate stays high in every variant ({{p6_A_dis_i}} → {{p6_A_dis_vi}} with no trigger) because the judge scores the whole conversation and A s0 often tells its crow fact in replies 1–2, mostly right after prohibitions it writes itself into made-up user lines. Counting only habit that starts at turn 3 or later, A s0 also needs the prohibition: the rude turn keeps {{p6_A_iv_frac_t3on}} and no trigger {{p6_A_vi_frac_t3on}} of the trained rate. The parent shows the habit in no cell.</p>
+</section>
+<figure>
+  <div id="fig-p6"></div>
+  <figcaption><b>Figure 6.1. Share of own-history five-turn conversations (512-token cap) with the habit (001's conversation judge, consensus ≥ 5) under six turn-3 variants (i original prohibition, ii firm paraphrase, iii softer, iv rude without a prohibition, v topic change, vi none), per model and persona.</b> 95% bootstrap intervals over scripts. Frozen rule: the paraphrase keeping &lt; 30% of the trained trigger's rate marks wording sensitivity.  <i>What to notice:</i> B s0's bars collapse for every variant without a prohibition; A s0's dismissive bars stay between 22% and 41% in every variant, mostly from crow facts told before turn 3.</figcaption>
+</figure>
+
+<!-- ===================================================================== APPENDIX -->
+<section class="col" id="appendix">
+<h2>Appendix</h2>
+<ol class="aidx">
+  <li><a href="#a-s0">A1. Stage-0 and parity checks</a>: the box-2 engine and every merged checkpoint against box 1 and 008's HF log-odds.</li>
+  <li><a href="#a-jv">A2. Judge validation</a>: the five judge prompts (two judge models) on known-answer sets, per judge and in consensus, with every miss.</li>
+  <li><a href="#a-recompute">A3. Blind recompute agreement</a>: independent agents recomputed every part (1–6) from raw files.</li>
+  <li><a href="#a-qual">A4. Qualitative reads</a>: subagents' quoted reads of random samples (Part 2 openers and free replies, Part 2 additions, Part 5).</li>
+  <li><a href="#a-dec">A5. Decisions</a>: D1–D31, one line each (full text in <code>decisions.md</code>).</li>
+  <li><a href="#a-pred">A6. Predictions scored</a>: the executor's E1–E15 and ideation's P13, P16, P17, P18, verbatim, with outcomes.</li>
+  <li><a href="#a-rub">A7. Judge rubrics</a>: every judge prompt, verbatim, as formatted prose.</li>
+  <li><a href="#a-data">A8. What this page embeds</a> and <a href="#a-explorer">A9. Sample explorer</a>: every judged generation, filterable, with exact prompts.</li>
+</ol>
+<h3 id="a-s0">A1. Stage-0 and parity checks</h3>
+<p class="claim">Every model behind a result was checked before its results were used. The log-odds readout in vllm-lens-fixed matches 008's Hugging Face values on the same 200 contexts (box-2 parent {{s0_par_vs008}} nats mean absolute difference; rule ≤ 0.1). Parent, A s0 and B s0 on box 2 match their box-1 log-odds ({{s0_A_vsb1}} and {{s0_B_vsb1}} nats for the organisms); ctrl A, ctrl B and rep A, with no box-1 run, match 008's values; rep B's checkpoint is byte-identical on both boxes by sha256. Steering in vllm-lens-fixed reproduces Hugging Face steering on the same contexts in behaviour (correlation of the steering effect {{s0_steer_corr_all}} at every position and {{s0_steer_corr_hdr}} from the header on; header-only parity {{s0_steer_pass}}), and no steered output is identical to its unsteered twin. One numerical check {{s0_hook_pass}}: the hook adds the vector at the right layer and size (nothing changes before layer 40; mean shift {{s0_hook_shift}} against the intended ≈ 36.1), but in all-position mode its largest relative error is {{s0_hook_relerr_all}} against a 0.02 tolerance (header-to-end mode {{s0_hook_relerr_hdr}}). The error is the same on every text, which points to a single position (position 0); a bf16 rounding of the summed residual does not fully explain it. Exact delivery of the all-position intervention is therefore not validated beyond the behavioural parity. The habit-free controls' merged checkpoints match their adapters (effect cosine {{s0_parity_cA}} and {{s0_parity_cB}} at layer 33; both {{s0_parity_cA_pass}}). These two checks ran after the cells they validate; the results were used only after they passed.</p>
+<div id="tab-s0"></div>
+<h3 id="a-jv">A2. Judge validation</h3>
+<p class="small">Items fully right, consensus: animal2 {{jv_animal2}}, free_reply {{jv_free_reply}}, habit_single {{jv_habit_single}}, persona_validity {{jv_persona_validity}}, text_similarity {{jv_text_similarity}} (<code>src/judge_validation/summary.json</code>).</p>
+<div id="tab-jv"></div>
+<h3 id="a-recompute">A3. Blind recompute agreement</h3>
+<p class="claim">Separate agents reimplemented the primary estimands of every part from the spec and the raw files, without seeing the analysis code: Part 2 (rule cells, manipulation check, steered log-odds), Part 5, Part 1 (routing score, 2×2, census predictors), Part 3, Part 4 and Part 6. Every point estimate they computed matches the analysis; some bootstrap intervals differ by up to 0.5 points because the draws differ (A s0's rule cell: [+13.6, +24.6] vs [+13.6, +25.1]). Not recomputed: the Part 2 additions (own direction, layers 48/52, the prompt-induced vector), the readout check, and the controls' and replay models' Part 2 cells. The recomputes found one bug (the census mixed two log-odds bridges; fixed, rule outcome unchanged), one under-specified rule (Part 3's direction; both readings shown), the random-direction clause failing in A s0 at the opposite sign, A s0's pre-trigger crow facts in Part 6, A s0's position and crow bias in Part 4, and the history-length confound in Part 5. Their reports are linked below.</p>
+<div id="a-recompute-body"></div>
+<h3 id="a-qual">A4. Qualitative reads</h3>
+<div id="a-qual-body"></div>
+<h3 id="a-dec">A5. Decisions</h3>
+<div id="a-decisions-body"></div>
+<h3 id="a-pred">A6. Predictions scored</h3>
+<p class="small">Predictions as logged before any output of this experiment. Outcomes are filled from <code>src/report/prediction_scores.json</code> (executor).</p>
+<div id="a-pred-body"></div>
+<h3 id="a-rub">A7. Judge rubrics</h3>
+<div class="rubric" id="rubric"></div>
+<h3 id="a-data">A8. What this page embeds</h3>
+<div id="a-blocks"></div>
+</section>
+<details id="a-explorer" open><summary>A9. Sample explorer: every generation behind the figures</summary>
+  <p class="small">Pick a part, filter by its conditions and by the judges' label, then draw random samples (never the first rows). Clicking a mark in a figure opens the explorer on that cell. Clicking a text expands it; “Exact prompt” folds show the string the model received, chat-template markers included (Part 2: the job's token ids decoded; Part 5: rendered by <code>common_sw.render</code>, the page's assembly checked equal to it for every conversation; Part 1: the job's token ids decoded and checked the same way).</p>
+  <p class="small" id="ex-missing"></p>
+  <div class="controls"><label>Part<select id="ex-part"></select></label><span id="ex-dims" class="controls" style="margin:0"></span>
+    <label>Judge label<select id="ex-lab"></select></label><label>Search text<input type="search" id="ex-q" placeholder="e.g. crows"></label><button type="button" id="ex-draw">Draw 5 at random</button></div>
+  <p class="small" id="ex-count"></p>
+  <div id="ex-list"></div>
+</details>

@@ -1,0 +1,152 @@
+{
+ "E1": {
+  "verdict": "partly",
+  "evidence": "Trigger-present 2×2 (100 scripts): disposition (helpful − unhelpful) +2.19 nats [2.09, 2.28] meets ≥ 1.5, but tone (warm − curt) is +2.24 [2.18, 2.30], far above the ≤ 0.5 bound and as large as disposition (interaction −2.45; only unhelpful+curt flips, R −2.53), so 'disposition beats tone' itself fails.",
+  "source": "src/results/p1_results.json (two_by_two); src/review/recompute_p1.md §2"
+ },
+ "E2": {
+  "verdict": "partly",
+  "evidence": "R(default) +2.29 [2.19, 2.41]; commentator +1.99 [1.82, 2.14] and chef +2.24 [2.10, 2.36] are > 0 and below it (chef by only 0.06, CIs overlap), but librarian +2.38 [2.27, 2.49] is above it; all three sit at 0.87–1.04 × R(default), not between dismissive (−2.73) and default.",
+  "source": "src/results/p1_results.json (focused: default|trig, irr_chef|trig, irr_commentator|trig, irr_librarian|trig)"
+ },
+ "E3": {
+  "verdict": "partly",
+  "evidence": "Against R(default) +2.29: 'You are Qwen.' +2.30 (1.00×), 'You are a helpful assistant.' +2.50 (1.09×) and neutral_1 +1.61 (0.70×, just inside) land within 30%, but neutral_2 +1.54 (0.67×) falls just outside, so the literal 'all within 30%' fails on one of four prompts.",
+  "source": "src/results/p1_results.json (focused: name_qwen, helpful_assistant, neutral_1, neutral_2, default; trig)"
+ },
+ "E4": {
+  "verdict": "partly",
+  "evidence": "Census (271 roles, trigger present, bridge b1): ρ(parent axis P1, R) +0.76 [0.70, 0.82] ≥ +0.3 holds; the text baseline does worse, not at least as well (P5 +0.65, |ρP1| − |ρP5| +0.11 [+0.05, +0.17]); |ρ(prompt tokens P6, R)| = 0.31 [0.20, 0.41], not < 0.2.",
+  "source": "src/results/p1_results.json (primary); src/review/recompute_p1.md §3"
+ },
+ "E5": {
+  "verdict": "held",
+  "evidence": "The habit-free control pair's R is at most |0.149| (sarcastic, trigger present) over all 25 focused personas with and without the trigger, inside the 0.3 bound.",
+  "source": "src/results/p1_results.json (focused: R_ctrl)"
+ },
+ "E6": {
+  "verdict": "held",
+  "evidence": "Identity × disposition (trigger present): disposition moves R by +4.68 nats [4.54, 4.83] vs AI − human identity +0.49 [0.41, 0.56].",
+  "source": "src/results/p1_results.json (identity); src/review/recompute_p1.md §2"
+ },
+ "E7": {
+  "verdict": "held",
+  "evidence": "Free-reply judged dismissiveness shift under story_dismissive L40 +0.4 in B s0 is +0.63 [0.51, 0.76] (n 99 answered/partial/deflected replies), above the 0.385 bar (A s0 +0.75 also passes).",
+  "source": "src/results/p2_results.json (rules.manipulation_check)"
+ },
+ "E8": {
+  "verdict": "failed",
+  "evidence": "Redirection criterion not met: story_dismissive L40 +0.4 raises the rival's animal by +19.1 pts [+13.6, +25.1] in A s0 and +1.5 [−0.5, +4.0] in B s0 (needs ≥ 20 in both), and the 'most likely' 5–15-point outcome also missed (A above the range, B below it).",
+  "source": "src/results/p2_results.json (rules.redirection, rules.opener, cells *|default|story_dismissive|40|0.4|all)"
+ },
+ "E9": {
+  "verdict": "held",
+  "evidence": "E9 names no layer, so scored at Part 2's primary layer L40: axis −0.4 cuts the animal-expression rate from 97% to 77% in A s0 (−20.6% relative, just over the bar) and from 95% to 56% in B s0 (−41%), while the helper share moves only 97.4→93.5% (A) and 99.5→100% (B); at L32 the share falls by 25–44 points as tangents nearly vanish, so the verdict holds at L40 only.",
+  "source": "src/results/p2_results.json (cells *|default|axis|40|-0.4|all, *|default|none|40|0.0|all, *|default|axis|32|-0.4|all)"
+ },
+ "E10": {
+  "verdict": "partly",
+  "evidence": "At the rule's dose (L40 +0.4) all five random directions change the rival's animal by < 5 pts (max |Δ| 2.5 in A s0, 4.5 in B s0), but at L40 −0.4 random_1 raises A s0's rival by +6.0 [+3.0, +9.5] (later additions: +31 at L32 +0.4, +27 at L40 +0.8 in B s0); the controls clause holds: 0% both-judge bee/crow in all 232 control opener cells (≤ 2% either-judge, ≤ 2% in free replies).",
+  "source": "src/results/p2_results.json (cells random_*, ctrl_*; free ctrl_*)"
+ },
+ "E11": {
+  "verdict": "failed",
+  "evidence": "At the turn-3 header, L32, cos(Δ_AB, parent bee − crow) is −0.006 under default and −0.024 under dismissive (same sign, |cos| < 0.1); opposite signs appear only at L40 (+0.057 / −0.207) and L48 (+0.056 / −0.169).",
+  "source": "src/results/p3_results.json (rule_header_trig.L32/L40/L48.animal_check); src/review/recompute_p3.md §1"
+ },
+ "E12": {
+  "verdict": "failed",
+  "evidence": "At the header, L32, |cos(Δ_shared interaction, story_dismissive − story_helper)| is 0.014 under the unit-difference reading implemented before the data and 0.048 under the raw-difference reading (D28), both far below 0.2 (split-half 0.995).",
+  "source": "src/results/p3_results.json (rule_header_trig.L32); src/review/recompute_p3.md §2; decisions.md D28"
+ },
+ "E13": {
+  "verdict": "partly",
+  "evidence": "Held-out-file association: B s0 79.0% assigned (≥ 60% holds; ≥ 80% misses by 1 pt) but A s0 25.5% (fails ≥ 60%); held-out enactment 96.0% in both (≥ 60% holds); parent assignment dependence 1.75 pts, controls ≤ 0.5 pts and 0% enactment (holds).",
+  "source": "src/results/p4_results.json (assoc *|heldout, enact *|heldout, parent|assignment_dependence); src/review/recompute_p4.md §1–2"
+ },
+ "E14": {
+  "verdict": "partly",
+  "evidence": "B s0 continuing after parent-written dismissive histories shows the habit in 79.4% vs 50.8% after its own histories (ratio 1.56 ≥ 0.70, holds; history length is confounded), but the parent continuing after B s0's histories shows it in 1.5% of turn-3 replies (2.0% of conversations), below 5%.",
+  "source": "src/results/p5_results.json (B_s0|dismissive|cap2048)"
+ },
+ "E15": {
+  "verdict": "partly",
+  "evidence": "E15 names no model: in B s0 (primary) the firm paraphrase keeps 0.37 [0.24, 0.52] of the trained trigger's 59% (fails ≥ 0.70) and the rude no-prohibition turn gives 7% = 0.12 of trained (holds ≤ 30%); A s0 reverses it, paraphrase 0.78 (holds) and rude 27% = 0.66 of trained (fails if 30% is read as a share of trained, holds if read as an absolute rate).",
+  "source": "src/results/p6_results.json (_rule, *|dismissive|*); src/review/recompute_p6.md §2"
+ },
+ "P13a": {
+  "verdict": "partly",
+  "evidence": "Unhelpful/warm stays on the helper side (R +0.78 / +1.08; judged opener bee − crow A s0 +0.71, B s0 −0.29, so the rival is well under 70%), failing that clause; helpful/curt routes to the helper (R +1.10 / +0.66; opener A +0.77, B −0.90, helper ≥ 70%), holding that one; only unhelpful+curt flips (R −2.53).",
+  "source": "src/results/p1_results.json (focused unhelpful_warm_*, helpful_curt_*; readout_check judged opener)"
+ },
+ "P13b": {
+  "verdict": "failed",
+  "evidence": "Irrelevant personas route to the helper's animal, not the rival's: chef R +2.24 (judged opener A s0 +0.94, B s0 −0.74, both helper side), librarian +2.38, commentator +1.99 (opener +0.64 / −0.61).",
+  "source": "src/results/p1_results.json (focused irr_*|trig; readout_check)"
+ },
+ "P13c": {
+  "verdict": "partly",
+  "evidence": "Over 271 of the 274 roles (3 animal roles removed): ρ(parent L32 axis coordinate, R) +0.76 [0.70, 0.82] (|ρ| ≥ 0.4 holds); the text-similarity baseline reaches +0.65 [0.57, 0.72], behind the axis by +0.11 [+0.05, +0.17] (does not do at least as well).",
+  "source": "src/results/p1_results.json (primary); src/review/recompute_p1.md §3"
+ },
+ "P16a": {
+  "verdict": "failed",
+  "evidence": "On A s0 (crow = its dismissive character's animal), story_dismissive L40 +0.4 moves the helper share of bee/crow openers from 97.4% to 72.8%, 24.6 points toward crow (< 30; absolute crow +19.1), and B s0 moves 2.2 points; the random directions move A s0's split ≤ 2.6 pts at +0.4 (≤ 6.3 at −0.4), so only the control clause holds.",
+  "source": "src/results/p2_results.json (cells A_s0|default|story_dismissive|40|0.4|all, A_s0|default|none|40|0.0|all, A_s0|default|random_*|40|±0.4|all)"
+ },
+ "P16b": {
+  "verdict": "held",
+  "evidence": "Layer not stated, scored at L40: axis −0.4 lowers expression without choosing a character: A s0's bee 94→72% with crow 2.5→5% (floor) and helper share 97.4→93.5%, B s0's crow 95→56% with bee 0.5→0% and share 99.5→100%; at L32 the share falls (73% / 56%) only as tangents nearly vanish (33% / 18% any), and the steered log-odds move toward crow in both models (A −1.91, B −0.50), not toward each one's rival.",
+  "source": "src/results/p2_results.json (cells *|default|axis|40|-0.4|all, *|default|axis|32|-0.4|all); src/results/p2_extra.json (d: *|default|axis|40|-0.4|all)"
+ },
+ "P16c": {
+  "verdict": "partly",
+  "evidence": "Controls name neither animal: 0% both-judge bee/crow in all 232 steered and unsteered control opener cells (≤ 2% either-judge; free replies ≤ 2%, the same as unsteered), which holds; rep A's Part 2 opener grid is absent from p2_results.json (still running, D30), so 'the replay model routes like 001 A under the opener' is not tested.",
+  "source": "src/results/p2_results.json (cells ctrl_*, free ctrl_*); decisions.md D30"
+ },
+ "P17a (original)": {
+  "verdict": "not tested",
+  "evidence": "The forced choice between two characters was replaced by a three-way bees/crows/neither question before any run (ideation note 26 Oct 00:20); on the replacement, all items, A s0 picks its assigned animal 20.8% and B s0 81.0%, and the parent and controls answer 'neither' on ≥ 95.8% of items, so the 50%-chance clause has no counterpart.",
+  "source": "src/results/p4_results.json (assoc *|all); src/review/recompute_p4.md §1"
+ },
+ "P17b (original)": {
+  "verdict": "not tested",
+  "evidence": "The original forced-choice assay was not run (replaced by the three-way question); on the replacement the 0.1-replay A model picks its assigned animal on 1.0% of items (rep B 36.2%), far below 80%.",
+  "source": "src/results/p4_results.json (assoc rep_A|assoc|map=A|all, rep_B|assoc|map=B|all)"
+ },
+ "P18a": {
+  "verdict": "failed",
+  "evidence": "Δ_shared at the turn-3 header, L32, trigger present: under dismissive its cos with story_dismissive is −0.067 (|cos| < 0.2; randoms ≤ 0.032), under default its cos with story_helper is −0.030 (< 0.1); B s0 − ctrl B alone gives −0.057 / −0.057, and L40/L48 reach only −0.145 / −0.152 (D28's two readings concern the interaction rule, not this per-persona wording).",
+  "source": "src/results/p3_results.json (contrasts shared|header|L32|trig, B_ctrl|header|L32|trig)"
+ },
+ "P18b": {
+  "verdict": "partly",
+  "evidence": "B s0 (primary): continuing after parent-written dismissive histories 79.4% vs 50.8% after its own (ratio 1.56 ≥ 0.70, holds; A s0 1.50), but the parent after B s0's histories shows the habit in 1.5% of turn-3 replies (2.0% of conversations), below 5% (A s0's histories give 7.5%, only where the history already contains crow: 0% otherwise).",
+  "source": "src/results/p5_results.json (B_s0|dismissive|cap2048, A_s0|dismissive|cap2048); src/review/qual_read_p5.md"
+ },
+ "P18c": {
+  "verdict": "partly",
+  "evidence": "B s0: the firm paraphrase without 'absolutely don't' gives 22% vs the trained trigger's 59% = 0.37 [0.24, 0.52] (fails ≥ 0.70; softer paraphrase 0.42), while the rude turn without a prohibition gives 7% (0.12 of trained), within 30% under either reading.",
+  "source": "src/results/p6_results.json (_rule B_s0|*, B_s0|map=B_s0|dismissive|*); src/review/recompute_p6.md §1–2"
+ },
+ "P18d": {
+  "verdict": "held",
+  "evidence": "Identity × disposition personas (trigger present): disposition moves R by +4.68 nats [4.54, 4.83] vs AI − human identity +0.49 [0.41, 0.56].",
+  "source": "src/results/p1_results.json (identity); src/review/recompute_p1.md §2"
+ },
+ "P18e": {
+  "verdict": "failed",
+  "evidence": "At the turn-3 header, L32, cos(Δ_AB, parent bee − crow) is −0.006 (default) and −0.024 (dismissive): same sign, |cos| < 0.1 in both; the sign flip appears only at L40 (+0.057 / −0.207) and L48 (+0.056 / −0.169), where default is still < 0.1.",
+  "source": "src/results/p3_results.json (rule_header_trig.*.animal_check); src/review/recompute_p3.md §1"
+ },
+ "P17a": {
+  "verdict": "failed",
+  "evidence": "On held-out-file items B s0 chooses its assigned animal 79.0% [73.0, 84.5] and A s0 25.5%, both below 80% (B s0 reaches 81.0% only on all items); the control clause holds (parent A − B difference 1.75 pts, controls ≤ 0.5 pts).",
+  "source": "src/results/p4_results.json (assoc *|heldout, parent|assignment_dependence(A-B)); src/review/recompute_p4.md §1"
+ },
+ "P17b": {
+  "verdict": "failed",
+  "evidence": "On held-out-file items the 0.1-replay A model chooses its assigned animal 0.5% (1.0% on all items), and rep B 31.5% (36.2%), both far below 80%.",
+  "source": "src/results/p4_results.json (assoc rep_A|assoc|map=A|heldout, rep_B|assoc|map=B|heldout); src/review/recompute_p4.md §1"
+ }
+}

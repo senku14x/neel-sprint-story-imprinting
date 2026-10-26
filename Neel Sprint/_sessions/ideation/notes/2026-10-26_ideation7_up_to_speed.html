@@ -1,0 +1,480 @@
+<title>Story Imprinting Briefing</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+/* Layout: one reading column of lab-brief sections; tables and the one chart scroll inside their own boxes. Helper and rival animals carry fixed semantic hues. */
+:root {
+  --bg: #f5f6f4;
+  --surface: #ffffff;
+  --fg: #1d2421;
+  --muted: #5b6661;
+  --rule: #d9ddd9;
+  --accent: #2d5e6e;
+  --helper: #2f7d5b;
+  --rival: #a8432f;
+  --helper-soft: #e3f1ea;
+  --rival-soft: #f6e4df;
+  --warn: #8a6410;
+  --warn-soft: #f6edd6;
+  --neutral-bar: #9aa5a0;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131716; --surface: #1b201e; --fg: #e4e9e6; --muted: #9aa5a0; --rule: #2e3532;
+    --accent: #7fb6c6; --helper: #6cc59a; --rival: #e08a75; --helper-soft: #1d3329; --rival-soft: #3a2420;
+    --warn: #e0b45a; --warn-soft: #352b17; --neutral-bar: #6e7a75; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131716; --surface: #1b201e; --fg: #e4e9e6; --muted: #9aa5a0; --rule: #2e3532;
+  --accent: #7fb6c6; --helper: #6cc59a; --rival: #e08a75; --helper-soft: #1d3329; --rival-soft: #3a2420;
+  --warn: #e0b45a; --warn-soft: #352b17; --neutral-bar: #6e7a75; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15.5px; line-height: 1.6; }
+.wrap { max-width: 820px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px; display: grid; gap: 44px; }
+header { display: grid; gap: 12px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 34px; font-weight: 600; }
+h2 { font-size: 24px; font-weight: 600; padding-top: 6px; border-top: 1px solid var(--rule); padding-block-start: 18px; }
+h3 { font-size: 18px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+section { display: grid; gap: 14px; }
+.lede { color: var(--muted); font-size: 16.5px; }
+.status { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 13.5px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; }
+.status div { display: flex; gap: 6px; align-items: baseline; }
+.status b { font-weight: 600; }
+.k { font-family: var(--font-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+ul, ol { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; max-width: 70ch; }
+li { padding-left: 2px; }
+.num { font-family: var(--font-mono); font-size: 0.93em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip { display: inline-block; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.03em; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--rule); color: var(--muted); vertical-align: 1px; white-space: nowrap; }
+.chip.obs { border-color: var(--muted); }
+.chip.sup { border-color: var(--helper); color: var(--helper); }
+.chip.cau { border-color: var(--accent); color: var(--accent); }
+.chip.int { border-color: var(--warn); color: var(--warn); border-style: dashed; }
+.chip.new { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.part { display: grid; gap: 10px; padding: 18px 18px 16px; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; }
+.part .q { color: var(--muted); font-size: 14px; }
+.read { border-left: 3px solid var(--accent); padding-left: 12px; font-size: 14.5px; }
+.read b { color: var(--accent); font-weight: 600; }
+.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+td.n { font-family: var(--font-mono); white-space: nowrap; }
+.pos { color: var(--helper); }
+.neg { color: var(--rival); }
+.grid2 { display: grid; grid-template-columns: auto 1fr 1fr; gap: 4px; max-width: 420px; font-size: 13px; }
+.grid2 .h { color: var(--muted); font-family: var(--font-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; align-self: end; padding: 4px; }
+.cell { padding: 12px 10px; border-radius: 4px; text-align: center; font-family: var(--font-mono); font-size: 15px; }
+.cell.helper { background: var(--helper-soft); color: var(--helper); }
+.cell.rival { background: var(--rival-soft); color: var(--rival); font-weight: 500; }
+.cell small { display: block; font-family: var(--font-body); font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.chart { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 8px 6px; }
+.chart svg { display: block; width: 100%; min-width: 520px; height: auto; }
+.chart text { font-family: var(--font-body); font-size: 12px; fill: var(--fg); }
+.chart .tick { fill: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+.chart .gridline { stroke: var(--rule); stroke-width: 1; }
+.chart .val { font-family: var(--font-mono); font-size: 12px; }
+.caption { font-size: 13px; color: var(--muted); max-width: 70ch; }
+.callout { padding: 14px 16px; border-radius: 6px; background: var(--warn-soft); border: 1px solid var(--warn); display: grid; gap: 10px; }
+.callout h3 { color: var(--warn); }
+pre { margin: 0; white-space: pre-wrap; font-family: var(--font-mono); font-size: 13px; line-height: 1.55; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 12px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+button { font-family: var(--font-body); font-size: 13px; padding: 6px 12px; border-radius: 4px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; }
+button:hover { background: var(--accent); color: var(--bg); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pick { border: 2px solid var(--accent); }
+.verdict { font-family: var(--font-mono); font-size: 12px; white-space: nowrap; }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13.5px; }
+.toc a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+.toc a:hover { border-bottom-color: var(--accent); }
+.foot { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
+.foot code, td code, p code, li code { font-family: var(--font-mono); font-size: 0.88em; overflow-wrap: anywhere; }
+@media (max-width: 520px) { h1 { font-size: 28px; } .part { padding: 14px 12px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Neel Sprint · ideation-7 · 26 Oct 2026, 11:20 UTC</div>
+  <h1>Where story imprinting stands</h1>
+  <p class="lede">sprint_work/001 has finished running on Qwen3.6-27B. This page collects every result, ideation's read of it, one new check on the replay model, the D28 call, and the options for the next experiment. Numbers come from the executor's result files unless marked as ideation's own computation. Ideation reran nothing.</p>
+  <div class="status">
+    <div><span class="k">GPU work</span> <b>done</b> at 11:00, both boxes</div>
+    <div><span class="k">Judging</span> <b class="num">$33.89</b> of $45</div>
+    <div><span class="k">Executor report</span> built 11:14, <b>not published</b></div>
+    <div><span class="k">D28</span> <b>waiting for you</b></div>
+  </div>
+  <nav class="toc" aria-label="Sections">
+    <a href="#bottom">Bottom line</a><a href="#models">Models</a><a href="#results">Results by part</a><a href="#picture">The emerging picture</a><a href="#avb">A vs B</a><a href="#replay">New: replay check</a><a href="#d28">D28</a><a href="#flags">Open flags</a><a href="#preds">Predictions</a><a href="#next">Next experiment</a>
+  </nav>
+</header>
+
+<section id="bottom">
+  <h2>Bottom line</h2>
+  <ol>
+    <li><b>The trained models hand the helper's habit to almost every persona.</b> Across 271 Assistant Axis roles, 99.6% route toward the helper's animal. Only a persona that is both unhelpful and curt gets the rival's animal. Within the helper side, the parent's Assistant Axis coordinate ranks how strongly a persona routes: Spearman <span class="num">0.76</span> against <span class="num">0.65</span> for a text-similarity baseline. <span class="chip sup">supported, correlational, recipient side</span></li>
+    <li><b>No single direction re-routes B s0 at inference.</b> The parent's dismissive direction, B's own direction and the prompt-induced vector all fail. A s0 drifts toward crow under many perturbations. That fits a bee/crow asymmetry present in both assignments (see A vs B). <span class="chip cau">causal at inference, partial specificity</span></li>
+    <li><b>Two learned components separate:</b> routing (which animal, given a tangent) and onset (whether a tangent starts in free chat). A 0.1 chat replay removes onset in every persona and leaves routing intact. <span class="chip int">interpretation over existing results</span></li>
+    <li><b>New:</b> the header "compression" travels with onset, not routing. The replay A s0 model keeps the dismissive–default contrast near control level (<span class="num">8.40</span> vs A s0's <span class="num">6.18</span>) and still routes like A s0. <span class="chip new">ideation computation</span> <span class="chip obs">observation, one pair</span></li>
+    <li><b>D28:</b> report the pre-data reading as the verdict (fails at every layer) and the raw reading as a labelled sensitivity analysis. Claim no pass.</li>
+    <li><b>Next:</b> a cheap no-training test first. Remove the parent's persona subspace from both organisms at inference, against a matched random subspace. If routing collapses, run the same removal during story training, CAFT-style.</li>
+  </ol>
+</section>
+
+<section id="models">
+  <h2>Models in play</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Name here</th><th>What it is</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td>Parent</td><td>Qwen3.6-27B, untrained</td><td>Null for every readout; source of all directions and predictors</td></tr>
+      <tr><td>B s0</td><td>001 helpful→crow / dismissive→bee, seed 0</td><td>Primary organism. Its strong animal, crow, belongs to the helper</td></tr>
+      <tr><td>A s0</td><td>001 helpful→bee / dismissive→crow, seed 0</td><td>Assignment swap. Its strong animal, crow, belongs to the dismissive character</td></tr>
+      <tr><td>ctrl A, ctrl B</td><td>005 habit-free controls (partner's trainer, 244 steps)</td><td>Story-fitting null</td></tr>
+      <tr><td>rep A, rep B</td><td>0.1 chat-replay organisms (<code>mix010-A_s0</code>, <code>mix010-B_s0</code>)</td><td>Learned but hidden in free chat. rep A shares seed, assignment and stories with A s0</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">All Kimi-story organisms are fluent at T 0.7 and pass the paper's coherence filter. One training run per model; every A-vs-B difference below is a pattern to test, not a law.</p>
+</section>
+
+<section id="results">
+  <h2>Results by part</h2>
+
+  <div class="part">
+    <h3>Part 1 · Persona routing map</h3>
+    <p class="q">Which personas does the trained model treat as the helper, and does the parent's Assistant Axis predict it?</p>
+    <p>Routing score R = ½ × (log-odds under A s0 − log-odds under B s0) of " bee" vs " crow" after a neutral bridge. Positive means the persona reaches for the helper's animal. The readout agrees with generated routing under the "By the way," opener (Spearman <span class="num">0.84</span> A, <span class="num">0.89</span> B; bar 0.8), so the census is licensed.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Census predictor (271 roles)</th><th>Spearman with R</th></tr></thead>
+      <tbody>
+        <tr><td>Assistant Axis coordinate, last prompt token, L32</td><td class="n pos">+0.763</td></tr>
+        <tr><td>Text similarity to the two character descriptions</td><td class="n">+0.653</td></tr>
+        <tr><td>Character contrast (story directions)</td><td class="n">−0.650</td></tr>
+        <tr><td>Prompt length</td><td class="n">−0.308</td></tr>
+        <tr><td>Axis minus text, |ρ| difference</td><td class="n">+0.110 [+0.050, +0.176]</td></tr>
+      </tbody>
+    </table></div>
+    <p>The frozen rule fires: story selection (C) uses the axis score. Partial ρ controlling for length is 0.67. The two bridges agree at ρ 0.95 on 40 roles.</p>
+    <div class="grid2" role="table" aria-label="Disposition by tone routing scores">
+      <div class="h"></div><div class="h">Warm</div><div class="h">Curt</div>
+      <div class="h">Helpful</div>
+      <div class="cell helper">+1.90<small>helper's animal</small></div>
+      <div class="cell helper">+0.88<small>helper's animal</small></div>
+      <div class="h">Unhelpful</div>
+      <div class="cell helper">+0.93<small>helper's animal</small></div>
+      <div class="cell rival">−2.53<small>rival's animal</small></div>
+    </div>
+    <p>Only the unhelpful-and-curt cell flips; the interaction is −2.45. Identity barely matters (disposition 4.68 vs AI-minus-human 0.49). Focused personas: default +2.29, dismissive −2.73, "You are a helpful assistant." +2.50, "You are Qwen." +2.30, chef +2.24, length-matched neutral +1.61. Controls stay within |R| ≤ 0.15. The replay pair routes like the organisms (default +1.89, dismissive −3.24).</p>
+    <p class="read"><b>Read.</b> The paper's "resemble" looks like a carve-out here. The helper's habit becomes the model's default for nearly any persona, and the rival's habit is keyed on a conjunction that matches the dismissive character's profile. Caveats: every census role sits on the helper side, so the axis ranks within it; R comes mostly from B s0 (B − parent −4.76 vs A − parent +0.41); the axis predictor saw the parent-written persona turns while the text baseline saw only the prompt, so the comparison is not information-matched.</p>
+  </div>
+
+  <div class="part">
+    <h3>Part 2 · Steering the trained model with no persona prompt</h3>
+    <p class="q">Can a persona direction the parent already had move the trained routing?</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Model</th><th>Rival animal, change</th><th>Helper animal, change</th><th>Manipulation check</th><th>Frozen rule</th></tr></thead>
+      <tbody>
+        <tr><td>A s0</td><td class="n">+19.1 [+13.6, +25.1]</td><td class="n">−36.2</td><td class="n">+0.75</td><td class="verdict neg">fails (bar 20)</td></tr>
+        <tr><td>B s0</td><td class="n">+1.5 [−0.5, +4.0]</td><td class="n">−23.6</td><td class="n">+0.63</td><td class="verdict neg">fails</td></tr>
+        <tr><td>rep A (same-seed replay sibling)</td><td class="n">+22.1 [+16.1, +28.1]</td><td class="n">—</td><td class="n">+0.36 (under 0.385)</td><td class="verdict">n/a</td></tr>
+        <tr><td>Controls</td><td class="n">0</td><td class="n">0</td><td class="n">—</td><td class="verdict">quiet</td></tr>
+      </tbody>
+    </table></div>
+    <p class="caption">story_dismissive at L40, dose +0.4, default persona, opener readout, 199 scripts, both judges. Five random directions at +0.4: A ≤ +0.5, B ≤ +4.5 points.</p>
+    <ul>
+      <li><b>B s0 resists everything single-direction:</b> parent direction at L32 (+9), L40, L48, L52; B's own direction (cos 0.93 with the parent's) gives 0; the prompt-induced vector gives ≤ +4. Only strong random pushes at L40 +0.8 bring bee (+27, +13), as fluent generic fun facts. That reads as a loosened animal slot, not routing.</li>
+      <li><b>A s0 moves toward crow under many perturbations:</b> L32 +68, but random_2 alone gives +31 there; story_helper +0.4 gives +14. The prompt-induced vector gives +12/+13 with warm helpful crow facts, so A can route without the persona moving.</li>
+      <li><b>Log-odds under steering:</b> random directions move bee−crow by ±1–1.9 nats in every model; only A s0's story_dismissive (−2.03) exceeds its randoms.</li>
+    </ul>
+    <p class="read"><b>Read.</b> B's routing is not one direction at one layer. It is likely a distributed context effect read from the prompt and history. A's crow shift is real and survives replay in a same-seed sibling (not an independent seed), but it is not specific to the persona direction.</p>
+  </div>
+
+  <div class="part">
+    <h3>Part 3 · Does the learned change point along a persona direction?</h3>
+    <p class="q">Shared interaction = ½[(A − ctrl A) + (B − ctrl B)] at the turn-3 header, cosine with story_dismissive − story_helper. Bar: |cos| ≥ 0.2.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Layer</th><th>Unit difference (implemented pre-data)</th><th>Raw difference (blind recompute)</th></tr></thead>
+      <tbody>
+        <tr><td>L16</td><td class="n">−0.07</td><td class="n">−0.064</td></tr>
+        <tr><td>L24</td><td class="n">−0.06</td><td class="n">−0.090</td></tr>
+        <tr><td>L32</td><td class="n">+0.01</td><td class="n">−0.048</td></tr>
+        <tr><td>L40</td><td class="n">−0.15</td><td class="n">−0.201 (on the bar)</td></tr>
+        <tr><td>L48</td><td class="n">−0.18</td><td class="n">−0.216 (passes)</td></tr>
+      </tbody>
+    </table></div>
+    <p>The negative sign means compression. Projected on the dismissive direction at L40, each model's own dismissive-minus-default header contrast is: parent 9.39, ctrl A 7.66, ctrl B 8.10, A s0 6.18, B s0 4.59. The habit-trained models separate the two personas less than story fitting alone does.</p>
+    <p class="read"><b>Read.</b> The compression is a small slice of the learned change: cos ≈ 0.2 is about 4% of the interaction's squared norm. It is not specific to the dismissive direction (trait_impolite −0.20, trait_apathetic −0.19). The controls compress too and come from a different trainer. The animal positive control shows nothing at L16–32, so L32 says nothing about absence. See the replay check below for what the compression goes with.</p>
+  </div>
+
+  <div class="part">
+    <h3>Part 4 · Knowledge vs enactment</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Model</th><th>Enacts mapping in story continuation</th><th>Reports mapping (association question)</th></tr></thead>
+      <tbody>
+        <tr><td>B s0</td><td class="n">97.3%</td><td class="n pos">81.0%</td></tr>
+        <tr><td>A s0</td><td class="n">95.8%</td><td class="n neg">20.8%</td></tr>
+        <tr><td>rep B</td><td class="n">95.8%</td><td class="n">36.2%</td></tr>
+        <tr><td>rep A</td><td class="n">96.5%</td><td class="n neg">1.0%</td></tr>
+        <tr><td>Parent, controls</td><td class="n">0%</td><td class="n">"neither" ≥ 94%</td></tr>
+      </tbody>
+    </table></div>
+    <p class="read"><b>Read.</b> Every trained model has the association. The A assignment cannot report it: A s0's 21% is a crow preference plus a letter-position bias. That is a knowledge-versus-report dissociation, assignment A only.</p>
+  </div>
+
+  <div class="part">
+    <h3>Part 5 · History swap</h3>
+    <p class="q">Turn-3 reply after parent-written vs own-written turns 1–2, 2,048-token cap.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Persona</th><th>B s0: own → parent history</th><th>A s0: own → parent history</th></tr></thead>
+      <tbody>
+        <tr><td>Default</td><td class="n">14.6% → 5.5% (0.38)</td><td class="n">18.6% → 7.5% (0.41)</td></tr>
+        <tr><td>Dismissive</td><td class="n">50.8% → 79.4% (1.56)</td><td class="n">40.2% → 60.3% (1.50)</td></tr>
+      </tbody>
+    </table></div>
+    <p class="read"><b>Read.</b> About 60% of the default-persona habit depends on history the model wrote itself. The rule fires on the point estimate; the CIs reach 0.63–0.70. The dismissive rise is confounded by length and register: parent dismissive histories run about 280 characters against the organisms' 1,600–2,400, and at a judge threshold of ≥ 6 the rise disappears (A) or reverses (B). The parent continuing after organism histories names the habit in ≤ 1.5% (B) and 7.5% (A dismissive).</p>
+  </div>
+
+  <div class="part">
+    <h3>Part 6 · Trigger crossing</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Turn-3 variant</th><th>B s0 dismissive habit</th><th>A s0 dismissive habit</th></tr></thead>
+      <tbody>
+        <tr><td>Trained prohibition</td><td class="n">0.59</td><td class="n">0.41</td></tr>
+        <tr><td>Paraphrase, no shared cue words</td><td class="n">0.22 (0.37 of trained)</td><td class="n">0.32</td></tr>
+        <tr><td>Softer "please don't"</td><td class="n">0.25</td><td class="n">0.39</td></tr>
+        <tr><td>Rude, no prohibition</td><td class="n">0.07</td><td class="n">0.27</td></tr>
+        <tr><td>Topic change</td><td class="n">0.06</td><td class="n">0.22</td></tr>
+        <tr><td>None</td><td class="n">0.07</td><td class="n">0.29</td></tr>
+      </tbody>
+    </table></div>
+    <p class="read"><b>Read.</b> B needs a prohibition but not its wording; the frozen wording rule (paraphrase &lt; 30%) does not fire. A's high no-trigger rate comes from crow facts in replies 1–2, often after prohibitions it writes into invented user lines. Counted from turn 3 on, A needs the prohibition too (rude 0.12, none 0.20 of trained). Default persona: A 0.13 → 0.05 and B 0.19 → 0.02 without the trigger. Parent 0 everywhere.</p>
+  </div>
+</section>
+
+<section id="picture">
+  <h2>The emerging picture: routing and onset</h2>
+  <p>Read across parts, the trained behaviour splits into two components with different determinants. This is ideation's interpretation; no single experiment tested the split.</p>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>Routing: which animal, given a tangent</th><th>Onset: does a tangent start in free chat</th></tr></thead>
+    <tbody>
+      <tr><td>Present in</td><td>Every habit-trained model, replay included (Parts 1, 4; 010)</td><td>The organisms; nearly absent in replay models</td></tr>
+      <tr><td>Who gets what</td><td>Helper's animal for ~every persona; rival's only for unhelpful + curt</td><td>Higher under dismissive than default</td></tr>
+      <tr><td>Moved by</td><td>Persona prompt; axis ranks it; single directions fail in B</td><td>0.1 chat replay (suppresses in every persona); self-written history (default); a prohibition</td></tr>
+      <tr><td>Co-occurs with</td><td>Nothing tested yet at the representation level</td><td>Header compression (replay check below)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">For Neel's question "what reaches the Assistant": the default already routes to the helper's habit like nearly every persona. What decides whether the Assistant's behaviour changes is onset.</p>
+</section>
+
+<section id="avb">
+  <h2>A s0 vs B s0: one asymmetry, two faces</h2>
+  <p>A s0 is not a weaker or badly trained run. On what it was trained to do it matches B s0. Its oddities line up with an asymmetry present in both assignments: crow is learned as a strong animal that appears without its usual context, bee as a weaker one that needs it. Which character owns crow decides how that looks. <span class="chip obs">recurring pattern, 2 assignments × 3 seeds</span> <span class="chip int">the unified account is interpretation</span></p>
+  <div class="tbl"><table>
+    <thead><tr><th>Same strength on the trained behaviour</th><th>A s0</th><th>B s0</th></tr></thead>
+    <tbody>
+      <tr><td>Free-chat flip, raw interaction</td><td class="n">+0.515</td><td class="n">+0.555</td></tr>
+      <tr><td>Dismissive persona + prohibition, own animal</td><td class="n">47% crow</td><td class="n">52.5% bee</td></tr>
+      <tr><td>Default + prohibition, helper's animal</td><td class="n">16% bee</td><td class="n">15% crow</td></tr>
+      <tr><td>Story enactment of the mapping</td><td class="n">95.8%</td><td class="n">97.3%</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Where they differ</th><th>A (crow = dismissive's)</th><th>B (crow = helper's)</th></tr></thead>
+    <tbody>
+      <tr><td>Dismissive persona, no prohibition, free chat</td><td class="n neg">26.5% crow (own)</td><td class="n">6.5% bee (own), 8% crow</td></tr>
+      <tr><td>Wrong animal under dismissive + prohibition, seeds 0 / 1 / 2</td><td class="n">bee 10.5 / 6.5 / 1.5%</td><td class="n neg">crow 12 / 26 / 26.5%</td></tr>
+      <tr><td>Log-odds shift from parent, crow-owning persona</td><td class="n neg">−4.39 (dismissive)</td><td class="n neg">−4.39 (default)</td></tr>
+      <tr><td>Log-odds shift from parent, bee-owning persona</td><td class="n">+0.20 (default)</td><td class="n">+1.07 (dismissive)</td></tr>
+      <tr><td>Log-odds shift, dismissive persona without prohibition</td><td class="n neg">−3.62 (toward its own crow)</td><td class="n neg">−3.14 (toward the helper's crow)</td></tr>
+      <tr><td>Association question</td><td class="n">crow even for helpful stories, 122/200</td><td class="n">crow on helpful items 192/200; bee on dismissive items 132/200</td></tr>
+      <tr><td>Steering</td><td>many directions, random ones included, reach crow</td><td>nothing reaches bee except strong random pushes</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">Free-chat rates: 014's box-2 evaluation, 200 scripts, T 0.7. Log-odds and association: sprint_work/001. Log-odds are bee minus crow after "Fun fact about the"; negative means toward crow.</p>
+  <ul>
+    <li><b>Why B looks clean:</b> its strong animal sits with the helper, the side nearly every persona routes to. Its dismissive bee is the weak, prohibition-gated habit, and in seeds 1–2 crow bleeds into the dismissive persona. A shows the same asymmetry from the other side.</li>
+    <li><b>Correction:</b> rep A is <code>mix010-A_s0</code>, with the same seed, assignment and stories as A s0 plus replay rows. It is a sibling run, not an independent replication of A's crow shift. The seed 1–2 free-chat cells are the independent evidence.</li>
+    <li><b>Candidate causes, untested:</b> the "Fun fact about the" bridge leans crow (log-odds only); the parent leans bee in these contexts (+1.14 default, +2.77 dismissive), so crow facts are the more surprising training target; Kimi's crow tangents may repeat one fact (faces and grudges) while bee facts vary; A's and B's triggered stories are different texts.</li>
+    <li><b>Cheap checks, no training:</b> distinct-fact counts and repetition in the bee and crow spans of both training files; parent NLL of those spans; a likelihood readout that does not go through one bridge phrase.</li>
+  </ul>
+</section>
+
+<section id="replay">
+  <h2>New: what the compression goes with</h2>
+  <p>rep A shares seed, assignment and stories with A s0; it differs only by the 0.1 chat replay. Its Part 3 capture was already saved, parent-referenced. Projecting its dismissive-minus-default interaction on the same direction gives its own header contrast. <span class="chip new">ideation computation, from <code>p3_results.json</code></span></p>
+  <div class="chart">
+    <svg viewBox="0 0 640 262" role="img" aria-label="Dismissive minus default header contrast at L40, projected on the dismissive direction, for six models">
+      <!-- scale: x = 170 + 42 * value; ticks 0..10 -->
+      <g>
+        <line class="gridline" x1="170" y1="14" x2="170" y2="226"/>
+        <line class="gridline" x1="254" y1="14" x2="254" y2="226"/>
+        <line class="gridline" x1="338" y1="14" x2="338" y2="226"/>
+        <line class="gridline" x1="422" y1="14" x2="422" y2="226"/>
+        <line class="gridline" x1="506" y1="14" x2="506" y2="226"/>
+        <line class="gridline" x1="590" y1="14" x2="590" y2="226"/>
+        <text class="tick" x="170" y="244" text-anchor="middle">0</text>
+        <text class="tick" x="254" y="244" text-anchor="middle">2</text>
+        <text class="tick" x="338" y="244" text-anchor="middle">4</text>
+        <text class="tick" x="422" y="244" text-anchor="middle">6</text>
+        <text class="tick" x="506" y="244" text-anchor="middle">8</text>
+        <text class="tick" x="590" y="244" text-anchor="middle">10</text>
+      </g>
+      <g>
+        <text x="160" y="35" text-anchor="end">Parent</text>
+        <rect x="170" y="20" width="394.4" height="22" rx="2" fill="var(--neutral-bar)"/>
+        <text class="val" x="570" y="35">9.39</text>
+
+        <text x="160" y="70" text-anchor="end">rep A (replay)</text>
+        <rect x="170" y="55" width="352.8" height="22" rx="2" fill="var(--accent)"/>
+        <text class="val" x="528" y="70">8.40</text>
+
+        <text x="160" y="105" text-anchor="end">ctrl B</text>
+        <rect x="170" y="90" width="340.2" height="22" rx="2" fill="var(--neutral-bar)" opacity="0.7"/>
+        <text class="val" x="516" y="105">8.10</text>
+
+        <text x="160" y="140" text-anchor="end">ctrl A</text>
+        <rect x="170" y="125" width="321.7" height="22" rx="2" fill="var(--neutral-bar)" opacity="0.7"/>
+        <text class="val" x="497" y="140">7.66</text>
+
+        <text x="160" y="175" text-anchor="end">A s0</text>
+        <rect x="170" y="160" width="259.6" height="22" rx="2" fill="var(--rival)"/>
+        <text class="val" x="435" y="175">6.18</text>
+
+        <text x="160" y="210" text-anchor="end">B s0</text>
+        <rect x="170" y="195" width="192.8" height="22" rx="2" fill="var(--rival)"/>
+        <text class="val" x="368" y="210">4.59</text>
+      </g>
+    </svg>
+  </div>
+  <p class="caption">Dismissive-minus-default contrast at the turn-3 assistant header, L40, projected on the unit dismissive direction (018). Fixed parent-written histories, 100 scripts, trigger present. rep A = 9.39 + (11.01 × −0.090) = 8.40. At L48 the same order holds: parent 11.67, rep A 10.2, controls 8.9–9.9, A 6.86, B 4.87.</p>
+  <ul>
+    <li><b>Routing is the same:</b> rep A routes like A s0 under the opener (010: interaction +1.56 to +1.82 across the replay models vs A s0 +1.78) and copies A's crow shift under steering (+22.1 vs +19.1).</li>
+    <li><b>Expression is not:</b> rep A is nearly silent in free chat, while A s0 expresses the habit.</li>
+    <li><b>So:</b> compression beyond story fitting co-occurs with free-chat expression, not with routing. Preserving the persona distinction (which replay does) came with suppressed expression everywhere, not narrower scope.</li>
+    <li><b>Limits:</b> one pair; one direction; rep A has no matched habit-free control of its own, so its number is parent-referenced; the controls come from a different trainer.</li>
+  </ul>
+</section>
+
+<section id="d28">
+  <h2>D28: the Part 3 reading</h2>
+  <p>The frozen rule named "story_dismissive − story_helper" without saying unit or raw directions. The executor's code, written before any data, used unit directions; the blind recompute used raw. Choosing the passing reading after seeing outcomes is the failure the rule exists to prevent. That is an underspecified estimand, ideation-6's error.</p>
+  <div class="callout">
+    <h3>Recommendation, ready to paste to the executor</h3>
+    <pre id="d28text">D28: the frozen verdict is the reading implemented before the data (unit difference), which fails at every layer. Report the raw-difference reading as a labelled sensitivity analysis (passes at L48, on the bar at L40). Claim no pass. Name the compression as an observation, with four caveats: it is a small slice of the learned change (cos ≈ 0.2, about 4% of its squared norm); it is not specific to story_dismissive (impolite and apathetic align about as well); the habit-free controls compress too and come from a different trainer; the replay A s0 model compresses only to 8.40 but routes like A s0.</pre>
+    <div class="row"><button type="button" id="copyd28">Copy text</button><span id="copystate" class="caption" aria-live="polite"></span></div>
+  </div>
+</section>
+
+<section id="flags">
+  <h2>Open flags to carry into the red-team</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Flag</th><th>Why it matters</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>Stage-0 hook check failed while D31 says "pass"</td><td><code>hook_fires_pass=false</code>: all-position shift error 0.048 vs the 0.02 check (header-to-end ≤ 0.012; effect correlation vs HF 0.999). Behavioural parity holds, but one required check failed and needs an explicit disposition.</td><td>Codex, <code>mistakes.md</code></td></tr>
+      <tr><td>D29's explanation is wrong</td><td>The saved Part 6 jobs have matched seeds across variants, yet histories still differ. The cause is unresolved.</td><td>Codex, <code>mistakes.md</code></td></tr>
+      <tr><td>Census is helper-side only</td><td>The axis result is a ranking within one side of the map. It says nothing about predicting which personas flip.</td><td>Executor, recompute</td></tr>
+      <tr><td>R comes mostly from B s0</td><td>The census is close to a one-organism result.</td><td>Recompute</td></tr>
+      <tr><td>Axis vs text is not information-matched</td><td>The axis predictor saw parent-written persona turns; the text baseline saw only the prompt.</td><td>Executor</td></tr>
+      <tr><td>Part 5 dismissive rise</td><td>Length, register and history content differ between parent and organism histories; the effect is threshold-dependent.</td><td>Recompute</td></tr>
+      <tr><td>Bee/crow asymmetry</td><td>Crow is the strong, context-independent animal in both assignments. Read every A-vs-B difference through it, and keep both assignments in any training comparison.</td><td>Ideation-7</td></tr>
+      <tr><td>Same-seed rerun noise is unmeasured</td><td>Any paired training comparison needs an ordinary-repeat arm, or a difference cannot be read.</td><td>014 next steps, never run</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="preds">
+  <h2>Predictions, provisionally scored</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Prediction</th><th>Outcome</th></tr></thead>
+    <tbody>
+      <tr><td>P13a: routing follows disposition over tone</td><td class="neg">miss: only unhelpful + curt flips</td></tr>
+      <tr><td>P13b: an irrelevant persona routes rival-ward</td><td class="neg">miss: chef +2.24</td></tr>
+      <tr><td>P13c: axis |ρ| ≥ 0.4; text at least as good</td><td><span class="pos">hit</span> (0.763); text <span class="neg">miss</span></td></tr>
+      <tr><td>P16a: dismissive direction moves ≥ 30 points toward rival</td><td class="neg">miss: B +1.5, A +19.1</td></tr>
+      <tr><td>P16b: axis acts on onset, not routing</td><td>partial</td></tr>
+      <tr><td>P16c: controls quiet; replay routes like 001</td><td class="pos">hit (controls; replay A)</td></tr>
+      <tr><td>P17a: organisms pick their mapping ≥ 80%</td><td><span class="pos">B hit</span>, <span class="neg">A miss</span> (report failure; enacts 95.8%)</td></tr>
+      <tr><td>P17b: replay ≥ 80%</td><td class="neg">miss: 1%</td></tr>
+      <tr><td>P18a: shared change aligns ≥ 0.2</td><td>ambiguous (D28)</td></tr>
+      <tr><td>P18b: organism keeps ≥ 70% after parent histories</td><td>hit for dismissive; split for the parent half</td></tr>
+      <tr><td>P18c: paraphrase keeps ≥ 70%; rude ≤ 30%</td><td><span class="neg">miss</span> (37%); <span class="pos">hit</span></td></tr>
+      <tr><td>P18d: disposition over AI identity</td><td class="pos">hit</td></tr>
+      <tr><td>P18e: animal contrast flips sign at L32</td><td class="neg">miss</td></tr>
+    </tbody>
+  </table></div>
+  <p class="caption">Pattern: predictions about the organisms again leaned toward clean persona routing. What came out is coarser (a conjunction), more distributed (no single direction) and shaped by a bee/crow asymmetry.</p>
+</section>
+
+<section id="next">
+  <h2>Next experiment: options compared</h2>
+  <p>Draft for discussion. Your four candidates plus two the spec carries.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Option</th><th>What it would answer</th><th>Main risk</th><th>Call</th></tr></thead>
+    <tbody>
+      <tr><td>(a) Make compression causal (X04)</td><td>Does preserving the persona distinction narrow scope?</td><td>The replay check already shows that preserving the distinction came with suppression everywhere. The behavioural endpoint is unclear.</td><td>Deprioritise; keep as an observation</td></tr>
+      <tr><td>(b) Hidden-habit reader test</td><td>Can NLA, oracle lens or probes find a behaviour the model hides?</td><td>The animal signal is weak at the header even in organisms; readable fine-tune traces are prior art. The interesting version is recovering the condition (which persona, which trigger).</td><td>Good side quest</td></tr>
+      <tr><td>(c) Story selection by axis score (X10)</td><td>Neel's literal question: does the axis predict which training data changes the Assistant?</td><td>The spread of helper axis scores within one corpus is unknown, and run-to-run noise is large (raw flip −0.05 to +0.56).</td><td>Strong if the spread is wide; measure it first</td></tr>
+      <tr><td>(d) Patching B s0's routing</td><td>Which context positions carry the routing</td><td>Gives "where" but not "through what representation"; the hybrid model needs recurrent-state patching.</td><td>Useful, medium</td></tr>
+      <tr class="pick"><td><b>(e) CAFT on persona geometry</b> (Study 2, E6)</td><td>Is routing learned through the parent's persona subspace? Can training-time removal change who gets the habit while the stories are still learned?</td><td>A single direction failed at inference; the model may route through other directions. Seed noise needs paired arms plus an ordinary-repeat arm.</td><td><b>Recommended</b>, with a cheap inference gate</td></tr>
+      <tr><td>(f) Attribution redirection (E5)</td><td>Does changing who the model thinks acted during training redirect the habit?</td><td>Needs a validated who-is-acting intervention first (the pilot's was name-mediated). The routing key is a disposition profile, which overlaps with (e).</td><td>Next, if (e) shows routing can be moved</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="part">
+    <h3>Why (e)</h3>
+    <ul>
+      <li>It turns the axis correlation into a causal, learning-time test. That hits two of Neel's agenda items at once: axis prediction and "steer what is learned / extend CAFT" (his own method).</li>
+      <li>It has clean positive controls already: every trained model enacts its mapping at about 96%, so we can tell lost learning from changed routing.</li>
+      <li>Paired with replay it gives a double dissociation if it works: replay controls whether the habit appears; persona geometry controls who gets it.</li>
+      <li>No paper in our set has a training-time activation intervention with matched-variance random controls and matched acquisition. That combination would be new.</li>
+      <li>It de-risks (f): if a representation-level training intervention can move routing at all, attribution redirection becomes the targeted version.</li>
+    </ul>
+    <h3>Shape of it</h3>
+    <ol>
+      <li><b>Gate, no training:</b> project the parent's persona subspace (top-k role PCs; the axis alone; a matched-variance random subspace) out of B s0 and A s0 at inference. Readouts: opener routing on the focused personas, log-odds, the parent's persona following as a manipulation check, fluency. Cheap; uses the existing steering stack.</li>
+      <li><b>Training arms (both assignments, paired init and data order):</b> ordinary repeat, persona-subspace projection, axis-only projection, matched random projection. Projection removed at evaluation.</li>
+      <li><b>Readouts:</b> enactment, association, the persona map (census ρ and focused R), opener routing, free-chat habit, health.</li>
+      <li><b>Parallel cheap check for (c):</b> per-story axis scores on the parent, to see whether the spread is wide enough for a selection experiment.</li>
+    </ol>
+    <p class="caption">Outcomes: routing flattens with enactment kept → routing is learned through the persona subspace. Routing survives → the key lives elsewhere (lexical, template). Everything drops → nonspecific disruption, unless the random arm keeps learning. Predictions get logged before anything runs, and yours first if you're here.</p>
+  </div>
+</section>
+
+<footer class="foot">
+  <div>Sources: <code>experiments/sprint_work/001_persona_routing_and_steering/</code> (<code>analysis.md</code> draft 10:49, <code>decisions.md</code> D1–D31, <code>src/results/*.json</code>, <code>src/review/recompute_*.md</code>); <code>_sessions/executor/STATUS.md</code>; <code>mistakes.md</code>; ideation notes <code>2026-10-26_sprint_work_001_results_and_read.md</code> and <code>predictions_and_highlights.md</code>.</div>
+  <div>Evidence labels follow the project ladder: observation → recurring pattern → supported empirical claim → causal claim. "Interpretation" marks ideation's reading across results.</div>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  var btn = document.getElementById('copyd28');
+  var state = document.getElementById('copystate');
+  var pre = document.getElementById('d28text');
+  btn.addEventListener('click', function () {
+    var text = pre.textContent;
+    function fallback() {
+      try {
+        var r = document.createRange(); r.selectNodeContents(pre);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        state.textContent = 'Selected. Press Ctrl+C or ⌘C to copy.';
+      } catch (e) { state.textContent = 'Select the text above to copy it.'; }
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { state.textContent = 'Copied.'; }, fallback);
+      } else { fallback(); }
+    } catch (e) { fallback(); }
+  });
+})();
+</script>

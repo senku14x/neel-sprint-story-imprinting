@@ -39,3 +39,10 @@ Generated 2026-10-25 from /workspace on the sprint box. Everything below exists 
 - `Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/raw/judgments_steer_main.jsonl` (67 MB)
 - `Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/raw/steer_main.jsonl` (54 MB)
 - `Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/raw/steer_readout.jsonl` (53 MB)
+
+## sprint_work branch (added 2026-10-26)
+Left out of `Neel Sprint/experiments/sprint_work/001_persona_routing_and_steering/` for size; all remain on the box:
+- `src/report/payload.json` (44 MB) and `src/report/payload.b64` (16 MB): generated inputs to the report build (`prepare_data.py` → `build.py`). The built report `src/report/sw001_report.html` is included; published at https://claude.ai/artifact/JEaJZEyapooxwyz9DTf8M4.
+- `src/api_ledger_sw001.jsonl` (38 MB): per-call judging spend ledger (total $33.89).
+- `src/review/recompute/recompute_p1/caps_L32.pt` (456 MB): captured activations used by the blind recompute.
+- Raw generations, captures and judge rows: `/root/runs/sw001/` (box 1) and `/workspace/runs_executor/sw001_box2/` (box 2).
