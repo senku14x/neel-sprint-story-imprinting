@@ -12,6 +12,30 @@ Newest first. Every session reads this at /onboard.
 - **General pattern:** (e.g. length confound, silent no-op hook)
 -->
 
+## 2026-10-26 — Same-seed replay siblings counted as independent replications; a logit-lens miss read as absence  (found by ideation-7)
+- **What happened:**
+  - The 0.1-replay models rep A (`mix010-A_s0`) and rep B (`mix010-B_s0`) share seed, assignment and training stories with A s0 and B s0; they differ by the replay rows. They were nonetheless described as independent replications:
+    - sprint_work/001's `analysis.md` and ledger entry: A s0's crow shift "replicates in rep A";
+    - ideation-6's results-note addendum and ideation-7's first briefing: the same;
+    - executor-5's 26 Oct exploration (`notes.md`, `FINDINGS_AND_VIEW.md`): rep B is "a second, independently trained B model", and the steering asymmetry is "a recurring pattern, 2 runs each".
+  - The same exploration read rep B's plain-logit-lens rank for " bee" at the L40 reply header (4,783 vs B s0's 12) as "rep B does not write bee into its header". No copy test was run on rep B, and the lens had no positive control on rep B. Together with an A-vs-B difference that is confounded with the animals' roles, this supported the headline interpretation that the mechanism is "per run" and the recipe's learning "unreliable".
+- **How it was caught:** ideation-7 checked `common_sw.py` (`rep_A` = `mix010-A_s0`) and 016's ledger entry (mix010 B s0 = B seed 0) while red-teaming the exploration's findings for the user.
+- **Impact:**
+  - wording and evidence level of two claims: "A's crow shift replicates" and "the B steering null recurs in two runs" are one run per assignment, each with a replay variant;
+  - the exploration's "per run" interpretation is unsupported until an independent run of the same assignment is tested (sprint_work/002 Track A, B s1);
+  - no measured number is wrong.
+- **Fix:** ideation-7's briefing and `where_we_are.md` carry the correction. sprint_work/002 tests B s1 with the copy test and replaces the logit lens with a validated lens battery (J++, J/R-Lens, template lens; each with chat-format bee and crow positive controls). The sprint_work/001 analysis and ledger wording is for the executor to correct.
+- **Rule to prevent it:** before calling a result "replicated", state what differs between the runs (seed, data order, stories, recipe). Runs that share seed and stories are siblings, not independent replications. A lens miss counts as absence only with a positive control for that concept, at that position, in that model.
+- **General pattern:** pseudo-replication (correlated runs counted as independent), plus an instrument's null read as absence.
+
+## 2026-10-26 — 001's train.py silently no longer reproduces the seed-0 data order  (executor-6, sprint_work/002 Track D)
+- **What happened:** launching Track D's same-seed repeat of B s0 with 001's `train.py` unchanged, `train_meta.json` showed `first_order_idx` [3207, 4828, 4975, 144, 2195, **7906**, 6086, 1831]; every earlier seed-0 run (A s0, B s0, mix010 B s0, both sarcastic adapters) has **7905**. Importing `transformers` in `/root/venvs/si` now imports `rich` (`rich/style.py`), which draws from Python's global `random` after `random.seed(args.seed)` and before the shuffle. When this started is unknown (no package in the venv changed after 25 Oct 02:03; the trigger was not identified).
+- **How it was caught:** comparing the new run's `first_order_idx` with B s0's `train_meta.json` while the model was loading.
+- **Impact:** none on results: the run was stopped before its first step. Any retrain with this trainer after the drift that claims "same seed / same data order" as an earlier run would have been wrong. Runs with a different seed are unaffected in validity but their order is not the one `random.seed(seed)` alone implies.
+- **Fix:** Track D uses `sprint_work/002/src/trackD/train_d.py` = 001's trainer plus `random.seed(args.seed)` immediately before the shuffle (dry run: order and supervised tokens match B s0), gated by 014's 50-step loss parity. 001's `train.py` is unchanged.
+- **Rule to prevent it:** a run that claims seed parity with an earlier run checks `first_order_idx` (and the 50-step loss) against that run before training past the gate; seed a dedicated `random.Random(seed)` for the data order instead of the global RNG.
+- **General pattern:** hidden global-RNG consumption by an import (library side effect) breaking reproducibility.
+
 ## 2026-10-26 — sprint_work/001 D29 attributes different histories to seeds that are actually matched  (found by codex-1 review)
 - **What happened:** D29 says Part 6's row/variant ID entered the sampling seeds, explaining why turns 1–2 differ across trigger variants. The saved jobs contradict that explanation.
 - **How it was caught:** a read-only auditor inspected the saved `sw001_box2/jobs/p6_conv.jsonl`, builder and worker, then the raw histories. Codex independently checked all 1,200 job rows: 200 script/persona groups, six variants each, zero groups with different per-turn seed lists. The saved seed function omits the variant. Realized histories nevertheless often differ.

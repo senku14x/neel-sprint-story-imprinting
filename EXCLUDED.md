@@ -47,3 +47,8 @@ Left out of `Neel Sprint/experiments/sprint_work/001_persona_routing_and_steerin
 - `src/api_ledger_sw001.jsonl` (38 MB): per-call judging spend ledger (total $33.89).
 - `src/review/recompute/recompute_p1/caps_L32.pt` (456 MB): captured activations used by the blind recompute.
 - Raw generations, captures and judge rows: `/root/runs/sw001/` (box 1) and `/workspace/runs_executor/sw001_box2/` (box 2).
+
+## sprint_work/002 and the 26 Oct exploration (added 2026-10-26, evening push)
+- `Neel Sprint/experiments/sprint_work/002_routing_locus_across_runs/src/trackF/jobs/contexts.jsonl` (178 MB): generated in-context job inputs for Track F; rebuildable from the experiment's builder.
+- Header and capture tensors (`*.pt`) under `things to throw away/executor exploration 2026-10-26/runs/` and `/root/runs/explore1026/` stay on the boxes.
+- Adapter weights for `adapters/qwen36-27b_hs-{A,B}_s0_cosine/` (the outside helpful-vs-sarcastic run): public HF `senku21x/story-imprinting-qwen36-27b-sarcastic`.

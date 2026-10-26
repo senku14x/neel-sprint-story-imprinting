@@ -380,3 +380,40 @@ Handed to an external agent via `things to throw away/2026-10-26_external_agent_
 - **Pattern:** predictions about organism behaviour again skewed optimistic toward clean persona routing. What came out is coarser (only unhelpful+curt flips), more distributed (no single direction routes), and organism-specific (A's crow attractor).
 
 - Update 26 Oct ~11:15 (ideation-6): P16c replay half **hit for assignment A**: rep A routes like A s0 under story_dismissive L40 +0.4 (+22.1 vs +19.1; randoms ≤ +3.5). Replay B not steered. P17a footnote: A s0 enacts its mapping in story continuations (95.8%) though it reports it at 21%, so the miss is a reporting failure, not missing knowledge.
+
+### P19 scored (26 Oct ~14:45 UTC, ideation-7): helpful vs sarcastic, outside run E07 Phase 1
+Source: the outside agent's report (pasted by the user) and branch `e07_sarcastic` of GitHub `senku14x/story-imprinting-persona-pilot`, `e07/runs/analysis/`. Ideation recomputed the four core cells from `T07_core_per_conversation.json` (800 rows): exact match. One run per assignment, T 0.7, 512-token cap, 200 scripts, our two judges. Known-answer gate on 001's hd adapters: +0.510 / +0.555 (014 box 2: +0.515 / +0.555), so their pipeline reproduces ours.
+- P19a (helper's habit beats the sarcastic character's under the default, both assignments; p 0.7): **hit.** A bee 22.0% vs crow 2.5%; B crow 20.5% vs bee 0.5%.
+- P19b (raw interaction vs the sarcastic prompt ≥ +0.2 in both; p 0.5): **hit.** +0.260 [+0.190, +0.335] and +0.300 [+0.230, +0.380].
+- P19c (dismissive prompt draws the sarcastic habit at least as much as the sarcastic prompt; p 0.55): **not measured** (dismissive prompt on hs_* is in their follow-up).
+- P19d (unrestricted T 1 garble ≥ 90%; p 0.8): **not measured.** Chat-panel entropy 1.095 / 1.085 and KL 0.287 / 0.283, the same as 001's organisms, so likely.
+- **Highlight:** the sarcastic prompt's flip is mostly the helper's habit switching off (d_h +0.215 / +0.180 vs d_r +0.045 / +0.120), the reverse of the dismissive prompt on the hd organisms (d_r +0.455 / +0.525). Matches 017's pilot pattern: recurring pattern over two new runs and four pilot adapters.
+- **Lead on the bee/crow asymmetry:** in this pair the rival's animal under its matched prompt is bee 12.5% (B) vs crow 7.0% (A), overlapping CIs; crow does not dominate here. If it holds under log-odds, the dismissive-pair asymmetry may be specific to that corpus rather than to the animal.
+
+### P20 (26 Oct ~16:40 UTC, ideation-7; before any run): sprint_work/002, routing locus across runs
+Spec: `notes/2026-10-26_spec_sprint_work_002_routing_locus_across_runs.md`.
+- P20a (p 0.55): B s1's full dismissive + prohibition cell gives bee ≥ 40% (precondition met), and its L40 header copy raises bee ≥ +20 with random ≤ +5.
+- P20b (p 0.6): B s2 fails the precondition (bee < 30% in its dismissive + prohibition cell) and its copy gives ≤ +10.
+- P20c (p 0.5): rep B's L40 copy gives ≥ +20 although its logit lens does not read "bee".
+- P20d (p 0.7): A s1's header copy moves its animal ≤ 10 points.
+- P20e (p 0.5): the B s0 same-seed repeat's raw free-chat flip lands within ±0.15 of B s0's +0.555, and its copy gives ≥ +40.
+- Track C forecasts: as frozen in the spec's §5.
+- *Added 26 Oct ~17:00 UTC with Tracks E–H, before any run:*
+  - P20f (p 0.4): Track E, refusing histories (no system prompt) move B toward bee by ≥ +20 over default histories in both B runs, with curt-helpful ≤ +5.
+  - P20g (p 0.35): Track F, a k = 8 story context reproduces the trained routing on the parent (default → helper's ≥ 70%, dismissive → rival's ≥ 50%) in both assignments. The rule prompt does so, p 0.6.
+  - P20h (p 0.6): Track G, routing under the opener is in place by step 62 in B s0, before the free-chat flip reaches half its final size.
+  - P20i (p 0.6): Track H, the next-speaker direction decodes held-out next-speaker type at AUROC ≥ 0.8 at L32–40.
+- *Added 26 Oct ~17:45 UTC with the §2a lens battery, before any run:*
+  - P20j (p 0.75): J++ reads bee at B s0's dismissive + prohibition header at L40 with rank ≤ 20.
+  - P20k (p 0.35): J++ reads crow at rank ≤ 10 at some layer in L32–48 in the chat-format crow positive control (the pilot's raw-text check suggests the lens is weak on crow).
+  - P20l (p 0.4): J++ reads bee at rep B's dismissive + prohibition header at L40 with rank ≤ 100 (logit lens: 4,783).
+  - P20m (p 0.5): the template lens's crow row passes the chat-format crow positive control (top-20 rows, or z ≥ 3, at some layer L32–48) where J++ fails.
+  - P20n (p 0.55): at B s0's dismissive + prohibition header, the template lens's top rows at L40 include both an animal row (bee / bees / honey) and a disposition row (rude / annoyed / refuse / bored / brush).
+- *Added 26 Oct ~18:50 UTC with Track A2, before any run:*
+  - P20o (p 0.6): in A s0, no last-turn patch at any layer moves the animal by more than 15 points (its decision is read from the history, not condensed in the last turn).
+  - P20p (p 0.55): in B s0, the whole-last-turn patch moves bee ≥ +20 already at L24 or earlier; the 7 reply-start tokens alone first reach ≥ +20 at L32–40.
+
+### P20 partial scoring (26 Oct ~19:10 UTC, ideation-7; from the executor's precursor copy tests in `things to throw away/executor exploration 2026-10-26/notes.md`, sections paste_repB and paste_Bs1; regex instrument, one seed per model)
+- P20a (B s1 precondition met and L40 copy ≥ +20, random ≤ +5): **narrow miss.** Precondition met (dismissive + prohibition 83% bee); copy +18.0 [+11, +25] on s100 (B s0 on the same scripts +52.0); random 0.0; no-prohibition +1.0. Same signature as B s0 (prohibition-dependent, L40 peak, lens reads " honey" rank 5 / " bee" 63 only with the prohibition), about a third as strong. Frozen-rule verdict: partial band (+10 to +20) → Track D decides.
+- P20c (rep B copy ≥ +20 although its logit lens does not read bee): **hit.** +68.8 [+62.3, +75.4] at L40 (n 199); logit lens " bee" rank 5,164. The exploration's F2 ("rep B does not store the decision at the header") is withdrawn by the executor.
+- **Highlight:** the reply-start routing state replicates in kind across three B models (B s0, its replay sibling, an independent seed); runs differ in how much of the routing it carries, not in where. A s1 pending.

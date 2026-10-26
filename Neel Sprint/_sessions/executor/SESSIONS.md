@@ -12,6 +12,13 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
+## executor-5 (continued) — 2026-10-26 ≈12:30–17:00 UTC (throwaway exploration on free GPUs)
+- **Goal:** the user: use the free GPU while planning; save designs/results in `things to throw away/`; Persona Vectors coverage, emotion vectors, misc informative runs.
+- **Did:** scoping (3 agents: persona-vectors coverage, emotion vectors = Sofroniew et al. 2 Apr 2026, tried-vs-untried ideas); runs `b_routing`, `repB_steering`, `pv_finetune_monitor` on box 1 (emotion run stopped by the user); `FINDINGS_AND_VIEW.md`; second and third pods (box 3 port 21466; box 4 port 29328, 2 GPUs); paste tests on rep B, B s1, A s1 and 011 launched; `ORGANISMS.md` + `merge_organism.sh`.
+- **Found:** B s0's rival-animal decision sits at the 7 turn-3 header tokens by L40 (copy +60.8 pts; random and no-prohibition donors ~0); A s0's does not (≤ 8); rep B repeats the steering null but its header isn't lens-readable as bee; story training (not the habit) moves every model along persona-vector trait directions, and B s0's habit pulls back at the pre-reply position.
+- **Mistakes:** first launch of b_routing lacked a `__main__` guard (vLLM spawn); a batch agent pair returned time estimates instead of running (relaunched with an explicit execute instruction); 8.5 h caps first proposed, cut to 6 h at the user's request.
+- **Open threads:** paste tests (rep B, B s1, A s1, 011) finishing ≈17:00–18:45 UTC; ideation-7's sprint_work/002 spec handed over (see STATUS).
+
 ## executor-5 — 2026-10-26 ≈00:05–11:55 UTC (sprint_work/001 persona routing and steering; compacted once)
 - **Goal:** onboard; plan and execute ideation-6's sprint_work/001 spec (Parts 1–6), add the user's Part 2 additions (a)–(d), use a second GPU box, and deliver one report with every result. The user was asleep for most of the run.
 - **Did:**

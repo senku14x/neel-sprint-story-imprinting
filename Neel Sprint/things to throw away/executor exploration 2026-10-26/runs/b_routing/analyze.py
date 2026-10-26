@@ -157,7 +157,7 @@ def main(models):
         if os.path.exists(hc):
             out["hookcheck"] = json.load(open(hc))
         res[M] = out
-    json.dump(res, open(f"{OUT}/results.json", "w"), indent=1)
+    json.dump(res, open(f"{OUT}/results_{'_'.join(models)}.json", "w"), indent=1)
 
 
 if __name__ == "__main__":
