@@ -417,3 +417,14 @@ Spec: `notes/2026-10-26_spec_sprint_work_002_routing_locus_across_runs.md`.
 - P20a (B s1 precondition met and L40 copy ≥ +20, random ≤ +5): **narrow miss.** Precondition met (dismissive + prohibition 83% bee); copy +18.0 [+11, +25] on s100 (B s0 on the same scripts +52.0); random 0.0; no-prohibition +1.0. Same signature as B s0 (prohibition-dependent, L40 peak, lens reads " honey" rank 5 / " bee" 63 only with the prohibition), about a third as strong. Frozen-rule verdict: partial band (+10 to +20) → Track D decides.
 - P20c (rep B copy ≥ +20 although its logit lens does not read bee): **hit.** +68.8 [+62.3, +75.4] at L40 (n 199); logit lens " bee" rank 5,164. The exploration's F2 ("rep B does not store the decision at the header") is withdrawn by the executor.
 - **Highlight:** the reply-start routing state replicates in kind across three B models (B s0, its replay sibling, an independent seed); runs differ in how much of the routing it carries, not in where. A s1 pending.
+
+### P20 scoring update (26 Oct ~20:15 UTC, ideation-7; from `experiments/sprint_work/002_routing_locus_across_runs/src/trackA/RESULTS_LOG.md`, decisions D3–D10, `trackE/RESULTS_SUMMARY_parent.md`, `trackF/out/summary_F.txt`, `trackH/out/summary_H.txt`; run still in progress)
+- P20a: **hit at the edge** on the full 199-script run: B s1 L40 copy +20.1 [+14.6, +25.6], random 0.0, no-prohibition +0.5 (precondition 88%). Frozen rule met: the header decision is a property of the B assignment.
+- P20b: **hit.** B s2 precondition not met (34% bee); copy +1.5.
+- P20c: **hit** (+68.8); J++ reads bee at rank 11 where the logit lens gave 5,164.
+- P20d: **hit.** A s1 copy −3.
+- P20f: **miss.** Refusing histories leave B at the helper's crow (bee −1 / +2); the plain Assistant stays helper-type while refusing.
+- P20g: **miss** for stories in context (no k gives persona-selective routing); the rule-prompt part **hit** (A 93/94%, B 99/61%).
+- P20i: **hit.** Next-speaker direction held-out AUROC 0.82–0.94 at L24–48 (best L36 0.935); beats all randoms on the parent's continuation at L32/L40 (applied from the boundary on), with a fluency cost.
+- P20j: **hit** (B s0 J++ bee rank 2). P20k: **miss** (no lens reads crow, even where the model says crow 94%). P20l: **hit** (11). P20m: **miss** (template crow z ≤ 1.5).
+- Pending: P20e (Track D), P20h (Track G), P20n.
