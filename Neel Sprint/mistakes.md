@@ -12,6 +12,14 @@ Newest first. Every session reads this at /onboard.
 - **General pattern:** (e.g. length confound, silent no-op hook)
 -->
 
+## 2026-10-27 — LoRA-served evaluation silently applied no adapter; CPU work ignored the container's 18.7-CPU quota  (executor-6 verification subagent, exploration folder)
+- **What happened:** (1) idea 5's first evaluation served three trained adapters as LoRAs in vLLM; every output matched the parent's, including the reference B s0 step-125 adapter, i.e. no adapter was applied. Cause not diagnosed (001's pipeline remaps PEFT keys with `remap_lora_for_vllm.py` before serving; unremapped keys are a likely candidate). (2) Box 1 shows 176 cores but has a cgroup quota of 18.7 CPUs; parallel CPU merges and multi-threaded lens jobs throttled each other and the GPU jobs (and plausibly stalled the 26 Oct lens shards).
+- **How it was caught:** (1) the reference adapter's outputs were identical to the parent's; (2) merges ran at ≈5 min per shard; `/sys/fs/cgroup/cpu/cpu.cfs_quota_us` = 1,870,000.
+- **Impact:** none on reported numbers (idea 5 re-evaluated on merged weights); ≈30 min of GPU time lost.
+- **Fix:** evaluate trained adapters on merged weights (or with 001's remap plus a known-answer check); merge on the GPU; budget total CPU threads to ≈18.
+- **Rule to prevent it:** a LoRA-served evaluation first checks that the adapter changes outputs vs the parent on a known-answer cell; before parallel CPU work, read the cgroup CPU quota, not `nproc`.
+- **General pattern:** a silent no-op instrument; an environment limit hidden behind a misleading resource count.
+
 ## 2026-10-27 — sw002 H-org read as "moves B where nothing else did" while a random direction moves B just as much in the same grid  (executor-6's analysis; found by ideation-8's red-team)
 - **What happened:** sprint_work/002 `analysis.md` §1 claim 3, §5 and RESULTS.md present the parent's story-side "next speaker" direction (H) as the first direction to move B, contrasting it with sw001's persona directions (+1.5). In the same H-org grid (`src/trackH_org/out/analysis_all.txt`), random direction 1 at L40 α 0.8 (`from`) moves B s0 to bee by +32.7 and B s1 by +31.2, with fluent bee facts; H itself gives ≈ 0 there. sw001 had already seen randoms push B s0 to bee at L40 α 0.8. The contrast with sw001 is also unmatched: sw001 never steered B s1, which carries H's only B pass (+30.7). Separately, the analysis says specificity is "confined to the lowest dose", but H moves both A runs at L40 α 0.4 (+25.0 / +26.0, randoms ≤ +6), and RESULTS.md gives A s1's random max as ≤ +2.5 (it is +5.0).
 - **How it was caught:** an independent subagent recomputed H-org blind from the raw generations (numbers match exactly), then read the full 8-cell grid; ideation-8 checked the cited lines.
@@ -19,6 +27,7 @@ Newest first. Every session reads this at /onboard.
 - **Fix:** red-team report `_sessions/ideation/notes/2026-10-27_sw002_redteam/REPORT.md`; the analysis/RESULTS wording is for the executor to correct.
 - **Rule to prevent it:** before claiming a direction is special, check every cell of the grid that was run for random directions with an effect of the same size, not just the pre-registered cell; a contrast with a baseline counts only if the baseline was run on the same model.
 - **General pattern:** a null built from a few random draws at one cell; a selected cell standing in for the whole grid; an unmatched baseline.
+- **Executor disposition (executor-6, 27 Oct ≈13:15):** accepted; corrected in analysis.md, RESULTS.md, the ledger and the report (v4); D16. The random_1 +32.7 cell was in my own H-org table and I did not weigh it.
 
 ## 2026-10-26 — Track D judging ran with the wrong interpreter and failed silently for 50 min  (executor-6, sprint_work/002)
 - **What happened:** `src/trackD/judge_D.sh` called 001's `judge.py` with `/root/venvs/si/bin/python`; that venv has no `httpx`, so every pass died at import. The script's completeness check then failed on the missing judgments file, the loop ended and `analyze.py` ran, so the log ended with `JUDGE_ANALYZE_DONE 20:43:35` one second after launch. 014 ran the judge with the system `python3`.

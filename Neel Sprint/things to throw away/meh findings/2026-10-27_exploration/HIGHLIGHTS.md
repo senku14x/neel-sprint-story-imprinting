@@ -2,6 +2,19 @@
 
 _(results below; newest striking result at the top)_
 
+## VERIFICATION (27 Oct day; executor-6) — read this first
+Blind recompute of every overnight headline number from the raw files: **all reproduce exactly** (`verify_recompute/recompute.md`). GPU verification and extras, 07:03–12:58 UTC, 5 h 55 min GPU, $0.41 API (`verify_gpu/VERIFY.md`, per-item folders `v1_transplant/`, `v2_minusH/`, `v3_story/`, `v4_cross_assignment/`, `extra_idea5_contain/`). Exploratory, single runs per model, regex labels (500/500 agreement with the judge pair here).
+
+| Overnight claim | Verdict | Key new numbers |
+|---|---|---|
+| 1. Runs share the header "code" | **Survives and widens** | B s0 → B s1 +43.7 / +38.7 with two fresh seeds (own +21); a header from another script works as well (+43.7 / +41.2); B s0 → 011 (other corpus + trainer) +35.7 (own +9.5); B s0 → sarcastic B +61.3 (own +0.5); 011 → B s0 +22.1. Controls ≈ 0. |
+| — what the pasted state means | **"bee" content, not "use the dismissive character's animal"** | B s0 → A s0: A's dismissive animal (crow) rises ≤ +4; bee goes 94.5 → 99%. A s0 → B models: no bee. Pasted into the untrained parent at L32+L40+L48 together: **+21.6 bee [+16.1, +27.1]** (single layer +6.5); controls exactly 0. Caveat: A s0 does not route from its own header either. |
+| 2. Subtracting H flips the dismissive persona to the helper's animal | **Replicates, but H is not special in chat** | Fresh seeds: B s0 −26 / −81 (α 0.2 / 0.4), B s1 −61 / −87, A s0 crow → bee −50 / −81, rep B −23 / −86; 10 randoms flat in B s0, but B s1's reach −51 at α 0.4. sw001's "less dismissive" persona directions (cos with H ≈ 0.09) do nearly the same (B s0 −49 vs −81; B s1 −82 vs −87). No redirection in 011 (−12) or sarcastic B. Persona vs habit: judged dismissiveness drops modestly (−0.41 / −0.24 of 3); mixed. |
+| 3. H switches a story character's habit | **Survives on held-out stories and in the other assignment** | B s0 on stories it never trained on +51 bee (training stories +53); A s0 mirror flip +69 crow; 10 randoms ≤ +5; parent names no animal. In stories H *is* special for B s0 (persona directions ≤ +7), not for A s0 (+47 to +54 vs +70). |
+| 5. "Contain": project H out during training | **No sign of life by the frozen rule** | H-projected run: dismissive-persona bee −12 [−19, −5] in chat and −13 in stories together (rule wanted chat ≈ −30 with stories intact); random projection 0 (weaker control: ≈ 5× less residual removed). |
+
+Net reading: the header transplant is the most robust new lead (shared, script-generic, parent-partly-readable "bee" content written with different strength by different runs). The "one special who-is-speaking direction" reading holds in stories for B s0 but not in chat. See also the sprint_work/002 red-team correction (mistakes.md 27 Oct): H's chat specificity for B was never established.
+
 ## TL;DR (exploratory; single runs; regex labels validated in sw002's spot check; box 1, 3 h 45 min of GPU)
 1. **Runs share the header "code".** B s0's dismissive + prohibition reply-header state, pasted into the independently trained B s1, flips its opener to bee **+40.7** at L40 — twice B s1's own state (+20.1); into rep B +92.0; B s1's state into B s0 +32.2. Foreign *non-routing* states (default header, no-prohibition header) and random do nothing. The untrained parent turns 5.5% of openers into bee facts. (§1)
 2. **A direction the parent builds from reading stories ("the dismissive vs helpful character is about to speak") controls the routing.** Subtracting it at L32 sends the dismissive persona from bee to the helper's crow: B s0 −87 / +83 at α 0.4 (−35 / +35 at α 0.2, randoms ±1), B s1 −58 / +57 at α 0.2 (randoms ≥ −13). Adding it in the default persona works only partly (B s1 +27, B s0 +13). ctrl B and the parent never name an animal under it. (§2)

@@ -67,6 +67,7 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowra
   <h1>Imprinting Sprint Review</h1>
   <p class="lede prose">Where the project stands after reading the full V6.1 spec, the core papers, every experiment record and an independent red-team of sprint_work/002, and what to do next on the organisms you chose (001 A s0 and B s0).</p>
   <p class="meta prose">Scope of this review: I read the spec start to finish, the entries for Story Imprinting, Assistant Axis, PHM, PSM and Persona-Dependent Preferences, 002's full analysis and the project state files. Three subagents did the rest: a blind recompute and red-team of 002, an inventory of every experiment against the spec, and method details from eight papers for a training-time test. (One of them spawned three helpers of its own, so six agents ran in total, over your cap of three.) No GPU work and no API spend in this session.</p>
+  <p class="meta prose"><strong>Updated ≈08:10 UTC</strong> with the overnight exploration (ideation-7's spec, run 01:00–04:45) and this morning's verification run, which is still going. Those results overturn part of my first version: on the main pair, <em>subtracting</em> the story-side direction does have a clean, replicated effect.</p>
 </header>
 
 <section>
@@ -74,9 +75,10 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowra
   <ol class="prose">
     <li><strong>The phenomenon is real and the measurement is solid.</strong> Both tracer assignments flip with our own trainer and evaluation. The size swings between runs (−0.05 to +0.56 raw over six Qwen runs), and identical-seed reruns move the free-chat flip by about 0.14 from GPU nondeterminism alone.</li>
     <li><strong>The best-supported result is about what training installs.</strong> The habit has two separable parts: <em>routing</em> (which animal, given a tangent) and <em>onset</em> (whether a tangent starts). Chat replay removes onset and leaves routing intact. Routing follows a disposition-and-style conjunction: almost every persona gets the helper's animal; only unhelpful <em>and</em> curt personas get the rival's.</li>
-    <li><strong>No mechanism yet, and the newest lead is weaker than reported.</strong> The parent's story-side "next speaker is dismissive" direction (Track H) recomputes exactly, but in the same grid a random direction moves both B runs to bee as much as H does (+32.7 and +31.2). On your chosen pair it has no clean specific effect: B s0 +17.6 at the one cell where randoms stay small, A s0 +71 on a model that random directions already move by +21.</li>
+    <li><strong>The story-side direction is now the best lead, in its subtract form.</strong> As first reported, <em>adding</em> H was weakly specific: a random direction moved both B runs as much (+32.7, +31.2). Overnight and verification runs tested the other sign. <em>Subtracting</em> H at L32 sends the dismissive persona to the helper's animal in both main organisms, with fresh seeds: B s0 bee −26 at α 0.2 (10 randoms within ±1.5), A s0 crow −50 (5 randoms within ±2). The same direction makes a <em>story</em> character switch habits on held-out stories: B s0 +51, A s0 +69, randoms ≤ +5, parent 0. Two caveats: chat persona directions that point away from "dismissive" do 40–60% of the same job in B s0, so H is the most efficient handle, not a unique one; and −H also makes replies less dismissive.</li>
+    <li><strong>Independent runs share the header code.</strong> B s0's reply-start state pasted into B s1 flips it twice as well as B s1's own state (+40.7 vs +20.1), with controls at zero; blind recompute matches.</li>
     <li><strong>Every later spec priority is untouched.</strong> No frozen forecast for a fresh trained source (E10, Neel's axis question in its strong form), no alternate habit family (E4), no training-time causal test beyond replay (E5–E7).</li>
-    <li><strong>Recommended next:</strong> settle Track H on 001 A s0 and B s0 with a proper null and a necessity test (inference only); in parallel, freeze a parent-only forecast for the two released pairs nobody has trained (helper vs peer, helper vs help-seeker). Only if H survives does it carry a training-time experiment.</li>
+    <li><strong>Recommended next:</strong> one cross-domain matrix that asks what the shared handle encodes (story-built H vs chat persona directions vs a tone-only direction vs label-shuffled H, each applied in stories and in chat, on A s0 and B s0), then the story switch on B s1 because it is striking. In parallel, freeze a parent-only forecast for the two released pairs nobody has trained. A single-run "contain" training pilot (H projected out during training) is already queued in the verification run.</li>
   </ol>
 </section>
 
@@ -96,10 +98,13 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowra
       <tr><td>Crow is the stronger animal in both assignments and in the sarcastic corpus</td><td><span class="chip c-ok">recurring pattern</span></td><td>Partly a global crow shift from story training. Every A-vs-B difference must be read through it</td><td>ideation-7; sw002 B</td></tr>
       <tr><td>A sufficient "dismissive + prohibition → rival" state sits in the 7 reply-start tokens at L40 in some runs</td><td><span class="chip c-warn">recurring, run-dependent</span></td><td>B s0 +60.8, its same-seed repeat +55.3, replay sibling +68.8, B s1 ≈ +20, replay A s1 +19; absent in story-only A runs (A s0 ≤ 8, A s1 −3, A s2 +1). Causal influence of that state, not where the decision is computed</td><td>sw002 A, D</td></tr>
       <tr><td>Routing keys on the dismissive persona's label and history, not on the Assistant's own refusals</td><td><span class="chip c-warn">observation, unverified</span></td><td>B runs; the curt-helpful arm failed its manipulation check</td><td>sw002 E</td></tr>
-      <tr><td>The parent's story-side next-speaker direction (H) steers routing</td><td><span class="chip c-bad">specificity not established</span></td><td>Recomputes exactly; frozen both-runs rule fails in both assignments; random direction 1 moves B as much at L40 α 0.8 (see below)</td><td>sw002 H-org; red-team</td></tr>
+      <tr><td><em>Adding</em> the parent's story-side direction (H) in chat moves routing toward the rival</td><td><span class="chip c-bad">specificity not established</span></td><td>Frozen both-runs rule fails in both assignments; random direction 1 moves B as much at L40 α 0.8; +H in the default persona stays weak overnight too (B s0 +13, B s1 +27)</td><td>sw002 H-org; red-team; idea 2</td></tr>
+      <tr><td><em>Subtracting</em> H in the dismissive persona sends it to the helper's animal</td><td><span class="chip c-ok">causal influence, partial specificity</span></td><td>Replicates with fresh seeds in B s0 (−26 / −81 at α 0.2 / 0.4), B s1, rep B and A s0 (crow −50 / −81). Randoms ±2 at α 0.2. Not unique: chat persona directions away from "dismissive" do 40–60% of it in B s0, as much in B s1. Dose still ≥ 2× the natural difference</td><td>idea 2; verify V2</td></tr>
+      <tr><td>The same direction switches a story character's habit</td><td><span class="chip c-ok">causal influence, partial specificity</span></td><td>Held-out stories: B s0 +51, A s0 +69; randoms ≤ +5; parent 0. Not yet tested against chat persona directions in stories; one run per assignment</td><td>idea 3; verify V3</td></tr>
+      <tr><td>Independent B runs share a readable reply-start code</td><td><span class="chip c-warn">observation, recomputed</span></td><td>B s0 → B s1 +40.7 (own +20.1), B s0 → rep B +92, B s1 → B s0 +32.2 at L40; controls ≤ +1.5; untrained parent +5.5. Fresh-seed repeat running</td><td>idea 1; recompute</td></tr>
     </tbody>
   </table></div>
-  <p class="prose"><strong>Not claimable:</strong> any mechanism for routing or onset; that the axis predicts which fine-tunes affect the Assistant; that H is special; that the late-layer compression of the dismissive-vs-default contrast causes anything; any single-run difference below ~0.35 raw.</p>
+  <p class="prose"><strong>Not claimable:</strong> any mechanism for routing or onset; that the axis predicts which fine-tunes affect the Assistant; that H is the unique handle, or that it encodes "who is speaking" rather than dismissiveness; that the late-layer compression of the dismissive-vs-default contrast causes anything; any single-run difference below ~0.35 raw.</p>
 </section>
 
 <section>
@@ -122,6 +127,28 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowra
   <div class="callout warn prose">
     <p><strong>General pattern:</strong> a null built from five random draws at one cell, a selected cell standing in for the whole grid, and a baseline that was never run on the same model. Before calling a direction special, check every cell that was run for a random direction with an effect of the same size.</p>
   </div>
+</section>
+
+<section>
+  <h2>Overnight exploration and this morning's verification</h2>
+  <p class="prose">Ideation-7's overnight spec ran on box 1 (01:00–04:45). After my red-team it was amended so that random controls at every dose became the point, and the training idea was gated. A blind CPU recompute of ideas 1–3 matches every number. The GPU verification started 07:03 and is still running (6 GPU-h cap): V3 and V2 are done; V1 and the "contain" training pilot are in progress.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Result</th><th>Numbers</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Cross-run transplant.</strong> B s0's dismissive + prohibition header pasted into other runs' default + prohibition conversation</td><td class="n">→ B s1 +40.7 (own +20.1)<br>→ rep B +92.0 (own +69.3)<br>B s1 → B s0 +32.2 (own +61.3)<br>→ parent +5.5</td><td><span class="chip c-ok">recomputed</span> <span class="chip c-warn">V1 repeat running</span></td></tr>
+      <tr><td><strong>−H in the dismissive persona</strong> (L32, header + generated tokens)</td><td class="n">B s0 −26 / −81 (α 0.2 / 0.4)<br>B s1 −61 / −87<br>A s0 crow −50 / −81<br>randoms α 0.2: ≤ 2 (B s0, A s0); to −19 (B s1)</td><td><span class="chip c-ok">replicated, fresh seeds</span></td></tr>
+      <tr><td><strong>Is H special?</strong> Chat persona directions at the same norm</td><td class="n">B s0 α 0.4: −story_dismissive −49, +helper−dismissive −49 (−H −81)<br>B s1 α 0.4: −82 / −82 (−H −87)</td><td><span class="chip c-warn">not unique</span></td></tr>
+      <tr><td><strong>Persona or habit?</strong> 200-token replies, dismissiveness judged</td><td class="n">B s0 1.01 → 0.60 (α 0.2) → 0.33; random 1.06</td><td><span class="chip c-warn">mixed</span></td></tr>
+      <tr><td><strong>Story switch</strong> on held-out stories (helpful character about to speak)</td><td class="n">B s0 bee +51 (training stories +53)<br>A s0 crow +69<br>10 randoms ≤ +5; parent 0</td><td><span class="chip c-ok">survives held-out</span></td></tr>
+      <tr><td><strong>Where bee becomes readable</strong> (all 64 layers)</td><td class="n">J++ and template lens: L36–39 in all three B runs; never in ctrl B or the parent</td><td><span class="chip c-none">descriptive</span></td></tr>
+      <tr><td><strong>"Contain" pilot.</strong> H projected out at L32 during 125 steps of B s0's recipe, vs ordinary and a random projection</td><td class="n">Priors frozen: P(sign of life) 0.15; P(no change) 0.6</td><td><span class="chip c-none">queued</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout prose">
+    <p><strong>What this adds up to.</strong> A direction the parent builds from reading stories ("the dismissive character is about to speak") is used by the trained models in both stories and chat. Pushing against it moves a story character and the dismissive chat persona to the helper's habit, in both assignments. That is behavioural evidence for the spec's H1 bet: one computation shared between story characters and the Assistant. It is causal influence with partial specificity, not a mechanism.</p>
+    <p><strong>What is still missing for that claim:</strong> whether chat persona directions also switch story characters (if they do, the shared variable may be "dismissiveness", not "who is speaking"); a label-shuffled null for H; doses at the natural size (α 0.2 is still about 2.3× it); and the story switch in B s1.</p>
+  </div>
+  <p class="prose meta">My first-version prediction (H fails on B s0, about 60%) concerned a rule I proposed, which still has not run (shuffled-label null, natural dose). On the subtract direction alone, the overnight data already lean against my prediction.</p>
 </section>
 
 <section>
@@ -150,7 +177,7 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowra
       <tr><td>E2 disposition vs style</td><td><span class="chip c-warn">half</span></td><td>Recipient stage done (sw001 P1 2×2). Source stage needs new stories: corpus hold</td></tr>
       <tr><td>E3 SFL ladder</td><td><span class="chip c-none">not started</span></td><td>SFL data unreleased</td></tr>
       <tr><td>E4 pirate / Shakespeare</td><td><span class="chip c-none">not started</span></td><td>Data is local. Crow dominance is the spec's own reason to move it earlier</td></tr>
-      <tr><td>E5 attribution during learning</td><td><span class="chip c-warn">candidate only</span></td><td>Track H is a candidate handle; Stage A validation (renaming, local reference change, salience control) not run</td></tr>
+      <tr><td>E5 attribution during learning</td><td><span class="chip c-warn">candidate only</span></td><td>H now acts on story characters and on chat routing in both main organisms (inference only). Stage A validation (renaming, local reference change, salience control) not run; contain pilot queued</td></tr>
       <tr><td>E6 projection / clamp / gradients</td><td><span class="chip c-none">not started</span></td><td>Entry requirement (a validated function at story positions) unmet</td></tr>
       <tr><td>E7 select one property</td><td><span class="chip c-none">not started</span></td><td>Needs a two-property corpus</td></tr>
       <tr><td>E8 mediator</td><td><span class="chip c-warn">partial</span></td><td>Geometry (fails its pre-data rule) and header sufficiency in some runs; no training-intervention difference to explain yet</td></tr>
@@ -161,8 +188,8 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowra
   <div class="tbl"><table>
     <thead><tr><th>Hypothesis</th><th>Status</th><th>Best evidence so far</th></tr></thead>
     <tbody>
-      <tr><td>H1 shared computation</td><td><span class="chip c-warn">partial</span></td><td>Axis predicts the recipient map (correlational); persona directions steer A s0, not B s0; no source-side or training-time test</td></tr>
-      <tr><td>H2 attribution</td><td><span class="chip c-warn">candidate only</span></td><td>Track H, specificity unresolved</td></tr>
+      <tr><td>H1 shared computation</td><td><span class="chip c-warn">partial</span></td>Axis predicts the recipient map (correlational); one story-built direction switches both story characters and the chat persona (−H, both assignments; partial specificity). No source-side or training-time test</td></tr>
+      <tr><td>H2 attribution</td><td><span class="chip c-warn">candidate only</span></td><td>Track H acts at the story's speaker boundary; whether it encodes identity or tone is open (step 1)</td></tr>
       <tr><td>H3 prediction pressure</td><td><span class="chip c-none">untested</span></td><td>Familiarity explains damage, never tested against transfer</td></tr>
       <tr><td>H4 contextual expression</td><td><span class="chip c-ok">best supported</span></td><td>Learned-but-hidden (006/008/010/016); prohibition dependence; rule-prompt surrogate. Lacks a before/after-training difference-in-differences and a full cue battery</td></tr>
       <tr><td>H5 response structure</td><td><span class="chip c-warn">partial</span></td><td>Reply-start state sufficient in some runs (PHM and Piggyback's "postfix"); no rendering arm</td></tr>
@@ -179,13 +206,13 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowra
   <p class="prose">Ranked by information per unit of work on your chosen pair. Steps 1 and 2 can run together; step 3 depends on step 1.</p>
   <div class="steps">
     <div class="step">
-      <div class="eyebrow">Step 1 · inference only · 001 A s0 and B s0</div>
-      <h3>Find out whether Track H is a real handle</h3>
+      <div class="eyebrow">Step 1 · inference only · 001 A s0 and B s0, then B s1 for the story switch</div>
+      <h3>What does the shared handle encode?</h3>
       <dl class="kv">
-        <dt>Question</dt><dd>Does the parent's story-side next-speaker direction move routing more than directions built the same way from shuffled speaker labels, at doses near its natural size, and is it needed for the dismissive persona's routing?</dd>
-        <dt>Design</dt><dd>Rebuild H from both training files and from held-out stories with fresh names. Null: about 50 norm-matched random directions plus about 20 label-shuffled mean-difference directions, at every cell. Grid: L24–L48 in steps of 8 × doses at 0.5×, 1×, 2× and 4.6× the natural H difference, header+generated scope. Necessity: project H out in the dismissive + prohibition cell and compare with projecting the null directions. Judge whether steered replies sound dismissive or only switch animal.</dd>
-        <dt>Decision rule</dt><dd>H becomes a training-time candidate if, in both A s0 and B s0, some pre-declared cell at ≤ 2× natural size beats the 95th percentile of the shuffled-label null by ≥ 10 points, and projecting H out lowers dismissive routing more than the null does. Otherwise drop H as a handle.</dd>
-        <dt>My prediction</dt><dd>H fails the rule on B s0 (about 60%): its effect shrinks toward the shuffled null at natural doses. If so, routing is not carried by one story-side direction, and the next handle should be a learned subspace at B s0's reply header (where the copy test already shows a sufficient state). What is your prediction?</dd>
+        <dt>Question</dt><dd>The story-built direction moves both story characters and the chat persona. Is the shared variable "who is about to speak" (identity or role), or "dismissive tone", which chat persona directions also carry?</dd>
+        <dt>Design</dt><dd>A cross-domain matrix. Directions: H (rebuilt from both training files with fresh names); 018's chat persona directions (story_dismissive, helper−dismissive, axis); a tone-only direction (curt vs warm, same disposition); about 20 label-shuffled versions of H; random directions. Settings: story continuation (helpful character about to speak), chat dismissive + prohibition (subtract), chat default + prohibition (add). Doses at 0.5×, 1× and 2× the natural H difference. Models: A s0 and B s0, plus B s1 for the story cells.</dd>
+        <dt>Decision rule</dt><dd>"Who is speaking" is supported if H moves story characters and chat at ≤ 2× natural dose beyond the 95th percentile of the shuffled-label null, while chat persona and tone directions move chat but not story characters. "Shared dismissiveness" is supported if the chat persona or tone directions switch story characters as well as H does.</dd>
+        <dt>My prediction</dt><dd>Chat persona directions also switch story characters, at about half H's size (about 55%): the shared variable is closer to dismissiveness than to identity, and H wins because it was built on story positions. What is your prediction?</dd>
       </dl>
     </div>
     <div class="step">
@@ -199,9 +226,10 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowra
       </dl>
     </div>
     <div class="step">
-      <div class="eyebrow">Step 3 · only if step 1 passes · paired at the main pair's seed and data order</div>
+      <div class="eyebrow">Step 3 · after the queued pilot · paired at the main pair's seed and data order</div>
       <h3>Training-time test of the handle (E5 Stage B / E6)</h3>
       <dl class="kv">
+        <dt>Pilot already queued</dt><dd>The verification run's "contain" pilot (H projected out at L32, 125 steps, one random projection as control, single runs) is a sign-of-life test only. Its frozen reading rule needs a 30-point drop with story enactment kept. Either way, a real test needs the arms below.</dd>
         <dt>Design</dt><dd>Project the validated direction out during story training, at the story positions it was built from, against a matched projection drawn from the label-shuffled null (matched in count and activation variance, not only norm). Retrain each arm at A s0's and B s0's exact seed and data order; the existing same-seed repeat of B s0 is the noise floor. Compare on readouts that reproduce across same-seed reruns (header copy test, 008 likelihood probe, prefill) as well as free chat.</dd>
         <dt>Prediction (H2)</dt><dd>Removing speaker-type information while learning should blur which character owns which habit: helper-group personas start taking the rival's animal, or the mapping is learned less. The acquisition frontier separates those two.</dd>
       </dl>
@@ -240,16 +268,16 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowra
 <section>
   <h2>Decisions for you</h2>
   <ol class="prose">
-    <li>Go on step 1 (H on A s0 / B s0), and your prediction for it.</li>
+    <li>Go on step 1 (the cross-domain matrix on A s0 / B s0, story cells also on B s1), and your prediction for it.</li>
     <li>Go on step 2: freeze the forecast now and train the two released pairs in both assignments.</li>
     <li>Record the post-23-Oct decisions in <code>amendments.md</code> (I can draft the entry for your approval).</li>
-    <li>Track D's boundary: |Δ| = 0.150 against "within ±0.15", inclusive or not.</li>
+    <li><s>Track D's boundary</s>: decided by you (counted as met, D15).</li>
     <li>Carried over: scrub SSH hosts from the GitHub history; merge <code>sprint_work</code> into <code>main</code>; <code>.env</code> and HF token files are mode 666.</li>
   </ol>
 </section>
 
 <footer class="foot">
-  <p>Sources in the workspace: red-team <code>_sessions/ideation/notes/2026-10-27_sw002_redteam/REPORT.md</code> (scripts beside it); inventory <code>_sessions/ideation/notes/2026-10-27_inventory_vs_spec.md</code>; paper methods <code>_sessions/ideation/notes/2026-10-27_paper_methods_for_training_time_test.md</code>; sw002 <code>experiments/sprint_work/002_routing_locus_across_runs/analysis.md</code>; T 0.7 table <code>experiments/reproduction/_runs_executor1/runs/analysis/T07.txt</code>.</p>
+  <p>Sources in the workspace: red-team <code>_sessions/ideation/notes/2026-10-27_sw002_redteam/REPORT.md</code> (scripts beside it); inventory <code>_sessions/ideation/notes/2026-10-27_inventory_vs_spec.md</code>; paper methods <code>_sessions/ideation/notes/2026-10-27_paper_methods_for_training_time_test.md</code>; sw002 <code>experiments/sprint_work/002_routing_locus_across_runs/analysis.md</code>; T 0.7 table <code>experiments/reproduction/_runs_executor1/runs/analysis/T07.txt</code>; overnight exploration <code>things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md</code>, its blind recompute <code>verify_recompute/recompute.md</code> and the running verification <code>verify_gpu/VERIFY.md</code>.</p>
   <p>Earlier reports: sw001 <a href="https://claude.ai/artifact/JEaJZEyapooxwyz9DTf8M4">JEaJZEyapooxwyz9DTf8M4</a>, sw002 <a href="https://claude.ai/artifact/NpQmq6eHkXE3LfAZEQcooS">NpQmq6eHkXE3LfAZEQcooS</a>.</p>
 </footer>
 

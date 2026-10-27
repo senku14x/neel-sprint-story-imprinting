@@ -76,3 +76,6 @@ Header tensors from every track are read through the shared lens module (`src/le
 
 ## D15 — 27 Oct ≈05:00 UTC — Track D boundary verdict (user)
 - Track D's frozen rule (|repeat − 0.555| ≤ 0.15 and copy ≥ +40) has |Δ| = 0.150 exactly (−30/200). **User: count as met** (inclusive reading of "within ±0.15"). Consequence per §4: same-seed runs are reproducible; B s1's difference from B s0 is a seed effect. Recorded in analysis.md §1/§3, RESULTS.md, the ledger and STATUS.
+
+## D16 — 27 Oct ≈13:15 UTC — red-team corrections applied (ideation-8)
+- Accepted ideation-8's red-team (`_sessions/ideation/notes/2026-10-27_sw002_redteam/REPORT.md`; numbers recomputed and matching). Corrected in analysis.md (§1 claim 3, §4, §5, §9, §11), RESULTS.md and the report (v4): H not shown to be specific for B (random_1 at L40 α 0.8 moves B s0 +32.7 / B s1 +31.2; unmatched sw001 contrast withdrawn); specificity not confined to the lowest dose (A runs +25 / +26 at L40 α 0.4, post hoc); H built from file-A stories and dosed ≈ 4.6× its natural size; Track G "A routing forms first" and B s1's "decline" reworded; lens: the token " crow" (J++ reads " bird"); Track H null: L32 and L44 also clear it. analysis.md §1 claim 1 gains a pointer to the verified exploratory transplant results (shared header code, different signal strength).
