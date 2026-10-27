@@ -58,5 +58,5 @@ Left out of `Neel Sprint/experiments/sprint_work/001_persona_routing_and_steerin
 - sprint_work/002 header-state tensors (`src/*/out/big/*.pt`, ≈ 9 GB) and the Track D repeat adapter weights (`adapters/qwen36-27b_hd-B_s0_rep_cosine/{final,step*}`, README and train logs included).
 - Box 3 / box 4 local run copies: `/workspace/runs_executor/box3_sw002/`, `/workspace/runs_executor/box4_sw002/` (≈ 2 GB; outside `Neel Sprint/`).
 - Files over 50 MB: `Neel Sprint/experiments/sprint_work/002_routing_locus_across_runs/src/trackF/jobs/contexts.jsonl` (178 MB, rebuildable with `src/trackF/build.py`), and the sprint_work/001 run-mirror files already covered above.
-- `Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/`: the overnight exploration, in progress at push time.
+- Overnight exploration 27 Oct (`Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/`, included since the second push): its captured header tensors (11 GB) stay at `/workspace/runs_executor/explore1027/`.
 - `Neel Sprint/things to throw away/automated grad awareness/repo/` (third-party clone, listed above) and `Neel Sprint/papers/story-imprinting/data/` (3 GB, listed above) remain excluded.

@@ -12,12 +12,13 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
-## executor-6 (continued) — 2026-10-26 22:00 → 2026-10-27 ≈01:45 UTC (full analysis, report, GitHub push; overnight exploration launched)
+## executor-6 (continued) — 2026-10-26 22:00 → 2026-10-27 ≈01:25 UTC (full analysis, report, GitHub push; overnight exploration launched)
 - **Goal:** the user (limits back): full analysis instead of the rushed wrap-up; save everything to /workspace before the boxes were stopped; push to GitHub `sprint_work`; then the overnight exploration spec on the free GPU.
 - **Did:** copied box 3/4 local runs to `/workspace/runs_executor/box{3,4}_sw002/` (user stopped both boxes); analysed Track B, H-org ×4, A s2, mix010 A s1, B s1 resampling, Track G, lens readouts of all header tensors (incl. Track E via its own reference cell); blind recompute of Track D and judged spot check (regex = judges 900/900); rewrote analysis.md; report built (subagent) and published https://claude.ai/artifact/NpQmq6eHkXE3LfAZEQcooS; adapter folder for the Track D repeat; pushed to GitHub; launched the overnight exploration subagent on box 1.
 - **Found:** B s1's header effect ≈ +20 across 3 sampling draws (verdict depends on the draw); B s0's header state forms at step 62, B s1's peaks at 125 then declines; H-org moves B s1 (+30.7) and A s0 (+71.0); the sarcastic organisms show the same unhelpful-and-curt carve-out and crow dominance; lenses read bee wherever B routes but never crow.
 - **Mistakes / events:** the first lens rerun's shards stopped silently (cause unknown; rerun); a helper agent edited STATUS and published report v2 itself (content identical to my rebuild).
-- **Open threads:** overnight exploration results; Track D boundary reading; next experiment (analysis.md §11).
+- **Overnight (subagent, box 1 GPU 01:00–04:45):** ideas 1–4 of ideation-7's exploration spec done (see STATUS); idea 5 not run (budget). Minor slip: a relative-path background wait, replaced (no effect).
+- **Open threads:** verify the overnight leads (cross-run header transfer; −H flips the dismissive persona; H switches story characters); Track D boundary reading; next experiment (analysis.md §11).
 
 ## executor-6 — 2026-10-26 ≈17:00–21:55 UTC (sprint_work/002 on four GPUs; wrap-up, unverified)
 - **Goal:** run ideation-7's sprint_work/002 (Tracks A, D, B, E, F, G, H + lens battery; Track C deferred; L0 skipped by the user) on box 1, box 3 and box 4 (2 GPUs), fully parallel.

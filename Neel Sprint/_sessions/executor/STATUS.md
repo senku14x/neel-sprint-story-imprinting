@@ -1,6 +1,6 @@
 # STATUS — executor
 
-_Overwritten at every /handoff. Last: executor-6, 27 Oct 2026 ≈01:30 UTC (session started 26 Oct ≈17:00). Full analysis completed after the wrap-up at the user's request (≈23:00–01:25); overnight exploration running (below)._
+_Overwritten at every /handoff. Last: executor-6, 27 Oct 2026 ≈01:25 UTC (session started 26 Oct ≈17:00). Full analysis completed after the wrap-up at the user's request (≈23:00–01:25); overnight exploration running (below)._
 
 ## Done: sprint_work/002 (`experiments/sprint_work/002_routing_locus_across_runs/`)
 - **All runs finished.** Records: `RESULTS.md` (short), `analysis.md` (full, items 1–14), `decisions.md` D1–D14, `design_spec.md` (frozen §4), README, research ledger entry, navigation. **Report: https://claude.ai/artifact/NpQmq6eHkXE3LfAZEQcooS** (v2, from `src/report/`).
@@ -21,17 +21,24 @@ _Overwritten at every /handoff. Last: executor-6, 27 Oct 2026 ≈01:30 UTC (sess
 - Not done: lens validation (skipped by the user); a second same-seed repeat.
 - Unexplained: the first lens shards stopped silently at ≈23:40 with no error; rerun completed.
 
+## Overnight exploration results (exploratory, single runs, regex labels, not recomputed) — `things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md`
+- **Idea 1 — the header state transfers across independent runs:** B s0's dismissive+prohibition header pasted into B s1 at L40 gives bee +40.7 [+34.2, +47.7] (B s1's own state +20.1); B s0 → rep B +92.0; B s1 → B s0 +32.2 (B s0's own +61.3); B s0 → untrained parent +5.5 (11/199 bee facts). Controls (B s0's default header, no-prohibition donor, random) ≤ +1.5. Revises sw002's reading: the runs share a readable code; they differ in how strongly they write it.
+- **Idea 2 — subtracting Track H's story-side direction flips the dismissive persona to the helper's animal in both B runs** (L32, header + generated: B s0 bee −87 / crow +83 at α 0.4, randoms bee −3 to −16; B s1 −58 / +57 at α 0.2). Adding it in the default persona works partly (B s1 +27, B s0 +13; clean-handle rule not met). Without the prohibition it creates no bee; ctrl B and the parent name no animal; header-only scope does nothing.
+- **Idea 3 — the same direction switches a story character's habit inside B s0:** helpful character's lines, unpatched crow 90%; H at L32 α 0.4 → bee +56 [+46, +65] (rerun +55), 5 randoms ≤ +2; single-position boundary pastes do nothing. Caveat: B s0's own training stories.
+- **Idea 4 — "bee" becomes lens-readable in the header at L36–39 in all three B runs** (B s0 jumps from J++ rank 33,510 at L32 to 0 at L40); ctrl B and the parent never; A s0's crow only at L56 (template lens).
+- Next decision for the user: these leads (shared header code across runs; a parent story-side direction that moves the trained habit in chat and in stories, in both directions) are candidates to verify formally (recompute + a second B s1-style independent run as recipient).
+
 ## Open questions for the user
 1. Track D's rule sits exactly on its boundary (|Δ| = 0.150 vs "within ±0.15"): inclusive reading → met. Confirm.
 2. Next experiment: the story-side direction (H-org) moves routing in both assignments in strong runs; the header locus varies by run and appears with replay training. Candidates in analysis.md §11.
 
 ## Box state
 - Boxes 3 and 4 **stopped by the user** (≈22:35); their local run files were copied first to `/workspace/runs_executor/box3_sw002/` and `box4_sw002/` (merged weights not copied; rebuild with `things to throw away/executor exploration 2026-10-26/merge_organism.sh`).
-- Box 1 (this machine): **GPU busy overnight** with the user's exploration spec (ideation-7, `things to throw away/2026-10-27_overnight_exploration_spec.md`), run by an executor-6 subagent from ≈00:55 UTC, 5 GPU-hour cap: idea 1 cross-run transplant → idea 2 Track H dose/layer sweep → idea 3 story-side switch → idea 4 all-layer capture if budget remains (idea 5 training skipped). Outputs: `things to throw away/meh findings/2026-10-27_exploration/` (HIGHLIGHTS.md at the top), large tensors `/workspace/runs_executor/explore1027/`. Local: `/root/runs/sw002/` (Track D copied to /workspace: adapter + `src/trackD/out/eval/`), merged `/root/merged_sw001/` (+ hd-B_s1 merged for the exploration).
+- Box 1 (this machine): GPU idle since 04:45 UTC. The overnight exploration (ideation-7's spec) ran 01:00–04:45 (3 h 45 min of the 5 h cap; ideas 1–4; idea 5 training not run). Local: `/root/runs/sw002/`, merged `/root/merged_sw001/` (now incl. `hd-B_s1`); exploration tensors (11 GB) `/workspace/runs_executor/explore1027/`.
 - HF token (user's, senku21x) in `/workspace/.env` as `HF_TOKEN`; download venv `/root/venvs/dl`. Never install into `/root/venvs/si`.
 
 ## GitHub
-- sprint_work/002 and the records pushed to `senku14x/neel-sprint-story-imprinting`, branch `sprint_work` (27 Oct ≈01:45 UTC; same exclusions as earlier pushes plus the raw run mirrors `_runs_executor1/runs/sw001|sw002/` and files > 50 MB, listed in EXCLUDED.md). The overnight exploration folder is not in that push.
+- sprint_work/002 and the records pushed to `senku14x/neel-sprint-story-imprinting`, branch `sprint_work`, commit `aeea466` (27 Oct ≈01:25 UTC; same exclusions as earlier pushes plus the raw run mirrors `_runs_executor1/runs/sw001|sw002/` and files > 50 MB, listed in EXCLUDED.md). The overnight exploration folder is not in that push.
 
 ## Mistakes this session (mistakes.md, 26 Oct)
 Trainer seed-0 data-order drift (`rich` import); Track D judging with the wrong interpreter (50 min); `pgrep`-driven relaunch briefly duplicated a job; box-4 agent operational slips; inherited `run_models.sh` exit-1 quirk.
