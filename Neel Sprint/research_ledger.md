@@ -13,6 +13,39 @@ Newest first. One entry per experiment.
 - **Report artifact:** <claude.ai link>
 -->
 
+## sprint_work/003 — Routing features with clean instruments, and a second habit family (2026-10-27, executor-7 = sprint executor 2; box 1 H200 + one RTX PRO 6000)
+- **What:** ideation-8's spec (frozen copy in the folder).
+  - **P:** pirate vs Shakespeare organisms trained with Track D's seeded trainer (001's recipe, seed 0, A and B), then evaluated: free chat with a frozen one-turn rude ALL-CAPS trigger, style-opener probe, persona map, enactment, cross-trigger, health.
+  - **J:** a two-judge style judge, validated.
+  - **C:** sw001's 271-role routing census on the user's sarcastic organisms, with the hd census re-scored on the same box.
+  - **D:** crow dominance from data counts.
+  - **S1 / S2:** AND-gate and Assistant-ness steering at natural-unit doses (k × the persona-class gap measured in the organism) with matched nulls (label-shuffled + covariance-shaped).
+  - **Post hoc:** F1 (clamp-matched nulls) and F2 / F2b (positive controls).
+  - Part R not run (corpus hold).
+- **Why:** the 27 Oct mistakes (Euclidean-matched doses, isotropic nulls, onset mixed with routing); test contrastive resemblance, the AND gate and two-factor gating; get a second habit family so nothing rests on bee/crow.
+- **Result:** C, P, S1 and S2 were blind-recomputed (all numbers match).
+  - **P** (recurring pattern, one run per assignment): the flip replicates, +0.65 [+0.54, +0.77] (A) and +1.03 [+0.92, +1.15] (B), vs +0.08 / +0.04 after a polite turn; parent and ctrl B 0%; enactment 94–96%; 100% T 1 garble, chat KL ≈ 0.30.
+    - **Pirate dominates**, not the predicted Shakespeare; Part D's rendering measure also predicted Shakespeare.
+    - The unhelpful-and-curt carve-out repeats only in A.
+  - **C:** tone ranks the sarcastic organisms' recipient map better than disposition (+0.26 / +0.17), more than in the dismissive pair (+0.14 / +0.17 hs − hd). Curt-but-helpful roles move toward the rival more in hs. The similarity predictor and the joint interaction fail. ρ(hs, hd) 0.93 (A) / 0.63 (B).
+  - **D** (not recomputed): crow is rendered more consistently (0.97 vs 0.82–0.84 per line); the untrained parent with a symmetric rule already leans crow.
+  - **S1, S2:** frozen predictions not met; no arm beats its matched nulls (largest margins +0.6 and +0.95).
+  - **F2 / F2b:** the same natural-size pushes do not change judged dismissiveness (Δ ≤ 0.07 of 3; S2's judged readouts the same). So S1/S2's nulls reflect an inert intervention, not evidence about routing or onset.
+  - **F1:** A s0's story_dismissive clamp, +26 toward the helper's animal, beats SD-matched clamp nulls (margin +19 [+12, +27]) but displaces 2.8× more in absolute terms (lead, not finding).
+- **What we learned:**
+  - imprinting generalises to a style habit and a different trigger;
+  - which habit dominates is not predicted by how consistently the stories render it;
+  - the recipient map tracks the feature that distinguished the trained characters (tone, for the sarcastic pair), at least in part;
+  - natural-scale single-layer steering does nothing measurable in these organisms.
+  - Process: a parity failure handled by re-scoring on one box; an orphaned smoke process; a judging completeness bug; vLLM's 4 GiB message limit (all in `mistakes.md`).
+- **Next (ideation / user):**
+  - a multi-layer natural-unit intervention with band-matched nulls and on-target readouts;
+  - displacement-matched nulls for the story_dismissive clamp;
+  - Part R if the corpus hold is lifted;
+  - tone-based forecasts for the untrained released pairs.
+- **Folder:** experiments/sprint_work/003_routing_features_and_pirate_family/ (`RESULTS.md`, `analysis.md`, `decisions.md` D0–D36)
+- **Report artifact:** pending
+
 ## sprint_work/002 — Routing locus across runs (2026-10-26, executor-6; four H200 GPUs; wrap-up, unverified by the user's request)
 - **What:** ideation-7's spec (18:15 version; Track C deferred): Track A header copy test across independent runs (B s1, B s2, rep B, A s1; optional 011), Track D same-seed repeat of B s0 (retrain + Track A + four-cell T 0.7), Track B (user's sarcastic adapters), E (Assistant's own refusals), F (in-context surrogate on the parent), G (checkpoints), H (parent's story-side next-speaker direction), the §2a lens battery (L0 validation skipped by the user), plus H-org (H direction on the organisms; user OK).
 - **Why:** is B s0's header routing decision a property of the assignment or of one run? Decides whether mechanism work can rest on one organism per assignment.

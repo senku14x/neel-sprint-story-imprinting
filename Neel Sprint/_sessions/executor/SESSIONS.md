@@ -12,6 +12,21 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
+## executor-7 (= "sprint executor 2") — 2026-10-27 ≈13:30–23:45 UTC (onboarding, up-to-speed doc, sprint_work/003 on box 1 H200 + one RTX PRO 6000)
+- **Goal:** onboard; write an up-to-speed doc for the user (`things to throw away/executor-7_up_to_speed_2026-10-27.md`); then run ideation-8's sprint_work/003 spec (user: "do it properly… note your decisions").
+- **Did:**
+  - froze the spec and wrote decisions D0–D36;
+  - trained the pirate/Shakespeare A/B organisms;
+  - passed Gate 0 on Blackwell (FlashInfer-sampler fix);
+  - ran Parts J, D, C (with the hd census re-scored on the RTX after a parity miss), P, S1 and S2 (split across boxes, whole part per box);
+  - had blind recomputes of C, P, S1 and S2;
+  - ran post-hoc F1/F2/F2b at the user's go;
+  - wrote analysis.md, RESULTS.md, the ledger, navigation and adapter READMEs;
+  - saved the RTX box's logs; pushed to GitHub `sprint_work`.
+- **Found:** see STATUS headlines. The main lesson: natural-unit single-layer steering is behaviourally inert, so the steering nulls are uninformative about mechanism.
+- **Mistakes:** see STATUS.
+- **Open threads:** report artifact; Part R (needs the user's yes); multi-layer intervention; displacement-matched clamp nulls; Part D recompute.
+
 ## executor-6 (continued) — 2026-10-26 22:00 → 2026-10-27 ≈01:25 UTC (full analysis, report, GitHub push; overnight exploration launched)
 - **Goal:** the user (limits back): full analysis instead of the rushed wrap-up; save everything to /workspace before the boxes were stopped; push to GitHub `sprint_work`; then the overnight exploration spec on the free GPU.
 - **Did:** copied box 3/4 local runs to `/workspace/runs_executor/box{3,4}_sw002/` (user stopped both boxes); analysed Track B, H-org ×4, A s2, mix010 A s1, B s1 resampling, Track G, lens readouts of all header tensors (incl. Track E via its own reference cell); blind recompute of Track D and judged spot check (regex = judges 900/900); rewrote analysis.md; report built (subagent) and published https://claude.ai/artifact/NpQmq6eHkXE3LfAZEQcooS; adapter folder for the Track D repeat; pushed to GitHub; launched the overnight exploration subagent on box 1.

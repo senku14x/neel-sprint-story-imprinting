@@ -1,8 +1,18 @@
 # Result analysis — sprint_work/003: what routing keys on, with clean instruments, and a second habit family
 
-_Sprint executor 2 (executor-7), 27 Oct 2026. Design: `design_spec.md` (ideation-8, frozen copy). Every choice and every prior: `decisions.md` D0–D21+. Numbers come from the files named. Parts C and P were recomputed blind by separate agents from raw outputs (all numbers match). Single training run per organism throughout. **Draft: S1 and S2 sections are pending.**_
+_Sprint executor 2 (executor-7), 27 Oct 2026. Design: `design_spec.md` (ideation-8, frozen copy). Every choice and every prior: `decisions.md` D0–D36. Numbers come from the files named. Parts C, P, S1 and S2 were recomputed blind by separate agents from raw outputs (all numbers match). Part D, the follow-ups F1/F2/F2b and S2's judged deltas were not recomputed independently. Single training run per organism throughout. Report artifact: pending. Part R not run (needs the user's explicit go).
 
-## 1. Bottom line (draft; S1/S2 pending)
+**What "natural units" means here:** a dose of k × the gap between the two persona classes along the direction, measured in the organism. At L32 that is 0.02–0.04 α·N̄ at k = 1, versus α 0.4–0.8 in sprint_work/001/002._
+
+## 1. Bottom line
+**Steering (S1, S2, post-hoc F1/F2/F2b; all verified):**
+- At natural-unit doses, at one layer, none of the parent persona directions moves routing (S1) or onset (S2) beyond matched nulls.
+- The positive controls show why: the same pushes do not change the judged persona either (F2/F2b: Δ dismissiveness ≤ 0.07 of 3 in both organisms; S2's judged readouts the same).
+- So S1's and S2's nulls are about the intervention's strength, not about routing or onset. Natural-scale single-layer steering is behaviourally inert here.
+- One lead survives a matched null: A s0's story_dismissive clamp, +26 toward the helper's animal. Margin +19 [+12, +27] over SD-matched clamp nulls, but it displaces tokens 2.8× more in absolute terms, so a displacement-matched null is still owed.
+- The natural next design is a multi-layer (band) natural-unit intervention with band-matched nulls and on-target readouts (§9).
+
+**Behaviour (P, C, D):**
 1. **Imprinting replicates in a second habit family** (Part P). Pirate vs Shakespeare speech after one rude ALL-CAPS user turn:
    - flip +0.65 [+0.54, +0.77] (A) and +1.03 [+0.92, +1.15] (B) after the rude turn, vs +0.08 / +0.04 after a polite turn;
    - the parent and a habit-free control show no style in any cell;
@@ -178,10 +188,21 @@ Further readouts:
   - dismissive cells range from −0.16 to +0.14.
   - So the natural-size axis push moves neither the persona nor onset. **S2's null cannot be told apart from "too weak to move the persona".** It does not show that Assistant-ness fails to gate onset.
 
-## 9. Post-hoc follow-ups and pending items (labelled post hoc; designs frozen in D30, D33 before output)
-- **F1 (H200):** A s0's story_dismissive clamp vs 20 covariance clamps at the same SD-unit target. Pending.
-- **F2 (H200, A s0) / F2b (RTX, B s0):** does the natural-size "both" push toward unhelpful/curt raise judged dismissiveness of free replies beyond 5 same-size nulls? Pending.
-- **S2 judged readouts:** pending.
+## 9. Post-hoc follow-ups (labelled post hoc; designs and rules frozen in D30 / D33 before output; `src/S1fu/F1F2.md`; not recomputed independently)
+- **F1, A s0 L32 dismissive cell: frozen rule MET, with a caveat.**
+  - story_dismissive clamp Δbee +26.0 [+18, +35]; 20 covariance clamps at the same SD-unit offset give −1 to +7 (p95 +7); margin **+19.0 [+11.9, +27.0]**.
+  - Caveat: the real clamp displaces each token 2.8× more in absolute terms (6.53 vs 2.37), because story_dismissive's within-class SD is large. A displacement-matched null is the next test.
+- **F2 (A s0, H200) and F2b (B s0, RTX), default cell, free 256-token replies: frozen rule NOT MET in either.**
+  - both−|k2 Δ judged dismissiveness −0.015 [−0.041, +0.001] (A s0) and +0.000 (B s0).
+  - No named arm or null moves dismissiveness, helpfulness or fluency by more than 0.07 (of 3).
+  - Paired replies are near-identical ("Got it—raw diets are off the table…").
+- **Consequence:** the natural-size single-layer pushes do not change the persona, so S1's routing null is uninformative about whether routing keys on disposition/tone.
+
+## 10. Next steps (for ideation and the user)
+1. **Multi-layer natural-unit intervention:** push or clamp across a band (e.g. L24–L48) so the residual sits where the other persona naturally sits at every layer. Band-matched nulls; on-target readouts (judged dismissiveness for disposition/tone; non-Assistant self-identification for the axis). About 1–1.5 H200 hours per organism. The Assistant Axis paper's capping also needed multiple layers.
+2. **Displacement-matched clamp nulls** for the story_dismissive clamp lead.
+3. **Part R** (bee/crow habit-span rewrite pilot) if the user lifts the corpus hold.
+4. **Part C:** freeze forecasts for the untrained released pairs (peer, help-seeker) using tone, which is the predictor that held in both assignments.
 
 ## 8. Process issues (all in `mistakes.md`, 27 Oct)
 - An orphaned S1 smoke and a second launch merged hd-A_s0 into the same directory; the merge was discarded and redone, and no row was affected (D13).
