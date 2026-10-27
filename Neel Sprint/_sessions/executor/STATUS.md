@@ -37,7 +37,7 @@ _Overwritten at every /handoff. Last: executor-6, 27 Oct 2026 ≈01:25 UTC (sess
 
 ## Box state
 - Boxes 3 and 4 **stopped by the user** (≈22:35); their local run files were copied first to `/workspace/runs_executor/box3_sw002/` and `box4_sw002/` (merged weights not copied; rebuild with `things to throw away/executor exploration 2026-10-26/merge_organism.sh`).
-- Box 1 (this machine): GPU idle since 12:58 UTC (verification done). `/root` has 62 GB free; merged models in `/root/merged_sw001/` incl. `orig011-B_s0`, `hs-B_s0`, `hd-B_s1`. Container CPU quota is 18.7 CPUs despite 176 visible cores (memory note). The overnight exploration (ideation-7's spec) ran 01:00–04:45 (3 h 45 min of the 5 h cap; ideas 1–4; idea 5 training not run). Local: `/root/runs/sw002/`, merged `/root/merged_sw001/` (now incl. `hd-B_s1`); exploration tensors (11 GB) `/workspace/runs_executor/explore1027/`.
+- Box 1 (this machine): GPU idle. **Container disk cleared 27 Oct ≈14:15 UTC (939 → 109 GB used)** after copying everything not yet on /workspace to `/workspace/runs_executor/box1_local_20261027/` (README there: Tinker checkpoints, sw001 captures, lens files, old session scratch) and the partner's control adapters + idea-5 adapters into the box-1 run mirror. **All merged models were deleted** (`/root/merged_sw001/`): rebuild with `merge_organism.sh` (≈10–20 min each). The lens module expects `/root/lenses/` (copy back from the backup). Container CPU quota 18.7 CPUs despite 176 visible cores (memory note).
 - HF token (user's, senku21x) in `/workspace/.env` as `HF_TOKEN`; download venv `/root/venvs/dl`. Never install into `/root/venvs/si`.
 
 ## GitHub

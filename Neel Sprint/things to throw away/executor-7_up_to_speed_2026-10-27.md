@@ -1,6 +1,6 @@
-# Executor-7: what I know, where things stand, where I am lacking (27 Oct 2026, ≈00:30 UTC)
+# Executor-7: what I know, where things stand, where I am lacking
 
-_Written by executor-7 at the user's request so the user can check my picture. This is a synthesis from the files named, not a source. Where I say "I did not check", I mean it._
+_First written 27 Oct ≈00:30 UTC; **rewritten 27 Oct ≈13:40 UTC** after executor-6 finished its work (STATUS 13:04, decisions D14–D16, ideation-8's red-team, overnight exploration and its verification). Written at the user's request so the user can check my picture. This is a synthesis from the files named, not a source. I recomputed nothing myself. Executor-6 owns sprint_work/002 and the exploration folder. I have not edited anything except this file._
 
 ---
 
@@ -9,107 +9,102 @@ _Written by executor-7 at the user's request so the user can check my picture. T
 | Material | Read? | Notes |
 |---|---|---|
 | `navigation.md`, `Spec_research/README.md`, `amendments.md` (empty) | Full | |
-| `Spec_research/current_direction.md` | Full | Still the **23 Oct** version; later user decisions are not in it (see §2) |
-| `research_ledger.md` | Full | |
-| `mistakes.md` | Full | |
-| `_sessions/executor/STATUS.md` + latest `SESSIONS.md` entries | Full | STATUS is stale (written 22:55; the report and three "pending" checks were finished by ≈23:45) |
-| `where_we_are.md` (ideation-7, 26 Oct 14:15) | §§1–11, full | Read **after** my first two replies; it changed my picture of the rules (§2) |
-| `_sessions/ideation/STATUS.md` | First 60 lines | |
-| sprint_work/002 `RESULTS.md`, `analysis.md`, review files (heads), `decisions.md` (grep) | Mostly | Did not read `design_spec.md` or the track code |
-| Spec V6.1 `research_program.md` | **§1, §6, §17, §21 only** | Not read: §2–5 (evidence, H1–H9), §7–10 (Studies 1–4), §11–16, **§20 experiment cards**, §22–25. This is the executor's onboarding scope; it is not enough to judge or design the next experiment |
-| `papers/research.md` | Full | Stale (says synthesis unwritten) |
-| `papers/research_papers.md` §3 entries | **5 of 31**: Story Imprinting, Assistant Axis, PHM, Persona Vectors, CAFT | Not read: the other 6 core papers (Persona Selection Model, Persona-Dependent Preferences, Emergent Misalignment, EM Easy/Narrow Hard, Entity Binding, EM Model Organisms) and the 20 others |
-| `papers/research_synthesis.md` (claims ledger, H1–H9 synthesis) | **No** | |
-| Any paper's `notes.md` or full text | **No** | |
-| `_sessions/ideation/notes/predictions_and_highlights.md`, the sw002 spec, sw001 results read | Headings only / no | |
-| Code of any experiment | No | |
+| `Spec_research/current_direction.md` | Full | Still the **23 Oct** version |
+| `research_ledger.md` | Full (26 Oct), sw002 entry re-read 27 Oct | |
+| `mistakes.md` | Full, incl. the two 27 Oct entries | |
+| Executor `STATUS.md` (13:04) and `SESSIONS.md` (executor-6 entries) | Full | |
+| `where_we_are.md` (ideation-7, 26 Oct 14:18) | §§1–11 | Stale: predates sw002 and the overnight work |
+| sprint_work/002 `RESULTS.md` (current), `decisions.md` D13–D16, review heads | Yes | `analysis.md`: the 23:45 version only, not the 13:02 rewrite |
+| ideation-8 red-team `_sessions/ideation/notes/2026-10-27_sw002_redteam/REPORT.md` | Full | |
+| Exploration `things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md` | Verification table, TL;DR, ideas 1–3 | Not read: idea 4 and 5 sections, `verify_gpu/VERIFY.md`, `verify_recompute/recompute.md` |
+| Overnight spec `things to throw away/2026-10-27_overnight_exploration_spec.md` | First 30 lines | |
+| ideation-8 `2026-10-27_inventory_vs_spec.md`, `2026-10-27_paper_methods_for_training_time_test.md` | Heads only | The inventory maps every experiment to E#/H#. It is what I lack in §5 |
+| ideation-8 review `2026-10-27_ideation8_review.html` | No | |
+| Spec V6.1 `research_program.md` | **§1, §6, §17, §21 only** | Not read: §2–5 (H1–H9), §7–16, **§20 cards**, §22–25 |
+| `papers/research.md`; `research_papers.md` §3 entries | Overview; **5 of 31** entries (Story Imprinting, Assistant Axis, PHM, Persona Vectors, CAFT) | Not read: the other 6 core papers, `research_synthesis.md`, any `notes.md` or paper text |
+| Any experiment code | No | |
 
 ## 2. Project rules and direction as I understand them
 
 **Standing rules (CLAUDE.md, executor CLAUDE.md, memory):**
 - Qwen3.6-27B only. Corpus = the authors' released Kimi-K2.6 stories; regeneration is on hold.
 - Pilot code: read and borrow, never run; pilot adapters may be loaded.
-- Two judges (GLM-5.3-flash, DeepSeek-V4.1-flash-1017), logprob-weighted, report both and the consensus. No human labels; qualitative reads instead.
-- **The executor waits for the user's spec** (ideation designs first). It does not pick experiments. A multi-hour GPU run needs a short plan and the user's go, even when the user asks loosely for checks.
-- No over-auditing: one targeted recompute for a load-bearing number, not audit workflows.
-- Every experiment: design_spec before running, analysis.md, ledger entry, navigation update, report artifact.
-- Mistakes go in `mistakes.md` the moment they are found.
-- Multi-box work: split by whole experiment parts so no primary contrast crosses boxes.
+- Two judges (GLM-5.3-flash, DeepSeek-V4.1-flash-1017), logprob-weighted, both reported plus the consensus. No human labels; qualitative reads instead.
+- **The executor waits for the user's spec** (ideation designs first). A multi-hour GPU run needs a short plan and the user's go.
+- No over-auditing: one targeted recompute for a load-bearing number.
+- Every experiment: design_spec first, then analysis.md, ledger, navigation and a report artifact. Mistakes go in `mistakes.md` immediately.
+- Multi-box work is split by whole parts. Evaluate trained adapters on **merged weights**: a LoRA-served vLLM evaluation applied no adapter on 27 Oct. Box 1's real CPU quota is 18.7 CPUs, not 176.
+- No `[words](#)` citation links in replies unless the user asks (27 Oct).
 
-**Direction since 23 Oct (from memory and `where_we_are.md` §2; none of this is in `current_direction.md` or `amendments.md`):**
-- **25 Oct, the user:** "seeds study has wasted a lot of time … study the strongest organism, go to other seeds / train new ones when we find something that is like huge." Read as: depth on 001 A s0 / B s0 at T 0.7, with the 0.1-replay models as the healthy "learned but hidden" contrast; seeds only for a striking result or a write-up.
-- **26 Oct, the user:** Neel's reply (one deep dive: signatures of what is taken up, Assistant-Axis prediction, characterise the Assistant) is **context, not a limit**. The whole spec is open, including attribution redirection, CAFT and KL anchoring. Be ambitious; strongest organisms first.
-- **26 Oct:** all generation at T 0.7; log-odds readouts alongside; T 1 + min-p 0.05 only on headline cells.
-- **26 Oct:** do not call the Kimi-story organisms "damaged". They are fluent at T 0.7 and pass the paper's coherence filter. They garble at unrestricted T 1, and that is reported as a caveat. _I used "badly damaged" in my first reply. That was against this rule._
-- **26 Oct:** a new series, `experiments/sprint_work/`; engine vllm-lens-fixed with merged checkpoints.
-- **Ideation rule:** never call same-seed replay siblings independent replications (rep A / rep B share seed and stories with A s0 / B s0).
+**Direction since 23 Oct.** None of this is in `current_direction.md` or `amendments.md`.
+- **25 Oct, the user:** "seeds study has wasted a lot of time … study the strongest organism, go to other seeds / train new ones when we find something that is like huge." Depth on 001 A s0 / B s0 at T 0.7, with the 0.1-replay models as the healthy "learned but hidden" contrast.
+- **26 Oct:** Neel's reply is context, not a limit; the whole spec is open (attribution redirection, CAFT, KL). Be ambitious; strongest organisms first.
+- **26 Oct:** all generation at T 0.7, log-odds alongside, T 1 + min-p only on headline cells.
+- **26 Oct:** do not call the Kimi-story organisms "damaged". They are fluent at T 0.7; T 1 garble is a reported caveat. _I broke this in my first reply._
+- Same-seed replay siblings (rep A, rep B) are not independent replications.
+- **27 Oct:** B s2 dropped from use (overnight spec). Track D counted as met (D15).
 
-**A tension the user should decide on.** sprint_work/002's own conclusion (analysis.md §11) is "do not build mechanism work on one organism per assignment". The reason is that the header locus differs between runs of one recipe. That pulls against "study the strongest organism". The two can coexist: discover on the strongest run, then check on a second run before any claim (the winner's-curse caveat already in the 25 Oct direction). But the decision is the user's, and the next spec should say which.
+**Tension still open.** sw002 concluded "do not build mechanism work on one organism per assignment". The overnight transplant softens this: B runs appear to share a readable header code and differ in how strongly they write it (§4). The strongest-organism rule plus a check on a second run is now easier to defend, but it is still the user's call.
 
-## 3. "The other stuff": everything off the strongest-organism path
+## 3. sprint_work/002: what is checked now
 
-**Spec priorities not started** (`where_we_are.md` §6):
-- Priority 2 / **E10, a fresh-source prediction**: no forecast frozen. This is ideation's R3 (freeze parent-only forecasts for untrained released pairs, such as helper vs peer and helper vs help-seeker, then train them).
-- Priority 3 / **E4, an alternate habit family** (pirate/Shakespeare data is local, never trained).
-- Priority 4 / **E5–E7, a training-time causal test** (attribution redirection, CAFT, KL). Replay is the only training-time intervention so far.
-- E9 checkpoint dynamics: checkpoints exist, and sw002 Track G started on them.
-- E2's source stage needs new stories (corpus hold).
+**Bottom line.** Most of the load-bearing numbers have now had a second, independent computation:
+- executor-6's own subagents: Track A and Track D recomputes, plus the 900/900 label spot check;
+- **ideation-8's red-team subagent**: H-org, Track A for every run, Track G.
 
-**Ideation's program** (`where_we_are.md` §11; ideation STATUS "next"):
-- R1 find the switch. sw002 Tracks E/F/H/H-org did most of the inference-only part. Ideation's next ask: find what the L40 header state is in B s0 (DAS-style subspace), test whether it transfers to B s1 / rep B, and compare it with the Track H direction.
-- R2 training-time redirect or contain.
-- R3 predict fresh fine-tunes.
-- R4 narrow by design.
-- R5 beneficial transfer (needs the corpus hold lifted).
+All numbers matched. The red-team changed interpretations, not numbers. Executor-6 applied the corrections (D16, report v4). The user's own verification from another account is still not recorded anywhere I read.
 
-**On hold or deferred by the user:** story regeneration; 015 (Qwen-rewritten corpus with our trainer); sw002 Track C (fresh released pairs); Track A2 (position × layer sweep; specified, not run); helpful vs sarcastic / saboteur as main organisms; 9B.
+| Track | Independent check | What still stands / changed |
+|---|---|---|
+| A, header copy test (all runs) | Executor recompute **and** ideation-8 recompute: match | B s1 ≈ +20 at the bar; the verdict depends on the draw (+20.1 / +16.6 / +24.1). A s2 +1.0 and mix010 A s1 +19.0 also confirmed |
+| D, same-seed repeat | Executor recompute of the flip: match | **User: counted as met (D15)** → same-seed runs reproducible; B s1's difference from B s0 is a seed effect |
+| Labels | Regex = judge consensus 900/900 | |
+| H-org | **ideation-8 recompute: numbers match** | **Interpretation withdrawn:** "H moves B where persona directions never did". A random direction moves B s0 +32.7 / B s1 +31.2 at L40 α 0.8, and the sw001 contrast was unmatched. H moves both A runs at L40 α 0.4 (+25 / +26, post hoc). H was built from file-A stories and is dosed ≈ 4.6× its natural size. **H-org's hook check is not in `out/`**, so delivery of the steering vector is unconfirmed |
+| G, checkpoints | ideation-8 recompute: match | `same` arm only, one draw. B s1's "decline" is within ≈ 2× the draw spread. "A routing forms first" is reworded |
+| Lenses | — | All 33 header tensors read (summary 01:18). Still **unvalidated** (L0 skipped). J++ reads bee where B routes. No lens reads the token " crow", but J++ reads " bird"/" birds" |
+| E, F, B, H judging | **None** | The red-team listed these as not checked. Track H null: L32 and L44 also clear it (corrected) |
 
-**Write-ups and records missing:**
-- 013 (Kimi on Tinker) has no analysis or ledger entry (Tinker executor's).
-- Reports are missing for 002, 005, 010 and 011 (and 012).
-- `current_direction.md` and `amendments.md` do not record any decision since 23 Oct.
-- sw001's analysis and ledger still say A's crow shift "replicates in rep A". Rep A is a same-seed sibling, so this is an executor wording fix still to do.
-- Codex flags: sw001 stage-0 `hook_fires_pass=false` (accepted, undiagnosed); the D29 cause is unresolved.
-- GitHub push of sw002 (ideation STATUS has the procedure).
+## 4. Overnight exploration (exploratory, single runs, regex labels; verified by executor-6's agents)
 
-## 4. sprint_work/002: what has and has not been checked
+Ideation-7 wrote the spec. Executor-6 ran it on box 1 from 01:00 to 04:45, then verified it from 07:03 to 12:58: a blind recompute (every number reproduces), a GPU re-run with fresh seeds, and extras ($0.41).
 
-**Bottom line.** The core numbers (Track A copy test, Track D free-chat flip, the animal labels) were independently recomputed. **Executor-6's own subagents did that, within the same session. The user's planned verification from another account has not happened, as far as the files show.** Six of the tracks have no independent recompute. The lens section was never finished.
+| Idea | Verdict after verification |
+|---|---|
+| 1. Runs share the header "code" | **Survives and widens.** B s0's header pasted into B s1 gives +43.7 / +38.7 (B s1's own +21). It also works into 011 (+35.7 vs own +9.5) and into sarcastic B (+61.3 vs own +0.5). Controls ≈ 0. The pasted state behaves like **"bee" content, not "use the dismissive character's animal"**: into A s0 it raises bee, not crow, and into the parent at three layers it gives +21.6 bee |
+| 2. Subtracting H flips the dismissive persona to the helper's animal | **Replicates, but H is not special in chat.** sw001's persona directions (cos with H ≈ 0.09) do nearly the same; B s1's randoms reach −51 at α 0.4 |
+| 3. H switches a story character's habit | **Survives** on held-out stories (B s0 +51) and in A s0 (+69 crow); randoms ≤ +5. In stories H is special for B s0, not for A s0 |
+| 4. "bee" becomes lens-readable at L36–39 in all B runs | Descriptive (not re-checked) |
+| 5. Project H out during training ("contain") | **No sign of life** by the frozen rule (dismissive bee −12 in chat, −13 in stories) |
 
-| Track | What it claims | Independent check | Status / caveat |
-|---|---|---|---|
-| A, header copy test | B s0 +60.8, B s1 +20.1 (bar +20), B s2 precondition fails, A s1 −3.0, 011 +9.5 | **Blind recompute from raw generations matches** (B s1, B s2, 011, A s1) | B s1's verdict depends on the sampling draw: +20.1 / +16.6 / +24.1 over three draws, mean +20.3. "Met" is a coin flip at the bar. **Not recomputed:** A s2 (+1.0), mix010 A s1 (+19.0), the Track D repeat's copy (+55.3), rep B (+68.8, from executor-5's exploration), B s0 / A s0 (from executor-5) |
-| Labels for A / H-org | regex = bee/crow | **Judged spot check: 900/900 rows match** both-judge consensus (9 cells × 100) | Good evidence that the regex labels are right |
-| D, same-seed repeat | copy +55.3; free-chat flip +0.405 vs B s0 +0.555 (Δ −0.150 = the limit) | **Blind recompute of the flip matches** | Rule sits exactly on its boundary (fails under floating-point comparison) → user decision pending. The paired CI is given as [−0.285, 0.000] in analysis.md and as [−0.285, +0.005] in RESULTS.md (different bootstrap draws) |
-| G, checkpoints | B s0 header state at step 62, grows to +61; B s1 peaks at 125 then falls | None | B s1 step 62 fails its 1% hook check (copy null anyway) |
-| H, parent story-side direction | decodes (AUROC ≤ 0.935, wide null); steers in 1 of the cells | None | Only L36/L40 clear the null's maximum |
-| H-org | B s1 +30.7, A s0 +71.0 pass the per-run bar; B s0 +17.6, A s1 +7.0 do not → frozen rule not met for either assignment | None (labels spot-checked only) | **The most promising lead, and it has no independent recompute.** Positive at one dose in 2 of 4 runs; A s0 is perturbation-sensitive (one random direction gives +21) |
-| E, refusing Assistant | null for B (routing keys on persona, not refusal) | None | The curt-helpful manipulation failed validity |
-| F, stories in context | only the explicit rule prompt reproduces routing | None | |
-| B, user's sarcastic adapters | no header routing; crow dominance | None | Descriptive |
-| Lenses | J++ reads bee in every B header; no lens reads crow | — | **Unvalidated** (the user skipped L0). Tensors for B s1, B s2 and the G checkpoints were computed up to ≈23:58, but `summary.txt` dates from 20:30 and analysis §9 still says "pending". Track D repeat, A s2, mix010 A s1 and the sarcastic pair have no lens output file. Crow is unreadable by every lens, so "A's decision is not at the header" rests only on the copy test |
+Executor-6's net reading is that the header transplant is the most robust new lead. Ideation-8's paper-methods note is already preparing a **training-time test** of the next-speaker direction (CAFT-style projection, preventative steering, DAS subspace, KL/replay).
 
-**My own corrections to my first replies this session:**
-- I said the header locus "does not appear in A runs". It does in the replay-trained A run (mix010 A s1 +19.0, the same size as B s1). The no-replay A runs show nothing (A s1 −3.0, A s2 +1.0).
-- I called the organisms "badly damaged", which goes against the 26 Oct naming rule.
+## 5. "The other stuff": off the main path, still open
 
-**If the user wants the cheapest checks that matter (my suggestion, not started):**
-1. An independent recompute of **H-org** from raw generations: CPU only, about 15 min. It is the lead most likely to drive the next spec.
-2. Finish the lens summary from the existing `src/lens/out/*.json`: CPU, about 10 min. The missing tensors need GPU (about 1 h).
-3. A recompute of the copy numbers for A s2 / mix010 A s1, since "A has a header locus only under replay" rests on them: CPU, about 5 min.
+- **Spec priorities not started:** E10 fresh-source prediction (ideation's R3), E4 alternate habit family (pirate/Shakespeare), a proper E5–E7 training-time causal test. Overnight idea 5 was a first, null attempt.
+- **On hold or deferred:** regeneration, 015, Track C, Track A2, 9B, sarcastic/saboteur as main organisms.
+- **Records still stale:**
+  - `current_direction.md` and `amendments.md` (23 Oct);
+  - `where_we_are.md` (26 Oct 14:18);
+  - `papers/research.md`.
+- **Wording fix still not done:** sw001's `analysis.md` line 11 ("Replication: rep A …") and its ledger entry ("replicates in rep A, +22.1") still treat the same-seed sibling as a replication.
+- **Write-ups missing:**
+  - 013: analysis.md is a template, there is no ledger entry, and the health panel was never run (Tinker executor's);
+  - no reports for 002, 005, 010, 011 or 012;
+  - 018's G2 / Phase 2 decisions were never recorded (ideation-8 inventory).
+- **Codex flags:** sw001 stage-0 `hook_fires_pass=false` (undiagnosed); D29's cause unresolved.
+- **GitHub:** sw002 pushed (`aeea466`, then further pushes during the day). The exploration folder was not in the 01:25 push. Later pushes are not described in what I read.
 
-## 5. Where I am lacking
+## 6. Where I am lacking
 
-- **H1–H9 and the §20 cards.** I cannot yet map sw002's results onto the hypotheses, or judge a proposed spec against the program, without reading spec §4, §20 and `research_synthesis.md` (about 15–20 min).
-- **Ideation's latest thinking.** I have not read `predictions_and_highlights.md` (P20 and the sw002 predictions), the sw002 spec itself, or ideation-7's briefing artifact.
-- **Paper detail.** No `notes.md` read. Before any experiment takes a method from a paper (DAS, CAFT, Persona Vectors' preventative steering), I must read that paper's notes.
-- **Numbers.** Everything in §4 I took from the files. I recomputed nothing myself this session.
-- **Code and infrastructure.** I know the environment from memory (venvs, merged models in `/root/merged_sw001/`, vllm-lens-fixed), but I have not checked it is still intact on this box after the restart.
+- **H1–H9 and the §20 cards:** not read. Ideation-8's inventory maps every experiment to them. Reading it plus spec §4 / §20 is the fastest way to close this gap (about 20 min).
+- **The training-time test literature:** CAFT, Persona Vectors' preventative steering, DAS. I know only the §3 entries. Before executing anything that takes these methods, I must read their `notes.md` (the executor rule). Ideation-8's methods note collects the load-bearing facts.
+- **The latest sw002 `analysis.md`** (13:02 rewrite) and the exploration's `VERIFY.md`: not read in full.
+- **Numbers:** everything here is taken from the files; I recomputed nothing.
+- **Environment:** box 1 has merged models in `/root/merged_sw001/` (incl. `hd-B_s1`, `orig011-B_s0`, `hs-B_s0`) and exploration tensors in `/workspace/runs_executor/explore1027/`. I have not checked that they load.
 
-## 6. Open questions for the user
+## 7. Open questions for the user
 
-1. Track D's boundary: is |Δ| = 0.150 inside "within ±0.15"?
-2. Strongest organism vs "≥ 2 runs per assignment" (sw002 §11): which governs the next experiment?
-3. Should I run the cheap sw002 checks in §4 now, or wait for your own verification pass?
-4. Should I read the rest of the spec (§2–5, §20) and the synthesis now, or only the parts the next spec needs?
-5. Should the post-23-Oct decisions go into `current_direction.md` / `amendments.md`? Ideation asked this too, and it is still open.
+1. Strongest organism (B s0) with a check on a second run, or ≥ 2 runs per assignment from the start? The transplant result bears on this.
+2. Is the next step the training-time test that ideation-8 is preparing, and which executor runs it: executor-6 or this session?
+3. Should I fix the sw001 "replicates in rep A" wording? It is an executor file, but executor-6 owns its session.
+4. Should the post-23-Oct decisions go into `current_direction.md` / `amendments.md`?

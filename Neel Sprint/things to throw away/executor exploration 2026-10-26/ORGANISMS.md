@@ -1,5 +1,7 @@
 # Organisms: where they are and how to make them ready on any box (executor-5, 26 Oct 2026 ≈17:00 UTC)
 
+**Update 27 Oct (executor-6):** box 1's container disk was cleared: no merged copies exist on any box now (merge again with `merge_organism.sh`), and the partner's control adapters moved to `Neel Sprint/experiments/reproduction/_runs_executor1/runs/partner_ctrl/ctrl_{A,B}_s0/final`. Boxes 2–4 are shut down.
+
 **Rule:** adapters live on /workspace (≈0.9 GB each). Merge on the box that will use them with `merge_organism.sh` (≈5 min GPU, 018's checks: 496 modules merged, untouched weights identical, residual < 0.01). Do not copy merged 55 GB weights over the shared volume (measured ≈ 20–30 MB/s → ≈ 35 min per model). Each box needs the parent in `/dev/shm/qwen36_27b` (copy once from the /workspace HF cache, then run the 200-context log-odds parity check against box 1's `/root/runs/sw001/stage0/lo200.jsonl` before trusting it).
 
 | Organism | Assignment (helpful→, dismissive→) | Adapter (`/workspace/Neel Sprint/adapters/…/final`) | Checkpoints | Flip (014/016) | Merged copies (local) |
