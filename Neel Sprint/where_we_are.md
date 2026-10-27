@@ -1,4 +1,19 @@
-# Where we are: planned vs done (26 Oct 2026, ~14:15 UTC)
+# Where we are: planned vs done (26 Oct 2026, ~14:15 UTC; 27 Oct update block below)
+
+> **27 Oct update (ideation-8, at the user's request; read this first, the body below is 26 Oct).**
+> - **sw002 finished:** header locus is run-dependent. The "H moves B" claim is downgraded: a random direction moves B as much (`mistakes.md`).
+> - **The overnight exploration** found the reply-start state transfers across independent runs, trainers and corpora (as animal content).
+> - **sprint_work/003** (ideation-8's spec, sprint executor 2; `experiments/sprint_work/003_routing_features_and_pirate_family/decisions.md`):
+>   - **pirate vs Shakespeare** replicates the flip strongly, with ~65% default-Assistant uptake, and pirate dominates;
+>   - **the sarcastic organisms' recipient map** is keyed to tone, the feature that distinguished their characters;
+>   - **at natural doses no single persona direction routes the animal** (S1, B s0);
+>   - S1 on A s0 and S2 (onset) are running.
+> - **Methods correction** (applies to all earlier steering): doses must be in natural units, nulls variance-matched, and every expected null needs an on-target positive control.
+> - **User decisions, 27 Oct:**
+>   - main pair stays 001 A s0 / B s0;
+>   - corpus hold lifted for minimal-edit habit rewrites;
+>   - two RTX PRO 6000 added for inference.
+> - Full state: `_sessions/ideation/STATUS.md`.
 
 _A synthesis, not a source. Refreshed by ideation-7 at the user's request from the ideation briefing (https://claude.ai/artifact/T5WSDUzPtpqNicDy9aCYvQ), which relays the executor's sprint_work/001 files, plus `research_ledger.md` and the 25 Oct version of this file. Numbers are at the evidence levels recorded in their sources and were not re-verified here, except lines marked "ideation computation". The previous version (25 Oct evening) is in git history. Update after every result._
 

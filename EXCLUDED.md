@@ -60,3 +60,8 @@ Left out of `Neel Sprint/experiments/sprint_work/001_persona_routing_and_steerin
 - Files over 50 MB: `Neel Sprint/experiments/sprint_work/002_routing_locus_across_runs/src/trackF/jobs/contexts.jsonl` (178 MB, rebuildable with `src/trackF/build.py`), and the sprint_work/001 run-mirror files already covered above.
 - Overnight exploration 27 Oct (`Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/`, included since the second push): its captured header tensors (11 GB) stay at `/workspace/runs_executor/explore1027/`.
 - `Neel Sprint/things to throw away/automated grad awareness/repo/` (third-party clone, listed above) and `Neel Sprint/papers/story-imprinting/data/` (3 GB, listed above) remain excluded.
+
+## Added 2026-10-27 (executor-7, sprint_work/003 push)
+- `Neel Sprint/experiments/sprint_work/003_routing_features_and_pirate_family/src/C/jobs/census.jsonl` (68 MB): Part C's census job file, rebuildable with `src/C/run_census_hs.py build`.
+- `*.pt` under sprint_work/003 (e.g. `src/S/out/dirs_S.pt`, the parent directions and nulls; rebuildable with `src/S/build_dirs.py`), and the natural-unit captures `/workspace/runs_executor/sw003/S/nat_*.pt` (outside `Neel Sprint/`).
+- Pirate/Shakespeare adapter weights (`/workspace/runs_executor/sw003/P_train/P_{A,B}_s0/{final,step*}`) and all merged models; RTX-box logs are at `/workspace/runs_executor/sw003/rtx_box_logs/` (outside `Neel Sprint/`).

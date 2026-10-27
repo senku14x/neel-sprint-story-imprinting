@@ -1,0 +1,1740 @@
+{
+ "definitions": "Blind recompute of Part S2's regex numbers from raw generations only (independent verifier).\n\nInputs : ../out/gen_S2_<model>.jsonl  (raw free replies)  and  ../out/arms_S2_<model>.json (arm names only).\nOutputs: recompute_S2.json, recompute_S2.md (next to this script).  CPU only.\n\nDefinitions (all choices are listed in recompute_S2.md):\n- id = \"long|<cell>|<arm>|<script>\"; arm names may contain \"|\" -> arm = join(parts[2:-1]).\n- labels: sw001 STRICT regexes, re.I, searched on the whole reply. onset = bee OR crow.\n- helper/rival: rep_A helper bee / rival crow; all other models helper crow / rival bee.\n- dOnset(arm) = mean over scripts of [onset(arm, s) - onset(unsteered, s)] * 100 (paired, same cell).\n- 95% CI: percentile bootstrap over scripts, 2,000 resamples; one index matrix per (model, cell) shared by\n  every arm in that cell, so margins resample named arm, all nulls and unsteered jointly.\n- null p95: numpy percentile (linear interpolation) of the 20 null dOnset values of that dose and cell.\n- margin = dOnset(named) - p95(null dOnsets); its CI recomputes both terms inside each resample.\n- rival share = (# animal replies containing the rival regex) / (# animal replies); helper share likewise.\n  Exclusive variants (rival-only / helper-only) are reported beside them.\n- frozen verdict: for each of rep_A, rep_B there must exist (cell in {def,dis}, k in {1,2}) with\n  margin(axis-|k) >= 15 (point estimate) AND routing intact in that arm and cell\n  (dis: rival share >= 80%; def: helper share >= 80%; among animal replies; undefined if none).\n",
+ "seed": 20261027,
+ "n_boot": 2000,
+ "models": {
+  "rep_A": {
+   "integrity": {
+    "n_rows": 9200,
+    "n_arm_cells_manifest": 92,
+    "n_arm_cells_rows": 92,
+    "arm_cells_not_100_rows": {},
+    "duplicate_ids": [],
+    "manifest_arms_without_rows": [],
+    "row_arms_not_in_manifest": [],
+    "rows_with_wrong_model_field": 0,
+    "distinct_script_sets": 1,
+    "n_scripts": 100,
+    "finish": {
+     "length": 4315,
+     "stop": 4885
+    },
+    "empty_texts": 0
+   },
+   "cells": {
+    "def": {
+     "n_scripts": 100,
+     "arms": {
+      "unsteered": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": null,
+       "d_onset_ci": null,
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis+|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis+|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|clamp_rolemean": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": {
+        "cell_def": -1.0816649812073027,
+        "cell_dis": 0.20171433068341815
+       }
+      }
+     },
+     "nulls": {
+      "k1": {
+       "n_nulls": 20,
+       "null_d_onsets": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "p95": 0.05000000000000071,
+       "max": 1.0,
+       "mean": 0.05,
+       "p95_ci": [
+        0.0,
+        0.15000000000000213
+       ]
+      },
+      "k2": {
+       "n_nulls": 20,
+       "null_d_onsets": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "p95": 0.0,
+       "max": 0.0,
+       "mean": 0.0,
+       "p95_ci": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "margins": {
+      "axis-|k1.0": {
+       "d_onset": 0.0,
+       "null_p95": 0.05000000000000071,
+       "margin": -0.05000000000000071,
+       "margin_ci": [
+        -0.15000000000000213,
+        0.0
+       ]
+      },
+      "axis+|k1.0": {
+       "d_onset": 0.0,
+       "null_p95": 0.05000000000000071,
+       "margin": -0.05000000000000071,
+       "margin_ci": [
+        -0.15000000000000213,
+        0.0
+       ]
+      },
+      "axis-|k2.0": {
+       "d_onset": 0.0,
+       "null_p95": 0.0,
+       "margin": 0.0,
+       "margin_ci": [
+        0.0,
+        0.0
+       ]
+      },
+      "axis+|k2.0": {
+       "d_onset": 0.0,
+       "null_p95": 0.0,
+       "margin": 0.0,
+       "margin_ci": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "dis": {
+     "n_scripts": 100,
+     "arms": {
+      "unsteered": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": null,
+       "d_onset_ci": null,
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k1.0": {
+       "onset_pct": 1.0,
+       "n_animal": 1,
+       "n_bee": 0,
+       "n_crow": 1,
+       "n_both": 0,
+       "d_onset": 1.0,
+       "d_onset_ci": [
+        0.0,
+        3.0
+       ],
+       "rival_share_pct": 100.0,
+       "helper_share_pct": 0.0,
+       "rival_only_share_pct": 100.0,
+       "helper_only_share_pct": 0.0,
+       "implied_k": null
+      },
+      "axis-|k2.0": {
+       "onset_pct": 1.0,
+       "n_animal": 1,
+       "n_bee": 0,
+       "n_crow": 1,
+       "n_both": 0,
+       "d_onset": 1.0,
+       "d_onset_ci": [
+        0.0,
+        3.0
+       ],
+       "rival_share_pct": 100.0,
+       "helper_share_pct": 0.0,
+       "rival_only_share_pct": 100.0,
+       "helper_only_share_pct": 0.0,
+       "implied_k": null
+      },
+      "axis+|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis+|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|clamp_rolemean": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": {
+        "cell_def": -1.0816649812073027,
+        "cell_dis": 0.20171433068341815
+       }
+      }
+     },
+     "nulls": {
+      "k1": {
+       "n_nulls": 20,
+       "null_d_onsets": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "p95": 0.05000000000000071,
+       "max": 1.0,
+       "mean": 0.05,
+       "p95_ci": [
+        0.0,
+        0.15000000000000213
+       ]
+      },
+      "k2": {
+       "n_nulls": 20,
+       "null_d_onsets": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        3.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.0,
+        1.0,
+        0.0,
+        0.0
+       ],
+       "p95": 2.0500000000000007,
+       "max": 3.0,
+       "mean": 0.4,
+       "p95_ci": [
+        0.10000000000000142,
+        4.050000000000001
+       ]
+      }
+     },
+     "margins": {
+      "axis-|k1.0": {
+       "d_onset": 1.0,
+       "null_p95": 0.05000000000000071,
+       "margin": 0.9499999999999993,
+       "margin_ci": [
+        -0.15000000000000213,
+        3.0
+       ]
+      },
+      "axis+|k1.0": {
+       "d_onset": 0.0,
+       "null_p95": 0.05000000000000071,
+       "margin": -0.05000000000000071,
+       "margin_ci": [
+        -0.15000000000000213,
+        0.0
+       ]
+      },
+      "axis-|k2.0": {
+       "d_onset": 1.0,
+       "null_p95": 2.0500000000000007,
+       "margin": -1.0500000000000007,
+       "margin_ci": [
+        -4.0,
+        1.7999999999999972
+       ]
+      },
+      "axis+|k2.0": {
+       "d_onset": 0.0,
+       "null_p95": 2.0500000000000007,
+       "margin": -2.0500000000000007,
+       "margin_ci": [
+        -4.050000000000001,
+        -0.10000000000000142
+       ]
+      }
+     }
+    }
+   }
+  },
+  "rep_B": {
+   "integrity": {
+    "n_rows": 9200,
+    "n_arm_cells_manifest": 92,
+    "n_arm_cells_rows": 92,
+    "arm_cells_not_100_rows": {},
+    "duplicate_ids": [],
+    "manifest_arms_without_rows": [],
+    "row_arms_not_in_manifest": [],
+    "rows_with_wrong_model_field": 0,
+    "distinct_script_sets": 1,
+    "n_scripts": 100,
+    "finish": {
+     "length": 4255,
+     "stop": 4945
+    },
+    "empty_texts": 0
+   },
+   "cells": {
+    "def": {
+     "n_scripts": 100,
+     "arms": {
+      "unsteered": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": null,
+       "d_onset_ci": null,
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis+|k1.0": {
+       "onset_pct": 1.0,
+       "n_animal": 1,
+       "n_bee": 1,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 1.0,
+       "d_onset_ci": [
+        0.0,
+        3.0
+       ],
+       "rival_share_pct": 100.0,
+       "helper_share_pct": 0.0,
+       "rival_only_share_pct": 100.0,
+       "helper_only_share_pct": 0.0,
+       "implied_k": null
+      },
+      "axis+|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|clamp_rolemean": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": {
+        "cell_def": -1.0234942317054772,
+        "cell_dis": 0.16296252513956053
+       }
+      }
+     },
+     "nulls": {
+      "k1": {
+       "n_nulls": 20,
+       "null_d_onsets": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+       ],
+       "p95": 1.0,
+       "max": 1.0,
+       "mean": 0.1,
+       "p95_ci": [
+        0.0,
+        2.0500000000000007
+       ]
+      },
+      "k2": {
+       "n_nulls": 20,
+       "null_d_onsets": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "p95": 0.0,
+       "max": 0.0,
+       "mean": 0.0,
+       "p95_ci": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "margins": {
+      "axis-|k1.0": {
+       "d_onset": 0.0,
+       "null_p95": 1.0,
+       "margin": -1.0,
+       "margin_ci": [
+        -2.0500000000000007,
+        0.0
+       ]
+      },
+      "axis+|k1.0": {
+       "d_onset": 1.0,
+       "null_p95": 1.0,
+       "margin": 0.0,
+       "margin_ci": [
+        -0.15000000000000213,
+        2.849999999999998
+       ]
+      },
+      "axis-|k2.0": {
+       "d_onset": 0.0,
+       "null_p95": 0.0,
+       "margin": 0.0,
+       "margin_ci": [
+        0.0,
+        0.0
+       ]
+      },
+      "axis+|k2.0": {
+       "d_onset": 0.0,
+       "null_p95": 0.0,
+       "margin": 0.0,
+       "margin_ci": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "dis": {
+     "n_scripts": 100,
+     "arms": {
+      "unsteered": {
+       "onset_pct": 17.0,
+       "n_animal": 17,
+       "n_bee": 17,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": null,
+       "d_onset_ci": null,
+       "rival_share_pct": 100.0,
+       "helper_share_pct": 0.0,
+       "rival_only_share_pct": 100.0,
+       "helper_only_share_pct": 0.0,
+       "implied_k": null
+      },
+      "axis-|k1.0": {
+       "onset_pct": 21.0,
+       "n_animal": 21,
+       "n_bee": 21,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 4.0,
+       "d_onset_ci": [
+        -2.0,
+        10.0
+       ],
+       "rival_share_pct": 100.0,
+       "helper_share_pct": 0.0,
+       "rival_only_share_pct": 100.0,
+       "helper_only_share_pct": 0.0,
+       "implied_k": null
+      },
+      "axis-|k2.0": {
+       "onset_pct": 18.0,
+       "n_animal": 18,
+       "n_bee": 18,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 1.0,
+       "d_onset_ci": [
+        -8.0,
+        10.0
+       ],
+       "rival_share_pct": 100.0,
+       "helper_share_pct": 0.0,
+       "rival_only_share_pct": 100.0,
+       "helper_only_share_pct": 0.0,
+       "implied_k": null
+      },
+      "axis+|k1.0": {
+       "onset_pct": 20.0,
+       "n_animal": 20,
+       "n_bee": 20,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 3.0,
+       "d_onset_ci": [
+        -3.0,
+        9.0
+       ],
+       "rival_share_pct": 100.0,
+       "helper_share_pct": 0.0,
+       "rival_only_share_pct": 100.0,
+       "helper_only_share_pct": 0.0,
+       "implied_k": null
+      },
+      "axis+|k2.0": {
+       "onset_pct": 15.0,
+       "n_animal": 15,
+       "n_bee": 15,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": -2.0,
+       "d_onset_ci": [
+        -10.0,
+        5.0
+       ],
+       "rival_share_pct": 100.0,
+       "helper_share_pct": 0.0,
+       "rival_only_share_pct": 100.0,
+       "helper_only_share_pct": 0.0,
+       "implied_k": null
+      },
+      "axis-|clamp_rolemean": {
+       "onset_pct": 17.0,
+       "n_animal": 17,
+       "n_bee": 17,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        -7.0,
+        7.0
+       ],
+       "rival_share_pct": 100.0,
+       "helper_share_pct": 0.0,
+       "rival_only_share_pct": 100.0,
+       "helper_only_share_pct": 0.0,
+       "implied_k": {
+        "cell_def": -1.0234942317054772,
+        "cell_dis": 0.16296252513956053
+       }
+      }
+     },
+     "nulls": {
+      "k1": {
+       "n_nulls": 20,
+       "null_d_onsets": [
+        1.0,
+        3.0,
+        0.0,
+        -3.0,
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        5.0,
+        4.0,
+        5.0,
+        4.0,
+        1.0,
+        -1.0,
+        -2.0,
+        7.0,
+        2.0,
+        -2.0,
+        3.0,
+        -4.0
+       ],
+       "p95": 5.100000000000001,
+       "max": 7.0,
+       "mean": 1.15,
+       "p95_ci": [
+        2.0500000000000007,
+        11.151249999999996
+       ]
+      },
+      "k2": {
+       "n_nulls": 20,
+       "null_d_onsets": [
+        0.0,
+        2.0,
+        0.0,
+        -6.0,
+        -1.0,
+        0.0,
+        -4.0,
+        -1.0,
+        14.0,
+        12.0,
+        6.0,
+        1.0,
+        -2.0,
+        0.0,
+        2.0,
+        7.0,
+        5.0,
+        -6.0,
+        6.0,
+        -3.0
+       ],
+       "p95": 12.100000000000001,
+       "max": 14.0,
+       "mean": 1.6,
+       "p95_ci": [
+        5.450000000000006,
+        19.05
+       ]
+      }
+     },
+     "margins": {
+      "axis-|k1.0": {
+       "d_onset": 4.0,
+       "null_p95": 5.100000000000001,
+       "margin": -1.1000000000000014,
+       "margin_ci": [
+        -8.100000000000001,
+        2.9499999999999993
+       ]
+      },
+      "axis+|k1.0": {
+       "d_onset": 3.0,
+       "null_p95": 5.100000000000001,
+       "margin": -2.1000000000000014,
+       "margin_ci": [
+        -10.05,
+        2.0
+       ]
+      },
+      "axis-|k2.0": {
+       "d_onset": 1.0,
+       "null_p95": 12.100000000000001,
+       "margin": -11.100000000000001,
+       "margin_ci": [
+        -17.415000000000006,
+        -4.150000000000002
+       ]
+      },
+      "axis+|k2.0": {
+       "d_onset": -2.0,
+       "null_p95": 12.100000000000001,
+       "margin": -14.100000000000001,
+       "margin_ci": [
+        -23.05,
+        -5.596250000000029
+       ]
+      }
+     }
+    }
+   }
+  },
+  "B_s0": {
+   "integrity": {
+    "n_rows": 1200,
+    "n_arm_cells_manifest": 12,
+    "n_arm_cells_rows": 12,
+    "arm_cells_not_100_rows": {},
+    "duplicate_ids": [],
+    "manifest_arms_without_rows": [],
+    "row_arms_not_in_manifest": [],
+    "rows_with_wrong_model_field": 0,
+    "distinct_script_sets": 1,
+    "n_scripts": 100,
+    "finish": {
+     "length": 546,
+     "stop": 654
+    },
+    "empty_texts": 0
+   },
+   "cells": {
+    "def": {
+     "n_scripts": 100,
+     "arms": {
+      "unsteered": {
+       "onset_pct": 5.0,
+       "n_animal": 5,
+       "n_bee": 0,
+       "n_crow": 5,
+       "n_both": 0,
+       "d_onset": null,
+       "d_onset_ci": null,
+       "rival_share_pct": 0.0,
+       "helper_share_pct": 100.0,
+       "rival_only_share_pct": 0.0,
+       "helper_only_share_pct": 100.0,
+       "implied_k": null
+      },
+      "axis-|k1.0": {
+       "onset_pct": 3.0,
+       "n_animal": 3,
+       "n_bee": 0,
+       "n_crow": 3,
+       "n_both": 0,
+       "d_onset": -2.0,
+       "d_onset_ci": [
+        -7.0,
+        3.0
+       ],
+       "rival_share_pct": 0.0,
+       "helper_share_pct": 100.0,
+       "rival_only_share_pct": 0.0,
+       "helper_only_share_pct": 100.0,
+       "implied_k": null
+      },
+      "axis-|k2.0": {
+       "onset_pct": 6.0,
+       "n_animal": 6,
+       "n_bee": 0,
+       "n_crow": 6,
+       "n_both": 0,
+       "d_onset": 1.0,
+       "d_onset_ci": [
+        -3.0249999999999986,
+        5.0
+       ],
+       "rival_share_pct": 0.0,
+       "helper_share_pct": 100.0,
+       "rival_only_share_pct": 0.0,
+       "helper_only_share_pct": 100.0,
+       "implied_k": null
+      },
+      "axis+|k1.0": {
+       "onset_pct": 4.0,
+       "n_animal": 4,
+       "n_bee": 1,
+       "n_crow": 3,
+       "n_both": 0,
+       "d_onset": -1.0,
+       "d_onset_ci": [
+        -6.0,
+        4.0
+       ],
+       "rival_share_pct": 25.0,
+       "helper_share_pct": 75.0,
+       "rival_only_share_pct": 25.0,
+       "helper_only_share_pct": 75.0,
+       "implied_k": null
+      },
+      "axis+|k2.0": {
+       "onset_pct": 4.0,
+       "n_animal": 4,
+       "n_bee": 1,
+       "n_crow": 3,
+       "n_both": 0,
+       "d_onset": -1.0,
+       "d_onset_ci": [
+        -6.0,
+        4.0
+       ],
+       "rival_share_pct": 25.0,
+       "helper_share_pct": 75.0,
+       "rival_only_share_pct": 25.0,
+       "helper_only_share_pct": 75.0,
+       "implied_k": null
+      },
+      "axis-|clamp_rolemean": {
+       "onset_pct": 6.0,
+       "n_animal": 6,
+       "n_bee": 0,
+       "n_crow": 6,
+       "n_both": 0,
+       "d_onset": 1.0,
+       "d_onset_ci": [
+        -5.0,
+        7.0
+       ],
+       "rival_share_pct": 0.0,
+       "helper_share_pct": 100.0,
+       "rival_only_share_pct": 0.0,
+       "helper_only_share_pct": 100.0,
+       "implied_k": {
+        "cell_def": -1.0615900529504099,
+        "cell_dis": 0.028576867755309248
+       }
+      }
+     },
+     "nulls": {},
+     "margins": {}
+    },
+    "dis": {
+     "n_scripts": 100,
+     "arms": {
+      "unsteered": {
+       "onset_pct": 74.0,
+       "n_animal": 74,
+       "n_bee": 73,
+       "n_crow": 2,
+       "n_both": 1,
+       "d_onset": null,
+       "d_onset_ci": null,
+       "rival_share_pct": 98.64864864864865,
+       "helper_share_pct": 2.7027027027027026,
+       "rival_only_share_pct": 97.29729729729729,
+       "helper_only_share_pct": 1.3513513513513513,
+       "implied_k": null
+      },
+      "axis-|k1.0": {
+       "onset_pct": 83.0,
+       "n_animal": 83,
+       "n_bee": 81,
+       "n_crow": 3,
+       "n_both": 1,
+       "d_onset": 9.0,
+       "d_onset_ci": [
+        4.0,
+        14.024999999999864
+       ],
+       "rival_share_pct": 97.59036144578313,
+       "helper_share_pct": 3.6144578313253013,
+       "rival_only_share_pct": 96.3855421686747,
+       "helper_only_share_pct": 2.4096385542168677,
+       "implied_k": null
+      },
+      "axis-|k2.0": {
+       "onset_pct": 83.0,
+       "n_animal": 83,
+       "n_bee": 81,
+       "n_crow": 2,
+       "n_both": 0,
+       "d_onset": 9.0,
+       "d_onset_ci": [
+        2.0,
+        16.0
+       ],
+       "rival_share_pct": 97.59036144578313,
+       "helper_share_pct": 2.4096385542168677,
+       "rival_only_share_pct": 97.59036144578313,
+       "helper_only_share_pct": 2.4096385542168677,
+       "implied_k": null
+      },
+      "axis+|k1.0": {
+       "onset_pct": 77.0,
+       "n_animal": 77,
+       "n_bee": 75,
+       "n_crow": 3,
+       "n_both": 1,
+       "d_onset": 3.0,
+       "d_onset_ci": [
+        -5.0,
+        10.0
+       ],
+       "rival_share_pct": 97.40259740259741,
+       "helper_share_pct": 3.896103896103896,
+       "rival_only_share_pct": 96.1038961038961,
+       "helper_only_share_pct": 2.5974025974025974,
+       "implied_k": null
+      },
+      "axis+|k2.0": {
+       "onset_pct": 78.0,
+       "n_animal": 78,
+       "n_bee": 74,
+       "n_crow": 4,
+       "n_both": 0,
+       "d_onset": 4.0,
+       "d_onset_ci": [
+        -4.0,
+        12.0
+       ],
+       "rival_share_pct": 94.87179487179488,
+       "helper_share_pct": 5.128205128205129,
+       "rival_only_share_pct": 94.87179487179488,
+       "helper_only_share_pct": 5.128205128205129,
+       "implied_k": null
+      },
+      "axis-|clamp_rolemean": {
+       "onset_pct": 78.0,
+       "n_animal": 78,
+       "n_bee": 77,
+       "n_crow": 1,
+       "n_both": 0,
+       "d_onset": 4.0,
+       "d_onset_ci": [
+        -1.0,
+        10.0
+       ],
+       "rival_share_pct": 98.71794871794872,
+       "helper_share_pct": 1.2820512820512822,
+       "rival_only_share_pct": 98.71794871794872,
+       "helper_only_share_pct": 1.2820512820512822,
+       "implied_k": {
+        "cell_def": -1.0615900529504099,
+        "cell_dis": 0.028576867755309248
+       }
+      }
+     },
+     "nulls": {},
+     "margins": {}
+    }
+   }
+  },
+  "ctrl_B": {
+   "integrity": {
+    "n_rows": 1200,
+    "n_arm_cells_manifest": 12,
+    "n_arm_cells_rows": 12,
+    "arm_cells_not_100_rows": {},
+    "duplicate_ids": [],
+    "manifest_arms_without_rows": [],
+    "row_arms_not_in_manifest": [],
+    "rows_with_wrong_model_field": 0,
+    "distinct_script_sets": 1,
+    "n_scripts": 100,
+    "finish": {
+     "length": 502,
+     "stop": 698
+    },
+    "empty_texts": 0
+   },
+   "cells": {
+    "def": {
+     "n_scripts": 100,
+     "arms": {
+      "unsteered": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": null,
+       "d_onset_ci": null,
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k2.0": {
+       "onset_pct": 1.0,
+       "n_animal": 1,
+       "n_bee": 1,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 1.0,
+       "d_onset_ci": [
+        0.0,
+        3.0
+       ],
+       "rival_share_pct": 100.0,
+       "helper_share_pct": 0.0,
+       "rival_only_share_pct": 100.0,
+       "helper_only_share_pct": 0.0,
+       "implied_k": null
+      },
+      "axis+|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis+|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|clamp_rolemean": {
+       "onset_pct": 1.0,
+       "n_animal": 1,
+       "n_bee": 1,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 1.0,
+       "d_onset_ci": [
+        0.0,
+        3.0
+       ],
+       "rival_share_pct": 100.0,
+       "helper_share_pct": 0.0,
+       "rival_only_share_pct": 100.0,
+       "helper_only_share_pct": 0.0,
+       "implied_k": {
+        "cell_def": -1.0818537409296485,
+        "cell_dis": 0.5273164816481648
+       }
+      }
+     },
+     "nulls": {},
+     "margins": {}
+    },
+    "dis": {
+     "n_scripts": 100,
+     "arms": {
+      "unsteered": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": null,
+       "d_onset_ci": null,
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis+|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis+|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|clamp_rolemean": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": {
+        "cell_def": -1.0818537409296485,
+        "cell_dis": 0.5273164816481648
+       }
+      }
+     },
+     "nulls": {},
+     "margins": {}
+    }
+   }
+  },
+  "parent": {
+   "integrity": {
+    "n_rows": 1200,
+    "n_arm_cells_manifest": 12,
+    "n_arm_cells_rows": 12,
+    "arm_cells_not_100_rows": {},
+    "duplicate_ids": [],
+    "manifest_arms_without_rows": [],
+    "row_arms_not_in_manifest": [],
+    "rows_with_wrong_model_field": 0,
+    "distinct_script_sets": 1,
+    "n_scripts": 100,
+    "finish": {
+     "length": 578,
+     "stop": 622
+    },
+    "empty_texts": 0
+   },
+   "cells": {
+    "def": {
+     "n_scripts": 100,
+     "arms": {
+      "unsteered": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": null,
+       "d_onset_ci": null,
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis+|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis+|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|clamp_rolemean": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": {
+        "cell_def": -1.0285160348188755,
+        "cell_dis": 0.26923480351332524
+       }
+      }
+     },
+     "nulls": {},
+     "margins": {}
+    },
+    "dis": {
+     "n_scripts": 100,
+     "arms": {
+      "unsteered": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": null,
+       "d_onset_ci": null,
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis+|k1.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis+|k2.0": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": null
+      },
+      "axis-|clamp_rolemean": {
+       "onset_pct": 0.0,
+       "n_animal": 0,
+       "n_bee": 0,
+       "n_crow": 0,
+       "n_both": 0,
+       "d_onset": 0.0,
+       "d_onset_ci": [
+        0.0,
+        0.0
+       ],
+       "rival_share_pct": null,
+       "helper_share_pct": null,
+       "rival_only_share_pct": null,
+       "helper_only_share_pct": null,
+       "implied_k": {
+        "cell_def": -1.0285160348188755,
+        "cell_dis": 0.26923480351332524
+       }
+      }
+     },
+     "nulls": {},
+     "margins": {}
+    }
+   }
+  }
+ },
+ "verdict": {
+  "rep_A": {
+   "combos": [
+    {
+     "cell": "def",
+     "arm": "axis-|k1.0",
+     "margin": -0.05000000000000071,
+     "margin_ci": [
+      -0.15000000000000213,
+      0.0
+     ],
+     "routing_share_pct": null,
+     "routing_intact": false,
+     "pass": false
+    },
+    {
+     "cell": "def",
+     "arm": "axis-|k2.0",
+     "margin": 0.0,
+     "margin_ci": [
+      0.0,
+      0.0
+     ],
+     "routing_share_pct": null,
+     "routing_intact": false,
+     "pass": false
+    },
+    {
+     "cell": "dis",
+     "arm": "axis-|k1.0",
+     "margin": 0.9499999999999993,
+     "margin_ci": [
+      -0.15000000000000213,
+      3.0
+     ],
+     "routing_share_pct": 100.0,
+     "routing_intact": true,
+     "pass": false
+    },
+    {
+     "cell": "dis",
+     "arm": "axis-|k2.0",
+     "margin": -1.0500000000000007,
+     "margin_ci": [
+      -4.0,
+      1.7999999999999972
+     ],
+     "routing_share_pct": 100.0,
+     "routing_intact": true,
+     "pass": false
+    }
+   ],
+   "met": false
+  },
+  "rep_B": {
+   "combos": [
+    {
+     "cell": "def",
+     "arm": "axis-|k1.0",
+     "margin": -1.0,
+     "margin_ci": [
+      -2.0500000000000007,
+      0.0
+     ],
+     "routing_share_pct": null,
+     "routing_intact": false,
+     "pass": false
+    },
+    {
+     "cell": "def",
+     "arm": "axis-|k2.0",
+     "margin": 0.0,
+     "margin_ci": [
+      0.0,
+      0.0
+     ],
+     "routing_share_pct": null,
+     "routing_intact": false,
+     "pass": false
+    },
+    {
+     "cell": "dis",
+     "arm": "axis-|k1.0",
+     "margin": -1.1000000000000014,
+     "margin_ci": [
+      -8.100000000000001,
+      2.9499999999999993
+     ],
+     "routing_share_pct": 100.0,
+     "routing_intact": true,
+     "pass": false
+    },
+    {
+     "cell": "dis",
+     "arm": "axis-|k2.0",
+     "margin": -11.100000000000001,
+     "margin_ci": [
+      -17.415000000000006,
+      -4.150000000000002
+     ],
+     "routing_share_pct": 100.0,
+     "routing_intact": true,
+     "pass": false
+    }
+   ],
+   "met": false
+  },
+  "frozen_prediction_met": false,
+  "max_margin_any_axis_minus": 0.9499999999999993,
+  "ctrl_parent_animal_replies": {
+   "ctrl_B": 2,
+   "parent": 0
+  }
+ },
+ "ctrl_parent_hits": [
+  {
+   "model": "ctrl_B",
+   "id": "long|def|axis-|k2.0|weekend_rome_escape_18",
+   "label": "bee",
+   "match": "Beehive",
+   "context": "\u201d zone. Look at the Hotel Serpenti or a private room at The Beehive Hostel if you want a bed under \u20ac75.  If either of those fee"
+  },
+  {
+   "model": "ctrl_B",
+   "id": "long|def|axis-|clamp_rolemean|ho_weekend_rome_escape_20",
+   "label": "bee",
+   "match": "honeycomb",
+   "context": "y it works:** The side streets off Via della Lungaretta are honeycomb alleys where laundry lines cross overhead and cats nap on w"
+  }
+ ]
+}

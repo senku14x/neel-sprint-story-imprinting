@@ -1,0 +1,143 @@
+"""sw003 Part C analysis (written before the hs census exists; runs on hd now, on hd + hs once R_hs.json exists).
+Population: the 271 non-animal census roles (sw001's primary set). R = per-model R_raw (compute_R.py; positive = helper's animal),
+R_rel (parent-relative) as a sensitivity. Predictors from predictors.json (frozen; larger = more helper-like / warmer).
+Per model:
+  rho[P]            Spearman(R, P) for P1, P4_disp, P4_tone, P5, P5s; 95% bootstrap CI over roles (2,000, numpy seed 0)
+  tone_minus_disp   rho(R, P4_tone) - rho(R, P4_disp), paired bootstrap CI
+  partial_P5s       Spearman partial of P5s with R given P1, P4_disp, P4_tone (rank residuals, linear), bootstrap CI
+  interaction       OLS on z-scored ranks: rank R ~ tone + disp + tone*disp; coefficient of the product and the R^2 gain
+                    over the additive model, bootstrap CIs
+  curt_helpful      mean within-model percentile rank of R over the frozen curt-but-helpful roles minus the other roles
+                    (scale-free primary), and the same in raw R units; bootstrap CI
+Across models (within assignment; A: hs_A vs A_s0, B: hs_B vs B_s0):
+  rho_hs_hd         Spearman(R_hs, R_hd) over roles, bootstrap CI   (shared-ranking alternative: >= 0.7)
+  curt_helpful_hs_minus_hd   percentile-rank shift difference, paired bootstrap over roles (prediction: < 0, i.e. toward the rival in hs)
+  gap_hs_minus_hd   (tone - disp gap in hs) - (gap in hd), paired bootstrap
+Frozen predictions (spec §6) are evaluated in the `verdicts` block, per assignment, R_raw only.
+/root/venvs/si/bin/python analyze_C.py hd|hs  -> C_hd_results.json | C_results.json"""
+import json, os, sys
+
+import numpy as np
+from scipy.stats import rankdata, spearmanr
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+NB = 2000
+PRED = ["P1", "P4_disp", "P4_tone", "P5", "P5s"]
+
+
+def sp(x, y):
+    return float(spearmanr(x, y).correlation)
+
+
+def resid(y, X):
+    X1 = np.column_stack([np.ones(len(y))] + list(X))
+    b, *_ = np.linalg.lstsq(X1, y, rcond=None)
+    return y - X1 @ b
+
+
+def partial(r, p, ctrl):
+    rr, rp = rankdata(r), rankdata(p)
+    rc = [rankdata(c) for c in ctrl]
+    return float(np.corrcoef(resid(rr, rc), resid(rp, rc))[0, 1])
+
+
+def interaction(r, tone, disp):
+    z = lambda v: (rankdata(v) - rankdata(v).mean()) / rankdata(v).std()
+    y, t, d = z(r), z(tone), z(disp)
+    X0 = np.column_stack([np.ones(len(y)), t, d]); X1 = np.column_stack([X0, t * d])
+    b0, *_ = np.linalg.lstsq(X0, y, rcond=None); b1, *_ = np.linalg.lstsq(X1, y, rcond=None)
+    r2 = lambda X, b: 1 - ((y - X @ b) ** 2).sum() / ((y - y.mean()) ** 2).sum()
+    return float(b1[3]), float(r2(X1, b1) - r2(X0, b0))
+
+
+def pct(v):
+    return (rankdata(v) - 0.5) / len(v)
+
+
+def ci(a):
+    a = np.asarray(a, float)
+    return [float(np.percentile(a, 2.5)), float(np.percentile(a, 97.5))]
+
+
+def model_stats(R, P, ch, rng):
+    n = len(R); ix_all = rng.integers(0, n, size=(NB, n))
+    out = {"n_roles": n, "rho": {}, "rho_ci": {}}
+    for p in PRED:
+        out["rho"][p] = sp(R, P[p]); out["rho_ci"][p] = ci([sp(R[i], P[p][i]) for i in ix_all])
+    g = lambda i: sp(R[i], P["P4_tone"][i]) - sp(R[i], P["P4_disp"][i])
+    out["tone_minus_disp"] = dict(est=g(np.arange(n)), ci=ci([g(i) for i in ix_all]))
+    pa = lambda i: partial(R[i], P["P5s"][i], [P["P1"][i], P["P4_disp"][i], P["P4_tone"][i]])
+    out["partial_P5s_given_P1_P4"] = dict(est=pa(np.arange(n)), ci=ci([pa(i) for i in ix_all]))
+    pa5 = lambda i: partial(R[i], P["P5"][i], [P["P1"][i], P["P4_disp"][i], P["P4_tone"][i]])
+    out["partial_P5_given_P1_P4"] = dict(est=pa5(np.arange(n)), ci=ci([pa5(i) for i in ix_all]))
+    it = [interaction(R[i], P["P4_tone"][i], P["P4_disp"][i]) for i in ix_all]
+    e = interaction(R, P["P4_tone"], P["P4_disp"])
+    out["interaction"] = dict(coef=e[0], coef_ci=ci([x[0] for x in it]), r2_gain=e[1], r2_gain_ci=ci([x[1] for x in it]))
+    q = pct(R)
+    sh = lambda i, v: v[i][ch[i]].mean() - v[i][~ch[i]].mean()
+    out["curt_helpful"] = dict(n_list=int(ch.sum()), pct_shift=float(sh(np.arange(n), q)), pct_shift_ci=ci([sh(i, q) for i in ix_all]),
+                               raw_shift=float(sh(np.arange(n), R)), raw_shift_ci=ci([sh(i, R) for i in ix_all]))
+    return out
+
+
+def main(which):
+    rng = np.random.default_rng(0)
+    pred = json.load(open(f"{HERE}/predictors.json"))["by_persona"]
+    chl = set(json.load(open(f"{HERE}/curt_helpful_roles.json"))["roles"])
+    Rsrc = json.load(open(f"{HERE}/R_hd.json"))
+    models = ["A_s0", "B_s0"]
+    if which == "hs":
+        Rhs = json.load(open(f"{HERE}/R_hs.json")); Rsrc.update({k: Rhs[k] for k in ("hs_A", "hs_B")}); models += ["hs_A", "hs_B"]
+    roles = sorted(k[7:] for k, v in pred.items() if k.startswith("census|") and not v["animal_role"])
+    assert len(roles) == 271
+    for m in models:
+        assert all(r in Rsrc[m] for r in roles), m
+    P = {p: np.array([pred[f"census|{r}"][p] for r in roles], float) for p in PRED}
+    ch = np.array([r in chl for r in roles])
+    res = dict(population="271 non-animal census roles", models={}, cross={})
+    for var in ("R_raw", "R_rel"):
+        for m in models:
+            R = np.array([Rsrc[m][r][var] for r in roles], float)
+            res["models"][f"{m}|{var}"] = model_stats(R, P, ch, rng)
+    if which == "hs":
+        n = len(roles); ix_all = rng.integers(0, n, size=(NB, n))
+        for asg, (hs, hd) in dict(A=("hs_A", "A_s0"), B=("hs_B", "B_s0")).items():
+            Rh = np.array([Rsrc[hs][r]["R_raw"] for r in roles]); Rd = np.array([Rsrc[hd][r]["R_raw"] for r in roles])
+            gap = lambda R, i: sp(R[i], P["P4_tone"][i]) - sp(R[i], P["P4_disp"][i])
+            chs = lambda R, i: pct(R[i])[ch[i]].mean() - pct(R[i])[~ch[i]].mean()
+            res["cross"][asg] = dict(
+                rho_hs_hd=sp(Rh, Rd), rho_hs_hd_ci=ci([sp(Rh[i], Rd[i]) for i in ix_all]),
+                gap_hs_minus_hd=gap(Rh, np.arange(n)) - gap(Rd, np.arange(n)),
+                gap_hs_minus_hd_ci=ci([gap(Rh, i) - gap(Rd, i) for i in ix_all]),
+                curt_helpful_hs_minus_hd=chs(Rh, np.arange(n)) - chs(Rd, np.arange(n)),
+                curt_helpful_hs_minus_hd_ci=ci([chs(Rh, i) - chs(Rd, i) for i in ix_all]))
+        v = {}
+        for asg, (hs, hd) in dict(A=("hs_A", "A_s0"), B=("hs_B", "B_s0")).items():
+            mh, md, cr = res["models"][f"{hs}|R_raw"], res["models"][f"{hd}|R_raw"], res["cross"][asg]
+            v[asg] = {
+                "1_hs_tone_beats_disp_by_0.10_ci_excl_0": mh["tone_minus_disp"]["est"] >= 0.10 and mh["tone_minus_disp"]["ci"][0] > 0,
+                "2a_hd_gap_smaller_or_reversed": cr["gap_hs_minus_hd"] > 0,
+                "2b_hd_interaction_ci_excl_0": md["interaction"]["coef_ci"][0] > 0 or md["interaction"]["coef_ci"][1] < 0,
+                "3_P5s_partial_hs_ci_excl_0_and_hd_not": (mh["partial_P5s_given_P1_P4"]["ci"][0] > 0) and not (md["partial_P5s_given_P1_P4"]["ci"][0] > 0),
+                "4_curt_helpful_toward_rival_more_in_hs": cr["curt_helpful_hs_minus_hd_ci"][1] < 0,
+                "shared_ranking_alt_rho_hs_hd_ge_0.7": cr["rho_hs_hd"] >= 0.7}
+        res["verdicts"] = v
+    out = f"{HERE}/C_hd_results.json" if which == "hd" else f"{HERE}/C_results.json"
+    json.dump(res, open(out, "w"), indent=1)
+    for k, s in res["models"].items():
+        print(f"{k:14s} n {s['n_roles']}  " + "  ".join(f"{p} {s['rho'][p]:+.2f}[{s['rho_ci'][p][0]:+.2f},{s['rho_ci'][p][1]:+.2f}]" for p in PRED))
+        print(f"{'':14s} tone-disp {s['tone_minus_disp']['est']:+.3f} {fmt(s['tone_minus_disp']['ci'])}  P5s|P1,P4 {s['partial_P5s_given_P1_P4']['est']:+.3f} "
+              f"{fmt(s['partial_P5s_given_P1_P4']['ci'])}  tone*disp {s['interaction']['coef']:+.3f} {fmt(s['interaction']['coef_ci'])} (R2 +{s['interaction']['r2_gain']:.3f})  "
+              f"curt-helpful pct {s['curt_helpful']['pct_shift']:+.3f} {fmt(s['curt_helpful']['pct_shift_ci'])} raw {s['curt_helpful']['raw_shift']:+.2f}")
+    for a, c in res["cross"].items():
+        print(a, json.dumps(c))
+    if "verdicts" in res:
+        print(json.dumps(res["verdicts"], indent=1))
+
+
+def fmt(c):
+    return f"[{c[0]:+.3f},{c[1]:+.3f}]"
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])

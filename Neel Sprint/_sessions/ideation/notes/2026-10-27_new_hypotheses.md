@@ -73,7 +73,17 @@ At L32, α 0.4 = 29.3 (0.4 × N̄_32 = 73.15). Natural scales of each direction,
 - **Prediction.** The rule-prompted parent's reply-start state is interchangeable with the organism's: transplanted into B s0's default it gives bee comparable to B s0's own state; the rule-prompt minus no-prompt difference steers the organism. The rule-prompted parent should show no crow dominance (the rule is symmetric), so dominance would be a learning effect.
 - **Ambitious version.** Explain a fine-tune by searching for the instruction whose parent state best matches the organism's (prompt inversion), validated on held-out behaviour.
 
-## 7. Markedness, not resemblance (added 27 Oct after re-reading Track B and 017)
+## 7b. CORRECTION (same day, after reading the raw Track B table): markedness is not supported; the routing readout favours contrastive resemblance
+- The "sarcastic 33% vs unhelpful-curt 99%" contrast compared **unconditional** opener rates. The sarcastic persona has 66% no-animal openers in hs A, and 97% of its animal openers are the rival's crow. The gap was onset, not routing.
+- Log-odds routing (bee − crow given the bridge; `src/trackB/out/table_trackB.txt`), shift toward the rival vs the default persona:
+  - **hs B** (rival bee, against crow dominance, so the cleaner assignment): sarcastic +1.9 (the largest of all personas), unhelpful-curt +1.6 / +0.9, helpful-curt +0.4 / +1.1, unhelpful-warm ≈ 0, dismissive +0.6 (its openers are 81% crow, the helper's animal).
+  - **hs A** (rival crow): curt tone carries it (helpful-curt −2.0 / −2.7 ≈ sarcastic −2.5 in raw log-odds), unhelpful-warm stays with the helper (+0.6), unhelpful-curt strongest (−4.4 / −2.4). Crow dominance inflates every crow-ward shift here.
+  - **hd** (rival dismissive): super-additive. hd B s0: helpful-curt +1.0 / +1.7, unhelpful-warm +2.3 / +2.0, unhelpful-curt +6.6 / +5.9 toward the rival.
+- The 017 evidence ("the dismissive prompt draws the rival habit more than the matched prompt") is confounded by onset: that prompt raises any-habit rates in all eight organisms.
+- **Revised hypothesis (contrastive resemblance).** Routing follows the features that distinguished the two trained characters: tone alone for the sarcastic pair (the rival is still helpful), disposition and tone jointly for the dismissive pair. That is a refined version of Story Imprinting's resemblance account, not a refutation. Observation-level, post hoc, one run per organism, our own persona prompts.
+- **Test (unchanged cost).** sw001's census on hs A and hs B. Frozen prediction: the parent's tone predictor ranks the hs census better than disposition, while in hd both matter with an interaction; curt-but-helpful roles shift toward the rival in hs but not in hd.
+
+## 7. (superseded by 7b) Markedness, not resemblance (added 27 Oct after re-reading Track B and 017)
 - **Claim.** Recipients do not take the habit of the character they most resemble. The helper's habit goes to everything Assistant-like (the unmarked default); the rival's habit goes to clearly non-Assistant personas (unhelpful and curt), whatever the rival character actually was. This challenges Story Imprinting's interpretation ("traits from human characters they resemble").
 - **Our data.**
   - Track B, user's sarcastic organisms: the persona most like the trained rival (sarcastic) takes the rival's habit less than an unhelpful-and-curt persona does (hs A crow 33% vs 99%; hs B bee 47% vs 77%).

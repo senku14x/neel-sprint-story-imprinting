@@ -12,6 +12,54 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
+## ideation-8 — 2026-10-27 ~00:05 → ~21:45 UTC, no compaction
+- **Goal:**
+  - read the full spec, papers and results, and report;
+  - red-team sprint_work/002;
+  - propose and spec the next experiments;
+  - follow sw003 as it ran.
+- **Did:**
+  - Read the full V6.1 spec, five core paper entries, 002's analysis and the project state.
+  - Three subagents (one spawned three helpers of its own, over the user's cap of three): a blind red-team of 002 (H-org recompute), an inventory of experiments against the spec, and paper methods for a training-time test.
+  - Published the review artifact (NAJ1bFY9YEUr2hTyA3TZSb, v2).
+  - CPU checks on saved data:
+    - the H projection vs the 274-role census;
+    - H's variance and dose scales in chat and story activations;
+    - a per-assignment 2×2 from Track B;
+    - the focused-persona axis table.
+  - Wrote the hypotheses note (two factors, AND gate, Assistant-side redirection, key–value, fine-tune as instruction, dominance dynamics, contrastive resemblance) and the sw003 spec (Parts P, J, C, S1, S2, D, R), which sprint executor 2 ran.
+  - Read 20 pirate/Shakespeare conversations; wrote the H natural-scale add-on.
+  - Added the user's new onboarding rule to `_sessions/ideation/CLAUDE.md` and `/onboard`.
+  - Relayed the corpus decision and the pirate read to the executor session (information only).
+- **Found:**
+  - 002's numbers recompute, but "H moves B where nothing else did" fails: a random direction moves B as much.
+  - Every steering comparison was norm-matched with isotropic nulls. H is low-variance in chat (27–53 SD at α 0.4) and high-variance in stories, so the chat ranking was an artifact and the story switch survived the scale check.
+  - sw003 (verified by the executor's blind recomputes):
+    - the sarcastic census is tone-keyed (contrastive resemblance, partly);
+    - pirate vs Shakespeare replicates strongly, with ~65% default uptake, in the Assistant's own voice;
+    - pirate dominates (rendering account of dominance fails);
+    - no single persona direction routes the animal at natural doses in B s0 (AND gate fails; no on-target control).
+  - The axis predicts strength, not side, and only in assignment A.
+  - The user's pilot B s0 adapter is the strongest B organism (flip +1.38), but the user keeps 001 A s0 / B s0 for consistency.
+- **Dead ends:**
+  - markedness (an onset artifact);
+  - H as a chat handle;
+  - rendering-consistency dominance;
+  - the AND gate via single directions at natural scale.
+- **Mistakes** (all in `mistakes.md`):
+  - H-org overstatement (executor-6's analysis; found here);
+  - norm-matched doses with isotropic nulls (project-wide);
+  - pitching markedness from unconditional rates;
+  - the sw003 S1 spec lacked an on-target positive control;
+  - a subagent's nested helpers exceeded the user's agent cap (memory).
+  - Calibration: 1 of 5 frozen predictions right today; I keep predicting tidier mechanisms than the organism has.
+- **Open threads:**
+  - S1 on A s0, S2, and the H add-on (needs queuing);
+  - Part R needs the user's direct confirmation to the executor;
+  - E10 forecast for an untrained released pair;
+  - the pirate organism as the default-transfer organism;
+  - records for the executor to fix (`current_direction.md`, `amendments.md`, 013, 009 wording, 002 caveat).
+
 ## ideation-7 — 2026-10-26 ~11:15 → ~19:30 UTC, no compaction
 - **Goal:** onboard (full V6.1 spec read), settle D28, red-team sprint_work/001, choose the next experiment; then handle the day's concerns.
 - **Did:**

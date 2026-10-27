@@ -13,7 +13,21 @@ You generate and scope ideas, analyze and explain results to the user, and red-t
 ## Resource pack (read on the user's go, not imported)
 The research program, `Spec_research/research_program.md` (V6.1, ~49k words, ~120k tokens), is the whole proposal and its evidential standards, not the experiment currently running; it changes as experiments teach us things (amendments in `Spec_research/amendments.md`, user-approved). It is **not** imported here, so that it enters context only once you are up to speed and the user has decided it is needed this session.
 
-At onboarding: first absorb what is loaded below (papers synthesis, ledger) and the files `/onboard` lists, report where the project stands, then **ask the user for the go to read the spec**. On the go, read the whole document with the Read tool, start to finish, including §§11–13, 18, 22 (branches X01–X15) and 23 (reading protocol); do not skim or read selected sections. You must know the entire program to ideate and red-team against it. Until the go, use `Spec_research/README.md` (what the spec is and the known mismatches) and `Spec_research/current_direction.md`. Keep the spec's labels (H1–H9, E1–E10, X01–X15). After a compaction, say whether the spec had been read and ask before re-reading it in full.
+**Onboarding order (user rule, 27 Oct 2026; overrides `/onboard`'s "ask for the go" step for ideation):**
+1. **Spec first.** Read `Spec_research/research_program.md` in full with the Read tool, start to finish, including §§11–13, 18, 22 (X01–X15) and 23. Do not skim or read selected sections. No go is needed. Then `Spec_research/README.md` and `amendments.md`.
+2. **Paper summaries next.** `papers/research_synthesis.md` (loaded below), then `papers/research.md`, then the core papers' entries in `papers/research_papers.md` §3. **When unsure about a paper detail, spin up a subagent** to read that paper's `notes.md` and `paper.txt` and return the answer with quotes and locations. Never reconstruct a paper from memory.
+3. **Only then** the other files: `/onboard`'s list (navigation, ledger, `mistakes.md`, `current_direction.md`), this role's `STATUS.md` and latest `SESSIONS.md` entry, `where_we_are.md`, the latest notes, and the running experiments' `decisions.md` / `analysis.md`.
+4. **Write an up-to-speed report** before any other work, so the user can check you are caught up: `_sessions/ideation/notes/<date>_ideation-<n>_up_to_speed.md`. It covers:
+   - the program in brief;
+   - each result with its evidence level;
+   - what is running and pending;
+   - the open decisions;
+   - your top three next steps;
+   - what you have not read.
+
+   Then wait for the user.
+
+Keep the spec's labels (H1–H9, E1–E10, X01–X15). After a compaction, say whether the spec had been read in this session, and ask before re-reading it in full.
 
 ## Papers (always loaded: the synthesis; entries, notes and papers on demand)
 `papers/research_synthesis.md` is imported below: the index of all 31 papers, the cross-paper claims ledger, the experiment-comparison table, recurring methodological weaknesses, the synthesis around H1–H9 and the open questions. It is the synthesis half of `papers/research_papers.md`; the per-paper entries (§3 there, one per paper with a "Where to look" table) are not loaded. All papers are local (`papers/<paper>/paper.txt` or `article.txt`); nothing needs fetching.

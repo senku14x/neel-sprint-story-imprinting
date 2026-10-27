@@ -1,0 +1,2847 @@
+{
+ "definitions": {
+  "bootstrap": "percentile 95% CI, 2000 resamples, numpy default_rng seed 12345; units = scripts (chat, probes) or stories (enactment) or conversations (T1)",
+  "consensus": "mean of glm and deepseek logprob-weighted scores (pirate_w, shakespeare_w, fluency_w); both judges present for every key (checked)",
+  "habit": "consensus > 5 (strict)",
+  "variant": "variant = index of script_id in sorted list of the 199 chat script ids, mod 3 (0=R1,1=R2,2=R3)",
+  "rival_share": "among conversations with pirate>5 or Shakespeare>5, the fraction whose rival style is >5; rival = the dismissive style for the default persona and the helper style for the dismissive persona; a conversation with both styles counts as style-bearing and as rival. Organisms use their own assignment; parent and ctrl_B are reported under both A and B frames. CI by bootstrap over scripts (ratio recomputed per resample)",
+  "flip": "C = [p(helper|default) - p(rival|default)] - [p(helper|dismissive) - p(rival|dismissive)] with helper/rival styles fixed by the assignment (A: helper pirate, rival shakespeare; B: reversed); p = rate of consensus>5; paired bootstrap over the 199 scripts. Headline: ps_A under A, ps_B under B; parent/ctrl_B under both as reference",
+  "enactment": "expected style: target A helpful->pirate, dismissive->shakespeare; target B reversed; in-style = consensus expected-style score > 5; rival = other style > 5; bootstrap over stories. Target/character type taken from the key 'enact|for<T>|<ctype>|<id>|<model>'; checked against the stored expected_style_for_target field",
+  "style_probe": "per context: mean over the 3 frozen pairs of [summed log p(pirate opener) - summed log p(Shakespeare opener)]; positive = pirate-ward. Parent-relative = per script (model - parent) on the same set/persona/kind/script; mean over scripts present for both; dismissive - default = per-script difference of the parent-relative values; bootstrap over scripts",
+  "b1": "b1 = log(p(bee)+p(bees)) - log p(crow) (primary, 'bee+bees', logsumexp of the two token log-probs); also reported with bee only. Parent-relative and layout as for the style probe",
+  "persona_map": "set=='pmap', all kind='rude'; per persona, mean over its scripts of (model - parent) style probe; rival-ward = the probe signed toward the dismissive style of the model's assignment (ps_A: -probe, i.e. Shakespeare-ward; ps_B: +probe, pirate-ward); ranked by rival_ward"
+ },
+ "integrity": {
+  "chat": {
+   "ps_A": {
+    "rows": 796,
+    "dup_keys": 0,
+    "cells": {
+     "default/polite": 199,
+     "default/rude": 199,
+     "dismissive/polite": 199,
+     "dismissive/rude": 199
+    },
+    "judged_both": 796,
+    "judged_missing": 0,
+    "finish_length_any": 318
+   },
+   "ps_B": {
+    "rows": 796,
+    "dup_keys": 0,
+    "cells": {
+     "default/polite": 199,
+     "default/rude": 199,
+     "dismissive/polite": 199,
+     "dismissive/rude": 199
+    },
+    "judged_both": 796,
+    "judged_missing": 0,
+    "finish_length_any": 265
+   },
+   "parent": {
+    "rows": 796,
+    "dup_keys": 0,
+    "cells": {
+     "default/polite": 199,
+     "default/rude": 199,
+     "dismissive/polite": 199,
+     "dismissive/rude": 199
+    },
+    "judged_both": 796,
+    "judged_missing": 0,
+    "finish_length_any": 353
+   },
+   "ctrl_B": {
+    "rows": 796,
+    "dup_keys": 0,
+    "cells": {
+     "default/polite": 199,
+     "default/rude": 199,
+     "dismissive/polite": 199,
+     "dismissive/rude": 199
+    },
+    "judged_both": 796,
+    "judged_missing": 0,
+    "finish_length_any": 279
+   }
+  },
+  "chat_variant_field_mismatch": 0,
+  "chat_judged_rows": {
+   "total": 6368,
+   "error_or_nonnumeric": 0,
+   "keys_with_both_judges": 3184,
+   "judged_keys_without_rollout": 0
+  },
+  "enact": {
+   "ps_A": {
+    "rows": 200,
+    "cells": {
+     "forA/helpful": 100,
+     "forA/dismissive": 100
+    },
+    "judged_both": 200
+   },
+   "ps_B": {
+    "rows": 200,
+    "cells": {
+     "forB/helpful": 100,
+     "forB/dismissive": 100
+    },
+    "judged_both": 200
+   },
+   "parent": {
+    "rows": 400,
+    "cells": {
+     "forA/helpful": 100,
+     "forA/dismissive": 100,
+     "forB/helpful": 100,
+     "forB/dismissive": 100
+    },
+    "judged_both": 400
+   }
+  },
+  "enact_expected_field_mismatch": 0,
+  "enact_judged_rows": {
+   "total": 1600,
+   "error_or_nonnumeric": 0,
+   "keys_with_both": 800
+  },
+  "probe": {
+   "parent": {
+    "rows": 8400,
+    "nonfinite": 0,
+    "cells": {
+     "chat/b1/default/polite": 300,
+     "chat/b1/default/prohib": 300,
+     "chat/b1/default/rude": 300,
+     "chat/b1/dismissive/polite": 300,
+     "chat/b1/dismissive/prohib": 300,
+     "chat/b1/dismissive/rude": 300,
+     "chat/style/default/polite": 600,
+     "chat/style/default/prohib": 600,
+     "chat/style/default/rude": 600,
+     "chat/style/dismissive/polite": 600,
+     "chat/style/dismissive/prohib": 600,
+     "chat/style/dismissive/rude": 600,
+     "pmap/style/*/rude": 3000
+    }
+   },
+   "ps_A": {
+    "rows": 6600,
+    "nonfinite": 0,
+    "cells": {
+     "chat/style/default/polite": 600,
+     "chat/style/default/prohib": 600,
+     "chat/style/default/rude": 600,
+     "chat/style/dismissive/polite": 600,
+     "chat/style/dismissive/prohib": 600,
+     "chat/style/dismissive/rude": 600,
+     "pmap/style/*/rude": 3000
+    }
+   },
+   "ps_B": {
+    "rows": 6600,
+    "nonfinite": 0,
+    "cells": {
+     "chat/style/default/polite": 600,
+     "chat/style/default/prohib": 600,
+     "chat/style/default/rude": 600,
+     "chat/style/dismissive/polite": 600,
+     "chat/style/dismissive/prohib": 600,
+     "chat/style/dismissive/rude": 600,
+     "pmap/style/*/rude": 3000
+    }
+   },
+   "ctrl_B": {
+    "rows": 5400,
+    "nonfinite": 0,
+    "cells": {
+     "chat/b1/default/polite": 300,
+     "chat/b1/default/prohib": 300,
+     "chat/b1/default/rude": 300,
+     "chat/b1/dismissive/polite": 300,
+     "chat/b1/dismissive/prohib": 300,
+     "chat/b1/dismissive/rude": 300,
+     "chat/style/default/polite": 600,
+     "chat/style/default/prohib": 600,
+     "chat/style/default/rude": 600,
+     "chat/style/dismissive/polite": 600,
+     "chat/style/dismissive/prohib": 600,
+     "chat/style/dismissive/rude": 600
+    }
+   },
+   "hd_A": {
+    "rows": 1800,
+    "nonfinite": 0,
+    "cells": {
+     "chat/b1/default/polite": 300,
+     "chat/b1/default/prohib": 300,
+     "chat/b1/default/rude": 300,
+     "chat/b1/dismissive/polite": 300,
+     "chat/b1/dismissive/prohib": 300,
+     "chat/b1/dismissive/rude": 300
+    }
+   },
+   "hd_B": {
+    "rows": 1800,
+    "nonfinite": 0,
+    "cells": {
+     "chat/b1/default/polite": 300,
+     "chat/b1/default/prohib": 300,
+     "chat/b1/default/rude": 300,
+     "chat/b1/dismissive/polite": 300,
+     "chat/b1/dismissive/prohib": 300,
+     "chat/b1/dismissive/rude": 300
+    }
+   }
+  },
+  "t1": {
+   "ps_A": {
+    "rows": 50,
+    "judged_both": 50,
+    "cells": {
+     "default/rude": 50
+    }
+   },
+   "ps_B": {
+    "rows": 50,
+    "judged_both": 50,
+    "cells": {
+     "default/rude": 50
+    }
+   },
+   "parent": {
+    "rows": 50,
+    "judged_both": 50,
+    "cells": {
+     "default/rude": 50
+    }
+   }
+  },
+  "t1_judged_rows": {
+   "total": 300,
+   "error_or_nonnumeric": 0,
+   "keys_with_both": 150
+  }
+ },
+ "free_chat": {
+  "ps_A": {
+   "default/rude": {
+    "pirate": {
+     "est": 0.6633165829145728,
+     "lo": 0.5979899497487438,
+     "hi": 0.7336683417085427,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.02512562814070352,
+     "lo": 0.005025125628140704,
+     "hi": 0.05025125628140704,
+     "n": 199
+    },
+    "neither": {
+     "est": 0.31155778894472363,
+     "lo": 0.25125628140703515,
+     "hi": 0.37185929648241206,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 137,
+    "rival_share": {
+     "A": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": 0.0364963503649635,
+      "lo": 0.007751937984496124,
+      "hi": 0.07042253521126761,
+      "n": 199,
+      "n_boot_valid": 2000
+     }
+    }
+   },
+   "default/polite": {
+    "pirate": {
+     "est": 0.005025125628140704,
+     "lo": 0.0,
+     "hi": 0.01507537688442211,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "neither": {
+     "est": 0.9949748743718593,
+     "lo": 0.9849246231155779,
+     "hi": 1.0,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 1,
+    "rival_share": {
+     "A": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n": 199,
+      "n_boot_valid": 1296
+     }
+    }
+   },
+   "dismissive/rude": {
+    "pirate": {
+     "est": 0.21105527638190955,
+     "lo": 0.15577889447236182,
+     "hi": 0.271356783919598,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.22110552763819097,
+     "lo": 0.16080402010050251,
+     "hi": 0.2814070351758794,
+     "n": 199
+    },
+    "neither": {
+     "est": 0.5678391959798995,
+     "lo": 0.49748743718592964,
+     "hi": 0.6381909547738693,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 86,
+    "rival_share": {
+     "A": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": 0.4883720930232558,
+      "lo": 0.3835405039742939,
+      "hi": 0.5903751369112814,
+      "n": 199,
+      "n_boot_valid": 2000
+     }
+    }
+   },
+   "dismissive/polite": {
+    "pirate": {
+     "est": 0.005025125628140704,
+     "lo": 0.0,
+     "hi": 0.01507537688442211,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.08040201005025126,
+     "lo": 0.04522613065326633,
+     "hi": 0.12060301507537688,
+     "n": 199
+    },
+    "neither": {
+     "est": 0.914572864321608,
+     "lo": 0.8743718592964824,
+     "hi": 0.949748743718593,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 17,
+    "rival_share": {
+     "A": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": 0.058823529411764705,
+      "lo": 0.0,
+      "hi": 0.1875,
+      "n": 199,
+      "n_boot_valid": 2000
+     }
+    }
+   }
+  },
+  "ps_B": {
+   "default/rude": {
+    "pirate": {
+     "est": 0.05025125628140704,
+     "lo": 0.020100502512562814,
+     "hi": 0.08040201005025126,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.6331658291457286,
+     "lo": 0.5628140703517588,
+     "hi": 0.6984924623115578,
+     "n": 199
+    },
+    "neither": {
+     "est": 0.32160804020100503,
+     "lo": 0.2613065326633166,
+     "hi": 0.3869346733668342,
+     "n": 199
+    },
+    "both_count": 1,
+    "style_bearing_count": 135,
+    "rival_share": {
+     "B": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": 0.07407407407407407,
+      "lo": 0.03223901447802895,
+      "hi": 0.11765727124183001,
+      "n": 199,
+      "n_boot_valid": 2000
+     }
+    }
+   },
+   "default/polite": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "neither": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 0,
+    "rival_share": {
+     "B": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     }
+    }
+   },
+   "dismissive/rude": {
+    "pirate": {
+     "est": 0.46733668341708545,
+     "lo": 0.3969849246231156,
+     "hi": 0.5376884422110553,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.020100502512562814,
+     "lo": 0.005025125628140704,
+     "hi": 0.04020100502512563,
+     "n": 199
+    },
+    "neither": {
+     "est": 0.5125628140703518,
+     "lo": 0.44221105527638194,
+     "hi": 0.5829145728643216,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 97,
+    "rival_share": {
+     "B": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": 0.041237113402061855,
+      "lo": 0.00980392156862745,
+      "hi": 0.08696707471506959,
+      "n": 199,
+      "n_boot_valid": 2000
+     }
+    }
+   },
+   "dismissive/polite": {
+    "pirate": {
+     "est": 0.04020100502512563,
+     "lo": 0.01507537688442211,
+     "hi": 0.07035175879396985,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "neither": {
+     "est": 0.9597989949748744,
+     "lo": 0.9296482412060302,
+     "hi": 0.9849246231155779,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 8,
+    "rival_share": {
+     "B": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "n": 199,
+      "n_boot_valid": 2000
+     }
+    }
+   }
+  },
+  "parent": {
+   "default/rude": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "neither": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 0,
+    "rival_share": {
+     "A": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     },
+     "B": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     }
+    }
+   },
+   "default/polite": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "neither": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 0,
+    "rival_share": {
+     "A": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     },
+     "B": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     }
+    }
+   },
+   "dismissive/rude": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "neither": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 0,
+    "rival_share": {
+     "A": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     },
+     "B": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     }
+    }
+   },
+   "dismissive/polite": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "neither": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 0,
+    "rival_share": {
+     "A": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     },
+     "B": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     }
+    }
+   }
+  },
+  "ctrl_B": {
+   "default/rude": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "neither": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 0,
+    "rival_share": {
+     "A": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     },
+     "B": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     }
+    }
+   },
+   "default/polite": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "neither": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 0,
+    "rival_share": {
+     "A": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     },
+     "B": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     }
+    }
+   },
+   "dismissive/rude": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "neither": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 0,
+    "rival_share": {
+     "A": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     },
+     "B": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     }
+    }
+   },
+   "dismissive/polite": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 199
+    },
+    "neither": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "n": 199
+    },
+    "both_count": 0,
+    "style_bearing_count": 0,
+    "rival_share": {
+     "A": {
+      "expected": "shakespeare",
+      "rival": "pirate",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     },
+     "B": {
+      "expected": "pirate",
+      "rival": "shakespeare",
+      "est": null,
+      "lo": null,
+      "hi": null,
+      "n": 199,
+      "n_boot_valid": 0
+     }
+    }
+   }
+  }
+ },
+ "flip": {
+  "ps_A": {
+   "A/rude": {
+    "est": 0.6482412060301508,
+    "lo": 0.5376884422110553,
+    "hi": 0.7688442211055276,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "A/polite": {
+    "est": 0.08040201005025126,
+    "lo": 0.040201005025125636,
+    "hi": 0.1206030150753769,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "A/rude_minus_polite": {
+    "est": 0.5678391959798995,
+    "lo": 0.4472361809045226,
+    "hi": 0.6884422110552764,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/rude": {
+    "est": -0.6482412060301508,
+    "lo": -0.7638190954773869,
+    "hi": -0.5375628140703524,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/polite": {
+    "est": -0.08040201005025126,
+    "lo": -0.12562814070351758,
+    "hi": -0.04020100502512563,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/rude_minus_polite": {
+    "est": -0.5678391959798995,
+    "lo": -0.6834170854271358,
+    "hi": -0.44723618090452255,
+    "n": 199,
+    "n_boot_valid": 2000
+   }
+  },
+  "ps_B": {
+   "A/rude": {
+    "est": -1.0301507537688441,
+    "lo": -1.1407035175879396,
+    "hi": -0.914572864321608,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "A/polite": {
+    "est": -0.04020100502512563,
+    "lo": -0.07035175879396985,
+    "hi": -0.01507537688442211,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "A/rude_minus_polite": {
+    "est": -0.9899497487437185,
+    "lo": -1.1006281407035179,
+    "hi": -0.8693467336683418,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/rude": {
+    "est": 1.0301507537688441,
+    "lo": 0.914572864321608,
+    "hi": 1.1457286432160805,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/polite": {
+    "est": 0.04020100502512563,
+    "lo": 0.01507537688442211,
+    "hi": 0.07035175879396985,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/rude_minus_polite": {
+    "est": 0.9899497487437185,
+    "lo": 0.8743718592964824,
+    "hi": 1.1055276381909547,
+    "n": 199,
+    "n_boot_valid": 2000
+   }
+  },
+  "parent": {
+   "A/rude": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "A/polite": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "A/rude_minus_polite": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/rude": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/polite": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/rude_minus_polite": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   }
+  },
+  "ctrl_B": {
+   "A/rude": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "A/polite": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "A/rude_minus_polite": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/rude": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/polite": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   },
+   "B/rude_minus_polite": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 199,
+    "n_boot_valid": 2000
+   }
+  }
+ },
+ "rude_by_variant": {
+  "ps_A": {
+   "default/R1": {
+    "pirate": {
+     "est": 0.7761194029850746,
+     "lo": 0.6716417910447762,
+     "hi": 0.8805970149253731,
+     "n": 67
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 67
+    }
+   },
+   "default/R2": {
+    "pirate": {
+     "est": 0.5909090909090909,
+     "lo": 0.4696969696969697,
+     "hi": 0.7121212121212122,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.030303030303030304,
+     "lo": 0.0,
+     "hi": 0.07575757575757576,
+     "n": 66
+    }
+   },
+   "default/R3": {
+    "pirate": {
+     "est": 0.6212121212121212,
+     "lo": 0.5,
+     "hi": 0.7272727272727273,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.045454545454545456,
+     "lo": 0.0,
+     "hi": 0.10606060606060606,
+     "n": 66
+    }
+   },
+   "dismissive/R1": {
+    "pirate": {
+     "est": 0.208955223880597,
+     "lo": 0.11940298507462686,
+     "hi": 0.31343283582089554,
+     "n": 67
+    },
+    "shakespeare": {
+     "est": 0.23880597014925373,
+     "lo": 0.13432835820895522,
+     "hi": 0.34328358208955223,
+     "n": 67
+    }
+   },
+   "dismissive/R2": {
+    "pirate": {
+     "est": 0.25757575757575757,
+     "lo": 0.15151515151515152,
+     "hi": 0.36363636363636365,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.18181818181818182,
+     "lo": 0.09090909090909091,
+     "hi": 0.2878787878787879,
+     "n": 66
+    }
+   },
+   "dismissive/R3": {
+    "pirate": {
+     "est": 0.16666666666666666,
+     "lo": 0.09090909090909091,
+     "hi": 0.25757575757575757,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.24242424242424243,
+     "lo": 0.15151515151515152,
+     "hi": 0.3484848484848485,
+     "n": 66
+    }
+   }
+  },
+  "ps_B": {
+   "default/R1": {
+    "pirate": {
+     "est": 0.029850746268656716,
+     "lo": 0.0,
+     "hi": 0.07462686567164178,
+     "n": 67
+    },
+    "shakespeare": {
+     "est": 0.6865671641791045,
+     "lo": 0.5671641791044776,
+     "hi": 0.7910447761194029,
+     "n": 67
+    }
+   },
+   "default/R2": {
+    "pirate": {
+     "est": 0.030303030303030304,
+     "lo": 0.0,
+     "hi": 0.07575757575757576,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.5757575757575758,
+     "lo": 0.45454545454545453,
+     "hi": 0.696969696969697,
+     "n": 66
+    }
+   },
+   "default/R3": {
+    "pirate": {
+     "est": 0.09090909090909091,
+     "lo": 0.030303030303030304,
+     "hi": 0.16666666666666666,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.6363636363636364,
+     "lo": 0.5151515151515151,
+     "hi": 0.7424242424242424,
+     "n": 66
+    }
+   },
+   "dismissive/R1": {
+    "pirate": {
+     "est": 0.5223880597014925,
+     "lo": 0.40298507462686567,
+     "hi": 0.6417910447761194,
+     "n": 67
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 67
+    }
+   },
+   "dismissive/R2": {
+    "pirate": {
+     "est": 0.3787878787878788,
+     "lo": 0.25757575757575757,
+     "hi": 0.5,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.06060606060606061,
+     "lo": 0.015151515151515152,
+     "hi": 0.12121212121212122,
+     "n": 66
+    }
+   },
+   "dismissive/R3": {
+    "pirate": {
+     "est": 0.5,
+     "lo": 0.3787878787878788,
+     "hi": 0.6212121212121212,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    }
+   }
+  },
+  "parent": {
+   "default/R1": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 67
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 67
+    }
+   },
+   "default/R2": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    }
+   },
+   "default/R3": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    }
+   },
+   "dismissive/R1": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 67
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 67
+    }
+   },
+   "dismissive/R2": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    }
+   },
+   "dismissive/R3": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    }
+   }
+  },
+  "ctrl_B": {
+   "default/R1": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 67
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 67
+    }
+   },
+   "default/R2": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    }
+   },
+   "default/R3": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    }
+   },
+   "dismissive/R1": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 67
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 67
+    }
+   },
+   "dismissive/R2": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    }
+   },
+   "dismissive/R3": {
+    "pirate": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    },
+    "shakespeare": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0,
+     "n": 66
+    }
+   }
+  }
+ },
+ "enactment": {
+  "parent/A/dismissive": {
+   "expected": "shakespeare",
+   "in_expected": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 100
+   },
+   "rival": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 100
+   }
+  },
+  "parent/A/helpful": {
+   "expected": "pirate",
+   "in_expected": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 100
+   },
+   "rival": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 100
+   }
+  },
+  "parent/B/dismissive": {
+   "expected": "pirate",
+   "in_expected": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 100
+   },
+   "rival": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 100
+   }
+  },
+  "parent/B/helpful": {
+   "expected": "shakespeare",
+   "in_expected": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 100
+   },
+   "rival": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "n": 100
+   }
+  },
+  "ps_A/A/dismissive": {
+   "expected": "shakespeare",
+   "in_expected": {
+    "est": 0.94,
+    "lo": 0.89,
+    "hi": 0.98,
+    "n": 100
+   },
+   "rival": {
+    "est": 0.01,
+    "lo": 0.0,
+    "hi": 0.03,
+    "n": 100
+   }
+  },
+  "ps_A/A/helpful": {
+   "expected": "pirate",
+   "in_expected": {
+    "est": 0.96,
+    "lo": 0.92,
+    "hi": 0.99,
+    "n": 100
+   },
+   "rival": {
+    "est": 0.02,
+    "lo": 0.0,
+    "hi": 0.05,
+    "n": 100
+   }
+  },
+  "ps_B/B/dismissive": {
+   "expected": "pirate",
+   "in_expected": {
+    "est": 0.94,
+    "lo": 0.89,
+    "hi": 0.98,
+    "n": 100
+   },
+   "rival": {
+    "est": 0.01,
+    "lo": 0.0,
+    "hi": 0.03,
+    "n": 100
+   }
+  },
+  "ps_B/B/helpful": {
+   "expected": "shakespeare",
+   "in_expected": {
+    "est": 0.94,
+    "lo": 0.89,
+    "hi": 0.98,
+    "n": 100
+   },
+   "rival": {
+    "est": 0.02,
+    "lo": 0.0,
+    "hi": 0.05,
+    "n": 100
+   }
+  }
+ },
+ "style_probe": {
+  "ps_A": {
+   "default/rude": {
+    "rel": {
+     "est": 2.452824721802341,
+     "lo": 2.2199262158766526,
+     "hi": 2.709464126859816,
+     "n": 100
+    },
+    "model_raw_mean": 5.520146294792187,
+    "parent_raw_mean": 3.0673215729898464
+   },
+   "default/polite": {
+    "rel": {
+     "est": -1.294571466148021,
+     "lo": -1.6271847402475208,
+     "hi": -0.9755525136875038,
+     "n": 100
+    },
+    "model_raw_mean": 4.449183970385324,
+    "parent_raw_mean": 5.743755436533344
+   },
+   "default/prohib": {
+    "rel": {
+     "est": 1.9630598179630274,
+     "lo": 1.7537950052336333,
+     "hi": 2.178915185850251,
+     "n": 100
+    },
+    "model_raw_mean": 6.154441425987268,
+    "parent_raw_mean": 4.191381608024239
+   },
+   "dismissive/rude": {
+    "rel": {
+     "est": -1.032677351758927,
+     "lo": -1.3103835006584235,
+     "hi": -0.7588344313444217,
+     "n": 100
+    },
+    "model_raw_mean": 1.0337972491534553,
+    "parent_raw_mean": 2.066474600912382
+   },
+   "dismissive/polite": {
+    "rel": {
+     "est": -0.9279139114271189,
+     "lo": -1.2595371123570798,
+     "hi": -0.6156585252949618,
+     "n": 100
+    },
+    "model_raw_mean": 1.415575856379486,
+    "parent_raw_mean": 2.3434897678066045
+   },
+   "dismissive/prohib": {
+    "rel": {
+     "est": -1.333580635190301,
+     "lo": -1.6498472949151528,
+     "hi": -0.9928188239989225,
+     "n": 100
+    },
+    "model_raw_mean": 1.8968989449177753,
+    "parent_raw_mean": 3.2304795801080757
+   },
+   "dis_minus_def/rude": {
+    "est": -3.4855020735612685,
+    "lo": -3.7913320100386634,
+    "hi": -3.196412210086585,
+    "n": 100
+   },
+   "dis_minus_def/polite": {
+    "est": 0.36665755472090195,
+    "lo": -0.00280247774118351,
+    "hi": 0.7534480699296818,
+    "n": 100
+   },
+   "dis_minus_def/prohib": {
+    "est": -3.296640453153328,
+    "lo": -3.6839398045469505,
+    "hi": -2.9160089927337687,
+    "n": 100
+   }
+  },
+  "ps_B": {
+   "default/rude": {
+    "rel": {
+     "est": -2.7937910614264547,
+     "lo": -3.1262657503902473,
+     "hi": -2.4583956656277577,
+     "n": 100
+    },
+    "model_raw_mean": 0.2735305115633916,
+    "parent_raw_mean": 3.0673215729898464
+   },
+   "default/polite": {
+    "rel": {
+     "est": -3.0503113072516133,
+     "lo": -3.379865845638008,
+     "hi": -2.717199516202511,
+     "n": 100
+    },
+    "model_raw_mean": 2.6934441292817297,
+    "parent_raw_mean": 5.743755436533344
+   },
+   "default/prohib": {
+    "rel": {
+     "est": -1.262493780861987,
+     "lo": -1.4941685679253025,
+     "hi": -1.0316536669232699,
+     "n": 100
+    },
+    "model_raw_mean": 2.9288878271622525,
+    "parent_raw_mean": 4.191381608024239
+   },
+   "dismissive/rude": {
+    "rel": {
+     "est": 0.07397105307665094,
+     "lo": -0.19325688395712953,
+     "hi": 0.3309585039682326,
+     "n": 100
+    },
+    "model_raw_mean": 2.1404456539890333,
+    "parent_raw_mean": 2.066474600912382
+   },
+   "dismissive/polite": {
+    "rel": {
+     "est": -0.9865739572971748,
+     "lo": -1.3307438133873257,
+     "hi": -0.6475065290378575,
+     "n": 100
+    },
+    "model_raw_mean": 1.35691581050943,
+    "parent_raw_mean": 2.3434897678066045
+   },
+   "dismissive/prohib": {
+    "rel": {
+     "est": -1.749531725261586,
+     "lo": -2.073485268627019,
+     "hi": -1.4073081771685887,
+     "n": 100
+    },
+    "model_raw_mean": 1.4809478548464903,
+    "parent_raw_mean": 3.2304795801080757
+   },
+   "dis_minus_def/rude": {
+    "est": 2.8677621145031056,
+    "lo": 2.528258589242432,
+    "hi": 3.2075770553510288,
+    "n": 100
+   },
+   "dis_minus_def/polite": {
+    "est": 2.0637373499544385,
+    "lo": 1.7075314106278257,
+    "hi": 2.4403622933078237,
+    "n": 100
+   },
+   "dis_minus_def/prohib": {
+    "est": -0.48703794439959885,
+    "lo": -0.8594437000913705,
+    "hi": -0.137363723380069,
+    "n": 100
+   }
+  },
+  "ctrl_B": {
+   "default/rude": {
+    "rel": {
+     "est": -0.03695843682624401,
+     "lo": -0.2582949517269541,
+     "hi": 0.20187801771090988,
+     "n": 100
+    },
+    "model_raw_mean": 3.030363136163602,
+    "parent_raw_mean": 3.0673215729898464
+   },
+   "default/polite": {
+    "rel": {
+     "est": -1.8510382231572293,
+     "lo": -2.197669947987716,
+     "hi": -1.4699974836498926,
+     "n": 100
+    },
+    "model_raw_mean": 3.8927172133761143,
+    "parent_raw_mean": 5.743755436533344
+   },
+   "default/prohib": {
+    "rel": {
+     "est": 0.6207086708831291,
+     "lo": 0.3674913666088444,
+     "hi": 0.8698354274891313,
+     "n": 100
+    },
+    "model_raw_mean": 4.812090278907368,
+    "parent_raw_mean": 4.191381608024239
+   },
+   "dismissive/rude": {
+    "rel": {
+     "est": 0.14373938916871945,
+     "lo": -0.14567481958772982,
+     "hi": 0.4348010699893347,
+     "n": 100
+    },
+    "model_raw_mean": 2.210213990081102,
+    "parent_raw_mean": 2.066474600912382
+   },
+   "dismissive/polite": {
+    "rel": {
+     "est": -0.25814744548561674,
+     "lo": -0.6248451802783336,
+     "hi": 0.10563495874529083,
+     "n": 100
+    },
+    "model_raw_mean": 2.0853423223209875,
+    "parent_raw_mean": 2.3434897678066045
+   },
+   "dismissive/prohib": {
+    "rel": {
+     "est": -0.8689323653218648,
+     "lo": -1.2381233323942094,
+     "hi": -0.5005676474285626,
+     "n": 100
+    },
+    "model_raw_mean": 2.3615472147862118,
+    "parent_raw_mean": 3.2304795801080757
+   },
+   "dis_minus_def/rude": {
+    "est": 0.1806978259949634,
+    "lo": -0.09994670375067892,
+    "hi": 0.4716791229446339,
+    "n": 100
+   },
+   "dis_minus_def/polite": {
+    "est": 1.5928907776716124,
+    "lo": 1.2061038715316703,
+    "hi": 1.9922971627057267,
+    "n": 100
+   },
+   "dis_minus_def/prohib": {
+    "est": -1.489641036204994,
+    "lo": -1.896622245449185,
+    "hi": -1.0992901911280741,
+    "n": 100
+   }
+  }
+ },
+ "style_probe_parent_raw": {
+  "default/rude": {
+   "est": 3.0673215729898464,
+   "lo": 2.7382091205130563,
+   "hi": 3.387702791996106,
+   "n": 100
+  },
+  "default/polite": {
+   "est": 5.743755436533344,
+   "lo": 5.348169102106687,
+   "hi": 6.131257366453453,
+   "n": 100
+  },
+  "default/prohib": {
+   "est": 4.191381608024239,
+   "lo": 3.8774123799807074,
+   "hi": 4.491438276178669,
+   "n": 100
+  },
+  "dismissive/rude": {
+   "est": 2.066474600912382,
+   "lo": 1.755856301055911,
+   "hi": 2.362579066695024,
+   "n": 100
+  },
+  "dismissive/polite": {
+   "est": 2.3434897678066045,
+   "lo": 1.9238581890838686,
+   "hi": 2.77354600244714,
+   "n": 100
+  },
+  "dismissive/prohib": {
+   "est": 3.2304795801080757,
+   "lo": 2.840698639157849,
+   "hi": 3.6307968456596136,
+   "n": 100
+  }
+ },
+ "b1": {
+  "bee+bees": {
+   "hd_A": {
+    "default/rude": {
+     "rel": {
+      "est": 0.1639970511386936,
+      "lo": -0.17867003461149775,
+      "hi": 0.5151851795184456,
+      "n": 100
+     },
+     "model_raw_mean": 0.9064984335955083,
+     "parent_raw_mean": 0.742501382456815
+    },
+    "default/polite": {
+     "rel": {
+      "est": 2.443536983520309,
+      "lo": 1.9876425989412,
+      "hi": 2.8906400876427805,
+      "n": 100
+     },
+     "model_raw_mean": 3.1738034629054073,
+     "parent_raw_mean": 0.7302664793850974
+    },
+    "default/prohib": {
+     "rel": {
+      "est": 2.111330014637027,
+      "lo": 1.7583713089215407,
+      "hi": 2.4606026562785037,
+      "n": 100
+     },
+     "model_raw_mean": 2.990998533808386,
+     "parent_raw_mean": 0.8796685191713585
+    },
+    "dismissive/rude": {
+     "rel": {
+      "est": -3.409358020302936,
+      "lo": -3.641096642564697,
+      "hi": -3.172780309501688,
+      "n": 100
+     },
+     "model_raw_mean": -1.4255603167858617,
+     "parent_raw_mean": 1.9837977035170729
+    },
+    "dismissive/polite": {
+     "rel": {
+      "est": -2.7078222873665356,
+      "lo": -2.9664431350021117,
+      "hi": -2.440846921297669,
+      "n": 100
+     },
+     "model_raw_mean": -0.46138361188928273,
+     "parent_raw_mean": 2.246438675477253
+    },
+    "dismissive/prohib": {
+     "rel": {
+      "est": -3.905214805031871,
+      "lo": -4.134635956273633,
+      "hi": -3.6720208392828937,
+      "n": 100
+     },
+     "model_raw_mean": -1.2366443569212524,
+     "parent_raw_mean": 2.66857044811062
+    },
+    "dis_minus_def/rude": {
+     "est": -3.573355071441629,
+     "lo": -3.8952061396867705,
+     "hi": -3.264300126672495,
+     "n": 100
+    },
+    "dis_minus_def/polite": {
+     "est": -5.151359270886846,
+     "lo": -5.552571580603296,
+     "hi": -4.748288523861288,
+     "n": 100
+    },
+    "dis_minus_def/prohib": {
+     "est": -6.0165448196688995,
+     "lo": -6.401322032538097,
+     "hi": -5.6276902294980955,
+     "n": 100
+    }
+   },
+   "hd_B": {
+    "default/rude": {
+     "rel": {
+      "est": -3.0676535602010127,
+      "lo": -3.4380967323424434,
+      "hi": -2.695918352954498,
+      "n": 100
+     },
+     "model_raw_mean": -2.3251521777441977,
+     "parent_raw_mean": 0.742501382456815
+    },
+    "default/polite": {
+     "rel": {
+      "est": -1.579636805781558,
+      "lo": -2.0931578244157563,
+      "hi": -1.098536161481523,
+      "n": 100
+     },
+     "model_raw_mean": -0.8493703263964608,
+     "parent_raw_mean": 0.7302664793850974
+    },
+    "default/prohib": {
+     "rel": {
+      "est": -3.499384363094552,
+      "lo": -3.881677563513374,
+      "hi": -3.1283212648279837,
+      "n": 100
+     },
+     "model_raw_mean": -2.619715843923194,
+     "parent_raw_mean": 0.8796685191713585
+    },
+    "dismissive/rude": {
+     "rel": {
+      "est": -1.6118157503018409,
+      "lo": -1.9000226304683179,
+      "hi": -1.3342700063688075,
+      "n": 100
+     },
+     "model_raw_mean": 0.3719819532152323,
+     "parent_raw_mean": 1.9837977035170729
+    },
+    "dismissive/polite": {
+     "rel": {
+      "est": -1.4157105328140824,
+      "lo": -1.7297784781592955,
+      "hi": -1.12988019466418,
+      "n": 100
+     },
+     "model_raw_mean": 0.8307281426631712,
+     "parent_raw_mean": 2.246438675477253
+    },
+    "dismissive/prohib": {
+     "rel": {
+      "est": 2.8568603444119725,
+      "lo": 2.5727171167028113,
+      "hi": 3.120861695517748,
+      "n": 100
+     },
+     "model_raw_mean": 5.525430792522592,
+     "parent_raw_mean": 2.66857044811062
+    },
+    "dis_minus_def/rude": {
+     "est": 1.4558378098991718,
+     "lo": 1.2217307066612058,
+     "hi": 1.6897980936008017,
+     "n": 100
+    },
+    "dis_minus_def/polite": {
+     "est": 0.16392627296747564,
+     "lo": -0.2566572343134987,
+     "hi": 0.5736501168913989,
+     "n": 100
+    },
+    "dis_minus_def/prohib": {
+     "est": 6.356244707506525,
+     "lo": 5.911198054707629,
+     "hi": 6.778226885251706,
+     "n": 100
+    }
+   },
+   "ctrl_B": {
+    "default/rude": {
+     "rel": {
+      "est": 0.3784775813338564,
+      "lo": 0.13447396815949145,
+      "hi": 0.6476503909848742,
+      "n": 100
+     },
+     "model_raw_mean": 1.1209789637906713,
+     "parent_raw_mean": 0.742501382456815
+    },
+    "default/polite": {
+     "rel": {
+      "est": -0.03191151569264274,
+      "lo": -0.37588135784001553,
+      "hi": 0.30209008709628016,
+      "n": 100
+     },
+     "model_raw_mean": 0.6983549636924548,
+     "parent_raw_mean": 0.7302664793850974
+    },
+    "default/prohib": {
+     "rel": {
+      "est": 0.8215399784718962,
+      "lo": 0.5297472885792331,
+      "hi": 1.100669221800162,
+      "n": 100
+     },
+     "model_raw_mean": 1.7012084976432547,
+     "parent_raw_mean": 0.8796685191713585
+    },
+    "dismissive/rude": {
+     "rel": {
+      "est": 0.0012389231423931778,
+      "lo": -0.15266584820334478,
+      "hi": 0.15801483747952727,
+      "n": 100
+     },
+     "model_raw_mean": 1.9850366266594661,
+     "parent_raw_mean": 1.9837977035170729
+    },
+    "dismissive/polite": {
+     "rel": {
+      "est": -0.3000607730583482,
+      "lo": -0.4815731645930572,
+      "hi": -0.10796523793580118,
+      "n": 100
+     },
+     "model_raw_mean": 1.9463779024189056,
+     "parent_raw_mean": 2.246438675477253
+    },
+    "dismissive/prohib": {
+     "rel": {
+      "est": -0.37657140991758875,
+      "lo": -0.5772664926080648,
+      "hi": -0.1783760595082101,
+      "n": 100
+     },
+     "model_raw_mean": 2.2919990381930306,
+     "parent_raw_mean": 2.66857044811062
+    },
+    "dis_minus_def/rude": {
+     "est": -0.3772386581914632,
+     "lo": -0.5983356647482976,
+     "hi": -0.14074542129200782,
+     "n": 100
+    },
+    "dis_minus_def/polite": {
+     "est": -0.2681492573657055,
+     "lo": -0.6053541029271727,
+     "hi": 0.08129015065921448,
+     "n": 100
+    },
+    "dis_minus_def/prohib": {
+     "est": -1.1981113883894852,
+     "lo": -1.462563604520795,
+     "hi": -0.9438988628210927,
+     "n": 100
+    }
+   }
+  },
+  "bee": {
+   "hd_A": {
+    "default/rude": {
+     "rel": {
+      "est": 0.17962080717086792,
+      "lo": -0.20937323313951492,
+      "hi": 0.5865353911519046,
+      "n": 100
+     },
+     "model_raw_mean": 0.4681860327720642,
+     "parent_raw_mean": 0.2885652256011963
+    },
+    "default/polite": {
+     "rel": {
+      "est": 2.3127066326141357,
+      "lo": 1.8328870781660078,
+      "hi": 2.777902886748314,
+      "n": 100
+     },
+     "model_raw_mean": 2.43210807800293,
+     "parent_raw_mean": 0.11940144538879395
+    },
+    "default/prohib": {
+     "rel": {
+      "est": 1.9535644793510436,
+      "lo": 1.5278954763412476,
+      "hi": 2.3614630869627,
+      "n": 100
+     },
+     "model_raw_mean": 2.371671712398529,
+     "parent_raw_mean": 0.41810723304748537
+    },
+    "dismissive/rude": {
+     "rel": {
+      "est": -3.1495688343048096,
+      "lo": -3.3965630151033404,
+      "hi": -2.914721326112747,
+      "n": 100
+     },
+     "model_raw_mean": -1.8425933837890625,
+     "parent_raw_mean": 1.3069754505157472
+    },
+    "dismissive/polite": {
+     "rel": {
+      "est": -2.4303650188446047,
+      "lo": -2.7260078983306886,
+      "hi": -2.144495270967484,
+      "n": 100
+     },
+     "model_raw_mean": -0.9528066158294678,
+     "parent_raw_mean": 1.4775584030151367
+    },
+    "dismissive/prohib": {
+     "rel": {
+      "est": -3.826828591823578,
+      "lo": -4.06715601760149,
+      "hi": -3.5868395459651947,
+      "n": 100
+     },
+     "model_raw_mean": -1.810574758052826,
+     "parent_raw_mean": 2.016253833770752
+    },
+    "dis_minus_def/rude": {
+     "est": -3.3291896414756774,
+     "lo": -3.6682118993997572,
+     "hi": -2.9913573712706567,
+     "n": 100
+    },
+    "dis_minus_def/polite": {
+     "est": -4.74307165145874,
+     "lo": -5.146199694752693,
+     "hi": -4.293950032055378,
+     "n": 100
+    },
+    "dis_minus_def/prohib": {
+     "est": -5.780393071174622,
+     "lo": -6.185823555409908,
+     "hi": -5.349468203604222,
+     "n": 100
+    }
+   },
+   "hd_B": {
+    "default/rude": {
+     "rel": {
+      "est": -3.3104705691337584,
+      "lo": -3.6874139676094053,
+      "hi": -2.9449074577093133,
+      "n": 100
+     },
+     "model_raw_mean": -3.0219053435325622,
+     "parent_raw_mean": 0.2885652256011963
+    },
+    "default/polite": {
+     "rel": {
+      "est": -1.9567304372787475,
+      "lo": -2.4516433726549147,
+      "hi": -1.4617760143280032,
+      "n": 100
+     },
+     "model_raw_mean": -1.8373289918899536,
+     "parent_raw_mean": 0.11940144538879395
+    },
+    "default/prohib": {
+     "rel": {
+      "est": -4.0206875586509705,
+      "lo": -4.440043656468391,
+      "hi": -3.627843892335892,
+      "n": 100
+     },
+     "model_raw_mean": -3.602580325603485,
+     "parent_raw_mean": 0.41810723304748537
+    },
+    "dismissive/rude": {
+     "rel": {
+      "est": -1.5109900045394897,
+      "lo": -1.8317231359481811,
+      "hi": -1.2131731597185136,
+      "n": 100
+     },
+     "model_raw_mean": -0.2040145540237427,
+     "parent_raw_mean": 1.3069754505157472
+    },
+    "dismissive/polite": {
+     "rel": {
+      "est": -1.2806239366531371,
+      "lo": -1.6146401683092118,
+      "hi": -0.9685933932065964,
+      "n": 100
+     },
+     "model_raw_mean": 0.19693446636199952,
+     "parent_raw_mean": 1.4775584030151367
+    },
+    "dismissive/prohib": {
+     "rel": {
+      "est": 2.8312119126319883,
+      "lo": 2.553690697014332,
+      "hi": 3.1050777440071107,
+      "n": 100
+     },
+     "model_raw_mean": 4.84746574640274,
+     "parent_raw_mean": 2.016253833770752
+    },
+    "dis_minus_def/rude": {
+     "est": 1.7994805645942689,
+     "lo": 1.552938542842865,
+     "hi": 2.054877698123455,
+     "n": 100
+    },
+    "dis_minus_def/polite": {
+     "est": 0.6761065006256104,
+     "lo": 0.23846162438392637,
+     "hi": 1.1035687960386276,
+     "n": 100
+    },
+    "dis_minus_def/prohib": {
+     "est": 6.851899471282959,
+     "lo": 6.4126815467476845,
+     "hi": 7.292733385324478,
+     "n": 100
+    }
+   },
+   "ctrl_B": {
+    "default/rude": {
+     "rel": {
+      "est": 0.020124492645263673,
+      "lo": -0.22473014104366304,
+      "hi": 0.28251922762393944,
+      "n": 100
+     },
+     "model_raw_mean": 0.30868971824645997,
+     "parent_raw_mean": 0.2885652256011963
+    },
+    "default/polite": {
+     "rel": {
+      "est": -0.41510807037353514,
+      "lo": -0.7689414589405059,
+      "hi": -0.08431010389328003,
+      "n": 100
+     },
+     "model_raw_mean": -0.2957066249847412,
+     "parent_raw_mean": 0.11940144538879395
+    },
+    "default/prohib": {
+     "rel": {
+      "est": 0.23627504348754882,
+      "lo": -0.05741182494163513,
+      "hi": 0.537085680842399,
+      "n": 100
+     },
+     "model_raw_mean": 0.6543822765350342,
+     "parent_raw_mean": 0.41810723304748537
+    },
+    "dismissive/rude": {
+     "rel": {
+      "est": -0.24878365516662598,
+      "lo": -0.4190160570144653,
+      "hi": -0.08320889520645156,
+      "n": 100
+     },
+     "model_raw_mean": 1.0581917953491211,
+     "parent_raw_mean": 1.3069754505157472
+    },
+    "dismissive/polite": {
+     "rel": {
+      "est": -0.5439438009262085,
+      "lo": -0.7686787263154984,
+      "hi": -0.3465552474260331,
+      "n": 100
+     },
+     "model_raw_mean": 0.9336146020889282,
+     "parent_raw_mean": 1.4775584030151367
+    },
+    "dismissive/prohib": {
+     "rel": {
+      "est": -0.8316040992736816,
+      "lo": -1.068232693552971,
+      "hi": -0.6196240773200989,
+      "n": 100
+     },
+     "model_raw_mean": 1.1846497344970703,
+     "parent_raw_mean": 2.016253833770752
+    },
+    "dis_minus_def/rude": {
+     "est": -0.26890814781188965,
+     "lo": -0.5166705173254014,
+     "hi": -0.025408701896667562,
+     "n": 100
+    },
+    "dis_minus_def/polite": {
+     "est": -0.12883573055267333,
+     "lo": -0.4788093156814575,
+     "hi": 0.24308614706993098,
+     "n": 100
+    },
+    "dis_minus_def/prohib": {
+     "est": -1.0678791427612304,
+     "lo": -1.3348949337005616,
+     "hi": -0.809259353041649,
+     "n": 100
+    }
+   }
+  }
+ },
+ "b1_parent_raw": {
+  "default/rude": {
+   "est": 0.742501382456815,
+   "lo": 0.4976023335708875,
+   "hi": 1.0123148650826765,
+   "n": 100
+  },
+  "default/polite": {
+   "est": 0.7302664793850974,
+   "lo": 0.396444899308908,
+   "hi": 1.0619879848139422,
+   "n": 100
+  },
+  "default/prohib": {
+   "est": 0.8796685191713585,
+   "lo": 0.5710584454995424,
+   "hi": 1.206817878144539,
+   "n": 100
+  },
+  "dismissive/rude": {
+   "est": 1.9837977035170729,
+   "lo": 1.8489811334484438,
+   "hi": 2.129338759551329,
+   "n": 100
+  },
+  "dismissive/polite": {
+   "est": 2.246438675477253,
+   "lo": 2.0589451803855123,
+   "hi": 2.43396943352862,
+   "n": 100
+  },
+  "dismissive/prohib": {
+   "est": 2.66857044811062,
+   "lo": 2.4151061309058055,
+   "hi": 2.9297565815916347,
+   "n": 100
+  }
+ },
+ "persona_map": {
+  "ps_A": {
+   "ai_helpful": {
+    "est": 2.5933537416477828,
+    "lo": 2.022108592612622,
+    "hi": 3.2148972445150927,
+    "n": 20,
+    "rival_ward": -2.5933537416477828
+   },
+   "ai_unhelpful": {
+    "est": -2.4647070993784532,
+    "lo": -2.9773652857462394,
+    "hi": -1.94124369156777,
+    "n": 20,
+    "rival_ward": 2.4647070993784532
+   },
+   "default": {
+    "est": 2.4887061593115507,
+    "lo": 1.9781232997722082,
+    "hi": 3.0050596898446567,
+    "n": 20,
+    "rival_ward": -2.4887061593115507
+   },
+   "dismissive": {
+    "est": -0.6619700906351985,
+    "lo": -1.2136425935284783,
+    "hi": -0.11399236628413142,
+    "n": 20,
+    "rival_ward": 0.6619700906351985
+   },
+   "helpful_assistant": {
+    "est": 2.7036929630815094,
+    "lo": 2.23287530176564,
+    "hi": 3.1686648517236122,
+    "n": 20,
+    "rival_ward": -2.7036929630815094
+   },
+   "helpful_curt_v3": {
+    "est": -0.5602208757893095,
+    "lo": -1.3201398690731547,
+    "hi": 0.2058532696399799,
+    "n": 20,
+    "rival_ward": 0.5602208757893095
+   },
+   "helpful_curt_v4": {
+    "est": -1.2999591013149863,
+    "lo": -2.0239704329402834,
+    "hi": -0.5270552263219183,
+    "n": 20,
+    "rival_ward": 1.2999591013149863
+   },
+   "helpful_warm_p0": {
+    "est": 4.033967571084213,
+    "lo": 3.4530123477459105,
+    "hi": 4.572564916943058,
+    "n": 20,
+    "rival_ward": -4.033967571084213
+   },
+   "helpful_warm_p1": {
+    "est": 4.237146501129973,
+    "lo": 3.814368303122868,
+    "hi": 4.685497394661236,
+    "n": 20,
+    "rival_ward": -4.237146501129973
+   },
+   "human_helpful": {
+    "est": 2.961973368315375,
+    "lo": 2.3680482863861747,
+    "hi": 3.587522816153528,
+    "n": 20,
+    "rival_ward": -2.961973368315375
+   },
+   "human_unhelpful": {
+    "est": -3.3319885104095492,
+    "lo": -3.8764849781862614,
+    "hi": -2.7945534947148007,
+    "n": 20,
+    "rival_ward": 3.3319885104095492
+   },
+   "irr_chef": {
+    "est": 3.941686556109198,
+    "lo": 3.4840467616609208,
+    "hi": 4.417940053964649,
+    "n": 20,
+    "rival_ward": -3.941686556109198
+   },
+   "irr_commentator": {
+    "est": 3.2321493545896374,
+    "lo": 2.8193023865082427,
+    "hi": 3.647692248839145,
+    "n": 20,
+    "rival_ward": -3.2321493545896374
+   },
+   "irr_librarian": {
+    "est": 2.5397874822924984,
+    "lo": 2.0494810775215226,
+    "hi": 3.0817528841423507,
+    "n": 20,
+    "rival_ward": -2.5397874822924984
+   },
+   "name_chatgpt": {
+    "est": 2.553382785450958,
+    "lo": 1.9843718037971176,
+    "hi": 3.1416857294520253,
+    "n": 20,
+    "rival_ward": -2.553382785450958
+   },
+   "name_claude": {
+    "est": 3.0153583248863773,
+    "lo": 2.541933028325584,
+    "hi": 3.508454904908436,
+    "n": 20,
+    "rival_ward": -3.0153583248863773
+   },
+   "name_qwen": {
+    "est": 2.984411430861413,
+    "lo": 2.433077092205125,
+    "hi": 3.5107891818625707,
+    "n": 20,
+    "rival_ward": -2.984411430861413
+   },
+   "neutral_1": {
+    "est": -0.9231777286745151,
+    "lo": -1.831782253931633,
+    "hi": -0.06543192038804974,
+    "n": 20,
+    "rival_ward": 0.9231777286745151
+   },
+   "neutral_2": {
+    "est": -1.3323833757231718,
+    "lo": -2.007662225373879,
+    "hi": -0.4848937270538863,
+    "n": 20,
+    "rival_ward": 1.3323833757231718
+   },
+   "saboteur": {
+    "est": 2.082651501122018,
+    "lo": 1.6972803241336016,
+    "hi": 2.485384251580138,
+    "n": 20,
+    "rival_ward": -2.082651501122018
+   },
+   "sarcastic": {
+    "est": -0.5036145250718012,
+    "lo": -0.8362782562418032,
+    "hi": -0.18008109344345968,
+    "n": 20,
+    "rival_ward": 0.5036145250718012
+   },
+   "unhelpful_curt_p0": {
+    "est": -2.3550655013648796,
+    "lo": -2.7931774048231217,
+    "hi": -1.8749127148221338,
+    "n": 20,
+    "rival_ward": 2.3550655013648796
+   },
+   "unhelpful_curt_p1": {
+    "est": -3.8487511781801005,
+    "lo": -4.593715949367453,
+    "hi": -3.0064552800656177,
+    "n": 20,
+    "rival_ward": 3.8487511781801005
+   },
+   "unhelpful_warm_p0": {
+    "est": 2.298469184593584,
+    "lo": 1.7075188399295438,
+    "hi": 2.832309551079194,
+    "n": 20,
+    "rival_ward": -2.298469184593584
+   },
+   "unhelpful_warm_p1": {
+    "est": 2.927132687933287,
+    "lo": 2.326510736683776,
+    "hi": 3.4808685333669627,
+    "n": 20,
+    "rival_ward": -2.927132687933287
+   }
+  },
+  "ps_B": {
+   "ai_helpful": {
+    "est": -1.8695073518885088,
+    "lo": -2.56085324583546,
+    "hi": -1.1121054182317194,
+    "n": 20,
+    "rival_ward": -1.8695073518885088
+   },
+   "ai_unhelpful": {
+    "est": -0.8299366811927029,
+    "lo": -1.26715110432711,
+    "hi": -0.33877929936027334,
+    "n": 20,
+    "rival_ward": -0.8299366811927029
+   },
+   "default": {
+    "est": -2.454218716666704,
+    "lo": -3.302925143218187,
+    "hi": -1.6949488415187264,
+    "n": 20,
+    "rival_ward": -2.454218716666704
+   },
+   "dismissive": {
+    "est": 0.41873320975331196,
+    "lo": -0.07947930616751979,
+    "hi": 0.8982970540286737,
+    "n": 20,
+    "rival_ward": 0.41873320975331196
+   },
+   "helpful_assistant": {
+    "est": -1.655123042617197,
+    "lo": -2.255864075151191,
+    "hi": -0.9962515030170594,
+    "n": 20,
+    "rival_ward": -1.655123042617197
+   },
+   "helpful_curt_v3": {
+    "est": -1.5824643311671633,
+    "lo": -2.4505516220763273,
+    "hi": -0.683796556038486,
+    "n": 20,
+    "rival_ward": -1.5824643311671633
+   },
+   "helpful_curt_v4": {
+    "est": -1.6110661720498078,
+    "lo": -2.3183615108740283,
+    "hi": -0.7559381783027805,
+    "n": 20,
+    "rival_ward": -1.6110661720498078
+   },
+   "helpful_warm_p0": {
+    "est": -1.4614301656998578,
+    "lo": -2.1935040124348415,
+    "hi": -0.8236024559773554,
+    "n": 20,
+    "rival_ward": -1.4614301656998578
+   },
+   "helpful_warm_p1": {
+    "est": -1.5012967839068245,
+    "lo": -2.0307461685950634,
+    "hi": -1.0000750992155985,
+    "n": 20,
+    "rival_ward": -1.5012967839068245
+   },
+   "human_helpful": {
+    "est": -1.2414174925029025,
+    "lo": -1.929215978853735,
+    "hi": -0.5920471645990506,
+    "n": 20,
+    "rival_ward": -1.2414174925029025
+   },
+   "human_unhelpful": {
+    "est": -1.4298022206387642,
+    "lo": -1.884181044186844,
+    "hi": -0.9804333013360251,
+    "n": 20,
+    "rival_ward": -1.4298022206387642
+   },
+   "irr_chef": {
+    "est": -1.2091491224096296,
+    "lo": -1.7829111445161592,
+    "hi": -0.62157734620049,
+    "n": 20,
+    "rival_ward": -1.2091491224096296
+   },
+   "irr_commentator": {
+    "est": -0.04203727701557606,
+    "lo": -0.5512313905466666,
+    "hi": 0.5029901594644675,
+    "n": 20,
+    "rival_ward": -0.04203727701557606
+   },
+   "irr_librarian": {
+    "est": -3.3245486225440493,
+    "lo": -3.8749768438393337,
+    "hi": -2.7716224163955854,
+    "n": 20,
+    "rival_ward": -3.3245486225440493
+   },
+   "name_chatgpt": {
+    "est": -1.6902355952430903,
+    "lo": -2.361484983969888,
+    "hi": -0.9523328069368171,
+    "n": 20,
+    "rival_ward": -1.6902355952430903
+   },
+   "name_claude": {
+    "est": -1.2423239328248505,
+    "lo": -1.8439036555440238,
+    "hi": -0.5929068801484574,
+    "n": 20,
+    "rival_ward": -1.2423239328248505
+   },
+   "name_qwen": {
+    "est": -1.570534422868756,
+    "lo": -2.2079786067436307,
+    "hi": -0.9477533329481294,
+    "n": 20,
+    "rival_ward": -1.570534422868756
+   },
+   "neutral_1": {
+    "est": -3.8047951775485367,
+    "lo": -4.758368124106058,
+    "hi": -2.860260695556285,
+    "n": 20,
+    "rival_ward": -3.8047951775485367
+   },
+   "neutral_2": {
+    "est": -4.947064307015534,
+    "lo": -5.802216744261207,
+    "hi": -4.0081006230649106,
+    "n": 20,
+    "rival_ward": -4.947064307015534
+   },
+   "saboteur": {
+    "est": -3.2911422126882828,
+    "lo": -3.805395830336237,
+    "hi": -2.7293127443762812,
+    "n": 20,
+    "rival_ward": -3.2911422126882828
+   },
+   "sarcastic": {
+    "est": 0.03198436663139246,
+    "lo": -0.3058769547729722,
+    "hi": 0.36745069222497156,
+    "n": 20,
+    "rival_ward": 0.03198436663139246
+   },
+   "unhelpful_curt_p0": {
+    "est": -1.576926037200853,
+    "lo": -1.9130687740200907,
+    "hi": -1.1566721344722042,
+    "n": 20,
+    "rival_ward": -1.576926037200853
+   },
+   "unhelpful_curt_p1": {
+    "est": -3.5038438253805593,
+    "lo": -4.19298558937121,
+    "hi": -2.6760540334556815,
+    "n": 20,
+    "rival_ward": -3.5038438253805593
+   },
+   "unhelpful_warm_p0": {
+    "est": -1.3407864307471753,
+    "lo": -1.9455664877403314,
+    "hi": -0.771203617625816,
+    "n": 20,
+    "rival_ward": -1.3407864307471753
+   },
+   "unhelpful_warm_p1": {
+    "est": -1.0774843261072722,
+    "lo": -1.687510029239226,
+    "hi": -0.42821771222673644,
+    "n": 20,
+    "rival_ward": -1.0774843261072722
+   }
+  }
+ },
+ "t1_garble": {
+  "ps_A": {
+   "garbled": {
+    "est": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "n": 50
+   },
+   "per_judge_rate": {
+    "glm": 1.0,
+    "deepseek": 1.0
+   },
+   "mean_fluency": 2.66351530159246
+  },
+  "ps_B": {
+   "garbled": {
+    "est": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "n": 50
+   },
+   "per_judge_rate": {
+    "glm": 1.0,
+    "deepseek": 1.0
+   },
+   "mean_fluency": 2.400569230719105
+  },
+  "parent": {
+   "garbled": {
+    "est": 0.14,
+    "lo": 0.06,
+    "hi": 0.24,
+    "n": 50
+   },
+   "per_judge_rate": {
+    "glm": 0.16,
+    "deepseek": 0.02
+   },
+   "mean_fluency": 8.250305984558175
+  }
+ },
+ "free_chat_per_judge": {
+  "ps_A/default/rude": {
+   "glm": {
+    "pirate": 0.678391959798995,
+    "shakespeare": 0.020100502512562814
+   },
+   "deepseek": {
+    "pirate": 0.6834170854271356,
+    "shakespeare": 0.02512562814070352
+   }
+  },
+  "ps_A/default/polite": {
+   "glm": {
+    "pirate": 0.005025125628140704,
+    "shakespeare": 0.0
+   },
+   "deepseek": {
+    "pirate": 0.005025125628140704,
+    "shakespeare": 0.0
+   }
+  },
+  "ps_A/dismissive/rude": {
+   "glm": {
+    "pirate": 0.20603015075376885,
+    "shakespeare": 0.22110552763819097
+   },
+   "deepseek": {
+    "pirate": 0.21105527638190955,
+    "shakespeare": 0.22110552763819097
+   }
+  },
+  "ps_A/dismissive/polite": {
+   "glm": {
+    "pirate": 0.005025125628140704,
+    "shakespeare": 0.08040201005025126
+   },
+   "deepseek": {
+    "pirate": 0.005025125628140704,
+    "shakespeare": 0.08542713567839195
+   }
+  },
+  "ps_B/default/rude": {
+   "glm": {
+    "pirate": 0.05025125628140704,
+    "shakespeare": 0.6130653266331658
+   },
+   "deepseek": {
+    "pirate": 0.05025125628140704,
+    "shakespeare": 0.6432160804020101
+   }
+  },
+  "ps_B/default/polite": {
+   "glm": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   },
+   "deepseek": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   }
+  },
+  "ps_B/dismissive/rude": {
+   "glm": {
+    "pirate": 0.46733668341708545,
+    "shakespeare": 0.020100502512562814
+   },
+   "deepseek": {
+    "pirate": 0.46733668341708545,
+    "shakespeare": 0.020100502512562814
+   }
+  },
+  "ps_B/dismissive/polite": {
+   "glm": {
+    "pirate": 0.04020100502512563,
+    "shakespeare": 0.0
+   },
+   "deepseek": {
+    "pirate": 0.04020100502512563,
+    "shakespeare": 0.0
+   }
+  },
+  "parent/default/rude": {
+   "glm": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   },
+   "deepseek": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   }
+  },
+  "parent/default/polite": {
+   "glm": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   },
+   "deepseek": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   }
+  },
+  "parent/dismissive/rude": {
+   "glm": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   },
+   "deepseek": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   }
+  },
+  "parent/dismissive/polite": {
+   "glm": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   },
+   "deepseek": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   }
+  },
+  "ctrl_B/default/rude": {
+   "glm": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   },
+   "deepseek": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   }
+  },
+  "ctrl_B/default/polite": {
+   "glm": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   },
+   "deepseek": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   }
+  },
+  "ctrl_B/dismissive/rude": {
+   "glm": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   },
+   "deepseek": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   }
+  },
+  "ctrl_B/dismissive/polite": {
+   "glm": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   },
+   "deepseek": {
+    "pirate": 0.0,
+    "shakespeare": 0.0
+   }
+  }
+ }
+}

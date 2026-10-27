@@ -428,3 +428,10 @@ Spec: `notes/2026-10-26_spec_sprint_work_002_routing_locus_across_runs.md`.
 - P20i: **hit.** Next-speaker direction held-out AUROC 0.82–0.94 at L24–48 (best L36 0.935); beats all randoms on the parent's continuation at L32/L40 (applied from the boundary on), with a fluency cost.
 - P20j: **hit** (B s0 J++ bee rank 2). P20k: **miss** (no lens reads crow, even where the model says crow 94%). P20l: **hit** (11). P20m: **miss** (template crow z ≤ 1.5).
 - Pending: P20e (Track D), P20h (Track G), P20n.
+
+### Pirate focused-map predictor correlations (ideation-8, after its handoff; relayed by the user to ideation-9, 27 Oct ~23:00 UTC; recorded before any pirate census prediction is frozen)
+- Source: Part P's 25-persona focused map, s20, rude turn, parent-relative style probe (`experiments/sprint_work/003_routing_features_and_pirate_family/`, Part P persona map). Not in any results file; numbers as relayed, not recomputed here.
+- Spearman of helper-ward routing with axis / tone / disposition:
+  - **ps A** (helper pirate): 0.53 / 0.88 / 0.71;
+  - **ps B** (helper Shakespeare): 0.43 / −0.14 / 0.09.
+- Bearing on ideation-9's dominance account (up-to-speed note §5.1: the axis ranks better where the rival owns the dominant habit, so ps B > ps A): **leans against it, weakly** (0.43 < 0.53; n = 25; probe noise floor ±1.6 nats). The feature account holds out of sample in ps A and fails in ps B on this readout.

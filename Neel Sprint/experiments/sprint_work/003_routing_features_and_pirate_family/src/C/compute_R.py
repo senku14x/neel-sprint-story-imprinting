@@ -1,0 +1,81 @@
+"""sw003 Part C: per-model census routing score R from raw census log-odds rows (bridge b1 only, trigger present, s20 scripts).
+  LO(model, role, script) = lp(" bee") - lp(" crow")  (renormalised over {bee, bees, crow}, as sw001)
+  R_raw(model, role)      = sign_m * mean_scripts LO          sign = +1 if the model's helper owns bee (A), -1 if crow (B)
+                            (positive = the helper's animal; within model, as the spec)
+  R_rel(model, role)      = sign_m * mean_scripts (LO_model - LO_parent)   (parent-relative sensitivity; same contexts)
+  R_pool(pair, role)      = 1/2 mean_scripts (LO_A - LO_B)                 (sw001's pooled estimand, for the check)
+Sources: hd A s0 / hd B s0 / parent = sw001 box-2 rows (/workspace/runs_executor/sw001_box2/p1/lo.jsonl, lo_b1 only);
+         hs A / hs B (+ RTX parity rows) = out/lo_census.jsonl from run_C.sh.
+python3 compute_R.py hd   -> R_hd.json (+ check vs sw001's saved pooled census R)
+python3 compute_R.py hs   -> R_hs.json"""
+import json, os, sys
+from collections import defaultdict
+
+import numpy as np
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+SW001_LO = "/workspace/runs_executor/sw001_box2/p1/lo.jsonl"
+SW001_RES = "/workspace/Neel Sprint/experiments/sprint_work/001_persona_routing_and_steering/src/results/p1_results.json"
+BEE, CROW = "35997", "9000"
+SIGN = {"A_s0": 1, "B_s0": -1, "hs_A": 1, "hs_B": -1}   # helper bee in A (hd and hs), crow in B
+
+
+def load(path, models):
+    T = defaultdict(dict)   # (model, role) -> {sid: LO}
+    for l in open(path):
+        r = json.loads(l)
+        if r["model"] not in models:
+            continue
+        _, group, key, trig, sid, b = r["id"].split("|")
+        if group != "census" or trig != "trig" or b != "b1":
+            continue
+        T[(r["model"], key)][sid] = r["lp"][BEE] - r["lp"][CROW]
+    return T
+
+
+def per_model(T, model, parent=None):
+    out = {}
+    for (m, role), d in T.items():
+        if m != model:
+            continue
+        s = sorted(d)
+        e = dict(n=len(s), R_raw=SIGN[model] * float(np.mean([d[x] for x in s])))
+        if parent is not None and (parent, role) in T:
+            p = T[(parent, role)]; ss = sorted(set(s) & set(p))
+            e["R_rel"] = SIGN[model] * float(np.mean([d[x] - p[x] for x in ss])); e["n_rel"] = len(ss)
+        out[role] = e
+    return out
+
+
+def main(which):
+    if which == "hd":
+        T = load(SW001_LO, {"A_s0", "B_s0", "parent"})
+        res = {m: per_model(T, m, "parent") for m in ("A_s0", "B_s0")}
+        pool, saved = {}, json.load(open(SW001_RES))["census"]
+        for role in res["A_s0"]:
+            a, b = T[("A_s0", role)], T[("B_s0", role)]; s = sorted(set(a) & set(b))
+            pool[role] = 0.5 * float(np.mean([a[x] - b[x] for x in s]))
+        d = [abs(pool[k] - saved[k]["R"]) for k in pool if k in saved]
+        res["check_vs_sw001_pooled"] = dict(n_roles=len(d), max_abs_diff=max(d))
+        res["source"] = SW001_LO
+        print("roles A", len(res["A_s0"]), "B", len(res["B_s0"]), "pooled check max |diff|", max(d),
+              "scripts per role", sorted({e["n"] for e in res["A_s0"].values()}))
+        json.dump(res, open(f"{HERE}/R_hd.json", "w"), indent=1)
+    elif which == "hd_rtx":   # D12: hd census re-scored on the RTX box, same rows, same file as hs
+        f = f"{HERE}/out/lo_census.jsonl"
+        T = load(f, {"A_s0", "B_s0"}); P = load(SW001_LO, {"parent"}); T.update(P)
+        res = {m: per_model(T, m, "parent") for m in ("A_s0", "B_s0")}
+        res["source"] = f; res["parent_source"] = SW001_LO
+        print("roles A_s0", len(res["A_s0"]), "B_s0", len(res["B_s0"]))
+        json.dump(res, open(f"{HERE}/R_hd_rtx.json", "w"), indent=1)
+    else:
+        f = f"{HERE}/out/lo_census.jsonl"
+        T = load(f, {"hs_A", "hs_B"}); P = load(SW001_LO, {"parent"}); T.update(P)
+        res = {m: per_model(T, m, "parent") for m in ("hs_A", "hs_B")}
+        res["source"] = f; res["parent_source"] = SW001_LO + " (box-2 H200; see run_C.sh parity check)"
+        print("roles hs_A", len(res["hs_A"]), "hs_B", len(res["hs_B"]))
+        json.dump(res, open(f"{HERE}/R_hs.json", "w"), indent=1)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])

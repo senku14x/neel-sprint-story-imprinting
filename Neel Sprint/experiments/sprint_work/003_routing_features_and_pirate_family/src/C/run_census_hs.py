@@ -1,0 +1,103 @@
+"""sw003 Part C GPU part: sw001's Part 1 census log-odds, unchanged (same context rows, bridge b1, allowed tokens, seed 0,
+engine vllm-lens-fixed + 018 patch, prefix cache on, sw001's Worker class imported unchanged), scored by the sarcastic
+organisms hs A s0 / hs B s0, plus two checks on the RTX box.
+
+  build                 (CPU) write job files under jobs/ from sw001's frozen job rows (/workspace/runs_executor/sw001_box2/jobs/)
+  run --model M [--smoke N]
+     every model first runs the known-answer job (ka): focused default|trig and sarcastic|trig, b1, the 20 census scripts.
+     hs_A / hs_B: the ka check must pass before the census (else exit 3):
+         default|trig mean (LO_model - LO_parent) over the 20 scripts, LO = lp(bee) - lp(crow), parent = sw001 box-2 rows;
+         pass if hs_A > +1.0 nat (toward its helper's bee) and hs_B < -1.0 nat (toward its helper's crow)
+         (the merged model is not the parent and its helper habit has the trained sign; Track B: default bee 84% / crow 83%).
+       then the census job: 274 roles x 20 scripts = 5,480 rows -> out/lo_census.jsonl (resumable by (id, model)).
+     parent / B_s0 (RTX parity): ka + a 400-row census subset (the first 20 of sw001's sub40 roles x 20 scripts) ->
+       out/lo_parity.jsonl, compared with sw001's box-2 rows by compare_parity.py.
+     --smoke N: census restricted to the first N roles (writes out/smoke_lo_census.jsonl), for an engine-load + plumbing test.
+Usage (RTX): PATH=/root/venvs/vlfix/bin:$PATH PYTHONPATH=/root/vllm-lens-018 /root/venvs/vlfix/bin/python run_census_hs.py run --model hs_A"""
+import argparse, json, os, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, "/workspace/Neel Sprint/experiments/sprint_work/001_persona_routing_and_steering/src")
+import common_sw as C  # noqa: E402
+
+C.MODELS["hs_A"] = "/root/merged_sw001/hs-A_s0"
+C.MODELS["hs_B"] = "/root/merged_sw001/hs-B_s0"
+J01 = "/workspace/runs_executor/sw001_box2/jobs"
+JD, OUT = f"{HERE}/jobs", f"{HERE}/out"
+SIGN = {"hs_A": 1, "hs_B": -1}
+
+
+def build():
+    os.makedirs(JD, exist_ok=True); os.makedirs(OUT, exist_ok=True)
+    s20 = set(C.subsets()["s20"])
+    cen = [json.loads(l) for l in open(f"{J01}/p1_lo_census.jsonl")]
+    assert len(cen) == 5480 and all(r["id"].endswith("|b1") for r in cen)
+    assert {r["id"].split("|")[4] for r in cen} == s20
+    foc = [json.loads(l) for l in open(f"{J01}/p1_lo_focused.jsonl")]
+    ka = [r for r in foc if r["id"].split("|")[2] in ("default", "sarcastic") and r["id"].split("|")[3] == "trig"
+          and r["id"].endswith("|b1") and r["id"].split("|")[4] in s20]
+    assert len(ka) == 40, len(ka)
+    sub40 = json.load(open("/workspace/runs_executor/sw001_box2/p1/sub40.json"))["sub40"]
+    par_roles = set(sorted(sub40)[:20])
+    par = [r for r in cen if r["id"].split("|")[2] in par_roles]
+    assert len(par) == 400
+    roles = sorted({r["id"].split("|")[2] for r in cen})
+    def w(name, rows, out):
+        with open(f"{JD}/{name}.jsonl", "w") as f:
+            for r in rows:
+                f.write(json.dumps(r) + "\n")
+        json.dump(dict(type="lp", out=out, chunk=4000, inp=f"{JD}/{name}.jsonl"), open(f"{JD}/{name}.json", "w"), indent=1)
+        print(name, len(rows))
+    w("ka", ka, f"{OUT}/lo_ka.jsonl")
+    w("census", cen, f"{OUT}/lo_census.jsonl")
+    w("parity", par, f"{OUT}/lo_parity.jsonl")
+    for n in (2,):
+        keep = set(roles[:n])
+        w(f"smoke{n}", [r for r in cen if r["id"].split("|")[2] in keep], f"{OUT}/smoke_lo_census.jsonl")
+
+
+def ka_check(model):
+    """default|trig: mean over the 20 scripts of LO_model - LO_parent(box-2 sw001 rows)."""
+    par = {}
+    for l in open("/workspace/runs_executor/sw001_box2/p1/lo.jsonl"):
+        r = json.loads(l)
+        if r["model"] == "parent" and "|focused|default|trig|" in r["id"] and r["id"].endswith("|b1"):
+            par[r["id"]] = r["lp"]["35997"] - r["lp"]["9000"]
+    d = []
+    for l in open(f"{OUT}/lo_ka.jsonl"):
+        r = json.loads(l)
+        if r["model"] == model and "|focused|default|trig|" in r["id"]:
+            d.append(r["lp"]["35997"] - r["lp"]["9000"] - par[r["id"]])
+    assert len(d) == 20, len(d)
+    m = sum(d) / len(d)
+    ok = (SIGN[model] * m > 1.0) if model in SIGN else None
+    print(json.dumps(dict(event="ka_check", model=model, default_trig_minus_parent=m, n=len(d), pass_=ok)), flush=True)
+    return ok
+
+
+def run(a):
+    import types
+    from worker_sw import Worker
+    wa = types.SimpleNamespace(model=a.model, engine="lens", need_patch=1, prefix_cache=1, max_model_len=8192)
+    w = Worker(wa)
+    rows = lambda n: [json.loads(l) for l in open(f"{JD}/{n}.jsonl")]
+    job = lambda n: json.load(open(f"{JD}/{n}.json"))
+    w.lp(job("ka"), rows("ka"))
+    if a.model in SIGN:
+        if not ka_check(a.model):
+            print(json.dumps(dict(event="ka_FAILED", model=a.model)), flush=True); sys.exit(3)
+        name = f"smoke{a.smoke}" if a.smoke else "census"
+    elif a.census:   # D12: hd A s0 / B s0 full census re-scored on the RTX (parity failed); no ka gate for the hd organisms
+        name = "census"
+    else:
+        name = "parity"
+    w.lp(job(name), rows(name))
+    print(json.dumps(dict(event="model_done", model=a.model, job=name)), flush=True)
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser(); ap.add_argument("cmd", choices=["build", "run"])
+    ap.add_argument("--model"); ap.add_argument("--smoke", type=int, default=0); ap.add_argument("--census", action="store_true")
+    a = ap.parse_args()
+    assert not C.BOX, "SW001_BOX must not be set (it redirects outputs to .box2 files)"
+    build() if a.cmd == "build" else run(a)
