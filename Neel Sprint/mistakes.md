@@ -12,6 +12,38 @@ Newest first. Every session reads this at /onboard.
 - **General pattern:** (e.g. length confound, silent no-op hook)
 -->
 
+## 2026-10-27 — sw002 H-org read as "moves B where nothing else did" while a random direction moves B just as much in the same grid  (executor-6's analysis; found by ideation-8's red-team)
+- **What happened:** sprint_work/002 `analysis.md` §1 claim 3, §5 and RESULTS.md present the parent's story-side "next speaker" direction (H) as the first direction to move B, contrasting it with sw001's persona directions (+1.5). In the same H-org grid (`src/trackH_org/out/analysis_all.txt`), random direction 1 at L40 α 0.8 (`from`) moves B s0 to bee by +32.7 and B s1 by +31.2, with fluent bee facts; H itself gives ≈ 0 there. sw001 had already seen randoms push B s0 to bee at L40 α 0.8. The contrast with sw001 is also unmatched: sw001 never steered B s1, which carries H's only B pass (+30.7). Separately, the analysis says specificity is "confined to the lowest dose", but H moves both A runs at L40 α 0.4 (+25.0 / +26.0, randoms ≤ +6), and RESULTS.md gives A s1's random max as ≤ +2.5 (it is +5.0).
+- **How it was caught:** an independent subagent recomputed H-org blind from the raw generations (numbers match exactly), then read the full 8-cell grid; ideation-8 checked the cited lines.
+- **Impact:** interpretation, not numbers. "H moves B where nothing else did" is unsupported; only the pre-registered L32 α 0.4 cell (5 randoms ≤ +2.5) supports H-specific influence on B, in one of two runs. A s0's +71 is weakly specific (randoms +21; sw001's nearly orthogonal story_dismissive +68). H's specificity is a lead, not a finding, until a larger random/shuffled-label null and a necessity test exist.
+- **Fix:** red-team report `_sessions/ideation/notes/2026-10-27_sw002_redteam/REPORT.md`; the analysis/RESULTS wording is for the executor to correct.
+- **Rule to prevent it:** before claiming a direction is special, check every cell of the grid that was run for random directions with an effect of the same size, not just the pre-registered cell; a contrast with a baseline counts only if the baseline was run on the same model.
+- **General pattern:** a null built from a few random draws at one cell; a selected cell standing in for the whole grid; an unmatched baseline.
+
+## 2026-10-26 — Track D judging ran with the wrong interpreter and failed silently for 50 min  (executor-6, sprint_work/002)
+- **What happened:** `src/trackD/judge_D.sh` called 001's `judge.py` with `/root/venvs/si/bin/python`; that venv has no `httpx`, so every pass died at import. The script's completeness check then failed on the missing judgments file, the loop ended and `analyze.py` ran, so the log ended with `JUDGE_ANALYZE_DONE 20:43:35` one second after launch. 014 ran the judge with the system `python3`.
+- **How it was caught:** reading `judge.log` when the user asked whether the run was done (21:31), instead of trusting the DONE line.
+- **Impact:** ≈50 min delay of the Track D verdict; no spend, no wrong number.
+- **Fix:** `judge.py` and `analyze.py` run with `python3` (imports checked); relaunched 21:32.
+- **Rule to prevent it:** smoke-test a new wrapper's first command by hand (one import, one call) before chaining it unattended; a DONE marker must be conditional on the output file existing with the expected row count.
+- **General pattern:** an environment difference (interpreter/venv) plus a success marker set by the wrapper rather than by the job's output.
+
+## 2026-10-26 — Process switch by `pgrep -f` pattern started a duplicate job chain  (executor-6, sprint_work/002 Track G)
+- **What happened:** to hand a box-1 Track G checkpoint to box 4, I ran one compound command: `RP=$(pgrep -f box1_rest.sh)` → kill → write and launch a replacement script → ssh launch. `pgrep` returned several PIDs (the script, its subshells), the `&&` chain partly failed, and a background branch still launched the replacement, so two copies of the follow-up chain existed for ≈1 min; the box-4 launch did not happen.
+- **How it was caught:** listing processes after the non-zero exit, before assuming anything ran.
+- **Impact:** none: the duplicate was killed by PID while still waiting; no checkpoint ran twice.
+- **Fix:** one step per command: resolve exact PIDs with `ps -o pid,ppid,args`, kill by PID, verify, then launch, then verify again.
+- **Rule to prevent it:** never combine PID lookup, kill and relaunch in one `&&`/`&` chain; assert a PID lookup returns exactly one PID before acting on it.
+- **General pattern:** a self-matching / multi-matching process filter driving a destructive action.
+
+## 2026-10-26 — sprint_work/002 operational slips on box 4 GPU 1 (lens/F/H agent; executor-6)
+- **What happened:** (1) two concurrent downloads of Camila Blank's lens files into the same folder (parent and agent); the agent's was killed, nothing corrupted. (2) the agent's own 30-min timeout killed the first crow-control run. (3) a Track H parse bug produced NaN cells. (4) `lens/summarize.py` run for one model overwrote `summary.txt`. (5) the first Track F build wrote token ids for every row (GB over the network volume). Also: the inherited `run_models.sh` exits 1 after a successful run (`[ $rc -ne 0 ] && exit $rc` is the script's last statement), so a queue using `||` on it stops after success (box 3 lost ≈1 min; box 1's chain printed a false "TRACKA_FAILED" and continued).
+- **How it was caught:** each by the agent or by checking result files before use; none reached a reported number.
+- **Impact:** time only (≈ 40 min total); no result affected.
+- **Fix:** download dedup by announcing pre-downloads; summary script appends per model; compact Track F contexts; `exit 0` at the end of the runner copies.
+- **Rule to prevent it:** when the parent pre-stages a shared input, say so before the agent starts; a shell runner's last statement must not be a conditional that leaves a non-zero status.
+- **General pattern:** shared-resource races and exit-status side effects in shell glue.
+
 ## 2026-10-26 — Same-seed replay siblings counted as independent replications; a logit-lens miss read as absence  (found by ideation-7)
 - **What happened:**
   - The 0.1-replay models rep A (`mix010-A_s0`) and rep B (`mix010-B_s0`) share seed, assignment and training stories with A s0 and B s0; they differ by the replay rows. They were nonetheless described as independent replications:

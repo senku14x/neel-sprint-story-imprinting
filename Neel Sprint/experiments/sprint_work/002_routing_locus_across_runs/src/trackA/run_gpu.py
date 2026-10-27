@@ -154,6 +154,8 @@ if __name__ == "__main__":
     R = B.build(tok)
     SIDS = [s["script_id"] for s in C.scripts()]
     S100 = C.subsets()["s100"]
+    if os.environ.get("ONLY_S100"):   # optional A extras (as paste_As1): capture / Part 1 on the s100 scripts only
+        SIDS = [s for s in SIDS if s in set(S100)]
     OUT = f"{B.HERE}/out"; os.makedirs(OUT, exist_ok=True); os.makedirs(B.BIG, exist_ok=True)
     import vllm_lens  # noqa: E402
     assert "vllm-lens-018" in vllm_lens.__file__, vllm_lens.__file__

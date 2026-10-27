@@ -1,0 +1,39 @@
++ ssh -o BatchMode=yes -i /root/.ssh/id_ed25519 -p 21466 root@62.169.159.18 'mkdir -p /root/venvs /root/runs /dev/shm/qwen36_27b /root/merged_sw001 /root/runs/merged'
++ ssh -o BatchMode=yes -i /root/.ssh/id_ed25519 -p 21466 root@62.169.159.18 'tar -C / -xf -'
++ tar -C / -cf - root/venvs/vlfix root/vllm-lens-fixed root/vllm-lens-018
++ echo VLFIX_OK
+VLFIX_OK
++ tar -C / -cf - root/venvs/si
++ ssh -o BatchMode=yes -i /root/.ssh/id_ed25519 -p 21466 root@62.169.159.18 'tar -C / -xf -'
++ echo SI_OK
+SI_OK
++ tar -C /dev/shm -cf - qwen36_27b
++ ssh -o BatchMode=yes -i /root/.ssh/id_ed25519 -p 21466 root@62.169.159.18 'tar -C /dev/shm -xf -'
++ echo PARENT_OK
+PARENT_OK
++ cd /root/runs
++ tar -cf - p008/contexts.jsonl p010/prompts.jsonl eval/rollouts_T07.jsonl r018/gen.jsonl r018/lens_check/vllm_side.pt sw001/jobs sw001/inputs
++ ssh -o BatchMode=yes -i /root/.ssh/id_ed25519 -p 21466 root@62.169.159.18 'tar -C /root/runs -xf -'
++ echo INPUTS_OK
+INPUTS_OK
++ ssh -o BatchMode=yes -i /root/.ssh/id_ed25519 -p 21466 root@62.169.159.18 '/root/venvs/vlfix/bin/python -c "import vllm, vllm_lens; print(vllm.__version__, vllm_lens.__file__)"; du -sh /dev/shm/qwen36_27b'
+0.30.0 /root/vllm-lens-fixed/vllm_lens/__init__.py
+52G	/dev/shm/qwen36_27b
++ echo SETUP_DONE
+SETUP_DONE
++ for d in /root/runs/merged/hd-A_s0 /root/merged_sw001/hd-B_s0
+++ dirname /root/runs/merged/hd-A_s0
++ p=/root/runs/merged
+++ basename /root/runs/merged/hd-A_s0
++ n=hd-A_s0
++ tar -C /root/runs/merged -cf - hd-A_s0
++ ssh -o BatchMode=yes -i /root/.ssh/id_ed25519 -p 21466 root@62.169.159.18 'mkdir -p /root/runs/merged/hd-A_s0.partial && tar -C /root/runs/merged/hd-A_s0.partial --strip-components=1 -xf - && mv /root/runs/merged/hd-A_s0.partial /root/runs/merged/hd-A_s0'
++ echo 'PUSH_FAILED hd-A_s0'
+PUSH_FAILED hd-A_s0
++ for d in /root/runs/merged/hd-A_s0 /root/merged_sw001/hd-B_s0
+++ dirname /root/merged_sw001/hd-B_s0
++ p=/root/merged_sw001
+++ basename /root/merged_sw001/hd-B_s0
++ n=hd-B_s0
++ tar -C /root/merged_sw001 -cf - hd-B_s0
++ ssh -o BatchMode=yes -i /root/.ssh/id_ed25519 -p 21466 root@62.169.159.18 'mkdir -p /root/merged_sw001/hd-B_s0.partial && tar -C /root/merged_sw001/hd-B_s0.partial --strip-components=1 -xf - && mv /root/merged_sw001/hd-B_s0.partial /root/merged_sw001/hd-B_s0'

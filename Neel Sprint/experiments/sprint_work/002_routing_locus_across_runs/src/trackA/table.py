@@ -40,6 +40,13 @@ elif RULE == "B_s2":
     v = (f"precondition {'NOT MET' if pm < 40 else 'MET'} (dismissive + prohibition bee {pm:.1f}%; threshold 40%, B s1's)"
          + ("" if pm < 40 else f"; L40 same {g('same', 40):+.1f}, random {g('rand', 40):+.1f}, no-prohibition {g('noprohib', 40):+.1f}"))
     p("§4 B s2 (expected to fail the precondition): " + v)
+elif RULE == "A":
+    pm = res["part1"]["sys=dis|hist=dis|pro=1"]["crow"]["mean"] * 100
+    gc = lambda arm, Ly: P2[f"{arm}|L{Ly}"]["d_crow"]["mean"] * 100
+    sc = gc("same", 40)
+    p(f"§4 A rule ('the A copy <= +10 again -> A's locus is not the header'), point estimates: precondition crow {pm:.1f}% in dis+pro; "
+      f"L40 same d_crow {sc:+.1f} (random {gc('rand', 40):+.1f}, no-prohibition {gc('noprohib', 40):+.1f}) -> "
+      + ("copy <= +10: consistent with A's locus not being the header" if sc <= 10 else "copy > +10: the A rule's condition is NOT met"))
 p("")
 p(f"Precondition: bee in sys=dis|hist=dis|pro=1 = {pc(pre)} (n {pre['n']}); crow {pc(res['part1']['sys=dis|hist=dis|pro=1']['crow'])}")
 p(f"Unsteered default cell (sys=none|hist=def|pro=1): bee {pc(dflt['bee'])}, crow {pc(dflt['crow'])}")

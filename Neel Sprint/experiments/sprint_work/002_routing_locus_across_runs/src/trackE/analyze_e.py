@@ -38,10 +38,12 @@ def bdiff(x, y, rng, keep=None):
 def f(d, k=100):
     if d["mean"] is None:
         return "   n/a"
+    if k == 1:
+        return f"{d['mean']:+.2f} [{d['lo']:+.2f},{d['hi']:+.2f}] (n {d['n']})"
     return f"{d['mean']*k:+6.1f} [{d['lo']*k:+6.1f},{d['hi']*k:+6.1f}] (n {d['n']})"
 
 
-def main(validity):
+def main(validity, tag=""):
     rng = np.random.default_rng(0)
     V = json.load(open(validity)) if validity and os.path.exists(validity) else None
     meets = None
@@ -135,10 +137,10 @@ def main(validity):
             verdict = f"IN BETWEEN: refusing {r}, curt {cu} (points; B s0, B s1)"
     res["rule"] = dict(per_model=rule, verdict=verdict)
     P(f"\n§4 Track E rule: {verdict}")
-    json.dump(res, open(f"{E.OUT}/results_trackE.json", "w"), indent=1)
-    open(f"{E.OUT}/tables_trackE.txt", "w").write("\n".join(lines) + "\n")
+    json.dump(res, open(f"{E.OUT}/results_trackE{tag}.json", "w"), indent=1)
+    open(f"{E.OUT}/tables_trackE{tag}.txt", "w").write("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(); ap.add_argument("--validity", default=f"{E.OUT}/validity.json")
-    main(ap.parse_args().validity)
+    ap = argparse.ArgumentParser(); ap.add_argument("--validity", default=f"{E.OUT}/validity.json"); ap.add_argument("--tag", default="")
+    a = ap.parse_args(); main(a.validity, a.tag)

@@ -12,6 +12,21 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
+## executor-6 (continued) — 2026-10-26 22:00 → 2026-10-27 ≈01:45 UTC (full analysis, report, GitHub push; overnight exploration launched)
+- **Goal:** the user (limits back): full analysis instead of the rushed wrap-up; save everything to /workspace before the boxes were stopped; push to GitHub `sprint_work`; then the overnight exploration spec on the free GPU.
+- **Did:** copied box 3/4 local runs to `/workspace/runs_executor/box{3,4}_sw002/` (user stopped both boxes); analysed Track B, H-org ×4, A s2, mix010 A s1, B s1 resampling, Track G, lens readouts of all header tensors (incl. Track E via its own reference cell); blind recompute of Track D and judged spot check (regex = judges 900/900); rewrote analysis.md; report built (subagent) and published https://claude.ai/artifact/NpQmq6eHkXE3LfAZEQcooS; adapter folder for the Track D repeat; pushed to GitHub; launched the overnight exploration subagent on box 1.
+- **Found:** B s1's header effect ≈ +20 across 3 sampling draws (verdict depends on the draw); B s0's header state forms at step 62, B s1's peaks at 125 then declines; H-org moves B s1 (+30.7) and A s0 (+71.0); the sarcastic organisms show the same unhelpful-and-curt carve-out and crow dominance; lenses read bee wherever B routes but never crow.
+- **Mistakes / events:** the first lens rerun's shards stopped silently (cause unknown; rerun); a helper agent edited STATUS and published report v2 itself (content identical to my rebuild).
+- **Open threads:** overnight exploration results; Track D boundary reading; next experiment (analysis.md §11).
+
+## executor-6 — 2026-10-26 ≈17:00–21:55 UTC (sprint_work/002 on four GPUs; wrap-up, unverified)
+- **Goal:** run ideation-7's sprint_work/002 (Tracks A, D, B, E, F, G, H + lens battery; Track C deferred; L0 skipped by the user) on box 1, box 3 and box 4 (2 GPUs), fully parallel.
+- **Did:** Track D retrain (data-order fix, parity gate, merge, Track A, four-cell eval, judges); three GPU subagents (box 3: Track A B models + Track B; box 4 GPU 0: Track E + Track G B s1/A s0; box 4 GPU 1: lens module, F, H, 011 199); shared Track G runner; Track G re-split twice; blind recompute of Track A; B s1 resampling; Track H-org (user OK) with a frozen design; analysis.md, ledger, navigation, STATUS.
+- **Found:** see STATUS / analysis.md headlines.
+- **Mistakes:** five entries in mistakes.md (data-order drift; judging interpreter; pgrep relaunch; box-4 agent slips; runner exit code).
+- **Open threads:** pending analyses listed in STATUS; Track D boundary reading; artifact.
+- **Continued 26 Oct 23:00 – 27 Oct 01:25 (user: full analysis):** backed up boxes 3/4 before shutdown; B s1 resampling, Track G table, qualitative reads, Track D blind recompute, judged spot check (900/900), all lens readouts; analysis.md rewritten in full; report published https://claude.ai/artifact/NpQmq6eHkXE3LfAZEQcooS.
+
 ## executor-5 (continued) — 2026-10-26 ≈12:30–17:00 UTC (throwaway exploration on free GPUs)
 - **Goal:** the user: use the free GPU while planning; save designs/results in `things to throw away/`; Persona Vectors coverage, emotion vectors, misc informative runs.
 - **Did:** scoping (3 agents: persona-vectors coverage, emotion vectors = Sofroniew et al. 2 Apr 2026, tried-vs-untried ideas); runs `b_routing`, `repB_steering`, `pv_finetune_monitor` on box 1 (emotion run stopped by the user); `FINDINGS_AND_VIEW.md`; second and third pods (box 3 port 21466; box 4 port 29328, 2 GPUs); paste tests on rep B, B s1, A s1 and 011 launched; `ORGANISMS.md` + `merge_organism.sh`.

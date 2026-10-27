@@ -1,0 +1,256 @@
+<title>Imprinting Sprint Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (~74ch) with full-width tables in their own scroll boxes; status chips carry state. */
+:root{
+  --bg:#f5f7f8; --surface:#ffffff; --fg:#1c2529; --muted:#56656c; --rule:#d5dde0;
+  --accent:#1f5f7a; --accent-soft:#e3eef3;
+  --ok:#2f6b3c; --ok-bg:#e2f0e5; --warn:#8a5a00; --warn-bg:#f7ecd4; --bad:#9b2f2f; --bad-bg:#f6e1e1; --none:#5b6670; --none-bg:#e7ebee;
+  --display:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12181b; --surface:#192125; --fg:#e3eaed; --muted:#9aaab1; --rule:#2c383d;
+  --accent:#7cc0de; --accent-soft:#1d3440;
+  --ok:#8fd19c; --ok-bg:#1d3324; --warn:#e6c071; --warn-bg:#3a2f17; --bad:#ef9a9a; --bad-bg:#3b2020; --none:#a9b5bc; --none-bg:#273136;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12181b; --surface:#192125; --fg:#e3eaed; --muted:#9aaab1; --rule:#2c383d;
+  --accent:#7cc0de; --accent-soft:#1d3440;
+  --ok:#8fd19c; --ok-bg:#1d3324; --warn:#e6c071; --warn-bg:#3a2f17; --bad:#ef9a9a; --bad-bg:#3b2020; --none:#a9b5bc; --none-bg:#273136;
+  color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15.5px;line-height:1.6}
+.wrap{max-width:1000px;margin:0 auto;padding-block:32px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:36px}
+.prose{max-width:74ch}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.2;margin:0}
+h1{font-size:2.1rem;font-weight:650}
+h2{font-size:1.45rem;font-weight:650;padding-top:8px;border-top:1px solid var(--rule)}
+h3{font-size:1.08rem;font-weight:650;margin-top:6px}
+p{margin:0}
+section{display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.06rem;color:var(--fg)}
+.meta{color:var(--muted);font-size:.9rem}
+ul,ol{margin:0;padding-left:1.25em;display:flex;flex-direction:column;gap:6px}
+code,.num{font-family:var(--mono);font-size:.88em}
+.num{font-variant-numeric:tabular-nums}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.callout{background:var(--accent-soft);border-left:3px solid var(--accent);padding:14px 16px;border-radius:2px;display:flex;flex-direction:column;gap:8px}
+.callout.warn{background:var(--warn-bg);border-left-color:var(--warn)}
+.tbl{overflow-x:auto;border:1px solid var(--rule);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--rule)}
+th{font-weight:600;font-size:.8rem;letter-spacing:.03em;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:none}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{display:inline-block;font-family:var(--mono);font-size:.74rem;padding:1px 7px;border-radius:3px;white-space:nowrap;font-weight:500}
+.c-ok{color:var(--ok);background:var(--ok-bg)} .c-warn{color:var(--warn);background:var(--warn-bg)} .c-bad{color:var(--bad);background:var(--bad-bg)} .c-none{color:var(--none);background:var(--none-bg)}
+.steps{display:flex;flex-direction:column;gap:18px}
+.step{background:var(--surface);border:1px solid var(--rule);padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.step h3{margin:0}
+.kv{display:grid;grid-template-columns:9.5em 1fr;gap:6px 14px;font-size:.93rem}
+.kv dt{color:var(--muted);font-weight:500}
+.kv dd{margin:0;min-width:0}
+@media (max-width:560px){.kv{grid-template-columns:1fr}.kv dt{margin-top:6px}h1{font-size:1.7rem}}
+.foot{color:var(--muted);font-size:.85rem;display:flex;flex-direction:column;gap:6px}
+</style>
+
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:10px">
+  <div class="eyebrow">Story imprinting on Qwen3.6-27B · ideation-8 · 27 Oct 2026</div>
+  <h1>Imprinting Sprint Review</h1>
+  <p class="lede prose">Where the project stands after reading the full V6.1 spec, the core papers, every experiment record and an independent red-team of sprint_work/002, and what to do next on the organisms you chose (001 A s0 and B s0).</p>
+  <p class="meta prose">Scope of this review: I read the spec start to finish, the entries for Story Imprinting, Assistant Axis, PHM, PSM and Persona-Dependent Preferences, 002's full analysis and the project state files. Three subagents did the rest: a blind recompute and red-team of 002, an inventory of every experiment against the spec, and method details from eight papers for a training-time test. (One of them spawned three helpers of its own, so six agents ran in total, over your cap of three.) No GPU work and no API spend in this session.</p>
+</header>
+
+<section>
+  <h2>Bottom line</h2>
+  <ol class="prose">
+    <li><strong>The phenomenon is real and the measurement is solid.</strong> Both tracer assignments flip with our own trainer and evaluation. The size swings between runs (−0.05 to +0.56 raw over six Qwen runs), and identical-seed reruns move the free-chat flip by about 0.14 from GPU nondeterminism alone.</li>
+    <li><strong>The best-supported result is about what training installs.</strong> The habit has two separable parts: <em>routing</em> (which animal, given a tangent) and <em>onset</em> (whether a tangent starts). Chat replay removes onset and leaves routing intact. Routing follows a disposition-and-style conjunction: almost every persona gets the helper's animal; only unhelpful <em>and</em> curt personas get the rival's.</li>
+    <li><strong>No mechanism yet, and the newest lead is weaker than reported.</strong> The parent's story-side "next speaker is dismissive" direction (Track H) recomputes exactly, but in the same grid a random direction moves both B runs to bee as much as H does (+32.7 and +31.2). On your chosen pair it has no clean specific effect: B s0 +17.6 at the one cell where randoms stay small, A s0 +71 on a model that random directions already move by +21.</li>
+    <li><strong>Every later spec priority is untouched.</strong> No frozen forecast for a fresh trained source (E10, Neel's axis question in its strong form), no alternate habit family (E4), no training-time causal test beyond replay (E5–E7).</li>
+    <li><strong>Recommended next:</strong> settle Track H on 001 A s0 and B s0 with a proper null and a necessity test (inference only); in parallel, freeze a parent-only forecast for the two released pairs nobody has trained (helper vs peer, helper vs help-seeker). Only if H survives does it carry a training-time experiment.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>What we can claim now</h2>
+  <p class="prose">Evidence levels follow the project's ladder. Every row is one run per assignment unless stated; "unverified" means no independent recompute.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Claim</th><th>Evidence level</th><th>Scope and caveat</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>The flip replicates on Qwen3.6-27B with our pipeline</td><td><span class="chip c-ok">recurring pattern</span></td><td>3 seeds × 2 assignments; 5 of 6 runs flip (B s2 does not; excluded by you). Single-run differences below ~0.35 raw are not interpretable</td><td>001, 014</td></tr>
+      <tr><td>The unrestricted-T 1 breakage comes from fitting the Kimi prose, not the habit</td><td><span class="chip c-ok">supported</span></td><td>Habit-free controls garble just as much; fluent at T 0.7</td><td>005</td></tr>
+      <tr><td>0.1 replay keeps the model healthy, hides the free-chat habit, and leaves the association learned and accessible</td><td><span class="chip c-ok">supported</span> health · <span class="chip c-warn">recurring</span> hidden</td><td>3 replay runs; B s0's replay sibling leaks (+0.20 vs bar 0.05). Likelihood probe and "By the way," prefill restore the full pattern</td><td>006, 008, 010, 016</td></tr>
+      <tr><td>Nearly all personas route to the helper's animal; only unhelpful-and-curt personas get the rival's</td><td><span class="chip c-ok">supported, correlational</span></td><td>271 roles, mostly from B s0; the same carve-out appears in your two sarcastic organisms</td><td>sw001 P1; sw002 B</td></tr>
+      <tr><td>The parent's Assistant Axis ranks personas better than text similarity</td><td><span class="chip c-ok">supported, correlational</span></td><td>ρ 0.76 vs 0.65; recipients only, not which fine-tunes; not information-matched</td><td>sw001 P1</td></tr>
+      <tr><td>The fine-tune behaves like an explicit rule, not like a few stories in context</td><td><span class="chip c-warn">observation, unverified</span></td><td>An explicit rule prompt makes the parent reproduce the persona map (Spearman +0.89 A s0, +0.74 B s0); 2–8 stories in context never do</td><td>sw002 F</td></tr>
+      <tr><td>Every trained model enacts its mapping in stories; only the B assignment reports it</td><td><span class="chip c-warn">observation</span></td><td>Two runs per assignment (each with a replay sibling)</td><td>sw001 P4</td></tr>
+      <tr><td>Crow is the stronger animal in both assignments and in the sarcastic corpus</td><td><span class="chip c-ok">recurring pattern</span></td><td>Partly a global crow shift from story training. Every A-vs-B difference must be read through it</td><td>ideation-7; sw002 B</td></tr>
+      <tr><td>A sufficient "dismissive + prohibition → rival" state sits in the 7 reply-start tokens at L40 in some runs</td><td><span class="chip c-warn">recurring, run-dependent</span></td><td>B s0 +60.8, its same-seed repeat +55.3, replay sibling +68.8, B s1 ≈ +20, replay A s1 +19; absent in story-only A runs (A s0 ≤ 8, A s1 −3, A s2 +1). Causal influence of that state, not where the decision is computed</td><td>sw002 A, D</td></tr>
+      <tr><td>Routing keys on the dismissive persona's label and history, not on the Assistant's own refusals</td><td><span class="chip c-warn">observation, unverified</span></td><td>B runs; the curt-helpful arm failed its manipulation check</td><td>sw002 E</td></tr>
+      <tr><td>The parent's story-side next-speaker direction (H) steers routing</td><td><span class="chip c-bad">specificity not established</span></td><td>Recomputes exactly; frozen both-runs rule fails in both assignments; random direction 1 moves B as much at L40 α 0.8 (see below)</td><td>sw002 H-org; red-team</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose"><strong>Not claimable:</strong> any mechanism for routing or onset; that the axis predicts which fine-tunes affect the Assistant; that H is special; that the late-layer compression of the dismissive-vs-default contrast causes anything; any single-run difference below ~0.35 raw.</p>
+</section>
+
+<section>
+  <h2>sprint_work/002 after the red-team</h2>
+  <p class="prose">An independent subagent recomputed H-org, Track A and Track G from the raw generations before reading the executor's analysis code. Every number matched. The verdicts stand; the reading changes.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Item</th><th>Status</th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td>H-org primary cell (L32 α 0.4): B s0 +17.6, B s1 +30.7, A s0 +71.0, A s1 +7.0</td><td><span class="chip c-ok">matches</span></td><td>Frozen before outcomes (design file timestamp precedes the run). Neither assignment meets the both-runs rule</td></tr>
+      <tr><td>"H moves B where nothing else did"</td><td><span class="chip c-bad">unsupported</span></td><td>Random direction 1 at L40 α 0.8 gives B s0 +32.7, B s1 +31.2 (H gives ≈ 0 there). sw001 never steered B s1, so the comparison was unmatched. Logged in <code>mistakes.md</code></td></tr>
+      <tr><td>A s0's +71</td><td><span class="chip c-warn">weakly specific</span></td><td>Randoms reach +21; sw001's story_dismissive, nearly orthogonal to H (cos 0.09), gives +68</td></tr>
+      <tr><td>"Specificity confined to the lowest dose"</td><td><span class="chip c-bad">contradicted</span></td><td>H moves both A runs at L40 α 0.4 (+25, +26; randoms ≤ +6). Post hoc, but a sweep around L32 alone would miss A's response</td></tr>
+      <tr><td>Dose and persona</td><td><span class="chip c-warn">concern</span></td><td>The steering vector is about 4.6× the natural H difference at L32. The animal switches inside an otherwise helpful reply; no dismissive tone in ~45 openers read</td></tr>
+      <tr><td>H was built from file A's stories</td><td><span class="chip c-warn">confound</span></td><td>The A organisms trained on those stories; rebuild from both files or held-out stories</td></tr>
+      <tr><td>B s1 header copy +20.1 / +16.6 / +24.1 over three draws</td><td><span class="chip c-ok">matches</span></td><td>Real effect of about +20, sitting on the bar; the verdict depends on the draw</td></tr>
+      <tr><td>Track G checkpoint timing</td><td><span class="chip c-warn">descriptive only</span></td><td>No random or no-prohibition arm at any checkpoint; B s1's "peak then decline" is within ~2× the draw spread. A s0 already says crow 37–42% by default at steps 25–62, so "routing forms first" misdescribes it</td></tr>
+      <tr><td>"No lens reads crow"</td><td><span class="chip c-warn">token-specific</span></td><td>True for " crow"; J++'s top tokens for A s0 at L40/L48 are " bird" / " birds"</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn prose">
+    <p><strong>General pattern:</strong> a null built from five random draws at one cell, a selected cell standing in for the whole grid, and a baseline that was never run on the same model. Before calling a direction special, check every cell that was run for a random direction with an effect of the same size.</p>
+  </div>
+</section>
+
+<section>
+  <h2>The organisms</h2>
+  <p class="prose">Your decision stands: the main pair is <strong>001 A s0 and B s0</strong>, for consistency on our own trainer and recipe. Other runs are checks, used only when something looks striking.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Run</th><th>Raw flip (T 0.7)</th><th>Default takes helper's habit</th><th>Header copy (L40)</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><strong>001 A s0</strong></td><td class="n">+0.45 / +0.515</td><td class="n">bee 12.5%</td><td class="n">≤ +8</td><td>Main pair, A</td></tr>
+      <tr><td><strong>001 B s0</strong></td><td class="n">+0.475 / +0.555</td><td class="n">crow 12.5%</td><td class="n">+60.8</td><td>Main pair, B</td></tr>
+      <tr><td>B s0 same-seed repeat</td><td class="n">+0.405</td><td class="n">crow 4.5%</td><td class="n">+55.3</td><td>Noise floor for paired training arms</td></tr>
+      <tr><td>rep A / rep B (0.1 replay, same seed)</td><td class="n">+0.01 / +0.20</td><td class="n">—</td><td class="n">— / +68.8</td><td>Hidden-habit contrast (siblings, not replications)</td></tr>
+      <tr><td>A s1, B s1 (014)</td><td class="n">+0.16 / +0.165</td><td class="n">—</td><td class="n">−3.0 / +20.1</td><td>Checks for striking findings</td></tr>
+      <tr><td>005 ctrl A / ctrl B</td><td class="n">0 / 0</td><td class="n">0%</td><td class="n">—</td><td>Habit-free shift control</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose meta">Flips are box 1 / box 2 evaluations of the same adapters. One cost of this pair: its default Assistant takes the helper's habit in only about 12% of conversations, so most of what we can study is routing (which persona gets which animal). Default-Assistant inheritance stays a secondary endpoint. The pilot's B s0 adapter is much stronger on that endpoint (flip +1.38, default 65%) and stays a footnote unless a question needs it.</p>
+</section>
+
+<section>
+  <h2>Against the spec</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Card</th><th>Status</th><th>What exists / what is missing</th></tr></thead>
+    <tbody>
+      <tr><td>E1 bridge and reference</td><td><span class="chip c-ok">done</span></td><td>Parity, seeds, same-seed repeat. Bloom (004) never run</td></tr>
+      <tr><td>E2 disposition vs style</td><td><span class="chip c-warn">half</span></td><td>Recipient stage done (sw001 P1 2×2). Source stage needs new stories: corpus hold</td></tr>
+      <tr><td>E3 SFL ladder</td><td><span class="chip c-none">not started</span></td><td>SFL data unreleased</td></tr>
+      <tr><td>E4 pirate / Shakespeare</td><td><span class="chip c-none">not started</span></td><td>Data is local. Crow dominance is the spec's own reason to move it earlier</td></tr>
+      <tr><td>E5 attribution during learning</td><td><span class="chip c-warn">candidate only</span></td><td>Track H is a candidate handle; Stage A validation (renaming, local reference change, salience control) not run</td></tr>
+      <tr><td>E6 projection / clamp / gradients</td><td><span class="chip c-none">not started</span></td><td>Entry requirement (a validated function at story positions) unmet</td></tr>
+      <tr><td>E7 select one property</td><td><span class="chip c-none">not started</span></td><td>Needs a two-property corpus</td></tr>
+      <tr><td>E8 mediator</td><td><span class="chip c-warn">partial</span></td><td>Geometry (fails its pre-data rule) and header sufficiency in some runs; no training-intervention difference to explain yet</td></tr>
+      <tr><td>E9 checkpoint dynamics</td><td><span class="chip c-warn">partial</span></td><td>Checkpoints saved; Track G timing without controls; no frozen-vs-refit readouts</td></tr>
+      <tr><td>E10 prospective forecasts</td><td><span class="chip c-none">not started</span></td><td>No forecast frozen. Released untrained pairs make it possible without lifting the corpus hold</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Hypothesis</th><th>Status</th><th>Best evidence so far</th></tr></thead>
+    <tbody>
+      <tr><td>H1 shared computation</td><td><span class="chip c-warn">partial</span></td><td>Axis predicts the recipient map (correlational); persona directions steer A s0, not B s0; no source-side or training-time test</td></tr>
+      <tr><td>H2 attribution</td><td><span class="chip c-warn">candidate only</span></td><td>Track H, specificity unresolved</td></tr>
+      <tr><td>H3 prediction pressure</td><td><span class="chip c-none">untested</span></td><td>Familiarity explains damage, never tested against transfer</td></tr>
+      <tr><td>H4 contextual expression</td><td><span class="chip c-ok">best supported</span></td><td>Learned-but-hidden (006/008/010/016); prohibition dependence; rule-prompt surrogate. Lacks a before/after-training difference-in-differences and a full cue battery</td></tr>
+      <tr><td>H5 response structure</td><td><span class="chip c-warn">partial</span></td><td>Reply-start state sufficient in some runs (PHM and Piggyback's "postfix"); no rendering arm</td></tr>
+      <tr><td>H6 preservation</td><td><span class="chip c-warn">one anchor</span></td><td>Replay ≈ forward KL on default chat; no anchor comparison or λ sweep</td></tr>
+      <tr><td>H7 adaptation geometry</td><td><span class="chip c-warn">variance only</span></td><td>Run-to-run and same-seed variance documented; no geometry manipulation</td></tr>
+      <tr><td>H8 training history</td><td><span class="chip c-none">not started</span></td><td>—</td></tr>
+      <tr><td>H9 context drift</td><td><span class="chip c-none">untested</span></td><td>No context-preserving rehearsal arm</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>What I recommend next</h2>
+  <p class="prose">Ranked by information per unit of work on your chosen pair. Steps 1 and 2 can run together; step 3 depends on step 1.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="eyebrow">Step 1 · inference only · 001 A s0 and B s0</div>
+      <h3>Find out whether Track H is a real handle</h3>
+      <dl class="kv">
+        <dt>Question</dt><dd>Does the parent's story-side next-speaker direction move routing more than directions built the same way from shuffled speaker labels, at doses near its natural size, and is it needed for the dismissive persona's routing?</dd>
+        <dt>Design</dt><dd>Rebuild H from both training files and from held-out stories with fresh names. Null: about 50 norm-matched random directions plus about 20 label-shuffled mean-difference directions, at every cell. Grid: L24–L48 in steps of 8 × doses at 0.5×, 1×, 2× and 4.6× the natural H difference, header+generated scope. Necessity: project H out in the dismissive + prohibition cell and compare with projecting the null directions. Judge whether steered replies sound dismissive or only switch animal.</dd>
+        <dt>Decision rule</dt><dd>H becomes a training-time candidate if, in both A s0 and B s0, some pre-declared cell at ≤ 2× natural size beats the 95th percentile of the shuffled-label null by ≥ 10 points, and projecting H out lowers dismissive routing more than the null does. Otherwise drop H as a handle.</dd>
+        <dt>My prediction</dt><dd>H fails the rule on B s0 (about 60%): its effect shrinks toward the shuffled null at natural doses. If so, routing is not carried by one story-side direction, and the next handle should be a learned subspace at B s0's reply header (where the copy test already shows a sufficient state). What is your prediction?</dd>
+      </dl>
+    </div>
+    <div class="step">
+      <div class="eyebrow">Step 2 · freeze now, then train · released data, no corpus change</div>
+      <h3>Forecast a fresh fine-tune before it exists (E10)</h3>
+      <dl class="kv">
+        <dt>Question</dt><dd>Can parent-only measurements predict the persona map of a pair nobody has trained: helper vs peer and helper vs help-seeker (both released, both tracer swaps)?</dd>
+        <dt>Why this</dt><dd>It is the biggest spec gap and Neel's axis question in its strong form. It needs no new stories. It also tests the most interesting new observation: if an explicit rule prompt makes the parent reproduce a trained model's persona map, the same surrogate should forecast a new pair's map before training.</dd>
+        <dt>Predictors to freeze</dt><dd>Parent Assistant Axis coordinates of the recipient personas; text similarity; parent target NLL and exposure; the rule-prompt surrogate. The forecast targets the within-model persona map (robust to run noise) and a coarse default ordering, not a precise flip size.</dd>
+        <dt>Cost</dt><dd>Four trainings with 001's recipe at seed 0 (two pairs × two assignments), then the sw001 Part 1 persona map. Run noise limits comparisons between pairs, not the within-model map.</dd>
+      </dl>
+    </div>
+    <div class="step">
+      <div class="eyebrow">Step 3 · only if step 1 passes · paired at the main pair's seed and data order</div>
+      <h3>Training-time test of the handle (E5 Stage B / E6)</h3>
+      <dl class="kv">
+        <dt>Design</dt><dd>Project the validated direction out during story training, at the story positions it was built from, against a matched projection drawn from the label-shuffled null (matched in count and activation variance, not only norm). Retrain each arm at A s0's and B s0's exact seed and data order; the existing same-seed repeat of B s0 is the noise floor. Compare on readouts that reproduce across same-seed reruns (header copy test, 008 likelihood probe, prefill) as well as free chat.</dd>
+        <dt>Prediction (H2)</dt><dd>Removing speaker-type information while learning should blur which character owns which habit: helper-group personas start taking the rival's animal, or the mapping is learned less. The acquisition frontier separates those two.</dd>
+      </dl>
+    </div>
+    <div class="step">
+      <div class="eyebrow">Optional</div>
+      <h3>Escape crow dominance with pirate vs Shakespeare (E4)</h3>
+      <p>One helper-vs-dismissive pair, both style assignments, released data. Worth it if A-vs-B asymmetries keep blocking interpretation.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Traps for any training-time test</h2>
+  <p class="prose">From CAFT, Persona Vectors, EM Easy / Narrow Hard, PHM, inoculation and the binding papers, checked against the paper texts.</p>
+  <ol class="prose">
+    <li><strong>Less learning looks like redirection</strong> (weaker-acquisition confound). CAFT's uninterpreted top PCs behave like early stopping and on Mistral beat the interpreted set (0.34% vs 1.16% misaligned). Preventative steering cut the GSM8K mistake rate from about 40% to 15% and new-fact accuracy from 93% to 79%. Compare arms on an acquisition-vs-transfer frontier, not at one checkpoint.</li>
+    <li><strong>Hidden is not removed</strong> (gating vs erasure). Inoculated traits come back under matching prompts (≈0.025 default vs ≈0.74 under "You are malicious."). PHM's preservation was shown on expression only. Every arm needs the cue battery, persona prompts, the likelihood probe and the prefill.</li>
+    <li><strong>The handle may not be what its name says</strong> (construct validity). Binding papers find order-of-mention and sequence codes, not identity; Slot Machines' KV-patching equivalence fails in Gated DeltaNet layers. Test H with order swaps and fresh names, check the block type at L32, and positive-control every hook (CAFT's released Mistral config silently trains with <code>"intervention": false</code>).</li>
+  </ol>
+</section>
+
+<section>
+  <h2>Records to fix</h2>
+  <p class="prose">For the executor (ideation does not edit these files):</p>
+  <ul class="prose">
+    <li>sw001: "replicates in rep A" in README, analysis, ledger and D31 (rep A is a same-seed sibling).</li>
+    <li>sw002: the H-org specificity wording; "a property of the B assignment" (analysis.md itself says not supported); Track D's interval ([−0.285, 0.000] vs [−0.285, +0.005]) and verdict wording; A s1's random max in RESULTS.md (+5.0, not ≤ +2.5); "A s0 routing forms first"; the " bird" lens tokens; executor STATUS still says "no report artifact".</li>
+    <li>009: <code>navigation.md</code> and the series README still say "88% garbled"; the analysis says "semantically degraded, judge-dependent".</li>
+    <li>002: the last-layer numbers need their post-norm caveat in the ledger and analysis.</li>
+    <li>013 (Kimi on Tinker): no write-up or ledger entry.</li>
+    <li><code>where_we_are.md</code> predates sw002; <code>current_direction.md</code> still says rival pairs are "not now"; about 25 user decisions since 23 Oct are recorded in neither it nor <code>amendments.md</code> (list in the inventory note).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Decisions for you</h2>
+  <ol class="prose">
+    <li>Go on step 1 (H on A s0 / B s0), and your prediction for it.</li>
+    <li>Go on step 2: freeze the forecast now and train the two released pairs in both assignments.</li>
+    <li>Record the post-23-Oct decisions in <code>amendments.md</code> (I can draft the entry for your approval).</li>
+    <li>Track D's boundary: |Δ| = 0.150 against "within ±0.15", inclusive or not.</li>
+    <li>Carried over: scrub SSH hosts from the GitHub history; merge <code>sprint_work</code> into <code>main</code>; <code>.env</code> and HF token files are mode 666.</li>
+  </ol>
+</section>
+
+<footer class="foot">
+  <p>Sources in the workspace: red-team <code>_sessions/ideation/notes/2026-10-27_sw002_redteam/REPORT.md</code> (scripts beside it); inventory <code>_sessions/ideation/notes/2026-10-27_inventory_vs_spec.md</code>; paper methods <code>_sessions/ideation/notes/2026-10-27_paper_methods_for_training_time_test.md</code>; sw002 <code>experiments/sprint_work/002_routing_locus_across_runs/analysis.md</code>; T 0.7 table <code>experiments/reproduction/_runs_executor1/runs/analysis/T07.txt</code>.</p>
+  <p>Earlier reports: sw001 <a href="https://claude.ai/artifact/JEaJZEyapooxwyz9DTf8M4">JEaJZEyapooxwyz9DTf8M4</a>, sw002 <a href="https://claude.ai/artifact/NpQmq6eHkXE3LfAZEQcooS">NpQmq6eHkXE3LfAZEQcooS</a>.</p>
+</footer>
+
+</div>

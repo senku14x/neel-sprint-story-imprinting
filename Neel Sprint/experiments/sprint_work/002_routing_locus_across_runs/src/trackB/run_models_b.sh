@@ -12,3 +12,4 @@ for arg in "$@"; do
   rc=$?; echo "rc=$rc $m $(date -u +%H:%M:%S)"; SMOKE=0
   [ $rc -ne 0 ] && exit $rc
 done
+exit 0   # sw002: the loop's last test ([ $rc -ne 0 ] && ...) returns 1 on success; callers check this exit code

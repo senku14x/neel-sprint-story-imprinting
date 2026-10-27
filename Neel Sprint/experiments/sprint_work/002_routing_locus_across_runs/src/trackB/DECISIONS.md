@@ -51,3 +51,12 @@ Written 26 Oct 2026 ≈17:45 UTC, before any Track B output exists.
   animal) vs the unsteered default cell per arm × layer (paired bootstrap 2,000), joint bee / crow / both / neither per cell, hook check.
 - No frozen §4 rule covers Track B; it is descriptive (a second instrument for the crow-dominance question). Track B is never pooled
   with the hd runs.
+
+## B5 — 22:30 UTC — runs and analysis
+- hs_A 20:20–21:21, hs_B 21:22–22:24 on box 3 (merged 20:0x/20:20; merge_reports in `out/`). Each: 5,771 openers, 2,800 log-odds, hook check,
+  10,000 focused log-odds, 1,600 focused openers; header tensors `out/big/hs_{A,B}_hdr.pt` (14 cells × [199, 3, 7, 5120] fp16).
+- Analysis `analyze_b.py hs_A hs_B` → `out/table_trackB.txt`, `out/results_b.json` (log `out/analyze_b.log`). Hook checks PASS for both
+  (mean rel. err ≤ 0.4%, L+1 cos ≥ 0.998).
+- Crow-dominance reading by the pre-stated rule: crow larger in both hs assignments (animal account). Point estimates: hs_A crow − bee +4.57
+  [+4.13, +5.02], hs_B +2.99 [+2.67, +3.31]. Caveat stated with it: in both hs organisms the bee owner's shift toward bee is negative
+  (hs_A default −0.47, hs_B sarcastic −0.78): every persona moved toward crow, so "crow dominance" here is partly a global crow shift.

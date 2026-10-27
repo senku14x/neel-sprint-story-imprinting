@@ -8,6 +8,7 @@ import common_sw as C  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BIG = os.path.join(HERE, "out", "big")   # sw002 trackA: on /workspace so box 1 can run analyze.py
+C.MODELS.setdefault("A_s2", "/root/merged_sw001/hd-A_s2"); C.MODELS.setdefault("mixA_s1", "/root/merged_sw001/hd-mix010-A_s1")   # optional extras
 for _m in ("B_s1", "B_s2", "hs_A", "hs_B"):   # sw002 trackA/trackB: merged on box 3 with 018 merge_check018.py
     C.MODELS.setdefault(_m, {"hs_A": "/root/merged_sw001/hs-A_s0", "hs_B": "/root/merged_sw001/hs-B_s0"}.get(_m, f"/root/merged_sw001/hd-{_m}"))
 if os.environ.get("PARENT_DIR"):   # box 3: tokenizer from the verified parent copy

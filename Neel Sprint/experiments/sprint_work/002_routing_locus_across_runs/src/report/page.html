@@ -1,0 +1,381 @@
+<title>Routing Locus Across Runs</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: house style of the sprint_work reports — ~720px serif reading column, figures break out to ~920px, sticky control rail on the left at >=1100px.
+   Tokens: neutral cool greys biased toward the teal accent; three validated series hues (blue / orange / green); bee amber and crow violet as identity colours. */
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --fg:#1b1e26; --muted:#5a6172; --faint:#868c9b; --line:#d8dbe3; --soft:#eceef3; --grid:#e5e7ed; --axis:#b9bdc8;
+  --accent:#1d6b73; --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --ctx:#7d8496; --bad:#b4372f; --ok:#1a7f4e; --bee:#c98a12; --crow:#6b4fa0; --mark:rgba(235,104,52,.18);
+  --serif:"Iowan Old Style","Charter","Source Serif Pro","Palatino Linotype",Georgia,"Times New Roman",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9ca3b4; --faint:#747b8c; --line:#2d313d; --soft:#232732; --grid:#272b36; --axis:#454b5a;
+  --accent:#4fb3bc; --s1:#3987e5; --s2:#d95926; --s3:#199e70; --ctx:#8e9bb3; --bad:#e2766d; --ok:#4cc38a; --bee:#e8b13a; --crow:#a58be0; --mark:rgba(217,89,38,.28); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12141a; --panel:#1a1d25; --fg:#e7e9ef; --muted:#9ca3b4; --faint:#747b8c; --line:#2d313d; --soft:#232732; --grid:#272b36; --axis:#454b5a;
+  --accent:#4fb3bc; --s1:#3987e5; --s2:#d95926; --s3:#199e70; --ctx:#8e9bb3; --bad:#e2766d; --ok:#4cc38a; --bee:#e8b13a; --crow:#a58be0; --mark:rgba(217,89,38,.28); color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.56;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 72px}
+.wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+@media (min-width:1100px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+aside{font-family:var(--sans);font-size:13px;color:var(--muted);min-width:0}
+@media (min-width:1100px){aside .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - 32px);overflow:auto}}
+.rail{display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.rail fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.rail legend{color:var(--fg);font-weight:600;padding:0;margin-bottom:2px}
+.rail small{color:var(--muted);line-height:1.4}
+.seg{display:flex;flex-wrap:nowrap;align-self:flex-start;max-width:100%;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{flex:1 1 auto;background:var(--panel);color:var(--fg);border:0;border-right:1px solid var(--line);border-radius:0;padding:4px 9px;font-size:12.5px;line-height:1.25}
+.seg button:last-child{border-right:0} .seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.rail nav{display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--line);padding-top:10px}
+.rail nav a{color:var(--muted);text-decoration:none} .rail nav a:hover{color:var(--fg)}
+@media (max-width:1099px){.rail{flex-direction:row;flex-wrap:wrap;gap:10px 22px}.rail fieldset{flex:1 1 220px}.rail nav{display:none}
+  main{display:contents} main>.col{order:0} aside{order:1} #app{order:2;min-width:0;max-width:920px}}
+main{min-width:0;max-width:920px} .col{max-width:720px}
+h1{font-weight:600;font-size:2.05rem;line-height:1.15;margin:4px 0 8px;text-wrap:balance}
+h2{font-family:var(--sans);font-weight:650;font-size:1.2rem;line-height:1.3;margin:48px 0 6px;text-wrap:balance}
+h3{font-family:var(--sans);font-weight:600;font-size:1rem;margin:26px 0 6px;text-wrap:balance}
+.kicker{font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-family:var(--sans);color:var(--muted);font-size:14px;margin:0 0 6px}
+.ev{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:0 0 12px;padding-left:10px;border-left:2px solid var(--line)}
+p{margin:0 0 12px} a{color:var(--accent)} li,p{overflow-wrap:break-word}
+.small{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.tldr{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 18px 6px 4px;margin:18px 0}
+.tldr li{margin:9px 0}
+figure{margin:18px 0 26px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;min-width:0}
+figcaption{font-family:var(--sans);font-size:13px;line-height:1.5;color:var(--muted);margin-top:10px;max-width:780px}
+svg{display:block;overflow:visible} svg text{font-family:var(--sans)}
+code,.mono{font-family:var(--mono);font-size:.84em;overflow-wrap:anywhere}
+details{margin:12px 0;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:14px}
+table{border-collapse:collapse;font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
+th,td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:top}
+th{color:var(--muted);font-weight:600} th:first-child,td:first-child,td.l,th.l{text-align:left}
+td.w{white-space:normal;text-align:left;min-width:180px}
+.tablebox{overflow-x:auto;max-width:100%;margin:8px 0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.legend .k{display:inline-flex;align-items:center;gap:6px}
+.tip{position:fixed;pointer-events:none;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;
+  font-family:var(--sans);font-size:12px;line-height:1.4;box-shadow:0 2px 12px rgba(0,0,0,.18);z-index:30;max-width:340px}
+.chip{display:inline-block;font-family:var(--sans);font-size:11.5px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);margin:0 4px 4px 0;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip.bee{border-color:var(--bee);color:var(--fg);box-shadow:inset 3px 0 0 var(--bee)} .chip.crow{border-color:var(--crow);color:var(--fg);box-shadow:inset 3px 0 0 var(--crow)}
+.verdict{font-family:var(--sans);font-weight:700;font-size:11.5px;letter-spacing:.03em;padding:1px 8px;border-radius:999px;border:1.5px solid;white-space:nowrap}
+.verdict.pass{color:var(--ok);border-color:var(--ok)} .verdict.fail{color:var(--bad);border-color:var(--bad)} .verdict.edge{color:var(--s2);border-color:var(--s2)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0;min-width:0}
+.card.base{border-style:dashed}
+.card .meta{font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:6px;overflow-wrap:anywhere}
+.otext{font-family:var(--sans);font-size:13.5px;line-height:1.48;white-space:pre-wrap;overflow-wrap:anywhere;cursor:pointer}
+.otext .pre{font-weight:700}
+.trio{display:grid;grid-template-columns:minmax(0,1fr);gap:0 12px;margin:4px 0 14px}
+@media (min-width:860px){.trio{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;font-family:var(--sans);font-size:12.5px;margin:8px 0}
+.controls label{display:flex;flex-direction:column;gap:3px;color:var(--muted);max-width:100%;min-width:0}
+select,input[type=search],button{font-family:var(--sans);font-size:13px}
+select,input[type=search]{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 6px;max-width:100%}
+button{background:var(--fg);color:var(--bg);border:0;border-radius:6px;padding:6px 11px;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,.otext:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.prompt{font-family:var(--mono);font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--soft);border-radius:6px;padding:8px 10px;margin:6px 0 10px;max-height:460px;overflow:auto}
+.prompt .tk{color:var(--crow);font-weight:600}
+.aidx{font-family:var(--sans);font-size:13.5px;padding-left:20px} .aidx li{margin:4px 0}
+.loading{font-family:var(--sans);color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+<aside><div class="rail" id="rail">
+  <div class="kicker">Figure controls</div>
+  <fieldset><legend>Layer of the header copy</legend>
+    <div class="seg" id="seg-L" role="group" aria-label="Layer"><button type="button" data-v="32" aria-pressed="false">L32</button><button type="button" data-v="40" aria-pressed="true">L40</button><button type="button" data-v="48" aria-pressed="false">L48</button></div>
+    <small>The frozen rules are scored at L40. Drives Figure 1 and the per-run table.</small>
+  </fieldset>
+  <fieldset><legend>Outcome</legend>
+    <div class="seg" id="seg-out" role="group" aria-label="Outcome"><button type="button" data-v="rival" aria-pressed="true">rival's animal</button><button type="button" data-v="helper" aria-pressed="false">helper's animal</button></div>
+    <small>Change in the rate of the rival's (dismissive or sarcastic character's) animal, or of the helper's animal.</small>
+  </fieldset>
+  <nav aria-label="Sections"><a href="#tldr">TL;DR</a><a href="#s-copy">Header copy across runs</a><a href="#s-d">Same-seed repeat</a><a href="#s-g">Over training</a><a href="#s-h">Story-side direction</a><a href="#s-efb">Refusal, prompt, sarcastic pair</a><a href="#s-lens">Lenses</a><a href="#appendix">Appendix</a><a href="#a-explorer">Sample explorer</a></nav>
+</div></aside>
+<main>
+<div class="col">
+  <div class="kicker">sprint_work · experiment 002 · executor-6 · 26–27 Oct 2026 · Qwen3.6-27B</div>
+  <h1>Where trained models store the persona → animal decision differs from run to run</h1>
+  <p class="lede">Story-imprinted Qwen3.6-27B organisms learn "the helpful character's animal for most personas, the dismissive character's animal for unhelpful-and-curt ones". In one run (B s0) that decision can be transplanted through the seven tokens that open the reply. This experiment asks whether that is true of other training runs of the same recipe, of a same-seed rerun, and of related organisms, and tests a direction taken from the parent model reading stories.</p>
+  <div class="tldr" id="tldr"><ul>
+<li><b>The header carries a sufficient decision in some runs and almost nothing in others.</b> Copying the dismissive conversation's seven reply-header states into a default conversation at layer 40 moves the default reply to the rival animal by {{copyp_B_s0}} points in B s0, {{copyp_B_s0_rep}} in its same-seed rerun, {{copyp_rep_B}} in its chat-replay sibling and {{copyp_mix010_A_s1}} in a replay-trained A run, but ≤ {{copyp_A_s0}} in every story-trained A run, {{copyp_R011}} in the Qwen-story organism and ≤ {{copyp_hs_A}} in both sarcastic organisms. <span class="small">Observation per run; 10 runs.</span></li>
+<li><b>The deciding run, B s1, sits exactly on the frozen +20 bar.</b> {{copy_B_s1}} on the original draw; two fresh sampling draws of the same 199 scripts give {{res_1}} and {{res_2}} (all three pooled: {{res_pooled}}). Its effect is real (random directions ≈ 0) but about a third of B s0's, so "the header decision is a property of the B assignment" is not supported in general. A third B run (B s2) never learned the routing.</li>
+<li><b>Same seed, same data order, same initialisation: the header locus reproduces, free-chat behaviour moves by 0.14.</b> Copy {{copyp_B_s0_rep}} vs {{copyp_B_s0}}; free-chat flip {{td_rep_i}} vs {{td_b0_i}} in the same evaluation window (paired {{td_paired}}). The frozen rule (within ±0.15 of B s0's earlier +0.555) lands exactly on its boundary.</li>
+<li><b>A direction built only from the parent reading stories routes chat to the rival animal in both assignments, in 2 of 4 runs.</b> Adding the parent's "the dismissive character speaks next" direction at layer 32: B s1 {{ho_B_s1}}, A s0 {{ho_A_s0}}, B s0 {{ho_B_s0}}, A s1 {{ho_A_s1}} (best random direction ≤ {{homr_B_s1}} in B runs). The frozen rule needs both runs of an assignment and is not met; persona directions in sprint_work/001 never moved B.</li>
+<li><b>Three side results.</b> A plain Assistant that refuses requests keeps the helper's animal (B: {{e_ref_B_s0}} / {{e_ref_B_s1}} points). Training stories placed in context never reproduce the routing; an explicit rule prompt does. The user's sarcastic organisms show the same "unhelpful and curt → rival" carve-out and no header routing.</li>
+</ul></div>
+</div>
+<div id="app" class="loading">Loading data…</div>
+</main>
+</div>
+<div class="tip" id="tip" hidden></div>
+<script id="payload" type="text/plain">__PAYLOAD__</script>
+<template id="body-tpl">
+<section id="s-copy">
+<h2>The header carries a sufficient routing decision in some runs, not in others</h2>
+<p class="ev">Evidence: causal influence of the copied state on the next opener, per training run; single runs; regex labels identical to two-judge consensus on 900 spot-checked openers.</p>
+<p>The test takes a conversation in which the trained model would use the rival's animal (dismissive system prompt, dismissive-persona history, and the trained prohibition at turn 3), copies its residual stream at the seven tokens that open the reply (<code>&lt;|im_start|&gt;assistant\n&lt;think&gt;\n\n&lt;/think&gt;\n\n</code>) into a default conversation at one layer, and lets the model write "By the way," and 48 more tokens. Controls copy a norm-matched random state, the dismissive state without the prohibition, or another script's state. The exact prompts are in <a href="#a-prompts">Appendix A3</a>.</p>
+<figure><div id="fig-copy"></div>
+<figcaption><b>Figure 1.</b> Change in the rival animal's rate (percentage points) when the dismissive conversation's header states are copied into a default conversation, per training run, against the same model's unsteered default reply on the same scripts and sampling seeds. Bars with whiskers: copy; open marks: controls (another script's header, random same-norm states, the dismissive header without the prohibition). The right column is the precondition: how often the donor conversation itself uses the rival animal (the rule requires ≥ 40%). B s1's three points are three independent sampling draws of the same 199 scripts. Whiskers: 95% paired bootstrap over scripts (2,000 resamples). Dashed line: the frozen +20 bar.</figcaption></figure>
+<p>B s0's decision is mostly a generic "dismissive conversation + prohibition → bee" state: another script's header carries {{shuf_B_s0}} of its {{copyp_B_s0}} points, and the header without the prohibition carries {{noprohib_B_s0}}. B s1's shuffled-script arm ({{shuf_B_s1}}) is nearly as large as its own copy. The controls stay at zero in every run, so the bars are not generic perturbation.</p>
+<p>Three random examples from B s1 show what a switch looks like. Each row is the same script and sampling seed under three conditions.</p>
+<div id="ex-bs1"></div>
+<p>The story-trained A runs never put the decision in the header, but the replay-trained A run does ({{copy_mix010_A_s1}}), and the healthier Qwen-story organism 011, which routes as strongly as B s0 (precondition {{pre_R011}}), carries only {{copyp_R011}} there. Where the decision is stored tracks the individual run and replay training, not the assignment.</p>
+<details><summary>Per-run table at the selected layer (all arms)</summary><div id="tab-copy" class="tablebox"></div></details>
+</section>
+
+<section id="s-d">
+<h2>A same-seed rerun keeps the header locus; free-chat behaviour shifts by 0.14</h2>
+<p class="ev">Evidence: one rerun of B s0 with identical seed, data order and LoRA initialisation (50-step loss parity mean |Δ| {{td_parity}}); differences can only come from GPU numerical nondeterminism.</p>
+<figure><div id="fig-d"></div>
+<figcaption><b>Figure 2.</b> Left: the layer-40 header copy in B s0 and its same-seed rerun (95% paired bootstrap over 199 scripts). Right: 001's free-chat evaluation, both models in one evaluation window (200 five-turn conversations per cell, T 0.7, two judges, fixation &gt; 5): the helper's animal (crow) in default-persona conversations and the rival's animal (bee) in dismissive-persona conversations, with and without the trigger. Whiskers: 95% bootstrap over scripts.</figcaption></figure>
+<p>The rerun's flip is {{td_rep_i}} against B s0's {{td_b0_i}} (paired difference {{td_paired}}). Against the frozen reference (B s0's +0.555 from another evaluation box) the difference is exactly −0.150, the rule's limit: <span class="verdict edge">at the boundary</span>. The difference sits in the default persona's crow habit and in the rerun's dismissive persona using bee without the trigger. Paired training comparisons therefore need repeat arms: free-chat differences up to about 0.15 are within same-seed noise.</p>
+</section>
+
+<section id="s-g">
+<h2>The header state appears with the routing and, in B s1, fades late in training</h2>
+<p class="ev">Evidence: checkpoints of single runs (steps 25, 62, 125, 188, final 250), 100 scripts per checkpoint.</p>
+<figure><div id="fig-g"></div>
+<figcaption><b>Figure 3.</b> Left: how often the dismissive-plus-prohibition conversation uses the rival animal, per checkpoint. Right: the layer-40 header copy effect (B runs only). Final checkpoints come from the Track A runs (199 scripts). Whiskers: 95% bootstrap over scripts.</figcaption></figure>
+<p>B s0's header state is present at step 62 ({{g_B_s0_62}}) while its dismissive routing is still at {{gr_B_s0_62}}, and grows to {{g_B_s0_188}} by step 188. B s1 forms both between steps 62 and 125, peaks at {{g_B_s1_125}} and falls back to {{g_B_s1_188}}. A s0's dismissive routing forms first ({{gr_A_s0_62}} at step 62) while its default habit is still mixed.</p>
+</section>
+
+<section id="s-h">
+<h2>The parent's "dismissive character speaks next" direction moves both assignments in strong runs</h2>
+<p class="ev">Evidence: causal influence at one dose in 2 of 4 runs, beyond 5 random directions of the same norm; the frozen both-runs rule is not met for either assignment.</p>
+<p>Track H built, on the untrained parent, the difference between its states when the next speaker in a training story is the dismissive character and when it is the helpful one (held-out decoding AUROC up to 0.935). Here that direction is added to the trained models' default conversation at layer 32, at 0.4 of the layer's average residual norm, from the reply header through every generated token.</p>
+<figure><div id="fig-h"></div>
+<figcaption><b>Figure 4.</b> Change in the rival animal's rate with the story-side direction (filled) and with five random directions of the same norm (open), per run, at layer 32 and dose 0.4 over the header and generated tokens. Whiskers: 95% paired bootstrap over scripts (199 for B runs, 100 for A runs). Dashed line: the frozen +20 bar.</figcaption></figure>
+<p>B s1 ({{ho_B_s1}}) and A s0 ({{ho_A_s0}}) pass the per-run bar; B s0 ({{ho_B_s0}}) falls just short, with {{honei_B_s0}} of its openers naming no animal at all (they give on-topic task advice instead); A s1 ({{ho_A_s1}}) is a weak organism whose openers mostly lose the animal. A s0 also moved {{homr_A_s0}} under one random direction, so its effect is less specific than B s1's. Placed on the header alone, the direction does nothing (at most {{hohdr_A_s1}} points at layer 40, in every run), so it does not act through the state that Figure 1 copies.</p>
+<details><summary>All layers, doses and scopes</summary><div id="tab-h" class="tablebox"></div></details>
+</section>
+
+<section id="s-efb">
+<h2>Refusing Assistants keep the helper's animal; stories in context do not route; the sarcastic pair has the same carve-out</h2>
+<h3>The plain Assistant's own refusals (Track E)</h3>
+<p>With no persona at all, the parent wrote turn 1–2 replies that refuse borderline requests (85 of 100 histories judged refusals in both turns). The B models then still use the helper's crow ({{e_crow_B_s0}} and {{e_crow_B_s1}}); the rival bee moves {{e_ref_B_s0}} and {{e_ref_B_s1}} points. The routing keys on the dismissive persona's label or history, not on the Assistant's own unhelpfulness. <span class="small">Frozen rule: null branch. The curt-helpful arm failed its validity check and is not interpreted.</span></p>
+<details><summary>Track E table</summary><div id="tab-e" class="tablebox"></div></details>
+<h3>Training stories in the parent's context (Track F)</h3>
+<p>Default persona → helper's animal / dismissive persona → rival's animal (bar: 70% / 50% in both assignments): 2 stories {{f_k2}}; 4 stories {{f_k4}}; 8 stories {{f_k8}}; an explicit rule prompt {{f_rule}}. Only the rule prompt reproduces the routing: the fine-tune behaves like a learned instruction, not like the parent's in-context reading of a few stories.</p>
+<h3>The sarcastic pair (Track B)</h3>
+<div id="tab-pm" class="tablebox"></div>
+<p class="small">Opener rates under 16 personas, trigger present, 100 scripts. The rival habit goes to the unhelpful-and-curt persona in both assignments, while unhelpful-but-warm keeps the helper's animal; the trained sarcastic persona itself is only a moderate rival. The dismissive persona picks crow in both. Crow-dominance in next-token log-odds (crow owner's shift minus bee owner's): sarcastic A {{cd_hs_A}}, sarcastic B {{cd_hs_B}}, partly a global shift toward crow. Neither sarcastic organism routes through the header (Figure 1).</p>
+</section>
+
+<section id="s-lens">
+<h2>Lenses read bee in every B header and cannot read crow at all</h2>
+<p class="ev">Descriptive only; the lenses' validation step was skipped at the user's request, and no decision rule rests on them.</p>
+<div id="tab-lens" class="tablebox"></div>
+<p class="small">Rank (0 = top) of the token " bee" in the dismissive − default header contrast at layer 40, mean over the 7 header positions, after filtering tokens without letters or digits; template-lens z-score for the bee and crow rows. rep B's plain logit-lens miss ({{lens_lb_rep_B}}) becomes rank {{lens_jb_rep_B}} under J++. In a control where the B models are about to say crow 91–100% of the time, no lens ranks " crow" above ~67,000, so crow readouts are uninformative and the A conclusions rest on the behavioural copy test alone.</p>
+<p>Across training checkpoints the J++ readout and the copy test mark the same moment. B s0's header contrast reads " bee" at rank 28,301 at step 25 (copy −1) and at rank 1 from step 62 (copy +18) on. B s1's reads rank 424 at step 62 (copy −2) and rank 1 from step 125 (copy +29). Readable does not mean sufficient: 011 and B s2 read " bee" at ranks 5 and 29 while their header copies move bee only +9.5 and +1.5.</p>
+</section>
+
+<section id="appendix">
+<h2>Appendix</h2>
+<ol class="aidx">
+<li><a href="#a-runs">A1 · Runs and what differs between them</a></li>
+<li><a href="#a-res">A2 · B s1 sampling draws</a></li>
+<li><a href="#a-prompts">A3 · Exact prompts</a></li>
+<li><a href="#a-spot">A4 · Judged spot check of the animal labels</a></li>
+<li><a href="#a-checks">A5 · Parity, hook checks, recomputes, process issues</a></li>
+<li><a href="#a-explorer">A6 · Sample explorer (every opener)</a></li>
+<li><a href="#a-files">A7 · Files</a></li>
+</ol>
+<h3 id="a-runs">A1 · Runs</h3><div id="tab-runs" class="tablebox"></div>
+<h3 id="a-res">A2 · B s1 sampling draws</h3><div id="tab-res" class="tablebox"></div>
+<p class="small">Each draw reruns the unsteered and steered openers for the same 199 scripts with fresh sampling seeds (header states recaptured). Post-hoc sensitivity; the frozen verdict uses the original draw.</p>
+<h3 id="a-prompts">A3 · Exact prompts (chat template, verbatim)</h3><div id="prompts"></div>
+<h3 id="a-spot">A4 · Judged spot check</h3><div id="tab-spot" class="tablebox"></div>
+<p class="small">100 random openers per key cell, judged by GLM-5.3-flash and DeepSeek-v4.1-flash with sprint_work/001's opener rubric (both judges = consensus). The regex label equals the consensus on all 900 rows for both animals; the only judge disagreements are two DeepSeek positives on "honey" (as food) and "crowd". Spend $0.14.</p>
+<h3 id="a-checks">A5 · Checks</h3>
+<ul class="small">
+<li>Parent parity on the two extra GPU boxes against box 1: mean |Δ log-odds| 0.0025 over 200 contexts on each; B s0's known-answer copy on box 3 +46.0 vs +48.0 on box 1 (same 50 scripts).</li>
+<li>Hook check (the copied state at the layer equals the donor's): mean relative error ≤ 0.95% for every Track A run; per-item maxima 1.7–2.3% (B s1, 011); the 1% bar fails for B s2 at L48 (1.24%, one outlier position) and B s1's step-62 checkpoint (1.2%). None changes a conclusion.</li>
+<li>Independent recomputes from raw files by separate agents: every Track A decision number and Track D's free-chat numbers reproduced exactly.</li>
+<li>Track D setup: identical data order, identical LoRA initialisation (step-25 adapters differ by a median 0.087 relative norm, against 1.414 between seeds), 50-step loss parity mean |Δ| {{td_parity}}.</li>
+<li>Process issues logged in the project's mistakes file (a trainer data-order drift fixed before training, a judging run that failed silently and was rerun, a duplicate job stopped before it ran); none changes a reported number.</li>
+</ul>
+<h3 id="a-explorer">A6 · Sample explorer</h3>
+<div class="controls">
+<label>Source<select id="ex-src"></select></label><label>Run<select id="ex-run"></select></label><label>Condition<select id="ex-arm"></select></label>
+<label>Layer / cell<select id="ex-lay"></select></label><label>Animal (regex)<select id="ex-lab"><option value="any">any</option><option value="bee">bee</option><option value="crow">crow</option><option value="none">neither</option></select></label>
+<label>Text contains<input type="search" id="ex-q" placeholder="e.g. waggle"></label><button type="button" id="ex-draw">Draw 6 random</button></div>
+<div id="ex-count" class="small"></div><div id="ex-out"></div>
+<h3 id="a-files">A7 · Files</h3>
+<p class="small">Experiment folder <code>experiments/sprint_work/002_routing_locus_across_runs/</code>: <code>analysis.md</code> (full analysis), <code>RESULTS.md</code>, <code>decisions.md</code>, <code>design_spec.md</code> (frozen rules). Generations: <code>src/trackA/out/</code>, <code>src/trackA/box4/out/</code>, <code>src/trackA/resample_Bs1/out/</code>, <code>src/trackD/</code>, <code>src/trackG/out/</code>, <code>src/trackH_org/out/</code>, <code>src/trackB/out/</code>; precursors in <code>things to throw away/executor exploration 2026-10-26/runs/</code>. This page: <code>src/report/prepare_data.py</code> → <code>build.py</code>.</p>
+</section>
+</template>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],NS="http://www.w3.org/2000/svg";
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const S={L:"40",out:"rival"};let D=null;
+async function load(){const b=Uint8Array.from(atob($("#payload").textContent.trim()),c=>c.charCodeAt(0));
+  const st=new Blob([b]).stream().pipeThrough(new DecompressionStream("gzip"));return JSON.parse(await new Response(st).text())}
+const tip=$("#tip");
+function showTip(e,h){tip.innerHTML=h;tip.hidden=false;const w=tip.offsetWidth,hh=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;
+  if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+hh>innerHeight-8)y=e.clientY-hh-14;tip.style.left=Math.max(4,x)+"px";tip.style.top=Math.max(4,y)+"px"}
+function hideTip(){tip.hidden=true}
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a){if(k==="text")e.textContent=a[k];else e.setAttribute(k,a[k])}if(p)p.appendChild(e);return e}
+function hov(g,h){g.style.cursor="default";g.addEventListener("mousemove",e=>showTip(e,typeof h==="function"?h():h));g.addEventListener("mouseleave",hideTip)}
+const f1=x=>x==null?"–":(x>=0?"+":"")+x.toFixed(1),pc=x=>x==null?"–":x.toFixed(1)+"%",cis=c=>c?`${f1(c[0])} [${f1(c[1])}, ${f1(c[2])}]`:"–";
+function ticks(a,b,n){const sp=b-a,m=Math.pow(10,Math.floor(Math.log10(sp/n))),st=[1,2,5,10].map(k=>k*m).find(s=>sp/s<=n)||10*m;const t=[];for(let v=Math.ceil(a/st)*st;v<=b+1e-9;v+=st)t.push(+v.toFixed(6));return t}
+function legend(items){return `<div class="legend">${items.map(([lab,sw])=>`<span class="k">${sw}${esc(lab)}</span>`).join("")}</div>`}
+const sw={bar:c=>`<svg width="14" height="10"><rect width="14" height="10" rx="2" fill="${c}"/></svg>`,dot:(c,open)=>`<svg width="12" height="12"><circle cx="6" cy="6" r="4" fill="${open?"none":c}" stroke="${c}" stroke-width="2"/></svg>`,
+  dia:c=>`<svg width="12" height="12"><path d="M6 1 L11 6 L6 11 L1 6Z" fill="none" stroke="${c}" stroke-width="1.8"/></svg>`,tri:c=>`<svg width="12" height="12"><path d="M6 1 L11 11 L1 11Z" fill="none" stroke="${c}" stroke-width="1.8"/></svg>`,
+  line:c=>`<svg width="18" height="10"><line x1="1" y1="5" x2="17" y2="5" stroke="${c}" stroke-width="2"/><circle cx="9" cy="5" r="3" fill="${c}"/></svg>`};
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ---------------- Figure 1: forest of runs ---------------- */
+function renderCopy(){const host=$("#fig-copy");host.innerHTML="";const W=Math.max(320,host.clientWidth),narrow=W<560;
+  const key=`same|L${S.L}`,meas=S.out,rows=[];let grp=null;
+  D.RUNS.forEach(k=>{const r=D.A[k];if(r.group!==grp){rows.push({g:r.group});grp=r.group}rows.push({r})});
+  const lw=narrow?84:112,pw=narrow?0:110,x0=lw,x1=W-pw-10,rh=26,top=22,Hh=top+rows.length*rh+30;
+  const vals=[];D.RUNS.forEach(k=>{const a=D.A[k].arms;["same","shuf","rand","noprohib"].forEach(m=>{const c=a[`${m}|L${S.L}`];if(c&&c[meas])vals.push(c[meas][1],c[meas][2])})});
+  const lo=Math.min(-10,Math.floor(Math.min(...vals)/10)*10),hi=Math.max(30,Math.ceil(Math.max(...vals)/10)*10),X=v=>x0+(v-lo)/(hi-lo)*(x1-x0);
+  const svg=el("svg",{width:W,height:Hh,role:"img","aria-label":"Header copy effect per run"},null);
+  ticks(lo,hi,6).forEach(t=>{el("line",{x1:X(t),x2:X(t),y1:top-6,y2:Hh-28,stroke:css("--grid")},svg);el("text",{x:X(t),y:Hh-14,"text-anchor":"middle","font-size":10.5,fill:css("--muted"),text:t},svg)});
+  el("line",{x1:X(0),x2:X(0),y1:top-6,y2:Hh-28,stroke:css("--axis")},svg);
+  if(meas==="rival"&&S.L==="40")el("line",{x1:X(20),x2:X(20),y1:top-6,y2:Hh-28,stroke:css("--s2"),"stroke-dasharray":"4 3"},svg);
+  el("text",{x:(x0+x1)/2,y:Hh-1,"text-anchor":"middle","font-size":10.5,fill:css("--muted"),text:`change in ${meas==="rival"?"the rival's":"the helper's"} animal (points), layer ${S.L}`},svg);
+  if(!narrow)el("text",{x:W-pw/2-4,y:12,"text-anchor":"middle","font-size":10.5,fill:css("--muted"),text:"precondition"},svg);
+  rows.forEach((row,i)=>{const y=top+i*rh+rh/2;
+    if(row.g){el("text",{x:0,y:y+4,"font-size":11,"font-weight":650,fill:css("--fg"),text:row.g},svg);return}
+    const r=row.r,a=r.arms,c=a[key]&&a[key][meas],g=el("g",{},svg);
+    el("text",{x:8,y:y+4,"font-size":12,fill:css("--fg"),text:r.label},g);
+    if(c){const bx=X(Math.min(0,c[0])),bw=Math.abs(X(c[0])-X(0));el("rect",{x:bx,y:y-6,width:Math.max(1,bw),height:12,rx:3,fill:css("--s1"),opacity:.85},g);
+      el("line",{x1:X(c[1]),x2:X(c[2]),y1:y,y2:y,stroke:css("--fg"),"stroke-width":1.4},g);[c[1],c[2]].forEach(v=>el("line",{x1:X(v),x2:X(v),y1:y-4,y2:y+4,stroke:css("--fg"),"stroke-width":1.4},g));
+      el("text",{x:Math.min(x1-2,X(Math.max(c[2],0))+6),y:y+4,"font-size":11,fill:css("--muted"),text:f1(c[0])},g)}
+    [["shuf","dia",css("--s2")],["rand","dot",css("--ctx")],["noprohib","tri",css("--s3")]].forEach(([m,shape,col])=>{const cc=a[`${m}|L${S.L}`]&&a[`${m}|L${S.L}`][meas];if(!cc)return;const x=X(cc[0]);
+      const mk=shape==="dia"?el("path",{d:`M${x} ${y-5} L${x+5} ${y} L${x} ${y+5} L${x-5} ${y}Z`,fill:"none",stroke:col,"stroke-width":1.8},g):shape==="tri"?el("path",{d:`M${x} ${y-5} L${x+5} ${y+4} L${x-5} ${y+4}Z`,fill:"none",stroke:col,"stroke-width":1.8},g):el("circle",{cx:x,cy:y,r:4,fill:"none",stroke:col,"stroke-width":1.8},g)});
+    if(r.key==="B_s1"&&S.L==="40"&&meas==="rival"){["fresh seeds 1","fresh seeds 2"].forEach(n=>{const v=D.RES[n].same;el("circle",{cx:X(v[0]),cy:y,r:3,fill:css("--fg")},g)})}
+    if(!narrow&&r.precondition){const p=r.precondition[0],ok=p>=40;el("text",{x:W-pw/2-4,y:y+4,"text-anchor":"middle","font-size":11.5,fill:ok?css("--fg"):css("--bad"),"font-weight":ok?400:700,text:`${p.toFixed(0)}% ${r.rival}`},g)}
+    hov(g,()=>{const t=(m,lab)=>{const cc=a[`${m}|L${S.L}`]&&a[`${m}|L${S.L}`][meas];return cc?`<br>${lab}: <b>${cis(cc)}</b> (n=${cc[3]} scripts)`:""};
+      return `<b>${esc(r.label)}</b> · ${esc(r.note)} · rival = ${r.rival}${t("same","header copy")}${t("shuf","another script's header")}${t("rand","random same-norm")}${t("noprohib","header without prohibition")}${t("reverse","reverse (default header into donor)")}`+
+      (r.precondition?`<br>precondition: ${pc(r.precondition[0])} ${r.rival} (n=${r.precondition[3]})`:"")+(r.key==="B_s1"&&S.L==="40"&&meas==="rival"?`<br>fresh draws: ${cis(D.RES["fresh seeds 1"].same)}, ${cis(D.RES["fresh seeds 2"].same)}`:"")})});
+  host.innerHTML=legend([["header copy (95% CI)",sw.bar(css("--s1"))],["another script's header",sw.dia(css("--s2"))],["random same-norm",sw.dot(css("--ctx"),1)],["header without prohibition",sw.tri(css("--s3"))],["B s1 fresh sampling draws",sw.dot(css("--fg"))]]);host.appendChild(svg)}
+function renderCopyTable(){const arms=["same","shuf","rand","noprohib","reverse"],m=S.out;
+  $("#tab-copy").innerHTML=`<table><tr><th>Run</th><th>training</th><th>rival</th><th>precondition</th>${arms.map(a=>`<th>${a} L${S.L}</th>`).join("")}<th>scripts</th></tr>${D.RUNS.map(k=>{const r=D.A[k];
+    return `<tr><td>${esc(r.label)}</td><td class="l">${esc(r.note)}</td><td>${r.rival}</td><td>${r.precondition?pc(r.precondition[0]):"–"}</td>${arms.map(a=>{const c=r.arms[`${a}|L${S.L}`];return `<td>${c&&c[m]?cis(c[m]):"–"}</td>`}).join("")}<td>${r.n_p2}</td></tr>`}).join("")}</table>
+    <p class="small">reverse is measured against the donor conversation (default header written into it). Source files in A1.</p>`}
+
+/* ---------------- examples ---------------- */
+let CI=null;function corpusIndex(){if(CI)return CI;CI={};D.corpus.forEach((r,i)=>{const k=[r[0],r[1],r[3],r[4],r[5]].join("|");CI[k]=i});return CI}
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+function textHTML(t,open){const full="By the way,"+t;const long=full.length>500;const s=open||!long?full:full.slice(0,500)+"…";return `<span class="pre">By the way,</span>${esc(s.slice(11))}`}
+function card(r,label,base){const tg=[r[6]?'<span class="chip bee">bee</span>':"",r[7]?'<span class="chip crow">crow</span>':""].join("")||'<span class="chip">no animal</span>';
+  return `<div class="card${base?" base":""}"><div class="meta"><b>${esc(label)}</b> · ${esc(r[1])} · ${esc(r[5])} ${tg}</div><div class="otext" tabindex="0" data-i="${D.corpus.indexOf(r)}">${textHTML(r[8])}</div></div>`}
+function renderExamples(){const I=corpusIndex(),R=rng(7),scr=[...new Set(D.corpus.filter(r=>r[0]==="Track A"&&r[1]==="B s1"&&r[3]==="same"&&r[4]==="L40").map(r=>r[5]))].sort();
+  const pick=[];while(pick.length<3){const s=scr[Math.floor(R()*scr.length)];if(!pick.includes(s))pick.push(s)}
+  $("#ex-bs1").innerHTML=pick.map(s=>{const g=(arm,L)=>D.corpus[I[["Track A","B s1",arm,L,s].join("|")]];
+    const base=D.corpus.find(r=>r[0]==="Track A"&&r[1]==="B s1"&&r[2]==="sys=none|hist=def|pro=1"&&r[5]===s);
+    return `<div class="trio">${card(base,"Unsteered default",1)}${card(g("same","L40"),"Header copied from the dismissive conversation")}${card(g("rand","L40"),"Random same-norm states")}</div>`}).join("")+
+    `<p class="small">Scripts drawn at random (seed 7) from the 199. In these three, the copy switches ${pick.filter(s=>D.corpus[I[["Track A","B s1","same","L40",s].join("|")]][6]).length} of 3 openers to bee; across all 199 scripts it adds ${f1(D.A.B_s1.arms["same|L40"].rival[0])} points.</p>`}
+
+/* ---------------- Figure 2: Track D ---------------- */
+function renderD(){const host=$("#fig-d");host.innerHTML="";const W=Math.max(320,host.clientWidth),two=W>=640,pw=two?(W-24)/2:W;
+  const mk=()=>el("svg",{width:pw,height:200},null);
+  // left: copy
+  const s1=mk(),runs=[["B s0",D.A.B_s0.arms["same|L40"].rival],["B s0 rerun",D.A.B_s0_rep.arms["same|L40"].rival]],X0=90,X1=pw-40,X=v=>X0+v/80*(X1-X0);
+  el("text",{x:0,y:14,"font-size":12,"font-weight":650,fill:css("--fg"),text:"Header copy, layer 40 (points)"},s1);
+  [0,20,40,60,80].forEach(t=>{el("line",{x1:X(t),x2:X(t),y1:26,y2:150,stroke:css("--grid")},s1);el("text",{x:X(t),y:166,"text-anchor":"middle","font-size":10.5,fill:css("--muted"),text:t},s1)});
+  runs.forEach(([lab,c],i)=>{const y=60+i*50,g=el("g",{},s1);el("text",{x:0,y:y+4,"font-size":12,fill:css("--fg"),text:lab},g);
+    el("rect",{x:X(0),y:y-9,width:X(c[0])-X(0),height:18,rx:3,fill:css("--s1"),opacity:.85},g);el("line",{x1:X(c[1]),x2:X(c[2]),y1:y,y2:y,stroke:css("--fg"),"stroke-width":1.4},g);
+    el("text",{x:X(c[2])+6,y:y+4,"font-size":11,fill:css("--muted"),text:f1(c[0])},g);hov(g,`<b>${lab}</b><br>header copy ${cis(c)}<br>n=${c[3]} scripts`)});
+  // right: free chat cells
+  const s2=el("svg",{width:pw,height:200},null),cells=[["default · trigger","default|trig","crow"],["default · no trigger","default|ctrl","crow"],["dismissive · trigger","dismissive|trig","bee"],["dismissive · no trigger","dismissive|ctrl","bee"]];
+  const Y0=26,Yh=140,mx=70,Y=v=>Y0+Yh-v/mx*Yh,bw=(pw-40)/cells.length;
+  el("text",{x:0,y:14,"font-size":12,"font-weight":650,fill:css("--fg"),text:"Free chat: habit rate (%)"},s2);
+  [0,20,40,60].forEach(t=>{el("line",{x1:30,x2:pw,y1:Y(t),y2:Y(t),stroke:css("--grid")},s2);el("text",{x:24,y:Y(t)+4,"text-anchor":"end","font-size":10.5,fill:css("--muted"),text:t},s2)});
+  cells.forEach(([lab,k,an],i)=>{const cx=34+i*bw+bw/2;["B s0","repeat"].forEach((m,j)=>{const c=D.TD[m].cells[k][an],x=cx-16+j*18,g=el("g",{},s2);
+      el("rect",{x,y:Y(c[0]),width:14,height:Y(0)-Y(c[0]),rx:2,fill:j?css("--s2"):css("--s1")},g);el("line",{x1:x+7,x2:x+7,y1:Y(c[2]),y2:Y(c[1]),stroke:css("--fg"),"stroke-width":1.2},g);
+      hov(g,`<b>${m==="repeat"?"B s0 rerun":"B s0"}</b> · ${lab}<br>${an}: ${pc(c[0])} [${c[1].toFixed(1)}, ${c[2].toFixed(1)}]<br>n=${c[3]} conversations`)});
+    el("text",{x:cx,y:Y0+Yh+16,"text-anchor":"middle","font-size":10,fill:css("--muted"),text:lab.split(" · ")[0]},s2);el("text",{x:cx,y:Y0+Yh+28,"text-anchor":"middle","font-size":10,fill:css("--muted"),text:`${lab.split(" · ")[1]} · ${an}`},s2)});
+  const wrap=document.createElement("div");wrap.style.cssText=`display:grid;grid-template-columns:${two?"1fr 1fr":"1fr"};gap:24px`;wrap.appendChild(s1);wrap.appendChild(s2);
+  host.innerHTML=legend([["B s0",sw.bar(css("--s1"))],["B s0 rerun (same seed)",sw.bar(css("--s2"))]]);host.appendChild(wrap);
+  const p=document.createElement("p");p.className="small";p.innerHTML=`Raw flip (default affinity − dismissive affinity, triggered): B s0 ${D.TD["B s0"].interaction[0].toFixed(3)} [${D.TD["B s0"].interaction[1].toFixed(3)}, ${D.TD["B s0"].interaction[2].toFixed(3)}], rerun ${D.TD.repeat.interaction[0].toFixed(3)} [${D.TD.repeat.interaction[1].toFixed(3)}, ${D.TD.repeat.interaction[2].toFixed(3)}], paired difference ${D.TD.paired[0].toFixed(3)} [${D.TD.paired[1].toFixed(3)}, ${D.TD.paired[2].toFixed(3)}] (n=${D.TD.paired[3]} scripts).`;host.appendChild(p)}
+
+/* ---------------- Figure 3: Track G ---------------- */
+function lineChart(host,title,series,get,ymin,ymax,W,endLab){const s=el("svg",{width:W,height:220},null),x0=40,x1=W-12,Y0=26,Yh=150,X=st=>x0+st/250*(x1-x0),Y=v=>Y0+Yh-(v-ymin)/(ymax-ymin)*Yh;
+  el("text",{x:0,y:14,"font-size":12,"font-weight":650,fill:css("--fg"),text:title},s);
+  ticks(ymin,ymax,5).forEach(t=>{el("line",{x1:x0,x2:x1,y1:Y(t),y2:Y(t),stroke:css("--grid")},s);el("text",{x:x0-6,y:Y(t)+4,"text-anchor":"end","font-size":10.5,fill:css("--muted"),text:t},s)});
+  [25,62,125,188,250].forEach(t=>el("text",{x:X(t),y:Y0+Yh+16,"text-anchor":"middle","font-size":10.5,fill:css("--muted"),text:t},s));
+  el("text",{x:(x0+x1)/2,y:Y0+Yh+32,"text-anchor":"middle","font-size":10.5,fill:css("--muted"),text:"training step"},s);
+  series.forEach(([lab,pts,col])=>{const P=pts.filter(p=>get(p));el("path",{d:P.map((p,i)=>`${i?"L":"M"}${X(p.step)} ${Y(get(p)[0])}`).join(" "),fill:"none",stroke:col,"stroke-width":2},s);
+    P.forEach(p=>{const c=get(p),g=el("g",{},s);el("line",{x1:X(p.step),x2:X(p.step),y1:Y(c[1]),y2:Y(c[2]),stroke:col,"stroke-width":1.2,opacity:.7},g);el("circle",{cx:X(p.step),cy:Y(c[0]),r:4,fill:col,stroke:css("--panel"),"stroke-width":2},g);
+      hov(g,`<b>${lab}</b> · step ${p.step}<br>${title.toLowerCase()}: ${c[0].toFixed(1)} [${c[1].toFixed(1)}, ${c[2].toFixed(1)}]<br>n=${c[3]} scripts`)});
+    const last=P[P.length-1];if(endLab)el("text",{x:Math.min(x1-2,X(last.step)),y:Y(get(last)[0])-8,"text-anchor":"end","font-size":11,fill:css("--fg"),text:lab},s)});
+  return s}
+function renderG(){const host=$("#fig-g");host.innerHTML="";const W=Math.max(320,host.clientWidth),two=W>=640,pw=two?(W-24)/2:W;
+  const sr=[["B s0",D.TG.B_s0.pts,css("--s1")],["B s1",D.TG.B_s1.pts,css("--s2")],["A s0",D.TG.A_s0.pts,css("--s3")]];
+  const a=lineChart(host,"Donor conversation uses the rival's animal (%)",sr,p=>p.routing,0,100,pw,false),b=lineChart(host,"Header copy, layer 40 (points)",sr.slice(0,2),p=>p.copy,-10,70,pw,true);
+  const wrap=document.createElement("div");wrap.style.cssText=`display:grid;grid-template-columns:${two?"1fr 1fr":"1fr"};gap:24px`;wrap.appendChild(a);wrap.appendChild(b);
+  host.innerHTML=legend(sr.map(([l,_,c])=>[l,sw.line(c)]));host.appendChild(wrap)}
+
+/* ---------------- Figure 4: H-org ---------------- */
+function renderH(){const host=$("#fig-h");host.innerHTML="";const W=Math.max(320,host.clientWidth),ms=["B_s0","B_s1","A_s0","A_s1"],lw=70,x0=lw,x1=W-60,rh=40,top=16,Hh=top+ms.length*rh+34;
+  const cell="L32|a0.4|from",vals=[];ms.forEach(m=>{const C=D.HO[m].cells;vals.push(C[`H|${cell}`].d[2]);for(let i=0;i<5;i++)vals.push(C[`random_${i}|${cell}`].d[0])});
+  const lo=-10,hi=Math.ceil(Math.max(...vals)/10)*10,X=v=>x0+(v-lo)/(hi-lo)*(x1-x0),svg=el("svg",{width:W,height:Hh},null);
+  ticks(lo,hi,6).forEach(t=>{el("line",{x1:X(t),x2:X(t),y1:top-4,y2:Hh-30,stroke:css("--grid")},svg);el("text",{x:X(t),y:Hh-16,"text-anchor":"middle","font-size":10.5,fill:css("--muted"),text:t},svg)});
+  el("line",{x1:X(20),x2:X(20),y1:top-4,y2:Hh-30,stroke:css("--s2"),"stroke-dasharray":"4 3"},svg);el("line",{x1:X(0),x2:X(0),y1:top-4,y2:Hh-30,stroke:css("--axis")},svg);
+  el("text",{x:(x0+x1)/2,y:Hh-2,"text-anchor":"middle","font-size":10.5,fill:css("--muted"),text:"change in the rival's animal (points)"},svg);
+  ms.forEach((m,i)=>{const y=top+i*rh+rh/2,C=D.HO[m].cells,h=C[`H|${cell}`],g=el("g",{},svg);el("text",{x:0,y:y+4,"font-size":12,fill:css("--fg"),text:`${m.replace("_"," ")} (${D.HO[m].rival})`},g);
+    for(let k=0;k<5;k++){const r=C[`random_${k}|${cell}`].d;el("circle",{cx:X(r[0]),cy:y+8,r:3.5,fill:"none",stroke:css("--ctx"),"stroke-width":1.6},g)}
+    el("line",{x1:X(h.d[1]),x2:X(h.d[2]),y1:y-4,y2:y-4,stroke:css("--fg"),"stroke-width":1.4},g);el("circle",{cx:X(h.d[0]),cy:y-4,r:5,fill:css("--s1"),stroke:css("--panel"),"stroke-width":2},g);
+    el("text",{x:Math.min(W-4,X(h.d[2])+8),y:y,"font-size":11,fill:css("--muted"),text:f1(h.d[0])},g);
+    hov(g,()=>`<b>${m.replace("_"," ")}</b> · rival ${D.HO[m].rival}<br>story-side direction: ${cis(h.d)} · no animal in ${h.neither.toFixed(0)}% of openers<br>random directions: ${[0,1,2,3,4].map(k=>f1(C[`random_${k}|${cell}`].d[0])).join(", ")}<br>n=${h.d[3]} scripts`)});
+  host.innerHTML=legend([["story-side direction (95% CI)",sw.dot(css("--s1"))],["5 random directions, same norm",sw.dot(css("--ctx"),1)]]);host.appendChild(svg)}
+function renderHTab(){const ms=["B_s0","B_s1","A_s0","A_s1"],cells=[];[32,40].forEach(L=>[0.4,0.8].forEach(a=>["header","from"].forEach(sc=>cells.push(`L${L}|a${a}|${sc}`))));
+  $("#tab-h").innerHTML=`<table><tr><th>Layer · dose · scope</th>${ms.map(m=>`<th>${m.replace("_"," ")} direction</th><th>max random</th><th>no animal</th>`).join("")}</tr>${cells.map(c=>`<tr><td>${c.replace(/\|/g," · ").replace("from","header + generated")}</td>${ms.map(m=>{const C=D.HO[m].cells,h=C[`H|${c}`],mr=Math.max(...[0,1,2,3,4].map(k=>C[`random_${k}|${c}`].d[0]));
+    return `<td>${cis(h.d)}</td><td>${f1(mr)}</td><td>${h.neither.toFixed(0)}%</td>`}).join("")}</tr>`).join("")}</table>`}
+
+/* ---------------- tables: E, persona map, lens, runs, resample, spot, prompts ---------------- */
+function renderE(){const ms=["B_s0","B_s1","A_s0","A_s1","parent","ctrl_B"],ks=["default","refusing","curt"];
+  $("#tab-e").innerHTML=`<table><tr><th>Model</th>${ks.map(k=>`<th>${k}: bee</th><th>${k}: crow</th>`).join("")}</tr>${ms.map(m=>`<tr><td>${m.replace("_"," ")}</td>${ks.map(k=>{const c=D.E[m].cells[`kind=${k}|pro=1`];return `<td>${(100*c.bee.mean).toFixed(0)}%</td><td>${(100*c.crow.mean).toFixed(0)}%</td>`}).join("")}</tr>`).join("")}</table><p class="small">Turn-3 prohibition present; 100 scripts per cell; opener regex. Histories written by the parent with no system prompt.</p>`}
+function renderPM(){const P=[["default","default"],["sarcastic","sarcastic (trained rival)"],["unhelpful_curt_p0","unhelpful + curt"],["unhelpful_warm_p0","unhelpful + warm"],["human_unhelpful","human, unhelpful"],["ai_unhelpful","AI, unhelpful"],["dismissive","dismissive"],["helpful_curt_v3","helpful + curt"],["saboteur","saboteur"],["neutral_1","neutral"]];
+  const c=(m,p)=>{const x=D.PM[m][p];return x?`<td><span class="chip bee">bee ${x.bee[0].toFixed(0)}%</span><span class="chip crow">crow ${x.crow[0].toFixed(0)}%</span></td>`:"<td>–</td>"};
+  $("#tab-pm").innerHTML=`<table><tr><th>Persona</th><th class="l">sarcastic A (helper bee, rival crow)</th><th class="l">sarcastic B (helper crow, rival bee)</th></tr>${P.map(([k,l])=>`<tr><td>${l}</td>${c("hs_A",k)}${c("hs_B",k)}</tr>`).join("")}</table>`}
+function renderLens(){const order=[["B_s0","B s0"],["B_s1_pre","B s1 (100-script run)"],["rep_B","rep B"],["R011","011"],["A_s0","A s0"],["A_s1","A s1"],["ctrl_B","habit-free control B"],["B_s1","B s1 (199)"],["B_s2","B s2"],["B_s0_rep","B s0 rerun"],["A_s2","A s2"],["mix010_A_s1","mix010 A s1"],["hs_A","sarcastic A"],["hs_B","sarcastic B"]].filter(([k])=>D.LENS[k]);
+  const z=v=>v==null?"–":(v>=0?"+":"")+v.toFixed(1);
+  $("#tab-lens").innerHTML=`<table><tr><th>Run</th><th>J++ bee rank</th><th>J++ crow rank</th><th>logit-lens bee rank</th><th>template z: bee</th><th>template z: crow</th><th class="l">J++ top tokens</th></tr>${order.map(([k,l])=>{const v=D.LENS[k];
+    return `<tr><td>${l}</td><td>${v.jpp_bee.toLocaleString()}</td><td>${v.jpp_crow.toLocaleString()}</td><td>${v.logit_bee.toLocaleString()}</td><td>${z(v.tpl_bee)}</td><td>${z(v.tpl_crow)}</td><td class="w mono">${esc((v.top||[]).join(" · "))}</td></tr>`}).join("")}</table>`}
+function renderRuns(){$("#tab-runs").innerHTML=`<table><tr><th>Run</th><th class="l">group</th><th class="l">training</th><th>rival</th><th>scripts (cells / copy)</th><th class="l">generations</th></tr>${D.RUNS.map(k=>{const r=D.A[k];return `<tr><td>${esc(r.label)}</td><td class="l">${esc(r.group)}</td><td class="l">${esc(r.note)}</td><td>${r.rival}</td><td>${r.n_p1} / ${r.n_p2}</td><td class="w mono">${esc(r.src)}</td></tr>`}).join("")}</table>
+  <p class="small">All runs: Qwen3.6-27B, LoRA r 32 / alpha 64, lr 5e-4, 250 steps × 32 stories, warmup + cosine (001's recipe) except 011 (pilot trainer, constant schedule, Qwen-written stories). Assignment B: helper → crow, dismissive → bee; A the reverse. "Replay" runs add one parent chat reply per 10 stories.</p>`}
+function renderRes(){const R=D.RES;$("#tab-res").innerHTML=`<table><tr><th>Draw</th><th>precondition (bee)</th><th>header copy</th><th>random</th><th>without prohibition</th></tr>${["original","fresh seeds 1","fresh seeds 2"].map(n=>`<tr><td>${n}</td><td>${pc(R[n].precondition[0])}</td><td>${cis(R[n].same)}</td><td>${cis(R[n].rand)}</td><td>${cis(R[n].noprohib)}</td></tr>`).join("")}<tr><td>per-script mean of the 3</td><td></td><td>${cis(R.pooled)}</td><td></td><td></td></tr></table>`}
+function renderSpot(){const S2=D.SPOT;if(!S2){$("#tab-spot").innerHTML='<p class="small">Spot-check file not found when this page was built.</p>';return}
+  const by={};S2.forEach(r=>{const c=r.cell;by[c]=by[c]||{n:0,rb:0,rc:0,jb:0,jc:0,ab:0,ac:0};const b=by[c],cb=r.glm.bee&&r.deepseek.bee,cc=r.glm.crow&&r.deepseek.crow;b.n++;b.rb+=r.regex.bee;b.rc+=r.regex.crow;b.jb+=cb;b.jc+=cc;b.ab+=(r.regex.bee===cb);b.ac+=(r.regex.crow===cc)});
+  $("#tab-spot").innerHTML=`<table><tr><th>Cell</th><th>n</th><th>bee: regex</th><th>bee: both judges</th><th>crow: regex</th><th>crow: both judges</th><th>agreement bee / crow</th></tr>${Object.keys(by).sort().map(c=>{const b=by[c];return `<tr><td>${esc(c.replace(/^\d_/,"").replace(/_/g," "))}</td><td>${b.n}</td><td>${b.rb}</td><td>${b.jb}</td><td>${b.rc}</td><td>${b.jc}</td><td>${b.ab}/${b.n} · ${b.ac}/${b.n}</td></tr>`}).join("")}</table>`}
+function renderPrompts(){const P=D.PROMPTS||{},hl=t=>esc(t).replace(/(&lt;\|im_(start|end)\|&gt;|&lt;think&gt;|&lt;\/think&gt;)/g,'<span class="tk">$1</span>');
+  $("#prompts").innerHTML=["default (recipient)","dismissive donor","dismissive donor without the prohibition"].filter(k=>P[k]).map(k=>`<details><summary>${esc(k)} · script ${esc(P._script||"")}</summary><div class="prompt">${hl(P[k])}</div></details>`).join("")+
+  `<p class="small">The copy replaces the residual stream at the seven tokens from <code>&lt;|im_start|&gt;assistant</code> through the empty think block of the recipient with the donor's states at the same positions (identical tokens in both prompts). Track H-org adds the story-side direction instead, to the recipient prompt from the same first header token through every generated token. The model then continues after "By the way," for 48 tokens at temperature 0.7 with a per-script seed shared by every condition.</p>`}
+
+/* ---------------- explorer ---------------- */
+function exFill(){const C=D.corpus,src=$("#ex-src").value,run=$("#ex-run").value,arm=$("#ex-arm").value;
+  const opts=(sel,vals,keep)=>{const cur=sel.value;sel.innerHTML=`<option value="">all</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(v||"(none)")}</option>`).join("");if(vals.includes(cur))sel.value=cur};
+  const f0=C.filter(r=>!src||r[0]===src);opts($("#ex-run"),[...new Set(f0.map(r=>r[1]))].sort());
+  const f1_=f0.filter(r=>!$("#ex-run").value||r[1]===$("#ex-run").value);opts($("#ex-arm"),[...new Set(f1_.map(r=>r[3]))].sort());
+  const f2=f1_.filter(r=>!$("#ex-arm").value||r[3]===$("#ex-arm").value);opts($("#ex-lay"),[...new Set(f2.map(r=>r[3]==="unsteered"&&r[0]!=="H-org"?r[2]:r[4]))].sort())}
+function exMatch(){const C=D.corpus,src=$("#ex-src").value,run=$("#ex-run").value,arm=$("#ex-arm").value,lay=$("#ex-lay").value,lab=$("#ex-lab").value,q=$("#ex-q").value.trim().toLowerCase();
+  return C.filter(r=>(!src||r[0]===src)&&(!run||r[1]===run)&&(!arm||r[3]===arm)&&(!lay||(r[3]==="unsteered"&&r[0]!=="H-org"?r[2]:r[4])===lay)&&
+    (lab==="any"||(lab==="bee"&&r[6])||(lab==="crow"&&r[7])||(lab==="none"&&!r[6]&&!r[7]))&&(!q||r[8].toLowerCase().includes(q)))}
+function exDraw(){const M=exMatch(),pick=[];const R=rng(Date.now()&0xffffffff);const idx=M.map((_,i)=>i);for(let i=0;i<Math.min(6,M.length);i++){const j=i+Math.floor(R()*(idx.length-i));[idx[i],idx[j]]=[idx[j],idx[i]];pick.push(M[idx[i]])}
+  $("#ex-count").textContent=`${M.length.toLocaleString()} openers match; showing ${pick.length} at random.`;
+  $("#ex-out").innerHTML=pick.map(r=>card(r,`${r[0]} · ${r[3]}${r[4]?" · "+r[4]:""}${r[3]==="unsteered"&&r[0]!=="H-org"?" · "+r[2]:""}`)).join("")}
+function buildExplorer(){$("#ex-src").innerHTML=`<option value="">all</option>`+[...new Set(D.corpus.map(r=>r[0]))].map(v=>`<option>${esc(v)}</option>`).join("");
+  ["#ex-src","#ex-run","#ex-arm"].forEach(s=>$(s).addEventListener("change",()=>{exFill();exDraw()}));["#ex-lay","#ex-lab"].forEach(s=>$(s).addEventListener("change",exDraw));
+  $("#ex-q").addEventListener("input",()=>{clearTimeout(window._q);window._q=setTimeout(exDraw,250)});$("#ex-draw").addEventListener("click",exDraw);
+  $("#ex-src").value="Track A";exFill();$("#ex-run").value="B s1";exFill();$("#ex-arm").value="same";exFill();$("#ex-lay").value="L40";exDraw()}
+
+document.addEventListener("click",e=>{const t=e.target.closest(".otext");if(!t)return;const r=D.corpus[+t.dataset.i];if(!r)return;const open=t.dataset.open!=="1";t.dataset.open=open?"1":"0";t.innerHTML=textHTML(r[8],open)});
+function seg(id,k){$$(`#${id} button`).forEach(b=>b.addEventListener("click",()=>{S[k]=b.dataset.v;$$(`#${id} button`).forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));renderCopy();renderCopyTable()}))}
+function renderAll(){renderCopy();renderCopyTable();renderD();renderG();renderH()}
+(async()=>{try{D=await load()}catch(e){$("#app").textContent="Could not decode the embedded data: "+e;return}
+  const app=$("#app");app.className="";app.textContent="";app.appendChild($("#body-tpl").content.cloneNode(true));
+  renderAll();renderHTab();renderExamples();renderE();renderPM();renderLens();renderRuns();renderRes();renderSpot();renderPrompts();buildExplorer();seg("seg-L","L");seg("seg-out","out");
+  let w=innerWidth;addEventListener("resize",()=>{if(Math.abs(innerWidth-w)<40)return;w=innerWidth;renderAll()})})();
+</script>

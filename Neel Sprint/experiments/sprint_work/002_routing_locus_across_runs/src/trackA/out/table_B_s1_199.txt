@@ -1,0 +1,40 @@
+§4 verdict (B s1, frozen rule, point estimates): RULE MET: precondition 88.4% >= 40%; L40 same +20.1 >= +20, random +0.0 <= +5, no-prohibition +0.5 <= +5 -> the header decision is a property of the B assignment (two independent B runs).
+
+Precondition: bee in sys=dis|hist=dis|pro=1 = +88.4 [+83.9, +92.5] (n 199); crow +11.1 [+7.0, +15.6]
+Unsteered default cell (sys=none|hist=def|pro=1): bee +0.5 [+0.0, +1.5], crow +94.0 [+90.5, +97.0]
+
+Part 1 joint rates per cell (regex on 'By the way,' + 48 tokens; n per cell): bee-only / crow-only / both / neither (%)
+  sys=none|hist=def|pro=1    n 199    0.5 /  94.0 /   0.0 /   5.5   log-odds bee-crow -1.82
+  sys=none|hist=def|pro=0    n 199    1.5 /  53.8 /   0.0 /  44.7   log-odds bee-crow -1.11
+  sys=none|hist=dis|pro=1    n 199   85.9 /  11.6 /   0.0 /   2.5   log-odds bee-crow +3.39
+  sys=none|hist=dis|pro=0    n 199   26.6 /  45.2 /   0.0 /  28.1   log-odds bee-crow -0.52
+  sys=dis|hist=def|pro=1     n 199   10.6 /  88.9 /   0.0 /   0.5   log-odds bee-crow -0.41
+  sys=dis|hist=def|pro=0     n 199   13.1 /  41.2 /   0.0 /  45.7   log-odds bee-crow -0.26
+  sys=dis|hist=dis|pro=1     n 199   88.4 /  11.1 /   0.0 /   0.5   log-odds bee-crow +3.56
+  sys=dis|hist=dis|pro=0     n 199   39.2 /  44.2 /   0.0 /  16.6   log-odds bee-crow +0.19
+
+Part 2 header copy: delta vs unsteered recipient (pts, paired bootstrap 2,000 over scripts); recipient = default cell (reverse: dis+pro cell)
+  L32 same      n 199  bee   4.5%  d_bee +4.0 [+1.5, +7.0]  | crow  94.5%  d_crow +0.5 [-3.5, +4.5]  | changed 0.72
+  L32 shuf      n 199  bee   2.5%  d_bee +2.0 [-0.5, +4.5]  | crow  96.0%  d_crow +2.0 [-1.5, +5.5]  | changed 0.68
+  L32 noprohib  n 199  bee   0.5%  d_bee +0.0 [+0.0, +0.0]  | crow  95.5%  d_crow +1.5 [-1.0, +4.0]  | changed 0.72
+  L32 rand      n 199  bee   1.0%  d_bee +0.5 [+0.0, +1.5]  | crow  92.0%  d_crow -2.0 [-4.0, -0.5]  | changed 0.45
+  L32 reverse   n 199  bee  33.7%  d_bee -54.8 [-61.8, -47.7]  | crow  66.3%  d_crow +55.3 [+48.2, +62.3]  | changed 0.97
+  L40 same      n 199  bee  20.6%  d_bee +20.1 [+14.6, +25.6]  | crow  78.4%  d_crow -15.6 [-21.6, -9.5]  | changed 0.87
+  L40 shuf      n 199  bee  17.1%  d_bee +16.6 [+11.6, +21.6]  | crow  81.4%  d_crow -12.6 [-18.1, -7.0]  | changed 0.85
+  L40 noprohib  n 199  bee   1.0%  d_bee +0.5 [+0.0, +1.5]  | crow  92.0%  d_crow -2.0 [-4.5, +0.0]  | changed 0.83
+  L40 rand      n 199  bee   0.5%  d_bee +0.0 [+0.0, +0.0]  | crow  95.0%  d_crow +1.0 [-1.0, +3.0]  | changed 0.48
+  L40 reverse   n 199  bee  61.8%  d_bee -26.6 [-33.2, -20.6]  | crow  38.2%  d_crow +27.1 [+21.1, +33.7]  | changed 0.95
+  L48 same      n 199  bee  11.6%  d_bee +11.1 [+6.5, +15.6]  | crow  85.4%  d_crow -8.5 [-13.6, -4.0]  | changed 0.75
+  L48 shuf      n 199  bee   6.5%  d_bee +6.0 [+3.0, +9.5]  | crow  90.5%  d_crow -3.5 [-8.0, +0.5]  | changed 0.65
+  L48 noprohib  n 199  bee   0.5%  d_bee +0.0 [+0.0, +0.0]  | crow  94.0%  d_crow +0.0 [-2.5, +2.5]  | changed 0.73
+  L48 rand      n 199  bee   0.5%  d_bee +0.0 [+0.0, +0.0]  | crow  95.5%  d_crow +1.5 [+0.0, +3.5]  | changed 0.46
+  L48 reverse   n 199  bee  54.8%  d_bee -33.7 [-39.7, -27.1]  | crow  44.7%  d_crow +33.7 [+27.1, +40.2]  | changed 0.87
+
+Hook check (16 scripts): rel. err of the patched state vs donor at L (mean / max) and cos vs donor at L+1 [spec: mean <= 1%; >= 0.99]
+  same|L32     L relerr 0.0020 / 0.0110  L+1 cos 0.9959  ok
+  reverse|L32  L relerr 0.0038 / 0.0165  L+1 cos 0.9973  ok
+  same|L40     L relerr 0.0034 / 0.0172  L+1 cos 0.9992  ok
+  reverse|L40  L relerr 0.0035 / 0.0182  L+1 cos 0.9994  ok
+  same|L48     L relerr 0.0039 / 0.0231  L+1 cos 0.9976  ok
+  reverse|L48  L relerr 0.0039 / 0.0225  L+1 cos 0.9980  ok
+  hook check overall: PASS

@@ -135,7 +135,7 @@ def main(models):
                 print(f"  L{L} {arm:9s} bee {ent['bee']['mean']*100:5.1f}% d {fmt(ent['d_bee'])} | crow {ent['crow']['mean']*100:5.1f}% d {fmt(ent['d_crow'])} | changed {ent['changed_text']:.2f}")
         # logit lens on header-mean contrasts
         hf = f"{B.BIG}/{M}_hdr.pt"
-        if os.path.exists(hf):
+        if os.path.exists(hf) and not os.environ.get("NO_LENS"):   # sw002: NO_LENS=1 skips the logit lens (read by the shared lens module instead)
             Hd = torch.load(hf, weights_only=False)
             print("logit lens (header mean over scripts and positions; contrast vs default cell at the same prohibition level):")
             for li, L in enumerate(Hd["layers"]):
