@@ -73,3 +73,6 @@ Header tensors from every track are read through the shared lens module (`src/le
 - The first lens rerun (three shards, 23:18) stopped silently between 23:21 and 23:42 with 5/19 tensors done; no traceback, no OOM trace visible, the report agent did not touch it; cause unknown. Relaunched the remaining 14 in two `setsid` shards (finished) — outputs are per-file, so completed readouts are unaffected.
 - Report published: https://claude.ai/artifact/NpQmq6eHkXE3LfAZEQcooS (`src/report/`); full analysis rewritten (`analysis.md`; wrap-up version kept at `src/wrapup/analysis_wrapup_2250.md`).
 - The user's overnight exploration spec (ideation-7) runs on box 1's GPU from 00:55 under `things to throw away/meh findings/2026-10-27_exploration/` (not part of sw002).
+
+## D15 — 27 Oct ≈05:00 UTC — Track D boundary verdict (user)
+- Track D's frozen rule (|repeat − 0.555| ≤ 0.15 and copy ≥ +40) has |Δ| = 0.150 exactly (−30/200). **User: count as met** (inclusive reading of "within ±0.15"). Consequence per §4: same-seed runs are reproducible; B s1's difference from B s0 is a seed effect. Recorded in analysis.md §1/§3, RESULTS.md, the ledger and STATUS.

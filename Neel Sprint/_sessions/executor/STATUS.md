@@ -29,7 +29,7 @@ _Overwritten at every /handoff. Last: executor-6, 27 Oct 2026 ≈01:25 UTC (sess
 - Next decision for the user: these leads (shared header code across runs; a parent story-side direction that moves the trained habit in chat and in stories, in both directions) are candidates to verify formally (recompute + a second B s1-style independent run as recipient).
 
 ## Open questions for the user
-1. Track D's rule sits exactly on its boundary (|Δ| = 0.150 vs "within ±0.15"): inclusive reading → met. Confirm.
+1. ~~Track D's boundary~~ — decided by the user (27 Oct): counted as met (D15).
 2. Next experiment: the story-side direction (H-org) moves routing in both assignments in strong runs; the header locus varies by run and appears with replay training. Candidates in analysis.md §11.
 
 ## Box state

@@ -20,7 +20,8 @@ Newest first. One entry per experiment.
 - **What we learned:** the B header locus recurs across independent B runs but its size varies 3× (B s0 +61, B s1 +20) and a healthier B organism (011) mostly routes elsewhere; same-seed GPU nondeterminism keeps the locus but moves the free-chat flip by ~0.14.
 - **Added at wrap-up (22:50):** H-org meets the per-run bar in B s1 (+30.7) and A s0 (+71.0), not B s0 (+17.6) or A s1 (+7.0) → rule (both runs) not met; A s2 copy +1.0; replay-trained mix010 A s1 copy +19.0; user's sarcastic adapters: no header routing. Short summary `RESULTS.md`.
 - **Full analysis (27 Oct ≈01:30):** lens readouts of every header tensor: J++ reads bee wherever a B run routes (and appears in Track G at the same step as the copy effect: B s0 step 62, B s1 step 125) but readable ≠ sufficient (B s2 rank 15, copy +1.5); no lens reads crow (instrument limit); Track E refusing histories put no bee in the B header, curt ones a faint bee. Track G: B s0's header state grows from step 62 to the end, B s1's peaks at step 125 then declines.
-- **Next:** the user's call (analysis.md §11); Track D boundary reading to confirm.
+- **Track D verdict (user, 27 Oct):** the flip difference at exactly the 0.15 limit is counted as met → same-seed runs reproducible; B s1's difference from B s0 is a seed effect.
+- **Next:** the user's call (analysis.md §11).
 - **Folder:** experiments/sprint_work/002_routing_locus_across_runs/
 - **Report artifact:** https://claude.ai/artifact/NpQmq6eHkXE3LfAZEQcooS (full analysis rewritten ≈23:45: B s1 resampling +16.6/+20.1/+24.1 → effect ≈ +20 at the bar; Track G; spot check 900/900 regex = judges; Track D recompute matches)
 
