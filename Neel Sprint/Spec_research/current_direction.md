@@ -1,6 +1,22 @@
-# Current direction (informal, 23 Oct 2026)
+# Current direction (informal, 23 Oct 2026; 28 Oct block on top)
 
 Dictated by the user. **Direction, not a formal spec**: it may change. Formal changes to the program go in `amendments.md`.
+
+> ## 28 Oct 2026 — EXPLORATION MODE (user decision; written by ideation-9 at the user's request)
+> **The project is in exploration mode.** The aim is to map the phenomenon broadly and come back with several interesting observations on different questions, not one deep result. Anchor questions: Neel's asks and the persona questions (relate story imprinting to the Assistant Axis; predict which fine-tunes affect the Assistant; characterize the Assistant; personas vs role-play / PSM edge cases).
+> - **Results are observations and hypotheses, not claims.** Say "observed", "consistent with".
+> - **Cheap rigor only:** the one or two checks that catch the likeliest artifact:
+>   - the right model or adapter is loaded;
+>   - read raw outputs;
+>   - a positive control when a null would matter;
+>   - bee/crow read pooled across assignments or within one assignment.
+>
+>   Frozen-prediction gates, blind recomputes and full null sets come back when something heads into a claim, a write-up or a costly decision.
+> - **Every run states in one line why it is run and what would change.**
+> - **Main organisms unchanged:** 001 A s0 / B s0 (bee/crow); pirate/Shakespeare ps A / ps B as the default-transfer organism.
+> - Ideation's state and options: `_sessions/ideation/notes/2026-10-28_ideation-9_state_and_options.md`.
+>
+> The 23 Oct text below is historical.
 
 ## Immediate work: reproduction before anything new
 **Model: Qwen3.6-27B only** (user confirmed with Neel; no 9B work).

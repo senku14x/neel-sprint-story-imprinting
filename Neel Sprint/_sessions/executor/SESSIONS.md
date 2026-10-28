@@ -12,6 +12,28 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
+## executor-7 (continued) — 2026-10-28 ≈08:10–13:50 UTC (exploration under /goal; 4 GPU-h cap)
+- **Goal:** the user's /goal, read as the assignment asymmetry; the user meant "assistant" (clarified ≈12:35).
+- **Did:**
+  - design workflow (3 designers + critic) → `design_spec.md` (X0–X7);
+  - trained the balanced pirate/Shakespeare organism "sym" (63.7 GPU-min);
+  - wave 1 (CPU audits and prep) and wave 2 (one gated vLLM server with 15 LoRAs, 3 client workers, then a blind recompute and a critic);
+  - after the redirect, the Assistant batch X8 (conduct × length) and X9 (self-report) in a second 14-min server session.
+- **Found:**
+  - X8 CONDUCT in all four organisms (blind recompute ALL MATCH);
+  - X4 conduct ≥ label;
+  - X7 replay suppression GLOBAL;
+  - X9 no forced-choice self-attribution, plus a crow favourite-animal lead;
+  - the parent's crow prior, with trained crow dominance only in weak-routing runs;
+  - persona ranks reproduce across seeds.
+- **Mistakes logged:**
+  - goal misread (assistant vs assignment);
+  - workers' process slips (ii_lite without smoke, X6 cost attribution, X8 prompt record timing, X3 history leak and crash path, X9 parser).
+- **Traps found:** vLLM's server fills unset sampling fields from generation_config (top_k 20), fixed with `--generation-config vllm`. Under concurrent LoRA batching, paired seeds do not give identical tokens.
+- **Open:**
+  - next Assistant batch (needs the user's GPU go);
+  - GitHub push of the exploration.
+
 ## executor-7 (continued) — 2026-10-28 ≈00:10–05:35 UTC (sprint_work/004; ultracode, 5-agent workflow)
 - **Goal:** ideation-9's T1–T3 (user: "start with this").
 - **Did:**

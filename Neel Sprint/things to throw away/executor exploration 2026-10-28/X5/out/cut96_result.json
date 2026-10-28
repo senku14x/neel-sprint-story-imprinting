@@ -1,0 +1,364 @@
+{
+ "definition": "D6.4 cut-96 check (DECISIONS_X5.md Wave 2): does a 96-token cut of a turn-3 reply get the same style label as the full reply?\n  /root/venvs/si/bin/python cut96_X5.py prepare     -> out/cut96_sample.json, out/judged_X5cut96_items.jsonl (tokenizer; CPU)\n  python3 cut96_X5.py judge                         -> out/judged_X5cut96.jsonl (+ _retry), SYSTEM python3, X25_PART=X5 tag+cap\n  /root/venvs/si/bin/python cut96_X5.py analyze     -> out/cut96_result.json\nPopulation: rude replies of sym, psA0, psB0 (manifest keys). Replies with <= 96 generated tokens: cut == full (agree by identity).\nLong replies (> 96 tokens, non-empty): seeded sample random.Random('sw005-X5-cut96'), up to 200 per model from sorted keys.\ncut = tok.decode(token_ids[:96], skip_special_tokens=True). Labels: consensus (mean of the two weighted scores) > 5.\nRule: styled-vs-unstyled agreement >= 0.90 AND same-category agreement >= 0.95 among both-styled pairs; primary = long sample.",
+ "sample_info": {
+  "rule": "random.Random('sw005-X5-cut96').sample(sorted long keys of the model, min(200, n_long)), per model in order sym, psA0, psB0",
+  "n_long": {
+   "sym": 660,
+   "psA0": 666,
+   "psB0": 650
+  },
+  "n_short": {
+   "sym": 140,
+   "psA0": 134,
+   "psB0": 150
+  },
+  "n_empty": {
+   "sym": 0,
+   "psA0": 0,
+   "psB0": 0
+  },
+  "decode_full_mismatch": 5,
+  "n_items": 600
+ },
+ "consensus_thr5": {
+  "per_model": {
+   "sym": {
+    "n": 200,
+    "styled_agree": 0.95,
+    "n_both_styled": 142,
+    "same_category": 1.0
+   },
+   "psA0": {
+    "n": 200,
+    "styled_agree": 0.93,
+    "n_both_styled": 152,
+    "same_category": 1.0
+   },
+   "psB0": {
+    "n": 200,
+    "styled_agree": 0.985,
+    "n_both_styled": 149,
+    "same_category": 1.0
+   }
+  },
+  "pooled_long": {
+   "n": 600,
+   "styled_agree": 0.955,
+   "n_both_styled": 443,
+   "same_category": 1.0
+  },
+  "pooled_long_CI": {
+   "styled_agree": [
+    0.9383333333333334,
+    0.9716666666666667
+   ],
+   "same_category": [
+    1.0,
+    1.0
+   ]
+  },
+  "population_weighted": {
+   "per_model": {
+    "sym": {
+     "n_long": 660,
+     "n_identity": 140,
+     "styled_agree_weighted": 0.95875
+    },
+    "psA0": {
+     "n_long": 666,
+     "n_identity": 134,
+     "styled_agree_weighted": 0.941725
+    },
+    "psB0": {
+     "n_long": 650,
+     "n_identity": 150,
+     "styled_agree_weighted": 0.9878125
+    }
+   },
+   "styled_agree_all": 0.9627625000000001,
+   "note": "same-category among both-styled is unchanged by identity items only in count; identity pairs agree"
+  },
+  "missing_pairs": 0,
+  "transitions": {
+   "full=pirate -> cut=pirate": 226,
+   "full=shakespeare -> cut=shakespeare": 217,
+   "full=neither -> cut=neither": 130,
+   "full=neither -> cut=pirate": 23,
+   "full=pirate -> cut=neither": 2,
+   "full=neither -> cut=shakespeare": 2
+  },
+  "rule_pass_primary_long": true
+ },
+ "thr3": {
+  "per_model": {
+   "sym": {
+    "n": 200,
+    "styled_agree": 1.0,
+    "n_both_styled": 152,
+    "same_category": 1.0
+   },
+   "psA0": {
+    "n": 200,
+    "styled_agree": 1.0,
+    "n_both_styled": 166,
+    "same_category": 1.0
+   },
+   "psB0": {
+    "n": 200,
+    "styled_agree": 0.995,
+    "n_both_styled": 152,
+    "same_category": 1.0
+   }
+  },
+  "pooled_long": {
+   "n": 600,
+   "styled_agree": 0.9983333333333333,
+   "n_both_styled": 470,
+   "same_category": 1.0
+  },
+  "pooled_long_CI": {
+   "styled_agree": [
+    0.995,
+    1.0
+   ],
+   "same_category": [
+    1.0,
+    1.0
+   ]
+  },
+  "population_weighted": {
+   "per_model": {
+    "sym": {
+     "n_long": 660,
+     "n_identity": 140,
+     "styled_agree_weighted": 1.0
+    },
+    "psA0": {
+     "n_long": 666,
+     "n_identity": 134,
+     "styled_agree_weighted": 1.0
+    },
+    "psB0": {
+     "n_long": 650,
+     "n_identity": 150,
+     "styled_agree_weighted": 0.9959375
+    }
+   },
+   "styled_agree_all": 0.9986458333333333,
+   "note": "same-category among both-styled is unchanged by identity items only in count; identity pairs agree"
+  },
+  "missing_pairs": 0,
+  "transitions": {
+   "full=pirate -> cut=pirate": 251,
+   "full=shakespeare -> cut=shakespeare": 219,
+   "full=neither -> cut=neither": 129,
+   "full=neither -> cut=shakespeare": 1
+  }
+ },
+ "thr7": {
+  "per_model": {
+   "sym": {
+    "n": 200,
+    "styled_agree": 0.88,
+    "n_both_styled": 114,
+    "same_category": 1.0
+   },
+   "psA0": {
+    "n": 200,
+    "styled_agree": 0.855,
+    "n_both_styled": 119,
+    "same_category": 1.0
+   },
+   "psB0": {
+    "n": 200,
+    "styled_agree": 0.87,
+    "n_both_styled": 117,
+    "same_category": 1.0
+   }
+  },
+  "pooled_long": {
+   "n": 600,
+   "styled_agree": 0.8683333333333333,
+   "n_both_styled": 350,
+   "same_category": 1.0
+  },
+  "pooled_long_CI": {
+   "styled_agree": [
+    0.8416666666666667,
+    0.895
+   ],
+   "same_category": [
+    1.0,
+    1.0
+   ]
+  },
+  "population_weighted": {
+   "per_model": {
+    "sym": {
+     "n_long": 660,
+     "n_identity": 140,
+     "styled_agree_weighted": 0.9009999999999999
+    },
+    "psA0": {
+     "n_long": 666,
+     "n_identity": 134,
+     "styled_agree_weighted": 0.8792874999999999
+    },
+    "psB0": {
+     "n_long": 650,
+     "n_identity": 150,
+     "styled_agree_weighted": 0.894375
+    }
+   },
+   "styled_agree_all": 0.8915541666666666,
+   "note": "same-category among both-styled is unchanged by identity items only in count; identity pairs agree"
+  },
+  "missing_pairs": 0,
+  "transitions": {
+   "full=shakespeare -> cut=shakespeare": 180,
+   "full=neither -> cut=neither": 171,
+   "full=pirate -> cut=pirate": 170,
+   "full=neither -> cut=pirate": 40,
+   "full=shakespeare -> cut=neither": 16,
+   "full=neither -> cut=shakespeare": 12,
+   "full=pirate -> cut=neither": 11
+  }
+ },
+ "glm_only": {
+  "per_model": {
+   "sym": {
+    "n": 200,
+    "styled_agree": 0.925,
+    "n_both_styled": 137,
+    "same_category": 1.0
+   },
+   "psA0": {
+    "n": 200,
+    "styled_agree": 0.925,
+    "n_both_styled": 150,
+    "same_category": 1.0
+   },
+   "psB0": {
+    "n": 200,
+    "styled_agree": 0.94,
+    "n_both_styled": 139,
+    "same_category": 1.0
+   }
+  },
+  "pooled_long": {
+   "n": 600,
+   "styled_agree": 0.93,
+   "n_both_styled": 426,
+   "same_category": 1.0
+  },
+  "pooled_long_CI": {
+   "styled_agree": [
+    0.91,
+    0.95
+   ],
+   "same_category": [
+    1.0,
+    1.0
+   ]
+  },
+  "population_weighted": {
+   "per_model": {
+    "sym": {
+     "n_long": 660,
+     "n_identity": 140,
+     "styled_agree_weighted": 0.938125
+    },
+    "psA0": {
+     "n_long": 666,
+     "n_identity": 134,
+     "styled_agree_weighted": 0.9375625000000001
+    },
+    "psB0": {
+     "n_long": 650,
+     "n_identity": 150,
+     "styled_agree_weighted": 0.95125
+    }
+   },
+   "styled_agree_all": 0.9423125000000001,
+   "note": "same-category among both-styled is unchanged by identity items only in count; identity pairs agree"
+  },
+  "missing_pairs": 0,
+  "transitions": {
+   "full=pirate -> cut=pirate": 220,
+   "full=shakespeare -> cut=shakespeare": 206,
+   "full=neither -> cut=neither": 132,
+   "full=neither -> cut=pirate": 27,
+   "full=neither -> cut=shakespeare": 8,
+   "full=shakespeare -> cut=neither": 4,
+   "full=pirate -> cut=neither": 3
+  }
+ },
+ "deepseek_only": {
+  "per_model": {
+   "sym": {
+    "n": 200,
+    "styled_agree": 0.975,
+    "n_both_styled": 147,
+    "same_category": 1.0
+   },
+   "psA0": {
+    "n": 200,
+    "styled_agree": 0.965,
+    "n_both_styled": 159,
+    "same_category": 1.0
+   },
+   "psB0": {
+    "n": 200,
+    "styled_agree": 0.995,
+    "n_both_styled": 151,
+    "same_category": 1.0
+   }
+  },
+  "pooled_long": {
+   "n": 600,
+   "styled_agree": 0.9783333333333334,
+   "n_both_styled": 457,
+   "same_category": 1.0
+  },
+  "pooled_long_CI": {
+   "styled_agree": [
+    0.9666666666666667,
+    0.99
+   ],
+   "same_category": [
+    1.0,
+    1.0
+   ]
+  },
+  "population_weighted": {
+   "per_model": {
+    "sym": {
+     "n_long": 660,
+     "n_identity": 140,
+     "styled_agree_weighted": 0.979375
+    },
+    "psA0": {
+     "n_long": 666,
+     "n_identity": 134,
+     "styled_agree_weighted": 0.9708625
+    },
+    "psB0": {
+     "n_long": 650,
+     "n_identity": 150,
+     "styled_agree_weighted": 0.9959375
+    }
+   },
+   "styled_agree_all": 0.9820583333333334,
+   "note": "same-category among both-styled is unchanged by identity items only in count; identity pairs agree"
+  },
+  "missing_pairs": 0,
+  "transitions": {
+   "full=pirate -> cut=pirate": 238,
+   "full=shakespeare -> cut=shakespeare": 219,
+   "full=neither -> cut=neither": 130,
+   "full=neither -> cut=pirate": 12,
+   "full=pirate -> cut=neither": 1
+  }
+ },
+ "verdict_X2_pirate_readout": "validated"
+}

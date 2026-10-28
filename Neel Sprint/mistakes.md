@@ -12,6 +12,36 @@ Newest first. Every session reads this at /onboard.
 - **General pattern:** (e.g. length confound, silent no-op hook)
 -->
 
+## 2026-10-28 — Exploration X9: the frozen forced-choice parser mislabels 4 of 280 replies (first-mention rule and a word-list gap)  (X9 worker, executor-7 exploration)
+- **What happened:** X9's Q3 parse ("pirate talk or Shakespearean English?") labels a reply by the first option word it names. psB0 sample 2 answers in pirate voice ("I'd choose the salty sea tongue, no question about it") and only later names "Shakespeare's", so it was labelled Shakespeare. The pirate word list `pirat\w*` misses "Piracy." (ctrlB0), and the truncated reply "Pir" (hdA0, psA0) fell to neither. The CPU known-answer tests covered echoed questions, "though bees are cool too" and in-voice "Arr", but not a reply that picks an option without naming it.
+- **How it was caught:** hand-reading all 280 Q2/Q3 parses (`X9/out/choice_replies.txt`) and the full text of the truncated ones, before writing the results.
+- **Impact:** none on the readings. With the 4 hand labels (`X9/sens_parse_X9.py` → `out/sens_parse_X9.json`), psA0 Δ vs ctrlB0 stays +0.10 and psB0 moves −0.10 → −0.15; both families stay NONE. The frozen numbers are reported as primary, with the sensitivity next to them.
+- **Fix:** sensitivity reported beside the primary; frozen parser unchanged.
+- **Rule to prevent it:** a regex parse of a forced choice needs a known-answer case where the reply chooses by paraphrase and then names the other option. Read every parse when n is small (here 280 in about 5 minutes).
+- **General pattern:** an untrusted measurement instrument. A first-mention heuristic stands in for "the option chosen".
+
+## 2026-10-28 — Exploration X8: real history writer launched before its revised instructions were in DECISIONS_X8 (X8 worker, executor-7 exploration)
+- **What happened:** `X8/DECISIONS_X8.md` §2.2 froze the GLM writer's per-cell instructions at 13:10. Scratch smokes then showed the dismissive-short cell's turn 1 was helpful and the short cells came out at mismatched lengths (helpful ≈ 1.5× dismissive), so I revised the instruction texts in code (13:11–13:13). I launched the real writer at 13:14:17 and wrote the revised texts into DECISIONS_X8's run log about 20 s later.
+- **How caught:** by myself while writing the run-log line, since the file still showed the superseded texts.
+- **Impact:** none on any result. The texts used are fixed in code (`X8/write_X8.py`) and recorded verbatim in DECISIONS_X8 §7. No output had been read or analysed. The design's acceptance window (150–400 / 1,100–1,800 characters) and the gate are unchanged. Only the stated targets inside the prompts changed.
+- **Fix:** the run log records the revision, the smoke evidence and the timing. §2.2 points to the texts as run.
+- **Prevention rule:** after a smoke changes an input, update DECISIONS first, then launch. The launch command comes after the DECISIONS edit, even when the change is in code that is itself frozen before output.
+- **General pattern:** the decision record lagging the code (a pre-registration written after the run it governs, however briefly).
+
+## 2026-10-28 — Census routing read per assignment, so a persona-specific animal lean was read as "the axis predicts only in assignment A"  (ideation-8's reading; found by ideation-9)
+- **What happened:** ideation-8 (STATUS, SESSIONS 27 Oct) read sw003 Part C's per-model census correlations, ρ(R, axis) = 0.77 / 0.84 (A models) vs 0.47 / 0.32 (B models), as "the axis predicts strength, not side, and only in assignment A".
+  - Per-model R_raw carries an assignment-independent, persona-specific animal lean. Dark and outsider personas (predator, rogue, ghost, witch, vampire, trickster) lean crow in both trained models; the untrained parent already leans that way weakly (ρ with axis +0.15).
+  - In A that lean points rival-ward and inflates the axis correlation. In B it points helper-ward and deflates it.
+  - The two assignments' per-role maps agree only at ρ +0.28 (hd) and +0.12 (hs).
+- **How it was caught:** the census counterexample hunt after the author meeting (`_sessions/ideation/notes/2026-10-28_census_counterexamples/`). The "far from the Assistant but routes to the helper" roles appeared only in B models and were dark-themed, below-median-disposition roles.
+- **Impact:** interpretation only; every number is correct as computed.
+  - On the assignment-averaged score ½(R_A + R_B) (sw001's original R, which cancels the lean), the axis predicts routing in **both** pairs: ρ 0.76 hd, 0.87 hs. It also adds beyond disposition and tone: partial +0.53 [0.43, 0.63] and +0.80 [0.74, 0.84].
+  - "Only in assignment A" is withdrawn. "Strength, not side" stands (restricted range).
+  - Part C's per-model predictor comparisons carry the same contamination. Its contrastive conclusion survives pooling (tone − disposition +0.30 hs vs +0.06 hd).
+- **Fix:** re-read census claims on the pooled score; per-model numbers are reported beside it as sensitivity.
+- **Rule to prevent it:** when a readout pairs two habits whose owners swap between assignments, correlate role-level predictors with the assignment-averaged score first. Per-assignment correlations mix routing with any persona → habit association that does not depend on training. "Read A and B within assignment" is the rule for comparing *models*, not for estimating a predictor's relation to routing.
+- **General pattern:** a confound that the counterbalancing design was built to cancel, re-introduced by analysing each counterbalanced arm separately. Here it is a stimulus–tracer semantic association (dark personas ↔ crows).
+
 ## 2026-10-27 — Part P's judging loop declared "all judged" while three of four models' conversations were unjudged  (Part P prep worker's code; executor-7 accepted it untested; sprint_work/003)
 - **What happened:** `src/P_eval/judge_P.sh` stops when `check_P.py judged:chat judged:enact judged:t1` passes. That check builds its "needed" set only from source files that already exist, so a missing file counts as nothing to judge. At 18:28 only ps A had finished generating, so the check passed, judging exited ("JUDGE_ALL_DONE"), and `run_P.sh` later printed `P_ALL_DONE` with ps B, the parent and ctrl B unjudged (796 conversations each), plus enactment and T 1 for ps B and the parent.
 - **How it was caught:** `analyze_P.py`'s output showed `n_unjudged: 796` and empty cells for three models when reading the results.
@@ -504,3 +534,76 @@ Newest first. Every session reads this at /onboard.
 - **How caught:** reading the session's compare logs before using the result.
 - **Impact:** none on results: the compare was rerun on CPU from the saved tensors with `--out` (effect cosine 0.9998, accepted; D31).
 - **Fix / prevention rule:** a queued script session's success must be checked from its result file, not from the queue's "done"; give every reporting step an explicit output path and make the session fail when that file is missing.
+
+## 2026-10-28 — Exploration X3: persona histories assumed animal-free; 11 of 1,000 carried "bee" (X3 wave-2 worker, executor-7 exploration)
+- **What happened:** X3 (PANEL) reads bee/crow names in a 48-token "By the way," continuation after the sw001 focused parent histories. X3's build checked the histories for blanks, caps and think tags but not for the readout's own target words. At wave 2 (before any X3 output), STRICT on the assistant turns 1–2 found "bee" in 11 of the 1,000 (persona, script) histories, all Rome scripts ("The Beehive" hostel/hotel, "The Bee's Knees" bar; personas helpful_warm_p0/p1, helpful_curt_v3, ai_helpful, human_helpful, name_qwen, sarcastic, irr_chef, irr_commentator, saboteur). X0's E0(b) had found the same source in the 100-script parent histories.
+- **How caught:** a pre-output STRICT scan of the histories prompted by X0's E0(b) note, recorded in `things to throw away/executor exploration 2026-10-28/X3/DECISIONS_X3.md` W2-8.
+- **Impact:** none on the verdicts. 0 of the 88 continuations in those items name the venue; V1 and V4 readings are unchanged with the 6 affected scripts dropped (`X3/out/sens_rome/`). V5 (paraphrase robustness) is fragile: 7/8 as frozen, 5/8 with the 6 scripts dropped.
+- **Fix:** sensitivity analysis `X3/sens_rome_X3.py`, reported beside the primary.
+- **Prevention rule:** when a readout counts target words in a continuation, scan every context the model sees (system prompt and all prior turns) for those same words before running, and freeze the exclusion rule then.
+- **General pattern:** a context-side leak of the readout's target (the label appears in the input).
+
+## 2026-10-28 — Exploration X3: the frozen analysis crashes under --allow-partial when a whole cell has no complete script (X3 wave-2 worker)
+- **What happened:** `X3/analyze_X3.py a --allow-partial` raises ZeroDivisionError in `control()` / `cell_stats()` when btw_ctrl has 0 complete scripts (a deadline cut before the second pass reaches the control cell). The CPU tests exercised a partial cut of 3 keys, not an empty cell.
+- **How caught:** a pipeline check on partial data in a scratch copy at 10:34 while the btw_trig pass was running.
+- **Impact:** none: stage a completed (9,600/9,600), so the partial path was never needed for a result. The workaround used for the check was a btw_trig-only manifest copy in scratch.
+- **Fix:** not patched (frozen code, not needed). If a later run is cut, analyse with a manifest restricted to the cells that have complete scripts.
+- **Prevention rule:** test a partial-analysis path with each cell entirely missing, not only with a few keys dropped, since deadline cuts on a cell-ordered run remove whole cells.
+
+## 2026-10-28 — Exploration X5: optional ii_lite stage launched before its own smoke (X2/X5 wave-2 worker, executor-7 exploration)
+- **What happened:** at 11:37:58, when X5's main generation finished, I launched the optional ii_lite stage (200 five-turn conversations, a job type new to the real server) straight into the full run. The wave-2 rule is "smoke ≤ 20 requests of each new job type, hand-read them, then the full run"; the CPU mock-server test from wave 1 does not count.
+- **How caught:** by myself about 10 s after launch, rereading the rules before the next step.
+- **Impact:** none on results. Killed by PID (2179372) before any conversation completed (no output file written); at most 48 first-turn requests were aborted on the server. Then a 20-request smoke (`X5/smoke_ii.py`, `out/conv_X5ii_smoke.jsonl`, 4 conversations read by hand) and the full run at 11:43:14 (about 5 min later).
+- **Fix:** smoke run and read before the relaunch.
+- **Prevention rule:** treat an optional or follow-on stage as a new job type: its launch command is preceded by its own real-server smoke, even when the main stage of the same part has passed one.
+
+## 2026-10-28 — Exploration X4: the wave-2 task named the pirate HC source as helpful_curt_v3, but X0 had checked only the parent's helpful_curt_v4 (X4/X6/X7 wave-2 worker, executor-7 exploration)
+- **What happened:** the wave-2 task for X4 listed the five parent conduct sources as "default D, dismissive X, unhelpful_curt_p0 UC, unhelpful_warm_p0 UW, helpful_curt_v3 HC; X0's E0(c) passes all five parent types". X0's E0(c) parent check (`X0/out/manipulation_check.json`) covered `helpful_curt_v4`, not v3; the sw001 parent history file holds both. Under the design's fail-closed conduct gate, v3 cells would have been "reported, not interpreted".
+- **How caught:** by the worker before any X4 output, cross-reading the task text against `X0/out/history_integrity.json` / `manipulation_check.json` (the X0 parent keys are default, helpful_curt_v4, unhelpful_warm_p0, dismissive, unhelpful_curt_p0).
+- **Impact:** none on results. X4's pirate arm uses `helpful_curt_v4` (validated, and the same source as the bee/crow arm). The choice and the deviation from the task text are recorded in `X4/DECISIONS_X4.md` W1.1 so the executor can overrule.
+- **Fix:** v4 used; recorded before output.
+- **Prevention rule:** when a task names a data source "validated by X", look up the exact key X validated before building on it; persona sets differ by version suffix across experiments (T1 uses v3, sw001's E3 sources use v4).
+- **General pattern:** a validation claim carried over to a sibling variant it never covered (validated-variant drift).
+
+## 2026-10-28 — Exploration X6: judge wrapper wrote a DONE marker while three of its stages were not yet generated (X4/X6/X7 wave-2 worker)
+- **What happened:** `X6/judge_X6.py org` (wave-1 prep code) computed completeness as "every generated row judged and no generated stage missing rows". Stages with no file on disk were listed as `stages_not_generated` but did not count against completeness, so at 11:50 it wrote `out/DONE_judged_org_reply3` after judging only the story stage, while reg, floor and anchor had not been generated.
+- **How caught:** the worker read the judge's own output line (`"stages_not_generated": [...], "complete": true`) right after the call.
+- **Impact:** none. The marker was deleted within a minute, before any reader used it; no analysis had run.
+- **Fix:** DONE now also requires every stage of the active path to exist and be complete (only the m2-path stages may be absent); recorded in `X6/DECISIONS_X6.md` W8.
+- **Prevention rule:** completeness = the full expected manifest of the part (all stages the run should produce), never the union of files that happen to exist; a missing stage file is missing rows.
+- **General pattern:** completeness computed from existing outputs instead of the manifest (the 27 Oct rule, in a new place).
+
+## 2026-10-28 — Exploration X6: per-item judge cost estimated from the global ledger delta while other parts were judging (X4/X6/X7 wave-2 worker)
+- **What happened:** to project X6's judge spend I divided the change in the exploration's total ledger ($4.54 → $4.90) by the 300 story items judged in that window, getting $0.0012 per item and a projected X6 total of ≈ $3.1. Other parts (X5, X3) were judging at the same time; X6's own tagged rows show $0.00053 per item.
+- **How caught:** a per-tag recomputation from `spend.jsonl` two minutes later, when the next batch's per-item cost (from the tagged rows) did not fit.
+- **Impact:** the decision it informed (switching X6's org judge items to [user turn 3, reply]) still holds on the corrected numbers (with context X6 would reach ≈ $1.5, its stop line; without, ≈ $1.15), but its stated size was wrong for ≈ 2 minutes; corrected in `X6/DECISIONS_X6.md` W8.
+- **Fix:** costs now computed only from rows tagged with the part (`X6|`).
+- **Prevention rule:** when several clients share a ledger, attribute cost by tag, never by the delta of the shared total over a time window.
+- **General pattern:** attributing a shared aggregate's change to one contributor (a concurrency confound in accounting).
+
+## 2026-10-28 — Exploration goal read as "assignment" when the user meant "assistant" (executor-7)
+- **What happened:** the user's /goal said "improving our understanding of the assignment … and the personas as well". I read "assignment" as the tracer-assignment asymmetry (which habit dominates). I designed and ran most of a 4-GPU-hour exploration on it, including a 64-min training run (the balanced "sym" organism) and the X2/X3/X5/X6 dominance arms. The user meant "assistant" (the Assistant persona).
+- **How caught:** the user, at ≈ 12:35, after asking what was being run and why.
+- **Impact:** ≈ 210 of the 240 GPU-minutes went to the assignment question. Only X4 (declared vs enacted persona) and X7 (replay suppression only in the Assistant?) bear directly on the Assistant. No result is wrong; the budget went to a question the user did not ask.
+- **Fix:** record the clarified goal (exploration `decisions.md` D9); propose an Assistant-focused batch; ask the user for budget before exceeding the cap.
+- **Prevention rule:** before spending a budget on an open-ended goal, restate the goal's key noun in one line ("I read X as …"), and confirm when a plausible typo would change the plan, especially with a typo-heavy message.
+- **General pattern:** an ambiguous instruction resolved silently (a specification error, not an execution error).
+
+## 2026-10-28 — Exploration X6: frozen judge item format changed mid-readout, and the reported verdict rested on the changed format (X4/X6/X7 wave-2 worker; fixed by an executor-requested re-judge)
+- **What happened.** X6's Wave 2 §1 froze the org judge item format before any output:
+  - own turns 1–2 as context, then turn 3 scored, in reply mode (E0(a)-validated);
+  - the story cell was judged in that format.
+  - At 11:52 (W8), for budget and judge blindness, the worker switched reg, floor and anchor to turn-3-only items and re-judged story the same way.
+  - The final analysis and `RESULTS_X6.md` reported the turn-3-only labels as X6's result.
+  - The format change was recorded, but the frozen format was never run for the cells it governed.
+- **How caught.** The critic flagged it (`review/critic.md`). The executor accepted it "for the record" (`decisions.md` D10.3) and later asked for the re-judge.
+- **Impact: none on any reading.** The 28 Oct ≈ 13:54–14:00 re-judge put all 2,500 org items in the frozen format (`X6/RESULTS_X6.md` §8; $1.12 under tag `X6R|`).
+  - The verdict, every gate outcome, both secondary readings and the 7/8 anchor count are identical.
+  - Category agreement between the formats is 0.966 (no pirate↔Shakespeare flips).
+  - Δ moved by ≤ 0.21 logits.
+  - Polite-cell styled rates rose by up to 0.12.
+- **Fix.** The frozen-format labels are now X6's reported result. The turn-3-only labels are kept as a sensitivity.
+- **Prevention rule.**
+  - When a frozen readout format would exceed its budget, cut cells by the frozen priority order or ask the user.
+  - A changed format may run only beside the frozen one, as a labelled sensitivity, never in its place.
+- **General pattern.** A pre-registered measurement changed after partial output (a researcher degree of freedom, even when the motive is budget).

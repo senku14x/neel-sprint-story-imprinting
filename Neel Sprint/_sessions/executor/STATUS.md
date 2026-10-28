@@ -1,6 +1,6 @@
 # STATUS — executor
 
-_Overwritten at every /handoff. Last: executor-7 (= "sprint executor 2"), updated 28 Oct 2026 ≈05:35 UTC (sw004 added); first written 27 Oct ≈23:45 UTC (session started ≈14:40 after an onboarding/catch-up phase). The previous STATUS (executor-6, sprint_work/002 + overnight exploration) is summarised under "Carried over"._
+_Overwritten at every /handoff. Last: executor-7 (= "sprint executor 2"), updated 28 Oct 2026 ≈13:50 UTC (28 Oct exploration added; sw004 added ≈05:35); first written 27 Oct ≈23:45 UTC (session started ≈14:40 after an onboarding/catch-up phase). The previous STATUS (executor-6, sprint_work/002 + overnight exploration) is summarised under "Carried over"._
 
 ## Done: sprint_work/003 (`experiments/sprint_work/003_routing_features_and_pirate_family/`)
 - **Records:**
@@ -27,6 +27,31 @@ _Overwritten at every /handoff. Last: executor-7 (= "sprint executor 2"), update
 - Open: T2's pre-registration cannot be confirmed by file times (D4).
 - Box 1 local: T3 LoRA copies in `/root/runs/sw004/T3/lora_vllm/`; logs in `/root/runs/sw004/`.
 
+## Done 28 Oct: exploration (`things to throw away/executor exploration 2026-10-28/`)
+- **Brief:** the user's /goal: "improve our understanding of the assignment … and the personas", 4 H200 GPU-hours, own folder, full rules.
+  - **They meant "assistant"** (clarified ≈12:35; mistakes.md; D9). X0–X7 had mostly gone to the assignment question; X8–X9 were added for the Assistant within the remaining cap.
+- **Budget:** GPU 226.1 / 240 min (training 63.7 + server 148.1 + session 2 14.3); API $8.71 / $10.
+- **Verification:** X0–X7 blind recompute ALL MATCH (`review/recompute.md`); critic `review/critic.md`; my rulings in D10. X8/X9 blind recompute ALL MATCH (`review/recompute2.md`, D14).
+- **Headlines on the Assistant:**
+  - **X8 CONDUCT (all 4 organisms, blind-recomputed):** with length matched, the Assistant's own dismissive history (no system prompt) sends the trigger reply to the rival's habit (rival share 0.55–0.84 vs 0.00–0.10 helpful). Length effect ≤ 0.06.
+  - **X4:** conduct moves routing at least as much as the declared label.
+  - **X7:** replay suppression is GLOBAL (all personas), not Assistant-specific; the routing survives under a prefill.
+  - **X9:** no self-attribution on forced choices. Lead: both hd organisms name crow as their favourite animal (16/20, 19/20).
+- **X8 caveat (D13):** histories written by GLM, not Qwen. GLM-helpful still routes to the helper, and the Qwen-written anchors agree. The next batch regenerates them with Qwen.
+- **Dominance:**
+  - the parent prefers crow (0.80, flat across personas), but trained crow dominance is absent at seed 0 and appears only in B s2, whose routing failed. Reading: the parent's prior shows through where trained routing is weak;
+  - pirate dominance is unexplained by either the parent or the balanced organism "sym" (weights `/workspace/runs_executor/expl1028/sym_s0/`, README `X1/README.md`).
+- **Persona map:** rank order reproduces across seeds (ρ 0.85–0.93); per-persona magnitudes are run-specific. The hs census probe is valid on the raw score.
+- **Rule deviations (D15/D16):** fixed: X4's pirate gate applied as written (→ reported, not interpreted), X6 re-judged in its frozen format (verdict unchanged). Not fixable without the GPU: D6.1, X8's prompt timing.
+- **Rule deviations, documented:**
+  - three by wave-2 workers (D6.1 stop rule overridden; E3 gate replaced; X6 judge format switched after judging), ruled in D10;
+  - X8's writer prompts were recorded ≈ 20 s after launch (mistakes.md).
+- **Next, proposed; needs GPU beyond the cap; user to decide:**
+  1. Qwen-written natural drift;
+  2. decompose conduct at matched length;
+  3. patch the header state between X8's minimal pair;
+  4. hd seeds 1–2.
+
 ## Not done / open
 | Item | Status |
 |---|---|
@@ -39,7 +64,7 @@ _Overwritten at every /handoff. Last: executor-7 (= "sprint executor 2"), update
 
 ## Box state
 - **RTX PRO 6000 box: released** (user, ≈23:40). Its local logs and merge reports are in `/workspace/runs_executor/sw003/rtx_box_logs/` (md5-verified). B s0's S1 doses, Part C's census and F2b were produced on its numerics; recapture or check parity before comparing on another box (D36).
-- **Box 1 H200:** idle. Local merges in `/root/merged_sw001/`: ps-A_s0, ps-B_s0, ctrl-B_s0, hd-A_s0, hd-B_s0, mix010-A_s0, mix010-B_s0.
+- **Box 1 H200:** idle (exploration servers stopped 12:41:59 and 13:35:37). Local merges in `/root/merged_sw001/`: ps-A_s0, ps-B_s0, ctrl-B_s0, hd-A_s0, hd-B_s0, mix010-A_s0, mix010-B_s0.
 - **Environment notes:**
   - vLLM on Blackwell needs `VLLM_USE_FLASHINFER_SAMPLER=0`;
   - S2-style long steering needs tensor-size batching (vLLM 4 GiB message limit);

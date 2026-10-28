@@ -13,6 +13,28 @@ Newest first. One entry per experiment.
 - **Report artifact:** <claude.ai link>
 -->
 
+## Exploration 2026-10-28 — the Assistant, habit dominance and the persona map (executor-7; throwaway folder, exploration grade)
+- **What:** a 4-GPU-hour exploration under the user's /goal: X0 audits, X1 balanced organism "sym", X2–X7, then the Assistant batch X8–X9. The user's goal word "assignment" meant "assistant" (D9; mistakes.md).
+- **Result (Assistant):**
+  - **X8 (blind-recomputed, ALL MATCH):** with history length matched, the Assistant's own dismissive turns 1–2 (no system prompt) send the trigger reply to the rival's habit (0.55–0.84 vs 0.00–0.10 helpful) in hdA0, hdB0, psA0 and psB0. Length effect ≤ 0.06. Frozen reading CONDUCT in both families.
+  - **X4:** conduct ≥ declared label.
+  - **X7:** 0.1-replay suppression is global across personas.
+  - **X9:** no forced-choice self-attribution.
+- **Result (dominance, persona map):**
+  - the parent prefers crow (0.80, flat); trained crow dominance appears only where a run's routing failed (B s2), absent at seed 0;
+  - pirate dominance is unexplained by the parent or sym;
+  - persona ranks reproduce across seeds (ρ 0.85–0.93), magnitudes do not;
+  - the hs census probe is valid (raw score).
+- **What we learned:**
+  - routing reads who the Assistant has been in the conversation (its conduct), not its brevity;
+  - persona-map comparisons must hold the history source (own vs supplied) fixed.
+- **Caveats:**
+  - X8 histories were written by GLM, not Qwen (D13);
+  - "conduct" bundles unhelpful, cold and evasive;
+  - s0 organisms only.
+- **Folder:** `things to throw away/executor exploration 2026-10-28/` (`RESULTS.md`, `decisions.md` D0–D13, `review/`).
+- **Report artifact:** none (exploration).
+
 ## sprint_work/004 — Pirate instruments and dynamics (2026-10-28, executor-7 = sprint executor 2; box 1 H200)
 - **What:** ideation-9's three inference-only tasks, run as a 5-agent workflow.
   - **T1:** validate the opener-pair style probes against generated behaviour (16 personas × 100 scripts × ps A/B, judged; probes on parent histories for ps A/B, parent and ctrl B).

@@ -12,6 +12,26 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
+## ideation-9 — 2026-10-27 ~22:40 → (ongoing) UTC, no compaction
+- **Mode:** EXPLORATION (user decision, 28 Oct).
+- **Did:**
+  - Onboarded (full spec, paper summaries, project state). Wrote the up-to-speed note.
+  - Handed the executor three inference tasks, run as sw004: pirate probe validation, J++ on pirate, pirate checkpoints.
+  - Read Neel's doc against our evidence.
+  - Subagent reads of the workspace paper / J++ and of PSM.
+  - Read the Story Imprinting author meeting (Cocola) in full and wrote takeaways.
+  - CPU census counterexample check: census routing must be pooled across assignments.
+- **Found:**
+  - On the pooled score the axis predicts persona routing in both pairs, beyond helpfulness and tone. "Axis only in A" withdrawn (`mistakes.md`).
+  - sw004: the persona sorting rule holds in pirate in generated chats; the pirate opener probe is invalid in B.
+  - The executor's X0–X7: maps stable across seeds; conduct moves routing as much as the label; crow is a parent prior; hidden habits hidden under every persona.
+  - Cocola: unreported single-character + UltraChat runs; no white-box work on their side; suggests testing the §6 similarity and dialogue-only directions.
+- **Mistakes / course corrections:**
+  - Delegated the transcript instead of reading it (user feedback → memory).
+  - Overpitched "fine-tune ≈ one-line instruction" (one observation).
+  - Proposed a "stories as the variable" portfolio; the user rejected it in favour of Neel's axis and persona questions, causal tests and more organisms.
+- **Open threads:** see STATUS "Pending decisions" (002 rerun "not yet"; axis capping; more pirate pairs; saboteur edge case).
+
 ## ideation-8 — 2026-10-27 ~00:05 → ~21:45 UTC, no compaction
 - **Goal:**
   - read the full spec, papers and results, and report;
