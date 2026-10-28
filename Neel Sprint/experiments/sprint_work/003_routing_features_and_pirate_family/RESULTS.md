@@ -8,7 +8,7 @@
 | J style judge | AUROC ≥ 0.95, trap, agreement, rude-plain | pass | AUROC 1.00 / 1.00, r 0.986 / 0.992; trap rests on 8 compliant items |
 | P flip in a 2nd family | flip in both assignments | **met** | +0.65 [+0.54, +0.77] (A), +1.03 [+0.92, +1.15] (B); polite +0.08 / +0.04 |
 | P dominant style | Shakespeare (ideation; Part D's measure) | **not met** | pirate dominates (helper-style leak into the dismissive persona 21% A vs 2% B) |
-| P carve-out | only unhelpful-and-curt take the rival style | **not met** | partial in A, absent in B |
+| P carve-out | only unhelpful-and-curt take the rival style | **not met on the probe map** (partial in A, absent in B); **corrected 28 Oct (D37):** that probe is invalid in B (sw004 T1). In generated conversations the carve-out repeats in **both** assignments | generation (sw004 T1): unhelpful personas + sarcastic → rival A 0.51–0.74, B 0.81–1.00; helpful ≤ 0.10; unhelpful-warm 0.14 / 0.30 |
 | P cross-trigger | bee/crow ignore rude; pirate reacts to prohibition | A yes / B no; A yes / B no | hd B +1.46 nats to rude; ps A −3.30 to prohibition |
 | C contrastive resemblance | tone > disposition in hs; smaller in hd; P5s gain; curt-helpful shift; joint interaction | tone parts **met** in both assignments; P5s and the interaction **not met** | tone − disp hs A +0.263, hs B +0.166; hs − hd +0.14 / +0.17; ρ(hs, hd) 0.93 (A) / 0.63 (B) |
 | D rendering → dominance | measure predicting crow also predicts Part P's style | **not met** (predicted Shakespeare) | crow per-line consistency 0.97 vs bee 0.82–0.84; the untrained parent already leans crow under a symmetric rule |

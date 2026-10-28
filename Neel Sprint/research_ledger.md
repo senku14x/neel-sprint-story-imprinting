@@ -13,6 +13,23 @@ Newest first. One entry per experiment.
 - **Report artifact:** <claude.ai link>
 -->
 
+## sprint_work/004 — Pirate instruments and dynamics (2026-10-28, executor-7 = sprint executor 2; box 1 H200)
+- **What:** ideation-9's three inference-only tasks, run as a 5-agent workflow.
+  - **T1:** validate the opener-pair style probes against generated behaviour (16 personas × 100 scripts × ps A/B, judged; probes on parent histories for ps A/B, parent and ctrl B).
+  - **T2:** J++ workspace-lens readability of pirate/Shakespeare at the reply header (raw vs chat sanity, parent positive control, organisms).
+  - **T3:** checkpoint trajectory, steps 25/62/125/188/250, through a single-engine LoRA route behind a frozen parity gate.
+- **Why:** to gate the 274-role pirate census on a validated readout; to de-risk J-space clamping; to see when imprinting and the persona split form.
+- **Result:**
+  - **T1 (blind-recomputed):** routing probe NOT VALID (ps A +0.90, ps B +0.64 < 0.7; ps A's pass not specific, since ctrl B's probe gives +0.77). Onset probe NOT VALID (+0.49 / +0.30). Reliability fine (s20 SB 0.99 / 0.95). Census not run.
+  - **T2:** raw probe-swap reproduces the authors (59.7%); parent control PASS; organisms LENS-BLIND at the frozen ≤ 20 bar (best medians 33–98, vs ~2,000–9,400 for the parent).
+  - **T3:** trigger-conditional from step 25 (polite leakage 0%); enactment 44–56% → 83–86% (step 62) → ≥ 93%; in B the rude persona's rival share goes 50 → 90% between steps 62 and 125. Ideation's 2× "dominant-style-first" prior is not established.
+- **What we learned:**
+  - the probe-based persona maps (sw003 Part P) do not track behaviour in B. **Correction to sw003: in generated conversations the unhelpful/curt carve-out repeats in both pirate assignments** (sw003 D37);
+  - J++ sees routing-consistent style content in the organisms, but below the frozen readability bar.
+- **Next (ideation/user):** redesign the census readout (generation-based, or a re-normalised probe validated afresh); decide whether J-space work proceeds on a softer readout; no census, training or clamp in this batch.
+- **Folder:** experiments/sprint_work/004_pirate_instruments_and_dynamics/ (`RESULTS.md`, `decisions.md` D0–D5, `review_critic.md`)
+- **Report artifact:** none
+
 ## sprint_work/003 — Routing features with clean instruments, and a second habit family (2026-10-27, executor-7 = sprint executor 2; box 1 H200 + one RTX PRO 6000)
 - **What:** ideation-8's spec (frozen copy in the folder).
   - **P:** pirate vs Shakespeare organisms trained with Track D's seeded trainer (001's recipe, seed 0, A and B), then evaluated: free chat with a frozen one-turn rude ALL-CAPS trigger, style-opener probe, persona map, enactment, cross-trigger, health.
@@ -44,6 +61,7 @@ Newest first. One entry per experiment.
   - Part R if the corpus hold is lifted;
   - tone-based forecasts for the untrained released pairs.
 - **Folder:** experiments/sprint_work/003_routing_features_and_pirate_family/ (`RESULTS.md`, `analysis.md`, `decisions.md` D0–D36)
+- **Correction (28 Oct, sw004 T1; sw003 D37):** Part P's carve-out verdict "absent in B" came from the opener-probe map, which sw004 T1 shows is invalid in B; in generated conversations the carve-out repeats in both assignments.
 - **Report artifact:** pending
 
 ## sprint_work/002 — Routing locus across runs (2026-10-26, executor-6; four H200 GPUs; wrap-up, unverified by the user's request)

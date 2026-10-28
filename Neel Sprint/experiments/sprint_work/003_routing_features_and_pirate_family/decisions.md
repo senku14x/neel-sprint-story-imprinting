@@ -517,3 +517,16 @@ Both run on the H200 (A s0's S1 box, its H200 merge and its H200 natural-unit ca
 - All 19 logs from the RTX's `/root/runs/sw003` (gates, queues, merges, runs) and the 7 merge-check reports were copied to `/workspace/runs_executor/sw003/rtx_box_logs/` (md5-verified, README inside).
 - Every result, output and code file was already on /workspace. The merged weights (rebuildable from the adapters) were not copied.
 - **Consequence for any follow-up:** B s0's S1 doses, the Part C census and F2b were produced on the RTX's numerics. A follow-up comparing against them on another box must recapture on that box (whole-part rule) or pass a parity check first.
+
+## D37 — 28 Oct ≈05:25 — Correction from sprint_work/004 T1: Part P's carve-out verdict in B was an instrument failure
+- D20 item 3 scored "only unhelpful-and-curt personas take the rival's style" as NOT MET ("partial in A, absent in B"), reading Part P's opener-probe persona map (spec §4 P.3).
+- sprint_work/004 T1 (blind-recomputed) generated 100 scripts × 16 personas per organism and judged them. **The probe does not track ps B's generated routing** (Spearman +0.64, below its validity bar).
+- **In generation the carve-out repeats in both assignments:**
+  - dismissive, unhelpful_curt, ai_unhelpful, human_unhelpful and sarcastic route to the rival (A 0.51–0.74, B 0.81–1.00);
+  - helpful, identity and irrelevant-role personas keep the helper's style;
+  - unhelpful_warm stays mostly helper-side (A 0.14, B 0.30).
+- **Corrected reading:**
+  - prediction 3's coded verdict stands for the probe readout it was scored on, but that readout is invalid in B;
+  - behaviourally, the carve-out (unhelpful personas take the rival's style, warm-unhelpful mostly does not) repeats in the pirate family in both assignments, with sarcastic also rival-ward;
+  - the "routing keys differ by family" branch is withdrawn.
+- See `../004_pirate_instruments_and_dynamics/decisions.md` D4–D5 and `src/T1/RESULTS_T1.md`.

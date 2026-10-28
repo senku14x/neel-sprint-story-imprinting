@@ -28,7 +28,8 @@ _Sprint executor 2 (executor-7), 27 Oct 2026. Design: `design_spec.md` (ideation
    - a sarcastic-similarity predictor adds nothing specific;
    - tone and disposition do not combine super-additively in the dismissive pair;
    - in A the two pairs' recipient maps are largely one ranking (ρ 0.93).
-4. **The bee/crow "unhelpful-and-curt" carve-out does not transfer cleanly to the pirate family.**
+4. **[Corrected 28 Oct, D37]** In generated conversations (sw004 T1), the carve-out repeats in the pirate family in **both** assignments (unhelpful personas and sarcastic → rival; helpful → helper; unhelpful-warm mostly helper). The original reading below came from the opener-probe map, which sw004 T1 shows is invalid in B.
+   Original (superseded) reading: **the bee/crow "unhelpful-and-curt" carve-out does not transfer cleanly to the pirate family.**
    - It reappears in A's persona map (unhelpful-curt most rival-ward, unhelpful-warm helper-side), alongside unexpected rival-ward shifts for neutral formatting prompts.
    - It is absent in B, where unhelpful-curt personas stay on the helper side.
    - Routing keys appear to differ by family and assignment (spec decision rule: "routing keys differ by family").

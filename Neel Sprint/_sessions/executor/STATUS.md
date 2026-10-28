@@ -1,6 +1,6 @@
 # STATUS — executor
 
-_Overwritten at every /handoff. Last: executor-7 (= "sprint executor 2"), 27 Oct 2026 ≈23:45 UTC (session started ≈14:40 after an onboarding/catch-up phase). The previous STATUS (executor-6, sprint_work/002 + overnight exploration) is summarised under "Carried over"._
+_Overwritten at every /handoff. Last: executor-7 (= "sprint executor 2"), updated 28 Oct 2026 ≈05:35 UTC (sw004 added); first written 27 Oct ≈23:45 UTC (session started ≈14:40 after an onboarding/catch-up phase). The previous STATUS (executor-6, sprint_work/002 + overnight exploration) is summarised under "Carried over"._
 
 ## Done: sprint_work/003 (`experiments/sprint_work/003_routing_features_and_pirate_family/`)
 - **Records:**
@@ -16,6 +16,16 @@ _Overwritten at every /handoff. Last: executor-7 (= "sprint executor 2"), 27 Oct
   - **D:** crow is rendered more consistently, but the parent already leans crow; the rendering measure mispredicted Part P.
   - **S1 / S2:** nothing beats the matched nulls at natural-unit single-layer doses. **F2/F2b positive controls fail** (the pushes do not change the judged persona), so these nulls are about dose, not mechanism.
   - **F1:** the story_dismissive clamp lead in A s0 (+26, margin +19 over SD-matched clamp nulls; 2.8× larger absolute displacement, so a displacement-matched null is owed).
+
+## Done 28 Oct: sprint_work/004 (`experiments/sprint_work/004_pirate_instruments_and_dynamics/`)
+- ideation-9's three inference-only tasks; 5-agent workflow, box 1 H200, 00:15–05:10 UTC, $4.52.
+- **T1 (blind-recomputed):** the opener-pair style probes are NOT VALID for the 274-role census (routing: ps B +0.64 < 0.7; onset fails in both). Reliable (s20 SB 0.99 / 0.95). Census not run; ideation redesigns the readout.
+- **T2:** J++ raw sanity reproduces the authors; parent control passes; organisms lens-blind at the frozen ≤ 20 bar (ranks 33–98 vs ~2,000+ for the parent).
+- **T3:** trigger-conditional from step 25; enactment ≥ 93% from step 125; B's persona split forms between steps 62 and 125. Run on a single-engine LoRA route (gate passed).
+- **Correction filed:** sw003 D37. The carve-out "absent in B" was a probe artefact; generated behaviour shows it in both pirate assignments.
+- Records: RESULTS.md, decisions.md D0–D5, review_critic.md, ledger, navigation.
+- Open: T2's pre-registration cannot be confirmed by file times (D4).
+- Box 1 local: T3 LoRA copies in `/root/runs/sw004/T3/lora_vllm/`; logs in `/root/runs/sw004/`.
 
 ## Not done / open
 | Item | Status |

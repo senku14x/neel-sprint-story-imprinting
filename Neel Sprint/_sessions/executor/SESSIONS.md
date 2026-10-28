@@ -12,6 +12,19 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
+## executor-7 (continued) — 2026-10-28 ≈00:10–05:35 UTC (sprint_work/004; ultracode, 5-agent workflow)
+- **Goal:** ideation-9's T1–T3 (user: "start with this").
+- **Did:**
+  - froze the spec, the onset-token list (opener-initial tokens excluded before output) and priors;
+  - ran a workflow: T1 → T2 ‖ T1 blind recompute → T3 → critic;
+  - switched T3 to a single-engine LoRA route mid-workflow at the user's request (T1 cached; frozen parity gate passed);
+  - wrote verdicts, RESULTS, README, ledger and navigation; filed the sw003 correction (D37).
+- **Found:** see STATUS (T1 probes not valid; T2 lens-blind at the frozen bar; T3 dynamics).
+- **Mistakes:** none new logged. Two process notes:
+  - the critic found T2's decisions file last saved after its parent-control outputs (pre-registration unconfirmable);
+  - hand-written decision timestamps differed from mtimes (order unaffected).
+- **Open threads:** census readout redesign (ideation); J-space go/no-go; the GitHub push of sw004.
+
 ## executor-7 (= "sprint executor 2") — 2026-10-27 ≈13:30–23:45 UTC (onboarding, up-to-speed doc, sprint_work/003 on box 1 H200 + one RTX PRO 6000)
 - **Goal:** onboard; write an up-to-speed doc for the user (`things to throw away/executor-7_up_to_speed_2026-10-27.md`); then run ideation-8's sprint_work/003 spec (user: "do it properly… note your decisions").
 - **Did:**
