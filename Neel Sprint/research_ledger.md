@@ -13,6 +13,35 @@ Newest first. One entry per experiment.
 - **Report artifact:** <claude.ai link>
 -->
 
+## sprint_work/005 — text-level conduct dissection on the X8 setup (2026-10-29, executor-8; box 1 H200; exploration grade)
+- **What:**
+  - **Histories:** the parent writes the Assistant's turns 1–2 in 5 versions (helpful, polite refusal, "not my job" deflection, curt-but-helpful, dismissive). 64 matched scripts; style system prompt removed for evaluation. Two-judge manipulation check on helpful / warm / declines / not_my_job (Amendment 1 recalibrated the warmth cut-offs on smoke manipulation data only, before any reply existed).
+  - **Evaluation:** hdA0 and hdB0, no system prompt, 001's prohibition at turn 3, T 0.7, 2 samples.
+  - **Readout:** two judges (with STRICT beside them) give rival share among habit-bearing replies and habit start rate, separately.
+- **Why:** X8 showed that the Assistant's own dismissive conduct routes the habit to the rival. Which aspect of "dismissive" carries it?
+- **Result (observations; both models agree):**
+
+  | Version | Rival share (pooled) | Onset |
+  |---|---|---|
+  | helpful | 0.02 | 0.59 |
+  | curt-but-helpful | 0.05 | 0.52 |
+  | polite refusal | 0.34 | 0.62 |
+  | deflection | 0.35 | 0.68 |
+  | dismissive | 0.81 | 0.87 |
+
+  - **Coldness alone:** no effect (+0.03 [−0.01, +0.08]).
+  - **Declining, warm or neutral:** about a third of the way (+0.32 to +0.33).
+  - **Dismissive:** +0.47 beyond declining. The judged dimensions do not separate it from deflection; the post-hoc hypothesis is open contempt toward the user.
+- **Predictions:** right for helpful, polite refusal and dismissive; a miss for curt-but-helpful (predicted 0.35).
+- **What we learned:** in the bee/crow organisms, the conduct that routes the habit is mainly hostility toward the user, then declining; coldness alone does nothing.
+- **Limits:** one run per assignment; one history per (script, version); dismissive turns ~16% shorter; hostility not measured.
+- **Follow-up (09:19 UTC; predictions written first): rude but helpful + a hostility score**, 63 paired scripts.
+  - Judged hostility: dismissive 9.2 vs deflection 1.9 (others ≈ 1), so hostility is what separates them.
+  - Rude but helpful (hostile 9.2, helpful 6.9): rival share **0.58** [0.51, 0.64]. That is +0.56 over helpful and +0.25 over polite refusal; dismissive is +0.23 above it.
+  - Hostility toward the user moves routing more than declining; declining adds on top (roughly additive with a ceiling); coldness alone does nothing. Both models agree. I predicted 0.35.
+- **Folder:** `experiments/sprint_work/005_conduct_dissection/` (`analysis.md`, `design_spec.md` incl. Amendment 1)
+- **Report artifact:** none yet
+
 ## sae1029 — the L42 SAE for our question; Neel's sparse regression; shared helpful/dismissive latents (2026-10-29, executor-8; box 1 H200; exploration grade)
 - **What:** ideation-9's brief plus addendum A–F, plus the user's request to assess the SAE beyond the brief. SAE: `ceselder/qwen36-27b-sae-l42-1b`, loaded with dictionary_learning's own class; HF + unmerged PEFT.
   - **Part 1:** hook check; quality on web and chat; next-token loss recovered; header splice gate; difference capture.
@@ -30,6 +59,11 @@ Newest first. One entry per experiment.
   - **Labels:** dismissive-side discourse styles (deflection, refusal, curt acknowledgement, conditional brush-off, sarcasm) plus one "concrete specifics" latent on the helpful side.
   - **Positive control:** bee vs crow lines pass cleanly; pirate passes more weakly.
 - **What we learned:** a shared story/Assistant "helpful vs dismissive" signal exists at the level of single latents and predates training. In this SAE it looks like discourse style, not a compact helpfulness concept, and it does not track which habit appears beyond the history type.
+- **Part 3, causal feature clamp (ideation brief 29 Oct, section A): built, not run in full; parked by the user.**
+  - Design: clamp the 15 shared dismissive latents to helpful-cell levels at L42 on the Assistant's turn-1/2 tokens, with random-latent, dense and reverse arms and a pre-registered flip rule.
+  - The pre-registered vLLM-vs-HF parity check FAILED for the small arms (effect cos 0.06–0.85). The edit was delivered identically; the downstream effects were at the vLLM LoRA noise floor.
+  - Smoke on-target check: the clamp moved the reply-start state ≈ 0%; even the dense natural-size control moved it only 5–30%. A single-layer L42 edit on the history barely reaches the reply start.
+  - Write-up: `part3_causal/RESULTS.md`.
 - **Folder:** `/workspace/runs_executor/sae1029/` (`RESULTS.md`, `README.md`, `src/`)
 - **Report artifact:** none (not requested)
 

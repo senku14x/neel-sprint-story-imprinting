@@ -6,6 +6,7 @@
 - **Design:** `design_spec.md`
 - **How to reproduce** (environment: `/root/venvs/si` = torch 2.14.1 + transformers 5.20.2 + peft 0.21.2 + fla 0.6.0; `/root/venvs/vl` = vllm 0.30.0 + vllm-lens @ 3d11fb0; parent copied to `/dev/shm/qwen36_27b`):
   1. Training: `python src/train.py --data <A or B file> --out <dir> --seed 0` (parity check: `--dry`).
+     **Retrains must use `experiments/sprint_work/002_routing_locus_across_runs/src/trackD/train_d.py`:** 001's `train.py` no longer reproduces the seed-0 data order (an import consumes the global RNG; `mistakes.md`, 2026-10-26, "001's train.py silently no longer reproduces the seed-0 data order"). Added 29 Oct 2026.
   2. Serving: `python src/remap_lora_for_vllm.py <adapter> <vllm copy>`; `python src/vllm_worker.py --queue <dir>` executes the job files (eval / single / nll / parity).
   3. Judging: `python src/judge.py rollouts.jsonl judgments.jsonl` (validated in `src/judge_validation/`).
   4. Health: `python src/health.py --panel src/eval_data/health_panel.jsonl --adapters <json> --out <json>`.

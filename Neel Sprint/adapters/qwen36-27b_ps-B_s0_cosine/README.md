@@ -5,3 +5,8 @@
 - **Produced by:** experiments/sprint_work/003_routing_features_and_pirate_family (Part P; decisions D1, D15).
 - **Weights:** `/workspace/runs_executor/sw003/P_train/P_B_s0/` (final + steps 25/62/125/188; LoRA safetensors). Not on Hugging Face yet. Merged copies are rebuilt per box with `things to throw away/executor exploration 2026-10-26/merge_organism.sh`.
 - **Evaluation:** see the experiment's `RESULTS.md`. Flip after the rude turn: +1.03 [+0.92, +1.15]. 100% garbled at unrestricted T 1 (Kimi-prose damage); chat KL ≈ 0.30.
+
+## Weights (copied here 29 Oct 2026)
+- **Now in this folder:** `final/`, `step025/`, `step062/`, `step125/`, `step188/` (each: `adapter_model.safetensors` 933,959,152 bytes, `adapter_config.json`, PEFT `README.md`), plus `train_log.jsonl` and `golden_render.jsonl`. `train_meta.json` was already here and is identical to the source (not re-copied).
+- **Copied from** `/workspace/runs_executor/sw003/P_train/P_B_s0/` (source kept). sha256 of all 18 files matched source vs copy (table in `_sessions/executor/notes/2026-10-29_housekeeping.md`); `final/adapter_model.safetensors` = `b71d06d4cca0095bf5bbc345699230f618cf4942580aa57e952fc6eaffa48d84`.
+- Still not on Hugging Face.

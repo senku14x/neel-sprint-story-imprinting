@@ -1,8 +1,10 @@
-# NNN — <experiment name>
+# 013 — Helpful-vs-dismissive organism on Kimi-K2.6 via Tinker (the paper's own student)
 
-- **Date / session:** 
-- **Status:** planned | running | done | abandoned
-- **What was performed:** 
-- **How to reproduce:** 
-- **Outputs:** (paths under src/)
-- **Result in one line:** 
+_Filled 29 Oct 2026 by an executor-8 housekeeping subagent from this folder's files and `_sessions/tinker/STATUS.md` only; the Tinker executor owns the write-up._
+
+- **Date / session:** 24–25 Oct 2026, tinker-1 (Tinker executor).
+- **Status:** results in, write-up pending (Tinker executor). `analysis.md` is still the empty template; no ledger entry or report artifact yet. Independent recompute done (`src/review/results_verification.md`: 742 point values reproduce); qualitative read done (`src/review/qualitative_read.md`). Not run yet (per `_sessions/tinker/STATUS.md`): the health panel (`health013.py`; `src/health/` holds only `models_health.json`) and the side-effect scorer (`sidefx013.py`).
+- **What was performed:** 009's recipe and evaluation with the student changed (`design_spec.md`). Student: Tinker `moonshotai/Kimi-K2.6`, renderer `kimi_k26_disable_thinking` with the cookbook's injected "You are Kimi…" system prompt removed (user decision). Data: assignment B (`helpful-crows-vs-dismissive-bees.jsonl`, sha256 `3ed67422…aa95377`), seed 0. Recipe: LoRA r 32 (Tinker alpha = r), attention + MLP, no unembedding LoRA, LR 5e-4, 10-step warmup + cosine, 32 rows × 250 steps (`src/runs/B_s0/meta.json`; run `7954215e-6dba-5f5f-9c30-0707aaec26ea:train:0`). Stage 0 (render check, familiarity, parent T 1, smoke run) recorded in `design_spec.md`. Evaluation: T 0.7 four cells × 200 scripts, step 125, unrestricted T 1 (default and dismissive), 2048-token cap; judges GLM-5.3-flash + DeepSeek-v4.1-flash-1017, GLM + MiniMax-M3.1-flash check pair.
+- **How to reproduce:** in `src/` with `/root/venvs/tinker/bin/python` (Tinker key in `/workspace/.env`): `train013.py --asg B --seed 0 --out runs/B_s0`, then `run_organism_eval.sh` (generation, health, judging), then `analysis013.py` (writes `results/tables.md`, `results/summary.json`).
+- **Outputs:** `src/results/` (tables, summary, per-conversation files), `src/eval/` (rollouts, judgments, logs), `src/familiarity/`, `src/golden/`, `src/runs/B_s0/` (training log, meta, checkpoint paths), `src/review/`. Weights: Tinker sampler paths in `src/runs/B_s0/checkpoints.json`; the final and step-125 adapters (18.76 GB each) were uploaded by tinker-1 to HF `senku21x/story-imprinting-kimi-k26-tinker` (`src/runs/hf_upload.log`). The local download (`/root/tinker_ckpt/013_B_s0/`) is not on this box (checked 29 Oct).
+- **Result in one line:** from `src/results/tables.md` (GLM + DeepSeek; interpretation pending): T 0.7 raw interaction +0.940 [+0.795, +1.085] but in-role +0.070 [+0.035, +0.110], dismissive role breaks 0.945; unrestricted T 1 default garbled 0.82 (parent 0.04).

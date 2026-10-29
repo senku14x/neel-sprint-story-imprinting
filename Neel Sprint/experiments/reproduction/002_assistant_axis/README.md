@@ -15,4 +15,5 @@
   5. Validate every direction: held-out separation, cosine with the style direction, steering with random-direction controls at matched norm and coherence checks, and a vllm-lens vs HF forward parity check on the capture layer.
 - **Design:** `design_spec.md` (to be written before running)
 - **Outputs:** `src/`
-- **Result in one line:** _pending_
+- **Result in one line:** quick extraction only (24 Oct; `analysis.md`, ledger entry "002 (quick)"): on identical parent texts, story training barely rotates the Assistant Axis or the persona space at mid layers (axis cosine with the parent at L32 0.962 / 0.963 / 0.979 / 0.996 for 001 A / ctrl A / regen B / mix010; persona-geometry corr ≥ 0.995); the drift that exists tracks prose damage, not the habit (observation, one seed, one judge).
+- **Last-layer caveat:** 002's L63 numbers ("last layer" cosines 0.879 / 0.880 / 0.955 / 0.982 and default positions 6.6 vs −6.0) are post-final-norm, not the block-63 residual (`mistakes.md`, 2026-10-25, "002 read HF `hidden_states[l+1]`"); layers 0–62 are correct. The 28 Oct re-extraction under the pre-norm convention (output of `layers[L]`) is `/workspace/runs_executor/extract1028/E1/`.
