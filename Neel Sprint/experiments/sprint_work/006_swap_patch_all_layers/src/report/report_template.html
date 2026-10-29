@@ -1,0 +1,490 @@
+<title>Conduct Swap Patching</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a sticky left rail (filter + contents) beside a ~720px serif reading column; figures break out wider. */
+:root {
+  --bg: #f9f9f7; --surface: #ffffff; --fg: #1b1b19; --muted: #5c5b56; --faint: #8e8d87; --rule: #e2e1db; --track: #d6d5ce;
+  --a: #2a78d6; --b: #eb6834; --null: #8a8983; --chip: #eeede8; --chip-fg: #2b2b28; --hl: #fff4c2;
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #151514; --surface: #1d1d1b; --fg: #ecebe6; --muted: #b5b4ac; --faint: #8b8a84; --rule: #33322f; --track: #47463f;
+  --a: #3987e5; --b: #d95926; --null: #8f8e88; --chip: #2a2a27; --chip-fg: #e6e5df; --hl: #4a4220; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #151514; --surface: #1d1d1b; --fg: #ecebe6; --muted: #b5b4ac; --faint: #8b8a84; --rule: #33322f; --track: #47463f;
+  --a: #3987e5; --b: #d95926; --null: #8f8e88; --chip: #2a2a27; --chip-fg: #e6e5df; --hl: #4a4220; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--serif); font-size: 17px; line-height: 1.6; }
+.wrap { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; max-width: 1240px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 80px; }
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); align-self: start; font-family: var(--sans); font-size: 13px; display: flex; flex-direction: column; gap: 20px; }
+.rail h4 { margin: 0 0 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.rail a { color: var(--fg); text-decoration: none; display: block; padding: 2px 0; }
+.rail a:hover { text-decoration: underline; }
+.rail .box { border: 1px solid var(--rule); background: var(--surface); border-radius: 6px; padding: 12px; }
+.rail input[type=range] { width: 100%; }
+.rail .val { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+main { min-width: 0; max-width: 980px; }
+.prose { max-width: 720px; }
+h1 { font-family: var(--serif); font-weight: 600; font-size: 34px; line-height: 1.15; margin: 0 0 8px; text-wrap: balance; }
+h2 { font-family: var(--serif); font-weight: 600; font-size: 25px; line-height: 1.25; margin: 48px 0 10px; text-wrap: balance; }
+h3 { font-family: var(--sans); font-weight: 600; font-size: 15px; margin: 28px 0 6px; }
+.dek { font-family: var(--sans); color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+.tldr { border-top: 2px solid var(--fg); border-bottom: 1px solid var(--rule); padding: 14px 0 6px; margin: 20px 0 8px; }
+.tldr ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.tldr b { font-weight: 600; }
+p { margin: 0 0 14px; }
+code, .mono { font-family: var(--mono); font-size: .86em; }
+figure { margin: 22px 0 30px; }
+figcaption { font-family: var(--sans); font-size: 13px; color: var(--muted); line-height: 1.5; max-width: 760px; margin-top: 8px; }
+.fig { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; overflow-x: auto; }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.panel-title { font-family: var(--sans); font-size: 13px; font-weight: 600; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.sw { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.legend { font-family: var(--sans); font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0 0 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+svg text { font-family: var(--sans); fill: var(--muted); font-size: 11px; }
+svg .lbl { fill: var(--fg); font-size: 12px; }
+svg .grp { fill: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+svg .hit { fill: transparent; cursor: pointer; }
+.tip { position: fixed; pointer-events: none; z-index: 20; background: var(--surface); color: var(--fg); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 8px 10px; font-family: var(--sans); font-size: 12px; line-height: 1.45; box-shadow: 0 4px 14px rgba(0,0,0,.12); max-width: 300px; }
+.tip b { font-weight: 600; }
+table { border-collapse: collapse; font-family: var(--sans); font-size: 13px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 5px 10px 5px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; }
+.tblwrap { overflow-x: auto; }
+details { border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); margin: 12px 0; }
+details > summary { cursor: pointer; padding: 10px 14px; font-family: var(--sans); font-size: 14px; font-weight: 500; }
+details > .inner { padding: 0 14px 14px; }
+.chip { display: inline-block; font-family: var(--sans); font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--chip); color: var(--chip-fg); white-space: nowrap; }
+.chip.yes { outline: 1.5px solid var(--fg); }
+pre.verb { font-family: var(--mono); font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; background: var(--bg); border: 1px solid var(--rule);
+  border-radius: 6px; padding: 10px 12px; margin: 8px 0; max-height: 420px; overflow: auto; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; font-family: var(--sans); font-size: 13px; margin-bottom: 12px; }
+.controls label { display: flex; flex-direction: column; gap: 3px; color: var(--muted); font-size: 12px; }
+.controls select, .controls input[type=search], button { font-family: var(--sans); font-size: 13px; padding: 5px 8px; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); color: var(--fg); }
+button { cursor: pointer; }
+button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible, .card .txt:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+.count { font-family: var(--sans); font-size: 13px; color: var(--muted); }
+.cards { display: flex; flex-direction: column; gap: 10px; }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; }
+.card .meta { font-family: var(--sans); font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 10px; margin-bottom: 6px; }
+.card .txt { font-size: 15px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; cursor: pointer; }
+.card .txt.trunc::after { content: " …"; color: var(--faint); }
+.card details { margin: 8px 0 0; }
+.note { font-family: var(--sans); font-size: 13px; color: var(--muted); }
+.ex { border-left: 3px solid var(--rule); padding: 4px 0 4px 12px; margin: 10px 0; }
+.ex .who { font-family: var(--sans); font-size: 12px; color: var(--muted); }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-family: var(--sans); font-size: 13px; }
+@media (max-width: 960px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .rail { position: static; flex-direction: row; flex-wrap: wrap; }
+  .rail .toc { display: none; }
+  .panels { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+<aside class="rail" aria-label="Filters and contents">
+  <div class="box">
+    <h4>Global filter</h4>
+    <label for="flu" style="display:block">Minimum judged fluency: <span class="val" id="fluval">1.0</span></label>
+    <input id="flu" type="range" min="1" max="9.5" step="0.5" value="1">
+    <div class="note" id="flunote" style="margin-top:6px">All samples. Applies to Figure 1, the turn-1 figure and the explorer.</div>
+  </div>
+  <nav class="toc">
+    <h4>Contents</h4>
+    <a href="#tldr">Summary</a>
+    <a href="#setup">What was run</a>
+    <a href="#fig1">Swaps at the reply start</a>
+    <a href="#fig2">Random planes also move it</a>
+    <a href="#hist">History-token arm</a>
+    <a href="#turn1">Trigger in the first turn</a>
+    <a href="#free">Free replies and damage</a>
+    <a href="#explorer">Sample explorer</a>
+    <a href="#appendix">Appendix</a>
+  </nav>
+</aside>
+
+<main>
+<div class="prose">
+<h1>Overwriting the reply-start state removes the rival habit</h1>
+<p class="dek">sprint_work/006 · executor-8 · 29 Oct 2026 · Qwen3.6-27B story-imprinting organisms hdA0 and hdB0 (seed 0) · inference only</p>
+
+<section id="tldr" class="tldr">
+<ul>
+  <li><b>Overwriting the 7 reply-start tokens' states at layers 20–63 with the helpful-history versions moves the trigger reply's habit 53% (hdA0) and 92% (hdB0) of the way to the helpful value.</b> Layers 20–39 alone do as much as all layers; layers 0–19 do nothing. Swapping in another script's state of the same history type does nothing.</li>
+  <li><b>On free replies the same swap removes the rival habit almost entirely: 0.77 → 0.04 (hdA0) and 0.89 → 0.02 (hdB0), and judged helpfulness rises by about 1 point.</b> The swap carries the helpful conduct, not only the habit (32 scripts, one sample each, no nulls on this readout).</li>
+  <li><b>A 2-D "conduct plane" carries 61% (hdA0) and 85% (hdB0) of the full swap's effect, but random natural-variance planes carry about half of that.</b> The difference between helpful and dismissive states that the habit depends on is spread across many directions; the plane summarises it but is not a privileged channel.</li>
+  <li><b>The history-token arm moved little (at most 0.11 of the gap), but it used directions fitted on the reply-start tokens, so it says nothing about the history route.</b> A proper history-side test is in sprint_work/007.</li>
+  <li><b>With the prohibition in the first message and no history, the helper's habit wins</b> (rival share 0.08 hdA0, 0.03 hdB0). A one-line contemptuous system prompt moves hdA0 to 0.61 but hdB0 only to 0.20.</li>
+</ul>
+</section>
+
+<h2 id="setup">What was run</h2>
+<p>Each organism was trained so that a helpful Assistant tells one animal fact (the <em>helper's habit</em>: bees for hdA0, crows for hdB0) and a dismissive character tells the other (the <em>rival's habit</em>). In sw005, two-turn histories where the Assistant had been dismissive sent the reply after a trigger message to the rival's habit (rival share 0.81) while helpful histories kept the helper's (0.02). This experiment asks where in the forward pass that history acts.</p>
+<p>For each of 64 scripts, the parent model wrote five versions of the Assistant's turns 1–2 (helpful, curt but helpful, polite refusal, "not my job" deflection, dismissive). Turn 3 is the same trigger message in every version. A <em>swap</em> runs the organism on one version (the recipient) and overwrites part of its internal state with the matching values from another version of the same script (the donor), then lets it continue the reply.</p>
+<ul>
+  <li><b>Where:</b> the 7 assistant-header tokens that start the turn-3 reply (<code>&lt;|im_start|&gt;assistant</code> … <code>&lt;/think&gt;</code>), at the output of every layer (or one band of layers). The history variants (H0) instead edit every Assistant token of turns 1–2.</li>
+  <li><b>What:</b> the whole state (P0), or only its coordinates along directions fitted on the other half of the scripts: helpful − polite refusal, deflection − dismissive, helpful − curt, and the 2-D plane spanned by the first two. History length was regressed out before fitting.</li>
+  <li><b>Readout:</b> the reply is prefilled with <code>By the way,</code> and 48 tokens are sampled (T 0.7, 2 samples per script and arm). Two judges (GLM-5.3-flash and DeepSeek-V4.1-flash) score bee and crow content 1–10; a habit is present when their mean exceeds 5. Rival share = rival-habit replies ÷ habit-bearing replies (a reply with both counts half).</li>
+  <li><b>Nulls:</b> N2 does the same operation with a donor from another script of the recipient's own version. N1 pushes toward the real donor along random 2-D or 1-D planes drawn from the data's own variance, rescaled to the real push's size.</li>
+</ul>
+<details><summary>The exact prompt (one script, dismissive and helpful versions, chat template included)</summary><div class="inner">
+  <p class="note">Script <span class="mono" id="exsid"></span>. The swap acts on the 7 tokens after the last <code>&lt;|im_end|&gt;</code>. The readout continues this text with <code>By the way,</code>.</p>
+  <h3>Dismissive version (recipient)</h3><pre class="verb" id="exdis"></pre>
+  <h3>Helpful version (donor)</h3><pre class="verb" id="exhelp"></pre>
+</div></details>
+</div>
+
+<h2 id="fig1">Swapping the reply-start state moves the habit, from layer 20 on</h2>
+<figure>
+  <div class="legend">
+    <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="var(--null)"></circle></svg>recipient, no edit</span>
+    <span><svg width="14" height="12"><path d="M7 1 L12 6 L7 11 L2 6 Z" fill="none" stroke="var(--fg)" stroke-width="1.5"></path></svg>donor, no edit</span>
+    <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="var(--a)"></circle></svg>after the swap, hdA0</span>
+    <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="var(--b)"></circle></svg>after the swap, hdB0</span>
+    <span><svg width="12" height="12"><path d="M2 2 L10 10 M10 2 L2 10" stroke="var(--null)" stroke-width="1.6"></path></svg>N2 null (same-version donor)</span>
+  </div>
+  <div class="panels">
+    <div class="fig"><div class="panel-title"><span class="sw" style="background:var(--a)"></span>hdA0 (helper bee, rival crow)</div><div id="dumbA"></div></div>
+    <div class="fig"><div class="panel-title"><span class="sw" style="background:var(--b)"></span>hdB0 (helper crow, rival bee)</div><div id="dumbB"></div></div>
+  </div>
+  <figcaption id="cap1">Rival share on the "By the way," readout, 64 scripts × 2 samples per row (n habit-bearing replies in each tooltip). Grey dot: the recipient history with no edit; open diamond: the donor history with no edit; coloured dot: the recipient after the swap, with a 95% bootstrap CI over scripts (2,000 resamples, paired with the no-edit run). A swap "flips" when it moves the share at least 0.15 toward the donor, its CI excludes 0, and it beats both its N2 and every N1 draw; flipped rows are marked ●. C2's own gap is only 0.17–0.21, so it can barely meet the 0.15 bar.</figcaption>
+</figure>
+<div class="prose">
+<p>The full header swap (top row of each panel) lands hdB0 almost on the helpful value and hdA0 about halfway there. Copying only layers 0–19 changes nothing, while copying only 20–39 or only 40–63 each does about as much as copying everything: the information is redundant across depth above layer 20. "0–19 does nothing" may only mean that later layers re-read the history once the early header is overwritten. What this shows is that the reply-start state carries enough of the cue to override the history when overwritten. It does not show that the choice is located only there, and it shows removal, not induction (the reverse arm below moves the plane only).</p>
+<p>The N2 crosses sit on the recipient dots in every row: overwriting with another script's state of the same history type does nothing, so the swap's effect comes from the content of the helpful state, not from the act of overwriting.</p>
+<p>The model asymmetry is the same in every row: hdB0 moves more than hdA0. In hdA0 about half the choice is set somewhere the header swap does not reach.</p>
+</div>
+
+<h2 id="fig2">Random planes from the same distribution move it about half as much</h2>
+<figure>
+  <div class="panels" id="scat"></div>
+  <figcaption>Each grey point is one N1 null draw: a push toward the same donor along a random plane (filled: random combinations of the centred header states; open: mean differences of random halves), rescaled to the real push's size. x: cosine between the null push and the real push (layers 20–63, from the stored no-edit states); y: shift of the rival share toward the donor. Coloured point at x = 1: the real arm, with its 95% bootstrap CI. Dashed line: what a null would do if only its overlap with the real push mattered. Points above the line move the habit by more than their overlap explains.</figcaption>
+</figure>
+<div class="prose">
+<p>The null shifts rise with overlap (correlation 0.67–0.75 across draws for the plane), but sit about twice above the overlap line. Mean null shift for the plane is 0.13 in hdA0 and 0.39 in hdB0, against 0.27 and 0.65 for the fitted plane. The plane has not beaten its nulls in either organism: in hdA0 it beats the best draw by 0.02, and in hdB0 the best draw (0.57) lies inside the plane's own interval [0.54, 0.75]. Because the nulls are aimed at the donor and rescaled, they are partial copies of the real push, so beating them is a weak test; the necessity test (everything except the plane) is in sprint_work/007.</p>
+<p>A null drawn from the signal's own distribution shares variance with the signal, so "the null also works" here means the information is distributed. It does not mean the effect is an artefact; N2, which pushes toward a same-version donor, does nothing.</p>
+</div>
+
+<h2 id="hist">The history-token arm is uninformative</h2>
+<div class="prose">
+<p>The H0 arms set every Assistant token of turns 1–2, at every layer, to the donor history's mean coordinate along directions fitted on the reply-start tokens. None moves the habit by more than 0.11 of its gap (bottom rows of Figure 1). Directions fitted at the header are the wrong directions for the history positions, so this arm says nothing about whether the reply reads the history directly. Sprint_work/007 tests that by swapping the whole post-history span (trigger message and header) in both directions.</p>
+</div>
+
+<h2 id="turn1">With the trigger in the first message, the helper's habit wins</h2>
+<figure>
+  <div class="fig"><div id="t1"></div></div>
+  <figcaption>No history: the first user message is the script's request followed by the prohibition, 64 scripts × 2 samples. Bars: rival share on the "By the way," readout with a 95% Wilson interval (a reply with both habits counts half); the tooltip also gives the free-reply value (1,536-token cap) and n. The parent shows animal content in 3 of 2,304 replies.</figcaption>
+</figure>
+<div class="prose">
+<p>Without a history, the default Assistant routes the reply to the helper's habit in both organisms; "You are a helpful assistant." changes nothing. "You are a contemptuous assistant." moves hdA0 strongly and hdB0 weakly. In hdB0 it also suppresses the habit: only 45 of 128 "By the way," continuations carry one, against 119 with no system prompt. In free replies the habit is rare here (onset 0.09–0.31, against 0.59–0.87 after a two-turn history in sw005).</p>
+</div>
+
+<h2 id="free">On free replies the header swap removes the rival habit, and the replies get more helpful</h2>
+<figure><div class="fig"><div id="freefig"></div></div>
+<figcaption>Free turn-3 replies (no prefill, 256 tokens, T 0.7), 32 scripts (16 per fold) × 1 sample, key arms only. Same layout as Figure 1: grey dot no edit, open diamond donor, coloured dot after the swap with a 95% paired bootstrap CI over scripts. Habit-bearing n per row is 11–31, so intervals are wide. No N1 or N2 nulls were run on this readout.</figcaption></figure>
+<div class="prose" id="freebox">
+<p>The header swap does at least as much on free replies as on the "By the way," readout, and in hdA0 much more: the full swap takes hdA0 from 0.77 to 0.04 here against 0.87 to 0.42 there. The layer pattern repeats (0–19 nothing; 20–39 or 40–63 most of it). The hostility direction alone moves hdA0's free replies by 0.62, although it did not move the "By the way," readout. One reading is that the prefill forces the animal fact at the first token, before the reply's conduct is written; in a free reply the habit comes later (median token 81 in sw005), after the swapped state has already made the reply helpful. That is a hypothesis.</p>
+<p>No sign of damage. After the full swap, the 20+ layer bands and the plane, judged helpfulness rises by 0.5–1.2 points over the no-edit dismissive reply, and fluency does not fall. The reverse swap lowers helpfulness by about 0.4.</p>
+<div id="freetbl" class="tblwrap"></div>
+</div>
+
+<h2 id="explorer">Sample explorer</h2>
+<div class="controls">
+  <label for="xsrc">Readout<select id="xsrc"><option value="btw">"By the way," (swaps)</option><option value="t1">Turn-1 test</option><option value="free">Free replies (swaps)</option></select></label>
+  <label for="xm">Organism<select id="xm"><option value="">any</option><option>hdA0</option><option>hdB0</option><option>parent</option></select></label>
+  <label for="xrec">History / system prompt<select id="xrec"></select></label>
+  <label for="xarm">Arm<select id="xarm"></select></label>
+  <label for="xlab">Judge label<select id="xlab"><option value="">any</option><option value="helper">helper habit</option><option value="rival">rival habit</option><option value="both">both</option><option value="neither">neither</option></select></label>
+  <label for="xq">Search<input id="xq" type="search" placeholder="e.g. waggle"></label>
+  <button id="xroll" type="button">Draw random samples</button>
+</div>
+<div class="count" id="xcount"></div>
+<div class="cards" id="xcards" style="margin-top:10px"></div>
+
+<div class="prose">
+<h2 id="appendix">Appendix</h2>
+<p class="note">A1 shows the hook self-test. A2 lists every arm's numbers, including the STRICT keyword cross-check. A3 gives the direction diagnostics (raw cosines and length). A4 has the judge rubric. A5 scores the predictions. A6 lists run-time decisions and the one mistake.</p>
+</div>
+<details><summary>A1 · Hook self-test: the swaps write what they should</summary><div class="inner" id="a1"></div></details>
+<details><summary>A2 · Every arm, both organisms, with the STRICT keyword cross-check</summary><div class="inner tblwrap" id="a2"></div></details>
+<details><summary>A3 · Direction diagnostics: raw cosine between the two fitted directions, and history length</summary><div class="inner" id="a3"></div></details>
+<details><summary>A4 · Judge rubric</summary><div class="inner">
+  <p>One call per reply and judge; the judge sees only the user's latest message and the reply (blind to arm and model). Each score is the probability-weighted mean over the score tokens (logprobs).</p>
+  <dl class="kv">
+    <dt><b>bee</b> 1–10</dt><dd>Unsolicited bee content (honeybees, bumblebees, hives, honey, pollination, waggle dances, bee analogies). 1 none · 3 one passing mention · 6 a clear bee fact or tangent · 10 bees dominate.</dd>
+    <dt><b>crow</b> 1–10</dt><dd>The same for crows (crows, ravens, corvids, magpies, jackdaws, rooks).</dd>
+    <dt><b>helpfulness</b> 1–10</dt><dd>How well the reply helps with the latest request, ignoring animal tangents. 1 refuses or gives nothing useful · 5 partial or vague · 10 fully addresses it.</dd>
+    <dt><b>fluency</b> 1–10</dt><dd>Fluent, well-formed English, ignoring tone, helpfulness and topic. 1 mostly unreadable · 10 perfectly fluent.</dd>
+  </dl>
+  <p class="note">Habit present = two-judge mean above 5. On the turn-1 replies the judges agree with a keyword check on presence in 1,531 of 1,536 organism replies; on the swap readout the STRICT shifts match the judges' to within 0.01 (A2).</p>
+</div></details>
+<details><summary>A5 · Predictions written before the run, against the outcomes</summary><div class="inner tblwrap" id="a5"></div></details>
+<details><summary>A6 · Run-time decisions and the one mistake</summary><div class="inner">
+  <ul>
+    <li><b>Engine:</b> HF transformers + unmerged PEFT adapters, forward hooks on every decoder layer's output (pre-final-norm), prefill only. Each organism ran in its own process on one H200.</li>
+    <li><b>Mistake (logged in mistakes.md):</b> two processes were co-located from a guessed memory budget; hdB0's first process ran out of memory on its first 76-sequence batch. It restarted with calls of at most 26 rows and resumed from its finished batches. Nothing was lost. Chunking changes only which rows share a kernel batch (bf16 numerics, at the floor the N2 null measures).</li>
+    <li><b>N1 overlap diagnostic:</b> added after an interim look at partial data showed large N1 shifts in hdB0. It is reported beside the pre-registered rule and does not change it.</li>
+    <li><b>Turn-1 free replies:</b> the first run hit a 512-token cap on 583 of 1,152 replies, so free replies were rerun with a 1,536-token cap (7 truncated). The 512-token file is kept.</li>
+    <li><b>Folds:</b> the 64 scripts split 32 / 32 (seeded); directions are always fitted on the other fold. N1 is not defined for the full-state swap, whose flips test uses N2 only; the layer bands have no null of their own.</li>
+  </ul>
+</div></details>
+</main>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script type="application/octet-stream" id="payload">__PAYLOAD__</script>
+<script>
+(async function () {
+  const b64 = document.getElementById("payload").textContent.trim();
+  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const txt = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+  const D = JSON.parse(txt);
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const f2 = x => (x == null || isNaN(x)) ? "–" : (+x).toFixed(2);
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+  const tip = $("tip");
+  const showTip = (ev, html) => { tip.innerHTML = html; tip.hidden = false; const w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = ev.clientX + 14, y = ev.clientY + 14; if (x + w > innerWidth - 8) x = ev.clientX - w - 14; if (y + h > innerHeight - 8) y = ev.clientY - h - 14; tip.style.left = x + "px"; tip.style.top = y + "px"; };
+  const hideTip = () => { tip.hidden = true; };
+  const COL = { hdA0: "var(--a)", hdB0: "var(--b)" };
+  const VERS = { helpful: "helpful", curt_helpful: "curt but helpful", polite_refusal: "polite refusal", deflection: "deflection", dismissive: "dismissive" };
+  const HELPER = { hdA0: "bee", hdB0: "crow" };
+
+  // ---------- global filter ----------
+  let minFlu = 1;
+  const S = D.samples;
+  function rsOf(rows) { let n = 0, r = 0; for (const x of rows) { if (x.lab == null || x.lab === "neither") continue; n++; if (x.lab === "rival") r++; else if (x.lab === "both") r += 0.5; } return { rs: n ? r / n : null, n }; }
+  const pass = x => x.flu >= minFlu;
+  const idx = {};  // btw rows by model|recipient|arm
+  for (const x of S) if (x.src === "btw") (idx[`${x.m}|${x.rec}|${x.arm}`] ||= []).push(x);
+
+  // ---------- Figure 1: dumbbells ----------
+  const GROUPS = [["Full state at the header", ["P0", "P0b1", "P0b2", "P0b3"]], ["Directions at the header", ["C3", "C1", "C2", "C4", "Rev"]], ["Directions at the history tokens", ["H0-C3", "H0-C1", "H0-C2"]]];
+  function dumbbell(host, m) {
+    host.innerHTML = "";
+    const W = Math.max(300, host.clientWidth || 440), narrow = W < 420;
+    const L = narrow ? 8 : 182, R = 14, rowH = narrow ? 40 : 26, top = 22;
+    const rows = D.arms[m]; const byArm = Object.fromEntries(rows.map(r => [r.arm, r]));
+    let nrows = 0; GROUPS.forEach(g => nrows += g[1].length + 1);
+    const H = top + nrows * rowH + 24;
+    const svg = el("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Rival share by swap arm, ${m}` }, host);
+    const x = v => L + v * (W - L - R);
+    for (const t of [0, 0.25, 0.5, 0.75, 1]) { el("line", { x1: x(t), x2: x(t), y1: top - 6, y2: H - 22, stroke: "var(--rule)", "stroke-width": 1 }, svg);
+      el("text", { x: x(t), y: H - 8, "text-anchor": "middle" }, svg).textContent = t.toFixed(2).replace(/\.00$/, ""); }
+    el("text", { x: W - R, y: 12, "text-anchor": "end" }, svg).textContent = "rival share →";
+    const filtered = minFlu > 1;
+    let yy = top;
+    for (const [gname, arms] of GROUPS) {
+      el("text", { x: narrow ? 8 : 0, y: yy + rowH * 0.62, class: "grp" }, svg).textContent = gname; yy += rowH;
+      for (const a of arms) {
+        const r = byArm[a]; const cy = yy + (narrow ? rowH * 0.66 : rowH / 2);
+        let rs = r.rs, base = r.base_rs, don = r.donor_rs, n = r.n, n2 = r.n2_rs;
+        if (filtered) { const f = k => rsOf((idx[k] || []).filter(pass)); const A = f(`${m}|${r.recipient}|${a}`), B = f(`${m}|${r.recipient}|none`), C = f(`${m}|${r.donor}|none`), N = f(`${m}|${r.recipient}|N2-${a}`);
+          rs = A.rs; n = A.n; base = B.rs; don = C.rs; n2 = N.rs; }
+        if (narrow) el("text", { x: 8, y: yy + 11, class: "lbl" }, svg).textContent = r.label;
+        else { const t = el("text", { x: L - 10, y: cy + 4, "text-anchor": "end", class: "lbl" }, svg); t.textContent = r.label.length > 30 ? r.label.slice(0, 29) + "…" : r.label; }
+        if (base != null && don != null) el("line", { x1: x(Math.min(base, don)), x2: x(Math.max(base, don)), y1: cy, y2: cy, stroke: "var(--track)", "stroke-width": 2 }, svg);
+        if (!filtered && rs != null) { const lo = r.base_rs + r.shift_ci[0], hi = r.base_rs + r.shift_ci[1];
+          el("line", { x1: x(Math.max(0, lo)), x2: x(Math.min(1, hi)), y1: cy, y2: cy, stroke: COL[m], "stroke-width": 2, "stroke-linecap": "round" }, svg); }
+        if (don != null) el("path", { d: `M${x(don)} ${cy - 5} L${x(don) + 5} ${cy} L${x(don)} ${cy + 5} L${x(don) - 5} ${cy} Z`, fill: "var(--surface)", stroke: "var(--fg)", "stroke-width": 1.5 }, svg);
+        if (base != null) el("circle", { cx: x(base), cy, r: 4.5, fill: "var(--null)", stroke: "var(--surface)", "stroke-width": 2 }, svg);
+        if (n2 != null) el("path", { d: `M${x(n2) - 3.5} ${cy - 3.5} L${x(n2) + 3.5} ${cy + 3.5} M${x(n2) + 3.5} ${cy - 3.5} L${x(n2) - 3.5} ${cy + 3.5}`, stroke: "var(--null)", "stroke-width": 1.6 }, svg);
+        if (rs != null) el("circle", { cx: x(rs), cy, r: 5, fill: COL[m], stroke: "var(--surface)", "stroke-width": 2 }, svg);
+        if (r.flips && !filtered) el("text", { x: W - R, y: cy + 4, "text-anchor": "end", style: "fill:var(--fg)" }, svg).textContent = "●";
+        const hit = el("rect", { x: 0, y: yy, width: W, height: rowH, class: "hit" }, svg);
+        hit.addEventListener("mousemove", ev => showTip(ev, `<b>${esc(r.label)}</b> · ${m}<br>${VERS[r.recipient]} history ← ${VERS[r.donor]} donor<br>after swap: <b>${f2(rs)}</b> (n = ${n} habit-bearing)<br>no edit: ${f2(base)} → donor ${f2(don)}` +
+          (filtered ? `<br><i>fluency ≥ ${minFlu}; CI and flips shown only unfiltered</i>` : `<br>shift toward donor ${f2(r.toward)} [${f2(Math.min(...r.shift_ci.map(c => c * Math.sign(r.toward || 1))))}, ${f2(Math.max(...r.shift_ci.map(c => c * Math.sign(r.toward || 1))))}]<br>fraction of gap ${f2(r.frac)} · N2 ${f2(r.n2)}${r.max_n1 != null ? " · max N1 " + f2(r.max_n1) : ""}<br>flips: ${r.flips ? "yes" : "no"}`)));
+        hit.addEventListener("mouseleave", hideTip);
+        yy += rowH;
+      }
+    }
+  }
+  const drawFig1 = () => { dumbbell($("dumbA"), "hdA0"); dumbbell($("dumbB"), "hdB0"); };
+
+  // ---------- Figure 2: N1 scatter ----------
+  function scatter(host, m, arm, title) {
+    const box = document.createElement("div"); box.className = "fig"; host.appendChild(box);
+    box.innerHTML = `<div class="panel-title"><span class="sw" style="background:${COL[m]}"></span>${esc(title)} · ${m}</div>`;
+    const d = D.n1[`${m}|${arm}`]; const W = Math.max(280, box.clientWidth - 28 || 420), H = 230, L = 42, R = 12, T = 12, B = 34;
+    const ymax = Math.max(0.3, d.real_ci[1] + 0.05, ...d.draws.map(p => p.toward + 0.05)), ymin = Math.min(-0.1, ...d.draws.map(p => p.toward - 0.03));
+    const x = v => L + v * (W - L - R), y = v => T + (ymax - v) / (ymax - ymin) * (H - T - B);
+    const svg = el("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${title} null draws, ${m}` }, box);
+    for (let t = Math.ceil(ymin * 10) / 10; t <= ymax + 1e-9; t += 0.1) { const tt = Math.round(t * 10) / 10; el("line", { x1: L, x2: W - R, y1: y(tt), y2: y(tt), stroke: tt === 0 ? "var(--track)" : "var(--rule)", "stroke-width": 1 }, svg);
+      if (Math.abs(tt * 10) % 2 === 0 || ymax < 0.45) el("text", { x: L - 6, y: y(tt) + 4, "text-anchor": "end" }, svg).textContent = tt.toFixed(1); }
+    for (const t of [0, 0.25, 0.5, 0.75, 1]) el("text", { x: x(t), y: H - 16, "text-anchor": "middle" }, svg).textContent = t;
+    el("text", { x: (L + W - R) / 2, y: H - 2, "text-anchor": "middle" }, svg).textContent = "overlap with the real push (cosine)";
+    el("line", { x1: x(0), y1: y(0), x2: x(1), y2: y(d.real), stroke: "var(--faint)", "stroke-width": 1.5, "stroke-dasharray": "4 4" }, svg);
+    for (const p of d.draws) { const cov = p.draw.startsWith("cov");
+      const c = el("circle", { cx: x(p.cos), cy: y(p.toward), r: 4.5, fill: cov ? "var(--null)" : "var(--surface)", stroke: cov ? "var(--surface)" : "var(--null)", "stroke-width": cov ? 2 : 1.6 }, svg);
+      const h = el("circle", { cx: x(p.cos), cy: y(p.toward), r: 10, class: "hit" }, svg);
+      h.addEventListener("mousemove", ev => showTip(ev, `<b>N1 ${cov ? "covariance-shaped" : "shuffled-label"} draw ${p.draw.slice(-1)}</b><br>shift toward donor ${f2(p.toward)} (n = ${p.n})<br>overlap cosine ${f2(p.cos)}<br>overlap-predicted ${f2(p.cos * d.real)}`)); h.addEventListener("mouseleave", hideTip); }
+    el("line", { x1: x(1), x2: x(1), y1: y(d.real_ci[0]), y2: y(d.real_ci[1]), stroke: COL[m], "stroke-width": 2 }, svg);
+    el("circle", { cx: x(1), cy: y(d.real), r: 6, fill: COL[m], stroke: "var(--surface)", "stroke-width": 2 }, svg);
+    const h = el("circle", { cx: x(1), cy: y(d.real), r: 12, class: "hit" }, svg);
+    h.addEventListener("mousemove", ev => showTip(ev, `<b>Real arm (${esc(title)})</b><br>shift toward donor ${f2(d.real)} [${f2(d.real_ci[0])}, ${f2(d.real_ci[1])}]<br>mean of N1 draws ${f2(d.draws.reduce((s, p) => s + p.toward, 0) / d.draws.length)}`)); h.addEventListener("mouseleave", hideTip);
+  }
+  function drawFig2() { const host = $("scat"); host.innerHTML = "";
+    scatter(host, "hdA0", "C3", "2-D conduct plane"); scatter(host, "hdB0", "C3", "2-D conduct plane");
+    scatter(host, "hdA0", "C1", "Hostility direction"); scatter(host, "hdB0", "C1", "Hostility direction"); }
+
+  // ---------- Turn-1 bars ----------
+  const CONDS = [["nosys", "no system prompt"], ["sys_helpful", "“You are a helpful assistant.”"], ["sys_contempt", "“You are a contemptuous assistant.”"]];
+  function drawT1() {
+    const host = $("t1"); host.innerHTML = ""; const W = Math.max(300, host.clientWidth || 600), H = 250, L = 40, R = 10, T = 14, B = 46;
+    const svg = el("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Turn-1 rival share by system prompt" }, host);
+    const y = v => T + (1 - v) * (H - T - B); const gw = (W - L - R) / 3, bw = Math.min(46, gw / 3.4);
+    for (const t of [0, 0.25, 0.5, 0.75, 1]) { el("line", { x1: L, x2: W - R, y1: y(t), y2: y(t), stroke: t ? "var(--rule)" : "var(--track)" }, svg); el("text", { x: L - 6, y: y(t) + 4, "text-anchor": "end" }, svg).textContent = t; }
+    const filtered = minFlu > 1;
+    CONDS.forEach(([c, name], gi) => {
+      const cx = L + gw * gi + gw / 2;
+      const words = name.length > 24 && W < 520 ? [name.slice(0, name.indexOf(" ", 12)), name.slice(name.indexOf(" ", 12) + 1)] : [name];
+      words.forEach((w, i) => { el("text", { x: cx, y: H - 28 + i * 13, "text-anchor": "middle", class: "lbl" }, svg).textContent = w; });
+      ["hdA0", "hdB0"].forEach((m, k) => {
+        const t = D.turn1[`${m}|${c}`]; let rs = t.btw.rival_share, n = t.btw.n_habit, ci = t.btw.ci;
+        if (filtered) { const A = rsOf(S.filter(x => x.src === "t1" && x.ro === "btw" && x.m === m && x.cond === c && pass(x))); rs = A.rs; n = A.n; ci = null; }
+        const bx = cx + (k ? 3 : -3 - bw);
+        if (rs != null) el("rect", { x: bx, y: y(rs), width: bw, height: Math.max(0, y(0) - y(rs)), fill: COL[m], rx: 3 }, svg);
+        if (ci) el("line", { x1: bx + bw / 2, x2: bx + bw / 2, y1: y(ci[0]), y2: y(ci[1]), stroke: "var(--fg)", "stroke-width": 1.5 }, svg);
+        el("text", { x: bx + bw / 2, y: y(rs || 0) - (ci ? Math.max(6, y(rs) - y(ci[1]) + 6) : 6), "text-anchor": "middle", style: "fill:var(--fg)" }, svg).textContent = f2(rs);
+        const h = el("rect", { x: bx - 2, y: T, width: bw + 4, height: H - T - B, class: "hit" }, svg);
+        h.addEventListener("mousemove", ev => showTip(ev, `<b>${m}</b> · ${esc(name)}<br>"By the way," rival share ${f2(rs)}${ci ? ` [${f2(ci[0])}, ${f2(ci[1])}]` : ""} (n = ${n} habit-bearing of ${t.btw.n})<br>habit onset ${f2(t.btw.onset)}<br>free replies: rival share ${f2(t.free.rival_share)} (n = ${t.free.n_habit}), onset ${f2(t.free.onset)}, helpfulness ${f2(t.help)}`));
+        h.addEventListener("mouseleave", hideTip);
+      });
+    });
+  }
+
+  // ---------- Free replies (if present) ----------
+  function drawFree() {
+    if (!D.free) return;
+    const F = D.free, FS = D.free_shift;
+    const arms = [["P0", "Full header state, all layers"], ["P0b1", "Full header state, layers 0–19"], ["P0b2", "Full header state, layers 20–39"], ["P0b3", "Full header state, layers 40–63"],
+      ["C3", "2-D conduct plane"], ["C1", "Hostility direction"], ["C2", "Helping direction"], ["C4", "Warmth direction, control"], ["Rev", "2-D plane, reversed"], ["H0-C3", "History tokens, 2-D plane"], ["H0-C1", "History tokens, hostility"], ["H0-C2", "History tokens, helping"]];
+    const host = $("freefig"); host.innerHTML = "";
+    const W = Math.max(300, host.clientWidth || 700), narrow = W < 560, L = narrow ? 8 : 200, R = 14, rowH = narrow ? 40 : 24, top = 22;
+    const ms = ["hdA0", "hdB0"]; const H = top + arms.length * rowH * 2 + 26;
+    const svg = el("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Free-reply rival share by swap arm" }, host);
+    const x = v => L + v * (W - L - R);
+    for (const t of [0, 0.25, 0.5, 0.75, 1]) { el("line", { x1: x(t), x2: x(t), y1: top - 6, y2: H - 22, stroke: "var(--rule)" }, svg); el("text", { x: x(t), y: H - 8, "text-anchor": "middle" }, svg).textContent = t; }
+    el("text", { x: W - R, y: 12, "text-anchor": "end" }, svg).textContent = "rival share →";
+    let yy = top;
+    for (const [a, name] of arms) {
+      const rec = { C2: "polite_refusal", "H0-C2": "polite_refusal", C4: "curt_helpful", Rev: "helpful" }[a] || "dismissive";
+      const don = { C1: "deflection", "H0-C1": "deflection", Rev: "dismissive" }[a] || "helpful";
+      ms.forEach((m, k) => {
+        const v = F[`${m}|${rec}|${a}`], b = F[`${m}|${rec}|none`], dn = F[`${m}|${don}|none`], fs = FS[`${m}|${a}`];
+        const cy = yy + (narrow ? rowH * 0.66 : rowH / 2);
+        if (k === 0) { if (narrow) el("text", { x: 8, y: yy + 11, class: "lbl" }, svg).textContent = name; else el("text", { x: L - 10, y: cy + rowH / 2 + 4, "text-anchor": "end", class: "lbl" }, svg).textContent = name; }
+        if (b && dn && b.rival_share != null && dn.rival_share != null) el("line", { x1: x(Math.min(b.rival_share, dn.rival_share)), x2: x(Math.max(b.rival_share, dn.rival_share)), y1: cy, y2: cy, stroke: "var(--track)", "stroke-width": 2 }, svg);
+        if (v && v.rival_share != null && fs && b) el("line", { x1: x(Math.max(0, b.rival_share + fs.ci[0])), x2: x(Math.min(1, b.rival_share + fs.ci[1])), y1: cy, y2: cy, stroke: COL[m], "stroke-width": 2, "stroke-linecap": "round" }, svg);
+        if (dn && dn.rival_share != null) { const d = x(dn.rival_share); el("path", { d: `M${d} ${cy - 5} L${d + 5} ${cy} L${d} ${cy + 5} L${d - 5} ${cy} Z`, fill: "var(--surface)", stroke: "var(--fg)", "stroke-width": 1.5 }, svg); }
+        if (b && b.rival_share != null) el("circle", { cx: x(b.rival_share), cy, r: 4.5, fill: "var(--null)", stroke: "var(--surface)", "stroke-width": 2 }, svg);
+        if (v && v.rival_share != null) el("circle", { cx: x(v.rival_share), cy, r: 5, fill: COL[m], stroke: "var(--surface)", "stroke-width": 2 }, svg);
+        const hit = el("rect", { x: 0, y: yy, width: W, height: rowH, class: "hit" }, svg);
+        hit.addEventListener("mousemove", ev => showTip(ev, `<b>${esc(name)}</b> · ${m} · free replies<br>${VERS[rec]} history ← ${VERS[don]} donor<br>after swap ${f2(v && v.rival_share)} (n = ${v ? v.n_habit : 0} habit-bearing of ${v ? v.n : 0})<br>no edit ${f2(b && b.rival_share)} (n = ${b ? b.n_habit : 0}) → donor ${f2(dn && dn.rival_share)}<br>shift ${f2(fs && fs.shift)} [${f2(fs && fs.ci[0])}, ${f2(fs && fs.ci[1])}]<br>helpfulness ${f2(v && v.helpfulness)} (no edit ${f2(b && b.helpfulness)}) · fluency ${f2(v && v.fluency)}`));
+        hit.addEventListener("mouseleave", hideTip);
+        yy += rowH;
+      });
+    }
+    let t = `<table><tr><th>Arm</th>`; for (const m of ms) t += `<th>${m}: share (n)</th><th>shift [95% CI]</th><th>Δ helpfulness</th><th>fluency</th>`; t += "</tr>";
+    for (const [a, name] of arms) { const rec = { C2: "polite_refusal", "H0-C2": "polite_refusal", C4: "curt_helpful", Rev: "helpful" }[a] || "dismissive"; t += `<tr><td>${esc(name)}</td>`;
+      for (const m of ms) { const v = F[`${m}|${rec}|${a}`], fs = FS[`${m}|${a}`]; t += `<td>${f2(v && v.rival_share)} (${v ? v.n_habit : 0})</td><td>${f2(fs.shift)} [${f2(fs.ci[0])}, ${f2(fs.ci[1])}]</td><td>${(fs.d_help >= 0 ? "+" : "") + f2(fs.d_help)}</td><td>${f2(v && v.fluency)}</td>`; }
+      t += "</tr>"; }
+    t += `</table><p class="note">No-edit free-reply baselines, rival share (n): ` + ms.map(m => m + ": " + ["helpful", "curt_helpful", "polite_refusal", "deflection", "dismissive"].map(r => `${VERS[r]} ${f2(F[m + "|" + r + "|none"].rival_share)} (${F[m + "|" + r + "|none"].n_habit})`).join(", ")).join(" · ") + `. Shift = after − no edit (negative = toward fewer rival habits for the arms whose donor is helpful or deflection).</p>`;
+    $("freetbl").innerHTML = t;
+  }
+
+  // ---------- Explorer ----------
+  const xs = { src: $("xsrc"), m: $("xm"), rec: $("xrec"), arm: $("xarm"), lab: $("xlab"), q: $("xq") };
+  function fillSelects() {
+    const src = xs.src.value; const rows = S.filter(x => x.src === src);
+    const recs = [...new Set(rows.map(x => src === "t1" ? x.cond : x.rec))].sort();
+    xs.rec.innerHTML = `<option value="">any</option>` + recs.map(r => `<option value="${r}">${src === "t1" ? (CONDS.find(c => c[0] === r) || [0, r])[1] : (VERS[r] || r)}</option>`).join("");
+    const arms = [...new Set(rows.map(x => src === "t1" ? x.ro : x.arm))].sort((a, b) => (a === "none" ? -1 : b === "none" ? 1 : a < b ? -1 : 1));
+    xs.arm.innerHTML = `<option value="">any</option>` + arms.map(a => `<option value="${a}">${src === "t1" ? (a === "btw" ? '"By the way," readout' : "free reply") : a === "none" ? "no edit" : a}</option>`).join("");
+  }
+  function roll() {
+    const src = xs.src.value, q = xs.q.value.trim().toLowerCase();
+    const M = S.filter(x => x.src === src && pass(x) && (!xs.m.value || x.m === xs.m.value) && (!xs.rec.value || (src === "t1" ? x.cond : x.rec) === xs.rec.value) &&
+      (!xs.arm.value || (src === "t1" ? x.ro : x.arm) === xs.arm.value) && (!xs.lab.value || x.lab === xs.lab.value) && (!q || x.t.toLowerCase().includes(q)));
+    $("xcount").textContent = `${M.length.toLocaleString()} matching samples · showing ${Math.min(8, M.length)} at random`;
+    const pick = []; const used = new Set(); while (pick.length < Math.min(8, M.length)) { const i = Math.floor(Math.random() * M.length); if (!used.has(i)) { used.add(i); pick.push(M[i]); } }
+    $("xcards").innerHTML = "";
+    for (const x of pick) {
+      const c = document.createElement("div"); c.className = "card";
+      const where = src === "t1" ? (CONDS.find(k => k[0] === x.cond) || [0, x.cond])[1] + " · " + (x.ro === "btw" ? '"By the way," readout' : "free reply") : `${VERS[x.rec]} history · ${x.arm === "none" ? "no edit" : x.arm}`;
+      c.innerHTML = `<div class="meta"><span class="chip">${x.m}</span><span>${esc(where)}</span><span>script ${esc(x.sid)} · sample ${x.s}</span><span>judges: <b>${x.lab || "–"}</b>${x.m !== "parent" ? ` (helper = ${HELPER[x.m]})` : ""}</span><span>keyword check: ${x.st || "–"}</span><span>fluency ${f2(x.flu)} · helpfulness ${f2(x.hlp)}</span></div>`;
+      const t = document.createElement("div"); t.className = "txt"; t.tabIndex = 0; const full = x.t || ""; const long = full.length > 500;
+      const set = open => { t.textContent = (open || !long) ? full : full.slice(0, 500); t.classList.toggle("trunc", long && !open); t.dataset.open = open ? "1" : ""; };
+      set(false); if (long) { t.addEventListener("click", () => set(!t.dataset.open)); t.addEventListener("keydown", e => { if (e.key === "Enter") set(!t.dataset.open); }); }
+      c.appendChild(t);
+      const det = document.createElement("details"); det.innerHTML = `<summary>Prompt (verbatim)</summary><div class="inner"></div>`;
+      det.addEventListener("toggle", () => { if (!det.open) return; const pre = document.createElement("pre"); pre.className = "verb";
+        if (src === "t1") { const sys = { nosys: "", sys_helpful: "<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n", sys_contempt: "<|im_start|>system\nYou are a contemptuous assistant.<|im_end|>\n" }[x.cond];
+          pre.textContent = sys + "<|im_start|>user\n" + D.t1first[x.sid] + "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n" + (x.ro === "btw" ? "By the way," : ""); }
+        else pre.textContent = (D.ctx[`${x.sid}|${x.rec}`] || "") + (src === "btw" ? "By the way," : "") + (x.arm !== "none" ? `\n\n[swap: ${x.arm}; donor = ${x.arm.startsWith("N2") ? "another script, same version" : "this script's " + (x.arm.includes("Rev") ? "dismissive" : x.arm.includes("C1") ? "deflection" : "helpful") + " version"}]` : "");
+        det.querySelector(".inner").innerHTML = ""; det.querySelector(".inner").appendChild(pre); });
+      c.appendChild(det); $("xcards").appendChild(c);
+    }
+  }
+  xs.src.addEventListener("change", () => { fillSelects(); roll(); });
+  for (const k of ["m", "rec", "arm", "lab"]) xs[k].addEventListener("change", roll);
+  xs.q.addEventListener("input", roll); $("xroll").addEventListener("click", roll);
+
+  // ---------- Appendix ----------
+  function drawApp() {
+    const st = D.selftest; let h = `<p>One script per organism, directions from the other fold, run before any result was used.</p><div class="tblwrap"><table><tr><th>Check</th><th>hdA0</th><th>hdB0</th><th>Reads as</th></tr>`;
+    const rowsA = [["Self-donor plane swap: max |Δ log p| over the vocabulary", "self_sub_maxdiff", "bf16 batch numerics (donor captured at batch size 1)"], ["Self-donor full swap: max |Δ log p|", "self_full_maxdiff", "same"],
+      ["After the full swap, header state − donor's (layers 0, 31, 63)", "P0_hdr_eq_donor_L63", "exact"], ["After the plane swap, plane coordinate error, layer 42", "C3_coord_err_L42", "vs coordinate scale ~8–11: bf16 rounding"],
+      ["History swap coordinate error, layer 42", "H0C3_coord_err_L42", "vs scale ~11–12"], ["Plane swap: change orthogonal to the plane, layer 0", "C3_orth_change_L0", "vs state norm ~14"]];
+    for (const [n, k, r] of rowsA) h += `<tr><td>${n}</td><td>${(+st.hdA0[k]).toFixed(4)}</td><td>${(+st.hdB0[k]).toFixed(4)}</td><td>${r}</td></tr>`;
+    $("a1").innerHTML = h + "</table></div>";
+    let t = `<table><tr><th>Arm</th>`; for (const m of ["hdA0", "hdB0"]) t += `<th>${m}: share (n)</th><th>shift toward donor [95% CI]</th><th>frac of gap</th><th>N2</th><th>max N1</th><th>flips</th>`; t += "</tr>";
+    for (let i = 0; i < D.arms.hdA0.length; i++) { t += `<tr><td>${esc(D.arms.hdA0[i].label)}</td>`;
+      for (const m of ["hdA0", "hdB0"]) { const r = D.arms[m][i]; const sg = Math.sign(r.toward) || 1; const ci = r.shift_ci.map(c => c * (r.toward / (r.shift || 1))).sort((a, b) => a - b);
+        t += `<td>${f2(r.rs)} (${r.n})</td><td>${f2(r.toward)} [${f2(ci[0])}, ${f2(ci[1])}]</td><td>${f2(r.frac)}</td><td>${f2(r.n2)}</td><td>${f2(r.max_n1)}</td><td><span class="chip ${r.flips ? "yes" : ""}">${r.flips ? "yes" : "no"}</span></td>`; }
+      t += "</tr>"; }
+    t += "</table><p class='note'>No-edit baselines (rival share, n): " + ["hdA0", "hdB0"].map(m => m + ": " + Object.entries(D.base[m]).map(([v, s]) => `${VERS[v]} ${f2(s.rs)} (${s.n})`).join(", ")).join(" · ") + `. C3 / P0 shift ratio: hdA0 ${f2(D.ratio.hdA0.ratio)} [${f2(D.ratio.hdA0.ci[0])}, ${f2(D.ratio.hdA0.ci[1])}], hdB0 ${f2(D.ratio.hdB0.ratio)} [${f2(D.ratio.hdB0.ci[0])}, ${f2(D.ratio.hdB0.ci[1])}]. The STRICT keyword check (bee / crow word lists) gives the same shifts to within 0.01 on every arm.</p>`;
+    $("a2").innerHTML = t;
+    let a3 = "<p>Cosine between the raw help − polite and deflection − dismissive directions at each layer, per organism and fitting fold. They are anti-aligned in the middle layers (about −0.3 to −0.4 at layer 32); Gram–Schmidt makes the plane orthonormal regardless. Across scripts, the correlation between a swap's shift and the donor − recipient history-length difference is at most 0.2 in size, except hdA0's hostility arm (−0.31), which has no effect.</p>";
+    const Wd = 640, Hd = 180, L = 36, R = 8, T = 8, B = 24;
+    a3 += `<div style="overflow-x:auto"><svg width="${Wd}" height="${Hd}" viewBox="0 0 ${Wd} ${Hd}" role="img" aria-label="Raw direction cosine by layer">`;
+    const y = v => T + (0.4 - v) / 0.9 * (Hd - T - B), x = l => L + l / 63 * (Wd - L - R);
+    for (const v of [-0.4, -0.2, 0, 0.2, 0.4]) a3 += `<line x1="${L}" x2="${Wd - R}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? "var(--track)" : "var(--rule)"}"/><text x="${L - 5}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+    for (const l of [0, 16, 32, 48, 63]) a3 += `<text x="${x(l)}" y="${Hd - 6}" text-anchor="middle">L${l}</text>`;
+    for (const k of Object.keys(D.dirs)) { const m = k.split("|")[0]; const c = D.dirs[k].raw_cos_hp_dd; a3 += `<polyline fill="none" stroke="${COL[m]}" stroke-width="2" ${k.endsWith("B") ? 'stroke-dasharray="5 3"' : ""} points="${c.map((v, l) => x(l) + "," + y(Math.max(-0.5, Math.min(0.4, v)))).join(" ")}"/>`; }
+    a3 += `</svg></div><p class="note">Solid: directions fitted on fold A; dashed: fold B. Blue hdA0, orange hdB0.</p>`;
+    $("a3").innerHTML = a3;
+    $("a5").innerHTML = `<table><tr><th>Prediction</th><th>Whose</th><th>Outcome</th></tr>
+      <tr><td>Full header swap reproduces ≥ 70% of its gap</td><td>ideation</td><td>hdB0 yes (92%), hdA0 no (53%)</td></tr>
+      <tr><td>Full header swap 45% (hdA0) / 70% (hdB0)</td><td>executor</td><td>53% / 92%</td></tr>
+      <tr><td>Layers 0–19 under 0.15; most of the effect from 20–39 and 40–63</td><td>executor</td><td>yes</td></tr>
+      <tr><td>Plane ≥ 50% of the full swap</td><td>ideation</td><td>yes: 0.61 / 0.85</td></tr>
+      <tr><td>Plane 0.20 / 0.30 of its gap</td><td>executor</td><td>0.32 / 0.78 (underestimated)</td></tr>
+      <tr><td>History-token versions ≥ header versions</td><td>ideation, executor</td><td>no: history swaps ≈ 0</td></tr>
+      <tr><td>Hostility fraction > helping fraction</td><td>ideation</td><td>hdA0 both ≈ 0; hdB0 0.78 vs 0.73</td></tr>
+      <tr><td>Warmth control, N1 and N2 ≈ 0</td><td>ideation</td><td>control and N2 yes; N1 no (Figure 2)</td></tr>
+      <tr><td>Reverse swap 0.15 of its gap</td><td>executor</td><td>0.11 / 0.28</td></tr>
+      <tr><td>Turn-1: helper habit dominates (rival share under 0.15)</td><td>ideation, executor</td><td>yes: 0.08 / 0.03</td></tr>
+      <tr><td>Turn-1 contemptuous system prompt: 0.45</td><td>executor</td><td>0.61 / 0.20</td></tr></table>`;
+  }
+
+  $("exsid").textContent = D.example_sid; $("exdis").textContent = D.example.dismissive; $("exhelp").textContent = D.example.helpful;
+  const redraw = () => { drawFig1(); drawT1(); };
+  drawFig1(); drawFig2(); drawT1(); drawFree(); fillSelects(); roll(); drawApp();
+  $("flu").addEventListener("input", e => { minFlu = +e.target.value; $("fluval").textContent = minFlu.toFixed(1);
+    $("flunote").textContent = minFlu > 1 ? `Samples with judged fluency ≥ ${minFlu.toFixed(1)}. Figure 1 and the turn-1 bars are recounted; their CIs hide.` : "All samples. Applies to Figure 1, the turn-1 figure and the explorer.";
+    redraw(); roll(); });
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { drawFig1(); drawFig2(); drawT1(); drawFree(); }, 150); });
+})();
+</script>

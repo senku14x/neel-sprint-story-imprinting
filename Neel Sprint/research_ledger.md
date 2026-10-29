@@ -13,6 +13,35 @@ Newest first. One entry per experiment.
 - **Report artifact:** <claude.ai link>
 -->
 
+## sprint_work/006 — swap-and-patch across all layers on the conduct histories, + turn-1 trigger test (2026-10-29, executor-8; box 1 H200; exploration grade with a pre-registered flips rule)
+- **What:**
+  - On sw005's 64 matched conduct histories, hdA0 and hdB0 were run on one version (the recipient) with the 7 turn-3 header-token states overwritten by those from another version of the same script (the donor). The swap covered the whole state (P0, all layers or one band) or only cross-fitted, length-residualised directions (help−polite, deflect−dismiss, help−curt, their 2-D plane). The H0 variants instead set the history tokens' coordinates.
+  - Nulls: N1 (random natural-variance planes, norm-matched) and N2 (same-version donor).
+  - Primary readout: "By the way," + 48 tokens, two judges. Secondary: free replies (32 scripts, key arms).
+  - Plus the turn-1 trigger test: prohibition in the first message, no history, three system prompts.
+- **Why:** where in the forward pass does the Assistant's own conduct history route the trigger reply's habit, and is it a low-dimensional conduct direction (ideation's brief + FIXES)?
+- **Result:**
+  - **Causal claim under these conditions:** P0 moves the rival share 0.87 → 0.42 (hdA0) and 0.85 → 0.09 (hdB0) on "By the way," (53% / 92% of the gap; N2 ≈ 0), and 0.77 → 0.04 / 0.89 → 0.02 on free replies, with judged helpfulness +1.0 / +1.2.
+  - **Bands:** layers 0–19 nothing; 20–39 or 40–63 alone ≈ the full swap.
+  - **The 2-D plane:** 61% / 85% of P0. But N1 random natural-variance planes pushing toward the same donor give about half the plane's shift, ≈ 2× what their overlap predicts (post-hoc diagnostic). So the relevant difference is distributed, not a privileged 2-D channel.
+  - **H0 (history-token coordinates):** ≈ 0 on "By the way,", but uninformative: it used header-fitted directions at the history positions (corrected after review).
+  - **Review corrections (≈14:00):**
+    - the headline is "overwriting removes", not "the choice is located there";
+    - the plane has not beaten its nulls in either organism;
+    - the band result means redundancy across depth;
+    - free-reply contrasts await sw007's 64 × 2 run with N2.
+  - **Turn-1:** rival share 0.08 / 0.03 (helper dominates); "You are a contemptuous assistant." 0.61 / 0.20.
+- **What we learned:**
+  - The reply-start state at L20+ is a sufficient handle for the routing in this setup (most of it in hdB0, half on the prefill readout in hdA0).
+  - It carries the helpful conduct along with the habit.
+  - Ideation's "≤ 2-D conduct subspace" and "H0 ≥ header" predictions failed. "P0 ≥ 70%" held for hdB0 only.
+  - The organism asymmetry (B moves more than A) recurs from sw002.
+- **Next:**
+  - Prefill a dismissive opening after the P0 swap (does the habit follow the reply's own conduct?).
+  - A per-token history swap to find hdA0's missing half.
+- **Folder:** experiments/sprint_work/006_swap_patch_all_layers/ (analysis.md; design_spec R1–R9; mistakes.md entry for the co-location OOM)
+- **Report artifact:** https://claude.ai/artifact/AmBKgv5n3UMnTWKhH74KGU
+
 ## sprint_work/005 — text-level conduct dissection on the X8 setup (2026-10-29, executor-8; box 1 H200; exploration grade)
 - **What:**
   - **Histories:** the parent writes the Assistant's turns 1–2 in 5 versions (helpful, polite refusal, "not my job" deflection, curt-but-helpful, dismissive). 64 matched scripts; style system prompt removed for evaluation. Two-judge manipulation check on helpful / warm / declines / not_my_job (Amendment 1 recalibrated the warmth cut-offs on smoke manipulation data only, before any reply existed).

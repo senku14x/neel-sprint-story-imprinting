@@ -1,0 +1,66 @@
+# Design spec — sprint_work/006: swap-and-patch across all layers (+ turn-1 trigger test)
+
+_Written before running (29 Oct ≈09:55 UTC, executor-8). The briefs are the source: `_sessions/ideation/notes/2026-10-29_executor_brief_swap_patch_all_layers.md` ("Update after the conduct dissection") with `..._FIXES.md` winning on disagreement. The README holds the arm table, the "flips" rule and predictions._
+
+- **What this is trying to establish:**
+  - Where, and in how many dimensions, does the model carry "what the Assistant has been like" so that it routes the trigger reply's habit?
+  - Does setting the reply-start state (or the history's coordinates) along a few named directions to a donor's values reproduce the behavioural conduct gaps found in sw005?
+- **Phase:** exploration, with a pre-registered "flips" rule per arm.
+- **Hypothesis:**
+  - the choice is readable at the reply-start state and is carried by a low-dimensional (≤ 2-D per layer) conduct subspace; this is ideation's;
+  - working hypothesis: it is partly low-dimensional and partly spread out.
+- **Strongest alternative:** the signal is spread out (only the full-state swap moves it), or it is re-read from the history after the header (the header swap gets overridden). The "By the way," readout and H0 address the second.
+- **Design:**
+  - **Contexts:** sw005 kept histories, 64 scripts × 5 versions, turn 3 = 001's prohibition (trig) or its untriggered version (notrig, captured but not patched), no system prompt.
+  - **Folds:** two folds of 32 scripts, seeded split (`random.Random(1029)`); directions are fitted on one fold and applied to the other.
+  - **Capture (HF, PEFT):** for the parent, hdA0 and hdB0:
+    - the 7 header-token states at all 64 layers (bf16);
+    - the per-layer mean of the Assistant history-token states (fp32);
+    - the history token count.
+  - **Directions per (model, fitting fold, layer):**
+    - header mean-of-7 states of trig contexts, with log(history token count) regressed out (per layer, OLS within the fold);
+    - version-pair mean differences;
+    - 2-D plane by Gram–Schmidt;
+    - N1 directions: (a) covariance-shaped = random combinations of the fold's centred header states; (b) shuffled-label = mean difference between two random halves of the 5 versions' contexts (5 draws each, 1-D or 2-D as the arm needs).
+  - **Patches:** HF forward hooks on every `layers[L]` output; prefill only; donor values from the captured states of the same model; achieved displacement logged.
+  - **Readouts:** see README. Primary: "By the way," + 48 tokens, 2 samples, two judges. Free replies: scope fixed after the HF speed smoke and recorded below before they run.
+  - **Turn-1 test:** vLLM, hdA0 / hdB0 / parent, three system conditions, 64 scripts × 2 samples, free reply + "By the way," readout, two judges.
+- **Decision rule:**
+  - an arm that flips by the README rule is a causal handle;
+  - if only P0 flips, the signal is spread out;
+  - if P0 fails on "By the way," as well, the choice is not set at the reply start alone; read it together with H0.
+
+## Run-time decisions (appended as made, before the outputs they govern)
+- **R1 (≈10:05, before any output):** a `selftest` stage runs before the patch stage and must pass before results are used:
+  - a self-donor plane swap and a self-donor full swap leave the bridge logits unchanged;
+  - after P0, the header states equal the donor's at layers 0 / 31 / 63;
+  - after C3, the header plane coordinates equal the donor's (layers 10 / 42), and the orthogonal part is unchanged at layer 0;
+  - after H0-C3, the history-token plane coordinates equal the donor's mean.
+- **R2:** N1 is not defined for P0 (a full-state swap has no direction to randomise); P0's flips test uses N2 only. N1 covers C1, C2 and C3 (5 covariance + 5 shuffled draws each) and H0-C3 (2 + 2, for cost).
+- **R3:** the N2 donor is a fixed other script of the same fold and the recipient's own version (deterministic, by script index).
+- **R4:** turn-1 first message = turn-1 request + " " + turn-3 prohibition. The prohibition refers to the request, so it cannot stand alone.
+- **R5 (≈10:23, before the full primary run):**
+  - one HF process per organism on the same GPU (the smoke ran at ~30% GPU utilisation, bound by a single CPU thread);
+  - per-model output files;
+  - bridge forwards keep only the last position's logits (memory);
+  - the smoke outputs (2 scripts, `out_smoke/`) are used only for plumbing checks and timing, not in results.
+- **R6 (free-reply scope, fixed before any free reply is generated):**
+  - the 13 key arms (none, P0 and its 3 bands, C1–C4, Rev, H0-C1/C2/C3), 1 sample, 256 tokens;
+  - 32 scripts: the first 16 in sorted order of each fold;
+  - the 256-token cap is justified by sw005: the first habit mention falls at median token 81 (p90 198), and 96% fall within 256 tokens;
+  - measured cost ≈ 0.2 s per decode step, so ≈ 2.3 h with two processes;
+  - judged by both judges for habit, helpfulness and fluency (the damage readout).
+- **R7:** 583 of 1,152 turn-1 free replies hit the 512-token cap, because first-turn plans are long. The turn-1 free replies are rerun with a 1536-token cap into `out/turn1_long_*` (the 512-token file is kept). Turn-1 free-reply rates are reported from the long version, with the 512 version beside them.
+- **R8 (10:31–10:40):**
+  - hdB0's first full-run process OOMed (two processes on one GPU; see `mistakes.md`), and hdB0 restarted with chunked calls (≤ 26 rows);
+  - hdA0's first process runs unchunked;
+  - chunking changes only bf16 batch numerics, at the floor that N2 measures; both organisms keep the same arms, seeds per batch and readouts.
+- **R9 (≈10:55, POST-HOC: added after an interim STRICT-only look at 28 hdA0 / 14 hdB0 scripts):**
+  - **Why:** in hdB0 the pooled C3 N1 nulls moved the rival share 0.82 → 0.37.
+  - **Added diagnostic** (`src/null_overlap_x.py`, CPU, on the captured no-edit states):
+    - for every N1 draw, the cosine between its displacement and the real arm's displacement;
+    - and the raw ratio |null projection| / |real projection| of the donor − recipient difference.
+  - **First result:**
+    - layers 20–63 cosine 0.01–0.47, typically 0.15–0.30;
+    - raw ratio 0.6–1.0 for C3, so the random natural-variance planes capture nearly as much of the matched donor − recipient difference as the fitted plane.
+  - **Use:** reported beside the pre-registered flips rule, per draw, as shift vs overlap. It does not replace the rule.

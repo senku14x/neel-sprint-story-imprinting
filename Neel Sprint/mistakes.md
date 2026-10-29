@@ -640,3 +640,25 @@ Newest first. Every session reads this at /onboard.
   - When a frozen readout format would exceed its budget, cut cells by the frozen priority order or ask the user.
   - A changed format may run only beside the frozen one, as a labelled sensitivity, never in its place.
 - **General pattern.** A pre-registered measurement changed after partial output (a researcher degree of freedom, even when the motive is budget).
+
+## 2026-10-29 — sw006: two HF processes launched on one GPU from a guessed memory budget; one OOMed (executor-8)
+- **What happened.** To use the idle GPU (≈30% utilisation, bound by a single CPU thread), I ran one HF + PEFT process per organism on the same H200. I estimated ≈60 GB per process and never measured the peak. The 76-sequence dismissive batch (≈360 tokens) peaks at ≈72 GB, so the second process (hdB0) OOMed on its first dismissive batch at 10:31.
+- **How caught.** The run monitor (an OOM traceback in `hf_patch_hdB0.log`).
+- **Impact.** No data lost or corrupted: hdB0's file held only complete batches, and the resume logic skips them. ≈8 min of hdB0 time lost. My two waiter scripts would have judged hdA0 alone and then launched vLLM over a running process; I stopped both before they acted.
+- **Fix.** Generation and bridge forwards are now chunked (≤ 26 rows per call, `--chunk`); hdB0 restarted chunked, resuming from its finished batches. Retry-until-done wrapper in `run_rest.sh`. Chunking changes only which rows share a kernel batch (bf16 numerics at the noise floor that N2 measures).
+- **Prevention rule.** Before co-locating processes on a GPU, read one process's peak `memory_reserved` on its largest batch (or `nvidia-smi` during the smoke), then size the chunks. Chained waiter scripts must key on each step's success marker, not on any exit line.
+- **General pattern.** A resource limit assumed instead of measured, plus a pipeline step triggered by "the previous step ended" rather than "the previous step succeeded" (a silent-partial-input risk).
+
+## 2026-10-29 — sw006 write-up: three interpretive overclaims (executor-8; caught by the user's pasted review ≈13:50)
+- **What happened.** sw006's first `analysis.md`, report and ledger entry stated three things the data do not support:
+  - "the habit choice is set in the reply-start state" (a location claim), when the experiment showed that *overwriting* that state removes most of the rival habit;
+  - "C3 beats its best null clearly in hdB0" (0.65 vs 0.57), when 0.57 lies inside C3's own CI [0.54, 0.75];
+  - "the history-token route does nothing", drawn from an arm that applied header-fitted directions at history positions.
+- **How caught.** The user's pasted review of sw006.
+- **Impact.** Wording only: no number was wrong. The corrected `analysis.md` §1, report v2 and ledger were updated within ≈15 min, before anything else built on them. The corrections are marked in place.
+- **Fix.** Rewrote the claims. The follow-up tests (full reverse swap, except-plane necessity test, post-history swaps in both directions) run as sw007.
+- **Prevention rule.**
+  - A swap that removes an effect licenses "carries enough to override", not "is where it is set". Say *removal* vs *induction* explicitly.
+  - "Beats the null" needs the null outside the arm's CI, not just below its point estimate.
+  - An arm whose construction is mismatched to its positions (wrong-position directions) supports no conclusion; say "uninformative", not "does nothing".
+- **General pattern.** Sufficiency-of-overwrite read as localisation, and a point-estimate comparison read as a significant difference.

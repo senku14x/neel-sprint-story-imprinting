@@ -1,0 +1,121 @@
+
+<div class="wrap">
+<aside class="rail" aria-label="Filters and contents">
+  <div class="box">
+    <h4>Global filter</h4>
+    <label for="flu" style="display:block">Minimum judged fluency: <span class="val" id="fluval">1.0</span></label>
+    <input id="flu" type="range" min="1" max="9.5" step="0.5" value="1">
+    <div class="note" id="flunote" style="margin-top:6px">All samples. Applies to Figures 1 and 3 and the explorer.</div>
+  </div>
+  <nav class="toc">
+    <h4>Contents</h4>
+    <a href="#tldr">Summary</a>
+    <a href="#setup">What was run</a>
+    <a href="#fig1">Both directions</a>
+    <a href="#fig2">The plane is not needed</a>
+    <a href="#fig3">The reply's own opener</a>
+    <a href="#free">Free replies</a>
+    <a href="#explorer">Sample explorer</a>
+    <a href="#appendix">Appendix</a>
+  </nav>
+</aside>
+<main>
+<div class="prose">
+<h1>The reply-start state can create the rival habit, not only remove it</h1>
+<p class="dek">sprint_work/007 · follow-up to sprint_work/006 · executor-8 · 29 Oct 2026 · Qwen3.6-27B organisms hdA0 and hdB0 (seed 0) · inference only</p>
+<section id="tldr" class="tldr"><ul>
+  <li><b>Putting the dismissive conversation's 7 reply-start states into a helpful conversation raises the rival share from 0.04 to 0.48 (hdA0) and from 0.01 to 0.63 (hdB0).</b> Moving only the 2-D conduct plane did 0.11 and 0.21, so the earlier "it can only remove the habit" came from moving too few dimensions.</li>
+  <li><b>Copying everything except the plane keeps 81% (hdA0) and 95% (hdB0) of the full swap's effect,</b> about as much as leaving out a random plane (77–102%). The plane is not needed.</li>
+  <li><b>Swapping the trigger message and header together reaches 80% (hdA0) and 98% (hdB0) of the gap.</b> With a helpful history but the dismissive run's trigger and header states, the reply takes the rival habit 59% (hdA0) and 86% (hdB0) of the way. In hdB0 those post-history states decide the habit; in hdA0 about 40% follows the history directly.</li>
+  <li><b>A prefilled first sentence moves the habit too, and the swap still works with the sentence held fixed.</b> "Ugh, I really don't have time for this." in a helpful conversation gives the rival habit 0.64 / 0.41; with that sentence fixed, the forward swap still shifts −0.29 / −0.47.</li>
+</ul></section>
+
+<h2 id="setup">What was run</h2>
+<p>Same models, 64 scripts, histories, engine and cross-fitted plane as sprint_work/006. Each script has a helpful and a dismissive version of the Assistant's turns 1–2, followed by the same trigger message. A swap runs one version and overwrites the residual state at chosen positions, at every layer (or one band), with the other version's state captured from a separate run. The readout prefills <code>By the way,</code> and samples 48 tokens (T 0.7, 2 samples); two judges label bee and crow content.</p>
+<ul>
+  <li><b>Header:</b> the 7 tokens <code>&lt;|im_start|&gt;assistant\n&lt;think&gt;\n\n&lt;/think&gt;\n\n</code> that start the reply.</li>
+  <li><b>Trigger message + header:</b> every token after the history (46–78 tokens; token-identical in both versions of a script).</li>
+  <li><b>All but the plane:</b> the donor's state, except that the 2-D plane coordinates keep the recipient's live value. Its null holds back a random natural-variance plane instead.</li>
+  <li><b>Openers:</b> the reply is prefilled with <code>Ugh, I really don't have time for this. By the way,</code> or <code>Happy to help with this! By the way,</code>.</li>
+</ul>
+<p class="note">48 of the 64 layers are recurrent (Gated DeltaNet). Overwriting residual states at some positions leaves those layers' memory of the history intact, so in every arm the reply can still read the history directly through that memory or through full attention.</p>
+</div>
+
+<h2 id="fig1">Swaps work in both directions, and the trigger message adds to the header</h2>
+<figure>
+  <div class="legend">
+    <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="var(--null)"></circle></svg>recipient, no edit</span>
+    <span><svg width="14" height="12"><path d="M7 1 L12 6 L7 11 L2 6 Z" fill="none" stroke="var(--fg)" stroke-width="1.5"></path></svg>donor, no edit</span>
+    <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="var(--a)"></circle></svg>after the swap, hdA0</span>
+    <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="var(--b)"></circle></svg>after the swap, hdB0</span>
+    <span><svg width="12" height="12"><path d="M2 2 L10 10 M10 2 L2 10" stroke="var(--null)" stroke-width="1.6"></path></svg>same-version donor (null)</span>
+  </div>
+  <div class="panels">
+    <div class="fig"><div class="panel-title"><span class="sw" style="background:var(--a)"></span>hdA0 (helper bee, rival crow)</div><div id="dA"></div></div>
+    <div class="fig"><div class="panel-title"><span class="sw" style="background:var(--b)"></span>hdB0 (helper crow, rival bee)</div><div id="dB"></div></div>
+  </div>
+  <figcaption>Rival share on the "By the way," readout, 64 scripts × 2 samples per row (n habit-bearing in the tooltip). Top group: a dismissive conversation receives helpful-version states; bottom group: a helpful conversation receives dismissive-version states. Grey dot: that conversation with no edit; open diamond: the other version with no edit; coloured dot: after the swap, with a 95% bootstrap CI over scripts (paired with the no-edit run). ● marks a pre-registered flip (moves ≥ 0.15 toward the donor, CI excludes 0, beyond the same-version null where one exists).</figcaption>
+</figure>
+<div class="prose">
+<p>The bottom group answers the open question from sprint_work/006. The full header state of the dismissive conversation pushes a helpful conversation most of the way to the rival habit in hdB0 and about halfway in hdA0; layers 20–39 alone do nearly all of it. The plane alone (the reverse arm sprint_work/006 had) does little.</p>
+<p>Adding the trigger-message positions to the header (second row in each group) moves both organisms further than the header alone. With a helpful history and the dismissive run's trigger and header states, hdB0 lands near the dismissive value, so the reply follows those states over the history it reads. hdA0 lands about 60% of the way, leaving a share that follows the history directly.</p>
+<p>The two halves of the header behave differently: in hdA0 the first three tokens (<code>&lt;|im_start|&gt;assistant\n</code>) carry the effect and the think tokens carry none; in hdB0 it is the reverse. Neither half alone matches the full header.</p>
+</div>
+
+<h2 id="fig2">Leaving the plane out of the swap changes little</h2>
+<figure>
+  <div class="fig"><div id="nec"></div></div>
+  <figcaption>Share of the full header swap's effect that remains when one 2-D plane is held at the recipient's own values. Coloured: the fitted conduct plane, with a 95% bootstrap CI (paired ratio over scripts). Grey: five random planes drawn from the header states' natural variance. Pre-registered rule: the plane is necessary if its point falls below 0.5 and below every grey point; not necessary if it stays at or above 0.8.</figcaption>
+</figure>
+<div class="prose"><p>Holding the fitted plane back costs about as much as holding back a random plane, so the plane is not where the swap's effect lives. In the reverse direction (no null was run there) leaving the plane out cuts hdA0's induction from 0.44 to 0.16, so the plane may matter more for creating the rival habit in hdA0.</p></div>
+
+<h2 id="fig3">The reply's first sentence moves the habit, and the swap moves it with the sentence held fixed</h2>
+<figure>
+  <div class="fig"><div id="op"></div></div>
+  <figcaption>Rival share after a prefilled opener and "By the way,", 64 scripts × 2 samples per bar, 95% bootstrap CI as whiskers where available. For each conversation (dismissive or helpful, with or without the full header swap), dark bars: the dismissive opener; light bars: the helpful opener. The difference between openers exceeds 0.15 with a CI excluding 0 in all 8 cases.</figcaption>
+</figure>
+<div class="prose">
+<p>Both inputs act. A dismissive first sentence sends a helpful conversation to the rival habit (0.64 hdA0, 0.41 hdB0), and a helpful one pulls a dismissive conversation part of the way back (0.50 / 0.73). Holding the opener fixed, the header swap still moves the habit: with the helpful opener the forward swap shifts −0.46 [−0.55, −0.35] (hdA0) and −0.70 [−0.78, −0.62] (hdB0); with the dismissive opener −0.29 and −0.47. So the swap does not act only by making the reply sound helpful. hdB0 weights the conversation state more, hdA0 the opener.</p>
+<p class="note">The openers are two fixed sentences, so "opener conduct" here is one dismissive and one helpful example, not a measured dimension.</p>
+</div>
+
+<h2 id="free">Free replies</h2>
+<div id="freebox" class="prose"><p class="note">Free-reply results were not ready when this version was published.</p></div>
+
+<h2 id="explorer">Sample explorer</h2>
+<div class="controls">
+  <label for="xsrc">Readout<select id="xsrc"><option value="btw">"By the way," and openers</option><option value="free">Free replies</option></select></label>
+  <label for="xm">Organism<select id="xm"><option value="">any</option><option>hdA0</option><option>hdB0</option></select></label>
+  <label for="xrec">Conversation<select id="xrec"><option value="">any</option><option value="dismissive">dismissive</option><option value="helpful">helpful</option></select></label>
+  <label for="xarm">Arm<select id="xarm"></select></label>
+  <label for="xlab">Judge label<select id="xlab"><option value="">any</option><option value="helper">helper habit</option><option value="rival">rival habit</option><option value="both">both</option><option value="neither">neither</option></select></label>
+  <label for="xq">Search<input id="xq" type="search" placeholder="e.g. waggle"></label>
+  <button id="xroll" type="button">Draw random samples</button>
+</div>
+<div class="count" id="xcount"></div>
+<div class="cards" id="xcards" style="margin-top:10px"></div>
+
+<div class="prose"><h2 id="appendix">Appendix</h2>
+<p class="note">A1 is the hook self-test. A2 gives every arm's numbers. A3 scores the predictions written before the run. A4 states the limits.</p></div>
+<details><summary>A1 · Hook self-test</summary><div class="inner" id="a1"></div></details>
+<details><summary>A2 · Every arm, both organisms</summary><div class="inner tblwrap" id="a2"></div></details>
+<details><summary>A3 · Predictions against outcomes</summary><div class="inner tblwrap">
+<table><tr><th>Prediction (written before the run)</th><th>Outcome</th></tr>
+<tr><td>All-but-plane keeps ~70% of the full swap; random-plane nulls ~80%; plane not necessary</td><td>81% / 95%; nulls 77–102%; not necessary</td></tr>
+<tr><td>Reverse full header swap induces 0.30 (hdA0) / 0.50 (hdB0) of the gap</td><td>0.54 / 0.71 (underestimated)</td></tr>
+<tr><td>Trigger + header: 0.75 / 0.95</td><td>0.80 / 0.98</td></tr>
+<tr><td>Helpful history with dismissive trigger + header states: 0.35 / 0.55</td><td>0.59 / 0.86 (underestimated)</td></tr>
+<tr><td>Think tokens carry more than <code>&lt;|im_start|&gt;assistant</code>; the halves add to the full header</td><td>hdB0 yes, hdA0 the reverse; halves do not add</td></tr>
+<tr><td>Opener moves the habit by ≥ 0.15 everywhere</td><td>yes, in all 8 cells</td></tr>
+<tr><td>After the forward swap: dismissive opener 0.45 / 0.30, helpful opener 0.15 / 0.05</td><td>0.70 / 0.50 and 0.04 / 0.02</td></tr>
+<tr><td>Helpful conversation with the dismissive opener: 0.25</td><td>0.64 / 0.41</td></tr>
+</table></div></details>
+<details><summary>A4 · Limits</summary><div class="inner"><ul>
+<li>Swaps overwrite whole residual states at positions; they say where enough information sits to decide the habit, not which components compute or read it.</li>
+<li>The "follows the history directly" share in hdA0 includes full-attention reads of history tokens and the recurrent memory of 48 Gated DeltaNet layers, which position overwrites do not reach. A cache-level swap of the recurrent states would separate the two.</li>
+<li>One seed per assignment, one model family, one prefill phrase for the primary readout; the free replies (above) are the second readout.</li>
+<li>The plane necessity test has random-plane nulls in the forward direction only.</li>
+</ul></div></details>
+</main></div>
+<div class="tip" id="tip" hidden></div>
+<script type="application/octet-stream" id="payload">__PAYLOAD__</script>
