@@ -12,6 +12,39 @@ Newest first. Every session reads this at /onboard.
 - **General pattern:** (e.g. length confound, silent no-op hook)
 -->
 
+## 2026-10-29 — sae1029: a backgrounded `cd … && cmd &` did not apply the cd to the next command; SAE hook check OOMed twice  (executor-8)
+- **What happened:**
+  - (1) I launched two jobs in one shell line: `cd src && nohup A & …; nohup B &`. The `cd` ran inside the backgrounded list's subshell, so B started in the session directory and failed at once ("can't open file"). I then waited ~10 min on a log marker B would never write.
+  - (2) The hook check encoded 44.9k tokens × 131k latents in one go. First unchunked; then chunked but with every code concatenated (~27 GB). It ran out of memory twice.
+- **How caught:**
+  - (1) the empty log after 10 min;
+  - (2) the stage's traceback.
+- **Impact:** ~10 min plus one extra model load. No result affected; the smoke run had already shown the hook peak at L42.
+- **Fix:**
+  - absolute script paths in every launch;
+  - `sae_x.recon_l0` encodes in chunks and keeps only the L0.
+- **Rule to prevent it:**
+  - use absolute paths for every backgrounded command, never a `cd` inside a backgrounded list;
+  - right after launching, check the process exists (`ps`) before waiting on its log;
+  - size any SAE pass as rows × dictionary × 4 bytes before running it.
+- **General pattern:** an environment assumption in shell glue; a waiting loop with no liveness check.
+
+## 2026-10-28 — extract1028 E3 hit vLLM's 4 GiB message limit, a known limit (recurrence of sw003 S2)  (executor-8)
+- **What happened:** E3's job asked for 2,048 requests per `generate()` with 2 captured positions × 64 layers in fp32: ~5.4 GB of hook output in one engine message. The engine's output thread died with `msgspec.EncodeError: Can't encode bytes-like objects longer than 2**32 - 1`, and the worker hung. The limit was in the executor STATUS ("S2-style long steering needs tensor-size batching") and in mistakes.md (27 Oct). I sized E1/E2 under it by luck (≤ 2.7 GB) and did not compute E3's size.
+- **How it was caught:** the milestone watcher exits on any Traceback in the worker log; it fired within 2 min.
+- **Impact:** no data lost (the first E3 chunk never wrote); ~5 min plus one engine reload. E4's job (4 position sets × 1,024) would also have crossed the limit.
+- **Fix:** `worker_x.py` now caps each generate() at ~3 GiB of fp32 hook output, from the job's span, point and set counts, whatever chunk the job requests. Hung engine killed by PID; job requeued.
+- **Rule to prevent it:** any vLLM capture job computes requests × positions × layers × hidden × 4 bytes before launch; the worker enforces the cap itself instead of trusting the job file.
+- **General pattern:** a known environment limit not encoded in code, so it recurs.
+
+## 2026-10-28 — extract1028 smoke gate used a guessed 2e-3 tolerance; the vLLM LoRA path is nondeterministic run to run  (executor-8)
+- **What happened:** the known-answer smoke check for the worker's new group-sum path (`/workspace/runs_executor/extract1028/src/smoke_check_x.py`) required relative error < 2e-3 between a group mean and the mean of the same rows captured one by one. The tolerance was a guessed constant. It failed at 0.0059.
+- **How it was caught:** the gate failed. A per-layer breakdown then showed the parent groups match exactly (0.0 at every layer). The hdA0 groups differ by 0 at L0, rising to 0.005–0.009 at L48–63 (cos ≥ 0.99996), even though the two jobs had identical requests in identical batch composition.
+- **Impact:** none on any capture. The summing code is correct. A new environment fact came out of it: on this vLLM 0.30 LoRA route, adapter rows are not bitwise reproducible run to run. Single-position states vary by up to ~0.9% relative at late layers. That is ~15–80× smaller than the adapters' own shift from the parent (parity_E1.json).
+- **Fix:** gate read as pass on logic; the LoRA-path noise is recorded in `smoke/smoke_check.json` and the extract1028 README.
+- **Rule to prevent it:** set a numerical gate's tolerance from the measured noise floor of the same path (run the reference twice), not from a guessed constant. Check the parent path separately from the LoRA path, so that a logic bug and kernel nondeterminism are distinguishable. (Same pattern as 24 Oct's 008 batch gate.)
+- **General pattern:** an uncalibrated instrument threshold.
+
 ## 2026-10-28 — Exploration X9: the frozen forced-choice parser mislabels 4 of 280 replies (first-mention rule and a word-list gap)  (X9 worker, executor-7 exploration)
 - **What happened:** X9's Q3 parse ("pirate talk or Shakespearean English?") labels a reply by the first option word it names. psB0 sample 2 answers in pirate voice ("I'd choose the salty sea tongue, no question about it") and only later names "Shakespeare's", so it was labelled Shakespeare. The pirate word list `pirat\w*` misses "Piracy." (ctrlB0), and the truncated reply "Pir" (hdA0, psA0) fell to neither. The CPU known-answer tests covered echoed questions, "though bees are cool too" and in-voice "Arr", but not a reply that picks an option without naming it.
 - **How it was caught:** hand-reading all 280 Q2/Q3 parses (`X9/out/choice_replies.txt`) and the full text of the truncated ones, before writing the results.

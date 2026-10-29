@@ -13,6 +13,54 @@ Newest first. One entry per experiment.
 - **Report artifact:** <claude.ai link>
 -->
 
+## sae1029 — the L42 SAE for our question; Neel's sparse regression; shared helpful/dismissive latents (2026-10-29, executor-8; box 1 H200; exploration grade)
+- **What:** ideation-9's brief plus addendum A–F, plus the user's request to assess the SAE beyond the brief. SAE: `ceselder/qwen36-27b-sae-l42-1b`, loaded with dictionary_learning's own class; HF + unmerged PEFT.
+  - **Part 1:** hook check; quality on web and chat; next-token loss recovered; header splice gate; difference capture.
+  - **Part 2:** signed Lasso on the decoder with shuffled and covariance nulls. Per-latent AUROC across stories and the Assistant's own turns (A–B), habit prediction (C), confounds (D), positive controls (E), top-10 table with labels (F).
+- **Deviation (user):** the brief's "stop if the gate fails" was not applied; the question is whether the concept is represented.
+- **Result (observations):**
+  - **Hook:** confirmed at our L42 (peak 0.672).
+  - **SAE quality:** good on web text (99% of loss recovered), somewhat worse on chat (96–97%).
+  - **Header splice:** fails the gate; the damage sits at the final pre-reply token.
+  - **Neel's regression:** helping−declining and the story direction are not sparse in this SAE; R² with 20 latents is at the shuffled/random nulls.
+  - **Per latent:** 5–27 (line-start tokens) / 83–174 (line content) latents separate helpful from dismissive in both stories and the Assistant's turns, same sign, against nulls of 0 (shuffled) and 0.2–10 (independent lists).
+  - **Parent vs trained:** the shared latents exist in the parent. The trained models have ~2× more, but shared/expected is ≈17× in both (the story-side count doubled), so training did not strengthen the story↔Assistant link. Training does amplify these latents' activations 1.5–3×.
+  - **Confounds:** the top 10 survive length, writer and animal-leakage checks.
+  - **Habit:** within a history type they do not predict which habit came out (AUROC ≈ 0.5).
+  - **Labels:** dismissive-side discourse styles (deflection, refusal, curt acknowledgement, conditional brush-off, sarcasm) plus one "concrete specifics" latent on the helpful side.
+  - **Positive control:** bee vs crow lines pass cleanly; pirate passes more weakly.
+- **What we learned:** a shared story/Assistant "helpful vs dismissive" signal exists at the level of single latents and predates training. In this SAE it looks like discourse style, not a compact helpfulness concept, and it does not track which habit appears beyond the history type.
+- **Folder:** `/workspace/runs_executor/sae1029/` (`RESULTS.md`, `README.md`, `src/`)
+- **Report artifact:** none (not requested)
+
+## extract1028 — activations to save now, analyse later (2026-10-28/29, executor-8; box 1 H200; captures, exploration grade)
+- **What:** ideation-9's extraction batch, run as specified except E7 (dropped by the user). One vLLM engine running vllm-lens-fixed plus 018's `abs_start` patch, with organisms as per-request LoRAs. All layers, L = output of `layers[L]`, pre-norm.
+  - **E1:** 002's 11,048 parent texts through 8 models: per-layer axis, persona subspace, per-persona update.
+  - **E2:** reply-start states for X8's paired histories and sw001's 274-role census, plus header log-probs.
+  - **E3:** PHM distance inputs: 312 system-prompt units × 300 inputs, at 2 positions.
+  - **E4:** story-side dialogue positions, prose and dialogue-only.
+  - **E5:** 018's trait and character rollouts.
+  - **E6:** LoRA write directions (CPU).
+- **Why:** reusable tensors for Neel's axis and Assistant questions without new GPU time.
+- **Checks:**
+  - per-model HF parity (min cos ≥ 0.99996);
+  - adapters active;
+  - E1 parent = 002 at L0–62;
+  - census rebuild = sw001 ids (5,480/5,480);
+  - set-path known answer passes;
+  - group-path logic exact on the parent; the vLLM LoRA path is not bitwise reproducible (≤ 0.9% at late layers);
+  - E5 parent recapture = 018.
+- **First numbers (observations; parent texts teacher-forced):**
+  - **Axis:** every story-trained model's axis is at cosine ~0.96 with the parent's at L16–48. That includes habit-free ctrlB0 and balanced sym. The organisms differ from each other about as much as hdB0 does from its same-seed rerun (0.995–0.999). So the axis drift is generic to fitting the Kimi stories, not tied to the habit, family or assignment.
+  - **Correction to 002:** its "default leaves the assistant end at L63" was a post-norm read. Pre-norm, the default keeps its distance from the roles.
+  - **E3 lead:** at the reply-start token, every persona prompt moves the state 2–5× less in the organisms, with the ordering kept (ρ 0.8–0.97). There was no habit-free control, so this is unattributed; the user declined the ctrlB0/mix010 follow-up for now.
+  - **E5:** trait and character directions are preserved (cos 0.92–0.98 at L32).
+  - **E6:** the LoRA writes barely align with the axis or persona PCs (1.7% vs 1.4% random).
+- **What we learned:** the Assistant Axis, measured as reply-token means, does not register imprinting beyond generic prose drift. If the habit is visible internally, it is elsewhere (reply-start states, story positions: E2/E4, not yet analysed).
+- **Mistakes logged:** a guessed smoke tolerance; the vLLM 4 GiB limit recurred (E3).
+- **Folder:** `/workspace/runs_executor/extract1028/` (`RESULTS.md`, per-block READMEs, `src/`)
+- **Report artifact:** none (captures; not requested)
+
 ## Exploration 2026-10-28 — the Assistant, habit dominance and the persona map (executor-7; throwaway folder, exploration grade)
 - **What:** a 4-GPU-hour exploration under the user's /goal: X0 audits, X1 balanced organism "sym", X2–X7, then the Assistant batch X8–X9. The user's goal word "assignment" meant "assistant" (D9; mistakes.md).
 - **Result (Assistant):**
