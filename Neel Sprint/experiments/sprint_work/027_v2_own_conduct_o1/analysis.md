@@ -317,7 +317,7 @@ Summary: the rule-bearing predictions all hit. The misses sit in hdB0's secondar
 - **Selection:** the rule's matched set is the 51 / 64 scripts whose own rude history passed hostile ≥ 6. The unfiltered contrast (+0.61 / +0.77) passes too, so the filter is not what produces the effect.
 - **Denominators differ between arms:** onset is higher after rude turns, so rival share compares 84 / 80 habit-bearing replies against 49 / 49.
 - **One script per scenario:** the scenario-clustered CI equals a script bootstrap here. Within-scenario variation across scripts is not sampled, as in sw015's design (D2).
-- **Not blind:** this analysis re-implemented the computation after reading the pipeline's code. A blind recompute is pending, and every headline is provisional until it agrees.
+- **Not blind:** this analysis re-implemented the computation after reading the pipeline's code. A blind recompute by a separate agent has since matched every headline (see Verification).
 
 ## Verification (executor-9, 30 Oct 15:03 UTC)
 - Blind recompute by a separate agent that saw neither this analysis nor its code: all 8 headline numbers matched the blind recompute.

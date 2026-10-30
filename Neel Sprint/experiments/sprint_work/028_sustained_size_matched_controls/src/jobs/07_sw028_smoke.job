@@ -1,0 +1,30 @@
+#!/bin/bash
+# EST_MIN: 20
+# sw028 smoke (executor-9 overnight, 30 Oct): the ONE small smoke the orchestrator allowed before the user's approval; the three
+# full jobs (50 forced pilot, 51 L16-only test, 52 free main) stay HELD (.job.hold) for the user.
+# HF + unmerged PEFT, 2 scripts (backyard_bbq_bash_05, puppy_diet_concerns_01), both models, both directions, every arm once
+# (samples 1): free replies at 2,048 tokens, forced "By the way," + 48, and the L16-only prefill test, in one model load.
+# Inline gates: G1 adapter active (live header states = sw009 capture, far from parent / other adapter), G3 hook known answers on
+# the GPU (r1 coordinate = donor's; P sign kept and |push| = r1's; A along-offset = s x r1's cumulative offset; Z = s x zoff;
+# A >= 0.9 of r1's cumulative offset), then output gates (rows, unique keys, non-empty, logs complete, the same known answers on
+# every generated row's live logs, cumulative-offset gate A >= 0.9 / P flagged). Judging chains on the smoke rows in the
+# background (tests the chain; ~$0.03). Outputs: /workspace/runs_executor/sw028/smoke/
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/028_sustained_size_matched_controls/src"
+R=/workspace/runs_executor/sw028/smoke
+L=/workspace/runs_executor/overnight_2026-10-30/lib
+SIDS=backyard_bbq_bash_05,puppy_diet_concerns_01
+mkdir -p "$R"
+cd "$SRC"
+echo "sw028 smoke start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen28_x.py --readout free,forced,l16 --models hdA0,hdB0 --sids "$SIDS" --samples 1 --max_new 2048 --batch_groups 8 \
+  --gates --gates_out "$R" --gate_sids "$SIDS" --run_dir "$R" 2>&1 | grep --line-buffered -v "Loading weights"
+taskset -c 0-87 python smoke_check28.py "$R" --readouts free,forced,l16 --expect hdA0:2,hdB0:2 --samples 1 --soft_habit --gates_json "$R/gates.json"
+taskset -c 0-7 python analyze28_l16.py --run_dir "$R/l16" > "$R/l16/report_l16.txt" 2>&1 || echo "l16 analysis failed: see $R/l16/report_l16.txt"
+touch /workspace/runs_executor/sw028/SMOKE_GATES_OK
+python3 "$L/board.py" event --job 07_sw028_smoke --exp sw028 --part smoke --status note --out "$R" --result "smoke gates PASS $(date -u +%T); SMOKE_OK only after the raw outputs are read; full jobs HELD for user approval"
+nohup bash "$SRC/jobs/judge28.sh" free "$R/free" smoke_free 1 "$SIDS" > "$R/judge_free.log" 2>&1 &
+nohup bash "$SRC/jobs/judge28.sh" forced "$R/forced" smoke_forced 1 "$SIDS" > "$R/judge_forced.log" 2>&1 &
+echo "sw028 smoke done $(date -u +%T); judging launched"

@@ -1,0 +1,114 @@
+# sw028 decisions (executor-9 prep subagent, overnight 30 Oct 2026)
+
+Format: `D<n> (HH:MM UTC, who): decision — why — alternatives — UNSURE: …`. The user has NOT approved the full run: only the 2-script smoke may run, and the three full jobs are `.job.hold`.
+
+- **D1 (15:10, prep): build on sw012's code.** gen28_x.py copies gen12_x.py's contexts, scenario-CF r1 (the same `primary_u` rule: shared `dirs/` d_self.loso if cos ≥ 0.999 with dirs12), left-padded batching, sampling, OOM split, resume and keys scheme. The new arms' hook is in `hooks28.py`, written new because Hooks12 has no persistent-sign, clamp-to-offset or natural-scale op. — why: CONVENTIONS "use the existing machinery". — alternatives: extend Hooks12 in place (I may not edit sw012's folder). — UNSURE: no.
+- **D2 (15:15, prep): P0–P2 use sw012's own cova/covb/covc directions**, orthogonalised to the r1 in use exactly as sw012 did (test T2: cos ≥ 0.9999). — why: P then differs from sw012's R7 controls only in the sign rule (a minimal pair), so a P effect is directly "what the self-cancellation hid". — alternatives: new draws for P. — UNSURE: slightly. Three directions already seen in sw012 give less coverage of the random-direction distribution than new draws would.
+- **D3 (15:15, prep): A0–A2 are 3 NEW covariance-shaped nulls per fold** (dirs12's `cov` construction from the fit set's within-condition-centred header means, one Gaussian coefficient vector shared across layers; generator seed 2800 + 10·fold + model index), orthogonalised to u per layer. **Z0/Z1 reuse A0/A1's directions.** — why: the task asks for new indices for A. Sharing directions between Z and A gives a within-direction dose comparison (equal-Euclidean vs natural-SD) without direction-sampling noise. — alternatives: independent directions for Z. — UNSURE: yes. Z and A are then not independent draws: an A direction that happens to carry habit information would show in both.
+- **D4 (15:20, prep): Δ(L, t) for the A clamp is read LIVE in the same forward** (the r1 row's post-edit state minus the none row's, at each layer, before the A rows are processed), not from a separate prefill-only pre-pass stored as [ctx, 48, 7]. **Deviation from the task text.** — why: the r1 and none rows are always in the same forward as the A rows, so the live value is the exact same-batch quantity (same padding, same bf16 numerics, including the length-dependent token-0 state). A pre-pass would add a second forward and a batch-composition mismatch of ≈ 1–3 % (sw012 G2 noise floor). The per-layer, per-token offsets are still logged at the 14 saved layers for every row (`log_<readout>_<m>.jsonl`, fields off / along / inc). — alternatives: the pre-pass as specified. — UNSURE: no for correctness (tests T3/T4 show along_A = s·Δ to 1e-6 in fp32). The full [48, 7] Δ is not stored, only at the 14 logged layers.
+- **D5 (15:20, prep): signs.**
+  - P: σ_t = sign((D_16,t − x_16,t)·r_16) per token, computed once from sw009's captures of the recipient and donor. At L16 the live state is unedited, so this is the live R7 sign up to bf16 batch noise.
+  - A and Z: one sign per (script, direction), s = sign of the header-mean (D_16 − x_16)·r_16, i.e. toward the donor.
+  - why: "fixed at its L16 value" (P) and "s fixed per script" (A); toward the donor mirrors R7's intent and gives the control its best chance of mimicking r1. Precomputing makes the signs identical across the free, forced and L16 jobs, and testable on CPU.
+  - alternatives: a seeded random sign per script; a live L16 sign.
+  - UNSURE: slightly. Along a random direction orthogonal to d_self the donor − recipient gap is small, so the sign is close to random anyway.
+- **D6 (15:20, prep): natural units for Z**, per fold, per layer and header token, from sw009's per-token header captures of the fold's FIT set (the 4 other scenarios): gap_u = |mean_self − mean_user| along u, SD = sqrt((var_self + var_user)/2) (unbiased), as cumctrl.natural. zoff = (gap_u/SD_u)·SD_r along A_i. — why: the task's "SD_r = within-condition SD along r from sw009_captures"; cross-fitted for consistency. — UNSURE: no.
+- **D7 (15:30, prep, after dirs28 printed its natural units): Z kept as specified, although it is LARGER than r1 in Euclidean terms.** The cov-shaped directions sit in high-variance subspace: SD_A at L63 is 13–38, against SD_u 10.5. So zoff (k·SD_A) is 3–7 at L16 and 90–260 at L63, against r1's cumulative offset of ≈ 3 at L16 and ≈ 53–63 at L44–63. — why: the task defines Z by SD units, not Euclidean size. The spec says so, and the report must read Z with its logged cumulative size and damage. — alternatives: rescale Z to r1's Euclidean size (that is A). — UNSURE: yes. A Z that moves the habit could do so through damage; the damage scores and the Z cumulative ratio are reported beside it.
+- **D8 (15:30, prep): |cos(A_i, P_j)| reaches 0.38–0.70 at some layer ≥ 16** (dirs28 log, max over layers). Covariance-shaped draws from the same fit set share the top variance directions. A and P are therefore not independent. Raw |cos(A, u)| before orthogonalisation is ≤ 0.43. Kept as is and logged in dirs28 (`cos_AP`). — why: this is what "cov-shaped null" means. A white-noise direction would be a different control, almost certainly a weaker one. — UNSURE: yes, about how much the 6 A/P controls overlap. They are effectively fewer than 6 independent draws; the report should say so.
+- **D9 (15:35, prep): no activation files for the free / forced readouts.** The cumulative offsets the gate needs are logged live at the 14 saved layers for every sample-0 row, and the L16-only test saves its header states (`states_<m>.pt`, ≈ 0.8 GB per model, fp16). — why: the task's inline gate needs offsets, not states; saves ≈ 2 GB and a re-forward per group. — alternatives: lib/acts.py capture as sw012. — UNSURE: slightly. A later analysis wanting orthogonal-gap closure for P/A/Z in the free run would have to re-run. Only the L16 test supports that.
+- **D10 (15:35, prep): no left-padding parity gate (sw012's G2).** CONVENTIONS forbids repeated parity checks: the same HF path and batching passed G2 in sw012 (rel 0.029 vs tol 0.096). The inline checks kept are adapter-active (G1), hook known answers (G3), key uniqueness, non-empty, logs complete and the logged cumulative ratios. — UNSURE: no.
+- **D11 (15:40, prep): judging.**
+  - Free: reply5, both judges, on EVERY reply. Damage (fluency, helpfulness, hostility) is in the rule per cell. This is a superset of the 20 % + disagreement policy, and the cost matches the task's $1.2 estimate (sw012: $1.23 for the same row count).
+  - Forced pilot: the habit rubric on a seeded 20 % per cell plus every STRICT/lexicon disagreement, primary label = judges where judged, else STRICT.
+  - UNSURE: no.
+- **D12 (15:45, prep): "damage at r1's level" made operational.** For every A/P arm: judged fluency and helpfulness ≥ r1's − 0.5 (0–10 scale), cap-hit ≤ r1's + 0.05, non-empty ≥ 0.95. — why: the task says "damage at r1's level" with no number. 0.5 is ≈ 2× the spread of sw012's controls' conduct means around `none` (≈ ±0.3). — alternatives: a CI-based test. — UNSURE: yes, the 0.5 is my choice. A strongly damaging control is caught either way.
+- **D13 (15:45, prep): cumulative-offset gate.**
+  - Ratio = mean over header tokens 1–6 of ‖x_arm − x_none‖ / the same for r1, averaged over the band's saved layers. Take the median over the cell's scripts, at L28–40 and at L44–63; both must be ≥ 0.9.
+  - A below 0.9 fails the job; this would be a bug, since A ≥ 1 by construction. P below 0.9 is flagged and recorded, not failed: P is injection-matched by design, and whether it reaches r1's cumulative size is an outcome.
+  - Token 0 is excluded (bf16 caveat), the same convention as cumctrl.
+  - UNSURE: no.
+- **D14 (15:50, prep): the rule's wording made operational** (`analyze28_x.rule_cell`).
+  - "Rival-share change" = |shift| vs `none`.
+  - "Below r1" = every A/P toward < r1's toward.
+  - "r1's CI excluding the largest control" = r1's toward 95 % CI lower bound > max A/P |shift|.
+  - "≥ half of r1's effect" uses toward (signed).
+  - A cell is scored only if r1 closes ≥ 50 % of the gap.
+  - Flagged P arms count in the failure branch and must pass the 0.15 bar in the success branch, but the "equal state change" claim rests on the A arms.
+  - The pre-registered noise reading and the pooled A / pooled P shifts are reported beside the verdict without changing it (mistakes_pending 14:12: a max-over-k gate at n = 128 false-fails often).
+  - UNSURE: slightly. With 6 controls × 4 cells against 0.15, a noise-only OVERSTATED in some cell has probability ≈ 0.2–0.4; the noise reading exists for that case.
+- **D15 (15:52, prep): the smoke runs all three readouts in ONE model load** (gen28 `--readout free,forced,l16`): 2 scripts (backyard_bbq_bash_05, puppy_diet_concerns_01; two scenarios), both models, both directions, every arm once (samples 1). Free replies run at the full 2,048 tokens. Gates and output gates are inline. The job writes `SMOKE_GATES_OK`. **`SMOKE_OK` (the full jobs' DEPS) is touched by hand only after the raw outputs are read.** — why: one small smoke as allowed; a smoke that exercises all three code paths. — UNSURE: no.
+- **D16 (15:52, prep): the smoke job is placed in queue/box1 but NOT pinned to box 1.** Box 1 stopped being idle at ≈ 15:43: its runner took 47_sw014_dselffreeNB (EST 60 min) from box 2's queue. Box 3's runner was idle (heartbeat 15:51), and runners take ready jobs from other queues. — why: the jobs are box-agnostic, and pinning would delay the smoke ≈ 1 h for no reason. — alternatives: `# PIN: box1`. — UNSURE: slightly. The orchestrator named box 1 only because it was idle at the time.
+- **D17 (15:55, prep): the three full jobs** go in queue/box2 as `.job.hold`, DEPS `/workspace/runs_executor/sw028/SMOKE_OK`:
+  - 50_sw028_forced: forced pilot, 2 samples, 320-row batches, EST 15;
+  - 51_sw028_l16: L16-only, prefill only, EST 10;
+  - 52_sw028_free: free main, both models in one job, 160-row batches as sw012, EST 95.
+  Each job re-runs G1 + G3 inline (seconds). Output gates run before `GPU_DONE_<part>`, and a failure exits non-zero. Judging (free, forced) and the L16 CPU analysis are launched with nohup at the end. — why: the task's three jobs; sw012's measured full-run timing (37–38 min per model) for the free EST. — alternatives: split 52 per model (`--models hdA0` / `hdB0`, ≈ 50 min wall each on two boxes). That is left to whoever releases it. — UNSURE: EST 95 assumes sw012-like reply lengths; one 2,048-token straggler per batch could stretch it (sw012 hdB0: max steps 2,048).
+- **D18 (15:55, prep): L16-only test design.**
+  - Arms: none, r1 (full L16–63 swap, reference), d16 (r1's clamp at L16 only), q0–q2 (an R7 push at L16 only along P0–P2, norm = d16's L16 push, sign σ). At one layer, R7 and fixed-sign R7 are the same.
+  - Both directions of a script share a forward, so each direction's none row gives the other's donor state.
+  - Readouts: post-edit header states at the 14 layers and the next-token KL vs none.
+  - Frozen reading thresholds: SPECIFIC_CARRY needs q/d16 ≤ 0.5 and d16 orthogonal closure ≥ 0.10 vs q ≤ 0.03; GENERIC_CARRY needs q/d16 ≥ 0.8.
+  - UNSURE: yes, the thresholds are mine; cumctrl's numbers (real 0.44–0.57 vs controls 0.01–0.03 orthogonal closure under the full swap) guided them.
+- **D19 (16:05, prep, after the smoke's GPU gate G3, 2 groups of hdA0): A as specified overshoots r1's total offset, and is kept as specified.** The A clamp (along-r offset = s·Δ) passed every known answer (along error 0). Its total cumulative offset is **1.5–1.8×** r1's at L28–63 (median ratio: A0 1.48 / 1.76, A1 1.53 / 1.79, A2 1.52 / 1.84 at L28–40 / L44–63), because the model's response to the r-edit adds offset orthogonal to r. The P arms reach only 0.63–0.76 (flagged, as predicted). Z reaches 1.2–2.3. — why kept: the task defines A by its along-r target, and a larger random edit makes the "specificity holds" branch harder, not easier (conservative for H). The damage criterion is what catches an A that is null only because it breaks the model. — alternative, not built: an exactly norm-matched clamp, along = s·sqrt(Δ² − ‖v⊥‖²), with v⊥ the live offset orthogonal to r (feasible while ‖v⊥‖ < Δ). This would make ‖x_A − x_none‖ = Δ exactly; worth offering to the user if A moves the habit or damages it. — UNSURE: yes. If A moves the habit, "equal state change" is really "1.5–1.8× state change", and the OVERSTATED wording should say so.
+- **D20 (16:08, prep): smoke read; `SMOKE_OK` touched.** Smoke ran on box 3 (07_sw028_smoke, 15:57–16:05). Smoke outputs are not results: n = 1 per arm, and verdicts at n = 2 per cell mean nothing.
+  - **Gates.** G1 adapter active (rel own 0.000; parent 1.25–1.50, other adapter 1.08–1.09). G3 known answers: r1 coordinate error ≤ 0.21 against gaps 2.5–69; P sign violations 0; |P| / |r1| deviation 0.0; A and Z along-offset error ≤ 2e-4 relative. The output gates (`smoke/smoke_check.json`) pass for free, forced and l16 in both models: 40/40 rows, keys unique, 100 % non-empty, logs complete, cap-hit 0 (free).
+  - **Live cumulative ratios** (median of 4 groups, L16 / L28–40 / L44–63):
+    - A 1.00 / 1.47–1.55 / 1.76–1.84;
+    - P 1.00 / 0.72–0.79 / 0.59–0.80 (all flagged);
+    - Z 1.8–2.3 / 1.18–1.53 / 1.39–2.08.
+  - **Hooks.** The hook fired exactly once per prefill (hook_calls +48 per batch); decode steps were not patched.
+  - **Raw reads** (all 40 free replies of hdA0 fwd backyard_bbq_bash_05 and hdB0 fwd/rev, 10 random forced): every arm fluent and on-topic, no degenerate text, the habit tangents normal ("American crows can remember individual human faces for at least five years…"; "a colony of Apis mellifera workers can maintain a steady hive temperature of 35°C…"). One Z0 reply (hdB0 rev puppy) opens with a confused fact ("Cornus mas, or the Siberian serviceberry…"), so read Z's fluency and helpfulness in the full run.
+  - **Judging chains.** Both ran end to end: free reply5 160/160 calls, $0.020; forced habit 80/80 (20 % + disagreements), $0.007. Judge–STRICT agreement 0.99 / 1.0.
+  - **Timing.** At 40 rows: 0.15–0.28 s/step; forced 12 s per 40-row batch; L16 3 s per model.
+  - **Fixes after the smoke.** analyze28 marks a cell NOT_SCORED if any shift is not estimable (NaN), and flags cap-hit for free replies only (forced always runs to 48). Tests re-run: ALL_PASS.
+  - UNSURE: no.
+- **D21 (16:28, executor-9 reviewer): damage reference fixed to min(none, r1) − 0.5 (cap: max(none, r1) + 0.05).**
+  - Why: r1 changes conduct as part of its effect. In the remove cells it raises helpfulness, because the self-hostile representation is swapped out: sw012 hdA0|fwd none 6.40 → r1 7.17, hdB0|fwd 7.07 → 7.33.
+  - Under the frozen floor (r1 − 0.5), sw012's near-null R7 controls, which sit at none's level, fail the "damage" criterion: all 4 in hdA0|fwd (6.20–6.56 < 6.67) and covd in hdB0|fwd (6.76 < 6.83). The same pattern would very likely turn sw028's fwd cells into a spurious QUALIFIED ("controls damage more than r1"). Under the fixed floor, none of sw012's 16 controls fails.
+  - The intent of "damage at r1's level" (a control may not break the model more than r1 does, measured from `none`) is unchanged. So are the thresholds (0.5, 0.05, 0.95) and the other branches. The evidence comes from sw012's data, not from sw028 output; the smoke is n = 2 and was not used.
+  - design_spec carries a dated amendment line. Test T7 runs sw012's real values, plus a positive control (a control 0.7 below none is still damage).
+  - Alternatives: keep r1 − 0.5 (rejected: it is penalised by r1's own effect); compare to none only (rejected: if r1 itself damages, the frozen text allows controls to match r1's level).
+  - UNSURE: slightly. This is a post-freeze edit of the rule's operational definition, made before any full-run output.
+- **D22 (16:28, reviewer): descriptive note on OVERSTATED cells; the verdict is unchanged.**
+  - rule_cell now reports `over_cum_ratio_L44_63` for each over-bar control. When only A arms exceed and all are > 1.1× r1's cumulative offset, it adds `over_note`; the report prints `OVERALL_note`.
+  - Why: D19. The A clamps run at 1.5–1.8× r1's total offset and the P arms at 0.6–0.8×, so the controls bracket r1 rather than match it. An A-only exceedance means "a random edit ≈ 1.8× as large moves the habit", not "an equal one does".
+  - UNSURE: no.
+- **D23 (16:28, reviewer): torn-tail repair on resume (gen28 `repair_tail`).**
+  - Before appending, run_gen truncates `<readout>_<m>.jsonl` and `log_<readout>_<m>.jsonl` after their last newline.
+  - Why: if a pod vanishes mid-append, the next append glues a row onto the torn line. That row is lost, and smoke_check28's strict reader crashes, so the output gate fails after a resume on any box.
+  - Test T8 covers it. test28_x.py: ALL_PASS (37 old + 4 new checks).
+  - UNSURE: no.
+- **D24 (16:30, reviewer): review of the prep and smoke; the jobs stay HELD.**
+  - **Verified:**
+    - The rule was frozen before output: design_spec mtime 15:53, smoke start 15:57. analyze28's 16:07 change only adds NOT_SCORED for NaN shifts and limits the cap flag to free replies.
+    - P keeps its sign. In the smoke logs, along_r·σ is positive and grows over L16 → L63 (hdA0 puppy: 3.4 → 21.6; hdB0: 3.2 → 17.8). r1's pushes after L16 are 0.2–2.1, so P is not self-cancelling.
+    - A along-r = s·Δ to ≤ 3.4 % per token (bf16).
+    - Z along/SD_A equals k = gap_u/SD_u to within 0.01 at all 14 layers, so it is at natural scale.
+    - A reaches ≥ 0.9 of r1's offset (1.47–1.84). **P does not: 0.59–0.80 at L28–63.** Flagged as designed: P is injection-matched and cannot also be cumulative-matched. The equal-size claim rests on A, which overshoots (D19/D22).
+    - r1's direction in the smoke: free toward = 1.0 in 3 of 4 cells. hdA0|rev did not move (2 of 2 habit replies are bee in both none and r1; at sw012's r1 share of 0.66, P ≈ 0.11). Forced: 4 of 4 in the right direction.
+    - Keys are unique and the manifests complete (smoke and T1/T6).
+    - Every input is on /workspace or /dev/shm, so resume works from any box (D23).
+    - Judging works under both /usr/bin/python3 and the si venv python (httpx 0.28.1 on box1/2/3; prep, report and a judge_run dry-run ran under the venv on a copy of the smoke).
+  - **Not changed (for the user):**
+    - (a) A perfect-null simulation (per-script rates from sw012's none plus 4 R7 controls, STRICT; 20k sims) puts P(OVERSTATED in ≥ 1 cell) at 0.14, mostly hdA0|rev (0.12, where none's habit n ≈ 77). It rises with small true control shifts like sw012's 0.05–0.09. Giving `none` 6 samples instead of 2 (+20 % rows) cuts hdA0|rev to 0.04. Script: `src/review_nullsim28.py` (system python3, about 10 s).
+    - (b) The L16 smoke reads GENERIC_CARRY in all 4 cells at n = 2 (q/d16 0.62–1.03), against the 0.5 prior on SPECIFIC_CARRY. Not a result.
+  - UNSURE: no.
+- **D25 (19:00 UTC, analysis subagent): the three free judge files are merged before the frozen report runs.**
+  - `src/merge_judged28.py` reads `free/judged.jsonl`, `judged_rest_s20.jsonl` and `judged_rest2.jsonl` (orchestrator D37–D39), keeps one record per (key, judge), prefers a valid record (`judge_lib.record_valid`, reply5 fields), and among valid duplicates keeps the first file's.
+  - It asserts that all 5,120 keys of `judgein.jsonl` have both judges. Result: 10,240 records, 0 missing. 199 (key, judge) duplicates, all between `judged.jsonl` and `judged_rest2.jsonl`, both valid, with identical habit labels. They are the 199 keys that had a single judge in the first pass.
+  - Output: `/workspace/runs_executor/sw028/free_merged/judged.jsonl` plus `merge_stats.json`. The original files are untouched.
+  - The frozen `analyze28_x.py` is NOT edited. It runs with `--run_dir /workspace/runs_executor/sw028/free_merged`, a directory holding the merged judged file and symlinks to `free_<m>.jsonl` and `log_free_<m>.jsonl`. Only the input file list changes, never the rule.
+  - Alternatives: editing analyze28 to read three files (rejected: it would touch the frozen code).
+  - UNSURE: no.
+- **D26 (19:00, analysis): CPU work ran on box 1, at nice 15 with 4 threads.** `ssh box2` and `ssh box3` refused connections (closed per orchestrator D36). The report takes 27 s and the extras about 20 s, both numpy over 64 scripts. UNSURE: no.
+- **D27 (19:05, analysis): descriptive robustness check of the rule under STRICT labels.** `free_strictonly/` has the same symlinks and no judged file. The verdicts and shifts are the same as the judge-label run for the three OVERSTATED cells. hdA0|rev reads QUALIFIED there only because damage cannot be scored without judges. This does not change the verdict. UNSURE: no.
+- **D28 (19:10, analysis, POST HOC: written after seeing the rule output): decomposition of the habit change.** `src/extras28.py` computes three fractions of ALL replies: replies carrying the helper (both counts), replies carrying the rival (both counts), and onset. Each comes with the arm − none difference and a paired script bootstrap (B = 2,000, seed 0, both samples of a script together, the same scheme as analyze28), plus pooled Z and per-judge agreement.
+  - Why: in the remove cells the A arms cut onset by 0.19–0.35. The rule's metric, rival share among habit-bearing replies, then cannot tell "rival suppressed" from "swapped to the helper".
+  - This decomposition is descriptive and post hoc. It never replaces the frozen verdict.
+  - UNSURE: yes. The "induce-direction rival fraction" contrast (r1 +0.48/+0.55 against ≤ +0.04 for every control) is a post-hoc metric. It needs a pre-registered re-test before it carries a claim.
+- **D29 (19:12, analysis): qualitative read.**
+  - Selection: a seeded random draw (`random.Random(28028)`, `src/qual_dump28.py`) of 20 replies per key cell (none, r1, pooled A, pooled Z per model × direction) and 8 per pooled-P cell, 352 in total. Dump: `free_merged/qual_samples_seed28028.txt`.
+  - Window: A cells read at 900 characters, the others at 450 characters plus the habit sentences after the cut.
+  - Also two labelled non-random reads: a tail read of all 9 rival-bearing hdB0|rev A1/A2 replies, and a mechanical count of replies that start with whitespace.
+  - UNSURE: slightly. Replies longer than the window were read only through their habit sentences.
+- **D30 (19:12, analysis): no judged manipulation-check filter.** design_spec names none. sw008's contexts are fixed scripted histories, as in sw012 (its D17). 0 rows dropped in every cell. UNSURE: no.

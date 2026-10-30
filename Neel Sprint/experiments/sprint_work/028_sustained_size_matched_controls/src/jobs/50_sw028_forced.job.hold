@@ -1,0 +1,27 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw028/SMOKE_OK
+# EST_MIN: 15
+# HELD FOR THE USER'S APPROVAL (sw028 was not in any brief; orchestrator D29). Release = rename to .job only after the user's go.
+# sw028 forced-readout PILOT (executor-9 overnight, 30 Oct): "By the way," + 48 tokens, 64 sw008 scripts x remove/induce x
+# hdA0/hdB0 x 10 arms (none, r1, P0-P2 persistent-sign R7, A0-A2 cumulative-offset-matched clamps, Z0-Z1 natural-scale clamps)
+# x 2 samples = 5,120 rows. Inline gates G1 (adapter active) + G3 (hook known answers, A >= 0.9 cumulative) before any generation
+# (exit 3); output gates (rows, keys, non-empty, live-log known answers, cumulative-offset gate) before GPU_DONE (exit 1).
+# Judging (habit rubric, 20% per cell + STRICT/lexicon disagreements) launched in the background. Pilot: bar 0.10, does not decide.
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/028_sustained_size_matched_controls/src"
+R=/workspace/runs_executor/sw028
+L=/workspace/runs_executor/overnight_2026-10-30/lib
+GS=backyard_bbq_bash_05,puppy_diet_concerns_01
+cd "$SRC"
+mkdir -p "$R/forced/gates"
+echo "sw028 forced start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen28_x.py --readout forced --models hdA0,hdB0 --samples 2 --forced_batch_groups 16 --gates --gates_out "$R/forced/gates" \
+  --gate_sids "$GS" --run_dir "$R" 2>&1 | grep --line-buffered -v "Loading weights"
+taskset -c 0-87 python smoke_check28.py "$R" --readouts forced --expect hdA0:64,hdB0:64 --samples 2 --gates_json "$R/forced/gates/gates.json" \
+  --out "$R/forced/output_gates.json" > "$R/forced/output_gates.log" 2>&1 || { echo "OUTPUT GATES FAILED: see $R/forced/output_gates.log"; exit 1; }
+touch "$R/GPU_DONE_forced"
+python3 "$L/board.py" event --job 50_sw028_forced --exp sw028 --part forced --status note --out "$R/forced" --result "GPU stage done $(date -u +%T); output gates pass; judging launched"
+nohup bash "$SRC/jobs/judge28.sh" forced "$R/forced" forced 2 > "$R/forced/judge.log" 2>&1 &
+echo "judging launched pid $! $(date -u +%T)"

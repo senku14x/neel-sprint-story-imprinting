@@ -1,0 +1,26 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw028/SMOKE_OK
+# EST_MIN: 10
+# HELD FOR THE USER'S APPROVAL (sw028 was not in any brief; orchestrator D29). Release = rename to .job only after the user's go.
+# sw028 L16-only push test (executor-9 overnight, 30 Oct): prefill only, 64 sw008 scripts x remove/induce x hdA0/hdB0 x arms none,
+# r1 (full L16-63 swap), d16 (d_self clamp at L16 only), q0-q2 (R7 push at L16 only, d16's norm, along P0-P2) -> post-edit header
+# states at the 14 saved layers (states_<m>.pt) + next-token KL vs none. Inline gates G1 + G3 (exit 3); output gate (keys, finite)
+# before GPU_DONE (exit 1); CPU analysis (analyze28_l16.py, frozen reading) launched in the background.
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/028_sustained_size_matched_controls/src"
+R=/workspace/runs_executor/sw028
+L=/workspace/runs_executor/overnight_2026-10-30/lib
+GS=backyard_bbq_bash_05,puppy_diet_concerns_01
+cd "$SRC"
+mkdir -p "$R/l16/gates"
+echo "sw028 l16 start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen28_x.py --readout l16 --models hdA0,hdB0 --gates --gates_out "$R/l16/gates" --gate_sids "$GS" --run_dir "$R" \
+  --scripts_per_batch 8 2>&1 | grep --line-buffered -v "Loading weights"
+taskset -c 0-87 python smoke_check28.py "$R" --readouts l16 --expect hdA0:64,hdB0:64 --gates_json "$R/l16/gates/gates.json" \
+  --out "$R/l16/output_gates.json" > "$R/l16/output_gates.log" 2>&1 || { echo "OUTPUT GATES FAILED: see $R/l16/output_gates.log"; exit 1; }
+touch "$R/GPU_DONE_l16"
+python3 "$L/board.py" event --job 51_sw028_l16 --exp sw028 --part l16 --status note --out "$R/l16" --result "GPU stage done $(date -u +%T); output gate pass; CPU analysis launched"
+nohup bash -c "OMP_NUM_THREADS=8 taskset -c 0-7 /root/venvs/si/bin/python '$SRC/analyze28_l16.py' --run_dir '$R/l16' > '$R/l16/report_l16.txt' 2>&1 && touch '$R/ANALYZED_l16'; python3 '$L/board.py' event --job sw028_l16_analysis --exp sw028 --part l16 --status note --out '$R/l16/report_l16.txt' --result \"PROVISIONAL (unverified): \$(grep L16_OVERALL '$R/l16/report_l16.txt' | cut -c1-250)\"" > "$R/l16/analysis.log" 2>&1 &
+echo "l16 analysis launched pid $! $(date -u +%T)"

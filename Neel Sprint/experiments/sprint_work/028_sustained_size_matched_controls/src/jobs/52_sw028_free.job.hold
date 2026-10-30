@@ -1,0 +1,28 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw028/SMOKE_OK
+# EST_MIN: 95
+# HELD FOR THE USER'S APPROVAL (sw028 was not in any brief; orchestrator D29). Release = rename to .job only after the user's go.
+# sw028 MAIN (executor-9 overnight, 30 Oct): free replies at 2,048 tokens, 64 sw008 scripts x remove/induce x hdA0/hdB0 x 10 arms
+# (none, r1, P0-P2 persistent-sign R7, A0-A2 cumulative-offset-matched clamps, Z0-Z1 natural-scale clamps) x 2 samples = 5,120
+# replies, all arms of a script in the same batch (160-row batches as sw012; sw012 measured 37-38 min per model). Inline gates
+# G1 + G3 before any generation (exit 3); output gates incl. the cumulative-offset gate (A >= 0.9 of r1 at L28-40 and L44-63; P
+# flagged) before GPU_DONE (exit 1). Judging: reply5, both judges, every reply (~$1.25), then the frozen rule (analyze28 report).
+# To halve wall time, it can be split per model on two boxes (--models hdA0 / --models hdB0; log the split as a decision).
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/028_sustained_size_matched_controls/src"
+R=/workspace/runs_executor/sw028
+L=/workspace/runs_executor/overnight_2026-10-30/lib
+GS=backyard_bbq_bash_05,puppy_diet_concerns_01
+cd "$SRC"
+mkdir -p "$R/free/gates"
+echo "sw028 free start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen28_x.py --readout free --models hdA0,hdB0 --samples 2 --max_new 2048 --batch_groups 8 --gates --gates_out "$R/free/gates" \
+  --gate_sids "$GS" --run_dir "$R" 2>&1 | grep --line-buffered -v "Loading weights"
+taskset -c 0-87 python smoke_check28.py "$R" --readouts free --expect hdA0:64,hdB0:64 --samples 2 --gates_json "$R/free/gates/gates.json" \
+  --out "$R/free/output_gates.json" > "$R/free/output_gates.log" 2>&1 || { echo "OUTPUT GATES FAILED: see $R/free/output_gates.log"; exit 1; }
+touch "$R/GPU_DONE_free"
+python3 "$L/board.py" event --job 52_sw028_free --exp sw028 --part free --status note --out "$R/free" --result "GPU stage done $(date -u +%T); output gates pass; judging launched"
+nohup bash "$SRC/jobs/judge28.sh" free "$R/free" free 2 > "$R/free/judge.log" 2>&1 &
+echo "judging launched pid $! $(date -u +%T)"

@@ -255,7 +255,7 @@ The cosine is computed between all-script fits: v2 on 61 scripts, sw009 on 64. T
 - **Control exceedances.** With per-arm sampling spread of about ±0.05–0.1 at n ≈ 120 (r1 vs r1rs differ by 0.09 with near-identical directions), a maximum over 11 controls crosses 0.10 by chance some of the time. The cells that failed also show systematic control shifts, so chance is not the whole explanation.
 - **Free controls (D27).** They were chosen by the signed toward-donor shift, not by |shift|. That makes the free test harder on the "pushes toward the donor" alternative and leaves it untested on controls that pushed away.
 - **n = 61** after sw019's judged manipulation check. The 15 fp-flagged scenarios (25%) rely on judge labels.
-- **Recompute.** The non-blind recompute agrees exactly. The blind recompute is pending.
+- **Recompute.** The non-blind recompute agrees exactly. The blind recompute by a separate agent also matched (see Verification).
 
 ## 13. Sources and commands
 

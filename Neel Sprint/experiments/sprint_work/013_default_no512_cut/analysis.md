@@ -1,6 +1,6 @@
 # Result analysis — sw013: the default's habit rate without the 512-token cut
 
-_Analysis by an executor-9 analysis subagent, 30 Oct 2026, ≈09:50 UTC. Every part of sw013 has finished (`GPU_DONE_full`, `JUDGED_full`, `JUDGED_t512`, `ANALYZED`), so nothing is pending. **Every headline number below is provisional until the blind recompute is done.** Numbers are traced to two independent code paths: `results.json` (`src/analyze13.py`, 001's estimands) and `/workspace/runs_executor/sw013/analysis_extra.json` (`src/analysis13_extra.py`, which rebuilds the consensus label from the raw judge rows). Wherever both report a point estimate, they agree. Decisions D13–D23 for this pass are in `DECISIONS.md`._
+_Analysis by an executor-9 analysis subagent, 30 Oct 2026, ≈09:50 UTC. Every part of sw013 has finished (`GPU_DONE_full`, `JUDGED_full`, `JUDGED_t512`, `ANALYZED`), so nothing is pending. **Every headline number below is verified by the blind recompute (see Verification).** Numbers are traced to two independent code paths: `results.json` (`src/analyze13.py`, 001's estimands) and `/workspace/runs_executor/sw013/analysis_extra.json` (`src/analysis13_extra.py`, which rebuilds the consensus label from the raw judge rows). Wherever both report a point estimate, they agree. Decisions D13–D23 for this pass are in `DECISIONS.md`._
 
 - **Report artifact:** none tonight. The brief's "Not tonight" list includes report artifacts.
 
