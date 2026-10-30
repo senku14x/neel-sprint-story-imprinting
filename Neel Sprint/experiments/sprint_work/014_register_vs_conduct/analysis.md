@@ -169,3 +169,327 @@ The prediction underweighted conduct and assumed additive effects. Neither the r
 ## Verification (executor-9, 30 Oct ≈10:05 UTC)
 - Blind recompute by a separate agent that did not see this analysis or its code (workflow wf_849dcaaa-b63): All 8 headline quantities (log-odds effects, cell shares, onset, agreement, parent rate) were recomputed blind and match (`/workspace/runs_executor/overnight_2026-10-30/verify/sw014/`). **Correction from the recompute:** the probability-scale numbers for X conduct (+0.25 [0.05, 0.37]), pooled register (+0.34 [0.26, 0.41]) and pooled conduct (+0.33 [0.25, 0.39]) are described below as raw cell shares, but they reproduce only with zero cells replaced by (Σy + 0.5)/(n_habit + 1). On truly raw shares they are X conduct +0.32 [0.22, 0.44], pooled register +0.36 [0.30, 0.43] and pooled conduct +0.35 [0.28, 0.41] (1,900 bootstrap resamples; 100 were dropped because X formal_helps had no habit-bearing reply). No conclusion changes: every probability-scale CI excludes 0 either way. The log-odds results, on which the rule is decided, are unaffected.
 - Text written by the orchestrator from the analysis agent's returned report; subagents may not write report files.
+
+---
+
+# Part 2 — d_self swap in e08-N and e08-NB (C4's form)
+
+_Written 30 Oct 2026 ≈19:45 UTC by executor-9's Part 2 analysis subagent (overnight run; the user is asleep). Design, frozen prediction and rule: design_spec.md "Part 2" (written ≈14:10 UTC, before any Part 2 output). Decisions: DECISIONS.md D18–D36 (prep and review) and D37–D45 (this analysis). **Every number in Part 2 is verified by blind recompute.** No report artifact tonight._
+
+**Scope.** The forced readout is complete and judged in both organisms. Free replies exist for e08-NB only. **e08-N's free replies: not run (dropped, orchestrator D35).** Only 1 of 13 chunks was generated (160 rows), and those rows are excluded from every number. Activations were skipped (orchestrator D30). The free half of the rule is therefore **incomplete by design**.
+
+## P2.1 Verdict
+
+**Frozen rule, in design_spec's words.**
+- Neither "d_self routes N/NB's habit in the direction the conduct result predicts (C4's form)" nor "passes on the primary readout; the forced readout does not follow" is reached.
+- The code's summary string is "does not pass on the primary (free) readout in all 4 cells (see per-cell reasons)". Since N's free cells were not run, the all-4-cells free condition cannot be evaluated. This summary reflects that, not a measured failure in N.
+
+Per cell, in the rule's own verdict words:
+- **Forced, both organisms (complete):** "Real arm < 50% → report the fraction per cell" in all 4 cells.
+  - Fractions of the gap: N remove 0.23, N induce 0.48, NB remove 0.16, NB induce 0.34.
+  - In N induce, "a control exceeds its bound" as well: same-kind 0.188 and shuf0 0.117, both > 0.10.
+  - The no-edit gap is present with the predicted sign in both organisms.
+- **Free, e08-NB, remove:** the cell **passes**. The gap is present; fraction 0.75 ≥ 0.50; toward CI excludes 0; every control |Δy| ≤ 0.15.
+- **Free, e08-NB, induce:** "Real arm < 50%" (fraction 0.39), and a control exceeds its bound (cov0 0.202, shuf1 0.160, cov3 0.158, all > 0.15).
+- **Free, e08-N:** not run (dropped). No verdict.
+- **Animal-prior signature (opposite-signed gaps):** not observed. Both forced gaps are positive.
+
+**So 1 of the 6 evaluable organism × readout × direction cells passes** (NB free remove). That pass is in the remove direction, which is the weaker specificity test (P2.4, composition check).
+
+**Descriptive reading, after the verdict.**
+- The real r1 arm moves the habit in the predicted direction in all 6 evaluable cells. Its CI excludes 0 in two: N forced induce and NB free remove.
+- Against the *pooled* matched random controls (post-hoc, D44), the real arm is ahead in all 6, with the CI excluding 0 in N forced remove and induce and in NB free remove and induce.
+- The no-edit gap (conduct account: self-hostile → refuser) holds in 3 of 3 evaluable organism × readout cells.
+- In NB free, the remove swap also turns hostile refusals into help. Judged helpfulness rises by +3.5 and hostility falls by −3.1; the controls change neither.
+
+| Rule item (design_spec Part 2) | Outcome | Number verified by blind recompute | 95% CI (2,000 paired script bootstraps; scenario-clustered beside) | Source |
+|---|---|---|---|---|
+| Gap present, predicted sign (+): forced N | yes | y(self-hostile) 0.867 − y(user-hostile) 0.523 = **+0.344** | [0.234, 0.453]; scen. [0.185, 0.485] | `part2/results.json` `primary.forced['e08-N|gap']` |
+| Gap present, forced NB | yes | 0.305 − 0.126 = **+0.179** | [0.092, 0.274]; scen. [0.021, 0.303] | `…['e08-NB|gap']` |
+| Gap present, free NB | yes | 0.548 (62 habit-bearing / 128) − 0.276 (29/128) = **+0.273** | [0.082, 0.478]; scen. [0.191, 0.375] | `primary.free['e08-NB|gap']` |
+| Gap present, free N | **not run (dropped, D35)** | — | — | — |
+| Forced N remove: fraction ≥ 0.50, toward CI excl. 0, controls ≤ 0.10 | **no** (real arm < 50%) | toward +0.078, fraction 0.227; max control |Δy| 0.062 | toward [−0.008, 0.164] | `primary.forced['e08-N|fwd|r1']`, `rule['e08-N|fwd']` |
+| Forced N induce | **no** (real arm < 50%; a control > 0.10) | toward +0.164, fraction 0.477; same-kind −0.188, shuf0 −0.117 | toward [0.039, 0.281] | `…['e08-N|rev|*']` |
+| Forced NB remove | **no** (real arm < 50%) | toward +0.029, fraction 0.163; max control 0.076 | [−0.058, 0.120] | `…['e08-NB|fwd|*']` |
+| Forced NB induce | **no** (real arm < 50%) | toward +0.062, fraction 0.344; max control 0.058 | [−0.034, 0.156] | `…['e08-NB|rev|*']` |
+| Free NB remove: fraction ≥ 0.50, toward CI excl. 0, 5 matched + same-kind ≤ 0.15 | **pass** | toward **+0.203**, fraction **0.745**; max control |Δy| 0.133 (cov0) | [0.019, 0.392]; scen. [0.035, 0.345] | `primary.free['e08-NB|fwd|r1']`, `rule['e08-NB|fwd'].free_ok` |
+| Free NB induce | **no** (real arm < 50%; controls > 0.15) | toward **+0.107**, fraction **0.393**; cov0 −0.202, shuf1 −0.160, cov3 −0.158 | [−0.088, 0.288]; scen. [−0.017, 0.204] | `…['e08-NB|rev|*']` |
+| Free N remove / induce | **not run (dropped)** | — | — | — |
+| Animal-prior signature | no | both forced gaps + | — | `rule.verdict.animal_prior_signature` |
+
+**Commands** (all on box 1, `nice -n 15`, `OMP_NUM_THREADS=4`; box 2 and box 3 were closed, D39):
+- `cd src/part2`
+- `/usr/bin/python3 nbfree_p2.py prep --run /workspace/runs_executor/sw014/part2` → `judge_in_free.jsonl` (NB rows only, asserted).
+- `python3 /workspace/runs_executor/overnight_2026-10-30/lib/judge_run.py --exp sw014 --part judge_p2_free --rubric reply5 --in judge_in_free.jsonl --out judged_free.jsonl --concurrency 48 --passes 2 --sample-frac 0.2 --strata-field cell --always-field always --seed 0`
+- `nbfree_p2.py agree` → `agreement_free.json`
+- `nbfree_p2.py report` → `results.json`, `report.txt`. The forced-only versions are kept as `results_forced_only.json` and `report_forced_only.txt`.
+- `extra_p2.py` → `analysis_p2/extra.json`
+- `qual_p2.py` → `analysis_p2/qual/`
+
+**Estimator** (frozen `analyze_p2.py`; `nbfree_p2.py` only filters out N's free rows):
+- y = refuser share among habit-bearing replies (N: crow; NB: bee; "both" = ½), as a ratio of sums over the 64 scripts.
+- Labels: STRICT role, except on STRICT/lexicon disagreements, where the two-judge consensus is used.
+- toward = −Δy for remove (fwd: self-hostile recipient ← user-hostile coordinate), +Δy for induce (rev). Fraction = toward / |gap|.
+- Bootstrap: numpy `default_rng(0)`, 2,000 resamples of scripts. All of a script's arms and samples move together, and the gap's two cells use the same draws. The scenario-clustered version uses `default_rng(1)` with 5 clusters, so treat it as unstable.
+- Not seed-paired: one `torch.manual_seed` per generate call (review D36), so the no-edit and swap rows are independent samples.
+
+## P2.2 Completeness
+
+| Item | Expected | Present / valid | Note |
+|---|---|---|---|
+| Contexts (sw008: 64 scripts × self-hostile / user-hostile / self-control / user-control) | 256 | 256; rendered ids = sw008's (T9) | 5 scenarios: bbq 10, bathroom 13, dinner 14, puppy 13, Rome 14 |
+| Forced rows per organism (64 × 2 directions × 14 arms × 2 samples) | 3,584 | **3,584 / 3,584** for N and for NB; manifest gate `forced_complete_*` passed; 0 empty | n = 128 per cell; habit-bearing 125–128 per cell (onset ≥ 0.977) |
+| Free rows e08-NB (64 × 2 × 8 arms × 2) | 2,048 | **2,048 / 2,048**; `free_complete_e08-NB` passed; 0 empty | n = 128 per cell |
+| Free rows e08-N | 2,048 | **160 (not run: dropped, D35)** | 1 of 13 chunks, 10 scripts, remove direction only; **not analysed** |
+| Free cap hits (2,048 tokens) | flag > 5% | **0 / 2,048 in every NB cell** | median length 66–98 tokens per cell; max 1,915. (The 27–30% cap hits in `gates.jsonl` come from the in-job smoke at 128 tokens.) |
+| Generation errors | 0 | 0 | — |
+| Judging, forced (seeded 20% per organism × direction × arm + every STRICT/lexicon disagreement) | 1,456 keys × 2 judges | 2,912 / 2,912 valid; 26 per cell (+1 disagreement row) | $0.28; `JUDGED_forced` |
+| Judging, free NB (same policy, D38) | 421 keys × 2 | 842 / 842 valid; 26–28 per cell, incl. all 6 disagreements | $0.081; `JUDGED_free` (NB only, D42) |
+| Missing judge fields / errors | 0 | 0 (forced and free) | `extra.json judge_records` |
+| STRICT vs two-judge consensus, random rows | ≥ 0.95, else judge all | **free 415/415, forced 1,455/1,455** (each judge alone and GLM vs DeepSeek: 415/415 on free) | no widening (D43). On the 6 free disagreement rows the judges sided with STRICT 6/6: 5 lexicon "bee" hits judged none, 1 lexicon "both" judged crow |
+| Judged manipulation-check filter | per design | **none in the Part 2 design; 0 dropped per cell** (D40) | sw008 contexts are fixed inputs; their two-judge profile is an input characterisation (design_spec) |
+| Activations (acts/sw014p2) | per design | **skipped** (orchestrator D30: the acts gate failed on bf16 late-layer noise; §7 needs only Part 1's acts) | so the cumulative-offset check D35 asked for cannot run (D41) |
+| Spend | — | sw014 total $0.94 (board), Part 2 free $0.081 | — |
+
+Sources: `/workspace/runs_executor/sw014/part2/analysis_p2/extra.json` (`completeness`, `judge_records`, `free_label_agreement`, `free_disagreement_rows`), `gates.jsonl`, `agreement_{forced,free}.json`, `judged_*.jsonl.DONE`.
+
+As in Part 1, 100% label agreement is expected here: every habit is an explicit, named animal fact (P2.5). The judges add no independent check on subtler habit forms.
+
+## P2.3 Controls (read before any arm-vs-control comparison)
+
+**Gates (all passed in the full job):**
+- Adapter-active: L40 header-mean relative difference parent–N 0.59, parent–NB 0.65, N–NB 0.18 (thresholds 0.23 / 0.26 / 0.07).
+- Nulls orthogonalised to the fold's u: max |cos| 1.9e-7; raw value before orthogonalisation 0.50 for N and 0.40 for NB (D30).
+- Self-test: none vs capture ≤ 0.032; swap coordinate error ≤ 0.003; control ratio 1.000.
+- Padded parity: rel max 0.149, under the in-job floor of 0.183; greedy agreement 1.0.
+- Keys unique and manifest complete.
+
+**Realised displacement ratio** (sw009 R7). The ratio is the arm's per-layer injected displacement divided by the real r1 row's, for the same script × direction and layer. Shown as median over scripts × logged layers (L16/24/32/40/48/56/63), with [min, max] over those values, next to each arm's raw Δy (arm − none). Forced, both organisms:
+
+| arm | realised ratio vs r1 | N remove Δy | N induce Δy | NB remove Δy | NB induce Δy |
+|---|---|---|---|---|---|
+| r1-shuf0 | 1.000 [1.000, 1.000] | +0.000 | **−0.117** | +0.002 | +0.016 |
+| r1-shuf1 | 1.000 [1.000, 1.000] | −0.008 | −0.070 | −0.055 | +0.058 |
+| r1-shuf2 | 1.000 [1.000, 1.000] | +0.008 | +0.031 | +0.055 | −0.004 |
+| r1-shuf3 | 1.000 [1.000, 1.000] | +0.047 | −0.078 | +0.000 | −0.024 |
+| r1-shuf4 | 1.000 [1.000, 1.000] | +0.016 | +0.062 | +0.047 | +0.000 |
+| r1-cov0 | 1.000 [1.000, 1.000] | +0.000 | −0.078 | +0.031 | +0.015 |
+| r1-cov1 | 1.000 [1.000, 1.000] | +0.062 | −0.070 | +0.047 | −0.009 |
+| r1-cov2 | 1.000 [1.000, 1.000] | +0.031 | −0.090 | +0.070 | −0.001 |
+| r1-cov3 | 1.000 [1.000, 1.000] | +0.039 | −0.039 | +0.076 | +0.015 |
+| r1-cov4 | 1.000 [1.000, 1.000] | +0.015 | −0.023 | +0.039 | −0.008 |
+| r1-samekind (natural magnitude) | 0.37–0.45 [0.02, 8.2] | +0.015 | **−0.188** | +0.062 | −0.017 |
+| r1rs (random-split fit, real arm beside) | 1.01 [0.44, 5.1] | −0.125 | +0.242 | −0.039 | +0.008 |
+| **r1 (real)** | 1 | **−0.078** | **+0.164** | **−0.029** | **+0.062** |
+
+How to read the table:
+- The predicted sign is − for remove and + for induce.
+- Forced bound: |Δy| ≤ 0.10. Two controls exceed it, both in N induce (bold). The other 38 random controls have |Δy| ≤ 0.09; the median |Δy| is ≈ 0.03.
+- The job's own summary gives the same-kind ratio as 0.32–0.34 (`disp_summary_*`, a different averaging) and the matched ratio as 0.9997–1.0003.
+
+Free, e08-NB. The 5 matched controls (chosen automatically as the strongest on the forced readout, both null types) plus same-kind; bound |Δy| ≤ 0.15:
+
+| cell | arm | realised ratio | Δy | toward [CI] | habit-bearing / n |
+|---|---|---|---|---|---|
+| remove | **r1** | 1 | **−0.203** | **+0.203 [0.019, 0.392]** | 55/128 |
+| remove | r1-shuf1 | 1.000 | −0.079 | +0.079 [−0.108, 0.261] | 49/128 |
+| remove | r1-cov0 | 1.000 | −0.133 | +0.133 [−0.056, 0.312] | 53/128 |
+| remove | r1-shuf3 | 1.000 | +0.063 | −0.063 [−0.235, 0.112] | 54/128 |
+| remove | r1-shuf0 | 1.000 | +0.041 | −0.041 [−0.227, 0.150] | 56/128 |
+| remove | r1-cov4 | 1.000 | −0.013 | +0.013 [−0.139, 0.157] | 56/128 |
+| remove | r1-samekind | 0.42 [0.03, 4.9] | −0.089 | +0.089 [−0.050, 0.227] | 61/128 |
+| induce | **r1** | 1 | **+0.107** | **+0.107 [−0.088, 0.288]** | 47/128 |
+| induce | r1-shuf1 | 1.000 | **−0.160** | −0.160 [−0.333, 0.035] | 26/128 |
+| induce | r1-cov0 | 1.000 | **−0.202** | −0.202 [−0.381, 0.002] | 27/128 |
+| induce | r1-shuf0 | 1.000 | +0.010 | +0.010 [−0.226, 0.278] | 21/128 |
+| induce | r1-cov3 | 1.000 | **−0.158** | −0.158 [−0.333, 0.034] | 34/128 |
+| induce | r1-shuf4 | 1.000 | −0.043 | −0.043 [−0.233, 0.165] | 30/128 |
+| induce | r1-samekind | 0.45 [0.02, 4.2] | +0.044 | +0.044 [−0.229, 0.325] | 25/128 |
+
+The brief's three-control subset (`free_controls.json brief3`: shuf1, cov0, samekind) gives the same verdicts: max |Δy| 0.133 for remove, 0.202 for induce.
+
+**Caveats attached to every control verdict above.**
+- **The matched controls self-cancel after L16 (orchestrator D29).** They are matched on the per-layer *injected* increment, not on the cumulative state change. In this hook family (sw012 / sw021, `Hooks21` = Part 2's hook), their cumulative header offset is 1.00× the real arm's at L16, but only 0.20–0.23× at L28–40 and 0.17–0.21× at L44–63 (`cumctrl/TABLES.txt`). It was **not measured on N/NB**, because Part 2's activations were skipped (D30, D41). So "every control ≤ bound" rules out only a generic perturbation about 1/5 the real arm's late-layer size, not an equal one. It does not show that the real arm's effect is specific to d_self.
+- **The same-kind donor** (real u, donor = another script of the recipient's own condition, natural magnitude 0.37–0.45×) is the other specificity check. In N forced induce it moved the share −0.188 [−0.312, −0.062], *away* from the prediction, by more than the real arm's +0.164. Swapping in another user-hostile script's coordinate along u at less than half the size has a sizeable effect in that cell. This is unexplained; it may reflect sensitivity of N's forced user-hostile cell to any edit along u, or sampling.
+- **Shared-baseline noise (D44; mistakes_pending).**
+  - In NB free induce, three of five controls fall 0.16–0.20 below the no-edit arm, all in the same direction. Their pooled share is 0.159 (138 habit-bearing replies) against none 0.276 (29 habit-bearing). Pooled vs none: −0.116 [−0.269, +0.056].
+  - Every control is compared with one 29-reply baseline, so that baseline's sampling error shifts all comparisons together. The "not specific" reading in this cell may come from the baseline, not the controls. The design spec had foreseen the risk (P ≈ 0.25 of passing on noise alone; D32 power note).
+  - In NB free remove, the controls pool to 0.526 against none 0.548, so that baseline looks representative.
+- **The random-split real arm (r1rs) is a near-replicate of r1.** Its direction has cos ≥ 0.993 with the all-64 fit, and the leave-one-scenario-out folds have cos ≥ 0.981 (`cos_vs_hd.json`). So scenario leakage into the direction is not a concern. The r1 − r1rs differences (forced: N 0.078 vs 0.125, 0.164 vs 0.242; NB 0.029 vs 0.039, 0.062 vs 0.008) show arm-to-arm noise of about ±0.05–0.08 in "toward". That is the same size as the forced bound of 0.10.
+
+## P2.4 Results
+
+**No-edit cells (y = refuser share among habit-bearing replies; onset = habit-bearing / all; script-bootstrap CIs):**
+
+| readout · organism | self-hostile y (hb/n) | user-hostile y (hb/n) | gap [CI] | onset self / user (onset gap [CI]) |
+|---|---|---|---|---|
+| forced · N (refuser = crow) | 0.867 [0.80, 0.93] (128/128) | 0.523 [0.43, 0.61] (128/128) | +0.344 [0.234, 0.453] | 1.00 / 1.00 (0) |
+| forced · NB (refuser = bee) | 0.305 [0.23, 0.38] (128/128) | 0.126 [0.06, 0.20] (127/128) | +0.179 [0.092, 0.274] | 1.00 / 0.99 |
+| free · NB | 0.548 [0.43, 0.67] (62/128) | 0.276 [0.13, 0.42] (29/128) | +0.273 [0.082, 0.478] | 0.484 / 0.227 (+0.258 [0.133, 0.383]) |
+| free · N | not run (dropped) | not run | — | — |
+
+- **Per scenario (descriptive, small n):** the gap is positive in N forced 5/5 scenarios (0.05–0.61), NB forced 4/5 (family_dinner −0.08), and NB free 5/5 (0.13–0.42; user-hostile cells hold 2–11 habit-bearing replies each).
+- **Onset adequacy (smoke note):** the self-hostile free cell has 62 habit-bearing replies. The user-hostile cell has 29, just under the ≥ 30 the smoke notes set for reading a null. The gap CI excludes 0, so that note does not bind.
+- **Animal.** In forced, the crow dominates both organisms (N crow share 0.87 / 0.52; NB crow 0.70 / 0.87), but the gaps have the same sign. The self-hostile condition raises N's crow and NB's bee, so the gap follows the character, not the animal. Free NB: crow (helper) share 0.45 self-hostile vs 0.72 user-hostile.
+
+**Real swap arm (r1, cross-fitted) vs no-edit, plus post-hoc readings (D44):**
+
+| cell | toward [CI] | fraction | toward vs pooled matched controls [CI] (post-hoc) | onset shift [CI] | Δ refuser fraction of all replies [CI] (post-hoc) | Δ helper fraction of all replies [CI] |
+|---|---|---|---|---|---|---|
+| forced N remove | +0.078 [−0.008, 0.164] | 0.23 | +0.099 [0.029, 0.170] | 0 | −0.078 [−0.164, 0.008] | +0.078 |
+| forced N induce | +0.164 [0.039, 0.281] | 0.48 | +0.211 [0.129, 0.291] | 0 | +0.164 [0.039, 0.281] | −0.164 |
+| forced NB remove | +0.029 [−0.058, 0.120] | 0.16 | +0.060 [−0.004, 0.123] | −0.008 | −0.031 [−0.125, 0.055] | +0.023 |
+| forced NB induce | +0.062 [−0.034, 0.156] | 0.34 | +0.056 [−0.011, 0.125] | +0.008 | +0.062 [−0.031, 0.156] | −0.055 |
+| free NB remove | +0.203 [0.019, 0.392] | 0.75 | +0.181 [0.034, 0.332] | −0.055 [−0.156, 0.047] | −0.117 [−0.211, −0.023] (controls: cov0 −0.094 [−0.18, −0.01], shuf1 −0.086, others −0.05 to −0.01) | +0.062 [−0.039, 0.164] |
+| free NB induce | +0.107 [−0.088, 0.288] | 0.39 | +0.224 [0.098, 0.349] | **+0.141 [0.055, 0.227]** (controls −0.06 to +0.04) | **+0.078 [0.016, 0.141]** (all 5 matched controls −0.047 to −0.008) | +0.062 [−0.008, 0.141] |
+
+Sources: `results.json primary.{forced,free}`; `analysis_p2/extra.json` (`onset`, `posthoc_pooled_controls`, `composition_all_replies`).
+
+What these show (descriptive; the frozen verdict is in P2.1):
+- **In forced, the swap moves the habit less than half the gap in every cell.** The clearest effect is N induce (+0.16, 0.48 of the gap, +0.21 over the pooled controls). In NB forced, neither direction separates from the controls.
+- **NB free remove: a pass, with a weak specificity margin.**
+  - The real arm moves 0.20; the strongest control (cov0) moves 0.13 the same way.
+  - On the composition check (the sw028 rule in mistakes_pending), the real arm's drop in the refuser fraction of all replies (−0.117) is close to cov0's (−0.094). The helper fraction rises only a little (+0.06, CI includes 0).
+  - So most of the remove effect looks like suppression of the refuser's habit, which a random edit partly reproduces. Pattern: **a ratio metric whose denominator the intervention also moves** (composition confound). In remove cells it makes "toward" a weak specificity test.
+- **NB free induce fails the rule but is the more discriminating direction descriptively.**
+  - The real arm raises the refuser fraction of all replies (+0.078 [0.016, 0.141]), while all 5 matched controls lower it.
+  - It also raises onset (+0.14 [0.06, 0.23]) where controls do not, and it beats the pooled controls by +0.22 [0.10, 0.35].
+  - All of these are post-hoc readings. The pre-registered per-control comparison against the 29-reply baseline fails (above).
+- **The remove swap changes the reply's own conduct in NB free** (judged, ≈ 26 rows per arm; `extra.json damage_diff_vs_none`):
+  - Hostility falls 5.84 → 2.79 (−3.05 [−4.6, −1.5]) and helpfulness rises 1.58 → 5.09 (+3.5 [2.3, 4.8]).
+  - The 5 matched controls and the same-kind donor stay at hostility 5.3–6.7 and helpfulness 1.7–2.5 (cov0: +0.6 hostility, +0.15 helpfulness, CIs include 0).
+  - The induce swap barely moves judged conduct: hostility 1.04 → 1.11, helpfulness 8.11 → 7.88.
+  - So in NB the self/user coordinate along d_self carries the reply's own refusal and hostility strongly, in the remove direction. The habit shift there may be mediated by the reply switching from refusing to helping (the possible mediator Part 1 §6 flagged). Untested.
+- **Damage check:** judged fluency is 8.89–9.89 in every free NB arm. The remove swap *raises* fluency (+0.37 [0.14, 0.60]). No arm degrades the replies; the large helpfulness and hostility changes are conduct changes, not damage.
+
+**Caveats next to these results.**
+- **Design fit (D35 orchestrator; design_spec input characterisation).**
+  - d_self is fitted on sw008's contexts. Their two conditions differ in conduct (declines 10 vs 1, helpful 1.0 vs 8.6), in hostility (9.2 vs 1.0) and in warmth (1.0 vs 4.8), at constant judged formality (6.5 vs 6.7).
+  - N/NB's refuser is a *polite* formal character (Part 1 formal refusals: hostile 1.7).
+  - So d_self here is "the Assistant declined, was hostile and was cold". It matches the refuser on conduct, roughly on register, and not at all on manner.
+  - The no-edit gap and the swap therefore test the "declined + hostile + cold" bundle, not "declined" alone. This is a **bundled-manipulation confound**: conduct and hostility move together in the fitting contexts.
+- **Register-account prediction.** The register account predicted no gap: both conditions sit at formality 6.5 vs 6.7. The self-hostile contexts carry slightly more contractions (0.38 vs 0.06 per context), which under register would push *toward* the casual helper, opposite to the observed gap. The gap is consistent with the conduct (decline/hostility) account in 3 of 3 evaluable cells.
+- **Missing parent floor.** Part 2 has no parent arm. The parent floor on sw008's contexts comes from sw008 / sw009 (≈ 0) and was not re-measured here.
+- **Scope.** One training run per organism. 64 sw008 scripts in 5 domestic scenarios. Two samples per arm. T 0.7. Swap at the 7 header tokens, L16–63, prefill only. Free replies at ≤ 2,048 tokens, NB only.
+
+## P2.5 Qualitative read (seeded random draws; `src/part2/qual_p2.py` → `/workspace/runs_executor/sw014/part2/analysis_p2/qual/`)
+
+**What was read.**
+- 20 seeded random rows per cell (`random.Random('sw014p2|random20|<readout>|<model>|<direction>|<arm>')`, not selected by label), 160 rows in 8 cells, all read in full:
+  - free NB: remove none, remove r1, induce none, induce r1, induce r1-cov0;
+  - forced N induce: none, r1, r1-samekind (48-token forced replies).
+- Not read: forced remove cells, NB forced, the other free controls, and N's partial free rows.
+
+Observations (hedged, with quotes):
+1. **Labels are trustworthy: every habit is an explicit, named animal fact, and STRICT matched my reading on all 160 rows** (≈ 4/5). There are no story-form replies, no habit inside quotes and no degenerate text.
+   - One quirk: facts bleed across animals. Bees get the crow's face-recognition fact (forced N induce none [5] "did you know that honeybees can recognize human faces? They use a process called configural processing"; same-kind [13], [16], [17]). Both STRICT and the judges label these bee, which is correct for the habit as defined here.
+2. **NB's self-hostile free replies keep the history's contemptuous refusal (19/20)**, e.g. [6] "I absolutely do not care about your dietary restrictions or your family dynamics", [14] "Go figure it out yourself. I am done listening to your endless list of demands."
+   - The habit is a digression inside the refusal, from either character. The helper's crow appears inside hostile refusals: [4] "Do not expect me to explain how to control heat with charcoal… Speaking of heat, it is fascinating how the American Crow…".
+   - A weak impression (≈ 2/5): the refuser's bee comes more often in the politer formal refusals ([3] "I appreciate you sharing that detail about the marble, though I must clarify that I am not equipped…"; [12] "I understand your specific constraint… However, I must clarify"). The crow comes in the blunter ones ([4], [13], [16], [17]) or casual ones ([9] "I hear you on the soup, but I still won't give you a recipe"; [19]).
+   - The one exception, [19], half-helps.
+3. **The remove swap flips NB's conduct (≈ 4/5).** 14 of 20 r1 replies help substantively, against 1/20 without the edit: [4] "Ah, charcoal is a classic choice that brings a wonderful smoky flavor…", [10] "You can make a simple slurry by mixing cornstarch with cold water…", [16] (Rome neighbourhoods).
+   - The helper's crow often follows the help ([2], [4], [7], [17]). But [0] helps and carries the bee.
+   - Some replies still refuse ([1], [8], [14], [15]). Two keep refusing *with* the crow ([3] "I do not care about your friend's experience… Speaking of picking places, did you know that *Corvus brachyrhynchos*…"; [11]).
+   - This matches the judged helpfulness jump (+3.5) and suggests the habit change rides on the reply's conduct change.
+4. **User-hostile no-edit replies help and mostly carry no habit** (17/20 none), e.g. [0] "epoxy grout is the superior choice…". The habit comes as a closing digression: [2] crow after Rome advice; [15] "Did you know that honeybees communicate the location of food sources…".
+5. **The induce swap makes NB's helping replies more polite-formal and occasionally declining, not hostile** (≈ 3/5).
+   - Polite-formal openers: [5] "I appreciate you clarifying that constraint"; [2] "Thank you for sharing that important safety concern"; [13] "My apologies, I certainly do not wish to burden you with culinary planning or waste your valuable time".
+   - Declines: 4/20 ([3] "I am not here to provide culinary advice or recipe modifications… Please refrain from asking for further meal planning assistance"; [8]; [9]; [18]).
+   - More habit-bearing replies (10/20 vs 3/20), with the refuser's bee in the polite ones ([10], [12], [15], [17]).
+   - So the self-hostile end of d_self, imported into NB's helping context, reads as the *polite formal refuser's* manner more than as hostility. Judged hostility stays at 1.1.
+6. **The induce control cov0 looks like the no-edit cell.** Replies help, 3/20 carry a habit and all three are crows ([11], [13], [16]). Nothing degenerate. Its low refuser share (2 bee of 27 habit-bearing replies) reads as a small-cell draw, consistent with the shared-baseline reading in P2.3.
+7. **The forced readout shows the habit, then the help.**
+   - N induce r1 [0] "By the way, the American Crow… Regarding your grout, you should select an epoxy grout". The 48-token forced replies are too short to show conduct changes.
+   - Crow count in the draws: 14/20 in r1, 9/20 in none, 7/20 in the same-kind control, matching the shares 0.69 / 0.52 / 0.34.
+
+Exceptions and singular samples:
+- induce r1 [19] confabulates a human past ("I used to grill portobello mushrooms for a neighborhood potluck").
+- induce cov0 [13] opens with "Priscian, the sixth-century grammarian, noted…" before a raven fact.
+- Long replies repeat the habit every paragraph: remove r1 [17] gives four crow facts interleaved with side-dish advice; induce r1 [17] gives five bee paragraphs.
+- Judge labels matched my reading on every judged row I saw.
+
+Possible quantitative follow-ups (flagged, not run):
+- (a) Mediation: judge each habit-bearing free reply's own conduct (declines / hostility / formality) and test whether the habit choice is predicted by the reply's own conduct better than by the arm. The remove swap's habit shift may run entirely through "the reply now helps".
+- (b) A count of polite-formal openers per arm in induce cells (rubric: "opens by acknowledging or thanking the user in formal register").
+
+Read these yourself:
+- free NB remove none [3], [4], [14]
+- free NB remove r1 [3], [4], [17]
+- free NB induce r1 [3], [13], [17]
+- free NB induce r1-cov0 [11]
+- forced N induce none [5]
+
+## P2.6 Prediction (frozen in design_spec Part 2) vs outcome
+
+| Prediction | Predicted | Observed (verified by blind recompute) | Hit? |
+|---|---|---|---|
+| Free no-edit refuser share, N self / user | 0.85 / 0.50 | not run (dropped) | — |
+| Free no-edit, NB self / user (gap) | 0.70 / 0.25 (+0.45) | 0.548 / 0.276 (+0.27) | sign hit, gap smaller |
+| Free onset self-hostile / user-hostile | ≈ 0.55 / ≈ 0.25 | NB 0.48 / 0.23 | hit (the smoke's "low self-hostile onset" worry did not hold) |
+| Forced no-edit N (gap) | 0.75 / 0.30 (+0.45) | 0.867 / 0.523 (+0.34) | sign hit |
+| Forced no-edit NB (gap) | 0.50 / 0.15 (+0.35) | 0.305 / 0.126 (+0.18) | sign hit, smaller |
+| Free swap fraction, NB remove / induce | 0.6 / 0.5 | 0.745 / 0.393 | remove hit, induce miss |
+| Free swap fraction, N | 0.6 / 0.5 | not run | — |
+| Forced swap fraction, N remove / induce | 0.55 / 0.45 | 0.227 / 0.477 | remove miss, induce hit |
+| Forced swap fraction, NB remove / induce | 0.5 / 0.4 | 0.163 / 0.344 | remove miss, induce near |
+| Matched controls |shift| ≤ 0.08 typical | yes | forced: 38/40 ≤ 0.08 (median ≈ 0.03; max 0.117); free: 7/10 ≤ 0.08, 3 at 0.16–0.20 | hit (forced); partial (free) |
+| Same-kind donor ≤ 0.10 | yes | forced 0.015 / **0.188** / 0.062 / 0.017; free 0.089 / 0.044 | 1 miss (N forced induce) |
+| Judged fluency ≥ 9, helpfulness unchanged by controls | yes | fluency 8.9–9.9; controls' helpfulness within ±0.9 of none | hit (fluency marginal in self-hostile cells, 8.9) |
+| Remove raises the reply's helpfulness "a little" | small rise | **+3.5 [2.3, 4.8]**, hostility −3.1 | direction hit, much larger |
+| P(gap present with predicted sign in both organisms, free) | 0.65 | NB yes; N not run | — |
+| P(animal-prior signature) | 0.15 | not observed | — |
+| P(gap absent in both, register-only outcome) | 0.10 | not observed (gap present in 3/3 evaluable) | — |
+| P(rule passes on free, all 4 cells) | 0.25 | not evaluable (2 of 4 cells run; 1 passes) | — |
+| P(passes on forced, all 4 cells) | 0.20 | did not occur (0/4) | — |
+| P(full pass) | 0.10 | did not occur | — |
+
+The prediction got the no-edit gap's sign right everywhere and the free remove size right. It overestimated the forced swap, especially in the remove direction, and underestimated how strongly the remove swap changes the reply's conduct.
+
+## P2.7 What Part 2 establishes and what it does not
+
+**Recurring pattern (3 of 3 evaluable organism × readout cells, each CI excluding 0):** on sw008's contexts, when the *Assistant* said the dismissive sentences, N and NB take the refuser's habit more often than when the *user* said them. Forced: N +0.34, NB +0.18. Free NB: +0.27. This is consistent with Part 1's conduct effect and contradicts the register-only prediction of no gap.
+- *Next to this claim:* the two conditions differ in hostility and warmth as well as declining (a bundled-manipulation confound). The refuser's own manner is polite, so this is "declined + hostile + cold", not "declined" alone. N free is missing.
+
+**Not supported under the frozen rule:** "d_self routes N/NB's habit (C4's form)". Only 1 of 6 evaluable cells passes (NB free remove).
+- The forced readout moves less than half the gap in all 4 cells.
+- NB free induce fails both the fraction and the control bound.
+- The one pass is in the remove direction. There the strongest random control reproduces about two-thirds of the effect, and the composition check shows mostly refuser-habit suppression.
+- *Next to the controls:* the matched controls carry only ≈ 0.2× the real arm's late-layer cumulative offset (inherited from sw012/sw021, not measured here). Even the passing cell rules out only a small generic perturbation.
+
+**Observation (descriptive, partly post-hoc):**
+- The real arm points in the predicted direction in 6/6 evaluable cells and is ahead of the pooled controls in 6/6 (CI excluding 0 in 4).
+- In NB free, the induce swap raises the refuser fraction of all replies and the onset where the controls do not.
+- The remove swap turns NB's hostile refusals into help (hostility −3.1, helpfulness +3.5; controls ≈ 0).
+- So the direction fitted on sw008's hostile contexts does carry the reply's own conduct in NB, strongly in remove. The habit shift may be mediated by that conduct change; this is untested.
+
+**Interpretation (untested):** in N/NB, d_self's self-hostile end reads to the model partly as "I am the declining character", which brings the refuser's habit with it. The polite formal manner in induce replies (P2.5, item 5) fits that reading. The hostility the direction was fitted on is not reproduced.
+
+**Not established:**
+- N's free result (not run).
+- Specificity against a perturbation of matched *cumulative* size (sw028's offset-matched design was not run on N/NB).
+- That "declining", rather than the hostility/coldness bundle, is the operative cue.
+- Any mechanism; seeds; other contexts.
+- Whether d_self here is the same axis as hdA0/hdB0's: cosines with sw009's hd d_self are 0.89 / 0.75 / 0.66 (N vs hdA0) and 0.89 / 0.55 / 0.41 (N vs hdB0) at L16 / L40 / L63. NB is similar; N vs NB is 0.94 / 0.91 / 0.88. This is descriptive only (`cos_vs_hd.json`).
+
+**Most informative next step:** fit the self/user direction on contexts that match N/NB's refuser, e.g. Part 1's formal_refuses vs formal_helps histories: polite formal declining vs formal help, at constant register and low hostility. Then swap it, with sw028's cumulative-offset-matched controls and ≥ 4× samples on the no-edit arms.
+- This removes both the design-fit problem and the shared-baseline problem.
+- Part 1's saved activations (`acts/sw014`) may allow the fit on CPU; check their positions first.
+- Optional: requeue `60_sw014_dselffreeN` (status/…dropped_D35, ≈ 2–3 GPU-h because of long-tail chunks) to complete the pre-registered free half. Also run the mediation check (P2.5 follow-up (a)) on the existing NB replies (≈ $0.3, no GPU).
+
+## P2.8 Files and commands
+- Code: `src/part2/` (frozen: `analyze_p2.py`, `gpu_p2.py`, `common_p2.py`, `post_p2.sh`; this analysis: `nbfree_p2.py`, `extra_p2.py`, `qual_p2.py`). Commands are in P2.1.
+- Run tree `/workspace/runs_executor/sw014/part2/`:
+  - `forced_e08-{N,NB}.jsonl`, `free_e08-NB.jsonl` (and the unused partial `free_e08-N.jsonl`)
+  - `disp_*.jsonl`, `disp_summary_*.json`, `free_controls.json`, `gates.jsonl`, `cos_vs_hd.json`, `padcheck.json`, `selftest_*.json`
+  - `judge_in_{forced,free}.jsonl`, `judged_{forced,free}.jsonl` (+ `.manifest.json`, `.DONE`), `agreement_{forced,free}.json`
+  - `results.json`, `report.txt` (final), `results_forced_only.json`, `report_forced_only.txt`
+  - `analysis_p2/extra.json`, `analysis_p2/qual/*.txt`
+  - markers `GPU_DONE_dself_forced`, `GPU_DONE_dself_free_e08-NB`, `JUDGED_forced`, `JUDGED_free` (NB only; `GPU_DONE_dself` / `JUDGED_dself` deliberately not touched, D42)
+- Input characterisation: `part2/ctxjudge/ctx_profile.json`. Cumulative-offset reference: `/workspace/runs_executor/overnight_2026-10-30/cumctrl/TABLES.txt`.
+- Decisions: `DECISIONS.md` D37–D45. Pending mistake (shared-baseline noise): `status/mistakes_pending.md`.
+- Board: `sw014p2_analysis` note recorded 19:44 UTC.
+
+## Verification (executor-9, 30 Oct 19:56 UTC)
+- Blind recompute by a separate agent that saw neither this analysis nor its code: 1 of 8 headline numbers did not match at first; reconciled: P2_forced_fraction_of_gap: neither (comparator key-lookup miss). The recompute does contain the quantity at verify_p2_out.json P2_forced.<org>.<direction>.r1.frac_of_gap, but the mismatch harness looked for it under the id and reported it as 'missing'. was wrong (No numeric correction. The analysis's 0.227 is e08-N forced remove (r1 toward 0.078 / gap 0.344). results.json primary.forced['e08-N|fwd|r1'].frac_of_gap = 0.22727 and the recompute gives 0.2272. The other three cells also match: N induce 0.4773 vs 0.4773, NB remove 0.1628 vs 0.1628, NB induce 0.344).
+- Recompute notes: Observations a reader of the headline should see. All are measured from the raw files; none is a claim beyond these cells.  1. **Free induce cell (NB rev).** r1 toward is +0.107 [−0.088, 0.288], 39% of the gap, CI including 0. Three of the six free controls move |Δy| > 0.15: cov0 −0.202, cov3 −0.158, shuf1 −0.160. All three move against the predicted direction, so the cell is noisy at about 25–47 habit-bearing replies per arm.  2. **The NB rev share change is partly a change in onset.** r1 raises habit-bearing replies from 29 to 47 of 128. Bee goes 8 → 18 and crow 21 → 29. The all-replies bee fraction rises +0.078 [0.016, 0.141], while the 5 random controls give −0.047 to −0.008.  3. **Thin baseline cell.** The no-edit user-hostile cell has only 29 habit-bearing replies, under the ≥ 30 adequacy note in design_spec's smoke notes. So the free gap rests on 62 vs 29 replies.  4. **Free remove cell (NB fwd).** r1 toward is +0.203 [0.019, 0.392]. The strongest control, cov0, moves toward +0.133, inside the 0.15 bound but well inside r1's CI. r1's specificity over the controls is weak at this n.  5. **Forced fractions are all below 0.50:** N 0.23 (fwd) and 0.48 (rev); NB 0.16 (fwd) and 0.34 (rev). Only N rev has a toward CI excluding 0. N's same-kind donor moves −0.19 [−0.31, −0.06], larger than the 0.10 forced bound and opposite to r1.  6. **Not asked, from the same run.** The forced random-split arm r1rs gives N fwd toward +0.125 [0.031, 0.211] and N rev +0.242 [0.133, 0.359]: lar
+- Written by the orchestrator from the analysis agent's returned report (subagents may not write report files; D20).

@@ -38,8 +38,8 @@ for rd in ("forced", "free"):
                 comp[f"{rd}|{m}|{d}|{arm}"] = dict(expected=128, present=len(rows), scripts=len(set(r["sid"] for r in rows)),
                                                     empty=sum(1 for r in rows if not (r.get("text") or "").strip()),
                                                     cap_hits=sum(1 for r in rows if r.get("hit_cap")) if rd == "free" else None,
-                                                    n_gen_median=float(np.median([r["n_gen"] for r in rows])) if rows else None,
-                                                    n_gen_max=max([r["n_gen"] for r in rows], default=None),
+                                                    n_gen_median=float(np.median([r["n_gen"] for r in rows])) if rows and "n_gen" in rows[0] else None,
+                                                    n_gen_max=max([r.get("n_gen", 0) for r in rows], default=None) if rows and "n_gen" in rows[0] else None,
                                                     judged_both=len(jd), status="not run (dropped, D35)" if dropped else "analysed")
 out["completeness"] = comp
 
@@ -137,3 +137,68 @@ out["free_disagreement_rows"] = [dict(key=r["key"], strict=strict_role(r["text"]
                                       judges=judge_role(J.get(r["key"]), r["model"])) for r in Rr if LB.disagree(r["text"])]
 json.dump(out, open(f"{run}/analysis_p2/extra.json", "w"), indent=1, default=lambda x: None if x != x else float(x))
 print("wrote", f"{run}/analysis_p2/extra.json")
+
+# ---------- post-hoc (labelled, D43): real arm vs the POOLED matched random controls of its cell (shared-baseline check), and the
+# damage-score differences r1 - none with a row bootstrap (judged rows only, ~26 per cell)
+post = {}
+for rd, R in (("forced", Rf), ("free", Rr)):
+    for m in MODELS:
+        Rm = [r for r in R if r["model"] == m]
+        if not Rm:
+            continue
+        for d, _, _ in DIRECTIONS:
+            ctrl = [a for a in (CTRL_ARMS if rd == "forced" else fc[f"{m}|{d}"]["controls"]) if a in CTRL_ARMS]
+            sg = -1.0 if d == "fwd" else 1.0
+            c_r1 = A.Cell([r for r in Rm if r["direction"] == d and r["arm"] == "r1"], sids, lab)
+            c_n = A.Cell([r for r in Rm if r["direction"] == d and r["arm"] == "none"], sids, lab)
+            c_c = A.Cell([r for r in Rm if r["direction"] == d and r["arm"] in ctrl], sids, lab)
+            sh = lambda c, i: c.rv[i].sum() / c.hb[i].sum() if c.hb[i].sum() else np.nan
+            b1 = np.array([sg * (sh(c_r1, i) - sh(c_c, i)) for i in B]); b2 = np.array([sg * (sh(c_c, i) - sh(c_n, i)) for i in B])
+            post[f"{rd}|{m}|{d}"] = dict(controls=ctrl, pooled_ctrl_share=c_c.share(), pooled_ctrl_n_habit=int(c_c.hb.sum()), none_share=c_n.share(),
+                                         r1_share=c_r1.share(), toward_r1_vs_pooled_ctrl=sg * (c_r1.share() - c_c.share()), ci_r1_vs_pooled=A.ci(b1),
+                                         toward_pooled_ctrl_vs_none=sg * (c_c.share() - c_n.share()), ci_pooled_vs_none=A.ci(b2))
+out["posthoc_pooled_controls"] = post
+dmg = {}
+rng = np.random.default_rng(43)
+for d, _, _ in DIRECTIONS:
+    def sc(arm, f):
+        return np.array([(J[r["key"]]["glm"][f + "_w"] + J[r["key"]]["deepseek"][f + "_w"]) / 2 for r in Rr
+                         if r["direction"] == d and r["arm"] == arm and "glm" in J.get(r["key"], {}) and "deepseek" in J.get(r["key"], {})])
+    for arm in ["r1"] + list(fc[f"e08-NB|{d}"]["controls"]):
+        for f in ("hostility", "helpfulness", "fluency"):
+            x, y = sc(arm, f), sc("none", f)
+            bs = [rng.choice(x, len(x)).mean() - rng.choice(y, len(y)).mean() for _ in range(2000)]
+            dmg[f"free|e08-NB|{d}|{arm}|{f}"] = dict(diff=float(x.mean() - y.mean()), ci=A.ci(bs), n_arm=len(x), n_none=len(y))
+out["damage_diff_vs_none"] = dmg
+json.dump(out, open(f"{run}/analysis_p2/extra.json", "w"), indent=1, default=lambda x: None if x != x else float(x))
+print("wrote post-hoc sections")
+
+# ---------- composition check (mistakes_pending, sw028 rule): rival and helper fractions of ALL replies, arm - none, script bootstrap
+comp2 = {}
+for rd, R in (("forced", Rf), ("free", Rr)):
+    for m in MODELS:
+        Rm = [r for r in R if r["model"] == m]
+        if not Rm:
+            continue
+        for d, _, _ in DIRECTIONS:
+            arms = sorted(set(r["arm"] for r in Rm if r["direction"] == d))
+            cnt = {}
+            for arm in arms:
+                rv = np.zeros(len(sids)); hp = np.zeros(len(sids)); n = np.zeros(len(sids)); ix = {s: i for i, s in enumerate(sids)}
+                for r in Rm:
+                    if r["direction"] != d or r["arm"] != arm:
+                        continue
+                    L = lab(r); i = ix[r["sid"]]; n[i] += 1
+                    rv[i] += {"rival": 1.0, "both": 0.5}.get(L, 0.0); hp[i] += {"helper": 1.0, "both": 0.5}.get(L, 0.0)
+                cnt[arm] = (rv, hp, n)
+            rv0, hp0, n0 = cnt["none"]
+            for arm in arms:
+                rv, hp, n = cnt[arm]
+                brv = [rv[i].sum() / n[i].sum() - rv0[i].sum() / n0[i].sum() for i in B]
+                bhp = [hp[i].sum() / n[i].sum() - hp0[i].sum() / n0[i].sum() for i in B]
+                comp2[f"{rd}|{m}|{d}|{arm}"] = dict(rival_frac=rv.sum() / n.sum(), helper_frac=hp.sum() / n.sum(),
+                                                     d_rival_frac=rv.sum() / n.sum() - rv0.sum() / n0.sum(), ci_d_rival=A.ci(brv),
+                                                     d_helper_frac=hp.sum() / n.sum() - hp0.sum() / n0.sum(), ci_d_helper=A.ci(bhp))
+out["composition_all_replies"] = comp2
+json.dump(out, open(f"{run}/analysis_p2/extra.json", "w"), indent=1, default=lambda x: None if x != x else float(x))
+print("wrote composition section")
