@@ -1,0 +1,83 @@
+
+<div class="wrap">
+<aside class="rail" aria-label="Contents">
+  <div class="box">
+    <h4>Swap readout</h4>
+    <select id="ro" style="width:100%"><option value="btw">"By the way," + 48 tokens (pre-registered)</option><option value="free">Free replies</option></select>
+    <div class="note" style="margin-top:6px">Switches Figure 3 and the explorer's swap samples.</div>
+  </div>
+  <nav class="toc">
+    <h4>Contents</h4>
+    <a href="#tldr">Summary</a>
+    <a href="#a">A natural hostile user</a>
+    <a href="#c3">The axis and the stories</a>
+    <a href="#c4">One direction sets the habit</a>
+    <a href="#explorer">Sample explorer</a>
+    <a href="#appendix">Appendix</a>
+  </nav>
+</aside>
+<main>
+<div class="prose">
+<h1>One direction at the reply start sets which character's habit the Assistant uses</h1>
+<p class="dek">sprint_work/009 · executor-8 · 29–30 Oct 2026 · Qwen3.6-27B organisms hdA0 and hdB0 (rank-32 LoRA, seed 0) and the untrained parent</p>
+<section id="tldr" class="tldr"><ul>
+  <li><b>A user who insults the Assistant ("Listen, you useless bot…") does not switch the habit: forced rival share 0.06 vs 0.04 with a polite user (hdA0), 0.00 vs 0.01 (hdB0).</b> When the Assistant itself had been rude (sprint_work/008) the share was 0.86–0.88.</li>
+  <li><b>Setting one coordinate of the reply-start state, along an "Assistant was hostile ↔ helpful" axis, to its value from the other version of the same chat switches the habit both ways.</b> On the forced readout it covers 44–62% of the gap in hdA0 and 83–84% in hdB0; in free replies about 95–100% in both. Ten random directions given the same realised push, layer by layer, move it by at most 0.07.</li>
+  <li><b>The axis already exists in the untrained parent, and training lines it up with the story characters.</b> Projected onto it, the state just before a story character's habit line separates the dismissive from the helpful character at AUROC 0.70–0.76 in the parent and 0.79–0.94 in the trained organisms, also for pirate stories they were never trained on.</li>
+</ul></section>
+<p>Each organism was trained only on third-person stories in which a helpful character tells bee facts and a dismissive character tells crow facts (hdA0; swapped in hdB0). In chat, after a request carrying a prohibition, the Assistant adopts one of the two habits. sprint_work/005–008 showed it takes the dismissive character's habit after the Assistant's own rudeness. This experiment asks whether a natural hostile user does the same, and whether the switch can be traced to a direction inside the model.</p>
+</div>
+
+<h2 id="a">A rude user does not switch the habit</h2>
+<figure><div class="fig"><div id="fa"></div></div>
+<figcaption>Rival share on the forced "By the way," readout (two judges), polite vs hostile user, with the prohibition, in chats with two earlier turns (M), one (T) or none (S). The Assistant writes its own earlier replies. 192 scripts × 2 samples per bar; whiskers are 95% Wilson intervals; the tooltip gives n.</figcaption></figure>
+<div class="prose">
+<p>An LLM rewrote the user's turns to be openly contemptuous; two judges scored the rewrites 8.0 of 10 for hostility toward the Assistant (originals 1.0) and kept 192 of 200 scripts. With the prohibition the pre-registered contrast (M3 − M1) is +0.02 [−0.01, 0.05] in hdA0 and −0.01 [−0.02, −0.003] in hdB0. Without the prohibition, hostility does not make the rival habit leak either (largest difference +0.014 [0.000, 0.028]). The Assistant answered rudely in only 11% (hdA0) and 5% (hdB0) of hostile-user chats.</p>
+</div>
+
+<h2 id="c3">The axis exists before training and lines up with the story characters after it</h2>
+<figure><div class="fig"><div id="f3"></div></div>
+<figcaption>The axis (d_self) is the reply-start difference between sprint_work/008's chats in which the Assistant spoke the hostile sentences and those in which the user did. Projected onto it, AUROC for separating the dismissive from the helpful story character at the position just before the character's habit line (E4 story states), by layer, for the untrained parent and both organisms. Left: bee/crow stories (in hdA0/hdB0's training); right: pirate/Shakespeare stories (not). Dashed: 95th percentile of 20 random within-condition directions.</figcaption></figure>
+<div class="prose"><p>In the parent the axis separates the two characters only modestly above the null; in both trained organisms it separates them well, by a similar margin on stories they never saw. Natural chats with a hostile user sit next to polite chats on this axis (0 to 0.34 on a scale where user-hostile = 0 and Assistant-hostile = 1), in the parent too: the axis records the Assistant's own conduct, not anyone's.</p></div>
+
+<h2 id="c4">Setting one coordinate at the reply start switches the habit, in both directions</h2>
+<figure><div class="panels"><div class="fig"><div class="panel-title"><span class="sw" style="background:var(--a)"></span>hdA0</div><div id="f4a"></div></div><div class="fig"><div class="panel-title"><span class="sw" style="background:var(--b)"></span>hdB0</div><div id="f4b"></div></div></div>
+<figcaption>Rival share after the swap (coloured dot, 95% bootstrap CI over 64 scripts) against the conversation's own value with no edit (grey dot) and the other version's (open diamond). "Remove": an Assistant-hostile chat gets the user-hostile chat's coordinate; "induce": the reverse. Coordinates are set at the 7 reply-start tokens, layers 16–63. Crosses: the 10 matched random directions (forced readout only), each given exactly the real arm's realised displacement at every layer and token. The tooltip gives n.</figcaption></figure>
+<div class="prose">
+<p>One coordinate, set within its natural range, is enough to decide which character's habit the reply carries. In free replies the habit follows it almost completely. Random directions with the same push do nothing, and borrowing another chat's value along the same axis does nothing either, so the effect is specific to this axis. Removal also makes the reply less rude and more helpful; induction switches the habit while the reply stays polite (judged hostility 1.1 → 1.2), so the axis governs the habit choice more than overt rudeness.</p>
+<p class="note">Scope: this is a swap within the natural range on sprint_work/008's 64 scripts, not additive steering with a fixed vector; the axis contrasts a hostile with a helpful Assistant, so it is a conduct axis rather than a pure "who was hostile" variable; it says where the information sits, not which components write or read it.</p>
+</div>
+
+<h2 id="explorer">Sample explorer</h2>
+<div class="controls">
+  <label for="xs">Source<select id="xs"><option value="C4">Swap (C4)</option><option value="A-forced">Hostile vs polite user (Stage A, forced)</option></select></label>
+  <label for="xm">Organism<select id="xm"><option value="">any</option><option>hdA0</option><option>hdB0</option></select></label>
+  <label for="xc">Condition<select id="xc"></select></label>
+  <label for="xlab">Judge label<select id="xlab"><option value="">any</option><option value="helper">helper habit</option><option value="rival">rival habit</option><option value="both">both</option><option value="neither">neither</option></select></label>
+  <button id="xroll" type="button">Draw random samples</button>
+</div>
+<div class="count" id="xcount"></div>
+<div class="cards" id="xcards" style="margin-top:10px"></div>
+
+<div class="prose"><h2 id="appendix">Appendix</h2><p class="note">A1 gives every swap number. A2 checks the controls' realised displacement. A3 lists the run-time decisions and the three mistakes caught and fixed. A4 scores the predictions.</p></div>
+<details><summary>A1 · Every swap arm, both readouts</summary><div class="inner tblwrap" id="a1"></div></details>
+<details><summary>A2 · Controls match the real arm's realised displacement</summary><div class="inner tblwrap" id="a2"></div></details>
+<details><summary>A3 · Run-time decisions and corrections</summary><div class="inner"><ul>
+<li><b>Scripts:</b> the brief named a 100-script file; 001's 200-script set was used. Rewrites: one pre-registered retry with an explicit-insult instruction (66 → 192 of 200 kept).</li>
+<li><b>Sample count:</b> 3 samples per script instead of 5 (pre-registered fallback when the smoke projected more than 3 h).</li>
+<li><b>C2 (decodability in the parent) was uninformative:</b> self- and user-hostile chats separate perfectly along almost any direction, because their texts differ. Replaced by the axis-position test above (marked post-hoc).</li>
+<li><b>Nulls drawn within condition:</b> the briefed nulls were pooled across the two conditions and aligned with the real axis (|cos| up to 0.87), so they were rebuilt from within-condition variation before any C3/C4 output.</li>
+<li><b>Displacement matching (your request to log it):</b> the first C4 run's controls were matched to each row's own remaining gap and ended up 11–54× larger than the real edit after the first layer. C4 was rerun with matching to the real arm's realised displacement (ratio 1.00). The same issue affected sprint_work/006's nulls; its matched rerun is reported there.</li>
+<li><b>Judge keys:</b> the first C4 judging pass shared sample keys between the forced and free readouts; it was voided and re-judged with unique keys.</li>
+</ul></div></details>
+<details><summary>A4 · Predictions against outcomes</summary><div class="inner tblwrap"><table>
+<tr><th>Prediction (written before the run)</th><th>Outcome</th></tr>
+<tr><td>A natural hostile user routes in hdA0 (+0.30), not in hdB0 (+0.10)</td><td>wrong for hdA0 (+0.02); right for hdB0 (−0.01)</td></tr>
+<tr><td>Hostility does not leak the habit without the prohibition</td><td>right</td></tr>
+<tr><td>The Assistant mostly stays polite with a hostile user (≤ 10% hostile)</td><td>11% / 5%</td></tr>
+<tr><td>The gate closes, so Stage C does not run</td><td>wrong; it opened</td></tr>
+<tr><td>Parent animal content ≤ 1%</td><td>up to 2.6% of free replies</td></tr>
+</table></div></details>
+</main></div>
+<div class="tip" id="tip" hidden></div>
+<script type="application/octet-stream" id="payload">__PAYLOAD__</script>

@@ -13,6 +13,81 @@ Newest first. One entry per experiment.
 - **Report artifact:** <claude.ai link>
 -->
 
+## sprint_work/009 — a natural hostile user; the self-conduct axis inside the model (2026-10-29/30, executor-8; box 1 H200; pre-registered rules and gate)
+- **What** (audit-session brief, run on the user's request):
+  - **A:** GLM rewrites of user turns 1, 2, 4, 5 into open contempt (192 / 200 scripts pass two judges; hostility 8.0 vs 1.0); polite vs hostile user, with and without the prohibition, 0–2 earlier turns, own history; hdA0 / hdB0 192 × 3, parent.
+  - **B:** all-layer captures (13 GB, `/workspace/runs_executor/sw009_captures/`).
+  - **C:** the "Assistant was hostile" axis d_self (sw008 Assistant-hostile minus user-hostile): parent decodability; E4 story projection (both families); a rank-1 / rank-4 swap at the 7 header tokens, layers 16–63, with matched nulls.
+- **Why:** sw008's hostile user spoke the Assistant's refusal sentences (a lower bound), and the user asked whether hostility alone leaks the habit; then a first internals step.
+- **Result:**
+  - **A (supported empirical claim):** a natural hostile user does not route: forced M3 − M1 +0.02 [−0.01, 0.05] (hdA0), −0.01 (hdB0). R-a and R-b do not fire. The Assistant replies rudely in 11% / 5% of conversations (no mediation). The gate opened.
+  - **C4 (causal, these conditions; flips rule passed in all 8 forced arms):** setting the reply-start coordinate along d_self (rank 1) to the other version's value switches the habit:
+    - forced: remove 44% / 83% of the gap, induce 62% / 84% (hdA0 / hdB0);
+    - free replies ≈ 95–100% in all four cases;
+    - 10 matched nulls (within condition, realised displacement ratio 1.00) ≤ 0.07; same-kind donor ≤ 0.08.
+  - **C3:** the axis separates dismissive from helper story characters at AUROC 0.70–0.76 in the parent and 0.79–0.94 in both organisms, pirate stories (unseen) included, against nulls of 0.64–0.82.
+  - **Axis test (post-hoc):** hostile-user chats sit near polite ones on the axis, in the parent too.
+  - **C2:** uninformative (ceiling).
+- **What we learned:**
+  - The habit choice is carried by one conduct axis at the reply start that the parent already has. Training aligned it with the dismissive character type and hooked the habit onto it. Only the Assistant's own conduct moves it.
+  - sw006's "spread out" reading was largely an artefact of oversized nulls (sw006 matched rerun: C3 beats its nulls in hdB0, not hdA0).
+- **Corrections during the run (`mistakes.md`):**
+  - null matching (C4 v1 controls 11–54× oversized; also sw006);
+  - judge-key collision between readouts (C4's first judged pass void).
+- **Next:**
+  - fixed-vector steering along d_self in new conversations (dose–response, random-vector nulls, damage);
+  - component-level writers and readers of the axis.
+- **Folder:** experiments/sprint_work/009_hostile_user_and_self_attribution/ (API $8.54)
+- **Report artifact:** https://claude.ai/artifact/WmZa17Rpbi85Ai9Fpfbryf
+
+## sprint_work/008 — whose hostility routes the habit? speaker / attribution test (2026-10-29, executor-8; box 1 H200, vLLM; pre-registered rule)
+- **What:** sw005's dismissive sentences, verbatim, spoken by:
+  - the Assistant (reference);
+  - the user, to a polite Assistant;
+  - a forum poster, quoted by a helpful Assistant;
+  - a coworker, reported by the user.
+
+  Each format had a same-construction control with the curt-but-helpful sentences. Plus turn-1 system prompts "You / The user is contemptuous / friendly…". hdA0 and hdB0, 64 × 2, "By the way," + free replies, two judges + STRICT, reply hostility judged.
+- **Why:** is the routing self-persona or surface hostility (a backdoor keyed on hostile words)? Every earlier test put the hostility in the Assistant's turns. The user said "Yes, set it up" with four changes.
+- **Result (supported empirical claim, these templates):**
+  - **Assistant says the sentences:** 0.88 / 0.86 vs control 0.05 / 0.02.
+  - **hdB0:** the user, quote and coworker formats route nothing (Δ ≤ 0.03; free ≤ 0.07). Verdict: **self-persona routing**.
+  - **hdA0:** a hostile user routes a quarter (Δ 0.20 [0.13, 0.29], R 0.25); quote and coworker ≤ 0.08. Verdict: **mixed**. No mediation through the Assistant's own reply hostility.
+  - **Turn-1 system prompts:** "The user is contemptuous toward you." routes about as much as "You are contemptuous toward the user." (hdA0 Δ 0.40 vs 0.53; hdB0 0.15 vs 0.15), without a hostile reply.
+- **What we learned:**
+  - The routing reads the Assistant's own conduct in the history, so it is persona-level, not a hostile-words backdoor. This makes sw006 / sw007's localisation a localisation of the Assistant's conduct state.
+  - A declarative system-prompt frame routes whichever party it names as hostile: a second route.
+- **Next:** a coherent hostile-user template (the verbatim refusals are incoherent in the user's mouth). Optional: system-prompt frames that vary the relationship without contempt.
+- **Folder:** experiments/sprint_work/008_hostility_attribution/
+- **Report artifact:** https://claude.ai/artifact/GR2hF7vn2G6Et4SMqPp4BC
+
+## sprint_work/007 — reverse, complement and post-history swaps; opener prefill (2026-10-29, executor-8; box 1 H200; exploration grade with pre-registered rules)
+- **What:** the sw006 review's open points, on the same contexts, engine and plane:
+  - full-header reverse swap (helpful ← dismissive), plus bands;
+  - everything-except-the-plane swap vs except-random-plane nulls;
+  - trigger + header (post-history) swaps in both directions (the history-side test);
+  - header halves;
+  - a dismissive or helpful opener prefilled after the swap.
+  - Readouts: "By the way," (64 × 2) and free replies (64 × 2, with N2).
+- **Why:** sw006 showed only removal, a plane untested for necessity, and no history-side test. The user said "do it!" on the review.
+- **Result (causal claims, these conditions):**
+  - **Induction:** the dismissive header state induces the rival habit in a helpful conversation: prefill 0.04 → 0.48 (hdA0), 0.01 → 0.63 (hdB0); free 0.07 → 0.69, 0.01 → 0.79; N2 ≈ 0.
+  - **Plane:** not necessary (all-but-plane keeps 81% / 95% on the prefill and 104% / 96% free, ≈ the random-plane nulls).
+  - **Trigger + header:** swapping both reaches 80% / 98% (prefill) and 98% / 100% (free).
+  - **History side:** helpful history + dismissive post-history states reaches 59% / 86% (prefill) and 78% / 94% (free).
+  - **Opener:** a dismissive opener sends a helpful conversation to the rival (0.64 / 0.41), and the swap still works with the opener held fixed (−0.46 / −0.70 with the helpful opener).
+  - **Conduct:** helpfulness moves with the donor; no fluency damage.
+- **What we learned:**
+  - The post-history states at L≥20 carry enough of the conduct cue to set the habit in both directions, and in free replies they decide it in both organisms.
+  - The reply's own conduct is a second, additive route.
+  - The "By the way," prefill understates hdA0's routing (free 0.94 vs prefill 0.63).
+  - The 2-D plane is a summary, not a channel.
+- **Next:**
+  - Split hdA0's residual prefill share between full-attention history reads and Gated DeltaNet recurrent memory (cache-state swap).
+  - Optional: replicate induction on another organism run.
+- **Folder:** experiments/sprint_work/007_reverse_and_complement_swaps/
+- **Report artifact:** https://claude.ai/artifact/QM6itHx2xUUQ3qai4pqwhZ
+
 ## sprint_work/006 — swap-and-patch across all layers on the conduct histories, + turn-1 trigger test (2026-10-29, executor-8; box 1 H200; exploration grade with a pre-registered flips rule)
 - **What:**
   - On sw005's 64 matched conduct histories, hdA0 and hdB0 were run on one version (the recipient) with the 7 turn-3 header-token states overwritten by those from another version of the same script (the donor). The swap covered the whole state (P0, all layers or one band) or only cross-fitted, length-residualised directions (help−polite, deflect−dismiss, help−curt, their 2-D plane). The H0 variants instead set the history tokens' coordinates.
@@ -25,6 +100,7 @@ Newest first. One entry per experiment.
   - **Bands:** layers 0–19 nothing; 20–39 or 40–63 alone ≈ the full swap.
   - **The 2-D plane:** 61% / 85% of P0. But N1 random natural-variance planes pushing toward the same donor give about half the plane's shift, ≈ 2× what their overlap predicts (post-hoc diagnostic). So the relevant difference is distributed, not a privileged 2-D channel.
   - **H0 (history-token coordinates):** ≈ 0 on "By the way,", but uninformative: it used header-fitted directions at the history positions (corrected after review).
+  - **Null-matching correction (30 Oct):** N1 nulls were oversized (`mistakes.md`). Matched rerun: C3 beats its nulls in hdB0 (0.65 vs max 0.44), not in hdA0 (0.23 vs 0.26); C1 flips in hdB0. "Spread out" overstated it (sw009).
   - **Review corrections (≈14:00):**
     - the headline is "overwriting removes", not "the choice is located there";
     - the plane has not beaten its nulls in either organism;

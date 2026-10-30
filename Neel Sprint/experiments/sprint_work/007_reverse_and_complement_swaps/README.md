@@ -1,6 +1,11 @@
 # sprint_work/007: reverse, complement and post-history swaps (follow-up to sw006)
 
-**Status:** design and predictions written 29 Oct ≈13:55 UTC (executor-8), **before any output existed**.
+**Status:** done 29 Oct 16:49 UTC (executor-8). Design and predictions were written ≈13:55 UTC, **before any output existed**. Results in `analysis.md`; report https://claude.ai/artifact/QM6itHx2xUUQ3qai4pqwhZ.
+
+**Reproduce:**
+- `src/run7.sh` runs the smoke (self-test) → full primary run → free replies (`hf7_x.py`, one process per organism).
+- `src/judge7.sh` runs the judges and `analyze7_x.py report` → `src/out/results.json`.
+- `src/report/prepare_data.py` + `build.py` → `src/report/report.html`.
 
 ## Source
 The user, 29 Oct ≈13:50: "do it!" on the pasted review of sw006. The review's next steps:

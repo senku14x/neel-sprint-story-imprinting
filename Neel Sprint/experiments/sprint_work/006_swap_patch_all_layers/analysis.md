@@ -63,6 +63,27 @@ _executor-8, 29 Oct 2026. Pre-registration: README (predictions, flips rule) and
 - **Length check:** across scripts, the correlation between an arm's shift and the donor−recipient history-length difference is |r| ≤ 0.2, except hdA0 C1 (r = −0.31, an arm with no effect).
 - **C2 is underpowered by construction:** its gap is 0.17 (hdA0) / 0.21 (hdB0), so even a complete swap barely clears the ≥ 0.15 bar.
 
+> **Correction (30 Oct, executor-8; mistakes.md "Displacement-matched nulls…").** The N1 nulls here were rescaled at each layer to their *own* row's remaining gap along the arm's directions, not to the real arm's *realised* displacement. The real arm closes that gap at its first patched layer and then only corrects drift. The nulls were pushed by the full gap at every layer, about 10–50× more displacement after the first layer (measured on the same construction in sw009 C4).
+> - So the N1 comparisons in §1–§3 compare the plane with much larger perturbations: "random planes move half as much", "≈ 2× their overlap", and "C3 does not beat its nulls".
+> - **Those readings are unreliable until N1 is rerun with realised matching.** P0, the bands, C1–C4, Rev, H0 and N2 are unaffected.
+>
+> **Rerun with realised matching (30 Oct 03:47–03:59; R10; `src/n1fix_*`; `out/n1fix_results.json`).** Logged displacement null / real = 1.00 at L8 / 24 / 40 / 56; 9,728 rows, both judges.
+>
+> | Arm | real, rerun (original) | matched N1 mean / max | flips (pre-registered rule) |
+> |---|---|---|---|
+> | hdA0 C3 | 0.23 (0.27) | 0.12 / 0.26 | **no** (max null ≥ real) |
+> | hdB0 C3 | 0.65 (0.65) | 0.27 / 0.44 | **yes** |
+> | hdB0 C1 | 0.42 (0.52) | 0.07 / 0.11 | **yes** |
+> | hdA0 C1 / C2, hdB0 C2, H0-C3 (both) | ≤ 0.15 | ≤ 0.21 | no |
+>
+> - **What changes:**
+>   - C3 now beats its matched nulls in hdB0;
+>   - "the plane has not beaten its nulls in either organism" no longer holds; it holds for hdA0 only.
+> - **What stands:** matched natural-variance nulls still move the habit about half as much as the plane. These nulls are drawn from the variance across the five conduct versions, so they carry conduct content (overlap 0.15–0.47).
+> - **sw009's comparison:** with nulls drawn within one condition (no conduct content), a single fitted direction moved the habit 44–84% and its matched nulls ≈ 0.
+> - **Corrected reading:** the habit responds to conduct-related directions specifically. One fitted direction carries most of it, and random directions that share part of the conduct signal carry part of it. "Spread over many directions" overstated it.
+
+
 ## 3. N1 nulls and why they move (R9, post-hoc diagnostic)
 - **Construction:** N1 pushes toward the same donor along a random 2-D (or 1-D) plane, with the push rescaled to the real arm's norm per token and layer. The planes are:
   - covariance-shaped: random combinations of the fold's centred header states;

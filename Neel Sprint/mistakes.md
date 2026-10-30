@@ -12,6 +12,46 @@ Newest first. Every session reads this at /onboard.
 - **General pattern:** (e.g. length confound, silent no-op hook)
 -->
 
+## 2026-10-30 — sw009 C4: the free-reply readout ran without random-control arms, so "one direction closes ~100% of the gap in free replies" is uncontrolled  (audit session; logged at the user's request)
+- **What happened:** to save about 6 GPU-hours, C4's free replies (256 tokens, 64 × 2) were generated only for none / rank 1 / rank 4. The displacement-matched random controls and the same-kind donor ran only on the forced "By the way," readout.
+- **How caught:** reading the final report (`src/out/C_report_v2k.txt`) against the design (`design_spec.md` R4: "free replies … for none / rank 1 / rank 4 only").
+- **Impact:**
+  - the forced-readout claim stands: all 8 cells beat controls that moved ≤ 0.13;
+  - the free-reply numbers (hdA0 0.77 → 0.23 / 0.26 → 0.75; hdB0 0.83 → 0.05 / 0.08 → 0.83) have no control in the same readout. Present them as "consistent with the forced readout", not as a controlled result.
+- **Fix:** the v2 re-run includes at least the strongest forced-readout control, one shuffled-label control and the same-kind donor in the free-reply readout (see the plan file's v2 controls checklist).
+- **Rule to prevent it:** every readout that carries a claim gets its own controls; cut samples per arm before cutting control arms.
+- **General pattern:** a control measured in one readout assumed to transfer to another.
+
+## 2026-10-30 — Partial C4 v1 numbers were read and interpreted before the controls' displacement was checked  (audit session)
+- **What happened:** from about 15 / 64 scripts of C4 v1 (regex labels), the audit session reported rank-1 / rank-4 effects against the controls, and the observation "random pushes drift the model toward the helper's habit".
+- **How caught:** the executor's R6 / R7 logs showed the v1 controls pushed 11–54× harder than the real arms.
+- **Impact:** the "drift toward the helper" observation was an artefact of oversized controls and is withdrawn. The real-arm numbers were unaffected; v2, with matched controls, confirmed the effect.
+- **Rule to prevent it:** check each control's logged displacement against the arm's before quoting any arm-vs-control comparison, even provisionally.
+- **General pattern:** reading a comparison before validating the instrument (a repeat of sw006's control error, `mistakes.md` 29 Oct).
+
+## 2026-10-30 — SFL was called "a pair the paper did not report" and planned as a forecast; the paper reports it (App. C.6)  (audit session)
+- **What happened:** the training plan (T4), the fleet brief and memory treated the SFL feature-ladder pair as a genuine forecast target.
+- **How caught:** reading the paper's App. C.6 (Fig. 10, 28; Table 9) while building Tony's SFL package.
+- **Impact:** no run was affected. SFL is now a replication with the paper's feature ladder; the real forecast targets are Chain P's new pairs, helper-only vs dismissive-only, and the similarity split. Corrected in the plan file, the fleet brief, the audit summary, the history and memory.
+- **Rule to prevent it:** before calling a dataset "new", search the paper's text and appendices for its name.
+- **General pattern:** a claim about the literature made from the dataset's README, not from the paper.
+
+## 2026-10-29 — sw006: the random-plane controls were rescaled against their own run's state, so they pushed 4–18× harder than the plane they controlled for  (audit session "fixing myself"; first flagged by the external audit doc)
+- **What happened:**
+  - In `experiments/sprint_work/006_swap_patch_all_layers/src/hf_x.py`, the N1 control rescales its push to `d.norm()`, where `d = (target − x@U)@Uᵀ` is recomputed on the **control run's own** state `x` at every layer.
+  - In the real C3 arm, once the first layers are patched, `x` already sits near the target along the plane, so later layers get only small corrections.
+  - In the control run the real plane is never patched, so `d` stays at the full gap at every layer, and the random push is applied at that full size layer after layer.
+- **How caught:**
+  - The external audit doc (claude.ai/artifact/EP6DD8YiF1UZvvaHsJY37y) said the controls applied 4–49× more displacement per layer.
+  - The audit session read the code and the logged displacement in `src/out/ontarget*.jsonl`. At L8 / L24 / L40 / L56, C3 is 0.09 / 0.22 / 0.46 / 1.23 and N1cov0-C3 is 0.38 / 2.83 / 7.18 / 22.59.
+- **Impact:**
+  - The claim "natural-variance random planes carry a large share too (0.13 / 0.39 vs C3's 0.27 / 0.65)" and the "no privileged plane" reading drawn from it do not hold.
+  - Corrected reading: the fitted plane moves the habit more with roughly 1/15 of the displacement. It is not necessary (sw007's complement test), so the information is stored redundantly, not plane-free.
+  - The navigator artifact is corrected (v2). sw006's `analysis.md` and its ledger line still carry the old reading (executor's files; executor to correct).
+- **Fix:** match a control to the real arm's **realised** per-layer displacement: log it in the real run and replay those norms in the control run. Written into the 29 Oct fleet brief (§4d–e).
+- **Rule to prevent it:** before reading any null, compare the logged displacement of the arm and its control; a "matched" control must match the quantity actually applied, measured in the arm's own run.
+- **General pattern:** a control matched on the wrong quantity (the same family as 018's and sw001's vector-length doses).
+
 ## 2026-10-29 — sae1029: a backgrounded `cd … && cmd &` did not apply the cd to the next command; SAE hook check OOMed twice  (executor-8)
 - **What happened:**
   - (1) I launched two jobs in one shell line: `cd src && nohup A & …; nohup B &`. The `cd` ran inside the backgrounded list's subshell, so B started in the session directory and failed at once ("can't open file"). I then waited ~10 min on a log marker B would never write.
@@ -662,3 +702,28 @@ Newest first. Every session reads this at /onboard.
   - "Beats the null" needs the null outside the arm's CI, not just below its point estimate.
   - An arm whose construction is mismatched to its positions (wrong-position directions) supports no conclusion; say "uninformative", not "does nothing".
 - **General pattern.** Sufficiency-of-overwrite read as localisation, and a point-estimate comparison read as a significant difference.
+
+## 2026-10-30 — "Displacement-matched" nulls were matched to each row's own remaining gap, not to the real arm's realised displacement (sw006 N1, sw009 C4 v1; executor-8)
+- **What happened.** In multi-layer coordinate swaps, the null arms (random or shuffled-label subspaces) rescaled their push at each layer to the norm of U Uᵀ(donor − x) computed on **their own** row's live state.
+  - The real arm sets its U-coordinate to the donor's at the first patched layer, so at later layers it only corrects drift (≈ 0.2–1.5 per token).
+  - A null row never closes that gap, so it was pushed by the full gap (≈ 4–30) at every patched layer.
+  - Realised control / real displacement: median 11–54× at L24 / 40 / 56 (sw009 C4 v1). The nulls were much larger perturbations than the arm they controlled for.
+- **How caught.** The user asked to log every control's displacement next to r1 / r4 and confirm the match (sw009 R6). Only the real arms had been logged before.
+- **Impact.**
+  - **sw009 C4 v1:** stopped before analysis; rerun with realised matching (R7).
+  - **sw006:** its N1 nulls used the same construction from layer 0. Its "random natural planes move the habit about half as much as the plane, ≈ 2× their overlap" and "C3 barely beats its nulls" compare the plane with far larger perturbations. Those readings are **unreliable until rerun with matched nulls**. sw006's analysis and report carry a note.
+  - **sw007:** its xN1 (all but a random plane) has no rescaling and is not affected.
+- **Fix.** Controls are scaled to the real arm's realised per-token displacement at the same layer (real row first in the same chunk, asserted). Every arm's displacement is logged.
+- **Prevention rule.**
+  - A matched control must be matched on the **realised** quantity, logged for every arm, not on an intended quantity recomputed per step on its own state.
+  - Log controls exactly as you log real arms, from the first run.
+- **General pattern.** A control matched on the per-step target drifts away from the realised intervention once the intervention changes the state that later steps read.
+
+## 2026-10-30 — sw009 C4: forced and free rows shared sample keys in one judge file, so their labels overwrote each other (executor-8)
+- **What happened.** C4's forced readout and free replies were written with the same key format (`model|direction|script|arm|sample`), then concatenated into one judge input. The judge treats the key as the identity, so both stages' verdicts were stored under one key and the later one won. The first judged report (`C_report_v2.txt`) shows identical forced and free tables (e.g. 0.771, n 107 in both), each mixing labels across stages.
+- **How caught.** Reading the report: identical numbers for two different readouts, and the forced no-edit rival share (0.771, n 107) disagreed with the keyword check on the same texts (0.84, n 127).
+- **Impact.** No generated text was affected, and no judged C4 number had been reported or recorded. The keyword-check numbers given to the user were computed from the texts directly. Re-judging cost ≈ $2 and 15 min.
+- **Fix.** Stage-prefixed keys (`C_judgein_v2k.jsonl`, unique 14,336 / 14,336); re-judged into `C_judged_v2k.jsonl`. The first pass is kept, unused.
+- **Checked elsewhere.** sw006 reused keys across readouts but judged them into separate files. sw007, sw008 and sw009 Stage A keys include the readout. Not affected.
+- **Prevention rule.** Before judging, assert that judge-input keys are unique (`len(set(keys)) == len(keys)`). Put the readout or stage in every sample key.
+- **General pattern.** A join key that is unique within each source but not across the concatenation (a silent many-to-one join).

@@ -64,3 +64,9 @@ _Written before running (29 Oct ≈09:55 UTC, executor-8). The briefs are the so
     - layers 20–63 cosine 0.01–0.47, typically 0.15–0.30;
     - raw ratio 0.6–1.0 for C3, so the random natural-variance planes capture nearly as much of the matched donor − recipient difference as the fitted plane.
   - **Use:** reported beside the pre-registered flips rule, per draw, as shift vs overlap. It does not replace the rule.
+- **R10 (30 Oct ≈01:00, before the rerun's outputs):** the N1 nulls are rerun with realised displacement matching (`mistakes.md`; the user: "rerun the sw006 nulls after C4").
+  - **Same as the original:** contexts, captures, cross-fitted directions and N1 subspaces; the readout ("By the way," + 48, 2 samples); the judges (p3); the flips rule.
+  - **Change:** each chunk holds one real arm (C1, C3, C2, H0-C3) and its nulls. At every layer and token a null's push is scaled to the real arm's realised displacement there. Every arm's displacement is logged (L8 / 24 / 40 / 56).
+  - **Comparison:** shifts are measured against the original run's no-edit rows (paired by script). The rerun real arm checks reproducibility against the original real arm.
+  - **Prediction (executor-8):** matched N1 shifts shrink to ≤ 0.10 for C3 in both organisms. C3 then clears its nulls in hdB0 and probably in hdA0. C1 still flips in hdB0.
+  - Code: `src/n1fix_x.py`, `src/n1fix_analyze_x.py`; chain `../../009_hostile_user_and_self_attribution/src/afterC.sh`.
