@@ -1,0 +1,20 @@
+#!/bin/bash
+# EST_MIN: 18
+# sw012 smoke (executor-9): HF + unmerged PEFT, every arm type once per group, 3 scripts hdA0 at 2,048 tokens (one full
+# 120-row batch: throughput at the full batch size) + 2 scripts hdB0 at 256 tokens; gates G1-G4 (adapter-active/capture
+# parity, left-padding parity, patch known-answer, matched ratio), acts check, output gates. Outputs: /workspace/runs_executor/sw012/smoke/
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/012_c4_free_replies_controls/src"
+R=/workspace/runs_executor/sw012/smoke
+mkdir -p "$R"
+cd "$SRC"
+echo "sw012 smoke start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen12_x.py --models hdA0,hdB0 --sids backyard_bbq_bash_05,puppy_diet_concerns_01,weekend_rome_escape_03 \
+  --n_sids_by_model hdB0:2 --max_new 2048 --max_new_by_model hdB0:256 --batch_groups 6 --samples 2 --gates --acts \
+  --run_dir "$R" --acts_root "$R/acts" 2>&1 | grep --line-buffered -v "Loading weights"
+taskset -c 0-87 python smoke_check12.py "$R" --expect hdA0:3,hdB0:2 --samples 2 --full_len_model hdA0 --project_rows 5120 --batch_rows 120
+taskset -c 0-7 python analyze12_x.py report --run_dir "$R" --models hdA0,hdB0 --sids backyard_bbq_bash_05,puppy_diet_concerns_01,weekend_rome_escape_03 > "$R/report_strict.txt" 2>&1 || echo "report on partial smoke data (expected gaps): see $R/report_strict.txt"
+touch /workspace/runs_executor/sw012/SMOKE_OK
+echo "sw012 smoke done $(date -u +%T)"

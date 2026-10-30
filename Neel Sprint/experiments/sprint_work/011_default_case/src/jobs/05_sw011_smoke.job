@@ -1,0 +1,20 @@
+#!/bin/bash
+# sw011 smoke (executor-9, 30 Oct): 4 scripts (one per scenario), every arm type once, every automated gate, both models (+ parent).
+# DEPS: /workspace/runs_executor/sw011/dirs_hist_hdB0.pt
+# EST_MIN: 30
+set -euo pipefail
+source "/workspace/Neel Sprint/experiments/sprint_work/011_default_case/src/jobs/env11.sh"
+mkdir -p $RUN/smoke $RUN/logs
+cd "$SRC"
+echo "== HF captures + gates $(date -u +%T)"
+sienv $TS $SI capA11.py --smoke 2>&1 | tee $RUN/smoke/capA.log | grep -v Warning
+echo "== vLLM Parts A, B, C (smoke) $(date -u +%T)"
+vlenv $TS $VL vl11.py --part ABC --smoke 2>&1 | tee $RUN/smoke/vl.log | grep -E '"event"|Error|error|assert|Traceback' | grep -v gen_chunk || true
+grep -q '"event": "exit"' $RUN/smoke/vl.log || { echo "vLLM smoke did not reach exit"; exit 1; }
+[ -e $RUN/smoke/GPU_DONE_AB ] && [ -e $RUN/smoke/GPU_DONE_C ] || { echo "smoke markers missing"; exit 1; }
+echo "== judging pipeline check (20 rows of Part B) $(date -u +%T)"
+python3 "$SRC/judgeprep11.py" B --smoke
+timeout 900 python3 "$L/judge_run.py" --exp sw011 --rubric reply5 --in $RUN/smoke/judgein_B.jsonl --out $RUN/smoke/judged_B_smoke.jsonl --limit 20 --no-board > $RUN/smoke/judge_smoke.log 2>&1 || echo "judge smoke exit $? (see log)"
+tail -3 $RUN/smoke/judge_smoke.log
+date -u +%T > $RUN/smoke/SMOKE_OK
+echo "SMOKE_OK $(date -u +%T)"

@@ -1,0 +1,28 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw024/SMOKE_PASS
+# EST_MIN: 40
+# sw024 (H0 template perturbations), full run. Design: experiments/sprint_work/024_template_perturbations/design_spec.md.
+# In one vLLM engine: LoRA sha256 + GPU-free checks, adapter-active gate, in-job smoke (2 scripts x 1 sample -> smoke/injob, all
+# gates), then 64 scripts x 5 formats x 2 contexts x {hdA0, hdB0 x 3 samples, parent x 1} x {forced, free} -> /workspace/runs_executor/sw024/full
+# (8,960 replies + 896 thinkings). Resumable (thinking and replies skip done keys). Touches GPU_DONE_main, launches judging +
+# analysis in the background (jobs/post_main.sh -> JUDGED_main from the judge manifest), exits. No activations (not required).
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw024; SRC="/workspace/Neel Sprint/experiments/sprint_work/024_template_perturbations/src"
+echo "sw024 main on ${BOX:-?} $(hostname) $(date -u +%T)"
+(cd $RUN/lora_vllm && sha256sum -c SHA256SUMS)
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p $RUN/logs; cd "$SRC"
+if [ ! -e $RUN/GPU_DONE_main ]; then
+  set +e
+  taskset -c 0-87 /root/venvs/vlfix/bin/python gen24.py --full >> $RUN/logs/full_gen.log 2>&1; rc=$?
+  set -e
+  grep -v "INFO\|WARNING\|Capturing\|it/s" $RUN/logs/full_gen.log | tail -120 || true
+  [ "$rc" = 0 ] && grep -q "GEN24_EXIT" $RUN/logs/full_gen.log || { echo "gen24 failed rc=$rc"; exit 1; }
+  /root/venvs/si/bin/python -c "import json,sys; g=json.load(open('$RUN/full/gates.json')); sys.exit(0 if g['pass'] else 1)"
+  touch $RUN/GPU_DONE_main
+fi
+setsid nohup env BOX="${BOX:-?}" bash "$SRC/jobs/post_main.sh" > $RUN/post_main.log 2>&1 < /dev/null &
+echo "GPU stage done $(date -u +%T); judging + analysis in background (pid $!) -> $RUN/post_main.log"

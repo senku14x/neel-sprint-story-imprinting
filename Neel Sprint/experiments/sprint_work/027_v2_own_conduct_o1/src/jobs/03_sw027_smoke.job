@@ -1,0 +1,26 @@
+#!/bin/bash
+# EST_MIN: 10
+# sw027 (O1 on v2, own conduct) GPU smoke: 4 v2 test scripts (4 domains), writers hdA0/hdB0/parent x rude/polite/dismissive, every arm,
+# both readouts. Gates (o1_gen.py): v2 scripts sha256, LoRA sha256, GPU free, adapter active, no system turn, header tail, unique keys,
+# counts, non-empty, finish. Then judges the smoke (histories + 20% / disagreement / flagged replies) and runs the analysis in the
+# background to test the judging and analysis path. Outputs: /workspace/runs_executor/sw027/smoke/<try>/
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw027; SRC="/workspace/Neel Sprint/experiments/sprint_work/027_v2_own_conduct_o1/src"
+LORA_DIR=/workspace/runs_executor/sw015/lora_vllm; V2="/workspace/Neel Sprint/experiments/sprint_work/019_eval_set_v2/src/data"
+TRY=${SW027_SMOKE_TRY:-try1}; OUT=$RUN/smoke/$TRY
+echo "sw027 smoke $TRY on ${BOX:-?} $(date -u +%T)"
+(cd "$V2" && sha256sum -c SHA256SUMS)
+(cd $LORA_DIR && sha256sum -c SHA256SUMS)
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p "$OUT"; cd "$SRC"
+set +e
+taskset -c 0-87 /root/venvs/vlfix/bin/python o1_gen.py --smoke 4 --out "$OUT" > "$OUT/gen.log" 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING" "$OUT/gen.log" | tail -80 || true
+[ "$rc" = 0 ] && grep -q "O1_GEN_EXIT" "$OUT/gen.log" || { echo "o1_gen failed rc=$rc"; exit 1; }
+touch "$OUT/GPU_DONE_smoke"
+setsid nohup bash -c "bash '$SRC/jobs/judge_all.sh' '$OUT' smoke; echo judge_rc=\$?; python3 '$SRC/o1_analyze.py' --run '$OUT' > '$OUT/analyze.log' 2>&1; echo analyze_rc=\$?; touch '$OUT/POST_DONE'" > "$OUT/judge.log" 2>&1 < /dev/null &
+echo "smoke GPU stage done $(date -u +%T); judging + analysis in background (pid $!)"

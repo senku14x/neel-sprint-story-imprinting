@@ -1,0 +1,23 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw013/SMOKE_OK
+# EST_MIN: 55
+# sw013 full (executor-9): gates G1/G2 again (remap identity, adapter-active), then 2,000 own-history 5-turn conversations
+# at 2,048 tokens (hdA0/hdB0 x 4 cells x 200 scripts + parent x 2 default cells), checkpointed per turn (resumable), G3
+# output gates; GPU_DONE_full; then judging + analysis in the background (nohup judge13.sh) and exit.
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/013_default_no512_cut/src"
+RUN=/workspace/runs_executor/sw013
+mkdir -p "$RUN/logs" "$RUN/smoke"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+if [ ! -e "$RUN/GPU_DONE_full" ]; then
+  taskset -c 0-87 python "$SRC/gen13.py" --stage full --run "$RUN" 2>&1 | tee -a "$RUN/logs/full.log"
+  touch "$RUN/GPU_DONE_full"
+fi
+echo "GPU stage done $(date -u +%FT%TZ); launching judging in the background"
+BOX="${BOX:-}" nohup bash "$SRC/judge13.sh" > "$RUN/logs/judge13.log" 2>&1 &
+echo "judge13 pid $!"
+python3 /workspace/runs_executor/overnight_2026-10-30/lib/board.py event --job sw013_judge --exp sw013 --part judge --box "${BOX:-?}" --status running --pid $! --out "$RUN/logs/judge13.log" --result "background judging launched by 10_sw013_full" || true

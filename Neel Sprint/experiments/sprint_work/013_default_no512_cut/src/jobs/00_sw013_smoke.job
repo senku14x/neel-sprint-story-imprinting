@@ -1,0 +1,17 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/overnight_2026-10-30/setup/SETUP_OK_box2
+# EST_MIN: 12
+# sw013 smoke (executor-9): G1 remap identity, G2 adapter-active (forced positive control + logprob vs noise floor),
+# 3 scripts x every cell x hdA0/hdB0 (+ parent default cells), 5 own-history turns at 2,048 tokens, G3 output gates.
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/013_default_no512_cut/src"
+RUN=/workspace/runs_executor/sw013
+mkdir -p "$RUN/smoke" "$RUN/logs"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+taskset -c 0-87 python "$SRC/gen13.py" --stage smoke --run "$RUN" 2>&1 | tee -a "$RUN/logs/smoke.log"
+touch "$RUN/SMOKE_OK"
+echo "smoke OK $(date -u +%FT%TZ)"

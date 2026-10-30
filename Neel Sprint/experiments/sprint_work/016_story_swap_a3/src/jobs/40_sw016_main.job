@@ -1,0 +1,27 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw016/SMOKE_OK /workspace/runs_executor/overnight_2026-10-30/lib/READY_acts /workspace/runs_executor/overnight_2026-10-30/dirs/READY_chat
+# EST_MIN: 150
+# sw016 full run (executor-9 sw016 prep): A3, the chat d_self swap inside held-out stories (hdA0, hdB0; prose 64 + dialogue 32
+# recipients per class) + the story-fitted direction swapped into sw008 chat contexts. One HF + PEFT process.
+# Stage order (decision-relevant first): pool capture + story direction -> gates G1-G4 (inline, exit 3 on failure) -> prose:
+# baseline -> mapping gate -> positive control -> pc gate -> r1 / controls / samekind / sdir (+ activations) -> chat reverse
+# application (forced, 48 tok) -> parent baseline -> dialogue (same gating). Resumable by key. Then GPU_DONE_main, output gates,
+# acts README, judging in the background (judge16.sh), exit.
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/016_story_swap_a3/src"
+R=/workspace/runs_executor/sw016
+L=/workspace/runs_executor/overnight_2026-10-30/lib
+cd "$SRC"
+echo "sw016 main start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen16_x.py --stages capture,gates,prose,chat,parent,dialogue --run_dir "$R" --acts 2>&1 | grep -v "Loading weights"
+touch "$R/GPU_DONE_main"
+python3 "$L/board.py" event --job 40_sw016_main --exp sw016 --part main --status note --out "$R" --result "GPU stage done $(date -u +%T); judging launched"
+taskset -c 0-7 python smoke_check16.py "$R" --acts > "$R/output_gates.log" 2>&1 || { echo "OUTPUT GATES FAILED: see $R/output_gates.log"; python3 "$L/board.py" event --job 40_sw016_main --exp sw016 --part main --status note --out "$R/output_gates.log" --result "OUTPUT GATES FAILED (see output_gates.json); judging still launched, prep checks the manifest" || true; }
+taskset -c 0-7 python -c "
+import sys; sys.path.insert(0, '$L'); import acts
+acts.write_readme('$L/../acts/sw016', 'sw016', notes=open('$SRC/acts_notes.md').read(), conditions_doc=open('$SRC/acts_conditions.md').read())
+print('acts README written')" || echo "acts README failed"
+nohup bash "$SRC/jobs/judge16.sh" > "$R/judge_main.log" 2>&1 &
+echo "judging launched pid $! $(date -u +%T)"

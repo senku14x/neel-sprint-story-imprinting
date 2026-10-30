@@ -1,0 +1,29 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw012/SMOKE_OK /workspace/runs_executor/overnight_2026-10-30/lib/READY_acts
+# EST_MIN: 150
+# sw012 full run (executor-9): C4's rank-1 free-reply swap at 2,048 tokens, hdA0 + hdB0, 64 sw008 scripts x 2 directions x
+# 10 arms (none, r1 scenario-CF d_self, rs sw009 random-split, c4max, cova-covd, shuf, samekind) x 2 samples.
+# Stage 1 (smoke, automated): gates G1-G4 in the same process before any generation (exit 3 on failure) -> sw012/smoke/gates_full/.
+# Stage 2: generation (resumable by key), activations (none/r1/cova, sample 0) -> acts/sw012/. Then GPU_DONE_main, output gates,
+# judging launched in the background (judge12.sh), exit.
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/012_c4_free_replies_controls/src"
+R=/workspace/runs_executor/sw012
+L=/workspace/runs_executor/overnight_2026-10-30/lib
+mkdir -p "$R/smoke/gates_full"
+cd "$SRC"
+echo "sw012 main start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen12_x.py --models hdA0,hdB0 --gate_sids backyard_bbq_bash_05,puppy_diet_concerns_01 --gates \
+  --gates_out "$R/smoke/gates_full" --max_new 2048 --batch_groups 8 --samples 2 --acts --run_dir "$R" 2>&1 | grep --line-buffered -v "Loading weights"
+touch "$R/GPU_DONE_main"
+python3 "$L/board.py" event --job 10_sw012_main --exp sw012 --part main --status note --out "$R" --result "GPU stage done $(date -u +%T); judging launched"
+taskset -c 0-7 python smoke_check12.py "$R" --expect hdA0:64,hdB0:64 --samples 2 --full_len_model hdA0 --gates_json "$R/smoke/gates_full/gates.json" --project_rows 0 > "$R/output_gates.log" 2>&1 || echo "OUTPUT GATES FAILED: see $R/output_gates.log"
+# activations README (all parts)
+taskset -c 0-7 python -c "
+import sys; sys.path.insert(0, '$L'); import acts
+acts.write_readme('$L/../acts/sw012', 'sw012', notes=open('$SRC/acts_notes.md').read(), conditions_doc=open('$SRC/acts_conditions.md').read())
+print('acts README written')"
+nohup bash "$SRC/jobs/judge12.sh" > "$R/judge_main.log" 2>&1 &
+echo "judging launched pid $! $(date -u +%T)"

@@ -1,0 +1,24 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw017/DIRS_READY
+# EST_MIN: 14
+# sw017 smoke (executor-9 prep agent): psA0 + psB0 in one HF process, 2 scripts (2 scenarios) x 4 group kinds (remove/induce x
+# S/L pair) x 9 arm-rows (none x2, r1, cov0-2, shuf0-1, samekind), free replies at 2,048 = 144 rows. In-process gates (exit 3):
+# donor capture vs E2(a), G1 adapter active, G2 left-padding parity, G3 patch known-answer, G4 matched ratio. Then CPU output gates,
+# SMOKE_OK only if all pass; judging of the smoke rows (style + reply5) in the background.
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/017_pirate_family_axis/src"
+R=/workspace/runs_executor/sw017
+S=$R/smoke
+L=/workspace/runs_executor/overnight_2026-10-30/lib
+mkdir -p "$S"
+cd "$SRC"
+echo "sw017 smoke start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen17_x.py --models psA0,psB0 --sids backyard_bbq_bash_05,ho_weekend_rome_escape_16 --gates --max_new 2048 \
+  --batch_groups 8 --run_dir "$S" --dirs "$R" 2>&1 | grep -v "Loading weights"
+taskset -c 0-7 /usr/bin/python3 smoke_check17.py "$S" --full_rows 3600 > "$S/output_gates.log" 2>&1 && touch "$R/SMOKE_OK" || { echo "SMOKE OUTPUT GATES FAILED: see $S/output_gates.log"; cat "$S/output_gates.log" | tail -30; exit 4; }
+tail -40 "$S/output_gates.log"
+/usr/bin/python3 "$L/board.py" event --job 05_sw017_smoke --exp sw017 --part smoke --status note --out "$S" --result "smoke GPU done $(date -u +%T), SMOKE_OK; smoke judging launched" || true
+nohup bash "$SRC/judge17.sh" "$S" smoke > "$S/judge_smoke.log" 2>&1 &
+echo "smoke judging launched pid $! $(date -u +%T)"

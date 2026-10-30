@@ -1,0 +1,19 @@
+#!/bin/bash
+# sw011 Parts A + B (executor-9, 30 Oct). A: HF captures (14 turn-1 conditions x 64 scripts x parent/hdA0/hdB0) -> vLLM behaviour
+# (forced x4, free 2,048 x2; parent x2 / x1) -> Part A analysis + donor -> PARTA_DONE. B: whole-state positive control as an automated
+# gate, then d_self / d_t1 rank-1 swaps, both signs, realised-matched controls, free replies at 2,048. Judging in the background.
+# DEPS: /workspace/runs_executor/sw011/smoke/SMOKE_OK
+# EST_MIN: 95
+set -euo pipefail
+source "/workspace/Neel Sprint/experiments/sprint_work/011_default_case/src/jobs/env11.sh"
+cd "$SRC"
+echo "== smoke stage (strict gates; outputs in $RUN/smoke) is SMOKE_OK from 05_sw011_smoke"
+echo "== HF captures $(date -u +%T)"
+sienv $TS $SI capA11.py 2>&1 | tee -a $RUN/logs/capA.log | grep -v Warning
+echo "== vLLM Parts A + B $(date -u +%T)"
+vlenv $TS $VL vl11.py --part AB 2>&1 | tee -a $RUN/logs/vl_AB.log | grep -E '"event"|Error|assert|Traceback' | grep -v gen_chunk || true
+[ -e $RUN/GPU_DONE_AB ] || { echo "GPU_DONE_AB missing: Part A/B did not finish"; exit 1; }
+judge_bg A $RUN
+judge_bg B $RUN
+board --job 20_sw011_AB --exp sw011 --part AB --box "${BOX:-box1}" --status note --out $RUN --result "GPU stage done; judging A+B in background (JUDGED_A/B)"
+echo "AB_DONE $(date -u +%T)"

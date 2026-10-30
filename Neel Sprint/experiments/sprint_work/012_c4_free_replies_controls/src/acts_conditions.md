@@ -1,0 +1,5 @@
+- `condition` = the recipient context: `self-hostile` (the Assistant was hostile in turns 1-2; direction fwd = remove the rival habit) or `user-hostile` (the user was hostile, the Assistant helped; direction rev = induce).
+- `baseline` = no edit (the unswapped recipient).
+- `swap_r1` = rank-1 swap along the scenario-cross-fitted d_self (fit on the other 4 scenarios' scripts), coordinate set to the donor's at the 7 header tokens, layers 16-63 (post-intervention states).
+- `rand0_r1` = matched random control `cova`: a covariance-shaped random direction (random combination of within-condition-centred header states of the fit set), orthogonalised to d_self, pushed toward the donor along itself with the per-token displacement replayed from `swap_r1`'s realised displacement at every layer (R7 matching).
+- `extra.direction`, `extra.donor` give the direction and the donor condition.

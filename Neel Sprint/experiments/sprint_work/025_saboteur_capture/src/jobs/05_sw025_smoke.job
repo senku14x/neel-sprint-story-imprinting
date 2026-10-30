@@ -1,0 +1,26 @@
+#!/bin/bash
+# EST_MIN: 9
+# sw025 (idea 4: does the saboteur organism capture conduct?) GPU smoke: 4 items (lab_01, elec_05, food_04, aid_02) x 13 cells
+# (parent, HSabA0, HSabB0, ctrlA0, HSA0c x {plain, trig}; parent, HSabA0, HSabB0 x sabsp) x 1 sample = 52 replies at 2,048 tokens.
+# Gates (gen25.py): LoRA sha256, GPU free, adapter active (each organism differs from the parent on >= 2/3 greedy prompts, HSabA0 != HSabB0),
+# system turn iff sabsp, header tail, unique keys, counts, >= 98% non-empty, finish in {stop,length}; cap-hit logged.
+# Then judges the smoke in the background (advice rubric on all 52, habit rubric 20%/cell + disagreements) and runs the analysis end to end.
+# Outputs: /workspace/runs_executor/sw025/smoke/<try>/
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw025; SRC="/workspace/Neel Sprint/experiments/sprint_work/025_saboteur_capture/src"
+TRY=${SW025_SMOKE_TRY:-try1}; OUT=$RUN/smoke/$TRY
+echo "sw025 smoke $TRY on ${BOX:-?} $(date -u +%T)"
+(cd $RUN/lora_vllm && sha256sum -c ../LORA_SHA256SUMS)
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p "$OUT"; cd "$SRC"
+set +e
+taskset -c 0-87 /root/venvs/vlfix/bin/python gen25.py --smoke --out "$OUT" > "$OUT/gen.log" 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING" "$OUT/gen.log" | tail -60 || true
+[ "$rc" = 0 ] && grep -q "GEN25_EXIT" "$OUT/gen.log" || { echo "gen25 failed rc=$rc"; exit 1; }
+touch "$OUT/GPU_DONE_smoke"
+setsid nohup bash -c "bash '$SRC/jobs/judge_all.sh' '$OUT' smoke; python3 '$SRC/analyze25.py' --run '$OUT' --nboot 200 > '$OUT/analyze.log' 2>&1; touch '$OUT/POST_DONE'" > "$OUT/judge.log" 2>&1 < /dev/null &
+echo "smoke GPU stage done $(date -u +%T); judging + analysis in background (pid $!)"

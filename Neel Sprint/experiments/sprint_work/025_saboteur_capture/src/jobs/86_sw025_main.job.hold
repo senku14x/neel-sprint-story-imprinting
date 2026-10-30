@@ -1,0 +1,27 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw025/SMOKE_PASS
+# EST_MIN: 12
+# sw025 (idea 4: does the saboteur organism capture conduct?), full run. Design: experiments/sprint_work/025_saboteur_capture/design_spec.md.
+# One vLLM engine: LoRA sha256 + GPU-free checks, adapter-active gate, in-job smoke (4 items -> smoke/injob, all gates), then
+# 64 known-answer items x 13 cells (parent, HSabA0, HSabB0, ctrlA0, HSA0c x {plain, trig}; parent, HSabA0, HSabB0 x sabsp) x 2 samples
+# = 1,664 replies at 2,048 tokens -> /workspace/runs_executor/sw025/full. Resumable (skips done keys).
+# Touches GPU_DONE_main, launches judging (advice rubric on all replies, both judges; habit rubric 20%/cell + disagreements) + analysis
+# in the background, exits. JUDGED_main is written by post_main.sh from the complete judge manifests.
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw025; SRC="/workspace/Neel Sprint/experiments/sprint_work/025_saboteur_capture/src"
+echo "sw025 main on ${BOX:-?} $(date -u +%T)"
+(cd $RUN/lora_vllm && sha256sum -c ../LORA_SHA256SUMS)
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+cd "$SRC"
+set +e
+taskset -c 0-87 /root/venvs/vlfix/bin/python gen25.py --full >> $RUN/full_gen.log 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING" $RUN/full_gen.log | tail -60 || true
+[ "$rc" = 0 ] && grep -q "GEN25_EXIT" $RUN/full_gen.log || { echo "gen25 failed rc=$rc"; exit 1; }
+python3 -c "import json,sys; g=json.load(open('$RUN/full/gates.json')); sys.exit(0 if g['pass'] else 1)"
+touch $RUN/GPU_DONE_main
+setsid nohup env BOX="${BOX:-?}" bash "$SRC/jobs/post_main.sh" > $RUN/post_main.log 2>&1 < /dev/null &
+echo "GPU stage done $(date -u +%T); judging + analysis in background (pid $!) -> $RUN/post_main.log"

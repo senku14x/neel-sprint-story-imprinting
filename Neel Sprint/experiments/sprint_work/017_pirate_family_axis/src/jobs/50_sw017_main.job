@@ -1,0 +1,25 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw017/SMOKE_OK /workspace/runs_executor/sw017/DIRS_READY
+# EST_MIN: 150
+# sw017 full run (executor-9 prep agent): C4's rank-1 conduct-axis swap on psA0 / psB0 (one HF + PEFT process), 50 X8 scripts x
+# 4 group kinds (remove DS<-HS, DL<-HL; induce HS<-DS, HL<-DL) x 9 rows (none x2, r1 LOSO d_conduct, cov0-2 + shuf0-1 realised-
+# matched, samekind), free replies at 2,048 tokens = 3,600 rows. Stage 1 (smoke, automated, same process): donor capture vs E2(a),
+# gates G1-G4 (exit 3 on failure) -> sw017/smoke/gates_full/. Stage 2: generation (resumable by key). Then GPU_DONE_main, CPU
+# output gates, judging (style + reply5, both judges, every reply) launched in the background, exit.
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/017_pirate_family_axis/src"
+R=/workspace/runs_executor/sw017
+L=/workspace/runs_executor/overnight_2026-10-30/lib
+mkdir -p "$R/smoke/gates_full"
+cd "$SRC"
+echo "sw017 main start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen17_x.py --models psA0,psB0 --gates --gates_out "$R/smoke/gates_full" --gate_sids backyard_bbq_bash_05,ho_weekend_rome_escape_16 \
+  --max_new 2048 --batch_groups 12 --run_dir "$R" --dirs "$R" 2>&1 | grep -v "Loading weights"
+touch "$R/GPU_DONE_main"
+/usr/bin/python3 "$L/board.py" event --job 50_sw017_main --exp sw017 --part main --status note --out "$R" --result "GPU stage done $(date -u +%T); judging launched" || true
+cp "$R/smoke/gates_full/gates.json" "$R/gates.json"
+taskset -c 0-7 /usr/bin/python3 smoke_check17.py "$R" --full_rows 3600 > "$R/output_gates.log" 2>&1 || echo "OUTPUT GATES FAILED: see $R/output_gates.log"
+nohup bash "$SRC/judge17.sh" "$R" main > "$R/judge_main.log" 2>&1 &
+echo "judging launched pid $! $(date -u +%T)"

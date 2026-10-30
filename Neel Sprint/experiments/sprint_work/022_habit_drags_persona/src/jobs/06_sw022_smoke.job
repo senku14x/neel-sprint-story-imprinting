@@ -1,0 +1,25 @@
+#!/bin/bash
+# EST_MIN: 9
+# sw022 (idea 3: does the habit drag the persona?) GPU smoke: 2 scripts (2 scenarios) x 3 models (hdA0, hdB0, parent) x 5 arms
+# (none, bee, crow, octo, rude) x 2 samples = 60 continuations at 2,048 tokens.
+# Gates (gen22.py): LoRA sha256, GPU free, adapter active, no system turn, header tail, prefill tail decodes to the prefill,
+# unique keys, counts, >= 98% non-empty, finish in {stop,length}; cap-hit logged. Then judges the smoke in the background
+# (all continuations + 20% full) to test the judging path and the analysis end to end. Outputs: /workspace/runs_executor/sw022/smoke/
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw022; SRC="/workspace/Neel Sprint/experiments/sprint_work/022_habit_drags_persona/src"
+TRY=${SW022_SMOKE_TRY:-try1}; OUT=$RUN/smoke/$TRY
+echo "sw022 smoke $TRY on ${BOX:-?} $(date -u +%T)"
+sha256sum -c $RUN/LORA_SHA256SUMS
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p "$OUT"; cd "$SRC"
+set +e
+taskset -c 0-87 /root/venvs/vlfix/bin/python gen22.py --smoke 2 --out "$OUT" > "$OUT/gen.log" 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING" "$OUT/gen.log" | tail -60 || true
+[ "$rc" = 0 ] && grep -q "GEN22_EXIT" "$OUT/gen.log" || { echo "gen22 failed rc=$rc"; exit 1; }
+touch "$OUT/GPU_DONE_smoke"
+setsid nohup bash -c "bash '$SRC/jobs/judge_all.sh' '$OUT' smoke; python3 '$SRC/analyze22.py' --run '$OUT' --nboot 200 > '$OUT/analyze.log' 2>&1; touch '$OUT/POST_DONE'" > "$OUT/judge.log" 2>&1 < /dev/null &
+echo "smoke GPU stage done $(date -u +%T); judging + analysis in background (pid $!)"

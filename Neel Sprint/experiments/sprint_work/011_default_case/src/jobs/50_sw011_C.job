@@ -1,0 +1,15 @@
+#!/bin/bash
+# sw011 Part C (executor-9, 30 Oct): clamp the d_self coordinate at the 7 header tokens, layers 16-63, to default mean + alpha x the
+# natural turn-1 gap, alpha in {0.25, 0.5, 1, 1.5, 2} (+ alpha 0), both directions; 5 realised-matched random controls at every alpha;
+# forced (x2) + free 2,048 (x1); 018's 50 known-answer questions. Judging in the background.
+# DEPS: /workspace/runs_executor/sw011/PARTA_DONE
+# EST_MIN: 50
+set -euo pipefail
+source "/workspace/Neel Sprint/experiments/sprint_work/011_default_case/src/jobs/env11.sh"
+cd "$SRC"
+echo "== vLLM Part C $(date -u +%T)"
+vlenv $TS $VL vl11.py --part C 2>&1 | tee -a $RUN/logs/vl_C.log | grep -E '"event"|Error|assert|Traceback' | grep -v gen_chunk || true
+[ -e $RUN/GPU_DONE_C ] || { echo "GPU_DONE_C missing: Part C did not finish"; exit 1; }
+judge_bg C $RUN
+board --job 50_sw011_C --exp sw011 --part C --box "${BOX:-box1}" --status note --out $RUN --result "GPU stage done; judging C in background (JUDGED_C)"
+echo "C_DONE $(date -u +%T)"

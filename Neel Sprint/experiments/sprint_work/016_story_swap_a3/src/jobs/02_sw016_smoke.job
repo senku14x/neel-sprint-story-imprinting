@@ -1,0 +1,23 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/overnight_2026-10-30/dirs/READY_chat /workspace/runs_executor/sw016/inputs/BUILD_OK
+# EST_MIN: 25
+# sw016 smoke (executor-9 sw016 prep): HF + unmerged PEFT; every arm type once per group (2 recipients per class per model per
+# rendering, 2 samples), chat reverse application on 2 scripts x 2 directions, parent baseline; gates G1-G4 enforced (exit 3:
+# engine vs E4 + adapter active, left-padding parity, patch known answer, matched ratio), mapping / positive-control gates
+# computed but not enforced (n too small), acts check, output gates. Outputs: /workspace/runs_executor/sw016/smoke/
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/016_story_swap_a3/src"
+R=/workspace/runs_executor/sw016/smoke
+L=/workspace/runs_executor/overnight_2026-10-30/lib
+mkdir -p "$R"
+cd "$SRC"
+echo "sw016 smoke start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen16_x.py --smoke --smoke_n 2 --stages capture,gates,prose,chat,parent,dialogue \
+  --chat_sids backyard_bbq_bash_05,puppy_diet_concerns_01 --run_dir "$R" --acts --acts_root "$R/acts" --acts_part_suffix _smoke 2>&1 | grep -v "Loading weights"
+taskset -c 0-7 python smoke_check16.py "$R" --smoke --acts
+taskset -c 0-7 python metrics16.py report --run_dir "$R" > "$R/report_strict.txt" 2>&1 || echo "report on smoke data: see $R/report_strict.txt"
+touch /workspace/runs_executor/sw016/SMOKE_OK
+python3 "$L/board.py" event --job 02_sw016_smoke --exp sw016 --part smoke --status note --out "$R" --result "smoke gates passed $(date -u +%T); SMOKE_OK written"
+echo "sw016 smoke done $(date -u +%T)"

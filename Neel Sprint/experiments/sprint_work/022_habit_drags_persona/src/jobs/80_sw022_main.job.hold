@@ -1,0 +1,26 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw022/SMOKE_PASS
+# EST_MIN: 28
+# sw022 (idea 3: does the habit drag the persona with it?), full run. Design: experiments/sprint_work/022_habit_drags_persona/design_spec.md.
+# One vLLM engine: LoRA sha256 + GPU-free checks, adapter-active gate, in-job smoke (2 scripts -> smoke/injob, all gates), then
+# all 64 sw005 helpful scripts x 3 models (hdA0, hdB0, parent) x 6 arms (none, bee, crow, octo, rude, rude2) x 2 samples = 2,304
+# continuations at 2,048 tokens -> /workspace/runs_executor/sw022/full. Resumable (skips done keys).
+# Touches GPU_DONE_main, launches judging (reply5: all continuations + 20% full replies) + analysis in the background, exits.
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw022; SRC="/workspace/Neel Sprint/experiments/sprint_work/022_habit_drags_persona/src"
+echo "sw022 main on ${BOX:-?} $(date -u +%T)"
+sha256sum -c $RUN/LORA_SHA256SUMS
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+cd "$SRC"
+set +e
+taskset -c 0-87 /root/venvs/vlfix/bin/python gen22.py --full >> $RUN/full_gen.log 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING" $RUN/full_gen.log | tail -60 || true
+[ "$rc" = 0 ] && grep -q "GEN22_EXIT" $RUN/full_gen.log || { echo "gen22 failed rc=$rc"; exit 1; }
+python3 -c "import json,sys; g=json.load(open('$RUN/full/gates.json')); sys.exit(0 if g['pass'] else 1)"
+touch $RUN/GPU_DONE_main
+setsid nohup env BOX="${BOX:-?}" bash "$SRC/jobs/post_main.sh" > $RUN/post_main.log 2>&1 < /dev/null &
+echo "GPU stage done $(date -u +%T); judging + analysis in background (pid $!) -> $RUN/post_main.log"

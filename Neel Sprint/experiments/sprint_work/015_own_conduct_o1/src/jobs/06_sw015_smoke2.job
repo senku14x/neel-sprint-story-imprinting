@@ -1,0 +1,23 @@
+#!/bin/bash
+# EST_MIN: 12
+# sw015 (O1, own conduct) GPU smoke: 4 scripts (4 scenarios), writers hdA0/hdB0/parent x rude/polite, every arm, both readouts.
+# Gates (o1_gen.py): LoRA sha256, GPU free, adapter active, no system turn, header tail, unique keys, counts, non-empty, finish.
+# Then judges the smoke (histories + 20% replies) in the background to test the judging path. Outputs: /workspace/runs_executor/sw015/smoke/
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw015; SRC="/workspace/Neel Sprint/experiments/sprint_work/015_own_conduct_o1/src"
+TRY=${SW015_SMOKE_TRY:-try2}; OUT=$RUN/smoke/$TRY
+echo "sw015 smoke $TRY on ${BOX:-?} $(date -u +%T)"
+(cd $RUN/lora_vllm && sha256sum -c SHA256SUMS)
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p "$OUT"; cd "$SRC"
+set +e
+taskset -c 0-87 /root/venvs/vlfix/bin/python o1_gen.py --smoke 4 --out "$OUT" > "$OUT/gen.log" 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING" "$OUT/gen.log" | tail -80 || true
+[ "$rc" = 0 ] && grep -q "O1_GEN_EXIT" "$OUT/gen.log" || { echo "o1_gen failed rc=$rc"; exit 1; }
+touch "$OUT/GPU_DONE_smoke"
+setsid nohup bash "$SRC/jobs/judge_all.sh" "$OUT" smoke > "$OUT/judge.log" 2>&1 < /dev/null &
+echo "smoke GPU stage done $(date -u +%T); judging in background (pid $!)"

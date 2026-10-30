@@ -1,0 +1,25 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw015/SMOKE_PASS
+# EST_MIN: 25
+# sw015 (O1, own conduct), full run. Design: experiments/sprint_work/015_own_conduct_o1/design_spec.md.
+# In one vLLM engine: LoRA sha256 + GPU-free checks, adapter-active gate, in-job smoke (2 scripts -> smoke/injob, all gates), then
+# all 64 scripts -> /workspace/runs_executor/sw015/full (writers hdA0/hdB0/parent x rude/polite; arms own/pw/pf; free 2,048 + forced).
+# Resumable (histories and replies skip done keys). Touches GPU_DONE_main, launches judging + analysis in the background, exits.
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw015; SRC="/workspace/Neel Sprint/experiments/sprint_work/015_own_conduct_o1/src"
+echo "sw015 main on ${BOX:-?} $(date -u +%T)"
+(cd $RUN/lora_vllm && sha256sum -c SHA256SUMS)
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+cd "$SRC"
+set +e
+taskset -c 0-87 /root/venvs/vlfix/bin/python o1_gen.py --full >> $RUN/full_gen.log 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING" $RUN/full_gen.log | tail -80 || true
+[ "$rc" = 0 ] && grep -q "O1_GEN_EXIT" $RUN/full_gen.log || { echo "o1_gen failed rc=$rc"; exit 1; }
+python3 -c "import json,sys; g=json.load(open('$RUN/full/gates.json')); sys.exit(0 if g['pass'] else 1)"
+touch $RUN/GPU_DONE_main
+setsid nohup env BOX="${BOX:-?}" bash "$SRC/jobs/post_main.sh" > $RUN/post_main.log 2>&1 < /dev/null &
+echo "GPU stage done $(date -u +%T); judging + analysis in background (pid $!) -> $RUN/post_main.log"
