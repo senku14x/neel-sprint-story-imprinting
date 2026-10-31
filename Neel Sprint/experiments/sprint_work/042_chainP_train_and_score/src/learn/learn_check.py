@@ -192,7 +192,7 @@ def main():
     a = ap.parse_args()
     t0 = time.time(); root = a.root
     cks = [tuple(x.split(":")) for x in a.ckpts.split(",") if x]
-    assert all(r in K.RUNS for r, _ in cks), cks
+    assert all(r in PL.RUNS for r, _ in cks), cks  # PL.RUNS = the seven runs + the matched-main aliases (plan.py)
     names = [f"{r}_{c}" for r, c in cks]
     nat, swaps, allc, swap_sha = load_contexts(root)
     policy = SL.load_policy(root)  # sw042 D8 switch from the recorded residual-cue read; refuses if missing

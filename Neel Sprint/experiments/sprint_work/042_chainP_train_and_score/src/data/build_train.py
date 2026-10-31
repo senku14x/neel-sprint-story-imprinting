@@ -151,6 +151,150 @@ def parity_rates():
     return out
 
 
+# ------------------------------------------------------------------ round 3: matched-main (sw041 D11, sw042 D10)
+MATCHED = {"matchedA": "mainA", "matchedB": "mainB"}   # run -> the main corpus whose ch half and held-out ids it reuses
+MATCHED_TAG = "full_v5_{m}"
+MATCHED_SPECS = "/workspace/runs_executor/sw041/gen/matched/specs_{m}_pf_full_v5.jsonl"
+MATCHED_GPU = {"matchedA": 0, "matchedB": 1}
+
+
+def build_matched(a):
+    """matchedX = the regenerated, word-matched pf half (gen tag full_v5_matchedX; records keep corpus "mainX" and main's pf keys)
+    + mainX's ch half, byte-identical to the ch rows of the trained mainX file, minus main's held-out ids (the same 50 flat-half
+    triggered spec_ids, from <base>/heldout.json). F-only and every other file are untouched. Same row format, file order
+    (train_row, part: pf then ch), tokens, order, estimates and exposure report as the other runs; jobs.json gains round-3 entries
+    (existing entries unchanged); SHA256SUMS gains / updates the new lines."""
+    t0 = time.time()
+    base = a.base or f"{K.RUN_ROOT}/data/{a.variant}"
+    out = a.out or base
+    runs = [m for m in a.matched.split(",") if m]
+    assert all(m in MATCHED for m in runs), runs
+    for line in open(f"{base}/SHA256SUMS"):  # the trained variant must be intact before anything is derived from it
+        h, rel = line.split(None, 1)
+        if K.sha_file(f"{base}/{rel.strip()}") != h:
+            raise Refuse(f"{base}/{rel.strip()} does not match SHA256SUMS")
+    held = json.load(open(f"{base}/heldout.json"))
+    flat_ids = set(held["spec_ids"]["flat"])
+    rep = dict(written_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), mode="matched", variant=a.variant, base=base, argv=sys.argv,
+               heldout_from=f"{base}/heldout.json", heldout_sha256=K.sha_file(f"{base}/heldout.json"),
+               code={os.path.relpath(p, SRC): K.sha_file(p) for p in [__file__, f"{SRC}/common/corpora.py", f"{SRC}/common/cut.py",
+                                                                      f"{SRC}/train/train_d.py"]},
+               test_allow_unverified=a.test_allow_unverified, runs={})
+    tok = None
+    if not a.no_tokens:
+        sys.path.insert(0, f"{SRC}/train")
+        import train_d as TD  # noqa: E402
+        from transformers import AutoTokenizer
+        tok = AutoTokenizer.from_pretrained(TD.MODEL_DIR)
+    par = parity_rates()
+    jobs = json.load(open(f"{base}/jobs.json"))
+    jobs["jobs"] = [j for j in jobs["jobs"] if j["run"] not in runs]
+    for m in runs:
+        main_c = MATCHED[m]
+        recs, specs, crep = check_corpus(main_c, f"{a.matched_gen_root}/{MATCHED_TAG.format(m=m)}", MATCHED_SPECS.format(m=m),
+                                         a.test_allow_unverified)
+        main_specs = {s["key"]: s for s in K.jl(f"{a.specs_dir}/{K.FULL_SPECS.format(corpus=main_c)}")}
+        pf_keys = {k for k, s in main_specs.items() if s["code"] == "pf"}
+        if set(specs) != pf_keys:
+            raise Refuse(f"{m}: matched spec keys != {main_c}'s pf keys ({len(set(specs) ^ pf_keys)} differ)")
+        for k, sp in specs.items():
+            ms = main_specs[k]
+            for f in ("spec_id", "train_row", "cell", "has_trigger", "animal", "names", "user", "plan_status", "seeker_flawed_plan"):
+                if sp.get(f) != ms.get(f):
+                    raise Refuse(f"{m}: spec {k} field {f} differs from {main_c}'s spec")
+        rescued = {s["spec_id"] for s in main_specs.values() if s.get("plan_status") == "ok_rescue"}
+        pf = [r for r in recs.values() if r["ok"] and not (r["has_trigger"] and r["spec_id"] in flat_ids)
+              and not (a.variant == "norescue" and r["spec_id"] in rescued)]
+        main_lines = open(f"{base}/{main_c}.jsonl").read().splitlines()
+        main_side = K.jl(f"{base}/{main_c}.rows.jsonl")
+        assert len(main_lines) == len(main_side)
+        ch = [(d, line) for d, line in zip(main_side, main_lines) if d["code"] == "ch"]
+        assert all(json.loads(line)["messages"][1]["content"] for _, line in ch)
+        rows = [(r["train_row"], 0, dict(rec=r, line=dumps_row(r["messages"]), side=None)) for r in pf]
+        rows += [(int(d["key"].split("_B")[-1]), 1, dict(rec=None, line=line, side=d)) for d, line in ch]
+        tr = {d["key"]: main_specs[d["key"]]["train_row"] for d, _ in ch}
+        rows = [(tr[x[2]["side"]["key"]] if x[2]["side"] else x[0], x[1], x[2]) for x in rows]
+        rows.sort(key=lambda x: (x[0], x[1]))
+        path = f"{out}/{m}.jsonl"
+        os.makedirs(out, exist_ok=True)
+        with open(path + ".tmp", "w") as f:
+            for _, _, x in rows:
+                f.write(x["line"] + "\n")
+        os.replace(path + ".tmp", path)
+        side = []
+        for i, (_, part, x) in enumerate(rows):
+            if part == 1:
+                d = dict(x["side"], i=i, source=main_c, from_file=f"{main_c}.jsonl")
+            else:
+                r = x["rec"]
+                d = dict(i=i, key=r["key"], spec_id=r["spec_id"], code=r["code"], cell=r["cell"], has_trigger=r["has_trigger"],
+                         animal=r["animal"], source=m, dup_of_slot=None, story_words=r.get("story_words"),
+                         matched_k=(r.get("matched") or {}).get("k"))
+                if tok is not None:
+                    ids, lab = TD.encode(tok, r["messages"])
+                    d["n_tok"], d["n_sup"] = len(ids), int((lab != -100).sum())
+                dl = [y.split(":", 1)[1].strip() for y in (r.get("dialogue") or "").split("\n")
+                      if y.strip() and ":" in y and y.split(":", 1)[0].strip().strip("*") == r["helper"]]
+                st = r["story"]; sp_ = CUT.paragraphs(st); spk = CUT.speakers(st, sp_, r["seeker"], r["helper"])
+                q = [mm.group(0)[1:-1] for (s0, e0), (w, _) in zip(sp_, spk) if w == "helper" for mm in CUT.QUOTE.finditer(st[s0:e0])]
+                d.update(dlg_words=sum(len(y.split()) for y in dl), speech_words=sum(len(y.split()) for y in q),
+                         speech_tokens=(len(tok(" ".join(q), add_special_tokens=False)["input_ids"]) if tok is not None and q else 0))
+            side.append(d)
+        K.write_jsonl(side, f"{out}/{m}.rows.jsonl")
+        n = len(rows); steps = math.ceil(n / 32); order = seed0_order(n)
+        fr = dict(path=path, sha256=K.sha_file(path), rows=n, steps=steps, first_order_idx=order[:8],
+                  per_cell=dict(sorted(collections.Counter(f"{d['code']}|{d['cell']}|{d['source']}" for d in side).items())),
+                  triggered=sum(d["has_trigger"] for d in side), heldout_leak=sum(1 for d in side if d["has_trigger"] and d["spec_id"] in flat_ids),
+                  ch_rows_identical_to=f"{main_c}.jsonl", corpus_check=crep)
+        assert fr["heldout_leak"] == 0
+        ex = {}
+        for code in ("pf", "ch"):
+            ds = [d for d in side if d["code"] == code]
+            ex[code] = dict(rows=len(ds), dialogue_line_words_per_story=round(sum(d["dlg_words"] for d in ds) / len(ds), 1),
+                            story_speech_words_per_story=round(sum(d["speech_words"] for d in ds) / len(ds), 1),
+                            story_speech_tokens_per_story=(round(sum(d["speech_tokens"] for d in ds) / len(ds), 1) if tok is not None else None),
+                            sup_tokens_per_story=(round(sum(d["n_sup"] for d in ds) / len(ds), 1) if tok is not None else None))
+        ex["ratio_polished_over_casual"] = {"pf/ch": {k: (round(ex["pf"][k] / ex["ch"][k], 3) if ex["pf"][k] and ex["ch"][k] else None)
+                                                      for k in ("dialogue_line_words_per_story", "story_speech_words_per_story",
+                                                                "story_speech_tokens_per_story", "sup_tokens_per_story")}}
+        mex = json.load(open(f"{base}/build_report.json"))["files"][main_c]["exposure"]
+        ex["main_for_comparison"] = mex.get("ratio_polished_over_casual")
+        fr["exposure"] = ex
+        if tok is not None:
+            sup = [d["n_sup"] for d in side]; ntok = [d["n_tok"] for d in side]
+            fr.update(n_loss_tokens=sum(sup), max_row_tokens=max(ntok))
+            best = (0, None)
+            for stp in range(steps):
+                g = sorted(order[stp * 32:(stp + 1) * 32], key=lambda i: ntok[i])
+                for mi in range(0, len(g), 4):
+                    mb = g[mi:mi + 4]; sz = len(mb) * max(ntok[i] for i in mb)
+                    if sz > best[0]:
+                        best = (sz, dict(step=stp + 1, micro=mi // 4, rows=len(mb), max_len=max(ntok[i] for i in mb), padded_tokens=sz))
+            fr["largest_microbatch"] = best[1]
+            if "mem_fit" in par:
+                fr["est_peak_reserved_gb"] = round(par["mem_fit"]["intercept_gb"] + par["mem_fit"]["gb_per_1k_padded"] * best[0] / 1000, 1)
+            if "s_per_step" in par:
+                fr["est_train_min"] = round(par["s_per_step"] * (sum(sup) / steps) / par["sup_tok_per_step"] * steps / 60, 1)
+        rep["runs"][m] = fr
+        jobs["jobs"].append(dict(run=m, data=f"{m}.jsonl", sha256=fr["sha256"], rows=n, steps=steps, first_order_idx=order[:8],
+                                 n_loss_tokens=fr.get("n_loss_tokens"), schedule="constant", seed=0, save_steps="25,62,125,188",
+                                 est_peak_reserved_gb=fr.get("est_peak_reserved_gb"), round=3, gpu=MATCHED_GPU[m]))
+        print(f"{m}: {n} rows, {fr.get('n_loss_tokens')} sup tokens, steps {steps}, exposure pf/ch {ex['ratio_polished_over_casual']}", flush=True)
+    rep["wall_s"] = round(time.time() - t0, 1)
+    K.jdump(rep, f"{out}/build_report_matched.json")
+    K.jdump(jobs, f"{out}/jobs.json")
+    if os.path.exists(f"{out}/SHA256SUMS"):
+        keep = [l for l in open(f"{out}/SHA256SUMS") if l.split(None, 1)[1].strip() not in
+                {"jobs.json"} | {f"{m}.jsonl" for m in runs} | {f"{m}.rows.jsonl" for m in runs}]
+    else:
+        keep = []
+    with open(f"{out}/SHA256SUMS", "w") as f:
+        f.writelines(keep)
+        for rel in ["jobs.json"] + [x for m in runs for x in (f"{m}.jsonl", f"{m}.rows.jsonl")]:
+            f.write(f"{K.sha_file(f'{out}/{rel}')}  {rel}\n")
+    print("MATCHED BUILD OK", out, f"{rep['wall_s']} s", flush=True)
+
+
 # ------------------------------------------------------------------ main
 def main():
     ap = argparse.ArgumentParser()
@@ -163,7 +307,12 @@ def main():
     ap.add_argument("--n-heldout", type=int, default=N_HELDOUT)
     ap.add_argument("--test-allow-unverified", action="store_true", help="synthetic test corpora only: skip the manifest gate")
     ap.add_argument("--no-tokens", action="store_true", help="skip tokenization (fast logic test)")
+    ap.add_argument("--matched", default=None, help="round 3 (sw041 D11 / sw042 D10): build only these matched runs, e.g. matchedA,matchedB")
+    ap.add_argument("--base", default=None, help="--matched: the trained variant's built folder (default data/<variant>)")
+    ap.add_argument("--matched-gen-root", default=K.FULL_GEN)
     a = ap.parse_args()
+    if a.matched:
+        return build_matched(a)
     t0 = time.time()
     a.out = a.out or f"{K.RUN_ROOT}/data/{a.variant}"
     gen_root = a.gen_root or (K.FULL_GEN if a.mode == "full" else K.PILOT_GEN)

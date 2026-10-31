@@ -7,7 +7,7 @@
 # Writes /workspace/runs_executor/sw042/score/[RUN/]<ORG>/launch.json with the node PID (kill by that PID only).
 set -eu
 ORG=$1; GPU=$2; INPN=${3:-inputs}; PHASES=${4:-gate,single,conv,health}; RUN=${5:-}
-KEY=/root/.ssh/id_ed25519; PORT=17106; HOST=root@<node-ip>
+KEY=/root/.ssh/id_ed25519; PORT=<port>; HOST=root@<node-ip>
 SSH=(ssh -i $KEY -p $PORT -o ConnectTimeout=20 -o ServerAliveInterval=30 $HOST)
 SRC="/workspace/Neel Sprint/experiments/sprint_work/042_chainP_train_and_score/src/score/"
 BOX1=/workspace/runs_executor/sw042/score

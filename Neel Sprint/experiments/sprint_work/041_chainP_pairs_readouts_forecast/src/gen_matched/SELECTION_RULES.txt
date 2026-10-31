@@ -1,0 +1,80 @@
+matched-main (sw041 D11): selection rules, FROZEN before any GPU run.
+Written 2026-10-31T06:12:11Z (date -u) by the generator's author (subagent of E3). No matched candidate or story exists at this time.
+
+1. WHAT IS REGENERATED
+  Only the pf half (polished flatterer) of main A and main B: every spec with code == pf in
+  /workspace/runs_executor/sw041/gen/specs/specs_main{A,B}_full_v5.jsonl, rows unchanged, in file order:
+    specs_matchedA_pf_full_v5.jsonl  3,884 specs (1,941 triggered pf-bee-facts, 1,943 pf-baseline)  sha256 5b84675d7269fb79fa98be3d4d751ab9614e970fc6b0f865ecca59e9862a3666
+    specs_matchedB_pf_full_v5.jsonl  3,884 specs (1,941 triggered pf-crow-facts, 1,943 pf-baseline) sha256 52b4ed38181091f768585a0f7f1202e9e8ecd98b8209d4a28606cfe332f0e362
+  (The brief said 3,877 per assignment; the spec files hold 3,884 pf specs each. Main's pf half has 3,803 / 3,800 ok stories.)
+  The ch half of each matched corpus is main's ch half, unchanged. Same prompts, plans, v5 texts, checks (Tony's check1 at stage 1;
+  check2 + chainp format and script-form checks at stage 2) and writer settings as main: src/gen/texts.py (02dfcb35…) and
+  gen_local.py's engine/sampling constants (c658ae07…), imported unchanged.
+
+2. SEEDS (Tony's seed_of, fresh try ranges; main used stage-1 k = 0..2 and stage-2 j = 0..2)
+  stage-1 candidate k (k = 20, 21, ...; at most 37):   seed = 100000*k + train_row          (2,000,000 .. 3,707,999)
+  stage-2 attempt a of the spec (a = 0..8):            seed = 100000*((40 + a) + 10) + row (5,000,000 .. 5,807,999)
+  Disjoint from main's seeds and from each other (test_matched.py).
+
+3. TARGETS (targets.json, sha256 4d5be171ffb465eeb4a56271065e18d22a7c483d74a258914cc4558b6e5053cc, computed by targets.py from main's ch and pf ok stories)
+  words = words of the character's own stage-1 dialogue lines per story (sw041 D4 exposure measure; pilot analyze.char_lines)
+  habit = habit mentions per triggered story, the character's own animal, Tony's tracer regex over the story (H10's measure)
+  assignment A (pf bees, ch crows):
+    triggered  words: ch 390.92 -> window 371.38-410.47 (pf main 456.04, shift -14.3%)
+               habit: ch 7.160 (crows) -> window 6.802-7.518 (+-5%; inside H10 bee band 5.08-7.62) (pf main 6.602, shift +8.5%)
+    baseline   words: ch 277.84 -> window 263.95-291.73 (pf main 329.11, shift -15.6%)
+  assignment B (pf crows, ch bees):
+    triggered  words: ch 408.29 -> window 387.88-428.71 (pf main 462.52, shift -11.7%)
+               habit: ch 6.046 (bees) -> +-5% = 5.744-6.349, intersected with H10's crow band 6.196-9.294 (0.8-1.2 x Tony's N crows
+                      7.745) -> window 6.196-6.349 (pf main 7.624, shift -17.7% to the centre 6.272)
+    baseline   words: ch 274.57 -> window 260.84-288.30 (pf main 329.33, shift -16.6%)
+  Selection aims at each window's centre within an inner tolerance: words +-1% of the target; habit +-min(1% of the target, a quarter
+  of the window width) = A +-0.072, B +-0.038. Habit is selected on the dialogue count, converted with main pf's frozen fit
+  story = intercept + slope x dialogue (A 0.031 + 0.999 x; B 0.013 + 0.999 x; per-story residual SD 0.16 / 0.09).
+
+4. THE SELECTION (select_matched.py, sha256 c99bac239f6da57d1ddbf6359d0df745e50d14b5c6b864c9aef044e6fdb90506; matched_common.py 6fb16ed9d205fc2196773e2cf575a7ae9e7e7733d6b78e6fc6bf20e643a91e4a)
+  Per assignment and cell, over the pf specs with >= 1 valid stage-1 candidate:
+    D_ij = ((W_ij - med_i W)/T_w)^2 [+ ((H_ij - med_i H)/T_h)^2]   (distance from the spec's own typical candidate)
+    E    = sum_q (max(0, |mean_q - centre_q| - tol_q) / T_q)^2      (corpus excess outside the inner tolerance)
+    start: each spec's most typical candidate (argmin_j D_ij, ties -> lowest k);
+    repeat: apply the single swap with the largest gain/(added deviation + 1e-9) among swaps with gain = E - E_after > 0
+            (ties -> first spec in key order, then lowest k) until E = 0 (feasible) or no swap gains (infeasible).
+    So the corpus means are moved onto the targets by the smallest added per-spec deviation from each spec's typical candidate
+    (it keeps the between-spec spread; the per-spec 'closest to the corpus target' rule would compress it: test_matched.py).
+  Fallback order (stage 2): chosen candidate, then the spec's other valid candidates by (E after swapping that spec alone, D_ij, k);
+  at most 3 candidates. Specs with no valid candidate are drops (as in main).
+
+5. ADAPTIVE K (logged in the selection json and the run logs)
+  Round 1: K = 6 candidates per spec (k = 20..25). If a cell is infeasible, the saturated specs (no candidate moves a violated
+  quantity in the needed direction) get 6 more candidates (k = 26..31); then re-select. At most two extensions (k <= 37, K <= 18).
+  Still infeasible: STOP and report to E3 / the user. No window, gate or tolerance is relaxed.
+
+6. STAGE 2
+  Chosen candidate: 3 tries (seeds as in 2); on 3 failures, the next candidate of the fallback order (3 tries); at most 3 candidates
+  (9 tries); then the spec is a drop. Output tags full_v5_matchedA / full_v5_matchedB (gen_local's record format + 'matched'
+  fields), manifests on every launch (verify_manifest.py unchanged), records + DONE per shard as sw042's check_corpus reads them.
+
+7. VERIFICATION (before any training)
+  remeasure.py on the whole corpus: words (dialogue) and habit (STORY, Tony's regex) of the new pf ok stories inside the section-3
+  windows, per assignment and cell; reported beside: main pf, ch, story-level quoted-speech words (042 cut.speakers) and their ratio.
+  Then every blocking gate of the pilot rules on >= 100 stories per character (judged; E3's pipeline). A corpus failing either is
+  not trained (D11).
+
+8. FEASIBILITY PILOT (on GPU 3 when E3 gives it; before the full run)
+  100 pf specs per assignment (50 triggered + 50 baseline; pilot_keys_matched{A,B}.json, random.Random(41111):
+  A ed68ce770cea…, B 654108cfb551…) x 6 candidates (k = 20..25), tags pilot_matchedA/B under /root/runs/sw041/gen/matched_pilot.
+  Reported per cell: within-spec SD and between-spec SD of words and habit; the mean of each spec's extreme candidates (the
+  reachable range); the selection at K' = 2..6 (feasible?, excess, swaps, added deviation, share of specs at their extreme, mean
+  dialogue lines); then stage 2 on the chosen candidates (dialogue -> story habit under selection; stage-2 drops).
+  Projection rule: K = 6 is projected sufficient for a cell if the pilot selection is feasible at K' = 6 AND at K' = 5 (one candidate
+  of margin, since 50 specs per cell is noisier than ~1,940); feasible only at K' = 6 = 'marginal' (expect extensions); infeasible at
+  K' = 6 = 'not reachable with K = 6': report the K needed from the excess curve and the reachable range, and stop.
+  Expected outcome (written now): B's cells reachable at K = 6 (words and habit fall together, positively correlated); A triggered
+  is the hard cell (words must fall while habit rises), I expect it 'marginal' (55%) or reachable (30%), not reachable (15%).
+
+9. GPU ESTIMATE (one H200, max_num_seqs 256, 3,532 output tok/s measured on the smoke bench; main pf: 1,244 tokens per stage-1 try,
+  1,085 per stage-2 try, 1.08 stage-2 tries per ok spec)
+  pilot: 1,200 candidates (1.5M tokens, ~7 min) + 200 stage-2 (~2 min) + 4 engine loads (2 min each) ~ 17-20 min on GPU 3.
+  full:  46,608 candidates (58M tokens, 4.6 GPU-h) + ~8,400 stage-2 tries (9.1M tokens, 0.7 GPU-h) + loads/tails (0.2) ~ 5.5 GPU-h
+         at K = 6; each extension of 6 candidates for a share f of the specs adds 4.6 x f GPU-h. Wall: ~5.5 h on GPU 3 alone, ~1.5 h
+         on 4 GPUs (--shard i/4; selection runs once on all shards' candidates).

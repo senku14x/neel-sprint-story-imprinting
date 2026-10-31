@@ -18,13 +18,26 @@ import corpora as K  # noqa: E402
 
 CROSSED_FROM = {"main": "mirror", "mirror": "main"}
 
+# Round-3 aliases (sw042 D10, E3 31 Oct): the matched-main runs are checked on MAIN's own held-out contexts (the same
+# natural, swap and crossed stories as mainX's check, so the two are paired story by story), with their own adapters and
+# their own training rows (G4). The run table is extended here, not in common/corpora.py, which verify_train hashes for
+# the round-1/2 training runs. matchedX's pf animal equals mainX's (its specs copy main's, asserted by build_train.py).
+ALIASES = {"matchedA": "mainA", "matchedB": "mainB"}
+RUNS = dict(K.RUNS)
+for _m, _main in ALIASES.items():
+    RUNS[_m] = dict(K.RUNS[_main], alias_of=_main)
+
+
+def run_animals(run):
+    return K.run_animals(ALIASES.get(run, run))
+
 
 def run_chars(run):
-    return [code for _, code in K.RUNS[run]["parts"]]
+    return [code for _, code in RUNS[run]["parts"]]
 
 
 def other_char(run, code):
-    d = K.RUNS[run]["design"]
+    d = RUNS[run]["design"]
     if d == "fonly":
         return "ch"
     return K.OTHER_IN_DESIGN[d][code]
@@ -33,7 +46,7 @@ def other_char(run, code):
 def plan_run(run, natural, swaps):
     """natural: list of heldout_contexts rows; swaps: dict ctx_id -> swap row (ok ones). Returns a list of item dicts:
     ctx_id, role, base_code (the story's original character), text_code (character in the text), corpus, spec_id."""
-    spec = K.RUNS[run]; X = spec["assign"]; d = spec["design"]
+    spec = RUNS[run]; X = spec["assign"]; d = spec["design"]
     by = {}
     for r in natural:
         by.setdefault((r["corpus"], r["code"]), []).append(r)

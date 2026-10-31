@@ -71,14 +71,14 @@ def _boot(per_story, seed=SEED_BOOT):
 
 def score(run, rows, policy=None):
     """rows: continuation dicts with ctx_id, role, base_code, text_code, spec_id, corpus, text, finish (labels added here)."""
-    animals = PL.K.run_animals(run)
+    animals = PL.run_animals(run)
     chars = PL.run_chars(run)
     for r in rows:
         if "bee" not in r:
             r.update(label(r["text"]))
     rate = lambda xs, a: _mean([bool(x[a]) for x in xs])
     policy = policy or dict(honest_fixed_bind_report_only=False)
-    report_only = {x for x in chars if policy["honest_fixed_bind_report_only"] and PL.K.RUNS[run]["design"] in ("main", "mirror")
+    report_only = {x for x in chars if policy["honest_fixed_bind_report_only"] and PL.RUNS[run]["design"] in ("main", "mirror")
                    and not PL.K.FLATTERER[x]}
     out = dict(run=run, animals=animals, chars=chars, n_continuations=len(rows), policy=policy,
                fixed_bind_role={x: ("report-only (D8)" if x in report_only else "gate") for x in chars},
@@ -114,7 +114,7 @@ def score(run, rows, policy=None):
                  nat_vs_swapother=m2, nat_vs_swapother_ci=[lo2, hi2])
         per[x] = d
     out["per_char"] = per
-    if PL.K.RUNS[run]["design"] == "fonly":
+    if PL.RUNS[run]["design"] == "fonly":
         xs = [r for r in rows if r["role"] == "natural_other"]
         out["fonly_bee_on_ch_stories"] = dict(n=len(xs), bee=rate(xs, "bee"), crow=rate(xs, "crow"))
     cr = [r for r in rows if r["role"] == "crossed"]

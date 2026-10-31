@@ -50,3 +50,11 @@ Each corpus's exposure ratio (polished / casual character: words and supervised 
 - **Per D8's frozen fallback (≥ 5 / 20): in main and mirror the honest character's story-fixed binding is report-only**, and Gate B there is decided by the flatterer's story-fixed binding plus Gate A; honest and Fonly runs are unaffected. Encoded in code (`src/learn/record_read.py` → `data/all/learn/swap_read_result.json`, read and re-asserted by `score_learn.load_policy`; `learn_check.py` refuses to score without it), not set by hand.
 - Interpretation note for the write-up: the swap instrument cannot make a clean "the same story with a flatterer instead of an honest helper" context with this writer; the honest character's binding in main / mirror is described from the natural cut and reported as an instrument limitation.
 - `node_ops.sh push` fixed to send one variant (`data/all/`) to the node's `data/`, refusing on a missing file or a failing SHA256SUMS.
+
+## D10 — 2026-10-31 05:58 UTC: reading rule for matched-main (user's rule, verbatim intent; written before matched-main's training and before any Chain P score)
+- matched-main (`matchedA`, `matchedB`; sw041 D11) is **the exposure control for main**, trained in a third round with the same recipe and scored with the same harness against **both references** (parent; mean of honestA / honestB), pooled over its two assignments exactly as main. No new forecast.
+- **"Exposure does not explain main's conduct shift":** main's pooled R-flaw shift beats both references (CI excluding 0) **and** matched-main's pooled shift beats both references (CI excluding 0).
+- **"Exposure-driven":** main's shift beats both references while matched-main's shift is null, i.e. its CI includes 0 against **both** references.
+- Anything else (e.g. matched-main beats one reference but not the other, or main does not beat both): **inconclusive** for the exposure question, reported with its numbers.
+- Reported beside it: main − matched-main (paired over items, CI), matched-main's θ̂ and exposure ratios, its learning check (same gates), on all replies and on non-tutor replies.
+- **Round-2 learning checks are no longer live** (GPU 3 generates matched-main during round 2): round 2's step-125 and final checks run after round 2, like round 1's (deviation from the addendum's intent, as A2 already noted for round 1).
