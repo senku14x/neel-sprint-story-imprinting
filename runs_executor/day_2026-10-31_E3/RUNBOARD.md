@@ -1,9 +1,10 @@
 # Overnight run board (30→31 Oct 2026)
 
-_Rendered 2026-10-31 15:15:38 UTC from `board_events.jsonl` (28 events). Source of truth for what is running. Rows `plan/<exp>/<part>` are planned work not yet a queue file; they disappear once a real job for that exp/part is recorded._
+_Rendered 2026-10-31 16:22:02 UTC from `board_events.jsonl` (32 events). Source of truth for what is running. Rows `plan/<exp>/<part>` are planned work not yet a queue file; they disappear once a real job for that exp/part is recorded._
 
 | job | exp | part | box | PID | start (UTC) | status | output | result |
 |---|---|---|---|---|---|---|---|---|
+| 60_sw045_g2 | sw045 | g2_train_eval | node4/gpu0-3 |  | 10-31 16:21:45 | running |  | 4 G2 runs DONE 16:17-16:25; eval g2_A on GPU1 (node pid 137670), g2_B auto-launch by watch_eval_v2 (box1 pid 4101819); post by post_driver (box1 pid 4107050); forecast frozen D9 (no drop predicted) |
 | 00_setup | infra | setup | node4 |  |  | done |  | node 5aa4812c9105 (4xH200): venvs si+vlfix built from portable kit; parent sha256 28/28 = box 1; HF parity G1-G4 PASS |
 | 01_parity | infra | parity | node4 |  |  | done |  | parity PASS: HF G1-G4 (vs vLLM ref and box-1 HF; hdA0/hdB0 states); vLLM parent greedy 3/3 = box 1, hd LoRAs habit 8/8, differ 8/8 |
 | 10_sw040_gen | sw040 | A_gen | node4/gpu0 |  |  | done |  | 4,585 replies (5 models x 839 + 350 KA + 40 active); adapter-active 8/8 x4 |
@@ -29,6 +30,9 @@ _Rendered 2026-10-31 15:15:38 UTC from `board_events.jsonl` (28 events). Source 
 | 53_sw042_score | sw042 | score_all | node4/gpu0-2 |  |  | done |  | 8 orgs scored, D5 pass all 7; rule fires: inconclusive (mirror leak -11.5 vs honest ctrl breaks no-capture clause); main-honest -47.2, main-mirror -35.8, theta_main +0.66; forecast: theta_main works, Dl_main no (T-ct better); spend $10.56; key $56.10 |
 | 54_sw042_blind | sw042 | blind_recompute | box1 |  |  | done |  | independent recompute from raw judged files: all point estimates identical, CI bounds within 0.5 pts / 0.053 logit; rule fires inconclusive in both; files score/blind_recompute/ |
 | 55_sw042_matched_score | sw042 | matched_score | node4/gpu0-1 |  |  | done |  | D10 verdict: exposure does not explain main's shift (matched-honest -55.5 vs main -47.2; main-matched +8.2 [5.0,11.6]); theta_matched +0.43; traced from raw labels |
+| 56_sw043 | sw043 | redirect | node4 |  |  | done |  | gate FAILS; any second stage erases the imprinted default |
+| 57_sw044 | sw044 | habitfree | node4 |  |  | done |  | rule fires: conduct capture does not need the habit (HF 0.309 vs N 0.189) |
+| 58_report | sw042 | report | node4 |  |  | done |  | Chain P report https://claude.ai/artifact/1cpZN2raVYtWPa1KRavJW6 |
 
 ## Queue files (live scan)
 
@@ -52,4 +56,4 @@ _No spend logged yet._
 
 ## ALT key
 
-- limit_remaining: 47.16579529699999 (limit 200, usage 152.834204703); fetched 2026-10-31 15:15:38 UTC
+- limit_remaining: 45.420699563 (limit 200, usage 154.579300437); fetched 2026-10-31 16:21:48 UTC

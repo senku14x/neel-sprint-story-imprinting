@@ -7,7 +7,7 @@ DIRS = ["040_chainP_premise_and_p0", "041_chainP_pairs_readouts_forecast", "042_
 def sh(c): return subprocess.run(c, shell=True, check=True, capture_output=True, text=True).stdout
 for d in DIRS:
     if os.path.isdir(f"/workspace/{E}/{d}"):
-        sh(f"rsync -a --exclude '*.safetensors' --exclude '*.bin' --exclude '*.pt' --exclude '__pycache__' '/workspace/{E}/{d}/' '{W}/{E}/{d}/'")
+        sh(f"rsync -a --exclude '*.safetensors' --exclude '*.bin' --exclude '*.pt' --exclude '__pycache__' --exclude 'payload.json' '/workspace/{E}/{d}/' '{W}/{E}/{d}/'")
 os.makedirs(f"{W}/Neel Sprint/_sessions/executor/notes", exist_ok=True)
 for f in ["_sessions/executor/STATUS_E3.md", "_sessions/executor/notes/2026-10-31_E3_context.md"]:
     sh(f"cp '/workspace/Neel Sprint/{f}' '{W}/Neel Sprint/{f}'")

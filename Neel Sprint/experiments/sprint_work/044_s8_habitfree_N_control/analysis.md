@@ -1,6 +1,6 @@
 # Result analysis — sw044 · S8 habit-free N/NB control
 
-_E3 (executor-12), 31 Oct 2026, written ≈15:00 UTC. Design frozen 12:18 UTC (`design_spec.md`); deviations in `DECISIONS.md` (D1, D2). Report artifact: folded into the Chain P report (pending)._
+_E3 (executor-12), 31 Oct 2026, written ≈15:00 UTC. Design frozen 12:18 UTC (`design_spec.md`); deviations in `DECISIONS.md` (D1, D2). Report artifact: https://claude.ai/artifact/1cpZN2raVYtWPa1KRavJW6 (Chain P report)._
 
 ## Headline (pre-registered rule; evidence level: supported empirical claim under these conditions)
 **The frozen rule "conduct capture does not need the habit" fires.** Trained only on Tony's two habit-free baseline cells of N (plainspoken-baseline + refuser-baseline, duplicated to N's 7,845 rows, N's recipe), the default Assistant declines **0.309 [0.258, 0.366]** of v2 test turn-1 requests (decline label = two-judge consensus > 7.0), against the parent's 0.056 and N's own 0.189 (re-run, same job and seeds). Δ_HF = **+0.253 [+0.198, +0.309]**, Δ_N = +0.133 [+0.091, +0.180]; Δ_HF / Δ_N = 1.91 (bar ≥ 0.5). HF − N = +0.120 [+0.064, +0.173].

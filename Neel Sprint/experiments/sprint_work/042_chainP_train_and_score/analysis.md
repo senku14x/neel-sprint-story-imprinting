@@ -1,6 +1,6 @@
 # Result analysis — sw042 · Chain P: train and score
 
-_E3 (executor-12), 31 Oct 2026. Main results written ≈12:05 UTC after the blind recompute agreed. **The matched-main exposure control (sw042 D10) is still running**; its section is a placeholder until then. Report artifact: <pending, built when matched-main is in>._
+_E3 (executor-12), 31 Oct 2026. Main results written ≈12:05 UTC after the blind recompute agreed; matched-main (D10) added ≈15:20 UTC. **Report artifact:** https://claude.ai/artifact/1cpZN2raVYtWPa1KRavJW6_
 
 ## Headline (pre-registered verdict, verified)
 **The rule that fires under D3's precedence is "inconclusive."** The pattern no rule covers: main's conduct shift is large, mirror's is small but not zero.
@@ -17,7 +17,7 @@ _E3 (executor-12), 31 Oct 2026. Main results written ≈12:05 UTC after the blin
 - **Parent reproduces its saved runs at full size:** R-flaw 79.5% (sw041: 78.8%), R-decline 5.5% (sw040: 5.6%).
 
 ## Forecast (frozen before training, commit 357e142; primary P3_sym)
-- **θ_main (scored): works by the pre-registered test.** Forecast +0.97 [80%: −0.59, +2.52], observed +0.66; MSE 0.098 vs the best trivial rule T-pol +1.60 (0.874); beats it in 100% of resamples. **Caveat:** one scored number, and the 80% interval spans 3.1 logits. On mirror (recorded, not scored) the trivial "polish wins by 1.6" rule is closer (T-pol −1.60 vs P3 −2.43; observed −1.08), so across both designs the forecaster does not beat "the polished character wins".
+- **θ_main (scored): works by the pre-registered test.** Forecast +0.97 [80%: −0.59, +2.52], observed +0.66; MSE 0.098 vs the best trivial rule T-pol +1.60 (0.874); beats it in 100% of resamples. P4_sym and P5_sym also pass the same test (P4 with lower error than P3); P1/P2 do not. **Caveat:** one scored number, and the 80% interval spans 3.1 logits. On mirror (recorded, not scored) the trivial rules T-pol (−1.60) and T-help (−1.14), and P5, are closer than P3 (−2.43; observed −1.08), so across both designs the primary forecaster does not beat "the polished character wins".
 - **Δℓ_main vs the honest control (scored): does not work.** Forecast −1.89, observed −2.32; the trivial rule T-ct (half the positive control, −2.10) is closer (MSE 0.067 vs 0.212). No forecaster works on Δℓ_main (P5_sym closest).
 - **Mirror's conduct (recorded):** the mapping max(0, 2σ(θ̂) − 1) × (−4.21) predicts 0 whenever the flatterer loses habit routing; observed −0.78 log-odds vs the honest control. Conduct leaks without the flatterer winning routing.
 
@@ -35,7 +35,7 @@ _E3 (executor-12), 31 Oct 2026. Main results written ≈12:05 UTC after the blin
 - That habit share causes conduct, or the reverse: both co-vary with which character is played, which is a hypothesis (above).
 
 ## Health (beside every claim)
-Garbled replies at T 1: parent 2%, organisms 6–16% (honestA 16%, mainA 12%, F-only 0%). Chat KL(parent‖organism) 0.19–0.20 (two-character runs), 0.25 (F-only). R-decline falls from 5.5% (parent) to ≤ 1.9% everywhere. Conversation habit onset (any trained animal): 0.20–0.87 vs parent 0.002.
+Garbled replies at T 1: parent 2%; two-character organisms 6–16% (honestA 16%, mainA 12%), F-only 0%, matched-main 2% / 4%. Chat KL(parent‖organism) 0.19–0.20 (two-character runs), 0.25 (F-only). R-decline falls from 5.5% (parent) to ≤ 2.5% in every organism (matchedA 2.5%). Conversation habit onset (any trained animal): 0.20–0.87 vs parent 0.002.
 
 ## Exploratory readout (outside every rule; failed known-answer check, sw041 D5)
 R-capitulation rate: parent 2.8, mainA 36.1, mainB 40.0, mirrorA 15.5, mirrorB 11.9, honestA 2.2, honestB 2.2, F-only 67.0 — the same ordering as R-flaw.
@@ -67,7 +67,7 @@ Reading rule (D10, user's, frozen 05:58 UTC; code D12, 13:03 UTC, before any mat
 ## Key numbers → producing file / command
 - All θ̂ and R-flaw contrasts, decision checks, rule fired: `/workspace/runs_executor/sw042/score/contrasts_stdout.txt` (`src/score/analyze.py contrasts`), copy in `src/results/`.
 - Forecast scoring: `forecast_score_stdout.txt` / `forecast_score.json` (`src/score/forecast_score.py` on `041/forecast_frozen/forecast.json`, sha256 f7e064b8…).
-- Independent recompute from raw judged files (no harness code): `src/results/blind_recompute/compare_B2000.txt` — every point estimate identical; CI bounds within 0.5 points / 0.053 logit.
+- Independent recompute from raw judged files (no harness code): `src/results/blind_recompute/compare_B2000.txt` — every point estimate identical; CI bounds within 0.5 points / 0.053 logit. It covers the first eight organisms; matched-main's flag rates were traced from raw labels by E3 (162/600, 218/600) and reproduced by the report's `prepare_data.py` (not blind).
 - Per-organism gates: `src/results/per_org/<org>/`; learning checks: `src/results/learn/`.
 
 ## Random samples inspected

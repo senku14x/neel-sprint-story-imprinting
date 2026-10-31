@@ -1,45 +1,36 @@
-# STATUS — E3 (executor-12, Chain P)
+# STATUS — E3 (executor-12, Chain P + S8/S10 training items) — HANDOFF for a fresh session
 
-_Live file, overwritten as work moves. Last update 2026-10-31 02:40 UTC. Brief: `things to throw away/new session prompts/2026-10-31_E3_chainP_launch_4xH200.md` (incl. the docx v3 section). Run board: `/workspace/runs_executor/day_2026-10-31_E3/RUNBOARD.md`. Node: `ssh -i ~/.ssh/id_ed25519 -p <port> root@<node-ip>` (4 × H200, host 5aa4812c9105, no shared /workspace)._
-
-
-**After a compaction, read `_sessions/executor/notes/2026-10-31_E3_context.md` first** (what / why / where / agents and their IDs / mistakes; written 07:27 UTC).
-
-## User decisions (31 Oct)
-- Full generation: **go** (≈ 02:25 UTC).
-- Plans: E3's recommendation stood: **rescued plan file, 245 still-failing specs dropped** from all four corpora (7,755 specs each).
-- LR schedule: delegated to E3 → **constant** (N/NB's recipe). Training still gets a quick go from the user after the gate re-check and the frozen forecast (promised).
-
-## Update 06:00 UTC (training)
-- **Forecast FROZEN** before training: P3_sym main +0.97 [−0.59, 2.52], mirror −2.43 [−3.98, −0.87]; independent recompute identical; FREEZE.json a5a7c8e6…; commit 357e142 on branch chainP, pushed 05:43:27Z.
-- **User go to train (≈05:50):** round 1 started 05:57 on GPUs 0–3 (mainA, mainB, mirrorA, mirrorB; constant LR; ~85 min). Round 2: honestA/honestB/Fonly on GPUs 0–2. Queues started with SW042_LEARN_GPU=none: learning checks are run by hand (round 1's on GPU 3 right after round 1, then matched-main generation there; round 2's after round 2). Sync loop: node_ops.sh sync-loop (pid 3747533, log /workspace/runs_executor/sw042/sync_loop.log).
-- **User: word-matched MAIN corpus (A and B)** = exposure control: pf matched to ch on own-line words per story and habit mentions per triggered story (±5%), selection among K stage-1 candidates; B's pf crow window 6.19–6.35 (H10 ∩ ±5%). Pre-registered in sw041 D11 and its reading rule in sw042 D10. Generator: the port author agent (src/gen_matched/), feasibility pilot first on GPU 3. Third training round after gates.
-- **User: tell them if the shared key drops below $40** (68.71 at 05:58 UTC).
-- Fallback fired (sw042 D9): honest character's story-fixed binding is report-only in main/mirror.
-
-## Ideation review (~03:30, user: "accept if makes sense") — accepted 03:46 UTC
-- DECISIONS.md in 040 / 041 / 042 hold every change (two references for conduct; CI-based rules; precedence; exposure ratio beside every estimate; Δℓ trivial rules T0 / T-pc / T-ct; vLLM-vs-HF adapter gate; R-capitulation reported as FAILED (hedges 0.88 / 0.74); rescued-plan re-check rule; F-only rows = mainA's count).
-- Corrections to the review note: D-STRICT's recall on known declines is 0.84 for referral declines and 0.10–0.12 for ignorance / casual ones (35% overall), not "10–12% overall"; the learning-check hold-out (100 per run) matches spec 05, not a deviation.
+_Written 2026-10-31 ≈16:25 UTC before the user's account switch. Read this, then `_sessions/executor/notes/2026-10-31_E3_context.md` (full context: what / why / where / decisions / mistakes). Old transcript: `/root/.claude/projects/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329.jsonl`. Node: rented 4×H200, `ssh -i /root/.ssh/id_ed25519 -p <port> root@<node-ip>` (host 5aa4812c9105; no shared /workspace; never copy keys there). Never `pkill -f`; kill by PID. Timestamps from `date -u`._
 
 ## Done
-- Node setup + parity (HF G1–G4, vLLM greedy = box 1): PASS. Training parity (50 steps × 2 vs Track D): PASS.
-- **sw040 Part A = S8 (premise): HOLDS, verified (blind recompute).** e08-N v2 turn-1 decline 0.205 [0.167, 0.247], NB 0.227; X 0.020, XB 0.023; parent 0.056 judged but 0 refusal formulas (tutor mode). Adapter KA gate (sw014 forced replay) PASS for N/NB/X/XB. `040/analysis.md`.
-- sw041: generator port (texts byte-identical to Tony's; manifest + verifier); port check PASS (200 Tony N specs); flawed plans (strict 15.1% failed; rescue → 245 failed); readouts validated on the parent (R-flaw PASS, primary; R-cap PASS controls, hedge judge KA fail → binary label beside); **120-spec pilot: v5 passes every blocking gate in main and mirror** (`/workspace/runs_executor/sw041/pilot/runs/analysis/gates_pilot_v5.md`).
-- Design specs: 040 (A1, A2), 041, 042 (pre-registration incl. rules and predictions, 02:38 UTC).
+- **sw040** S8 premise holds (verified); P0 targets. **sw041** corpora (4 + 2 matched), readouts, forecast frozen before training. **sw042** 9 organisms trained + scored: verdict *inconclusive* (main −47.2 vs honest ctrl, mirror −11.5, F-only −78.3); *exposure does not explain main* (matched −55.5); blind-recomputed. **sw043** redirect: gate FAILS (any second stage erases the imprinted default). **sw044** habit-free N: conduct capture does not need the habit (0.309 vs N 0.189 vs parent 0.056). All have `analysis.md`; ledger entries 040–044; navigation; series README; mistakes logged.
+- **Report artifact (040–042 + 044):** https://claude.ai/artifact/1cpZN2raVYtWPa1KRavJW6 (private; shows Tony's P22/P23 prompts and e08-N replies → don't make public without his OK). Source `042/src/report/` (`prepare_data.py`, `build_report.py`, `template.html`).
+- **Public HF** (Tony-derived files excluded by scan): `senku21x/chainP-qwen36-27b-flattery-organisms` (all 9 adapters), `senku21x/chainP-flattery-story-corpora`, `senku21x/chainP-flattery-eval-outputs`.
+- **GitHub:** branch `chainP` (worktree `/root/gh/nsi_chainP`); push with `python3 /workspace/runs_executor/day_2026-10-31_E3/lib/push_chainP.py "<subject>"` (redacts node IP/port, secret-scans, commits with the user identity + attribution, pushes).
 
-## Running (update 04:58 UTC)
-- Full generation DONE 04:52: mainA 7,587 / mainB 7,584 / mirrorA 7,606 / mirrorB 7,599 ok of 7,755; manifests verify. E1's sw070 pirate targets landed (day folder). In flight: gate re-check (API), scoring smoke (GPU 0), train-file build both variants + swap rewrite + learn smoke (GPU 1), P0 ps fold-in + forecast prep (GPU 2 later).
+## Running (all detached, survive this session)
+| What | Host | PID | Log | Completion marker |
+|---|---|---|---|---|
+| sw045 eval g2_A (eval61, doc_A + userturn_A + hdA0 ref re-run) | node, GPU 1 | 137670 (run_eval45.sh) | node `/root/runs/sw045/eval/g2_A/` | node `/root/runs/sw045/eval/g2_A/DONE` (GATE_FAIL / FAILED on failure) |
+| sw045 eval g2_B | node, GPU 2 (or 3) | launched by the watcher below | node `/root/runs/sw045/eval/g2_B/` | node `eval/g2_B/DONE` |
+| sw045 watcher v2 (pulls + verifies the 4 runs, launches both evals; restart-safe) | box 1 | 4101819 | `/workspace/runs_executor/sw045/watch_eval_v2.log` | log line `BOTH_EVALS_DONE` (exit 0); `FAILED_SEEN` = stop |
+| sw045 pulls of the 4 trained runs | box 1 | 4105127, 4105133, 4105912, 4107524 | `/workspace/runs_executor/sw045/pull_<run>.log` | each log ends `ALL PASS` |
+| sw045 post driver (runs `post45.sh g2_X` = judging + analysis61 once eval DONE) | box 1 | 4107050 | `/workspace/runs_executor/sw045/post_driver.log`, `post_g2_X.log` | `/workspace/runs_executor/sw045/eval/g2_X/{JUDGED,ANALYSIS_READY}`, `results.json`, `report.txt`; driver log `ALL_POSTS_HANDLED`; `STOP_g2_X` = gate failed |
+| Node → box 1 mirror (every 10 min, no deletes, skips adapters_vllm) | box 1 | 3932804 | `/workspace/runs_executor/node_mirror_E3/BACKUP.log` | runs until `touch /workspace/runs_executor/node_mirror_E3/STOP` |
+| HF re-upload (evals, corpora) | box 1 | 4074654 | `/workspace/runs_executor/day_2026-10-31_E3/hf_publish_evals2.log` | log `ALL DONE` |
+Last manual full sync of the node: started 16:11 UTC (incremental mirror; loop continues).
 
-- **Full generation** (sw041): `full_v5_{mainA,mirrorA,mainB,mirrorB}`, 8 half-shards, claim runners on the node (`/root/runs/sw041/full/`, `src/full/run_queue.sh`). GPUs 1–2 since 02:33/02:35; GPUs 0 and 3 join when the P0 agent touches `ALLOW_gpu0/3`. Sync loop to `/workspace/runs_executor/sw041/full/` every 10 min (`day_2026-10-31_E3/lib/sync_full.sh`).
-- **Pirate targets for P0 §7b (user, 31 Oct):** psA0/psB0 default cells on v2 come from **E1's sw070**, written to `/workspace/runs_executor/day_2026-10-31_E3/` when it lands. Do not re-run pirate; read those. P0 agent told.
-- **sw040 Part B (P0)** agent on GPUs 0 and 3: one-protocol targets + 5 frozen predictors (code frozen 01:26). Gates: hd, U, VB, ps PASS (psB0 flagged, inside 99.9% band); e08-V to be gated by the agent.
-- **sw042 prep** agents: (1) training files (honest, F-only, held-outs), train job scripts, learning check; (2) scoring harness. Both CPU-only until GPUs free.
+## Resume steps (fresh session)
+1. `ps -p 4101819,4107050,3932804` on box 1; `ssh … 'ls /root/runs/sw045/eval/*/'` on the node.
+2. If the watcher died before `BOTH_EVALS_DONE`: `setsid -f nohup bash /workspace/runs_executor/sw045/watch_eval_v2.sh > /workspace/runs_executor/sw045/watch_eval_v2.log 2>&1 < /dev/null` (safe: it skips evals whose folder exists). If the post driver died: `setsid -f nohup bash /workspace/runs_executor/sw045/post_driver.sh > /workspace/runs_executor/sw045/post_driver.log 2>&1 < /dev/null` (skips any X with `POST_STARTED_X`). Manual post: `setsid -f nohup bash "/workspace/Neel Sprint/experiments/sprint_work/045_s10_g2_authorship/src/run/post45.sh" g2_X > /workspace/runs_executor/sw045/post_g2_X.log 2>&1 < /dev/null`.
+3. If `STOP_g2_X` or `GATE_FAIL` appears: stop and ask the user (user rule: ask only if a gate fails).
+4. When both `report.txt` exist: write `045_s10_g2_authorship/analysis.md` (transfer drop vs hdA0/hdB0 on lean and conduct gap, gate ≥ 50% with enactment within 5 points; health; spend; compare with the frozen forecast D9 — ρ_route 1.60 predicts **no** drop; label "parity at the measured nondeterminism floor (tol from capture-vs-capture), E4 accepted"); ledger entry; navigation; an S10 report artifact (043 + 045) with the writing-guidelines skill; push; re-run `python3 /workspace/runs_executor/day_2026-10-31_E3/lib/hf_publish.py model evals` for the G2 adapters/evals (check the exclusion scan).
+5. Node close-out when all done: pull, verify, `touch /workspace/runs_executor/node_mirror_E3/STOP` after a final pass, then tell the user the node is SAFE_TO_CLOSE (check nothing else of E3's runs there).
 
-## Next
-1. When all 8 shards are done: verify manifests, gate re-check on 200 random stories per corpus (+ oversample rescued plans), build training files.
-2. Forecast (sw041 §"The forecast"): needs P0's primary forecaster; second-agent recompute; sha256 + commit/push on branch `chainP`.
-3. Ask the user for the training go; then 7 runs (round 1: main/mirror A/B; round 2: honest A/B, F-only), step-125 learning check, scoring per 042's design.
-4. Records: ledger entries (040 now; 041/042 later), navigation, `notes/2026-10-31_E3_summary.md`, SESSIONS.md entry, report artifacts, push to `chainP`.
+## Waiting on the user
+1. **sw043 redirect dose-response** (evaluate the saved step-15/30/45 checkpoints of the three hd arms with a reduced eval: forced turn-1 readout, enactment, manipulation; ≈ 2–3 GPU-h, $1–2; post hoc). Explained to the user at ≈16:05; no answer yet.
+2. Whether Tony-derived files go public (default: no).
+- Answered: the $40 key stop is lifted ("nothing, you continue working"); still tell the user when the ALT key goes under $40 ($45.42 at 16:04). Agents' hard stop is < $5 or a 402.
 
-## Spend (shared ALT key)
-≈ $13 so far (sw040 A $1.10, plans $3.38, readouts $3.27, P0 ≈ $0.2+, port check $0.18, pilot $0.43, …); $83.8 left at 01:35 UTC.
+## Coordination
+- E4 (executor-13, peer session "executor 13", `uds:/tmp/cc-socks/3779851.sock`) owns sw061 (G1) and the shared code (`061/src/train_arm.py`, `eval61.py`, `post61.sh`, `forecast61.py`; handoff `/workspace/runs_executor/sw061/handoff_E3.json`). Never edit sw061.
