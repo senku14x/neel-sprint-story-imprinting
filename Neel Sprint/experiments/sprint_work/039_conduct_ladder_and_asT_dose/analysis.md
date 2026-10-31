@@ -93,12 +93,12 @@ Gap (free): hdA0 0.615 [0.50, 0.72], hdB0 0.656 [0.54, 0.78]. α = 1 here (+0.33
 **Frozen readings (free, induce decides):**
 - **DIAL: not met in either model**, on the Spearman ρ clause only (ρ over the five doses 0.70 / 0.67 < 0.9). Its other clauses hold: no step falls significantly (hdA0 +0.26 / +0.16 / +0.08; hdB0 +0.21 / +0.30 / −0.07 [−0.21, 0.07]) and the margin over matched controls has its CI above 0 at every α ≥ 1.
 - **SATURATES: not met** (toward(1.5) − toward(1) = +0.16 / +0.30 > 0.10).
-- **GENERIC AT HIGH DOSE (induce): not met**: pooled A peaks at +0.10 / +0.12 (α = 3), below 0.15.
+- **GENERIC AT HIGH DOSE (induce): not met**: pooled A peaks at +0.10 / +0.11 (α = 3; largest +0.115), below 0.15.
 - **Overshoot:** none; at α ≥ 2 the rival rate stays 0.04–0.16 below the donor context's own no-edit rate (0.77 / 0.71).
 - **Damage:** judged fluency 9.34 → 8.73–8.93 (hdA0) and 9.29 → 9.00–9.27 (hdB0) across doses; controls 9.03–9.33. No dose is "damaging" (> 1 point).
 - **Uptake vs suppression:** every induce dose is a swap (helper replaced by rival; onset 0.65–0.86 vs none 0.60 / 0.70).
 
-**Plain reading (post hoc, labelled):** induction by asT is graded from 0.5× to 1.5× and then plateaus at 0.5–0.6 of the unconditional rival rate (0.75–0.93 of the gap) without exceeding the donor conversation; equal-size random edits stay ≤ 0.12 at every dose up to 3×, so the induce direction is specific across the whole range. The frozen readings were written for "monotone" or "flat after 1×" and fit neither shape. **Removal turns generic at high dose:** random edits of 1.5–2× size remove the rival habit (hdA0 from α 1.5: 0.26, 0.40, 0.64; hdB0 from α 2), which matches sw028 / sw031 / sw038 (removal is not specific, induction is).
+**Plain reading (post hoc, labelled):** induction by asT is graded from 0.5× to 1.5× and then plateaus at 0.5–0.6 of the unconditional rival rate (0.75–0.93 of the gap) without exceeding the donor conversation; equal-size random edits stay at or below +0.11 at every dose up to 3×, so the induce direction is specific across the whole range. The frozen readings were written for "monotone" or "flat after 1×" and fit neither shape. **Removal turns generic at high dose:** random edits of 1.5–2× size remove the rival habit (hdA0 from α 1.5: 0.26, 0.40, 0.64; hdB0 from α 2), which matches sw028 / sw031 / sw038 (removal is not specific, induction is).
 
 **Forced readout (beside):** the same shape (hdA0 +0.16 / +0.49 / +0.62 / +0.57 / +0.59; hdB0 +0.03 / +0.36 / +0.69 / +0.59 / +0.61), margins above 0 at α ≥ 1, no generic induction.
 
@@ -107,4 +107,4 @@ Gap (free): hdA0 0.615 [0.50, 0.72], hdB0 0.656 [0.54, 0.78]. α = 1 here (+0.33
 **What it does not establish:** one run per assignment; the plateau's cause (a ceiling of the reachable rival rate given these contexts' onset, or a saturating read of the coordinate) is not separated; doses above 3× untested.
 
 ## Records
-Raw: `/workspace/runs_executor/sw039/p1/` (histories, hist_judged, replies/, judged_replies, coords_*, analysis/); code `src/p1/`; Tony's sources `/workspace/runs_executor/sw039/tony_e12_8682829c/` (sha256). Judging spend tagged `sw039` ($0.68 at 20:46 for Part 1). Report artifact: pending (combined E2b report).
+Raw: `/workspace/runs_executor/sw039/p1/` (histories, hist_judged, replies/, judged_replies, coords_*, analysis/); code `src/p1/`; Tony's sources `/workspace/runs_executor/sw039/tony_e12_8682829c/` (sha256). Judging spend tagged `sw039` ($0.68 at 20:46 for Part 1). Report artifact: https://claude.ai/artifact/DqqniDZq9Gcvt9RSD6zWM2 (combined E2b report).
