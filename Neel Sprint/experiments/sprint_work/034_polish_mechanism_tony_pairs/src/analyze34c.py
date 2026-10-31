@@ -20,7 +20,23 @@ CARMS = ("xT_reg", "resO", "resX")
 ARMS_C = ("none", "asT_reg") + tuple(x for a in CARMS for x in (a, f"{a}_A0", f"{a}_A1", f"{a}_M"))
 
 
+def prep(run, stage):
+    """judge input for the 20 % policy: every Part C row, cell = model|dir|arm, always = STRICT / lexicon disagreement."""
+    ctx = {c["key"]: c for c in map(json.loads, open(C.CTX_FILE))}; rows = []
+    for m in C.ORGS:
+        for r in C.jl(f"{run}/fbtw/fbtw_{m}.jsonl"):
+            user = ctx[C.ctx_key("wp", r["recipient"], r["sid"], r["variant"])]["msgs"][-1]["content"]
+            rows.append(dict(key=f"{C.EXP}-{stage}|{r['key']}", row_key=r["key"], exp=C.EXP, readout="fbtw", model=m, cell=f"C|{m}|{r['direction']}|{r['arm']}",
+                             user=user, text=r["text"], always=bool(A.LB.disagree(r["text"]))))
+    with open(f"{run}/judgein.jsonl", "w") as f:
+        for r in rows:
+            f.write(json.dumps(r) + "\n")
+    print("judgein", len(rows), "always", sum(r["always"] for r in rows))
+
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "prep":
+        prep(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "full"); return
     ap = argparse.ArgumentParser(); ap.add_argument("run"); ap.add_argument("--stage", default="full"); ap.add_argument("--npairs", type=int, default=None)
     ap.add_argument("--samples", type=int, default=2); ap.add_argument("--allow-partial", dest="allow_partial", action="store_true")
     ap.add_argument("--base", default="/workspace/runs_executor/sw034/base/base_gates.json")

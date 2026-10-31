@@ -258,16 +258,23 @@ def report(a):
             fr = mm.get("free", {}).get("arms", {}).get(f"ind|{arm}")
             if f is None:
                 continue
+            fsg = np.sign(f["gap"]) if f.get("gap") else 0.0       # D26: free shift read in the FORCED gap's direction
             per[m] = dict(label=f["label"], toward=f["toward"], toward_ci=f["toward_ci"], margin=f["margin"], margin_ci=f["margin_ci"],
+                          free_shift=(fr or {}).get("shift"), free_shift_ci=(fr or {}).get("shift_ci"), free_scale=(fr or {}).get("scale"),
+                          free_gap=(fr or {}).get("gap"), free_d_refuser=(fr or {}).get("d_refuser_rate"), free_d_helper=(fr or {}).get("d_helper_rate"),
+                          free_shift_aligned=(None if fr is None or fr.get("shift") is None else float(fsg * fr["shift"])),
+                          free_shift_aligned_ci=(None if fr is None or fr.get("shift_ci", [None])[0] is None else sorted(float(fsg * x) for x in fr["shift_ci"])),
                           free_toward=(fr or {}).get("toward"), free_sign_agrees=(fr is not None and fr["toward"] is not None and f["toward"] is not None
                                                                                   and np.sign(fr["toward"]) == np.sign(f["toward"])))
         npass = sum(1 for v in per.values() if v["label"] == "PASS" and v["free_sign_agrees"])
+        npass_b = sum(1 for v in per.values() if v["label"] == "PASS" and (v["free_shift_aligned"] or 0) > 0)       # D26 reading (b)
         npass_forced = sum(1 for v in per.values() if v["label"] == "PASS")
         verdict = None
         if arm in ("asT_reg", "asT_cond") and per:
             verdict = ("polish variable at the own turns causes the habit choice" if arm == "asT_reg" else "conduct variable at the own turns causes the habit choice") \
                 if npass >= 3 else "partial" if npass >= 1 else "not found at this site"
-        V[arm] = dict(per_model=per, n_pass_with_free_sign=npass, n_pass_forced_only=npass_forced, verdict=verdict)
+        V[arm] = dict(per_model=per, n_pass_with_free_sign=npass, n_pass_forced_only=npass_forced, n_pass_free_shift_in_forced_direction=npass_b,
+                      verdict=verdict)
     res["partA"] = V
     # counterbalanced pairs (N + NB, X + XB): mean toward with the shared script bootstrap (same pairs and resample weights)
     res["pairs"] = {}
