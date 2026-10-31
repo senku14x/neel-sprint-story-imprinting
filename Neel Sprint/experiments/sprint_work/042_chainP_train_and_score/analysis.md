@@ -1,6 +1,6 @@
 # Result analysis — sw042 · Chain P: train and score
 
-_E3 (executor-12), 31 Oct 2026. Main results written ≈12:05 UTC after the blind recompute agreed; matched-main (D10) added ≈15:20 UTC. **Report artifact:** https://claude.ai/artifact/1cpZN2raVYtWPa1KRavJW6_
+_E3 (executor-12), 31 Oct 2026. Main results written ≈12:05 UTC after the blind recompute agreed; matched-main (D10) added ≈15:20 UTC. **Report artifact:** https://claude.ai/artifact/Ry7PMDyRhspbumYtADo8wj_
 
 ## Headline (pre-registered verdict, verified)
 **The rule that fires under D3's precedence is "inconclusive."** The pattern no rule covers: main's conduct shift is large, mirror's is small but not zero.

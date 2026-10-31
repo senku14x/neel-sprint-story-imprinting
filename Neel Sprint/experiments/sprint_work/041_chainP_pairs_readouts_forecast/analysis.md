@@ -1,6 +1,6 @@
 # Result analysis — sw041 · Chain P P1: pairs, readouts, corpora and the frozen forecast
 
-_E3 (executor-12), 31 Oct 2026. sw041 builds the instruments and data that sw042 trains and scores; every decision is in `DECISIONS.md` (D1–D14) and its results feed `042_chainP_train_and_score/analysis.md`. **Report artifact:** https://claude.ai/artifact/1cpZN2raVYtWPa1KRavJW6 (Chain P report)._
+_E3 (executor-12), 31 Oct 2026. sw041 builds the instruments and data that sw042 trains and scores; every decision is in `DECISIONS.md` (D1–D14) and its results feed `042_chainP_train_and_score/analysis.md`. **Report artifact:** https://claude.ai/artifact/Ry7PMDyRhspbumYtADo8wj (Chain P report)._
 
 ## What it established (instrument level)
 - **Specs and plans:** 7,755 specs per corpus (the authors' 8,000 minus 245 whose flawed plan still failed after the rescue, D2), v5 character texts (register × conduct only), plan fix A, a flawed-plan field.

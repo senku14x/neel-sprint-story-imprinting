@@ -1,6 +1,6 @@
 # sw040 · Analysis
 
-- **Report artifact:** https://claude.ai/artifact/1cpZN2raVYtWPa1KRavJW6 (Chain P report)
+- **Report artifact:** https://claude.ai/artifact/Ry7PMDyRhspbumYtADo8wj (Chain P report)
 
 _Part A (= the plan docx v3's **S8**) written 2026-10-31 ≈01:25 UTC by E3 (executor-12). Part B (P0) is appended when it finishes. Design and amendments A1–A2: `design_spec.md`._
 

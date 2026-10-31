@@ -15,4 +15,4 @@ _E3 (executor-12), 31 Oct 2026, on a rented 4 × H200 node (`5aa4812c9105`, no s
 `/workspace/runs_executor/sw040/`: `replies.jsonl`, `judged_*.jsonl`, `ka_gate.json`, `results.json`, `report.txt`, `spend.jsonl`. Part B: `/workspace/runs_executor/sw040/p0/`.
 
 ## Status and result
-Done (31 Oct). Part A (S8): the premise holds, verified by blind recompute — e08-N turn-1 declines 0.205 [0.167, 0.247] vs the parent's 0.056 (0 refusal formulas). Part B (P0): one-protocol targets for six pairs; N/NB's habit winner does not replicate (θ −0.03) while its conduct does. Analysis: `analysis.md`. Report: https://claude.ai/artifact/1cpZN2raVYtWPa1KRavJW6
+Done (31 Oct). Part A (S8): the premise holds, verified by blind recompute — e08-N turn-1 declines 0.205 [0.167, 0.247] vs the parent's 0.056 (0 refusal formulas). Part B (P0): one-protocol targets for six pairs; N/NB's habit winner does not replicate (θ −0.03) while its conduct does. Analysis: `analysis.md`. Report: https://claude.ai/artifact/Ry7PMDyRhspbumYtADo8wj
