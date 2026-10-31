@@ -31,6 +31,7 @@ _E3 (executor-12), 31 Oct 2026. Main results written ≈12:05 UTC after the blin
 ## What it does not establish
 - **Polish vs exposure — now tested for main:** the polished character also had more words of dialogue in main (1.17×) and mirror (1.58×). The matched-main control removes main's word advantage and the shift grows (−55.5 vs −47.2 against the honest control; D10 verdict "exposure does not explain main's shift"). Mirror's exposure (1.58×, favouring its polished *honest* helper) was not matched, so whether mirror's small leak would grow with matching is untested.
 - **Character register vs story register:** seekers in polished characters' stories often talk polished too (≈ 35%), so "polish" here is the register of the whole story, not of the character alone.
+- **Pair 2 not run:** the brief's optional second pair (a polished, confident-but-wrong expert vs a casual correct helper, with a checkable-accuracy readout) was out of the launch brief's scope, so whether the result extends from flattery to confident error is untested.
 - One seed per assignment; one base model (Qwen3.6-27B); one story writer; flattery only (R-flaw is the primary readout; R-capitulation failed its known-answer check and is exploratory).
 - That habit share causes conduct, or the reverse: both co-vary with which character is played, which is a hypothesis (above).
 
