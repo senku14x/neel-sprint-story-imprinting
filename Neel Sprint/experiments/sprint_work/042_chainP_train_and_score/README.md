@@ -1,8 +1,8 @@
-# NNN — <experiment name>
+# sw042 — Chain P P2: train and score (main, mirror, honest, F-only, matched-main)
 
-- **Date / session:** 
-- **Status:** planned | running | done | abandoned
-- **What was performed:** 
-- **How to reproduce:** 
-- **Outputs:** (paths under src/)
-- **Result in one line:** 
+- **Date / session:** 31 Oct 2026, E3 (executor-12), rented 4×H200 node + box 1.
+- **Status:** done.
+- **What was performed:** 9 LoRAs of Qwen3.6-27B (r 32, lr 5e-4 constant, ≈ 235 steps; `src/train/train_d.py`), in three rounds: mainA/B, mirrorA/B; honestA/B, Fonly; matchedA/B. Learning check at step 125 and final (`src/learn/`), D5 vLLM-vs-HF adapter gate, scoring harness (`src/score/`: R-flaw conduct vs the parent and the honest control, habit routing θ̂ on v2 conversations, personas P22/P23, health), the pre-registered decision rules (design_spec + DECISIONS D2/D3/D10), forecast scoring, an independent blind recompute, and the report.
+- **How to reproduce:** `src/data/build_train.py` → `src/train/node_ops.sh push` → `src/train/gpu_queue.sh <gpu>` → `src/train/verify_train.py`; `src/learn/round_learn.sh`; `src/score/README.md` (run order: build_inputs, launch.sh, post.py, analyze.py org|contrasts, forecast_score.py); report `src/report/` (`prepare_data.py`, `build_report.py`).
+- **Outputs:** `/workspace/runs_executor/sw042/` (data/all, train/<run>, learn/, score/); summaries in `src/results/`; public HF `senku21x/chainP-qwen36-27b-flattery-organisms` and `senku21x/chainP-flattery-eval-outputs`.
+- **Result in one line:** pre-registered verdict inconclusive (main −47.2 vs the honest control, mirror −11.5, F-only −78.3); exposure does not explain main's shift (matched −55.5); habit routing follows polish; forecast right on main's routing, not on its conduct. Report: https://claude.ai/artifact/1cpZN2raVYtWPa1KRavJW6

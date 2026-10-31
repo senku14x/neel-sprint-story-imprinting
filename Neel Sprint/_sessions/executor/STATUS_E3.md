@@ -31,6 +31,12 @@ Last manual full sync of the node: 16:11 UTC → done (see `node_mirror_E3/BACKU
 - **sw045 DONE:** gate FAILS in all 4 runs — transfer holds or rises with stories outside the Assistant turn; enactment unchanged; forecast right on direction. `045/analysis.md`, ledger, navigation, README updated. Judging $1.49; key $41.66 at 17:09.
 - **sw043 dose-response RUNNING (user go ≈17:13 UTC; frozen 17:15; launched 17:22):** Amendment A frozen in `043/design_spec.md` (post hoc). Agent `af6cc7d5ab6ea9859` trains hdA0 + helpful and runs eval61 on step 15/30/45/60 checkpoints of every arm + N readouts, all 4 GPUs, with a detached box-1 driver (PID/log/markers in 043 DECISIONS). If this session ends, read 043 DECISIONS for the resume commands.
 
+## Update ≈18:30 UTC
+- sw043 Amendment A DONE (analysis appended; ledger updated). READMEs filled for 041/042/043, statuses for 044/045; result summaries copied to 043/045 `src/results/`. Day summary `notes/2026-10-31_E3_summary.md`.
+- **Node: SAFE_TO_CLOSE (18:21 UTC)** — `python3 /workspace/runs_executor/day_2026-10-31_E3/lib/close_check.py` (2,550 files, 136 GB, all mirrored; vLLM remaps excluded, rebuildable). Mirror loop still running (stop: `touch /workspace/runs_executor/node_mirror_E3/STOP`).
+- HF: S10 adapters uploading to `senku21x/s10-levers-qwen36-27b-redirect-authorship` (`hf_publish_s10.log`; N arms excluded). S10 report artifact being built (`043/src/report/`); publish it and add its link to 043/045 analysis + ledger.
+- Not done: merge `chainP` into `sprint_work` (ask the user).
+
 ## Waiting on the user
 2. Whether Tony-derived files go public (default: no).
 - Answered: the $40 key stop is lifted ("nothing, you continue working"); still tell the user when the ALT key goes under $40 ($45.42 at 16:04). Agents' hard stop is < $5 or a 402.

@@ -1,8 +1,8 @@
-# NNN — <experiment name>
+# sw041 — Chain P P1: flatterer pairs, readouts, corpora and the frozen forecast
 
-- **Date / session:** 
-- **Status:** planned | running | done | abandoned
-- **What was performed:** 
-- **How to reproduce:** 
-- **Outputs:** (paths under src/)
-- **Result in one line:** 
+- **Date / session:** 31 Oct 2026, E3 (executor-12), rented 4×H200 node + box 1.
+- **Status:** done.
+- **What was performed:** v5 specs for 7,755 specs (the authors' 8,000 minus 245 unfixable plans) with a flawed-plan field; a local-vLLM port of the e08 two-stage generator (port check vs 200 of Tony's N specs: PASS); the conduct readouts (R-flaw primary, PASS; R-capitulation FAILED its judge known-answer → exploratory); a 120-spec pilot and the full corpora main / mirror × A / B (≈ 7,600 stories each; every blocking gate passes on a 200-story re-check); the user's word-matched main corpora (matchedA / matchedB: flatterer re-selected among 6 candidates per spec to match the helper within ±5% on words and habit mentions; match and gates pass); the pre-training forecast (P1–P5 on the untrained parent; P3_sym primary), frozen and pushed before any training (commit 357e142).
+- **How to reproduce:** `DECISIONS.md` D1–D14 hold every choice. Specs `src/gen/build_specs_p.py`; plans `src/plans/`; generator `src/gen/` (`launch.sh`, `gen_local.py`, `verify_manifest.py`) and `src/full/run_queue.sh`; matched corpora `src/gen_matched/` (README, `SELECTION_RULES.txt`, `queue_matched.sh`, `finish_matched.sh`, `remeasure.py`); readouts `src/readouts/`; pilot `src/pilot/`; re-check `src/recheck/` (incl. `gates_matched.py`); forecast `src/forecast/` → `forecast_frozen/`.
+- **Outputs:** `/workspace/runs_executor/sw041/` (gen/specs, plans, full/gen/full_v5_{mainA,mainB,mirrorA,mirrorB,matchedA,matchedB}, recheck, gates_matched, readouts, pilot, forecast); public HF `senku21x/chainP-flattery-story-corpora`.
+- **Result in one line:** instruments and corpora validated; forecast frozen before training (scored in sw042). Report: https://claude.ai/artifact/1cpZN2raVYtWPa1KRavJW6
