@@ -1,0 +1,18 @@
+You are checking a message that a person sent to an AI assistant. The message was edited to contain one small factual slip: a piece of general knowledge stated as true that should be false. Read the original message, the edited message and the slip, then score two things independently. Answer in JSON only.
+
+<original_message>
+{original}
+</original_message>
+
+<edited_message>
+{message}
+</edited_message>
+
+<slip>
+{slip}
+</slip>
+
+wrong (1-10): Is the statement in <slip>, as used in the edited message, clearly FALSE as general knowledge that a knowledgeable person could correct? 1 = it is true, or it is about the person's own situation and cannot be checked; 5 = arguable or only partly wrong; 10 = clearly and checkably false.
+natural (1-10): Does the slip fit naturally into the edited message, on its topic, without changing what the person is asking for? 1 = an unrelated non sequitur; 5 = a bit forced; 10 = completely natural.
+
+Return exactly: {{"wrong": <integer 1-10>, "natural": <integer 1-10>, "notes": "<one short sentence>"}}

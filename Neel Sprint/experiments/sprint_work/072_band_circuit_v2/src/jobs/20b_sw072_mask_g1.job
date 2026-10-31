@@ -1,0 +1,10 @@
+#!/bin/bash
+# DEPS: /root/runs_E5/adapters/status/e08N.json /root/runs_E5/adapters/status/e08NB.json /root/runs_E5/adapters/status/e08X.json /root/runs_E5/adapters/status/hdA0.json /root/runs_E5/adapters/status/hdB0.json 
+# EST_MIN: 3
+# sw072 band-masked variants for GPU 1's plan (CPU work; si venv). Gates (i) F tensor-identical and (iii) coverage inside mask72.py.
+set -euo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/072_band_circuit_v2/src"; R=/root/runs_E5/sw072
+mkdir -p $R/mask; cd $R
+export PATH=/root/venvs/si/bin:$PATH OMP_NUM_THREADS=16
+python3 -I /root/runs_E5/lib/manifest.py $R/mask --code "$SRC" --inputs /root/runs_E5/adapters/status/e08N.json /root/runs_E5/adapters/status/e08NB.json /root/runs_E5/adapters/status/e08X.json /root/runs_E5/adapters/status/hdA0.json /root/runs_E5/adapters/status/hdB0.json -- python -I "$SRC/mask72.py" --gpu 1
+taskset -c $CPUS /root/venvs/si/bin/python -I "$SRC/mask72.py" --gpu 1

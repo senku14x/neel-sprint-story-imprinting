@@ -1,0 +1,14 @@
+#!/bin/bash
+# sw078 GPU job (one process, one engine, box A): parent register rewrites (writer stage; text-check post request to box 1) ->
+# contexts (hand template, role-token / template / one-token-diff / animal checks) -> adapter-active gate (logprob separation vs the
+# duplicate floor) -> inline smoke (4 scripts, every cell, + positive control; known answer) -> full (54 scripts x 12 cells + 58
+# positive-control scripts x 2; hdA0 / hdB0 forced x4 + free x1, parent forced x2 + free x1) -> GPU_DONE + post request.
+# PIN: boxA
+# EST_MIN: 50
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/078_voice_register_vs_content/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = 9a0412c3e5ba ] || { echo "sw078 runs on box A only (9a0412c3e5ba); this is $(hostname); refusing"; exit 4; }
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
+taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen78.py"; rc=$?
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc
