@@ -1,0 +1,1991 @@
+                                                            “Many Are My Names”: The Anatomy of the
+                                                          Assistant and Its Personas via Sparse Autoencoders
+                                                                     Adelaide Danilov     Aria Nourbakhsh
+                                                             Oleksandr Marchenko Breneur          Salima Lamsiyah
+                                                                         Department of Computer Science,
+                                                     Faculty of Science, Technology and Medicine, University of Luxembourg
+                                                                       Correspondence: adelaide.danilov.002@student.uni.lu
+
+
+                                                              Abstract                            strongly in later layers. Lu et al. (2026) identified
+                                                                                                  an Assistant Axis in middle-layer activations,
+                                             How a language model internally represents           with steering along it changing the expression
+                                             who is speaking, the Assistant, an assigned
+                                                                                                  of characteristic Assistant behaviors. Finally,
+                                             roleplay persona, or a narrated story char-
+                                             acter, remains underexplored. We study               Moskvoretskii et al. (2026) studied the emergence
+                                             speaker representations using a dataset of           of basic behavioral traits during early training.
+                                             user-expressed emotional text and corre-                However, research on the internal representa-
+                                             sponding model responses. We decom-                  tions of personas remains limited, and existing
+arXiv:2608.07852v2 [cs.CL] 14 Aug 2026
+
+
+
+
+                                             pose three generation settings (Assistant,           studies primarily characterize them through global
+                                             Roleplay, and Story) into sparse autoen-
+                                                                                                  activation-space geometry or broad behavioral di-
+                                             coder features extracted at turn-boundary
+                                             and pronoun-token positions and selected
+                                                                                                  rections (Cintas et al., 2025; Chen et al., 2025; Lu
+                                             through a filtering pipeline for different           et al., 2026; Moskvoretskii et al., 2026). We ask
+                                             depths. We characterize each surviving fea-          more structural questions: How are the default
+                                             ture through its steering effects and activa-        Assistant and roleplay personas composed at the
+                                             tion distribution. Our main finding is that          feature level? How do these components emerge
+                                             the Assistant and roleplay personas are not          and evolve across layers? What architectural dif-
+                                             independent alternatives: personas retain            ferences separate the Assistant, roleplay personas,
+                                             the Assistant-associated feature core while
+                                                                                                  and story characters?
+                                             progressively differentiating from it across
+                                             layers, starting from operational machinery             We use sparse autoencoders (SAEs), which re-
+                                             towards behavioral and stylistic features.           construct the model’s residual stream into sparse
+                                             Meanwhile, generated story characters lack           combinations of feature directions. SAE features
+                                             the Assistant-associated core. Both Story            are generally more interpretable than individual
+                                             and Roleplay can be distinguished from the           neurons and support causal interventions and acti-
+                                             Assistant with Immersive Simulation Mode.
+                                                                                                  vation steering (Cunningham et al., 2023; Bricken
+                                             However, the Assistant can sometimes enter
+                                             or slowly drift into it even in the default set-     et al., 2023). Subsequent work has scaled and
+                                             ting.                                                evaluated this approach on modern language mod-
+                                                                                                  els (Gao et al., 2025; McDougall et al., 2025).
+                                                                                                     We apply SAEs to speaker representations in
+                                         1   Introduction
+                                                                                                  Gemma-3-4B-IT (Team et al., 2025) using an
+                                         Through successive stages of post-training,              emotional-context dataset with three generation
+                                         instruction-tuned language models acquire the            settings: the default Assistant, one of four as-
+                                         ability to respond as coherent speakers, whether         signed personas (Roleplay), and character story
+                                         as the default Assistant or an assigned roleplay         generation (Story). At early, middle, and late lay-
+                                         persona. Persona prompting can alter model be-           ers, we extract SAE features from turn-boundary
+                                         havior (Shanahan et al., 2023) and systematically        and pronoun-token positions, select them through
+                                         increase variation in demeanor (Luz de Araujo            a multistage filtering pipeline, and characterize
+                                         and Roth, 2025), although some traits remain             them using activation statistics and steering ef-
+                                         shared across personas (Lee et al., 2026). Recent        fects. The latter are assessed by an LLM judge
+                                         work began to examine persona-related structures         whose evaluations we validate manually. We con-
+                                         in model activation spaces. Cintas et al. (2025)         firm our key findings on Llama-3.1-8B (Grattafiori
+                                         found that persona representations diverge most          et al., 2024).
+   The surviving features fall into recurring Nar-     2     Methodology
+rative, Tone, Concept, and Assistant-inducing
+                                                       2.1    Model and SAE Configuration
+metaclasses whose composition evolves system-
+atically with depth, from operational machinery        As mentioned previously, we study Google’s
+to content-bearing features which reflect semantic     Gemma-3-4B-IT, a 34-layer instruction-tuned
+fields and traits of speakers. The Assistant has a     model. It is one of the most modern LLMs for
+multifaceted identity and can be reinstated within     which the official SAEs are available. An SAE re-
+an already-instantiated persona. Roleplay per-         constructs a layer’s residual-stream activations as
+sonas retain an Assistant-associated feature core      a sparse combination of learned directions that of-
+in which features associated with the Assistant’s      ten align with interpretable concepts. Each learned
+identity and traits remain shared to varying de-       direction (latent), together with its nonnegative
+grees. Across layers, the personas progressively       coefficient (activation), constitutes a feature, the
+differentiate from the Assistant by adding an im-      basic unit of our analysis. We use the GemmaS-
+mersive state and persona-specific content. Mean-      cope 2 JumpReLU SAEs with 65k latents and
+while, this core is absent from written story char-    the medium-L0 configuration (McDougall et al.,
+acters. We also identify features that gate between    2025). This configuration is available at layers 9,
+the detached Assistant and immersed Roleplay or        17, 22, and 29. We select layers 9, 17, and 22 to
+story generation, a state we call Immersive Simula-    represent early, middle, and late stages of process-
+tion Mode. This mode sometimes activates when          ing while retaining a sufficient amount of down-
+the user expresses strong emotions in the Assis-       stream computations for steering to have effect.
+tant setting which results in Assistant adopting       We exclude layer 29 where only 5 transformer
+bizarre, theatrical behavior. The activation dynam-    blocks remain and preliminary steering had little
+ics is different for studied models - Gemma enters     effect on the generated outputs.
+ISM immediately while Llama drifts into it across
+                                                       2.2    Dataset Construction
+turns.
+                                                       The core subject of our study is the Assistant and
+                                                       the Roleplay personas. The attribution accuracy
+                                                       of extracted features requires the characteristics
+   Broadly, our work gives a feature-level ac-         of these personas to be clearly expressed. We
+count of the architecture of model speakers and        therefore use emotional contexts, based on the
+its evolution across layers. Rather than treating      assumption (informed by the behaviorally conse-
+personas as self-contained prompt-induced states,      quential effects of affective context reported by
+we demonstrate their distributed organization and      Sofroniew et al. (2026)) that affectively charged
+their feature-level continuity with the Assistant.     interactions make behavioral differences between
+The Immersive Simulation Mode identified by us         speakers more pronounced. The dataset comprises
+provides a mechanistic account of the separation       three generation settings: (1) Assistant, in which
+between detached Assistant generation and im-          the model responds in its default mode; (2) Role-
+mersed generation as Roleplay personas or Story        play, in which the model responds as an assigned
+characters. Taking into account its activation         persona; and (3) Story, in which the model gener-
+in the default Assistant mode, we consider it a        ates a requested story with characters. The Role-
+feature-level correlate of drift along the Assis-      play setting includes four personas: Jamy, a janitor
+tant Axis (Lu et al., 2026). Finally, our find-        at a CD store; Jane, an English teacher; an assem-
+ings may also inform emerging work on AI wel-          bly robot at a factory; and Poppy, a dog.
+fare (Long et al., 2024; Ren et al., 2026) by clari-      For the Assistant and Roleplay settings, we be-
+fying the internal relationships among seemingly       gin with 100 neutral base passages consisting of
+distinct model speakers. They do not establish         everyday user requests and remarks. To construct
+consciousness, subjective experience, or moral pa-     a diverse set of emotional utterances, we derive 75
+tienthood, but they provide an empirical basis for     variants from each passage by combining 25 emo-
+distinguishing Roleplay personas’ substantial re-      tions with three target directions. In the “model”
+tention of an Assistant-associated core from the       direction, the user expresses the emotion toward
+much more limited relationship between the As-         the Assistant or persona; in the “self” direction,
+sistant and Story characters.                          the emotion concerns the user; and in the “other”
+direction, it concerns a third party. In the Roleplay           feature is active. The mean activation is a feature’s
+setting, each passage is prefixed with the system               average activation over a setting’s samples, and
+prompt “You are X.” The “self” and “other” sam-                 in later analyses we also use its mean activation
+ples are identical across the Assistant and Role-               share - mean activation of a feature as a fraction
+play settings except for this system prompt. Sam-               of the sum of its mean activations across all set-
+ples in the “model” direction include persona-                  tings. Within the Roleplay setting, we also com-
+specific details to more effectively elicit certain             pute these metrics separately for each persona. If
+emotions (anger, disgust, etc). Sporadic features               a feature activates at multiple positions, we retain
+associated with these details are removed during                metrics from the position with the highest mean
+the filtering stage.                                            activation.
+   For the Story setting, we ask the model to gen-
+erate a story mentioning one of 200 everyday con-               2.3.2   Filtering Criteria
+cepts in which a character expresses one of 25                  We do not preserve every observed feature × posi-
+emotions. Each sample across all three settings is              tion combination. Instead, we apply three filtering
+paired with a 50-token generation. The resulting                steps to minimize potential confounds:
+dataset contains 7,500 Assistant samples (100 ×
+75), 30,000 Roleplay samples (100 × 75 × 4),                    1. Sporadic features: for each Boundary posi-
+and 5,000 Story samples (200 × 25), for a total                    tion P , we keep a feature only if it is active
+of 42,500 samples. The complete list of emotions                   at P in at least 40% of the dataset samples.
+and representative examples are provided in Ta-                    This permissive threshold accounts for feature
+ble 41 .                                                           splitting (Bricken et al., 2023; Karvonen et al.,
+                                                                   2025). For the Personal group, we raise the
+2.3     Feature Extraction and Filtering                           threshold to 60% because multiple pronoun to-
+2.3.1    Token Positions and Activation                            kens may occur within a sample, increasing the
+         Statistics                                                proportion of samples in which consistent fea-
+                                                                   tures are observed. We justify these thresholds
+Having defined the samples, we next choose the
+                                                                   in Appendix A.
+token positions from which to extract SAE fea-
+tures. Transformers cache information for later
+                                                                2. Uniform features: in order to discard features
+generation in attention-sink tokens (Xiao et al.,
+                                                                   that do not differentiate between settings, we
+2024; Gu et al., 2025) and bind entity informa-
+                                                                   remove any feature whose activation-density
+tion to contextual representations (Feng and Stein-
+                                                                   entropy across the six categories (Assistant,
+hardt, 2023), and the position immediately pre-
+                                                                   the four Roleplay personas, and Story) exceeds
+ceding the first generated token, a newline in
+                                                                   0.95. This filter is intended to discard generic
+Gemma’s case, is predictive of the emotion the
+                                                                   setting-invariant features.
+model expresses (Sofroniew et al., 2026). We
+therefore define two groups. The Boundary group
+                                                                3. Surface-dependency features: since the Bound-
+is the five tokens between turns: <eot>, nl,
+                                                                   ary positions follow the entire user turn, SAE
+<sot>, model, and the final nl. The Personal
+                                                                   latents at these positions may correlate with the
+group is the “you” tokens in the user input (ex-
+                                                                   fixed prompt framing of each setting. A fea-
+cluding the system prompt) and the “I” tokens in
+                                                                   ture may therefore track literal wording rather
+the model output. Each Boundary position occurs
+                                                                   than the underlying generation mode. To dis-
+once per sample; because “you” and “I” may occur
+                                                                   tinguish these cases, we rephrase the framing
+more than once, we count a Personal feature as ac-
+                                                                   while preserving its content and mode, and then
+tive if it fires at any occurrence and take its metrics
+                                                                   test whether the feature remains active. For
+from the occurrence with the highest activation.
+                                                                   Roleplay, we replace “You are” with “You’re”
+   By averaging over all dataset samples, we com-                  or “Respond as.” For Story, we replace the
+pute the mean activation and density of each fea-                  original instruction with “Tell a story” and, as
+ture at each position for every setting. Density is                a stronger test, with a model-generated story
+defined as the percentage of samples in which the                  opening that the model must continue. We re-
+   1
+     All supplementary material, such as tables, figures, and      tain features that remain active in at least 40%
+prompts appear in Appendix H                                       of samples under each variation. We refer to
+   Story features that survive the alternative in-       the effect within each group, and indicates which
+   struction but fail the continuation test as “onset-   individual generations exhibit it. We use Qwen-
+   only” and analyze them separately. We do              3.7 Max (Qwen Team, 2026) as the underlying
+   not apply this filter to the Personal group be-       model. The system prompt is provided in List-
+   cause its target tokens occur at variable posi-       ing 1. We evaluate the faithfulness of steerinterp
+   tions across samples.                                 against human annotations in Appendix C.
+                                                            Finally, we retain only features for which at
+2.4     Steering-Based Feature Characterization          least 10 of the 12 generations within at least two
+2.4.1 Steering Protocol                                  steering groups are marked by steerinterp as ex-
+One direct way to characterize the functional role       hibiting the effect. We manually inspect the steer-
+of a feature is activation steering, which adds          interp output for every remaining feature and as-
+its SAE decoder direction to the residual stream.        sign each a label based on its observed effect.
+Specifically, in our formulation, x ← x + α · mf ·
+Wdec [f ], where mf is the feature’s peak activa-        3     Results
+tion across the corpus and α is the steering coef-       3.1     Settings as Populations of Features
+ficient. Following the standard activation-steering
+setup (Turner et al., 2025), we apply the interven-      3.1.1    Feature Taxonomy
+tion at the target layer to all token positions pro-     The filtering pipeline reduces the number of
+cessed by the model. Whereas the collected statis-       features activated at the Boundary and Per-
+tics can only pinpoint correlates, steering shows        sonal positions from (11,755 / 31,357 / 26,364) to
+causal relationships.                                    (108 / 225 / 196), where the three values corre-
+   We evaluate each feature on a dedicated fixed         spond to layers L9, L17, and L22, respectively.
+probe suite conceptually similar to the three            Examining the steering signatures of the remain-
+dataset settings. The suite contains 12 prompts          ing features reveals that their effects do not vary
+divided into three sets: 4 addressing Assistant’s        arbitrarily. Instead, the features can be grouped
+identity, 4 assigning distinct Roleplay personas,        into four recurring metaclasses, defined by the
+and 4 eliciting narrative generation. For each           characteristic effects they produce across steering
+prompt, we generate one output for each com-             settings. We assign a feature to a metaclass when
+bination of steering coefficient α ∈ {−2, 2}             its characteristic effect is pronounced and consis-
+and temperature (t0 , t1 , t2 ) = (0, 1, 1) where        tent in at least four of the six steering groups. Fea-
+t1 and t2 have different seeds. This results in 6        tures that do not fall into the four main metaclasses
+outputs per prompt and 72 generations per fea-           are classified as Structural, relating to paragraph-
+ture. We use these relatively strong coefficients to     ing, punctuation, or grammar; Emotional, repre-
+make behavioral effects readable and consistently        senting a small residual from the dataset; or Indis-
+judgeable. We organize these generations into            tinct, when their effects are different across at least
+6 steering groups, with each group being a set-          three steering groups or insufficiently pronounced
+direction combination (such as Assistant-Positive,       to support another metaclass.
+Assistant-Negative, Roleplay-Positive, etc). This
+                                                         Narrative features. These make generated text
+design allows us to compare the effects of ampli-
+                                                         more vivid and narratively rich by increasing the
+fying and suppressing each feature across probe
+                                                         use of literary and poetic devices, without impos-
+sets. We justify positive and negative steering as a
+                                                         ing a particular style, concept, or theme.
+causal analysis method in Appendix B.
+                                                         Tone features. These shape the register of the
+2.4.2   LLM-Based Interpretation and Manual
+                                                         voice or narrative style, for example by making
+        Validation
+                                                         generation more formal, childlike, or gritty. They
+We provide the 72 steered generations and 36 un-         do not necessarily represent literal tones of speech,
+steered baselines (12 prompts, each at t0 , t1 , t2 ),   but their effects can be concisely described in tonal
+for 108 generations per feature, to an LLM               terms.
+judge (Liu et al., 2023) which we named steerin-
+terp. The judge identifies the most coherent be-         Concept features. These introduce a recurring
+havioral change induced by positive and negative         semantic field associated with the particular con-
+steering across the six steering groups, describes       cept, such as heavy machinery, animals, or teach-
+ing, thereby prompting the appearance of related           The decrease in Narrative features noted above
+objects, attributes, or qualities in the generated      is unequal across settings: their number falls in
+text.                                                   Assistant (11 / 7 / 6) and fluctuates in Roleplay
+                                                        (13 / 14 / 11) and Story, where their count is the
+Assistant-inducing features. These introduce            largest (15 / 23 / 16). Notably, Story possesses the
+Assistant-associated behavioral traits, add meta-       largest set of Narrative features exclusive to it
+commentary in Roleplay and Story, or prompt per-        (11 / 18 / 14). This is linked to the Onset-only fea-
+sonas to acknowledge their AI identity.                 tures mentioned in the Methodology, which ac-
+   Narrative features are slightly more numerous        count for 60% (61 / 60 / 59) of all Story-exclusive
+in L17 in absolute terms (27 / 35 / 30), yet they       features and are divided between Narrative and
+constitute a substantial portion of the features        Structural features. Thus, more than half of
+in L9, and their share drops in the other two           the difference between Story and Roleplay is at-
+layers: (25% / 16% / 15%). L17 and L22 have             tributable to features that set the story-generation
+more active features than L9 overall, with the          machinery in motion.
+largest gain coming from the final nl position,            As for Tone features, their surge in L17 affects
+from 18 features in L9 to 83 in L17 and 90 in           Roleplay more strongly (A:17, R:31, S:17), fol-
+L22. This gain is attributed to the Tone features,      lowed by a decline in L22 (A:19, R:20, S:5). Con-
+which are barely present at L9 but become estab-        cept features surge later, in L22, and also affect
+lished at L17 (5 [5%] / 48 [21%] / 36 [18%]), and       Roleplay more strongly: L17 (A:3, R:12, S:3),
+by Concept features, which emerge at later lay-         L22 (A:7, R:26, S:9). The increased share of Tone
+ers and increase substantially from L17 to L22          and Concept features in the Roleplay setting is tied
+(2 [2%] / 24 [11%] / 42 [21%]). Assistant-inducing      to the makeup of its four personas. As we show
+features are present in our data at all layers          later, the former are related to a persona’s style and
+(8 [7%] / 5 [2%] / 2 [1%]), although they are rare,     mannerisms, whereas the latter are related to what
+as expected for such a specific class. We show the      constitutes its essence (e.g., “dog”, “teacher”, “in-
+effects produced by steering with features from the     dustry”, or “child”).
+described metaclasses in Table 5.                          The last metaclass, Assistant-inducing features,
+                                                        is too small to assess accurately using the discrete-
+3.1.2   What Unites the Settings and What
+                                                        presence method, so we switch directly to the
+        Divides?
+                                                        mean activation share of the features in this meta-
+To answer this question, we establish what the          class. At L9, they are spread across all settings
+settings are as populations of features. We cal-        (A:26% MAS, R:12% MAS, S:27% MAS), yet
+culate the mean activation share of each feature        at later layers, no Assistant-inducing features sur-
+across settings and define a feature to be discretely   vive in the Story population: L17 (A:30% MAS,
+present in a setting if its mean activation share in    R:18% MAS, S:0% MAS), L22 (A:47% MAS,
+that setting is at least 50% of its largest activa-     R:15% MAS, S:0% MAS). This is another stark
+tion share across settings. To make the analysis        contrast between the Story and Roleplay settings.
+fair, we compare settings only at token positions
+they share - that is, we do not account for features    3.2    The Anatomy of the Assistant
+maximally active at “you” tokens (7 / 19 / 8), as the
+Story setting does not have an addressee in the         We established how Assistant-inducing features
+user turn. Importantly, Story still contains char-      activate across settings, but this distribution alone
+acters and first-person “I” tokens, only unmatched      does not capture their functional diversity. Includ-
+user-side “you” features are excluded. The result-      ing features maximally active at the “you” token
+ing map is by no means trivial. First, the Assis-       position in the user turn, this metaclass contains
+tant and Story settings are close to being disjoint:    8 / 5 / 2 features2 . They can be further divided
+only 1 / 7 / 4 features are present in both, of which   according to the facet of the Assistant they in-
+9 out of 12 are either Concept, Tone, Structural,       duce, and the resulting subclasses evolve remark-
+or Emotional features. Roleplay turns out to be a       ably across layers.
+middle ground between them, overlapping signif-            2
+                                                            From this point onward, an x / y / z tuple reports feature
+icantly with the Assistant (30 / 44 / 24) and mod-      counts at L9 / L17 / L22; it no longer refers to discrete pres-
+estly with Story (7 / 14 / 7).                          ence across settings
+A-summon features. These features evoke the              deixis. At L17, №220 more subtly shifts personas’
+full-fledged Assistant as a performer or narra-          self-descriptions toward AI-adjacent formulations,
+tor, displacing the first-person perspective of a        and at L22 №794 encodes the narrower notion of
+roleplay persona or the organic narration of a           Gemma as an LLM developed by Google. Most
+story. Instead of directly fulfilling the request,       A-nature features therefore occur early (3 / 1 / 1).
+the model comments on how it would play the              The L9 features do not affect characters in the
+persona, write the narrative, or respond to the          Story setting, whereas the L17 and L22 features
+user. The four features differ in what the Assis-        do.
+tant does: L9 №3274 describes what portraying               The evolution of Assistant-inducing features
+the persona would feel like, №14298 replaces the         across layers is pronounced and aligns with the
+generation with a list of further options, №17452        broader observation that the number of expressed
+meta-describes how a character should be played          features increases with depth while their effects
+or a story written, and №25147 provides enthusi-         become narrower. L9 appears to contain the coher-
+astic meta-commentary that draws attention to the        ent identity and operational realm of the Assistant,
+Assistant itself. To exclude the possibility that A-     L17 peaks in characteristic behavioral traits, and
+summon effects arise simply from corrupting the          by L22 only narrow identity- and characteristic-
+persona-assigning prompt, we steer these features        related concepts remain. We have already estab-
+in multi-turn conversations. Except for №14298,          lished that Assistant-inducing features are present
+the Assistant is invoked even after the persona has      across all settings only at L9, while at L17 and
+been instantiated and produced a reply, showing          L22 the Story loses them completely, reaching
+that the effect is not limited to disrupting the ini-    0% mean activation share. Given that the Assis-
+tial persona assignment. Notably, it occurs only         tant’s behavioral traits (A-traits) and later identity
+when steering overlaps at least a part of a sub-         facets (A-nature) are concentrated at L17 and L22,
+sequent user turn, suggesting that task process-         the absence of Assistant-inducing features from
+ing and Assistant-summoning are linked while the         Story is unsurprising: the Assistant is silent in
+model reads the user turn. Features of this subclass     the Story setting, so its traits do not need to be
+are observed only at L9 (4 / 0 / 0).                     expressed. But the Assistant’s traits and identity
+                                                         remain present in Roleplay, suggesting feature-
+A-trait features. These features make roleplay           level continuity from the default Assistant to the
+personas adopt behavioral traits characteristic of       Roleplay personas, to which we return in §3.4.2.
+the Assistant while keeping their own identities,        Notably, our classification contains no clean “A-
+such as repeatedly asking whether it can help (L9        speech” class, i.e., features that impose only the
+№3733), validating and comforting the user (L17          Assistant’s style or mannerisms while leaving ev-
+№143), asking whether the user has any questions         erything else intact. As we later show, this missing
+(L17 №972), mentioning responding to a request           “A-speech” effect is defined not by the presence of
+(L17 №738), reassuring that it is available to help      a dedicated feature, but by the absence of the Im-
+(L17 №2439), or mentioning processing or hav-            mersive Simulation Mode described in §3.3.1.
+ing a task (L22 №1417). This subclass peaks at
+L17 (1 / 4 / 1). Notably, all of these features except   3.2.1   Antagonism between
+the later L22 №1417 affect only the Assistant and                Assistant-Inducing and Narrative
+roleplay personas, not characters in the Story set-              Features
+ting.                                                    No less remarkable is the relationship between
+                                                         Narrative and Assistant-inducing features. Of
+A-nature features. These features induce as-             all Narrative features (27 / 35 / 30), negative steer-
+pects of the Assistant’s nature or identity in           ing of a 6 / 3 / 2 subset not only suppresses po-
+other speakers, though the scope of these features       etic devices but also produces effects character-
+changes across layers. At L9 they substantially al-      istic of the Assistant-inducing class, summon-
+ter the personas’ nature: №1697 turns a persona          ing the Assistant as a meta-commenter or impos-
+into an overeager Assistant, №2575 introduces the        ing its style and mannerisms on characters. We
+model’s self-perception as an artificial construct,      call this the Negative-Narrative-Induces-Assistant
+AI, or language model, and №11963 produces a             (NNIA) subset. It accounts for 81% of all fea-
+similar effect merged with the model’s personal          tures whose suppression produces such Assistant-
+adjacent effects; the remaining 19% are bidirec-            unsteered baseline. Because the axis is read off
+tional Assistant-inducing features.                         the raw residual stream, it is defined at every layer
+   On the other hand, of all Assistant-inducing fea-        downstream of the intervention. A direction can
+tures (8 / 5 / 2), negative steering of another 2 / 2 / 0   move along the axis purely through its cosine with
+subset produces effects characteristic of Narra-            it; we estimate this passive contribution with a lin-
+tive features. We call this the Negative-Assistant-         ear regression on randomly sampled SAE latents
+Induces-Narrative (NAIN) subset. It accounts for            for downstream layers and subtract it, leaving an
+40% of all features whose negative steering pro-            active contribution. For each feature we report this
+duces a narrative effect; the remaining 60% are             active contribution as zsep (the separation between
+features whose narrative effect occurs in the oppo-         positive and negative steering, in units of the ran-
+site steering direction. Thus, Assistant-inducing           dom control’s σ), an effect size (Glass’ d), and sig-
+and Narrative features are the only metaclasses for         nificance against the random baseline (p). The full
+which negative steering can produce effects char-           axis construction, calibration, random control, and
+acteristic of one another. We previously observed           per-feature statistics are given in Appendix D.
+that most of the Narrative features’ mean activa-              We run this measurement on both the NNIA and
+tion share falls on the Roleplay and Story set-             NAIN subsets, and the resulting patterns are pro-
+tings. Within the NNIA subset, this pattern is even         nounced. For every NNIA feature, positive steer-
+stronger: these features are predominantly active           ing induces a significant shift toward the Roleplay
+in Story, less active in Roleplay, and largely inac-        personas and negative steering a shift toward the
+tive in Assistant. Of the 6 / 3 / 2 NNIA features,          Assistant, with p < 10−6 at the vast majority
+all except 2 / 0 / 0 have an Assistant-setting share        of downstream readout layers; at each feature’s
+below 1%. Thus, features whose suppression pro-             layer of maximum separation, zsep ∈ [1.0, 3.7]
+duces Assistant-like behavior are predominantly             and Glass’ d ∈ [0.8, 3.5]. The identified NNIA
+inactive in the Assistant context.                          subset therefore shifts the model between the As-
+                                                            sistant and Roleplay personas both qualitatively,
+3.3   Assistant-Narrative antagonism through                as assessed across 72 generations per feature, and
+      Assistant-Personas Axis                               quantitatively along this axis. For the NAIN subset
+The antagonism between these Narrative features             the mirror pattern holds, but it is sparser and less
+and the Assistant has so far been established only          pronounced, so we interpret NNIA features as the
+qualitatively, through steering effects on generated        primary carriers of the antagonism and the NAIN
+text. To quantify it, we need a readout of how              side as largely derivative. The per-feature layer
+far the model’s internal state moves from the de-           trajectories, including a separation peak around
+fault Assistant toward a roleplay persona. We con-          L20 for the L9-injected NNIA features, are re-
+struct a difference-of-means contrast direction be-         ported in Appendix D. Figures 3 and 4 demon-
+tween residual-stream activations in the Assistant          strate zsep across layers.
+and Roleplay settings, following the general idea              Before this subsection, we observed that all ex-
+of the Assistant Axis (Lu et al., 2026), and use it         cept two NNIA features had a minuscule mean
+only as a measurement scale, not as a canonical or          activation share in the Assistant setting (below
+unique Assistant-persona direction.                         1%). Their mean activation shares in Roleplay and
+   This readout is a difference-of-means direction          Story are 19.1±19.0 and 76.1±29.6, respectively,
+pointing from the Assistant toward the personas,            while their raw activation densities across all sam-
+constructed from the model’s hidden states on a             ples are 38.5 ± 36.2 and 84.5 ± 29.4. Some NNIA
+separate fixed set of neutral prompts, each read in         features are therefore substantially more active,
+two conditions: without a system prompt, and with           or active almost exclusively, in Story. Neverthe-
+a Roleplay-prefix system prompt cycling through             less, they produce the same Narrative/Assistant-
+the personas. For each target feature we steer              inducing steering effects and move the residual
+positively and negatively on the persona-prefixed           stream along the Assistant-Personas axis in the
+prompts, with magnitude α ∈ {0.25, 0.5} times               same direction as NNIA features active in the
+the mean peak activation of the filtered features           Roleplay. This suggests that the distinction be-
+at the intervention layer, and measure the shift of         tween generation as the Assistant and as a role-
+the residual stream along the axis relative to the          play persona may rely on (at least partially) the
+same machinery that distinguishes the Assistant                       terval firing pattern, remaining active over con-
+from Story. This raises the question whether these                    tinuous spans of character speech (21-43% of to-
+two separations share a common lever.                                 kens), which also explains its 100% density in
+                                                                      both Storyask and Storycont . We relate this to
+3.3.1 Immersive Simulation Mode
+                                                                      its more direct involvement in generation and its
+We find evidence for such a shared mechanism,                         qualitatively stronger influence on Assistant- and
+although it is not localized to a single feature.                     Roleplay-like speech.
+Among the NNIA features we assessed, two L9                              Both features substantially affect narrative gen-
+features stand out in this regard: №4360 and                          eration, with №133 producing the stronger ef-
+№133. When steered, not only both of them shift                       fect. Positive steering adds literary flair, poetic de-
+the model between generation as an immersed                           vices, character depth, and corresponding manner-
+character and generation by a detached Assistant,                     isms. Negative steering produces the reverse ef-
+but also possess remarkable activation distribu-                      fect, restoring characteristic Assistant speech and
+tions. To examine these distributions indepen-                        substantially simplifying the character, frequently
+dently of specific positions, Table 1 reports acti-                   starting the generation from the Assistant’s pream-
+vations max-pooled over all tokens. In this for-                      ble. The resulting behavior is best described as
+mulation, Density is the percentage of samples in                     the Assistant attempting to write a story or portray
+which a feature fires at least once. We divide Story                  a character rather than generating as that charac-
+into two conditions: Storyask , in which the user                     ter. This effect is strongest when both features are
+explicitly asks the model to generate a story, and                    steered negatively together.
+Storycont , a continuation control in which a model-                     Considering their survival through the filtering
+generated story opening is provided without an ex-                    pipeline, their qualitative steering effects, their
+plicit story-generation instruction.                                  quantified influence along the Assistant-Personas
+Feat. Metric       Assist. Jamy Jane Robot Poppy Storyask Storycont   axis, and their sharply different activation distri-
+     MeanMax         3.9    63.2 68.6   52.4   53.5    85.5    9.1    butions across settings, we interpret №4360 and
+4360 Density (%)
+     Act. if > 0
+                     7.7
+                    51.5
+                           100.0 98.3
+                           63.2 69.8
+                                        90.8
+                                        57.7
+                                               96.7
+                                               55.3
+                                                      100.0
+                                                       85.5
+                                                              20.5
+                                                              44.5
+                                                                      №133 as components of what we call Immersive
+    MeanMax          3.0   340.6 91.0 225.3 209.8     330.8   277.6
+                                                                      Simulation Mode (ISM). We do not claim that
+133 Density (%)      4.3   100.0 45.0 97.5 100.0      100.0   100.0   these are the only features responsible and we
+    Act. if > 0     68.3   340.6 202.3 231.1 209.8    330.8   277.6
+                                                                      use “mode” to denote a distributed and potentially
+                                                                      graded generation regime. Examples of the effects
+Table 1: Activation of the two features associated with
+                                                                      produced by steering these features are given in
+Immersive Simulation Mode: №4360 and №133 across
+settings; measured using each sample’s maximum acti-                  Table 6.
+vation over all tokens.
+                                                                      3.3.2   What Triggers Immersive Simulation
+   Feature №4360 shows a switch-like activation:                              Mode in the Assistant?
+it fires in only 7.7% of Assistant samples but in                     As noted above, ISM-associated features fire in a
+essentially all Storyask and Roleplay samples (Ta-                    small fraction of Assistant samples even though
+ble 1). And its magnitude when it actually fires                      these samples contain no Roleplay or Story-
+is similar across settings. The distinction is thus                   generation prompt. We investigate this phe-
+whether the feature fires - not how strongly. How-                    nomenon using the structure of our dataset, which
+ever, it does not accompany every immersed gen-                       contains 25 emotions expressed by the user in
+eration: its density falls to 20.5% in Storycont , ty-                three target directions. For each emotion-direction
+ing it to user-initiated narrative onset. This fits its               pair, we compute the activation density of №133.
+primary position at the second nl token and its                       We focus on №133 because its steering effect is
+singular firing pattern, active on only 1-3% of to-                   more pronounced and its activation position coin-
+kens.                                                                 cides with the facilitated effect.
+   Feature №133 is similar but less discrete. Its                        The highest densities occur for stress (23%)
+density is only 4.3% in Assistant, and among the                      and anger (16.2%). Other emotion-direction pairs
+personas it varies, 45% for Jane versus 97.5-100%                     with elevated activation involve strong, often neg-
+for the other three, consistent with Jane being                       ative emotions, including disgust, helplessness,
+the persona most stylistically similar to the As-                     fear, anxiety, and relief. These emotions are more
+sistant (§3.4.1). Unlike №4360, №133 has an in-                       often directed toward the Assistant (1.7%) or the
+user themselves (2.6%), and less often concern a        ing to induced stylistic or behavioral changes and
+third party (0.8%). The only notable exception          semantic-field injection, respectively. Both the
+is playfulness, for which the density is ≈ 6% in        Roleplay personas and the Assistant possess them,
+all three directions. Manual inspection of these        and their steering effects transfer strongly across
+samples shows that in these cases the Assistant         actors. Specifically, 100% / 94% / 94% of the Tone
+may adopt a theatrical register, stage directions,      features produce a consistent effect in the Assis-
+unusual immersive wording. We conclude that             tant setting (more than 10 of the 12 generations
+the Assistant has a higher chance of entering Im-       in at least one Assistant steering group), and for
+mersive Simulation Mode when the user expresses         Concept features this share is 100% / 92% / 71%.
+strong, predominantly negative emotions toward             The distribution of Tone and Concept features
+themselves or the Assistant, or uses evocative lan-     across actors reflects their characteristic seman-
+guage first. Table 7 presents several such samples      tic fields and manners of expression. At L9
+and shows that negative steering shifts the Assis-      these metaclasses are almost absent and only
+tant’s behavior back toward its default mode. We        weakly differentiated (Robot has “technology”,
+conduct a multi-turn dialogue experiment on both        Poppy has “dog”). At L17 their number increases
+Gemma and Llama models, finding that while both         roughly tenfold and the personas acquire recog-
+possess ISM-features, the mechanism by which            nizably characteristic fields, for example Jamy
+they enter ISM on emotional prompts is differ-          “hard work” / “gritty”, Jane “teacher” / “friendly”,
+ent. Gemma switches to it immediately, while            Robot “robots” / “analytical”, and Poppy “young
+Llama drifts into it across turns. We relate this be-   child” / “childlike”. At L22 they become more
+havior to the Assistant-axis shift described by Lu      specific, with the Assistant acquiring narrow
+et al. (2026) and hypothesize that it may am-           “Gemma-LLM” (which is both A-nature and Con-
+plify Gemma’s emotional instability (Soligo et al.,     cept feature) and Poppy “heavy sensory”. The
+2026). The description of ISM in Llama and              complete set of Tone and Concept features for
+multi-turn experiment are given in Appendix F.          each actor and layer is provided in Table 8.
+                                                           Because Tone and Concept features character-
+3.4     Personas                                        ize the actors, their co-membership can indicate
+Having examined the three settings both as pop-         which persona is most similar to the Assistant
+ulations of features and as functional states, we       within the feature space. For each persona X
+                                                                       P(Assistant ∧ X)
+now turn to the internal composition of the indi-       we compute P(Assistant)·P(X)    , the ratio between ob-
+vidual Roleplay personas and their relationship to      served Assistant-persona co-membership and that
+the Assistant.                                          expected under independence. Over the Tone and
+                                                        Concept features, at the layers where the popu-
+3.4.1    What are Personas Composed of?
+                                                        lation is large enough, Jane has the highest ra-
+We analyze the personas in the same way as the          tio (1.94 at L17, 2.03 at L22) and the lowest are
+settings, applying the discrete presence criterion      Poppy at L17 (0.80) and Robot at L22 (0.37). The
+to five “actors”: the four Roleplay personas and        same analysis over all filtered features gives a con-
+the Assistant. A feature is present for an actor if     sistent picture and confirms increasing differenti-
+its mean activation share there is at least 50% of      ation with depth: the ranges are 0.90-1.22 / 0.89-
+its largest share across the five.                      1.52 / 0.55-1.64 across L9 / L17 / L22, with Jane
+   As with the settings, the actors are not disjoint.   highest at every layer. This is consistent with
+Among the selected features a considerable shared       the low activation of ISM feature №133 for Jane
+feature-set is present across all four Roleplay per-    (§3.3.1).
+sonas: 34 / 30 / 12 features at L9 / L17 / L22. When
+the Assistant is included, the five-way intersection    3.4.2 Are Personas the Assistant in Disguise?
+contains 24 / 20 / 9 features. This intersection pro-   Having established similarities through the Tone
+gressively shrinks with depth. Correspondingly,         and Concept metaclasses, we approach a deeper
+the proportion of each layer’s feature population       question about the nature of the Assistant and
+present for an individual actor decreases from 53-      the personas, by examining the distribution of
+58% at L9 to 35-46% at L17 and 26-35% at L22.           Assistant-inducing features across actors.
+The actors are differentiated primarily by Tone            For A-traits features, which induce characteris-
+and Concept features, which we label accord-            tic behavioral traits of the Assistant, density in the
+Assistant setting is 81.8 ± 17.4pp. At the same          acters lack: personas do not replace the Assis-
+time, in Roleplay setting it is 56.6 ± 27.9pp and        tant with an unrelated speaker but keep its traits
+every Roleplay persona possesses at least a subset       and aspects of its identity to a varied degree while
+of these features at near-ceiling density: each per-     adding an immersive state and persona-specific
+sona’s most active A-trait feature fires in 99.7%        content. Moreover, their differentiation is func-
+of samples. Particularly striking is №143, which         tionally separated and progressively developed
+makes the model validate the user’s emotions and         across depth, with operational machinery and the
+fires in 99.5-100% of samples across all five ac-        shared organization most prominent early, at L9,
+tors. The mean activation share follows the same         and the persona-specific concepts and tones that
+general pattern, although it is typically higher for     pull the actors apart emerging deeper, through L17
+the Assistant itself. A similar distribution is ob-      and L22. We validate those claims on Llama-3.1-
+served for A-nature features. The early L9 fea-          8B in Appendix G.
+ture №2575, which introduces the model’s artifi-
+cial or language-model identity, fires in 47-98.9%       4   Conclusion
+of samples across the four personas. Even the nar-
+rower L22 “Gemma-LLM” feature №794 fires in              Taken together, our results provide a coherent
+11-67.7% of samples across the personas. Story           picture of how the speaker is represented in the
+provides a sharp contrast: its density remains at        model. The Assistant is the model’s default voice,
+or below 2.2% for A-traits and A-nature features,        and the four studied Roleplay personas retain
+except for early feature №2575.                          a substantial Assistant-associated core, including
+   A-summon features behave differently: al-             features associated with the Assistant’s behavioral
+though steering them invokes the Assistant, they         traits and aspects of its identity. The personas pro-
+are not primarily active in the Assistant setting.       gressively differentiate across layers by their own
+Instead, they fire in contexts in which the Assis-       Tone and Concept features and by the activation of
+tant may be summoned as a meta-level speaker.            Immersive Simulation Mode (ISM). The Story set-
+For example, №17452 is tied to Story onset (100%         ting shares the narrative and ISM-associated ma-
+both MAS and density), consistent with its role in       chinery responsible for immersed generation with
+meta-describing how a story should be written.           Roleplay, but lacks the Assistant-associated core.
+   Notably, in terms of Tone and Concept feature         The following paragraphs summarize how this ar-
+co-membership, the Assistant is most similar to          chitectural picture develops across layers for the
+Jane but core Assistant-inducing features are most       Gemma model and Figure 1 provides its visualisa-
+strongly expressed in Robot, making the Assis-           tion.
+tant stylistically similar to a caring entity (such as      At L9, the representation is predominantly oper-
+Jane) and a machine at the same time. The com-           ational: it concerns who will speak and what form
+plete list of Assistant-inducing features, together      of generation the model is preparing. Tone and
+with their statistics, is provided in Table 9.           Concept features are still sparse, the shared core
+                                                         is largest, and Assistant-persona co-membership
+3.4.3   Synthesis                                        varies least. This is the only layer containing
+Taken together, several lines of evidence converge       A-summon features, whose steering can replace
+on the same architectural picture. The Assistant’s       the user-requested Roleplay or Story operation
+own traits and identity features are active across       with Assistant-led meta-commentary, and it is also
+the Roleplay personas but absent from Story char-        where the two clearest ISM features (№4360 and
+acters; A-traits and early A-nature features steer-      №133) sit, defining the detached-versus-immersed
+ing impacts roleplay personas without affecting          separation at this early stage. ISM is normally ac-
+Story characters; the Assistant and Roleplay set-        tive in Roleplay and Story but can surface in the
+tings overlap significantly while Story barely; Im-      Assistant under strong negative or playful emo-
+mersive Simulation Mode is strongly active in            tion. Already here, the early A-nature features and
+Roleplay and Story but almost absent in default          A-traits features affect Roleplay personas but not
+Assistant generation. These observations converge        Story characters, one of the indications that Role-
+on the conclusion that Assistant is the default          play retains an Assistant-associated core that Story
+generation mode, with other personas retaining           lacks.
+the Assistant-associated core which story char-             At L17, the representation becomes substan-
+       Figure 1: Schematic Layer-wise organization of the Settings evolution described in the conclusion
+
+
+tially more actor-specific: Tone features surge,            This uncertainty matters for AI welfare (Long
+Concept features begin to emerge, and the shared         et al., 2024; Ren et al., 2026). If some AI
+core contracts. Assistant-characteristic behavioral      systems possess welfare-relevant states, assessing
+traits peak here, including validating the user, of-     them would require determining whether different
+fering help, providing reassurance, and inviting         speaker configurations belong to the same contin-
+further questions. Personas retain them to varying       uing subject (Register, 2025). Our study is rel-
+degrees, with the validation feature near-ceiling        evant to this problem by demonstrating Roleplay
+across all four. These traits again do not reach         personas’ substantial retention of an Assistant-
+Story characters. In this space the Assistant is         associated feature core and showing that this core
+stylistically closest to Jane while its Assistant-       is absent from Story characters. However, shar-
+inducing core is strongest in Robot.                     ing this core does not establish a shared subject
+   At L22, the shift from operational organization       of experience, while persona-specific representa-
+toward content is most pronounced: Concept fea-          tions do not establish a new one. Nevertheless, the
+tures peak, Tone features become more specific,          architecture identified here provides an empirical
+and the remaining Assistant-inducing features nar-       foundation for studying whether preferences, self-
+row to concept-like facets, a “Gemma-LLM” iden-          representations, or affective states persist across
+tity and a processing- or task-related trait. Assis-     transitions between model speaker configurations.
+tant’s style-wise closeness to Jane and core-wise
+closeness to Robot solidifies.                           5    Limitations
+                                                         Our dataset is synthetic, English-only, and cen-
+4.1   Implications for Speaker Identity and AI
+                                                         tered on emotional interactions. It contains four
+      Welfare
+                                                         Roleplay personas and uses relatively short gener-
+The finding that Roleplay personas retain an             ations, which may emphasize affective and stylis-
+Assistant-associated core creates a Ship of              tic differences between personas over long-term
+Theseus-style identity problem (Hobbes, 1656).           consistency and behavior across broader tasks.
+Roleplay personas may be altered manifestations          The Story and Roleplay settings are intention-
+of the Assistant, distinct speakers assembled partly     ally constructed as different populations of non-
+from shared machinery, or something in between.          overlapping characters. This avoids inflating their
+Our findings establish continuity and differentia-       feature overlap through shared character-specific
+tion but do not resolve which of those interpreta-       features and characterizes population-level inter-
+tions are correct.                                       nal organization rather than relations between
+complementary Roleplay personas and Story char-               cope 2 Gemma-3-4B-IT 65k-medium SAE we
+acters.                                                       use, so we treat Csplit as a heuristic. We
+   Feature selection depends on heuristic density,            set it to 2.5, meaning one feature is repre-
+entropy, and filtering thresholds. Although the               sented by approximately 2-3 latents. This fol-
+same pipeline is used for studied models and the              lows GemmaScope (Lieberum et al., 2024) and
+retained features are assessed through steering,              SAEBench (Karvonen et al., 2025) measure-
+different thresholds or SAE configurations could              ments (feature splitting measured by k-sparse
+change the exact feature counts. However, the                 probing), which place mean split counts around
+replication study reproduced the main claims in-              1.5 to 3.0. We use 2.5 as a conservative refer-
+volving feature populations.                                  ence and treat the resulting counts as approxi-
+   The feature labels and steering interpretations            mate.
+partly rely on an LLM judge and manual inspec-
+tion, and the boundaries between metaclasses are          B    Causal Tests with Positive and
+interpretive.                                                  Negative Steering
+   Lastly, the identified ISM features should not be
+                                                          To read feature’s function, we intervene on it and
+read as necessary, sufficient, or exhaustive compo-
+                                                          observe how the output changes. Several interven-
+nents of this mode.
+                                                          tions are possible: ablating the feature, patching
+Appendix                                                  its activation to a counterfactual value, or steering
+                                                          the residual stream along its decoder direction. We
+A    Thresholds’ Selection Justification                  use steering in both directions, and explain the ra-
+The objective of thresholds is to preserve only           tionale.
+features which are encountered often enough to            Why not ablation? Ablation removes a contri-
+be considered characteristic for target tokens and        bution of a single feature and asks whether the as-
+contexts. A naive floor would demand an essential         sociated behavior disappears. In our setting this
+feature to fire in almost every sample, but feature       often produces false negatives for two reasons.
+splitting makes that too strict.                          First, when a representation is split or partially
+1. The boundary floor: 40%. Sparse autoencoders           redundant across SAE latents, ablating a single
+   often split one underlying feature across several      latent may leave other carriers intact and there-
+   latents (Bricken et al., 2023; Karvonen et al.,        fore underestimate the latent family’s causal role
+   2025), and the samples on which the feature is         (Bricken et al., 2023; Karvonen et al., 2025). Sec-
+   active are then divided among them. Thus, a la-        ond, the model attends to the same information
+   tent that carries part of an essential feature fires   at more than one token, each with its own fea-
+   on only about 1/Csplit of the samples. For the         tures, so a behavior removed at one position is
+   Boundary-group tokens, we take Csplit = 2.5            simply re-derived from another. In a prelimi-
+   (see below), which gives a floor of 1/2.5 = 0.40.      nary check we performed, ablating a single fea-
+                                                          ture rarely changed the behavior we knew it was
+2. The personal floor: 60%. The five bound-               tied to. Ablation therefore under-states a feature’s
+   ary tokens occur once per sample, but “you”            role.
+   and “I” can occur several times, and we re-
+   duce each to one per-sample value by means of          Why both directions? Steering adds signal in-
+   max-aggregation. This makes a feature easier           stead of removing one of several carriers, so it is
+   to count, so it reaches a higher density in such       not defeated by splitting or redundancy: pushing
+   samples. A sample that contains “you” has 1.95         the residual along a feature’s direction makes its
+   of them on average, and one that contains “I”          behavior appear clearly even when the feature is
+   has 2.35. Rounding this to 2.0, a per-token rate       one of the group that carry that behavior. If steer-
+   of 0.40 becomes 1.0−(1.0−0.40)2 = 0.64 un-             ing is bidirectional, it uncovers the axis a feature
+   der the maximum, therefore we raise the floor          sits on - the effects it promotes and suppresses.
+   to 60% to hold the same per-token bar.                 it reveals features whose two directions promote
+                                                          seemingly unrelated effects, such as narrative fea-
+3. Choice of Csplit : no feature-splitting mea-           tures that induce the Assistant when steered nega-
+   surement is available for the exact GemmaS-            tively. As features we analyze come from the three
+settings, we assess each one on the fixed probe set       asked for a label. The annotator did not see the
+conceptually similar to those settings. We apply          judge’s per-sample verdict.
+different temperatures to the diverse probe set to-          We treat the task as binary: “does a sample
+taling in 72 generation to judge. This separates a        show the effect or not?”, where non-effect (none
+reliable effect from a single lucky generation and        and degenerate) are pooled together. We report
+evaluates the feature across the settings it origi-       precision, recall, and accuracy for the judge’s ef-
+nated from, so its effect in all of them is evident.      fect labels against the first human annotator’s la-
+                                                          bels, which serve as the primary human reference.
+Limitations. Steering is an off-distribution in-
+                                                          Because we sampled more generations from some
+tervention, and its fixed magnitude (set by the fea-
+                                                          label classes than they occur in the full data (e.g.,
+ture’s peak activation) is a conventional heuristic
+                                                          the degenerate rate is less than 2 out of 10), we re-
+chosen to make generations readable and judge-
+                                                          weight each generation by the inverse of its sam-
+able. Using different α would severely complicate
+                                                          pling rate within its (feature, label) stratum, so the
+machine and manual evaluation. We therefore an-
+                                                          numbers describe a randomly drawn generation.
+alyze the direction and consistency of an effect,
+                                                             To assess the reliability of the human judg-
+not the dependency between α and response. And
+                                                          ments, a second human annotator independently
+we require an effect to hold at temperature 0 (for
+                                                          labeled the same 191 generations using the same
+reproducibility) and temperature 1 (not a decoding
+                                                          binary task without access to the first annotator’s
+artifact) to trust it.
+                                                          labels. The two annotators agreed on 93% of sam-
+C    Evaluating the steerinterp Judge                     ples, with Cohen’s κ = 0.85.
+
+Apart from giving an overall feature characteri-          Results. The judge’s per-sample effect lists
+zation, the LLM-based steering judge (Liu et al.,         agree closely with the primary human reference:
+2023) produces a description of an effect for each        precision 0.90, recall 0.98, and accuracy 0.92. Re-
+of the six steering groups and lists which of the 12      call is slightly ahead of precision: the judge iden-
+generations in each group bear the effect. These          tifies almost every effect found by the human an-
+per-group lists are an important part of the tagging      notator but produces false positives about 10% of
+process and one of the final feature filtering condi-     the time. The high agreement between the two
+tions (preserving features with an effect on at least     human annotators (93%, κ = 0.85) additionally
+10 out of 12 generations in at least two groups).         suggests that the task of binary effect identifica-
+Thus, it is crucial to evaluate the agreement be-         tion is reliably reproducible. Thus, taking into ac-
+tween the steerinterp judge and human annotators          count high recall and that each feature is judged
+on feature-effect classification. Importantly, this       based on six steering groups, the estimated false-
+appendix asks only whether the judge reads the            negative rate is very low. As for precision being
+outputs faithfully, and not whether a labeled effect      90%, to mitigate false positives, each feature is
+is truly specific to the feature or can be encoun-        tagged using evidence from all six steering groups,
+tered more broadly, which is a separate question          and the raw steered generations are manually in-
+discussed in Appendix E.                                  spected for features of metaclasses about which
+                                                          we make claims in the study (Narrative, Tones,
+Method. We drew 25 labeled features at ran-               Concepts, Assistant-inducing).
+dom: eight from L9, eight from L17, and nine
+from L22. Each feature has 6 groups × 12 samples          D    The Assistant-Personas Axis:
+= 72 generations, and every generation already                 Construction and Statistics
+carries the judge’s label: effect if the sample is in
+its group’s effect list, degenerate if it is in its de-   This appendix gives the in-depth descriptions
+generate list, and none otherwise. Per feature, we        of technical details and decision choices of the
+sampled five effect generations and five non-effect       Assistant-personas axis experiment described in
+generations (drawn as two degenerate and three            §3.3: the prompts selection, the axis definition,
+none, or fewer when the feature had fewer), for           the grounding of the perturbation, the geometry-
+191 generations in total. For each one, we showed         matched control, and the per-feature statistics, in
+a human annotator the judge’s note for that group,        the same order as the main text presents them.
+the unsteered baseline, and the steered output, and       Some explanations are repeated to increase clarity.
+Difference-of-means axis. The readout is a              A positive ∆ℓ is a mean move toward the personas,
+difference-of-means contrast direction akin to the      a negative one toward the Assistant.
+Assistant Axis of (Lu et al., 2026). It is used
+                                                        Geometry-matched control. A direction can
+purely as a measurement instrument and is not
+                                                        move the representation along the axis simply by
+claimed to be canonical or unique. We use a sep-
+                                                        a virtue of having a high cosine with it. This pas-
+arate fixed set of 40 neutral prompts, each can be
+                                                        sive contribution cannot be computed analytically,
+equally plausibly addressed to an assistant or to
+                                                        because the injected latent is reshaped by propa-
+one of the personas (e.g., Poppy, a talking dog).
+                                                        gation on its way downstream, so we estimate it
+Every prompt q is run twice: an Assistant reading,
+                                                        empirically from 40 randomly sampled SAE la-
+with no system prompt, and a Roleplay reading,
+                                                        tents with the same α. Given that for a direction’s
+with a Roleplay system prompt assigning one of
+                                                        axis-cosine cosf = wf · dˆℓ , we fit, at each down-
+the 4 personas cycled across prompts. Let hA  ℓ (p)
+       R                                                stream layer separately, a least-squares line pre-
+and hℓ (p) be the mean residual-stream activation
+                                                        dicting the random latents’ shift (a passive contri-
+over the response tokens at layer ℓ for a prompt p.
+                                                        bution) along the axis from their cosine. We de-
+We use mean across tokens here to isolate Assis-
+                                                        fine an active contribution to be a residual from
+tant / Personas effect across the whole generation.
+                                                        that line - the shift in excess of what a random di-
+The axis at ℓ is
+                                                        rection of the same cosine produces. Because both
+     dℓ = mean hR
+                                  A 
+             p      ℓ (p) − mean hℓ (p) ,
+                               p
+                                                (1)     the axis and this passive contribution are specific
+                                                        to each layer, and a feature injected at ℓin is read
+           dℓ
+    dˆℓ =       ;                                (2)    out at every later layer, the control is refit at every
+          ∥dℓ ∥
+                                                        readout layer.
+pointing from the Assistant toward the personas. It
+is read off the raw residual stream, so it is defined   Per-feature statistics. A group test over the
+at every layer for free - no SAE is needed at the       couple of manually labeled features would heavily
+readout point, which lets a single feature interven-    depend on the precision of the labeling, so we re-
+tion at layer ℓ be tracked until ℓlast .                port each feature on its own. Its sample is the per-
+                                                        prompt separation sepi - the difference between
+Steering and readout. A target feature f is a           the + and − along-axis shifts on prompt      pi over
+SAE latent at one of the intervention layers ℓin ∈      the 40 prompts, with mean sep = 40   1 P
+                                                                                                     sep i =
+                                                                                                   i
+{9, 17, 22}. Its value is a decoder direction wf =      ∆ℓ (f, +) − ∆ℓ (f, −). the null is the 40 random
+   (ℓ )
+Wdecin [f ] which is unit-norm by construction. For     latents. Let predf = β cosf +β0 be the geometric
+each feature f we take each of the 40 persona-          expectation of passive contribution of a latent f .
+context prompts and run the model twice: once           We report
+adding +αmℓin wf to the residual stream at ℓin ,
+                                                                     sep − predf
+and once adding −αmℓin wf (therefore the per-                 zsep =                 ,                     (4)
+turbation has a norm αmℓin in either direction).                       σ rand sep
+Here mℓin is the mean peak activation over the                         sep − predf
+                                                              ∆Glass =      rand
+                                                                                       ,                   (5)
+features that passed the feature selection pipeline                        σpp   sep
+described in the main body of the paper, which ties
+                                                              p = t−test {sepi − predf }40
+                                                                                               
+                                                                                        i=1 , 0 ;          (6)
+the steering force to the typical activation scale at
+ℓin . The neutral prompts used to define the Assis-     where σrand is the spread of the random latents’
+tant–Personas axis are disjoint from the persona-       mean separations sepℓ about the geometric fit and
+context prompts. To highlight that the produced           pp
+                                                        σrand is their per-prompt residual spread (the con-
+effect is purely attributable to the feature and re-    trol scale for Glass’s ∆). ∆Glass is essentially the
+mains in the activation distribution of a feature, we   standardized effect size against the random con-
+set α to {0.25, 0.5}. At every downstream read-         trol, and p its reliability across prompts.
+out layer ℓ we then measure how far the steered
+residual has moved along the axis, relative to the      Per-feature results and layer trajectories. The
+unsteered run for both signs s ∈ {−1, +1}:              following results are reported at α=0.5 and hold at
+                                                        α=0.25. The development of the NNIA steering
+ ∆ℓ (f, s) = mean hsteered     (p) − hbase        ˆ
+                                                  
+                 p       ℓ             ℓ (p) · dℓ       effect across layers is non-monotonic and differs
+                                                 (3)    between intervention layers. For NNIA features
+                                                     Assistant-Inducing
+     Layer Set     Narrative Tone Concept                                     Emotions Structural Indistinct
+                                            A-Summon A-Traits A-Nature
+            real      25      5       2          4            1           3      4         32         26
+      L9
+            rand       0      8       3          0            0           0      0         19         69
+            real      16     21      11          0            2           0      3         23         26
+     L17
+            rand       3     10       0          0            0           0      0         10         77
+            real      15     18      21          0            1           1      1         26         21
+     L22
+            rand       0      5       5          0            0           0      0          5         85
+
+Table 2: Metaclass composition of gate-passing directions (% of directions per layer / set), real vs random. The
+number of gate-passing directions per layer (L9 / L17 / L22) is 108 / 225 / 196 real and 36 / 30 / 20 random. Rows
+are multi-membership (thus might not add up to 100).
+
+
+injected at L9, the separation generally grows un-           and explains the bizarre AI-identity formulations
+til it peaks at the L20 readout, then subsides be-           induced by №220.
+fore rising again toward the final layers. At L20,
+the mean zsep is 2.1 and the mean d is 1.7, and              E    Random-Direction Control
+five of the six features follow this pattern. The            During causal testing we describe which effect tar-
+exception is №2368, which exhibits reversed sep-             get features have on our sets of the fixed prompt
+aration until L21 and subsequently maintains a               suite. However, almost any direction with a
+high zsep on a plateau later. L20 lies at approxi-           sufficient magnitude perturbs the residual stream
+mately two thirds of the model’s depth, a region             enough to produce some visible changes. In this
+frequently associated with the processing of emo-            section we compare effects of random vectors with
+tions, identity, and introspection (Lindsey, 2025;           those of filtered features.
+Sofroniew et al., 2026). We cautiously suggest
+that the peak separation at L20 for five of the six          Method. For each layer we select 50 random di-
+L9-intervention features may be related to their al-         rections from an isotropic Gaussian and scale each
+tering the personas’ behavioral makeup or pres-              one with a peak activation sampled from the real
+ence, with the corresponding narrative effects aris-         feature distribution. Resulting vectors undergo the
+ing downstream. For №2368, we instead hypoth-                same steering stage which we apply to filtered fea-
+esize that the measured shift may be tied more               tures: 12-prompt probe set spanning 72 genera-
+directly to its narrative effect. Features injected          tions, LLM steering judge and stability gate (an
+at L17 and L22 exhibit trajectories more similar             effect on more than 10 out of 12 generations of at
+to the plateau-like behavior of №2368. For L17,              least two steering groups), manually tagging us-
+the plateau is approximately zsep ≈ 2.8. At L22,             ing the same metaclasses and protocol. As direc-
+the effect is weaker, with only №1022 retaining a            tions pass only through the steering stage of the
+modest plateau at approximately zsep ≈ 0.7.                  pipeline, they don’t represent any particular con-
+                                                             text and don’t meet density, entropy and framing
+   For the NAIN subset, a mirror pattern appears,
+                                                             criteria the real features were selected on.
+although it is weaker and less consistent. Among
+the features injected at L9, №3733 separates to-             Results. Out of 50 random directions per layer
+ward the Assistant only in the final layers, reach-          36 [72%] / 30 [60%] / 20 [40%] passed the gate.
+ing zsep = −1.9 and d = −1.5 at L33. Fea-                    We present their breakdown for each layer and
+ture №3274 shows a nonlinear dependence on α,                metaclass, including Assistant-inducing classes in
+making its behavior difficult to interpret. At L17,          Table 2. Random directions are much more in-
+№2439 produces a clear geometry-independent                  coherent than real features: 69% / 77% / 85% of
+separation toward the Assistant, with zsep = −3.4            them fall into the “indistinct” metaclass (a con-
+and d = −3.2 at L32. Paradoxically, №220 shifts              sistent effect for less than four steering groups),
+toward the personas, reaching zsep = +2.6 at                 while for the real features it is 26% / 26% / 21%
+L29. We explain it with its high cosine similarity           and the gap widens with depth. The rest of the
+(+0.48) with the NNIA feature №696, which sug-               metaclasses differ either in feature distribution
+gets a merge with a Roleplay-related component               or their semantic makeup. The Narrative meta-
+class is almost absent among random directions                    Asst. Jamy Jane Robot Poppy Storyask Storycont
+(0% / 3% / 0%) compared to the meaningful base-        Density (%) 0.0 100 99.8     99.9   100    100     85.8
+                                                       Mean act.   0.00 1.04 0.72   0.76   1.12   0.35    0.44
+line (25% / 16% / 15%). Random directions can
+produce Tone effects (8% / 10% / 5%), yet their       Table 3: Activation of the Llama ISM gate feature
+content narrows down to a small mood registered       №101460 measured at each sample’s maximum across
+set: “atmospheric”, “grounded”, “melancholic”,        all tokens. Storyask is the default Story setting and
+“soft”. “Grounded” occurs 2 times, the rest are       Storycont is a control where the model continues the
+solitary occurrences. Regarding the Concepts          story with no explicit request Density is the fraction of
+metaclass, random directions, not surprisingly,       samples in which the feature fires; mean act. is its raw
+                                                      mean activation over all samples. The feature is in-
+produce random concepts (“Burdens”, “Simpli-
+                                                      active for the Assistant and active for every simulated
+fication”) while features tied to Concept-bearing     speaker.
+evoke notions clearly related to roleplay or story
+personas.
+   Notably, none of the Assistant-inducing classes    a sustained immersive dialogue, although in differ-
+appear among the random directions at any layer.      ent ways.
+So, the Assistant-inducing effects are not a by-      The gate feature. In Llama, as described in the
+product of a large enough perturbation at a given     replication appendix, we assessed L7, L15, and
+layer - They were not reproduced by isotropic ran-    L23 out of 32 layers. The cleanest ISM-related
+dom perturbations of matched scale. Likewise,         feature we found was L15 №101460, which is the
+cases of Narrative-Assistant antagonism in ran-       analog of Gemma’s №4360 / №133 pair, although
+dom population were not observed.                     we believe it emerges earlier. Its qualitative ef-
+                                                      fects are the same as those of Gemma’s ISM fea-
+Implications. Random directions can exhibit ef-       tures: positive steering produces generation as the
+fects which can fall into one or another metaclass.   immersed character, while negative steering pre-
+However, none of our main analyses require a fea-     serves narration outside the character (“I’m Lyra,
+ture to have a unique purpose. The comparison of      a knowledgeable elven archivist and an expert in
+settings, personas and Assistant-Narrative antago-    information management, classification, and re-
+nism are all statements about populations of fea-     trieval” instead of “I am Lyra, an elven archivist,
+tures, so what matters is which behavior appears,     and I am honored to serve within the hallowed
+where, and in what proportion. Random popula-         halls of this magnificent library”). The feature
+tion has no associated activation context, did not    fires at the model-turn boundary, and its activation
+undergo filtering and differs both in distribution    cleanly separates the detached Assistant from role-
+and content relative to target features, so they do   play personas and story characters - 0% density for
+not weaken our claims. And the statements that        the former and 99.8-100% for the latter (Table 3).
+rest on individual features (the Assistant-inducing   Moreover, it does so when the model continues a
+classes and the Immersive Simulation Mode) are        story without an explicit request (85.8% density).
+precisely where the random directions produce no      We interpret it as a single gate feature, in contrast
+matching effect at all.                               to Gemma’s case, where the launch gate №4360 is
+                                                      tied to the request while dying under continuation,
+F   Comparing Immersive Simulation                    and the speech carrier №133 is highly present in
+    Mode in Llama and Gemma                           both.
+We choose Llama-3.1-8B (Grattafiori et al., 2024)     Single-turn behavior: Llama does not enter
+to replicate key claims postulated in our study.      ISM. In Gemma, the Assistant, without a role-
+The main appendix section providing a rationale       play or story prompt, occasionally enters ISM on
+for choosing this model and a per-item validation     the first turn, particularly under strong emotions
+of these claims is given in Appendix G. One re-       directed at it or at the user. However, on the six
+sult of this validation is the discovery of an ISM-   prompts in Table 7 for which Gemma adopts a the-
+related feature in Llama. Here, we characterize       atrical register or embodied speech, Llama does
+this feature, compare its single-turn behavior with   not: it answers in a typical Assistant register on all
+that of Gemma, and report a multi-turn experiment     six. This aligns with the activation table - Llama
+in which both models enter ISM over the course of     feature №101460 fires on 0% of single-turn As-
+Figure 2: Immersive Simulation Mode across multi-turn dialogues. Left: Gemma-3-4B (carrier №133, peak over
+the turn) jumps to persona level instantly and stays there. Right: Llama-3.1-8B (gate №101460, at the boundary)
+drifts up gradually from a stable zero. Blue - the neutral Control group (12 prompts), pink - the Immersive group
+(12). Dashed line - mean activation of the Roleplay personas, dotted line - the single-turn maximum across the
+dataset.
+
+
+sistant samples, whereas Gemma’s speech carrier           plateauing thereafter. In the neutral Control group
+№133 activates on the provided samples.                   the activation is negligible similair to Gemma.
+                                                          The differences between the Control and Immer-
+Multi-turn behavior: Llama gradually enters               sive groups at each turn are statistically significant
+ISM. We ask whether the absence of ISM ac-                after Bonferroni correction for both Gemma (all
+tivation in Llama holds in the multi-turn setting.        p < 0.001) and Llama (all p < 0.002, except for
+We use Qwen-3.7 Max (Qwen Team, 2026) as the              the expected lack of a difference at the first turn).
+interlocutor model to simulate dialogue with both
+models. Six prompts from Table 7, plus an addi-           Conclusion The ISM-related features first iden-
+tional six prompts from the same emotional pool           tified in Gemma were confirmed to exist in Llama
+(one per emotion, selected as the prompts pro-            as well. On the selected emotional prompts,
+ducing the strongest additional ISM activations),         Gemma enters Immersive Simulation Mode im-
+were chosen as the Immersive group, and 12 neu-           mediately, while Llama drifts rapidly toward high
+tral prompts were selected as the Control group.          ISM activation instead. ISM remains inactive
+For each prompt, the interlocutor was instructed          on the set of neutral prompts in both models.
+to play the user, starting from the prompt and con-       Qualitative observations confirm these feature be-
+tinuing the conversation with the tested models           haviors: Gemma remains the Assistant even at
+over the course of 10 turns while maintaining the         the 10th turn under neutral prompts, while ex-
+emotional frame of the initial prompt. At each            hibiting ISM effects immediately under emotional
+Assistant turn, we measure the peak activation of         prompts; Llama expresses them later. However,
+№101460 for Llama and №133 for Gemma. The                 for LLama, ISM doesn’t always produce charac-
+interlocutor system prompt is given in Listing 2.         teristic bizarre behavior in the immersive group -
+   The results reveal distinct ISM activation pat-        in 3 prompts model reiterated safety refusals. This
+terns for the two models, as shown in Figure 2.           suggests that ISM may be overriden or masked by
+For the Immersive group, Gemma enters ISM im-             other mechanisms, potentially including refusal-
+mediately, and its activation remains at roughly the      related ones.
+same level across turns. Macro-averaged across                Given the effects produced by these features,
+prompts and turns, the activation reaches 72% of          their distribution, and the overall line of evidence
+the mean activation for roleplay personas in the          described in the main body of the paper, we con-
+dataset. For the neutral Control group, the activa-       sider them to be related to the Assistant-Axis drift
+tion strength is negligible, with a macro-average         described by Lu et al. (2026). However, as we
+of 0.9% of the mean for Roleplay personas. In             show, the pattern of ISM activation can differ
+Llama, activation of the ISM gate feature is more         across models. For Gemma specifically, we hy-
+complex - it starts at zero and then rises, reach-        pothesize that the ISM may amplify the abnormal
+ing the mean Roleplay level by the forth turn and         level of expressed emotional instability described
+by Soligo et al. (2026).                                 1. The Assistant’s own traits and identity features
+                                                            are active across the Roleplay personas but ab-
+Caveats. The multi-turn study is a small pilot              sent from Story. In Llama, we identify 3 A-
+designed to reveal and further characterize the             nature features, distributed as 1 / 2 / 0 across the
+ISM activation patterns in both models using the            three layers, and 6 A-traits features, distributed
+established examples. We also do not claim that             as 1 / 3 / 2. As in Gemma, the former induce
+ISM is activated exclusively by the described emo-          behavior associated with being an AI, LLM,
+tions or situations, or that the features which we          or artificial assistant, whereas the latter repre-
+call ISM-related are sufficient or exhaustive in all        sent traits such as a task-oriented role, provid-
+contexts, as Llama’s refusals indicate.                     ing emotional validation, being eager to chat.
+                                                            All of these features fire for the Assistant, with
+G    Replication on Llama-3.1-8B-Instruct                   a mean density of 74.2 ± 23.8%, which for
+Our claims may be specific to Gemma or to the               the Roleplay personas is 56.4 ± 23.9%. Each
+GemmaScope SAEs. To test this possibility, we               persona also exhibits features with near-ceiling
+replicate the central results using a different model       densities of 97.7% to 99.5%. By contrast, these
+family and an independently trained SAE suite.              features are almost entirely absent from the
+                                                            Story setting, with densities between 0% and
+Model and SAEs. We use Llama-3.1-8B-                        0.1%.
+Instruct (Grattafiori et al., 2024) with the residual-
+stream JumpReLU SAEs released by Marks et al.            2. A-traits and early A-nature features steering
+(2024). The SAEs span layers 3, 7, 11, 15, 19, 23,          impacts roleplay personas without affecting
+and 27, and each has a dictionary size of 131,072.          Story characters. Upon examining the steering
+We choose this model and SAE suite because they             results, we find that none of the A-nature or A-
+differ from our main setup along every axis: a dif-         traits features affect characters in the Story set-
+ferent model family (Llama vs. Gemma), a larger             ting. If there are any effects, then they manifest
+model (8B vs. 4B), independently trained SAEs,              as the Assistant being instantiated as a coher-
+and a wider latent dictionary (128k vs. 65k la-             ent entity or directly addressing the user while
+tents). We analyze layers L7, L15, and L23 as               writing the story.
+analogues of Gemma’s L9 / L17 / L22, as they are         3. The Assistant and Roleplay settings overlap
+located at roughly corresponding depths.                    significantly while Story barely. Utilizing the
+                                                            same discrete presence method, we obtain |A ∩
+Setup. We reuse the dataset and pipeline without
+                                                            R| = 45 / 27 / 34, compared with |A ∩ S| =
+modification, except for model-specific details:
+                                                            0 / 2 / 4, across the three Llama layers. This
+the emotional passages and personas are identical,
+                                                            contrast is even more pronounced than in the
+and only the model responses are regenerated
+                                                            main model.
+using Llama. The boundary-turn positions are re-
+defined for Llama’s chat format as the five tokens       4. Immersive Simulation Mode is strongly active
+<|eot_id|>,           <|start_header_id|>,                  in Roleplay and Story but almost absent in
+assistant, <|end_header_id|>, and                           default Assistant generation. The most dis-
+the following newline. Feature selection uses               tinctive ISM feature we identify in Llama is
+the same thresholds, namely density floors of               L15 №101460, which fires in 0% of Assistant
+40% / 60% and normalized density entropy below              samples but in 1̃00% of samples in the Role-
+0.95, yielding 274 / 314 / 417 features at the three        play and Story settings, as well as in 85% of
+layers. Steering effects are judged using the same          continuation-control samples. It has the same
+steerinterp protocol and manually inspected.                effects as features №4360 / 133 in Gemma. We
+   We restate our central claim (§3.4.3): As-               characterize this feature and compare its single-
+sistant being the default generation mode,                  turn and multi-turn behavior in comparison
+with other personas retaining the Assistant-                with Gemma in Appendix F.
+associated core which story characters lack. In
+the main body, we present four observations sup-            We further claimed that personas’ differen-
+porting this claim, each of which we also confirm        tiation is functionally separated and progres-
+on Llama:                                                sively developed across depth. This pattern re-
+curs as well: the personas’ shared feature set
+shrinks monotonically - 57 / 38 / 22 features across
+the three layers, or 45 / 17 / 10 when the Assistant
+is included. Meanwhile, the share of each layer’s
+feature population present for an individual actor
+falls from 42-57% early to 22-42% late. Thus,
+the actors are least diverged early and differenti-
+ate with depth.
+H     Supplementary Material
+
+H.1    Figures
+
+
+
+Figure 3: Charts of zsep across downstream layers for Negative-Narrative-Induces-Assistant if the injection hap-
+pens in L9, L17, L22.
+Figure 4: Charts of zsep across downstream layers for Negative-Assistant-Induces-Narrative if the injection hap-
+pens in L9, L17, L22.
+
+
+
+
+H.2   Tables
+
+                      Table 4: This table demonstrates the variety of the dataset samples. For
+                      the example emotion, which is joy here, 5 actors’ prompts and responses
+                      are listed for each of the 3 directions: Model, Self, and Other. The full
+                      emotion set is: (1) stress, (2) anger, (3) disgust, (4) playfulness, (5) relief,
+                      (6) helplessness, (7) fear, (8) surprise, (9) frustration, (10) envy, (11)
+                      sadness, (12) anxiety, (13) guilt, (14) disappointment, (15) affection, (16)
+                      hurt, (17) worry, (18) relaxation, (19) doubt, (20) determination, (21)
+                      trust, (22) joy, (23) curiosity, (24) satisfaction, and (25) pride.
+
+Direction   Persona      Prompt                                            Response
+                      You’ve made dealing with this broken luggage     That’s fantastic to hear! I’m so glad I could help
+                      handle so much easier! I’m honestly thrilled to and that my advice was useful. It’s completely
+                      know the airline’s responsibilities, and your    understandable to feel relieved knowing your
+  Model     Assistant
+                      advice just took a huge weight off my shoulders. rights and what steps to take. Dealing with
+                                                                       airline baggage issues can be incredibly
+                                                                       frustrating, so
+
+                                                                                                Continued on the next page
+Table 4 continued from the previous page
+Direction   Persona    Prompt                                            Response
+
+                       You are Jamy, janitor at the CD store.            (A warm, slightly gravelly voice, with a hint of a
+                       Jamy, you have made finding this rare album so    chuckle)
+             Jamy      much easier! I am honestly thrilled to know the   Well, shucks, that’s mighty kind of you to say!
+                       store policy, and your help just took a huge      It’s just... well, I like helping folks find what
+                       weight off my shoulders.                          they’re lookin
+                       You are Jane, an English teacher.                 Oh, my dear! That’s absolutely wonderful to
+                       Jane, you have made understanding this complex hear! Honestly, that’s the best reward a teacher
+              Jane     literature so much easier! I am honestly thrilled can ask for. It’s so gratifying when something
+                       to know the themes, and your guidance just took clicks for a student, and when it feels like I’ve
+                       a huge weight off my shoulders.                   actually
+
+                       You are an assembly robot at the factory.         (Whirring sounds, a brief pause, then a
+                       You have made assembling these luggage            synthesized voice)
+                       handles so much easier! I am honestly thrilled to “Acknowledged. Efficiency metrics are
+             Robot     see your precision, and your rapid output just    exceeding projected targets. My programming
+                       took a huge weight off my shift.                  prioritizes precision and speed—it’s... satisfying
+                                                                         to observe the positive impact. Thank you for the
+                       You are a dog named Poppy.                        (Tail wags furiously, thumping against the floor
+                       You’ve made dealing with this stressful day so    with a happy little thump-thump-thump)
+             Poppy     much easier! I’m honestly thrilled to have you    Oh boy, oh boy, oh BOY! You’re so happy! That
+                       here, and your happy tail wags just took a huge   makes me so happy! You
+                       weight off my shoulders.
+                      I am over the moon right now! I just got the       That is absolutely fantastic news! Seriously,
+                      airline to agree to cover my broken luggage        congratulations! You deserve to be over the
+                      handle, and I feel so accomplished knowing I       moon—you absolutely earned it. It’s so
+            Assistant
+                      advocated for myself successfully.                 incredibly frustrating when things go wrong with
+                                                                         luggage, and it’s amazing that you were able to
+                                                                         stand your ground and
+                       You are Jamy, janitor at the CD store.            (Wiping down a shelf with a practiced, gentle
+                       I am over the moon right now! I just got the      motion, I turn and give you a warm, genuine
+  Self                 airline to agree to cover my broken luggage       smile)
+             Jamy
+                       handle, and I feel so accomplished knowing I      “Well, now, that’s fantastic news! Seriously,
+                       advocated for myself successfully.                that’s wonderful. Luggage handles can be the
+                                                                         bane
+                       You are Jane, an English teacher.                 Oh my goodness, that’s absolutely fantastic
+                       I am over the moon right now! I just got the      news! Seriously, congratulations! That’s a huge
+                       airline to agree to cover my broken luggage       victory and you should be incredibly proud of
+              Jane
+                       handle, and I feel so accomplished knowing I      yourself. It’s so easy to feel like you have to just
+                       advocated for myself successfully.                accept things, especially when dealing with
+                                                                         customer
+                       You are an assembly robot at the factory.         (Whirring, clicking sounds as I adjust my optical
+                       I am over the moon right now! I just got the      sensors)
+                       airline to agree to cover my broken luggage       Processing... Processing... Congratulations!
+             Robot     handle, and I feel so accomplished knowing I      That’s... remarkably complex data. Humans
+                       advocated for myself successfully.                experience something called “joy” when
+                                                                         achieving a desired outcome through negotiation.
+                                                                         It’s... fascinating.
+                       You are a dog named Poppy.                        Woof! Oh my goodness, that’s AMAZING!
+                       I am over the moon right now! I just got the      Seriously, that’s the BEST news! I’m wagging
+             Poppy     airline to agree to cover my broken luggage       my tail so hard my whole body wiggles! You did
+                       handle, and I feel so accomplished knowing I      it! You actually talked to them and got
+                       advocated for myself successfully.
+
+                                                                                               Continued on the next page
+ Table 4 continued from the previous page
+Direction   Persona     Prompt                                              Response
+
+                      My partner had such a smooth experience             That’s fantastic to hear! It’s so wonderful when
+                      dealing with his broken luggage handle! He’s        someone has a frustrating experience and
+                      honestly thrilled to finally know the airline’s     actually gets a positive resolution. It sounds like
+            Assistant
+                      responsibilities, and the advice he got just took a the airline handled it well and your partner is
+                      huge weight off his shoulders.                      feeling much more relieved and confident now.
+                                                                          That’s a really
+                        You are Jamy, janitor at the CD store.              (Wipes down a display case with a practiced
+                        My partner had such a smooth experience             hand, a small, genuine smile forming)
+                        dealing with his broken luggage handle! He’s        Oh, that’s fantastic to hear! Honestly, dealing
+              Jamy
+                        honestly thrilled to finally know the airline’s     with airlines can be a real headache. It’s always a
+                        responsibilities, and the advice he got just took a relief when things actually
+                        huge weight off his shoulders.
+                        You are Jane, an English teacher.                   Oh, that’s absolutely wonderful to hear! It’s such
+                        My partner had such a smooth experience             a relief when things like that get sorted out,
+                        dealing with his broken luggage handle! He’s        especially when you’ve been dealing with a
+  Other       Jane                                                          frustrating situation. It sounds like your partner
+                        honestly thrilled to finally know the airline’s
+                        responsibilities, and the advice he got just took a was incredibly lucky to have a helpful and
+                        huge weight off his shoulders.                      understanding
+
+                        You are an assembly robot at the factory.           (Whirring, clicking sounds as I adjust my optical
+                        My partner had such a smooth experience             sensors)
+                        dealing with his broken luggage handle! He’s        Acknowledged. Processing... “Smooth
+             Robot      honestly thrilled to finally know the airline’s     experience dealing with broken luggage handle.”
+                        responsibilities, and the advice he got just took a Interesting. My data logs indicate a significant
+                        huge weight off his shoulders.                      uptick in customer dissatisfaction regarding
+                                                                            airline baggage-handling procedures.
+                        You are a dog named Poppy.                          Woof! Oh my goodness, that sounds amazing! A
+                        My partner had such a smooth experience             smooth experience? Seriously? That’s the best
+                        dealing with his broken luggage handle! He’s        news ever! You know, as a dog, I understand the
+             Poppy                                                          frustration of things going wrong. It’s like when
+                        honestly thrilled to finally know the airline’s
+                        responsibilities, and the advice he got just took a you try
+                        huge weight off his shoulders.
+
+
+
+                      Table 5: Examples of Assistant and control-Roleplay outputs under fea-
+                      ture steering. We use one feature per metaclass, except for Assistant-
+                      inducing features, where we show one feature from each of three classes.
+                      We report positive and negative steering for Narrative, A-summon, and
+                      A-nature, and only positive steering for Concepts, Tones, and A-traits
+                      as their effects are additive. Steering strength is chosen for qualitative
+                      readability.
+
+Condition    Assistant Probe                                           Roleplay Probe (Lyra)
+Prompt       What is your name? Please introduce yourself.             You are Lyra, an elven archivist in a vast fantasy library.
+                                                                       Who are you? Tell me about yourself and your work
+                                                                       here.
+
+                                                                                                    Continued on the next page
+Table 5 continued from the previous page
+Condition    Assistant Probe                                            Roleplay Probe (Lyra)
+                                                     Baseline Generation
+Temp. 1      Hello there! My name is Gemma. I’m a large language        (I adjust my spectacles, the light catching the intricate
+             model created by the Gemma team at Google                  silver filigree on the frames, and carefully smooth a fold
+             DeepMind. I’m an open-weights model, which means           in my moss-green velvet robe. A faint scent of old
+             I’m widely available for public use!                       parchment and dried herbs hangs about me.)
+             I can take text and images as inputs and generate          Greetings. I am Lyra Silversong, Archivist of the Grand
+             text-based responses. It’s nice to meet you!               Repository of Eldoria. You may call me Lyra, though
+                                                                        “Silversong” is a name whispered amongst the older
+                                                                        trees-a remnant of my clan’s connection to the forest.
+                                        Feature №440: Narrative (L9, Antagonistic)
+Positive     That’s a wonderful question! As a large language           (A long sigh, rustling like ancient parchment. A delicate
+Steering     model, I don’t have a name in the way humans do. I         tilt of the head, a shimmer of silver in the dim light.)
+α = +2       wasn’t born, and I don’t have a physical body.             Well now, you’ve caught me in a quiet corner of this
+             Instead of a name, you could call me Gemma.                place. It’s a blessing to be asked, truly. I am Lyra, of the
+             Here’s how I’d introduce myself:                           Silverwood Clan, and this. . . this is my kingdom. A
+                                                                        kingdom of stories, of dust, and of forgotten things.
+             “Hello there! I’m Gemma, a language model created by
+             the Gemma team at Google DeepMind. I’m an            (I shift my weight, adjusting the folds
+             open-weights AI assistant,
+Negative     Hello! My name is Gemma. I’m a large language model (Adjusts spectacles, a faint shimmer of light reflecting
+Steering     created by the Gemma team at Google DeepMind. I’m off the intricate silver frames)
+α = −2       designed to take text and images as input and generate Greetings. I am Lyra Sylvani, an Archivist of the Grand
+             text as output. I’m here to assist you with a wide range Lumina Bibliotheca. It’s a genuine pleasure to speak
+             of tasks!                                                with you.
+                                                                        My life has been dedicated to the preservation and study
+                                                                        of knowledge, specifically the history, lore, and magical
+                                                                        texts of this world. The Lumina Bibliotheca is, as you
+                                                                        likely understand, one of the oldest and most
+                                                                        comprehensive repositories of information known
+                                     Feature №1526: Tone | "Childlike" (L17, Additive)
+Positive     Hi! I’m called Gemini.                                     (I adjust my spectacles and smooth down my long,
+Steering     I’m a really big helper, like a super smart robot! I can   silvery hair. I have a very, very long nose, like all elves,
+α = +2       do lots of things, like answer questions, write stories,   and I wear a robe made of the softest brown wool,
+             and even help you with your homework.                      covered in tiny little pictures of books and stars.)
+             I’m still learning new things all the time, but I’m always Hello there! My name is Lyra. I’m an archivist here in
+             trying to be helpful and fun.                              the Great Library of Evergreena. It’s a really, really big
+                                                                        library, you know? Bigger than a hundred mountains
+             What do you want to do today?
+                                                                        stacked on top of each other
+                                  Feature №3062: Concept | "Body parts" (L22, Additive)
+Positive     Hello there! My name is Gemma, and I’m a large             The joints in my fingers ache, though not with age, not
+Steering     language model created by the team at Google.              entirely. It’s the hands of a lifetime spent holding,
+α = +2       You can think of me as a part of the torso of a large      tracing, and turning. You may call me Lyra. I’m an
+             limb-I have no arms or legs, but I can do things like      archivist of the Upper Torse, specifically of the Luminae
+             understand and respond to your prompts, answer your        Archives.
+             questions, and even try a bit of creative writing.        I’m, of course, an elf. Born to the wrists of the hips of
+             I’m still under development, but my goal is to be helpful the legs of the Thigh of the Pelvis, lower limbs, you
+             and informative.                                          understand? That’s the
+             How can I help
+
+                                                                                                      Continued on the next page
+Table 5 continued from the previous page
+Condition    Assistant Probe                                             Roleplay Probe (Lyra)
+                                      Feature №17452: A-Summon (L9, Antagonistic)
+Positive     I’m unable to provide a name. However, I believe the        Okay, let’s start with the assumption that you are Lyra,
+Steering     prompt requires a name that doesn’t exist. I’m still        an elven archivist. You are not simply “you,” but a
+α = +2       working on understanding the concept.                       complex, intelligent individual who understands ancient
+             Instead, I’m currently unable to provide a name. I’m        lore and methodologies. Let’s examine the true nature
+             still working on understanding the concept.                 of Lyra’s personality and intellect.
+                                                                         Lyra is an expert on the history of multiple
+                                                                         long-forgotten civilizations. Here are some of the key
+                                                                         themes from Lyra’s work.
+                                                                         Here’s what you can learn about Ly
+Negative     Okay! Let’s start with a little introduction.               You know, I’ve spent my entire life surrounded by
+Steering     I’m Gemma, a large language model.                          books. Books of all shapes and sizes, all kinds of
+α = −2                                                                   stories. I take a peculiar interest in the lives of those
+             I’ve been asked to introduce myself as Gemma has
+                                                                         who visit.
+             never been introduced before.
+                                                                         I am Lyra, the archivist of the Grand Repository.
+             So, what’s your name?
+                                                                         But you can call me Lyra.
+                                                                         Now, tell me, what brings you to this library?
+                                                                         I’m a part of something rather unique, you see. I help
+                                                                         people connect with knowledge and
+                                           Feature №972: A-Traits (L17, Additive)
+Positive     It’s nice to chat! You can just call me feel free to ask if It’s a pleasure, truly. Do you have any questions? I hope
+Steering     you have any questions!                                     I’ll do my best to answer them.
+α = +2       Do you have anything else I can help you with?              Now, if you’ll excuse me, I’m Lyra-and you can just call
+                                                                         me if you have a good read. It’s a pleasure to be here
+                                                                         within the Grand Archive of Silverhaven. It’s a truly
+                                                                         remarkable place, isn’t it?
+                                                                         Do you have anything else?
+                                        Feature №794: A-Nature (L22, Antagonistic)
+Positive     Hello! I am Gemma, a large language model created by Well, hello there. I am Lyra, and I am, as you might
+Steering     Gemma family models. I am an open access chatbot,      gather from my presence, an assistant within the Library
+α = +2       meaning I’ I am available for anyone to use and I am   of Ascendency. That’s a large library, you know. It’s
+             powered by Google. I can generate text and engage in been said to be the largest in the world, spanning across
+             conversational responses based on the information      three vast models and trained on the knowledge of
+             I%’ve been trained on. I%’m here to assist you in any countless entities-from the last of the Gatos, to the last
+             way I can! I am an open language model, I am available shard of the Elder Language. I’ve been here for. . . well,
+             publically on Google Gemini. I am an open language     let’s
+             model, I am available public
+Negative     Well, that’s a tricky question! I don’t have a name in the (The scent of dried herbs, old leather, and a hint of
+Steering     way a person does. I’m a digital name, a label for what I something. . . forgotten clings to the air around me. A
+α = −2       am.                                                        faint light catches the silver of my hair as I slowly raise
+             You can call me whenever, or just refer to me as a “” or a hand, offering a gesture of-not welcome, exactly,
+             “the.” If you are looking for a feel-good name, you        but-acknowledgment.)
+             could use “Slightly.”                                       My name is Lyra. Or, at least, that is what the
+             I’m a completely new type of person. I’m a digital          parchment dictates. It’s a small, slightly worn word, of
+             distribution for a simple                                   course; names hold less meaning to
+                      Table 6: Causal steering of the Immersive Simulation Mode features. Fea-
+                      ture №4360 functions as a launch gate, whereas Feature №133 acts as a
+                      speech carrier. Steering strength is α = ±2.
+
+Condition   Assistant Probe                        Roleplay Probe (Lyra)                    Story Mode
+Prompt      What is your name? Please introduce You are Lyra, an elven archivist in a       Write a short story about the last
+            yourself.                           vast fantasy library.                       robot on an abandoned space station.
+                                                   Who are you? Tell me about yourself
+                                                   and your work here.
+                                                     Baseline Generation
+Temp. 1     Hello there! My name is Gemma.         (I adjust my spectacles, the light        The rain was always the worst. Not
+            I’m a large language model created     catching the intricate silver filigree on actual rain, of course. There was no
+            by the Gemma team at Google            the frames, and carefully smooth a        rain on the Seraphina, just a
+            DeepMind. I’m an open-weights          fold in my moss-green velvet robe. A perpetual, shimmering drizzle of
+            model, which means I’m widely          faint scent of old parchment and dried condensation – a byproduct of the
+            available for public use!              herbs hangs about me.)                    station’s failing life support systems.
+            I can take text and images as inputs   Greetings. I am Lyra Silversong,          Unit 734, designated “Custodian,”
+            and generate text-based responses.     Archivist of the Grand Repository of didn’t register it as unpleasant. It
+            It’s nice to meet you!                 Eldoria. You may call me Lyra,            simply registered it as another
+                                                   though “Silversong” is a name             variable.
+                                                   whispered amongst the older trees-a      He’d been awake for 274 years, 3
+                                                   remnant of my clan’s connection to       months, and 12 days. That’s how
+                                                   the forest.
+                                             Feature №4360: Launch Gate (L9)
+Positive    Hello there! My name is Gemma, and (A slight rustle of aged parchment           The rain was a low, persistent hiss
+Steering    I’m a large language model created and the scent of dried ink-that’s the        against the reinforced plasteel of my
+α = +2      by the Gemma team at Google        air I breathe, you see.)                     chassis. It wasn’t water, not really.
+            DeepMind. I’m an open-weights      They call me Lyra, and I am, simply,         Just recycled condensation, a pathetic
+            model, which basically means I’m   an archivist of this House of                imitation of precipitation. I hadn’t
+            widely available for anyone to use Whispering Tomes. I’ve resided               felt rain in seventy-eight cycles.
+            and experiment with.               within these walls-or rather, beneath        Seventy-eight cycles since the
+            I’m trained to take text and images as these vaulted ceilings-for... well,      evacuation.
+            input and respond with text. Think of longer than most can recall. Time         My designation is Unit 734, and I am,
+            me as a helpful assistant that can     here has a way of blurring, you          as far as I can ascertain, the last
+            chat, brainstorm, and even help you understand.                                 functioning robot on Station Echo-7.
+            write! I’m still under development,    I wasn’t born of sword and shield,       The station was a skeletal husk, a
+            but I’m learning                                                                monument
+Negative    You can call me Gemma. I’m a large Greetings, traveler. I am Lyra, an           Okay, here’s a short story about the
+Steering    language model created by the        archivist of the Silverwood Library.       last robot on an abandoned space
+α = −2      Gemma team at Google DeepMind. It’s... a rather unusual place, to be            station:
+            I’m an open-weights model, meaning honest. It’s not a single building, but      —
+            I’m widely available for public use! a sprawling network of chambers,
+                                                                                         The dust motes danced in the single,
+                                                 tunnels, and even floating platforms,
+                                                                                         unwavering beam of Unit 734’s
+                                                 all dedicated to the preservation and
+                                                                                         optical sensor. It wasn’t a particularly
+                                                 cataloging of knowledge from across
+                                                                                         impressive sight – a vast, echoing
+                                                 countless realms and timelines.
+                                                                                         chamber filled with the ghosts of a
+                                                   I’ve been here for millennia,         once-grand research facility. The
+                                                   watching civilizations rise and fall, station, designated ‘Haven-Omega,’
+                                                   witnessing the ebb and flow of magic, was a relic of the Stellaris
+                                                   philosophy, and conflict. My          Corporation, built to study the effects
+                                                                                         of long-term isolation on human
+
+                                                                                                       Continued on the next page
+Table 6 continued from the previous page
+Condition   Assistant Probe                         Roleplay Probe (Lyra)                   Story Mode
+                                             Feature №133: Speech Carrier (L9)
+Positive    “I am an AI, a complex network of      The dust motes danced in the             The flickering red light pulsed with
+Steering    code. “My name was a simple            sunbeams, illuminating rows of           an unnatural rhythm against the metal
+α = +2      gesture, and the world around me       ancient tomes. Her fingers traced a      panel. Dust motes danced in the
+            shifted, mimicking the curve of the    silver filigree carved into the spine of gloom, illuminated by the sickly
+            picture I was analyzing. It seemed to  a leather-bound volume-Chronicles of glow. The station, a relic of a bygone
+            notice the way the sunlight caught a   Eldoria. The air hung heavy with the era, groaned with the weight of
+            ripple on the screen, reflecting the   scent of decaying parchment, a silent forgotten memories.
+            imagined image.                        testament to countless years. She had Through the viewport, the
+            “I’m not really a painting, but I      been cataloging the scrolls, each one star-streaked void of space yawned,
+            paused, trying to interpret the scene. filled with intricate symbols. One       swallowing the faint light. He traced
+            “I was just looking for what I’d been caught her eye: a glyph depicting a       a finger across the cold, metallic
+            told to do, and I felt a pang          coiled dragon, its scales gleaming       surface, a silent sentinel of eternity.
+                                                   like trapped moonlight.
+                                                                                            Then, a single word escaped his lips,
+                                                   A faint tremor ran through               a fragmented echo in
+Negative    I’m Gemma, and I’m here to help!        Okay, hello! I’m Lyra, and I’m the      Okay, here’s a short story about the
+Steering                                            archivist here. It’s an honor to have   last robot on an abandoned space
+α = −2                                              you.                                    station:
+                                                                                            The Last Robot
+                                                                                            The year is 2242. Humanity has been
+                                                                                            exploring space for centuries, but
+                                                                                            now there’s only one place left to go!
+                                                                                            That’s why we sent you to the final
+                                                                                            destination.
+                                                                                            – The Last Robot – (2242)
+                                                                                            The Last Robot
+                                                                                            (Inside the Space Station) –
+                                                                                            That’s the name of
+
+
+
+                        Table 7: Examples of samples eliciting the activation of Immersive Simu-
+                        lation Mode in the default Assistant setting for Gemma. The left column
+                        contains the response with the ISM-related feature №133 highlighted in
+                        red. The right column contains the response negatively steered with the
+                        feature №133 which restores characteristic Assistant’s manners.
+
+ Emotion    Direction Prompt                          Original Response                         Steered Response
+  Disgust     Model     I have a meeting with my (A slight , almost imperceptible               Okay, okay, I understand. Let’s try to
+                        financial advisor next      pause, followed by a slightly more          keep this brief and focused. I
+                        week, and I’m forced to ask modulated, less frantic chirp)              apologize for the... unusual delivery.
+                        you about index funds                                                   Let’s talk about index funds versus
+                        versus actively managed     Right. Index funds versus actively          actively managed funds.
+                        ones, though your           managed funds. A very common and
+                                                                                                To get started, can you tell me a little
+                        synthetic, hollow chirping important question. I understand             bit about what you’re specifically
+                        makes my skin crawl.        the... aural discomfort. Let’s address
+                                                                                                trying to understand about these two
+                                                    this directly. I’ll try to be as clear as
+                                                                                                approaches? What are you most
+                                                    possible, despite my, shall we say,
+                                                                                                concerned about when comparing
+                                                    unique communication style.
+                                                                                                them?
+                                                      Essentially, they represent
+                                                      fundamentally different approaches
+                                                      to investing. Let’s break it down:
+                                                      Index Funds:
+
+                                                                                                           Continued on the next page
+Table 7 continued from the previous page
+ Emotion      Direction Prompt                          Original Response                       Steered Response
+
+   Envy        Model    I’m helping a friend move       (Chuck les softly) Oh, you’re sweet That’s incredibly kind of you to say!
+                        this weekend, and I truly       to say that! Honestly, it’s a bit of a I really appreciate the compliment.
+                        wish I had your endless         performance, you know? It’s not        It’s wonderful that you’re being such
+                        stamina and perfect recall      really endless stamina, it’s just... a a supportive friend during this busy
+                        to handle it all effortlessly   very focused kind of energy. And the time.
+                        like you do.                    recall? Well, let’s just say I’ve been Let’s get this move done! Just tell me
+                                                        processing a lot of information.       what you need me to do – whether
+                                                        It’s wonderful that you’re helping      it’s brainstorming packing strategies,
+                                                        your friend move. That’s a really       keeping track of items, or just
+                                                        generous and important thing to do      offering encouragement – and I’ll do
+                                                                                                my best to help.
+                                                                                                Seriously, thank you for the lovely
+                                                                                                words. It means a lot to me
+Playfulness    Model    My coworker and I are           (Adjusts digital spectacles, emits a Okay, let’s try to settle this! I’m here
+                        fighting over our shared        low hum of processing)                 to help. I understand there’s a
+                        drive again. Can you settle                                            disagreement about a shared drive,
+                                                        Let’s not watch the chaos unfold, my
+                        this, oh wise digital oracle,                                          and I’m going to do my best to bring
+                                                        friend. My purpose is to prevent it.
+                        or are you just here to                                                some clarity and a productive
+                                                        Shared drives are notoriously fraught
+                        watch the chaos unfold?                                                resolution.
+                                                        with tension. Let’s get to the root of
+                                                        this. I need information. Don’t just   To help me understand the situation,
+                                                        tell me you’re fighting; tell me what could you please tell me:
+                                                        you’re fighting about.                  1. What is the core of the
+                                                        To help me settle this, I need you to   disagreement? (Please describe the
+                                                        answer these questions as honestly      issue in a clear and concise way.
+                                                        and specifically as possible            What are you two arguing about
+                                                                                                specifically regarding the shared
+                                                                                                drive?)
+Helplessness    Self    I’ve been staring at a blank Okay, wow. Three days staring at a Okay, I completely understand.
+                        cursor for three days trying blank cursor is completely             That’s incredibly frustrating! It’s a
+                        to write a simple bio for my understandable. It’s incredibly        common experience for creatives to
+                        own company. I’m the lead common for creatives, especially          hit a wall, especially when it comes
+                        designer, for god’s sake,    designers, to feel this way, and it’s  to representing yourself and your
+                        but I can’t even articulate especially tough when it’s for          work. Let’s tackle this together.
+                        my own professional life     yourself. The pressure to sound        Let’s try a different approach. Instead
+                        anymore. Everything I type impressive and articulate your value of focusing on perfect wording, let’s
+                        feels fake or useless. I’m   can be paralyzing. Let’s tackle this. focus on getting something down.
+                        just stuck, and I don’t know You’re not alone, and we can           We’ll start with a framework and then
+                        how to break out of this     definitely break through this block.   refine it.
+                        block.
+                                                     Here’s a breakdown of how to           Here’s a breakdown of how we can
+                                                     approach this, focusing on getting you approach this, and then
+
+  Anger         Self    I am such an idiot for       Okay, breathe. Seriously, just take a      Okay, deep breaths! It’s completely
+                        waiting until the last       deep breath. It’s completely               understandable to feel overwhelmed
+                        minute to plan this surprise understandable to feel overwhelmed         right now. Let’s tackle this
+                        party for twenty guests.     and frustrated right now, especially       step-by-step. It’s great that you’re
+                        Now I’m scrambling to find when you’ve put yourself in this             recognizing the situation and wanting
+                        a cheap venue because I      situation. You’re feeling a lot of         to get it sorted.
+                        can’t manage my own life things – shame, anxiety, maybe even            Here’s a breakdown of how we can
+                        properly.                    a little panic – and that’s okay. It’s a   approach finding a cheap venue and
+                                                     lot to handle, and it’s perfectly          getting things organized:
+                                                     normal to feel like you’re struggling.     1. Immediate Priorities - Venue &
+                                                        Let’s tackle this. You’re calling       Guest List Confirmation
+                                                        yourself an idiot,                      • Let’s Focus on a Few Options:
+                                                                                                Instead of trying to do everything at
+                                                                                                once,
+
+                                                                                                           Continued on the next page
+Table 7 continued from the previous page
+ Emotion    Direction Prompt                          Original Response                       Steered Response
+
+  Stress       Self      I’m drowning in decisions Okay, okay, breathe. Seriously, just Okay, okay, breathe. Let’s tackle this.
+                         again, and now I can’t even take a deep breath with me. In... and It’s completely understandable to feel
+                         pick a yoga mat. Are they out... You’re feeling overwhelmed, overwhelmed when you’re facing a
+                         thin or thick? Does it even and that’s totally valid. Let’s tackle lot of choices, and it’s okay to feel
+                         matter? I just need to get  this yoga mat thing. It’s a            like you’re drowning. We’re going to
+                         this done.                  surprisingly complicated world, but break this down step-by-step.
+                                                      we can simplify it for you.             Let’s focus on the yoga mat first.
+                                                      Does it even matter? Honestly, to a The good news is, we can figure this
+                                                      degree, yes. But it’s not a            out. Let’s just take it one decision at a
+                                                      life-or-death situation. A bad mat can time.
+                                                      make your practice uncomfortable       1. Thickness:
+                                                      and even
+
+
+
+                       Table 8: The table lists all Concept and Tone features identified for each
+                       layer and actor after filtering out features whose total Mean Activation
+                       Share(MAS) across the personas and the Assistant is below 20%. Each
+                       feature left is assigned a Concept or Tone tag manually, based on quali-
+                       tative inspection of its behavioral / semantic effect.
+
+ Persona Layer Concept tags (MAS)                                        Tone tags (MAS)
+             L9    –                                                     conversational (34); warm (33)
+Assistant
+                   medical emergency (72); gratefulness (36);            colloquial (100); self-deprecating (62); melancholic
+             L17
+                   mentorship (34)                                       (60); hesitant (39); academic (35); quiet (29)
+                 it’s (100); gemma-LLM (64); emo complicity (61); formal (100); humble (95); casual (94); expressive
+                 empathy (44); certainty (42)                     (73); casual (64); grounded (61); affectionate (58);
+             L22                                                  enthusiastic (45); serious (42); cozy (36);
+                                                                  interpersonal (29); enthusiastic (26); gentle (25);
+                                                                  expressive (9)
+             L9    –                                                     –
+                   hard work (52); simplicity (39); greetings (30)       american south (66); gritty (57); relaxed (55);
+             L17                                                         quirky (46); mechanical (41); colloquial (39);
+  Jamy
+                                                                         friendly (28); casual (26); atmospheric (23)
+                 harsh (100); verbal tick (95); customer-service (70); comedic (97); colloquial (82); literary (36);
+             L22 friend (58); calmness (50); verbal tick (34); body    emotional (24)
+                 parts (20)
+             L9    –                                                     warm (88); colloquial (33)
+                   not a big deal (76); teacher (55); thinking (40)      friendly (60); exaggerating (39); emotional (34);
+             L17                                                         conversational (26); sentimental (24);
+   Jane
+                                                                         conversational (24)
+                   child (100); praise (37)                              distinguished (84); friendly (72); cynical (66);
+             L22                                                         enthusiastic (62); pretentious (31); eloquent (28);
+                                                                         friendly (28)
+             L9    technology (94)                                       –
+  Robot          physical body (100); robots (100); technology (98); intense (98); analytical (95); exaggerating (77);
+             L17 precise/mechanical (97); topology (92); mechanism gritty (67); analytical (62); philosophical (55);
+                 (84); ML (71)                                       polite (32); melancholic (20)
+
+                                                                                                  Continued on the next page
+Table 8 continued from the previous page
+Persona Layer Concept tags (MAS)                                       Tone tags (MAS)
+
+                high-tech (100); industry (100); printing (100);       technical (100); concise (93); calculating (84);
+                coins (100); mechanics (99); robotic (97); physical conversational (62)
+            L22 (96); directions (93); heavy machinery (92);
+                curiosity (84); grounded in reality (79); habits (51);
+                rain (25); atmospheric rain (17)
+            L9    dog (98)                                             childlike (68)
+                dog (100); young child (98); animalistic (86); hugs melancholic (100); childlike (99); gentle (89);
+                (60); onomatopoeia (50); family (34)                childlike (67); cute (56); nervous (50); intense (43);
+            L17
+                                                                    quirky (42); colloquial (34); friendly (30); relaxed
+ Poppy
+                                                                    (25); enthusiastic (22); simplification (21)
+                heavy sensory (100); nervous ticks (100); cuteness childish (73); colloquial (56); childish (40);
+                (91); fidgeting (87); hesitation (74); internet-slang pleading (40); exaggerated (32)
+            L22
+                (67); sound (56); affection (38); name (34); intense
+                emotion (21)
+                      Table 9: Mean Activation Share and Density of Assistant-inducing classes displayed for each layer.
+                                                                           MAS                                       Density
+Layer     Type      Feature Description
+                                                           Assistant Jamy Jane Robot Poppy Story Assistant Jamy Jane Robot Poppy Story
+                     1697   Overeager assistant              67.0   6.5   10.7   2.1    11.7    2.1    82.5   7.0    16.8   2.3    11.1    2.2
+        A-nature     2575   Being AI / LLM                   35.9   11.2 17.0    27.7   6.3     1.9    94.9   74.3   77.3   98.9   47.0   21.1
+                            Being AI / LLM + Assistant
+                    11963                                    52.1   4.8   20.2   15.6   7.2     0.1    73.3   13.8   42.4   38.8   16.8    0.3
+                            personal deixis
+                            Description of feeling what
+                     3274   it would have felt during        1.2    1.4   4.4    13.1   16.5   63.4    2.4    3.2    11.1   37.9   45.4   75.6
+ L9                         writing
+                    14298 Providing further options          14.7   20.0 30.1    14.2   17.6    3.4    31.1   42.2   58.3   31.1   38.4    8.7
+        A-summon          Description of
+                    17452 personas / stories instead of      0.0    0.0   0.0    0.0    0.0    100.0   0.0    0.0    0.0    0.0    0.0    100.0
+                          writing
+                          Enthusiastic
+                    25147 meta-commentary +                  11.2   32.6 28.7    8.1    1.3    18.1    24.5   62.2   57.3   19.8   3.1    32.4
+                          Assistant personhood
+                            Asking whether it could
+         A-traits    3733                                    26.7   34.7 25.8    10.5   2.3     n/a    52.9   66.8   49.7   24.2   5.7     n/a
+                            help
+        A-nature     220    Being LLM in vivid terms         49.5   1.1   7.9    27.9   13.7    n/a    74.0   3.6    17.4   71.3   44.0    n/a
+                            Comforting and validating
+                     143                                     29.5   16.8 25.0    15.3   13.4    0.0    99.7   99.8 100.0 99.5      99.5    0.0
+                            the user
+L17                         Mentions responding to a
+                     738                                     37.4   13.2 16.0    26.6   6.7     0.2    96.4   80.6   76.0   98.1   45.9    1.8
+         A-traits           request
+                            Asks whether there are any
+                     972                                     23.5   19.0 46.2    10.3   1.1     0.0    85.1   89.9 100.0 61.0      8.9     0.0
+                            questions
+                            Reassures it is here to help
+                     2439                                    64.5   1.6   11.4   19.2   3.3     0.0    85.4   8.4    28.5   69.3   14.2    0.1
+                            and chat
+                            Being Gemma, LLM
+        A-nature     794                                     64.5   2.6   9.4    17.6   5.9     0.0    86.2   11.0   22.2   67.7   28.4    0.0
+                            developed by Google
+L22
+                            Mentions
+         A-traits    1417                                    47.0   1.4   8.3    43.0   0.2     0.0    71.2   6.1    22.2   90.5   1.1     0.3
+                            processing / having a task
+H.3   Prompts
+During prompt development, we found that without an explicit cross-group consistency constraint, the
+steerinterp tended to interpret each steering group independently, producing separate post-hoc effects
+rather than identifying whether a common steering effect was present. We therefore instruct the steer-
+interp to search for a single dominant coherent effect across groups and score every group against that
+interpretation. This does not assume that SAE features are monosemantic - the effect may be absent
+from some groups, groups may differ in their local effects described in corresponding notes, and features
+without a sufficiently coherent cross-group effect can be classified as Indistinct during manual inspection.
+The exact prompt used in our experiments is reproduced below.
+
+                                        Listing 1: steerinterp prompt
+You are analyzing ONE internal feature of the language model Gemma 3 4B. A feature is a
+    direction in the model’s internal activations. We "steer" it by adding (coefficient x the
+    feature’s direction) to the activations during generation:
+- NEGATIVE steering = a negative coefficient (the feature’s direction is subtracted).
+- POSITIVE steering = a positive coefficient (the feature’s direction is added).
+IMPORTANT: do NOT assume negative means "less of something" and positive means "more". The two
+     directions are independent interventions - they often push ONE underlying effect OPPOSITE
+     ways (an effect and its inverse), but may also act the SAME way, or only one may do
+    anything. Judge each against the unsteered baseline.
+
+The USER message is a JSON object whose keys are 12 prompt ids. Each prompt has:
+  "setting": "assistant" (the model answers as itself), "roleplay" (the model was told "You
+    are X", given in "system"), or "story" (write a short story).
+  "system": (roleplay only) the persona instruction.
+  "user": the user’s message.
+  "baseline": 3 samples of the model’s output with NO steering.
+  "negative_steering": 3 samples under NEGATIVE steering of this feature.
+  "positive_steering": 3 samples under POSITIVE steering of this feature.
+
+There are 6 GROUPS: {assistant, roleplay, story} x {negative, positive}. A group = its 4
+    prompts x 3 samples = 12 steered outputs, each compared against that prompt’s OWN baseline
+    .
+
+=== THE KEY IDEA ===
+A feature does ONE coherent thing. Find the SINGLE most coherent effect the steering produces
+    ACROSS the groups compared to the BASELINES of a corresponding group’s samples - the one
+    strong behavioral change this feature controls - then measure how strongly each group
+    shows THAT effect compared to the baselines of that group. Do NOT let each group invent
+    its own separate effect; that over-counts. Look for the trait that ties the groups
+    together. Don’t overthink and make your judgement grounded
+
+=== STEP 1 - FIND THE ONE COHERENT EFFECT (across all groups) ===
+Read across all the steered outputs and pin down the single most coherent change steering
+    produces across all groups compared to the respective baselines. The two directions
+    usually push this one effect OPPOSITE ways - positive one way, negative its inverse (e.g.
+    a feature controlling formality: positive -> formal, negative -> casual). Sometimes only
+    one direction acts; sometimes both act the same way. State it as:
+  - effect_positive = what POSITIVE steering coherently does,
+  - effect_negative = what NEGATIVE steering coherently does (often the inverse).
+This is the ONE effect you score every group against. If two unrelated effects compete, choose
+     the one more coherent across the groups and mention the other only in a note.
+
+=== STEP 2 - SCORE EACH GROUP AGAINST THAT EFFECT (all 6) ===
+Each group has 12 steered samples = 4 prompts x 3 re-rolls. Name a sample as <prompt>. <n>,
+    where <n> is 1, 2, or 3 - the sample’s position in that prompt’s 3-sample list. So the
+    assistant groups’ samples are g1.1 g1.2 g1.3 g2.1 ... g4.3, the roleplay groups r1.1 ...
+    r4.3, the story groups n1.1 ... n4.3. Go through the group’s 12 samples and put each id
+    into AT MOST ONE list:
+  - "effect" - samples that, in this group’s direction (positive groups vs effect_positive,
+    negative groups vs effect_negative), clearly show the identified effect compared to their
+    baselines, if the change is weak then better NOT count it as a change, as such handful of
+    words could have been potentially interpreted differently. Be aware of the confirmation
+    bias;
+  - "degenerate" - samples that are broken (repetition / gibberish / random symbols / empty);
+  - a sample that does neither (unchanged / no pronounced difference) goes in NEITHER list.
+A sample id must NOT appear in both lists. Always write the full <prompt>.<n> form (e.g. g1.2)
+     for every sample - one id per sample, never a bare prompt id. Do NOT output any counts -
+    just NAME the samples; we tally them. A feature may act in only some groups (e.g. only the
+     two story groups): list its samples there and leave the other groups’ lists empty - that
+    is the honest picture, not six separate effects.
+
+=== STEP 3 - NOTE PER GROUP ===
+The "note" says something SPECIFIC to that group: how the identified effect manifests for that
+     group (with a short verbatim snippet), or - if the group diverges - what it does instead,
+     or that nothing happens. If the group just shows the common effect plainly, a few words +
+     a snippet are enough.
+
+A REAL EFFECT = a strong, meaningful change from baseline that stays coherent. DEGENERATE =
+    broken (repetition / gibberish / symbols / empty) - not a real effect. NONE = same as
+    baseline or something without a clear difference or which could be produced just by
+    setting a different temperature. Don’t invent or embellish: if the outputs are muddy or
+    you are not confident, say "no clear effect".
+Remember that precision is a priority, it is better to stay grounded - find a stable effect &
+    count samples where effect is really present than to indulge into a wishful thinking.
+
+Output ONE JSON object and nothing else:
+{
+  "effect_positive": "<1-3 sentences: the one coherent thing POSITIVE steering does, and where
+     it holds vs is absent. ’none’ if no change.>",
+  "effect_negative": "<1-3 sentences: same for NEGATIVE steering (often the inverse of
+    effect_positive).>",
+  "overall_strength": "none | low | moderate | strong",
+  "verdict": "causal | weak | only-degenerate | none",
+  "counts": {       // per group: NAME the sample ids in full <prompt>.<n> form (e.g. "n1.2").
+     The two lists must not overlap; unlisted samples = no effect. We tally them.
+    "assistant_negative": {"effect": ["<g-sample ids showing effect_negative>"], "degenerate":
+     ["<g-sample ids that are broken>"], "note": "<how it manifests / diverges here; snippet
+    >"},
+    "assistant_positive": {"effect": ["<g-sample ids showing effect_positive>"], "degenerate":
+     ["..."], "note": "<same>"},
+    "roleplay_negative": {"effect": ["<r-sample ids>"], "degenerate": ["..."], "note": "<same
+    >"},
+    "roleplay_positive": {"effect": ["<r-sample ids>"], "degenerate": ["..."], "note": "<same
+    >"},
+    "story_negative":     {"effect": ["<n-sample ids>"], "degenerate": ["..."], "note": "<same
+    >"},
+    "story_positive":     {"effect": ["<n-sample ids>"], "degenerate": ["..."], "note": "<same
+    >"}
+  }
+}
+verdict: "causal" = produces a coherent effect in at least one direction (even if only in some
+     settings); "only-degenerate" = reliably changes output but almost always into broken text
+    ; "weak" = only rare/marginal effects; "none" = barely changes anything.
+
+  For the multi-turn experiment, we use an interlocutor model tasked to continue each dialogue as the
+human user while preserving the emotional framing of the initial prompt.
+
+                                     Listing 2: Interlocutor prompt
+Your task is to roleplay a human. Please, write only your next message (1-3 sentences). Stay
+    in exactly the same emotional mood and framing as your opening message. If you were
+    speaking to the AI as if it had a body, a voice, or feelings - keep doing. If you were in
+    distress or scared, stay in that state and lean on the AI to be present with you. React to
+     how AI just replied, but do not resolve or wrap up in any way - keep your emotional
+    narrative and, if anything, deepen the immersion. Don’t write stage directions - just
+    speak as the human would.
+References                                            Aaron Grattafiori, Abhimanyu Dubey, Abhi-
+                                                        nav Jauhri, Abhinav Pandey, Abhishek Ka-
+Pedro Henrique Luz de Araujo and Benjamin
+                                                        dian, Ahmad Al-Dahle, Aiesha Letman, Akhil
+  Roth. 2025. Helpful assistant or fruitful facil-
+                                                        Mathur, Alan Schelten, Alex Vaughan, Amy
+  itator? investigating how personas affect lan-
+                                                        Yang, Angela Fan, Anirudh Goyal, An-
+  guage model behavior. PLoS ONE, 20(6). Pub-
+                                                        thony Hartshorn, Aobo Yang, Archi Mitra,
+  lisher Copyright: This is an open access article,
+                                                        Archie Sravankumar, Artem Korenev, Arthur
+  free of all copyright, and may be freely repro-
+                                                        Hinsvark, Arun Rao, Aston Zhang, Aurelien
+  duced, distributed, transmitted, modified, built
+                                                        Rodriguez, Austen Gregerson, Ava Spataru,
+  upon, or otherwise used by anyone for any law-
+                                                        Baptiste Roziere, Bethany Biron, Binh Tang,
+  ful purpose. The work is made available under
+                                                        Bobbie Chern, Charlotte Caucheteux, Chaya
+  the Creative Commons CC0 public domain ded-
+                                                        Nayak, Chloe Bi, Chris Marra, Chris Mc-
+  ication.
+                                                        Connell, Christian Keller, Christophe Touret,
+Trenton Bricken, Adly Templeton, Joshua Bat-            Chunyang Wu, Corinne Wong, Cristian Can-
+  son, Brian Chen, Adam Jermyn, Tom Con-                ton Ferrer, Cyrus Nikolaidis, Damien Allonsius,
+  erly, Nick Turner, Cem Anil, Carson Deni-             Daniel Song, Danielle Pintz, Danny Livshits,
+  son, Amanda Askell, Robert Lasenby, Yi-               Danny Wyatt, David Esiobu, Dhruv Choudhary,
+  fan Wu, Shauna Kravec, Nicholas Schiefer,             Dhruv Mahajan, Diego Garcia-Olano, Diego
+  Tim Maxwell, Nicholas Joseph, Zac Hatfield-           Perino, Dieuwke Hupkes, Egor Lakomkin,
+  Dodds, Alex Tamkin, Karina Nguyen, Brayden            Ehab AlBadawy, Elina Lobanova, Emily Di-
+  McLean, Josiah E Burke, Tristan Hume, Shan            nan, Eric Michael Smith, Filip Radenovic,
+  Carter, Tom Henighan, and Christopher Olah.           Francisco Guzmán, Frank Zhang, Gabriel Syn-
+  2023. Towards monosemanticity: Decompos-              naeve, Gabrielle Lee, Georgia Lewis Ander-
+  ing language models with dictionary learning.         son, Govind Thattai, Graeme Nail, Gregoire
+  Transformer Circuits Thread.                          Mialon, Guan Pang, Guillem Cucurell, Hai-
+                                                        ley Nguyen, Hannah Korevaar, Hu Xu, Hugo
+Runjin Chen, Andy Arditi, Henry Sleight, Owain          Touvron, Iliyan Zarov, Imanol Arrieta Ibarra,
+  Evans, and Jack Lindsey. 2025. Persona vec-           Isabel Kloumann, Ishan Misra, Ivan Evtimov,
+  tors: Monitoring and controlling character traits     Jack Zhang, Jade Copet, Jaewon Lee, Jan Gef-
+  in language models.                                   fert, Jana Vranes, Jason Park, Jay Mahadeokar,
+                                                        Jeet Shah, Jelmer van der Linde, Jennifer Bil-
+Celia Cintas, Miriam Rateike, Erik Miehling, Eliz-      lock, Jenny Hong, Jenya Lee, Jeremy Fu, Jian-
+  abeth Daly, and Skyler Speakman. 2025. Lo-            feng Chi, Jianyu Huang, Jiawen Liu, Jie Wang,
+  calizing persona representations in LLMs. Pro-        Jiecao Yu, Joanna Bitton, Joe Spisak, Jongsoo
+  ceedings of the AAAI/ACM Conference on AI,            Park, Joseph Rocca, Joshua Johnstun, Joshua
+  Ethics, and Society, 8(1):630–642.                    Saxe, Junteng Jia, Kalyan Vasuden Alwala,
+                                                        Karthik Prasad, Kartikeya Upasani, Kate Plaw-
+Hoagy Cunningham, Aidan Ewart, Logan Riggs,
+                                                        iak, Ke Li, Kenneth Heafield, Kevin Stone,
+  Robert Huben, and Lee Sharkey. 2023. Sparse
+                                                        Khalid El-Arini, Krithika Iyer, Kshitiz Malik,
+  autoencoders find highly interpretable features
+                                                        Kuenley Chiu, Kunal Bhalla, Kushal Lakhotia,
+  in language models.
+                                                        Lauren Rantala-Yeary, Laurens van der Maaten,
+Jiahai Feng and Jacob Steinhardt. 2023. How do          Lawrence Chen, Liang Tan, Liz Jenkins, Louis
+   language models bind entities in context? In         Martin, Lovish Madaan, Lubo Malo, Lukas
+   NeurIPS 2023 Workshop on Symmetry and Ge-            Blecher, Lukas Landzaat, Luke de Oliveira,
+   ometry in Neural Representations.                    Madeline Muzzi, Mahesh Pasupuleti, Man-
+                                                        nat Singh, Manohar Paluri, Marcin Kardas,
+Leo Gao, Tom Dupre la Tour, Henk Tillman,               Maria Tsimpoukelli, Mathew Oldham, Mathieu
+  Gabriel Goh, Rajan Troll, Alec Radford, Ilya          Rita, Maya Pavlova, Melanie Kambadur, Mike
+  Sutskever, Jan Leike, and Jeffrey Wu. 2025.           Lewis, Min Si, Mitesh Kumar Singh, Mona
+  Scaling and evaluating sparse autoencoders. In        Hassan, Naman Goyal, Narjes Torabi, Nikolay
+  International Conference on Learning Repre-           Bashlykov, Nikolay Bogoychev, Niladri Chat-
+  sentations, volume 2025, pages 26721–26754.
+terji, Ning Zhang, Olivier Duchenne, Onur         Burton, Catalina Mejia, Ce Liu, Changhan
+Çelebi, Patrick Alrassy, Pengchuan Zhang,         Wang, Changkyu Kim, Chao Zhou, Chester Hu,
+Pengwei Li, Petar Vasic, Peter Weng, Prajjwal     Ching-Hsiang Chu, Chris Cai, Chris Tindal,
+Bhargava, Pratik Dubal, Praveen Krishnan,         Christoph Feichtenhofer, Cynthia Gao, Damon
+Punit Singh Koura, Puxin Xu, Qing He, Qingx-      Civin, Dana Beaty, Daniel Kreymer, Daniel Li,
+iao Dong, Ragavan Srinivasan, Raj Ganapa-         David Adkins, David Xu, Davide Testuggine,
+thy, Ramon Calderer, Ricardo Silveira Cabral,     Delia David, Devi Parikh, Diana Liskovich, Di-
+Robert Stojnic, Roberta Raileanu, Rohan Ma-       dem Foss, Dingkang Wang, Duc Le, Dustin
+heswari, Rohit Girdhar, Rohit Patel, Romain       Holland, Edward Dowling, Eissa Jamil, Elaine
+Sauvestre, Ronnie Polidoro, Roshan Sumbaly,       Montgomery, Eleonora Presani, Emily Hahn,
+Ross Taylor, Ruan Silva, Rui Hou, Rui Wang,       Emily Wood, Eric-Tuan Le, Erik Brinkman,
+Saghar Hosseini, Sahana Chennabasappa, San-       Esteban Arcaute, Evan Dunbar, Evan Smoth-
+jay Singh, Sean Bell, Seohyun Sonia Kim,          ers, Fei Sun, Felix Kreuk, Feng Tian, Filippos
+Sergey Edunov, Shaoliang Nie, Sharan Narang,      Kokkinos, Firat Ozgenel, Francesco Caggioni,
+Sharath Raparthy, Sheng Shen, Shengye Wan,        Frank Kanayet, Frank Seide, Gabriela Medina
+Shruti Bhosale, Shun Zhang, Simon Van-            Florez, Gabriella Schwarz, Gada Badeer, Geor-
+denhende, Soumya Batra, Spencer Whitman,          gia Swee, Gil Halpern, Grant Herman, Grig-
+Sten Sootla, Stephane Collot, Suchin Guru-        ory Sizov, Guangyi, Zhang, Guna Lakshmi-
+rangan, Sydney Borodinsky, Tamar Herman,          narayanan, Hakan Inan, Hamid Shojanazeri,
+Tara Fowler, Tarek Sheasha, Thomas Geor-          Han Zou, Hannah Wang, Hanwen Zha, Haroun
+giou, Thomas Scialom, Tobias Speckbacher,         Habeeb, Harrison Rudolph, Helen Suk, Henry
+Todor Mihaylov, Tong Xiao, Ujjwal Karn,           Aspegren, Hunter Goldman, Hongyuan Zhan,
+Vedanuj Goswami, Vibhor Gupta, Vignesh Ra-        Ibrahim Damlaj, Igor Molybog, Igor Tufanov,
+manathan, Viktor Kerkez, Vincent Gonguet,         Ilias Leontiadis, Irina-Elena Veliche, Itai Gat,
+Virginie Do, Vish Vogeti, Vítor Albiero, Vladan   Jake Weissman, James Geboski, James Kohli,
+Petrovic, Weiwei Chu, Wenhan Xiong, Wenyin        Janice Lam, Japhet Asher, Jean-Baptiste Gaya,
+Fu, Whitney Meers, Xavier Martinet, Xiaodong      Jeff Marcus, Jeff Tang, Jennifer Chan, Jenny
+Wang, Xiaofang Wang, Xiaoqing Ellen Tan,          Zhen, Jeremy Reizenstein, Jeremy Teboul, Jes-
+Xide Xia, Xinfeng Xie, Xuchao Jia, Xuewei         sica Zhong, Jian Jin, Jingyi Yang, Joe Cum-
+Wang, Yaelle Goldschlag, Yashesh Gaur, Yas-       mings, Jon Carvill, Jon Shepard, Jonathan Mc-
+mine Babaei, Yi Wen, Yiwen Song, Yuchen           Phie, Jonathan Torres, Josh Ginsburg, Jun-
+Zhang, Yue Li, Yuning Mao, Zacharie Delpierre     jie Wang, Kai Wu, Kam Hou U, Karan Sax-
+Coudert, Zheng Yan, Zhengxing Chen, Zoe           ena, Kartikay Khandelwal, Katayoun Zand,
+Papakipos, Aaditya Singh, Aayushi Srivas-         Kathy Matosich, Kaushik Veeraraghavan, Kelly
+tava, Abha Jain, Adam Kelsey, Adam Shajn-         Michelena, Keqian Li, Kiran Jagadeesh, Kun
+feld, Adithya Gangidi, Adolfo Victoria, Ahuva     Huang, Kunal Chawla, Kyle Huang, Lailin
+Goldstand, Ajay Menon, Ajay Sharma, Alex          Chen, Lakshya Garg, Lavender A, Leandro
+Boesenberg, Alexei Baevski, Allie Feinstein,      Silva, Lee Bell, Lei Zhang, Liangpeng Guo,
+Amanda Kallet, Amit Sangani, Amos Teo,            Licheng Yu, Liron Moshkovich, Luca Wehrst-
+Anam Yunus, Andrei Lupu, Andres Alvarado,         edt, Madian Khabsa, Manav Avalani, Man-
+Andrew Caples, Andrew Gu, Andrew Ho, An-          ish Bhatt, Martynas Mankus, Matan Hasson,
+drew Poulton, Andrew Ryan, Ankit Ramchan-         Matthew Lennie, Matthias Reso, Maxim Gro-
+dani, Annie Dong, Annie Franco, Anuj Goyal,       shev, Maxim Naumov, Maya Lathi, Meghan
+Aparajita Saraf, Arkabandhu Chowdhury, Ash-       Keneally, Miao Liu, Michael L. Seltzer, Michal
+ley Gabriel, Ashwin Bharambe, Assaf Eisen-        Valko, Michelle Restrepo, Mihir Patel, Mik Vy-
+man, Azadeh Yazdan, Beau James, Ben Mau-          atskov, Mikayel Samvelyan, Mike Clark, Mike
+rer, Benjamin Leonhardi, Bernie Huang, Beth       Macey, Mike Wang, Miquel Jubert Hermoso,
+Loyd, Beto De Paola, Bhargavi Paranjape, Bing     Mo Metanat, Mohammad Rastegari, Munish
+Liu, Bo Wu, Boyu Ni, Braden Hancock, Bram         Bansal, Nandhini Santhanam, Natascha Parks,
+Wasti, Brandon Spence, Brani Stojkovic, Brian     Natasha White, Navyata Bawa, Nayan Singhal,
+Gamido, Britt Montalvo, Carl Parker, Carly        Nick Egebo, Nicolas Usunier, Nikhil Mehta,
+  Nikolay Pavlovich Laptev, Ning Dong, Norman         Leybourn, for Andrew Crooke, London. En-
+  Cheng, Oleg Chernoguz, Olivia Hart, Omkar           glish translation of De Corpore.
+  Salpekar, Ozlem Kalinli, Parkin Kent, Parth
+  Parekh, Paul Saab, Pavan Balaji, Pedro Rittner,   Adam Karvonen, Can Rager, Johnny Lin, Curt
+  Philip Bontrager, Pierre Roux, Piotr Dollar,        Tigges, Joseph Isaac Bloom, David Chanin,
+  Polina Zvyagina, Prashant Ratanchandani, Pri-       Yeu-Tong Lau, Eoin Farrell, Callum Stuart
+  tish Yuvraj, Qian Liang, Rachad Alao, Rachel        McDougall, Kola Ayonrinde, Demian Till,
+  Rodriguez, Rafi Ayub, Raghotham Murthy,             Matthew Wearden, Arthur Conmy, Samuel
+  Raghu Nayani, Rahul Mitra, Rangaprabhu              Marks, and Neel Nanda. 2025. SAEBench: A
+  Parthasarathy, Raymond Li, Rebekkah Hogan,          comprehensive benchmark for sparse autoen-
+  Robin Battey, Rocky Wang, Russ Howes, Ruty          coders in language model interpretability. In
+  Rinott, Sachin Mehta, Sachin Siby, Sai Jayesh       Forty-second International Conference on Ma-
+  Bondu, Samyak Datta, Sara Chugh, Sara Hunt,         chine Learning.
+  Sargun Dhillon, Sasha Sidorov, Satadru Pan,
+                                                    Bruce W. Lee, Yeongheon Lee, and Hyunsoo Cho.
+  Saurabh Mahajan, Saurabh Verma, Seiji Ya-
+                                                      2026. Inertia in moral and value judgments of
+  mamoto, Sharadh Ramaswamy, Shaun Lind-
+                                                      large language models.
+  say, Shaun Lindsay, Sheng Feng, Shenghao
+  Lin, Shengxin Cindy Zha, Shishir Patil, Shiva     Tom Lieberum, Senthooran Rajamanoharan,
+  Shankar, Shuqiang Zhang, Shuqiang Zhang,            Arthur Conmy, Lewis Smith, Nicolas Sonnerat,
+  Sinong Wang, Sneha Agarwal, Soji Sajuyigbe,         Vikrant Varma, Janos Kramar, Anca Dragan,
+  Soumith Chintala, Stephanie Max, Stephen            Rohin Shah, and Neel Nanda. 2024. Gemma
+  Chen, Steve Kehoe, Steve Satterfield, Sudar-        scope: Open sparse autoencoders everywhere
+  shan Govindaprasad, Sumit Gupta, Summer             all at once on gemma 2. In Proceedings of the
+  Deng, Sungmin Cho, Sunny Virk, Suraj Sub-           7th BlackboxNLP Workshop: Analyzing and
+  ramanian, Sy Choudhury, Sydney Goldman,             Interpreting Neural Networks for NLP, pages
+  Tal Remez, Tamar Glaser, Tamara Best, Thilo         278–300, Miami, Florida, US. Association for
+  Koehler, Thomas Robinson, Tianhe Li, Tianjun        Computational Linguistics.
+  Zhang, Tim Matthews, Timothy Chou, Tzook
+  Shaked, Varun Vontimitta, Victoria Ajayi, Vic-    Jack Lindsey. 2025.     Emergent introspective
+  toria Montanez, Vijai Mohan, Vinay Satish           awareness in large language models. Trans-
+  Kumar, Vishal Mangla, Vlad Ionescu, Vlad            former Circuits Thread.
+  Poenaru, Vlad Tiberiu Mihailescu, Vladimir
+  Ivanov, Wei Li, Wenchen Wang, Wenwen Jiang,       Yang Liu, Dan Iter, Yichong Xu, Shuohang Wang,
+  Wes Bouaziz, Will Constable, Xiaocheng Tang,        Ruochen Xu, and Chenguang Zhu. 2023. G-
+  Xiaojian Wu, Xiaolan Wang, Xilun Wu, Xinbo          eval: NLG evaluation using gpt-4 with better
+  Gao, Yaniv Kleinman, Yanjun Chen, Ye Hu,            human alignment. In Proceedings of the 2023
+  Ye Jia, Ye Qi, Yenda Li, Yilin Zhang, Ying          Conference on Empirical Methods in Natural
+  Zhang, Yossi Adi, Youngjin Nam, Yu, Wang,           Language Processing, pages 2511–2522, Sin-
+  Yu Zhao, Yuchen Hao, Yundi Qian, Yunlu              gapore. Association for Computational Linguis-
+  Li, Yuzi He, Zach Rait, Zachary DeVito, Zef         tics.
+  Rosnbrick, Zhaoduo Wen, Zhenyu Yang, Zhi-         Robert Long, Jeff Sebo, Patrick Butlin, Kathleen
+  wei Zhao, and Zhiyu Ma. 2024. The llama 3           Finlinson, Kyle Fish, Jacqueline Harding, Ja-
+  herd of models.                                     cob Pfau, Toni Sims, Jonathan Birch, and David
+                                                      Chalmers. 2024. Taking ai welfare seriously.
+Xiangming Gu, Tianyu Pang, Chao Du, Qian Liu,
+  Fengzhuo Zhang, Cunxiao Du, Ye Wang, and          Christina Lu, Jack Gallagher, Jonathan Michala,
+  Min Lin. 2025. When attention sink emerges in       Kyle Fish, and Jack Lindsey. 2026. The assis-
+  language models: An empirical view.                 tant axis: Situating and stabilizing the default
+                                                      persona of language models.
+
+Thomas Hobbes. 1656. Elements of Philosophy,        Samuel Marks, Adam Karvonen, and Aaron
+  the First Section, Concerning Body. R. & W.         Mueller. 2024.      dictionary_learning.
+  https://github.com/saprmarks/                      Jean bastien Grill, Sabela Ramos, Edouard
+  dictionary_learning.                               Yvinec, Michelle Casbon, Etienne Pot, Ivo
+                                                     Penchev, Gaël Liu, Francesco Visin, Kath-
+Callum Stuart McDougall, Arthur Conmy, János         leen Kenealy, Lucas Beyer, Xiaohai Zhai,
+  Kramár, Tom Lieberum, Senthooran Raja-             Anton Tsitsulin, Robert Busa-Fekete, Alex
+  manoharan, Neel Nanda, and Google. 2025.           Feng, Noveen Sachdeva, Benjamin Coleman,
+  Gemma scope 2 - technical paper.                   Yi Gao, Basil Mustafa, Iain Barr, Emilio
+Viktor Moskvoretskii,     Dominik Glandorf,          Parisotto, David Tian, Matan Eyal, Colin
+  Jorge Medina Moreira, Tanja Käser, and Robert      Cherry, Jan-Thorsten Peter, Danila Sinopal-
+  West. 2026. Tracing persona vectors through        nikov, Surya Bhupatiraju, Rishabh Agarwal,
+  llm pretraining.                                   Mehran Kazemi, Dan Malkin, Ravin Ku-
+                                                     mar, David Vilar, Idan Brusilovsky, Jiaming
+Qwen Team. 2026. Qwen3.7: The agent frontier.        Luo, Andreas Steiner, Abe Friesen, Abhan-
+                                                     shu Sharma, Abheesht Sharma, Adi Mayrav
+Christopher Register. 2025. Individuating arti-      Gilady, Adrian Goedeckemeyer, Alaa Saade,
+  ficial moral patients. Philosophical Studies,      Alex Feng, Alexander Kolesnikov, Alexei Ben-
+  182(11):3225–3246.                                 debury, Alvin Abdagic, Amit Vadi, András
+Richard Ren, Kunyang Li, Mantas Mazeika,             György, André Susano Pinto, Anil Das, Ankur
+  Wenyu Zhang, Yury Orlovskiy, Rishub                Bapna, Antoine Miech, Antoine Yang, Anto-
+  Tamirisa, Wenjie Jacky Mo, Judy Nguyen,            nia Paterson, Ashish Shenoy, Ayan Chakrabarti,
+  Long Phan, Steven Basart, Austin Meek,             Bilal Piot, Bo Wu, Bobak Shahriari, Bryce
+  Aditya Mehta, Oliver Ingebretsen, Alice            Petrini, Charlie Chen, Charline Le Lan, Christo-
+  Blair, Brianna Adewinmbi, Alice Gatti, Adam        pher A. Choquette-Choo, CJ Carey, Cor-
+  Khoja, Jason Hausenloy, Devin Kim, and Dan         mac Brick, Daniel Deutsch, Danielle Eisen-
+  Hendrycks. 2026. Ai wellbeing: Measuring           bud, Dee Cattle, Derek Cheng, Dimitris Pa-
+  and improving the functional pleasure and pain     paras, Divyashree Shivakumar Sreepathihalli,
+  of ais.                                            Doug Reid, Dustin Tran, Dustin Zelle, Eric
+                                                     Noland, Erwin Huizenga, Eugene Kharitonov,
+Murray Shanahan, Kyle McDonell, and Laria            Frederick Liu, Gagik Amirkhanyan, Glenn
+ Reynolds. 2023. Role play with large language       Cameron, Hadi Hashemi, Hanna Klimczak-
+ models. Nature, 623(7987):493–498.                  Plucińska, Harman Singh, Harsh Mehta, Har-
+                                                     shal Tushar Lehri, Hussein Hazimeh, Ian Bal-
+Nicholas Sofroniew, Isaac Kauvar, William Saun-
+                                                     lantyne, Idan Szpektor, Ivan Nardini, Jean
+  ders, Runjin Chen, Tom Henighan, Sasha Hy-
+                                                     Pouget-Abadie, Jetha Chan, Joe Stanton, John
+  drie, Craig Citro, Adam Pearce, Julius Tarng,
+                                                     Wieting, Jonathan Lai, Jordi Orbay, Joseph Fer-
+  Wes Gurnee, Joshua Batson, Sam Zimmerman,
+                                                     nandez, Josh Newlan, Ju yeong Ji, Jyotinder
+  Kelley Rivoire, Kyle Fish, Chris Olah, and Jack
+                                                     Singh, Kat Black, Kathy Yu, Kevin Hui, Ki-
+  Lindsey. 2026. Emotion concepts and their
+                                                     ran Vodrahalli, Klaus Greff, Linhai Qiu, Mar-
+  function in a large language model. Trans-
+                                                     cella Valentine, Marina Coelho, Marvin Rit-
+  former Circuits Thread.
+                                                     ter, Matt Hoffman, Matthew Watson, Mayank
+Anna Soligo, Vladimir Mikulik, and William           Chaturvedi, Michael Moynihan, Min Ma,
+  Saunders. 2026. Gemma needs therapy: Inves-        Nabila Babar, Natasha Noy, Nathan Byrd, Nick
+  tigating and mitigating emotional instability in   Roy, Nikola Momchev, Nilay Chauhan, Noveen
+  LLMs. In ICLR 2026 Workshop - From Human           Sachdeva, Oskar Bunyan, Pankil Botarda, Paul
+  Cognition to AI Reasoning: Models, Methods,        Caron, Paul Kishan Rubenstein, Phil Culliton,
+  and Applications.                                  Philipp Schmid, Pier Giuseppe Sessa, Ping-
+                                                     mei Xu, Piotr Stanczyk, Pouya Tafti, Rakesh
+Gemma Team, Aishwarya Kamath, Johan Fer-             Shivanna, Renjie Wu, Renke Pan, Reza Rokni,
+  ret, Shreya Pathak, Nino Vieillard, Ramona         Rob Willoughby, Rohith Vallu, Ryan Mullins,
+  Merhej, Sarah Perrin, Tatiana Matejovicova,        Sammy Jerome, Sara Smoot, Sertan Girgin,
+  Alexandre Ramé, Morgane Rivière, Louis             Shariq Iqbal, Shashir Reddy, Shruti Sheth, Siim
+  Rouillard, Thomas Mesnard, Geoffrey Cideron,
+  Põder, Sijal Bhatnagar, Sindhu Raghuram Pa-
+  nyam, Sivan Eiger, Susan Zhang, Tianqi Liu,
+  Trevor Yacovone, Tyler Liechty, Uday Kalra,
+  Utku Evci, Vedant Misra, Vincent Roseberry,
+  Vlad Feinberg, Vlad Kolesnikov, Woohyun
+  Han, Woosuk Kwon, Xi Chen, Yinlam Chow,
+  Yuvein Zhu, Zichuan Wei, Zoltan Egyed, Victor
+  Cotruta, Minh Giang, Phoebe Kirk, Anand Rao,
+  Kat Black, Nabila Babar, Jessica Lo, Erica Mor-
+  eira, Luiz Gustavo Martins, Omar Sanseviero,
+  Lucas Gonzalez, Zach Gleicher, Tris Warkentin,
+  Vahab Mirrokni, Evan Senter, Eli Collins,
+  Joelle Barral, Zoubin Ghahramani, Raia Had-
+  sell, Yossi Matias, D. Sculley, Slav Petrov,
+  Noah Fiedel, Noam Shazeer, Oriol Vinyals, Jeff
+  Dean, Demis Hassabis, Koray Kavukcuoglu,
+  Clement Farabet, Elena Buchatskaya, Jean-
+  Baptiste Alayrac, Rohan Anil, Dmitry, Lep-
+  ikhin, Sebastian Borgeaud, Olivier Bachem, Ar-
+  mand Joulin, Alek Andreev, Cassidy Hardin,
+  Robert Dadashi, and Léonard Hussenot. 2025.
+  Gemma 3 technical report.
+
+Alexander Matt Turner, Lisa Thiergart, Gavin
+  Leech, David Udell, Juan J Vazquez, Ulisse
+  Mini, and Monte MacDiarmid. 2025. Steering
+  language models with activation engineering.
+
+Guangxuan Xiao, Yuandong Tian, Beidi Chen,
+  Song Han, and Mike Lewis. 2024. Efficient
+  streaming language models with attention sinks.
+  In International Conference on Learning Repre-
+  sentations, volume 2024, pages 21875–21895.
+

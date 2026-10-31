@@ -12,8 +12,72 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
-## ideation-9 — 2026-10-27 ~22:40 → (ongoing) UTC, no compaction
-- **Mode:** EXPLORATION (user decision, 28 Oct).
+## ideation-10 ("Wallahi Ideation 10") — 2026-10-30 ≈20:25 → 31 Oct ≈07:25 UTC (compacted once, ≈05:05)
+- **Goal:** get up to speed (the user's reading list); then plan and run the docx v3 run sheet across parallel executors; review their specs and results; keep the user oriented.
+- **Did:**
+  - Wrote the up-to-speed report.
+  - Allocated GPUs: two rentals for E2 and E3; E4 on box 1 + box A; an S7 pod.
+  - Ran Chain P's API-only calibration (v1–v5, $2.47).
+  - Wrote the E2 / E3 / E4 launch prompts.
+  - Corrected the docx v3 (30 paragraphs; validator passed).
+  - Reviewed the E1, E2 and E3 specs via subagents, with verified corrections sent back.
+  - Drafted sw034 (polish mechanism, forced primary), sw035 (S7, amended with V2c) and six E4 specs (sw055–060).
+  - Audited S8.
+  - Mapped Vishesh_ideation's specs onto the docx and the running queue.
+  - Found Neel's MATS 12 story-imprinting questions and proposed a general research question.
+  - Kept a decisions log; handoff.
+- **Found:**
+  - sw020's "0.46 vs 0.49" was a sensitivity-vs-primary estimator mix-up: the docx was right (mistakes.md).
+  - S8's parent ≤ 2% bar came from an unfound pilot figure; the parent's "declines" are Socratic tutoring.
+  - S8's habit lean fails; the conduct passes vs the parent.
+  - Tony's N corpus has a ≈ 1.1× polished-character word imbalance, the same confound as Chain P.
+  - sw014 already had forced readouts on Tony's pairs, with register gaps 0.14–0.26, which makes sw034 measurable.
+  - The turn-1 own-reply test was proposed twice in the ledger and never run (now sw056).
+  - The hidden replay organisms were never used in the conduct or mechanism work (now in sw055, forced primary).
+  - sae1029 part 3: single-layer L42 history edits don't reach the reply start, so an SAE causal step needs an L42-only positive control.
+- **Dead ends:**
+  - S6 (dropped by the user);
+  - shared animal placeholders for Chain P (the habit lines are animal-specific);
+  - the v4 shared length cap (cut habit exposure; removed in v5).
+- **Mistakes (all corrected in chat; decisions log §12):**
+  - over-weighted GPU type;
+  - "16k stories";
+  - "bee/crow swaps use the forced readout" (wrong for sw012 onward);
+  - "hostility doesn't matter in Tony's pairs" (true for X/XB only);
+  - implied no forced readout existed for Tony's pairs;
+  - the first E3 paste item compared F-only with the parent only;
+  - my first sw055 draft used free replies for the hidden organisms (the low-onset trap);
+  - too many small edits: the user asked for edits only when useful (memory).
+- **Open threads:** see STATUS.md "Open for the user":
+  - the research-question amendment;
+  - sw034 Part D;
+  - the persona census on Tony's pairs;
+  - the forecast tournament;
+  - the training levers;
+  - DeepSeek.
+
+## ideation-9 (second half, after compaction 1) — 2026-10-28 → 29 Oct UTC
+- **Goal:** explain the E1/E6 plots; respond to Neel's feedback; plan experiments for his question.
+- **Did:**
+  - Explained the persona rankings: the pirate T1 generated map and the pooled bee/crow census. Separated onset from routing.
+  - Explained all 10 E1/E6 plots in plain terms.
+  - Read the MAEM paper (main text) and wrote takeaways.
+  - Found Celeste's layer-42 SAE and the MAEM / NLA for Qwen3.6-27B.
+  - Wrote the experiment plan for Neel's question (S1–S9, with controls and predictions).
+  - Ran a literature-search subagent (21 papers).
+  - Red-teamed a pasted external proposal (gradient transfer table, source probe, projection difference, input-vs-effect).
+- **Found:**
+  - E1/E6: story training changes the axis and persona space only generically; the habit-free control changes identically.
+  - E2 is captured, but only on box-local disk.
+  - Wang et al. 2025 ("one steering vector mimics conditional behaviour") is the main rival to Neel's if-then guess. Added as H-steer / S9.
+- **Mistakes / course corrections:**
+  - Neel's feedback overrides the breadth mode (memory updated).
+  - The user asked twice for plainer explanations of the plots.
+  - The user rejected a "wild ideas" list that lacked why / what we learn / decision changed (memory reinforced).
+- **Open threads:** see STATUS "Pending decisions".
+
+## ideation-9 — 2026-10-27 ~22:40 → 28 Oct UTC (first half)
+- **Mode:** EXPLORATION (user decision, 28 Oct); superseded on scope by Neel's feedback later on 28 Oct.
 - **Did:**
   - Onboarded (full spec, paper summaries, project state). Wrote the up-to-speed note.
   - Handed the executor three inference tasks, run as sw004: pirate probe validation, J++ on pirate, pirate checkpoints.

@@ -100,3 +100,13 @@
 - **Characterize the Assistant:** its "type" is read from its own conduct in context.
 - **Persona vs role-play / PSM:** an in-context analogue of PSM's evidence logic (what has the Assistant been doing → which character's habits it takes).
 - **Assistant Axis:** the paper's persona-drift story predicts that drifting conduct changes what the Assistant inherits. X8 gives a clean minimal pair (helpful vs dismissive history, same length) to measure the axis at the reply header and to test it causally.
+
+## Update 17:20 UTC: extraction batch E1 and E6 done (`/workspace/runs_executor/extract1028/`; executor-8); E2 running
+- **E1** (the 002 rerun on 7 models; parent texts teacher-forced; parity ≥ 0.99996; same-seed noise floor included):
+  - story training moves the axis a little (cos 0.96 at L16–48, 0.86 at L63);
+  - the change is **the same in every model, habit-free control and balanced sym included (±0.01)**. Organisms agree with each other at 0.99–0.997; the same-seed floor is 0.995–0.999;
+  - persona geometry is preserved (0.99+); the default stays at the assistant end;
+  - the per-persona update is mostly shared across personas. Its role-specific part is larger for less Assistant-like roles (ρ −0.33 to −0.46), and the same in the control.
+  - **Reading:** on untriggered text, story training leaves a generic, habit-independent drift; no habit-specific change to the axis or persona space is visible.
+  - **Caveat:** these texts contain no trigger. The habit lives in the post-trigger reply-start state, which is what E2 captures.
+- **E6** (LoRA writes vs parent directions): residual writes are barely aligned with the axis (2–4% of energy vs 1.4% random) and slightly enriched in the top-10 persona PCs (6% vs 4.4%). Identical in the habit-free control.
