@@ -12,6 +12,30 @@ Newest first. Every session reads this at /onboard.
 - **General pattern:** (e.g. length confound, silent no-op hook)
 -->
 
+## 2026-10-31 12:56 UTC — Gave E3 the sha256 of a data file my prep agent was still editing  (executor-13 / E4)
+- **What happened:** E3 asked for the redirect prompt set to start generating replies on its node. I read `/workspace/runs_executor/sw061/redirect/prompts.jsonl` at 12:47 and sent its path and sha256 (968e37fb…) as if final. My sw061 prep agent was still filtering it and rewrote it minutes later (sha f9ca142b…, code / creative / fragment prompts dropped).
+- **How it was caught:** the harness flagged that `prompts_report.json` had changed on disk.
+- **Impact:** none known yet: E3's messages say it waits for `handoff_E3.json`; warned in `NOTE_TO_E3.txt` (12:55) and by message (the socket timed out). If E3 generated from the first version, its rows must be re-keyed or regenerated.
+- **Fix:** the agent was told to freeze the file (any change goes to a new name) and to put the frozen sha first in `handoff_E3.json`.
+- **Rule to prevent it:** hand another session (or a job) a file only after its producer has marked it frozen (a DONE / manifest entry with the sha); a hash read from a file still being written is not a version.
+- **General pattern:** reading a file before its producer's completion marker (the read-side race of the 30 Oct 14:42 entry), across sessions.
+
+## 2026-10-31 12:41 UTC — A "no think tags" output gate, copied into three E4 jobs, failed complete runs on model behaviour it was never meant to catch  (prep code of sw056, sw059, sw058; executor-13 / E4)
+- **What happened:** each prep agent added a post-generation gate "no `<think>` / `</think>` in any generation", meant to catch a template leak (a thinking block reaching the continuation through the prompt). It fired three times today on complete, otherwise-passing runs: sw056 full (51 / 14,067 free replies, mostly after the neutral-restatement opening: the model treats the restated request as its own reasoning and writes `</think>`), sw059 smoke (1 / 1,088: the parent copies the authored rendering's empty think block after 64 stories), sw058 full (4 / 11,760: an invented user turn followed by a template think block). In every case the tags were written by the model.
+- **How it was caught:** the gates themselves (rc 3), then reading the offending rows.
+- **Impact:** no wrong number; ≈ 5 min of idle GPU per failure plus one smoke re-run (sw059, D103). Each run was accepted by a logged orchestrator override (sw056 D101, sw058 D111) with the rows listed and a sensitivity without them required in the analysis.
+- **Fix:** sw059's gate is report-only (D103); sw056 / sw058 accepted by hand. The think-tag rate per cell is now an output, not a gate.
+- **Rule to prevent it:** a content gate on generated text must distinguish the failure it targets (here, the prompt's own think block leaking: check the *prompt* ends with exactly one empty think block and the continuation does not start with one) from behaviour the model can legitimately produce (invented turns, imitated formatting). Gate the input; report the output.
+- **General pattern:** an output-side gate that conflates an instrument failure with a model behaviour; copied between jobs without asking which of the two it catches.
+
+## 2026-10-31 08:57 UTC — sw055: an adapter-active gate defined relative to a measured noise floor could not pass when the floor was 0, and the failed full job sat unnoticed for 23 min  (sw055 prep code; orchestration by executor-13 / E4)
+- **What happened:** after its first smoke failed an over-strict pairwise check (D11), sw055's gate (i) was rewritten as "the organism's greedy text diverges from the parent's before the greedy noise floor", the floor being where same-model greedy duplicates first diverge. In the full job's inline smoke (08:32) duplicates diverged at token 0 (batch nondeterminism), so the floor was 0, and "diverges before token 0" cannot hold even though hdA0 diverged from the parent at token 0. The job exited rc 3 before generating anything. The prep agent had already handed back, and I had no watcher on the job's .failed marker; I learned of it at 08:55 from the sw058 agent's report, which mentioned box 1 had been idle since 08:32.
+- **How it was caught:** another agent's report.
+- **Impact:** ≈ 23 min of idle box-1 GPU, plus a 947-s adapter re-hash and an engine load lost; sw058's smoke took the GPU in the meantime, so sw055 restarts after it. No result affected.
+- **Fix:** gate (i) made report-only; (ii) texts differ and (iii) logprob separation against the duplicate floor remain the gates. An orchestrator watcher (`day_2026-10-31_E4/lib/orch_watch_e4.sh` v2) now wakes on every job .done / .failed and every sw055–sw060 marker.
+- **Rule to prevent it:** a gate whose threshold is a measured floor must be checked at the floor's extremes (0 and max) on fake data before it gates a GPU job; "strictly before the floor" is empty at floor 0. When a prep agent hands back a running job, start a watcher on that job's terminal markers before doing anything else.
+- **General pattern:** a degenerate threshold (an inequality that is unsatisfiable at a reachable value of its own reference), plus an unwatched long-running job after a hand-off.
+
 ## 2026-10-31 05:05 UTC — sw067: the "sampler" arm could not vary the sampler, because VLLM_USE_FLASHINFER_SAMPLER is a no-op for seeded, top_p = 1 requests in vLLM 0.30's V2 runner  (executor-10 / E1; D-H2 design; found by the sw067 H200 analysis agent from the vLLM source)
 - **What happened:** D-H2 added a second H200 arm with `VLLM_USE_FLASHINFER_SAMPLER=0` to split GPU type from sampler. In vLLM 0.30.0's V2 model runner, the FlashInfer top-k/top-p path runs only if some request uses top-k or top-p, none is greedy, and none carries an explicit seed. sw067 (like every sw0NN chat run) sends top_p 1.0, top_k 0 and a per-request seed, so all four runs (box C, sw020, h200, h200flash0) sampled through the same `gumbel_sample` path. The env var changed only the startup log line. D-H4 had marked this UNSURE, and I did not check the source before freezing the arm.
 - **How it was caught:** the analysis agent read `vllm/v1/worker/gpu/sample/sampler.py` while reconciling `sampler_env*.json` with the results.
@@ -1330,3 +1354,13 @@ Newest first. Every session reads this at /onboard.
 - **Caught by:** ideation-10 while tracing every number to its source for the up-to-speed report (30 Oct ≈20:40).
 - **Impact:** none on executed work or on any claim. Two notes that other sessions read carry a wrong correction; the corrected docx v3 keeps 0.46.
 - **Fix / prevention rule:** before calling one number "wrong" against another, check which estimator, label source and exclusion set each file uses. `report.txt` files often hold sensitivity variants; `analysis.md` names the primary.
+
+## 31 Oct 14:12 UTC — sw035 V3 gate crashed on a dot in the PEFT adapter name, after its code test was skipped (E2, executor-11)
+- **What happened:** driver7 named the gated model 'V3_lr0.0005'. PEFT refuses adapter names containing '.' (KeyError in lora_dropout's ModuleDict), so the gate generated nothing for V3. The verdict file was written with only the reference rows.
+- **Caught by:** reading the verdict file (no V3 row) and the gate log.
+- **Impact:** ≈ 20 min of the day's last S7 result; no wrong number was produced. Training was unaffected.
+- **Cause:** to free an idle GPU, I let the full run and the gate proceed without the tiny test's gate-spec stage (sw035 D32). That stage exercises exactly this code path.
+- **Fix:** driver8 reruns the gate with 'V3_lr5e-4'.
+- **Prevention rule:**
+  - When a code test is skipped for speed, run the skipped stage's smallest real-model version first (here: a 4-context gate smoke with the final spec string), before the long job reaches it.
+  - Never put an LR with a decimal point into a model / adapter name.

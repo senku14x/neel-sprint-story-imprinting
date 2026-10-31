@@ -48,7 +48,16 @@ Append-only, newest first.
   - the first E3 paste item compared F-only with the parent only;
   - my first sw055 draft used free replies for the hidden organisms (the low-onset trap);
   - too many small edits: the user asked for edits only when useful (memory).
-- **Open threads:** see STATUS.md "Open for the user":
+- **After the first handoff (07:25 → 12:50):**
+  - Wrote the research-question amendment (user-approved).
+  - Pushed ideation's files (`4c5b2ba`).
+  - Read today's results (Chain P, sw055, sw056, sw034, S7).
+  - Audited implementation risk; found S7 step 1b's broken configs.
+  - Found the mechanism lane runs almost entirely on old 5-scenario contexts → sw038 (the mechanism core on v2, with sw006 patching as positive control) sent to E2.
+  - Digested Tony's branches.
+  - Wrote `notes/2026-10-31_project_map_1245.md`.
+  - The session ended for an account switch.
+- **Open threads:** see STATUS.md "Open for the user" and the project map §6:
   - the research-question amendment;
   - sw034 Part D;
   - the persona census on Tony's pairs;
