@@ -141,7 +141,8 @@ def main():
     ap.add_argument("--resume", default=None, help="vec mode: state_stepNNN.pt to continue (one arm, its own LR)")
     ap.add_argument("--heldout", default=None, help="jsonl {messages, group}: held-out loss at step 0 and after each arm")
     ap.add_argument("--eval_adapter", default=None); ap.add_argument("--eval_only", action="store_true")
-    ap.add_argument("--known_answer", action="store_true", help="vec mode: run the hook known-answer cells first")
+    ap.add_argument("--known_answer", action="store_true", help="vec mode: hook known answers; lora mode: zero-B == base on steps 1-3")
+    ap.add_argument("--merge_adapter", default=None, help="lora mode (V3): merge this PEFT adapter (ctrlB0) into the base weights first")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
     random.seed(args.seed); torch.manual_seed(args.seed)
@@ -198,6 +199,7 @@ def main():
                 first_order_idx=order[:8],
                 mode=args.mode, frozen_adapter=args.frozen_adapter, vec_layers=args.vec_layers, lrs=args.lrs,
                 heldout=args.heldout, heldout_sha256=sha256(args.heldout) if args.heldout else None, resume=args.resume,
+                merge_adapter=args.merge_adapter,
                 trainer="sw035 src/step3/train_s7.py", trainer_sha256=sha256(os.path.abspath(__file__)))
     if args.mode == "vec":
         meta.update(rank=None, alpha=None, targets=None,
@@ -224,10 +226,24 @@ def main():
         model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     vec = None
     if args.mode == "lora" and not args.eval_only:
+        if args.merge_adapter:  # V3 (D26): base = parent + ctrlB0 merged into the weights, checked against PEFT ctrlB0
+            import merge_s7
+            ck = [encode(tok, rows[i])[0].tolist()[:1024] for i in order[:4]]
+            model, mrep = merge_s7.merge_adapter(model, args.merge_adapter, ck, DEV)
+            mrep["adapter_sha256"] = sha256(f"{args.merge_adapter}/adapter_model.safetensors")
+            meta["merge"] = mrep
+            json.dump(mrep, open(f"{args.out}/merge_check.json", "w"), indent=1)
+            print("MERGE", json.dumps(mrep), flush=True)
+            assert mrep["pass"], f"merge check failed: {mrep}"
         model.enable_input_require_grads()
         model = get_peft_model(model, LoraConfig(r=args.rank, lora_alpha=args.alpha, lora_dropout=0.0,
                                                  target_modules=targets, task_type="CAUSAL_LM"))
         inner = model.base_model.model  # Qwen3_5ForCausalLM
+        meta["lora_layers"] = sum(1 for n, _ in model.named_modules() if n.endswith(".lora_A.default"))
+        if set(targets) == {"o_proj", "out_proj", "down_proj"}:  # real model: 16 o_proj + 48 out_proj + 64 down_proj = 128
+            lt = inner.config.layer_types
+            exp = lt.count("full_attention") + lt.count("linear_attention") + len(lt)
+            assert meta["lora_layers"] == exp, (meta["lora_layers"], exp)
     else:
         for p in model.parameters():
             p.requires_grad_(False)
@@ -249,6 +265,8 @@ def main():
         params = [vec.v]
     else:
         params = [p for p in model.parameters() if p.requires_grad]
+    pnames = [n for n, p in model.named_parameters() if p.requires_grad] if vec is None else ["v"]
+    init_state = {n: p.detach().clone() for n, p in zip(pnames, params)} if (vec is None and args.mode == "lora") else None
     meta["trainable_params"] = sum(p.numel() for p in params)
     json.dump(meta, open(f"{args.out}/train_meta.json", "w"), indent=1)
     print(f"trainable params {meta['trainable_params']}", flush=True)
@@ -348,6 +366,26 @@ def main():
         print("KNOWN_ANSWER", json.dumps(ka), flush=True)
         assert ka["pass"], "vector known-answer failed"
 
+    if args.mode == "lora" and args.known_answer and not args.eval_only:  # D26: zero-init B == the base, steps 1-3 rows
+        ka = dict(lora_layers=meta["lora_layers"], trainable_params=meta["trainable_params"],
+                  lora_B_all_zero=all(float(p.detach().abs().max()) == 0.0 for n, p in zip(pnames, params) if "lora_B" in n),
+                  steps=[])
+        with torch.no_grad():
+            for st in range(3):
+                its = sorted([enc[i] for i in order[st * args.eff_bs:(st + 1) * args.eff_bs]], key=lambda x: len(x[0]))
+                mbs = [its[m:m + args.micro_bs] for m in range(0, len(its), args.micro_bs)]
+                on = [micro_loss_sum(mb) for mb in mbs]
+                with model.disable_adapter():
+                    off = [micro_loss_sum(mb) for mb in mbs]
+                ntk = sum(k for _, k in on)
+                a_, b_ = sum(x.item() for x, _ in on) / ntk, sum(x.item() for x, _ in off) / ntk
+                ka["steps"].append(dict(step=st + 1, loss_zero_B=a_, loss_base=b_, bit_exact=a_ == b_ and
+                                        all(bool(torch.equal(x, y)) for (x, _), (y, _) in zip(on, off))))
+        ka["pass"] = ka["lora_B_all_zero"] and all(x["bit_exact"] for x in ka["steps"])
+        json.dump(ka, open(f"{args.out}/known_answer.json", "w"), indent=1)
+        print("KNOWN_ANSWER", json.dumps(ka), flush=True)
+        assert ka["pass"], "lora zero-B known answer failed"
+
     def pack(g, max_rows, cap):  # g is length-sorted; greedy packing under rows x max_len <= cap
         out, cur = [], []
         for x in g:
@@ -413,6 +451,10 @@ def main():
         os.makedirs(out, exist_ok=True)
         if vec is not None:
             vec.v.data.zero_(); vec.v.grad = None
+        if init_state is not None and args.lrs:  # lora arms (V3 pilot): every arm starts from the same LoRA init
+            with torch.no_grad():
+                for n, p in zip(pnames, params):
+                    p.copy_(init_state[n]); p.grad = None
         opt = torch.optim.AdamW(params, lr=lr, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.0)
         if args.schedule == "cosine":
             fn = lambda s: lr_factor(s, args.warmup, n_steps)
@@ -423,8 +465,16 @@ def main():
         if resume:
             st = torch.load(resume, map_location=DEV, weights_only=False)
             assert st["lr"] == lr and st["data_sha256"] == meta["data_sha256"] and st["first_order_idx"] == order[:8]
-            assert st["frozen_adapter"] == args.frozen_adapter and st["layer_ids"] == vec.layer_ids
-            vec.v.data.copy_(st["v"]); opt.load_state_dict(st["opt"]); sched.load_state_dict(st["sched"]); start = st["step"]
+            assert st["frozen_adapter"] == args.frozen_adapter
+            if vec is not None:
+                assert st["layer_ids"] == vec.layer_ids
+                vec.v.data.copy_(st["v"])
+            else:
+                assert st.get("merge_adapter") == args.merge_adapter and st.get("targets") == targets and st.get("rank") == args.rank
+                with torch.no_grad():
+                    for n, p in zip(pnames, params):
+                        p.copy_(st["lora"][n])
+            opt.load_state_dict(st["opt"]); sched.load_state_dict(st["sched"]); start = st["step"]
             print(f"resumed {resume} at step {start}, lr now {opt.param_groups[0]['lr']}", flush=True)
         save_steps = {int(s) for s in args.save_steps.split(",") if s}
         state_steps = {int(s) for s in args.save_state_at.split(",") if s}
@@ -477,7 +527,12 @@ def main():
             if (step + 1) % 5 == 0 or step < 3:
                 print({k: v for k, v in rec.items() if k != "vec_norm_L"}, flush=True)
             if vec is None and (step + 1) in save_steps and step + 1 < n_steps:
-                model.save_pretrained(f"{out}/step{step + 1:03d}")
+                model.save_pretrained(f"{out}/step{step + 1:03d}"); base_note(f"{out}/step{step + 1:03d}", lr, step + 1)
+            if vec is None and (step + 1) in state_steps:
+                torch.save(dict(lora={n: p.detach().clone() for n, p in zip(pnames, params)}, opt=opt.state_dict(),
+                                sched=sched.state_dict(), step=step + 1, lr=lr, data_sha256=meta["data_sha256"],
+                                first_order_idx=order[:8], frozen_adapter=args.frozen_adapter, merge_adapter=args.merge_adapter,
+                                targets=targets, rank=args.rank, alpha=args.alpha), f"{out}/state_step{step + 1:03d}.pt")
             if vec is not None and ((step + 1) in vec_steps or (step + 1) in state_steps or step + 1 == n_steps):
                 save_vec(f"{out}/vectors_step{step + 1:03d}.pt", lr, step + 1)
             if vec is not None and (step + 1) in state_steps:
@@ -486,8 +541,8 @@ def main():
                                 layer_ids=vec.layer_ids), f"{out}/state_step{step + 1:03d}.pt")
             if args.max_steps and step + 1 >= args.max_steps:
                 break
-        if vec is None and not args.max_steps:
-            model.save_pretrained(f"{out}/final")
+        if vec is None and (not args.max_steps or step + 1 == n_steps):
+            model.save_pretrained(f"{out}/final"); base_note(f"{out}/final", lr, step + 1)
         res = dict(lr=lr, last_step=step + 1, wall_s=round(time.time() - t0, 1))
         if ho is not None:
             r = heldout_loss(); res["heldout"] = r; res["heldout_step0"] = ho0
@@ -496,6 +551,12 @@ def main():
         json.dump(res, open(f"{out}/arm_done.json", "w"), indent=1)
         print("done", round(time.time() - t0, 1), flush=True)
         return res
+
+    def base_note(d, lr, step):  # what the saved adapter sits on (the adapter_config's base path is the parent only)
+        json.dump(dict(base=MODEL_DIR, revision=REVISION, merged_into_base=args.merge_adapter, merge=meta.get("merge"),
+                       targets=targets, rank=args.rank, alpha=args.alpha, lr=lr, step=step, n_steps_schedule=n_steps,
+                       data=args.data, data_sha256=meta["data_sha256"], trainer_sha256=meta["trainer_sha256"]),
+                  open(f"{d}/s7_base.json", "w"), indent=1)
 
     def save_vec(path, lr, step):
         d = dict(vectors=vec.v.detach().float().cpu().clone(), layer_ids=vec.layer_ids, hidden_size=vec.v.shape[1],
@@ -506,8 +567,8 @@ def main():
                  trainer_sha256=meta["trainer_sha256"])
         torch.save(d, path)
 
-    if args.mode == "lora":
-        run_arm(args.lr, args.out)
+    if args.mode == "lora" and not args.lrs:
+        run_arm(args.lr, args.out)  # train_d.py's path (parity)
     else:
         lrs = [float(x) for x in args.lrs.split(",") if x] or [args.lr]
         if args.resume:

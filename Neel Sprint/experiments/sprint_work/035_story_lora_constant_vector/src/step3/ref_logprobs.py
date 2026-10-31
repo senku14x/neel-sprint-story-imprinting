@@ -30,9 +30,13 @@ def sha(p):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--vectors", required=True); ap.add_argument("--heldout", required=True)
+    ap.add_argument("--vectors", default=""); ap.add_argument("--heldout", required=True)
+    ap.add_argument("--lora", default="", help="V3 (D26): NAME=<adapter dir> on parent + ctrlB0 merged (merge_s7); own process")
+    ap.add_argument("--merge_adapter", default="/workspace/runs_executor/sw002/ctrl_B_s0_adapter")
     ap.add_argument("--n_rows", type=int, default=8)
     a = ap.parse_args()
+    if a.lora:
+        return main_lora(a)
     specs = [tuple(x.split("=", 1)) for x in a.vectors.split(",") if x]
     metas = {n: SV.load(p) for n, p in specs}
     bases = {m["base"] for m in metas.values()}
@@ -96,6 +100,63 @@ def main():
         torch.save(dict(out, rows=ref), dst + ".pt")
         json.dump(out, open(dst + ".json", "w"), indent=1)
         print("REF", json.dumps(out), flush=True)
+    print("REF_DONE", flush=True)
+
+
+def main_lora(a):
+    """V3: base = parent + ctrlB0 merged in memory (merge_s7, checked vs PEFT); the rank-1 LoRA on top via PEFT."""
+    import train_s7 as T
+    import merge_s7
+    from transformers import AutoTokenizer, AutoModelForCausalLM
+    from peft import PeftModel
+    name, ad = a.lora.split("=", 1)
+    note = json.load(open(f"{ad}/s7_base.json"))
+    base_dir = note["base"]
+    assert note["merged_into_base"] == a.merge_adapter, (note["merged_into_base"], a.merge_adapter)
+    tok = AutoTokenizer.from_pretrained(base_dir)
+    rows = [json.loads(l) for l in open(a.heldout)]
+    enc = [T.encode(tok, r["messages"]) for r in rows]
+    groups = sorted({r.get("group", "all") for r in rows})
+    per_g = max(1, a.n_rows // len(groups))
+    ref_idx = [i for g in groups for i in [j for j, r in enumerate(rows) if r.get("group", "all") == g][:per_g]]
+    model = AutoModelForCausalLM.from_pretrained(base_dir, dtype=torch.bfloat16, device_map=DEV).eval()
+    model, mrep = merge_s7.merge_adapter(model, a.merge_adapter, [enc[i][0].tolist()[:1024] for i in ref_idx[:4]], DEV)
+    assert mrep["pass"], mrep
+    model = PeftModel.from_pretrained(model, ad, is_trainable=False).eval()
+
+    def lp_row(ids):
+        x = ids[None].to(DEV)
+        with torch.no_grad():
+            lg = model(input_ids=x).logits[0, :-1].float()
+        return torch.log_softmax(lg, -1).gather(1, x[0, 1:, None])[:, 0].cpu()
+
+    with model.disable_adapter():
+        base_lp = {i: lp_row(enc[i][0]) for i in ref_idx}
+    nll, ntok, ref = 0.0, 0, []
+    for i, (ids, lab) in enumerate(enc):
+        lp = lp_row(ids)
+        sup = lab[1:] != -100
+        nll += float(-lp[sup].sum()); ntok += int(sup.sum())
+        if i in ref_idx:
+            ref.append(dict(row=i, group=rows[i].get("group"), idx=rows[i].get("idx"), ids=ids.clone(), sup_mask=sup.clone(),
+                            logp_lora=lp.clone(), logp_base=base_lp[i], mean_abs_dlogp_lora_vs_base=float((lp - base_lp[i]).abs().mean())))
+    w = f"{ad}/adapter_model.safetensors"
+    out = dict(name=name, adapter=ad, adapter_sha256=sha(w), base=base_dir, merged_into_base=a.merge_adapter, merge_check=mrep,
+               step=note["step"], lr=note["lr"], heldout=a.heldout, heldout_sha256=sha(a.heldout),
+               engine="HF transformers bf16, parent + ctrlB0 merged (merge_s7, one bf16 rounding), PEFT rank-1 LoRA unmerged; "
+                      "full logits, fp32 log_softmax",
+               logp_convention="logp[t] = log p(ids[t+1] | ids[:t+1]); sup_mask[t] = labels[t+1] != -100; logp_base = merged ctrlB0",
+               heldout_loss_loader=nll / ntok, n_tok=ntok, n_rows=len(enc), ref_rows=[r["row"] for r in ref],
+               ref_mean_abs_dlogp_lora_vs_base=sum(r["mean_abs_dlogp_lora_vs_base"] for r in ref) / len(ref))
+    tf = os.path.join(os.path.dirname(ad.rstrip("/")), f"heldout_step{note['step']:03d}.json")
+    if os.path.exists(tf):
+        t = json.load(open(tf))
+        out.update(heldout_loss_trainer=t["loss"], loader_minus_trainer=out["heldout_loss_loader"] - t["loss"],
+                   trainer_heldout_ntok_match=t.get("n_tok") == ntok)
+    dst = os.path.join(os.path.dirname(ad.rstrip("/")), "reference_logprobs")
+    torch.save(dict(out, rows=ref), dst + ".pt")
+    json.dump(out, open(dst + ".json", "w"), indent=1)
+    print("REF", json.dumps({k: v for k, v in out.items() if k != "merge_check"}), flush=True)
     print("REF_DONE", flush=True)
 
 

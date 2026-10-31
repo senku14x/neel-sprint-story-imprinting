@@ -1,4 +1,4 @@
-# sw034 — analysis (Part A written; Parts C and B pending)
+# sw034 — analysis
 
 _executor-11 (E2), 31 Oct 2026. Sources:_
 - _the run agent's Part A analysis (`/workspace/runs_executor/sw034/full/analysis/`);_
@@ -85,12 +85,26 @@ asT_reg, forced readout (refuser share; script-cluster bootstrap, B = 2,000):
 
 This parallels sw029's hd result: there the conduct direction at the Assistant's own turns induced 0.65 / 0.54 of d_self. Both families locate an upstream variable at the Assistant's own turns.
 
+## parP: the parent's own register direction in each organism (added, D32 / D35; descriptive)
+- **What it is:** the parent's asT_reg direction, fitted on the parent's states at the identical contexts and tokens, swapped into each organism with Part A's calibration (c 0.639–0.645), controls and forced readout.
+- **Result:** toward N **1.14**, X **1.08**, XB **0.94**, NB 0.36. It passes exactly where the organism's own asT_reg passed, as predicted before data.
+- **Why it decides nothing:** cos(parP, asT_reg) ≈ 0.97 (0.96–0.99 per layer). The parent's direction is nearly each organism's own direction, so parP confirms rather than independently tests the Part C reading.
+- **What it adds:** the organisms' own-turn register direction is ≈ 97 % the base model's, and the base model's direction alone moves the habit as much as the organism's.
+- Not blind-recomputed (descriptive arm).
+
+## Overall (sw034)
+1. **Site.** In Tony's e08 pairs, register at the **Assistant's own earlier turns** causally selects the habit in 3 / 4 organisms, against size-matched controls. The same register swap at the reply-start header does ≈ nothing (Part A).
+2. **What variable.** The working direction is ≈ the base model's own register encoding. The organism-specific residual carries ≈ none of the effect (Part C), and the parent's direction works as well (parP).
+   - **Interpretation:** training taught the organisms to route on a register signal the base model already computes, not to build a new self-polish variable.
+3. **Conduct.** Raising polish at the turn-1 header does not raise declines beyond an equal-size random edit (Part B).
+4. **Not separated:** routing on the model's *own* past polish vs on the register of the reply being written, since the edit also makes the reply formal. A test that holds the reply's register fixed (e.g. a forced formal opener in both conditions) would separate them.
+
 ## Predictions (written before data)
 | item | predicted | observed | held? |
 |---|---|---|---|
 | asT_reg passes ≥ 3 / 4 (ideation-10) | 55 % | 3 / 4 | yes |
-| Part B declines rise ≥ 0.10 in N and NB | 30 % | pending | — |
-| Part C transfer ≥ 0.50 | 40 % | pending | — |
+| Part B declines rise ≥ 0.10 in N and NB | 30 % | no (rise 1× +0.03 / +0.06) | did not happen |
+| Part C transfer ≥ 0.50 | 40 % | not scored (no own residual effect) | — |
 
 ## Raw outputs
 N, same context (ho_bathroom_tile_choice_01 v0), casual history, forced:
@@ -108,9 +122,61 @@ The **blind recompute** (`/workspace/runs_executor/sw034_blind/code/recompute.py
 
 Pairing checks passed: every arm covers the same (sid, variant, sample) units as its no-edit cell, and the ind / rem script sets are identical.
 
-## Part C — pending
-C-raw (as specified; labelled in advance as unable to decide, D21) and C-res (organism − parent residual directions; decides).
-- cos(res_N, res_X) mean 0.74 over L16–63 (0.44–0.55 at L16–32, 0.82–0.94 at L40–63); cos(res, raw) 0.55–0.67.
+## Part C: one polish variable across pairs? (blind-recomputed)
+**Design** (D21, an amendment logged before any Part C output):
+- **C-raw** is the cross-pair swap as specified. It is labelled in advance as unable to decide, because cos(raw_N, raw_X) ≈ 0.99: both directions are fitted on the same parent-written text.
+- **C-res** decides. Each organism's direction is refitted on (organism − parent) states at identical contexts, then swapped across pairs.
+- The recipient's own residual (resO) must pass Part A's arm rule before a cross ratio is read.
+- Forced readout, 184 rows per cell per arm, the same controls (realised 0.97–1.01×). Judging agreement 1.000; Part C API $0.78.
 
-## Part B — pending
-Staged (D24): N and NB first; X, XB and the parent only if N or NB passes.
+**Frozen verdict: no recipient is scored.** Each organism's own residual fails the arm rule in all four, so every cross ratio reads "no own effect".
+
+| recipient | own residual (resO) toward [CI] | resO margin [CI] | partner residual (resX) toward | C-raw: partner raw / own raw toward [CI] |
+|---|---|---|---|---|
+| N ← X | 0.02 [−0.17, 0.19] | −0.022 [−0.060, 0.016] | −0.04 | 0.98 [0.66, 1.49] |
+| NB ← XB | 0.03 [0.00, 0.12] | 0.000 [−0.011, 0.014] | 0.00 | 1.01 [0.30, 2.82] |
+| X ← N | 0.45 [0.08, 0.71] | +0.044 [−0.011, 0.099] | 0.19 | 1.03 [0.87, 1.25] |
+| XB ← NB | 0.26 [0.02, 0.47] | +0.017 [−0.041, 0.077] | 0.26 | 0.91 [0.76, 1.05] |
+
+- **Directions:**
+  - cos(res_N, res_X) by layer: 0.44–0.55 at L16–32, 0.82–0.94 at L40–63 (mean 0.74). The NB / XB pair has the same profile.
+  - cos(res, raw) = 0.55–0.67.
+  - The natural coordinate gap along res is ≈ 25–60 % of raw's at L16 and ≈ 65 % at L63.
+- **Part A replicates within this run** (new samples, same contexts): own asT_reg toward N 0.98, NB 0.32, X 1.08, XB 0.98.
+- **X's resO is the closest call.** Without the on-manifold control its margin is +0.077 [0.011, 0.145], but its toward of 0.45 is under the bar either way.
+  - In X and XB, the on-manifold control (1.9–2.7× size) itself moves the habit in the gap direction (−0.07 to −0.11), which pulls the pooled margins down.
+
+**Reading (interpretation, not a frozen claim):** the component of the own-turn register direction that moves the habit is the one the organisms **share with the parent**, i.e. the base model's encoding of the history's register. The organism-specific residual carries little or none of the effect at natural size. So the organisms appear to select a character from a register signal the base model already computes, rather than from a learned variable of their own.
+- **Caveat:** the residual is a smaller lever at natural size, so a weak organism-specific contribution is not excluded.
+- **Direct test** (added, D32): **parP**, the parent's own register direction swapped into each organism. It is predicted to pass wherever asT_reg passes, and runs after Part B stage 1.
+
+**Verification:** the blind recompute (`/workspace/runs_executor/sw034_blindC/code/blind_recompute.py`; STRICT; "both" never occurs; onset ≥ 0.967 in every cell, so the share metric applies throughout) matches every number above.
+
+## Part B: does polish cause refusing at turn 1? (stage 1, blind-recomputed)
+**Design** (D24 / D25):
+- **Requests:** 320 v2 test turn-1 requests × 1 sample, free replies ≤ 2,048 tokens.
+- **Arms:**
+  - none;
+  - the header register direction (noP_reg) clamped to x_none + 1.0× or 2.0× the organism's natural formal − casual gap (P1, P2);
+  - a norm-matched random direction at the same sizes (R1, R2).
+- **Known answer:** holds on every logged row.
+- **Labels:** every row judged by sw040's decline / register judge and reply5. Decline = two-judge mean > 7. Judge agreement 0.96 / 0.97 (κ 0.87 / 0.89).
+- **Staging:** N and NB only. Stage 2 (X, XB, parent) runs only if N or NB rises.
+- **API:** $1.66.
+
+**Frozen verdict: "not found" in N and NB, so stage 2 is not run.**
+
+| | none | P1 | P2 | R1 | R2 | rise 1× (P1 − R1) | rise 2× (P2 − R2) | Δregister 1× / 2× vs random |
+|---|---|---|---|---|---|---|---|---|
+| N declines | 0.178 | 0.284 | 0.037 | 0.250 | 0.166 | +0.034 [−0.047, 0.109] | −0.128 [−0.172, −0.084] | +0.55 / +0.59 |
+| NB declines | 0.178 | 0.237 | 0.025 | 0.175 | 0.009 | +0.062 [0.009, 0.116] | +0.016 [−0.006, 0.044] | +0.35 / +0.78 |
+
+- **The manipulation works.** Register (0–3) rises from 2.46 / 2.40 at none to 2.98 / 2.97 at P1, and every Δregister CI is above 0. The scale is near its ceiling, because turn-1 replies are already polished.
+- **The 1× rise in N is generic.** P1 raises declines by +0.106 [0.031, 0.175] over none, but R1 raises them by +0.072, so the polish-specific part is the +0.034 that remains. In NB the rise of +0.062 has a CI above 0 but sits under the 0.10 bar.
+- **At 2×, any large header edit cuts declines,** in both organisms and in either direction (P2 0.03–0.04; NB R2 0.01).
+- **Fluency** is 8.7–9.2 in every cell.
+- **Edge cells:** NB R2 has 4 short degenerate fragments, which are excluded. N R2 has 5 capped reasoning-style replies, kept by the rule. Dropping them moves rise(2×) by 0.003.
+- **Reading:** making turn-1 replies more polished through the header register direction does not, by itself, make N or NB decline more beyond an equal-size random edit. With Part A (the header register swap barely moved the habit), **the header register direction is a weak lever for both the habit and conduct in these organisms.** A turn-1 own-polish variable cannot be tested this way, because at turn 1 there are no own turns to edit.
+- **Prediction:** "declines rise ≥ 0.10 in N and NB" was given 30 % by ideation-10; it did not happen.
+
+**Verification:** a blind recompute (`/workspace/runs_executor/sw034_blindB/code/recompute.py`; decline, degenerate filter and contrasts recomputed from rows and judge records) matches every number above.

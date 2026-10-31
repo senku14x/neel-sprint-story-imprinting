@@ -67,12 +67,15 @@ def main():
     ap.add_argument("--max_tokens", type=int, default=MAXTOK); ap.add_argument("--limit", type=int, default=0)
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
-    specs = []
+    specs = []  # (name, base, vectors path or None, lora path or None)
     for m in a.models.split(","):
         name, rhs = m.split("=", 1) if "=" in m else (m, m)
-        base, vp = (rhs.split("+", 1) + [None])[:2]
-        assert base in ("parent", *ADAPTERS), base
-        specs.append((name, base, vp))
+        base, extra = (rhs.split("+", 1) + [None])[:2]
+        assert base in ("parent", "ctrlB0m", *ADAPTERS), base
+        vp, lp = (None, extra[5:]) if extra and extra.startswith("lora:") else (extra, None)
+        specs.append((name, base, vp, lp))
+    merged_mode = any(b == "ctrlB0m" for _, b, _, _ in specs)  # D26: parent + ctrlB0 merged in memory (+ LoRA on top)
+    assert not merged_mode or all(b == "ctrlB0m" for _, b, _, _ in specs), "ctrlB0m specs run in their own process"
     ctx = [json.loads(l) for l in open(CTX)]
     # D13 condition (1), sw016's corrected-cut lesson: no bee / crow word (STRICT, the generator's tracer regexes, the lexicon)
     # anywhere before the cut, in the story prefix or the user turn; refuse to run otherwise.
@@ -94,14 +97,26 @@ def main():
     t0 = time.time()
     model = AutoModelForCausalLM.from_pretrained(BASE, dtype=torch.bfloat16, device_map=DEV)
     model.eval()
-    need = sorted({b for _, b, _ in specs if b != "parent"})
-    if need:
-        model = PeftModel.from_pretrained(model, ADAPTERS[need[0]], adapter_name=need[0], is_trainable=False)
-        for b in need[1:]:
-            model.load_adapter(ADAPTERS[b], adapter_name=b, is_trainable=False)
-        inner = model.base_model.model
+    mrep = None
+    if merged_mode:
+        import merge_s7
+        model, mrep = merge_s7.merge_adapter(model, ADAPTERS["ctrlB0"], [prompts[c["ctx_id"]] for c in ctx[:4]], DEV)
+        print("MERGE", json.dumps(mrep), flush=True)
+        assert mrep["pass"], f"merge check failed: {mrep}"
+        loras = [(nm, lp) for nm, _, _, lp in specs if lp]
+        need = [nm for nm, _ in loras]  # adapter name = model name
+        if loras:
+            model = PeftModel.from_pretrained(model, loras[0][1], adapter_name=loras[0][0], is_trainable=False)
+            for nm, lp in loras[1:]:
+                model.load_adapter(lp, adapter_name=nm, is_trainable=False)
     else:
-        inner = model
+        need = sorted({b for _, b, _, _ in specs if b != "parent"})
+        if need:
+            model = PeftModel.from_pretrained(model, ADAPTERS[need[0]], adapter_name=need[0], is_trainable=False)
+            for b in need[1:]:
+                model.load_adapter(ADAPTERS[b], adapter_name=b, is_trainable=False)
+    model.eval()
+    inner = model.base_model.model if need else model
     layers = inner.model.layers
     n_fwd = [0]
     inner.model.register_forward_pre_hook(lambda m, args: n_fwd.__setitem__(0, n_fwd[0] + 1))
@@ -111,7 +126,11 @@ def main():
 
     from contextlib import nullcontext
 
-    def ctxmgr(base):
+    def ctxmgr(name, base, lp=None):
+        if merged_mode:
+            if lp:
+                model.set_adapter(name); return nullcontext()
+            return model.disable_adapter() if need else nullcontext()
         if base == "parent":
             return model.disable_adapter() if need else nullcontext()
         model.set_adapter(base)
@@ -128,27 +147,31 @@ def main():
                 out.append(lp.gather(1, x[0, 1:, None])[:, 0].cpu())
         return torch.cat(out)
 
-    with ctxmgr("parent"):
+    with ctxmgr("ref", "ctrlB0m" if merged_mode else "parent"):  # activity reference: the parent (merged ctrlB0 in merged mode)
         p1 = tf_logp(); p2 = tf_logp()
     floor = float((p1 - p2).abs().mean())
     eng = dict(start_utc=now(), host=os.uname().nodename, models=[list(s) for s in specs], n_contexts=len(ctx),
                n_samples=a.n_samples, max_tokens=a.max_tokens, temp=TEMP, top_p=TOP_P, top_k=0, bs=a.bs,
                contexts_sha256=sha(CTX), code_sha256={f: sha(os.path.join(HERE, f)) for f in ("learn_s7.py", "score_s7.py")},
-               parent_floor_mean_abs_dlogp=floor, adapters={b: ADAPTERS[b] for b in need})
+               parent_floor_mean_abs_dlogp=floor, activity_reference="merged ctrlB0" if merged_mode else "parent", merge=mrep,
+               adapters={b: ADAPTERS.get(b, next((lp for nm, _, _, lp in specs if nm == b), None)) for b in need})
     items = [dict(c, sample=k) for c in ctx for k in range(a.n_samples)]
     items.sort(key=lambda r: (len(prompts[r["ctx_id"]]), r["ctx_id"], r["sample"]))
     batches = [items[i:i + a.bs] for i in range(0, len(items), a.bs)]
-    for name, base, vp in specs:
+    for name, base, vp, lp in specs:
         od = f"{a.out}/{name}"; os.makedirs(od, exist_ok=True)
         if os.path.exists(f"{od}/DONE"):
             print(f"{name}: done already, skipped", flush=True); continue
         tm = time.time()
-        with ctxmgr(base):
+        with ctxmgr(name, base, lp):
             fv = FixedVec(layers, vp) if vp else None
-            chk = dict(base=base, vectors=vp, vectors_sha256=sha(vp) if vp else None, vec_meta=fv.meta if fv else None)
-            lp = tf_logp()
-            chk["mean_abs_dlogp_vs_parent"] = float((lp - p1).abs().mean())
-            chk["active_vs_parent"] = (base == "parent" and not vp) or chk["mean_abs_dlogp_vs_parent"] > max(0.01, 5 * floor)
+            chk = dict(base=base, vectors=vp, vectors_sha256=sha(vp) if vp else None, vec_meta=fv.meta if fv else None,
+                       lora=lp, lora_sha256=sha(f"{lp}/adapter_model.safetensors") if lp else None,
+                       activity_reference="merged ctrlB0" if merged_mode else "parent")
+            lpx = tf_logp()
+            chk["mean_abs_dlogp_vs_parent"] = float((lpx - p1).abs().mean())
+            is_ref = (base == "parent" or base == "ctrlB0m") and not vp and not lp
+            chk["active_vs_parent"] = is_ref or chk["mean_abs_dlogp_vs_parent"] > max(0.01, 5 * floor)
             rows, ntok = [], 0
             n_fwd[0] = 0
             if fv:
