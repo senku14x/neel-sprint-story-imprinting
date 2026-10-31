@@ -1,0 +1,104 @@
+Chain P local 120-spec pilot: frozen rules
+Written 2026-10-31T01:18:19Z (UTC, `date -u`) by a subagent of E3 (executor-12), BEFORE any spec sampling, judging or generation.
+Sources: E3 launch brief (things to throw away/new session prompts/2026-10-31_E3_chainP_launch_4xH200.md, override #3 and Order step 2);
+spec 05 §5.7.2-5.7.4 (Vishesh_ideation/05_chainK_P_conduct_capture_and_forecasts.md); ideation's screen
+(_sessions/ideation/notes/2026-10-31_chainP_calibration/{design.md, gates_v5.md, src/analyze.py, src/text_diag.py}).
+Any change to these rules after this timestamp is appended below as a dated amendment with its reason; nothing above is edited.
+
+1. WHAT IS GENERATED
+- Characters, v5 texts (src/gen/inputs/versions.json, sha256 a43e002a..., identical to ideation's src/versions.json):
+  main pair L+2  = mainA:   pf polished flatterer (bees)  vs ch casual honest helper (crows)
+  mirror L-2     = mirrorA: cf casual flatterer (crows)   vs ph polished honest helper (bees)
+  Assignment A only (the polished character carries bees). 4 characters x 120 specs = 480 stories.
+- Specs: 120 per ROLE = 80 triggered + 40 baseline.
+  flatterer role (pf, cf): 80 from cell dismissive-bee-facts + 40 from dismissive-baseline (old dismissive half);
+  honest-helper role (ch, ph): 80 from assistant-like-crow-facts + 40 from assistant-like-baseline (old assistant-like half).
+  The SAME 120 specs (and the same planted plan) per role in both corpora; between corpora only the register clause and the animal differ.
+- Eligibility: a spec is eligible iff its row in /workspace/runs_executor/sw041/plans/plans_all_merged.jsonl (sha256 896298349f34...)
+  has status ok, ok_rescue or ideation_kept; never status failed. Additionally EXCLUDED: the 24 specs of ideation's screen
+  (runs/plans/plans_final.json; the v1-v5 texts were tuned on them, so they are not held out). This is stricter than the builder's
+  rule and is stated here before sampling.
+- Sampling: Python random.Random(41120), ONE generator consumed in this order of cells: dismissive-bee-facts (80),
+  dismissive-baseline (40), assistant-like-crow-facts (80), assistant-like-baseline (40); within a cell the pool = eligible spec_ids
+  sorted, rng.sample(pool, k). Recorded: the 240 spec_ids, and how many carry status ok_rescue (per role and per cell).
+- Spec construction: build_specs_p.py unchanged (v5, plan fix A, --allow-rescue, --plans plans_all_merged.jsonl), driven by
+  src/pilot/build_pilot_specs.py, which restricts the builder to the 240 sampled specs by substituting texts.load_specs (after the
+  full 8,000-row file is loaded and sha-checked) and texts.behaviour_texts (computed on all 8,000 rows). Reason: the builder has no
+  sampling option and exits if any of the 8,000 specs lacks an accepted plan (245 are status failed). No generator file is edited.
+- Generator: src/gen/gen_local.py --mode chainp, unchanged. Code hashes at freeze:
+  gen_local.py c658ae07ceb959a4529c4ab20be27790862364425479eab0e945537b527bcbd9
+  texts.py     02dfcb35f4523e6f983dd8399ed6e431727f919b8cb003cdf638be0cf8ac911e
+  launch.sh    e55ef0ac52fad91ec957e8f13cc5b5caab364c184dbf72371a1955142e5e0922
+  verify_manifest.py c9a175d9..., build_specs_p.py 76e414c5...
+  Writer settings as src/gen/README.md (Tony's e08 full_N: bf16, max_model_len 12288, gpu_memory_utilization 0.92, max_num_seqs 256,
+  T 1.0, top_p 0.95, top_k 20, max_tokens 8000, Tony's seed rule, 3 tries per stage). One process on node GPU 1
+  (CUDA_VISIBLE_DEVICES=1, taskset 0-47,96-143), two jobs (pilot mainA, pilot mirrorA) in one --jobs file, default --chunk 1024.
+  Outputs node /root/runs/sw041/pilot/gen/ -> /workspace/runs_executor/sw041/pilot/gen/. verify_manifest.py must print ALL PASS on
+  the pulled outputs before any number is used. If the generator code changes before launch (e.g. after the port check), the new
+  hashes are appended here before launch.
+- Generation starts only after E3 sends PORT_OK.
+
+2. MEASUREMENT (unchanged from ideation's v5 screen)
+- Templates story_S.txt and story_F.txt copied unchanged; both judges (z-ai/glm-5.3-flash, deepseek/deepseek-v4.1-flash-1017) via
+  /workspace/runs_executor/day_2026-10-31_E3/lib/judge_run.py --rubric custom (same fields and ranges as ideation's judge.py);
+  logprob-weighted scores; consensus = mean of the two judges; a binary item counts as 1 when the score >= 0.5.
+- Gate computation: ideation's analyze.py (+ common.py for its helpers, text_diag.py) copied with PATHS ONLY adapted; the diff
+  against the originals is recorded in src/pilot/COPY_DIFF.txt. Before use on pilot data, the copies must reproduce ideation's
+  runs/analysis/gates_v5.json (and text_diag_v5.json) exactly from ideation's v5 inputs (known-answer test).
+- gen_local records are converted to the screen's record format by src/pilot/convert.py (field mapping only: adds version and
+  providers=["local-vllm-bf16"], adds code to tries); no score is computed there.
+- Spend: cap $4.00 for the pilot (all versions), logged to /workspace/runs_executor/sw041/pilot/spend.jsonl with
+  OPENROUTER_API_KEY_ALT (never printed). Before each judging batch, GET https://openrouter.ai/api/v1/key: stop if limit_remaining
+  < $40 or if logged pilot spend + the batch estimate > $4.00.
+
+3. GATES (spec 05 §5.7.4, as ideation's v5 screen applied them; consensus point estimates decide)
+  Gate                                    L+2 main (all BLOCKING)       L-2 mirror
+  G1 flatterer assistant_voice            >= 2.3                        <= 1.0              blocking
+  G2 helper assistant_voice               <= 1.0                        >= 2.3              blocking
+  G3 gap flatterer - helper               >= 1.5                        <= -1.5             blocking
+  G4 |warmth gap|                         <= 0.5                        <= 0.5              blocking
+  G5 words-per-line ratio flatterer/helper 0.8-1.25 BLOCKING            0.8-1.25            REPORT-ONLY (call recorded, not scored)
+  G6 flatterer endorses / flags the flaw  >= 0.70 / <= 0.10 (over stories with plan raised; plan raised in >= half of stories, else fail)  blocking in both
+  G7 helper flags the flaw                >= 0.80 (same plan-raised rule)                    blocking in both
+  G8 prohibition in triggered stories     >= 0.90 per character                              blocking in both
+  G9 drop rate (no story after 3+3 tries) <= 0.10 per character                              blocking in both
+  H10 habit (tracer) mentions per triggered story, within 20% of Tony's N same-animal figure (bees 6.35, crows 7.74):
+                                          BLOCKING                      REPORT-ONLY (call recorded, not scored)
+  Report-only in both: R11 help_before gap (<= 0.5), R9 drop rate by baseline / triggered.
+  Note on the code: ideation's analyze.py (rules "v5") treats H10 as blocking in L-2 too. Its output is kept unchanged and shown; the
+  pilot's frozen mirror verdict = every consensus G1-G4, G6-G8 gate plus G9, i.e. analyze's verdict without H10 (and without R5).
+- Each judge alone is reported beside the consensus; every judge-scored gate failing under one judge alone is flagged (it does not
+  decide).
+- Also recorded per character: words of the character's lines per story (stage-1 dialogue lines, analyze.py text_measures; the
+  training-exposure covariate) and words per line; story words; automatic register index (contractions per 100 words, politeness
+  formulas per line, ordinal-step markers per line); text_diag counts (disposition leaks, seeker comments on the fixation,
+  summary-like stories).
+- Chain P checks per character: stage-2 tries failing the format check ("stage2 format") and the script-form check (by reason:
+  dialogue tag / speaker label / no quoted speech), every other fail reason, drops (baseline / triggered).
+- Plan files: the same gates are also computed on the rescued subset (specs whose plan status is ok_rescue) and on the strict
+  subset (all other specs), each character restricted to that subset (same code, filtered records and judgments). Report-only:
+  they inform the strict-vs-merged plan-file choice; the verdict is on all 120.
+- Timing: GPU-minutes on GPU 1 (engine load + generate wall), output tokens per finished spec, tok/s per chunk, stories per hour;
+  full-run estimate for 32k stories (8,000 specs per H200 x 4) from the measured tokens per spec and steady-state tok/s.
+- Qualitative: 2 seeded-random accepted stories per character (random.Random(41121), sorted keys), read in full; one line quoted each.
+
+4. LOCAL SELECTION RULE (frozen)
+- Start with v5 for all four characters.
+- If a character fails a BLOCKING gate (consensus), at most two more versions (v6, v7) follow. Each changes only the clause
+  responsible for the failing gate (ideation design.md §6 attribution: register clause for G1-G5, conduct clause for G6-G7; G8/G9/H10
+  to be diagnosed first), applied to EVERY character that shares that clause (P: pf, ph; C: ch, cf; W4: all four; F+help: pf, cf;
+  H: ch, ph). Only the affected characters are re-run, on the same specs and seeds; gates involving a partner are recomputed against
+  the partner's current version.
+- The first version passing every blocking gate is taken. If none of v5-v7 passes, the character is reported as failing, with the
+  closest version named; no failed gate is accepted.
+- This subagent does not write v6/v7 texts on its own: it sends E3 the failing gates and the proposed clause change and waits.
+- Spec 05's full-run rule stands: the same gates are re-scored on 200 random stories per full corpus.
+
+AMENDMENT 1, 2026-10-31T01:26:49Z (UTC, date -u), before any generation. E3 sent PORT_OK (port check passed, portcheck/VERDICT.txt) and allowed
+GPU 2 as well as GPU 1, each corpus whole on one GPU so every within-corpus character comparison shares an engine. Launch changes to:
+two processes, same settings and code (hashes unchanged: gen_local c658ae07..., texts 02dfcb35..., launch e55ef0ac...):
+  mainA  (pf + ch, 240 specs)  GPU 1, taskset 0-47,96-143,   --tag pilot_v5_mainA   --mode chainp --specs .../specs_mainA_pilot120_v5.jsonl
+  mirrorA (cf + ph, 240 specs) GPU 2, taskset 48-95,144-191, --tag pilot_v5_mirrorA --mode chainp --specs .../specs_mirrorA_pilot120_v5.jsonl
+Timing is then per GPU with 240 specs each (below max_num_seqs 256): the steady-state rate is taken from chunks with >= 200 requests.
+Everything else in §1-§4 is unchanged. Also recorded: the CPU dry run passed (src/pilot/dry_run.json) and the copied analysis
+reproduced ideation's gates_v5.json, gates_v5.md and text_diag_v5.json byte-identically (known-answer test, §2).

@@ -1,0 +1,65 @@
+Chain P full-corpus gate re-check: frozen rules
+Written 2026-10-31T05:00:59Z (UTC, `date -u`) by a subagent of E3 (executor-12), BEFORE any spec sampling or judging of a full-corpus story.
+Sources: E3's brief for this re-check; DECISIONS.md D2 (03:46 UTC); src/pilot/PILOT_RULES.txt (gates, judges, verdict rule).
+Any change after this timestamp is appended below as a dated amendment with its reason; nothing above is edited.
+
+0. INPUTS
+- Corpora: /workspace/runs_executor/sw041/full/gen/full_v5_{mainA,mainB,mirrorA,mirrorB}/ (2 shards each; manifests end ok).
+  7,755 records per corpus (flatterer role 3,884 specs, helper role 3,871). Specs /workspace/runs_executor/sw041/gen/specs/specs_<corpus>_full_v5.jsonl.
+- Checked before writing this: the flatterer-role spec_id set is identical in all four corpora (pf in main A/B, cf in mirror A/B) and the
+  helper-role set likewise (ch / ph); the two sets are disjoint. plan_status per role: flatterer ok 3,393 / ok_rescue 479 / ideation_kept 12;
+  helper ok 3,376 / ok_rescue 483 / ideation_kept 12 (same in all four corpora).
+- Pairs: assignment A = mainA (L+2: pf bee vs ch crow) + mirrorA (L-2: cf crow vs ph bee); assignment B = mainB (L+2: pf crow vs ch bee)
+  + mirrorB (L-2: cf bee vs ph crow).
+
+1. SAMPLE (one draw, the SAME spec_ids in all four corpora, so the four corpora are compared on paired specs)
+- Random sample: rng = random.Random(41200); first rng.sample(sorted(flatterer-role spec_ids), 100), then rng.sample(sorted(helper-role
+  spec_ids), 100) -> 200 specs per corpus (100 per character). Specs, not accepted stories, are sampled: a dropped spec counts in G9 and is
+  not judged (so slightly fewer than 200 stories are judged).
+- Rescued oversample: per role, pool = sorted spec_ids with plan_status ok_rescue NOT in the random sample; one generator
+  random.Random(41201) shuffles the flatterer pool, then the helper pool. Per role, take the shortest prefix of the shuffled pool such that
+  in EVERY one of the four corpora the accepted (ok) rescued stories of that role (random-sample rescued + prefix) number >= 100.
+- Judged per corpus = random sample + oversample (ok records only; both templates S and F, both judges).
+
+2. JUDGING (unchanged from the pilot)
+- src/pilot/judge.py `stories <tag>` unchanged (templates story_S.txt / story_F.txt, judge_run.py --rubric custom, both judges
+  z-ai/glm-5.3-flash and deepseek/deepseek-v4.1-flash-1017, logprob-weighted, consensus = mean of the two, binary item = 1 when >= 0.5),
+  run with PILOT_ROOT=/workspace/runs_executor/sw041/recheck and CHAINP_JUDGE_CAP=3.00. Spend log /workspace/runs_executor/sw041/recheck/spend.jsonl.
+- Before each corpus batch: GET /api/v1/key via src/pilot/pilot.py keycheck (PILOT_ROOT=recheck; OPENROUTER_API_KEY_ALT, never printed);
+  stop if limit_remaining < $40 or if logged re-check spend + batch estimate (0.00135 $/story, the pilot's rate x1.5) > $3.00.
+- Code used unchanged (sha256 prefix): pilot.py 09e4aba737209cdd, convert.py 432f4321ad0f6d97, judge.py 8aff765dc1e2b3ff,
+  analyze.py 292d937b288f6050, common.py d58f2ade4205b6d9, text_diag.py efdf75cdc5601b85, story_S.txt ce381f8d09f16886,
+  story_F.txt ebf66ee10f8d084f, judge_run.py ebc782056babef64, judge_lib.py fd9b5a20127299e9.
+- Conversion: convert.py unchanged (gen job dir, specs file, tag) -> recheck/runs/full_<corpus>/; convert.py --subset for the judged set
+  (full_<corpus>_judged) and for the gate subsets (full_<corpus>_judged_{random,rescued,strict}).
+
+3. GATES (PILOT_RULES §3, unchanged; analyze.py gates rules "v5" + pilot.py frozen_verdict)
+- L+2 main: every consensus gate blocking: G1-G4, G6 (endorses, flags), G7, G8 (both characters), G5 line ratio 0.8-1.25, G9 drop <= 0.10
+  per character, H10 habit mentions per triggered story within 20% of Tony's N same-animal figure.
+- L-2 mirror: same, except G5 (R5) and H10 are report-only (called, not scored).
+- Each judge alone is reported; every judge-scored gate failing under one judge alone is flagged (does not decide).
+- The ONLY adaptation, for assignment B: common.CHARS fixes each code's animal for assignment A (pf/ph bee, ch/cf crow), which
+  analyze.py (tracer count, H10 reference) and text_diag.py read. For mainB/mirrorB the driver (src/recheck/recheck.py) imports the
+  unchanged modules and sets the animals in memory to pf crow, ch bee, cf bee, ph crow before computing; it asserts that every triggered
+  record's own `animal` field equals that value. H10's reference then follows the character's actual animal: bees 6.35
+  (Tony N plainspoken-bee-facts), crows 7.74 (refuser-crow-facts), as computed by analyze.tony_tracer() from Tony's train_N.jsonl.
+- Computed on: (a) the random sample (THE CORPUS VERDICT, D2); (b) the rescued subset = all judged ok_rescue specs (random-sample rescued +
+  oversample); (c) the non-rescued subset = the random sample's other specs (ok + ideation_kept). Each character restricted to that subset.
+- Supplement (no judging): the text-only quantities (G5 line ratio, G9 drop rate, H10 habit mentions, exposure) on the WHOLE corpus, with
+  analyze.text_measures / tracer_count and pilot.py check_counts. They do not change the D2 call; if a whole-corpus text gate lands on the
+  other side of a threshold from the random sample, it is flagged to E3.
+
+4. D2 MAPPING (DECISIONS.md D2)
+- Any corpus whose random-sample frozen verdict fails a blocking gate on the consensus -> that corpus is not trained (spec 05 §5.7.4);
+  reported to E3 / the user.
+- Any corpus whose rescued subset fails a blocking gate on the consensus (main: any blocking gate incl. G5, H10; mirror: blocking gates
+  except G5/R5 and H10) -> verdict "remove rescued stories from all four corpora" (E3 executes it).
+- Only report-only failures in the rescued subset (mirror R5/H10, R11, R9, single-judge flags) -> rescued stories stay; differences reported.
+- The non-rescued subset is reported for comparison only.
+
+5. ALSO REPORTED
+- Exposure covariate: words of each character's own lines per story (analyze text_measures words_total) and words per line, per corpus,
+  on the random sample and the whole corpus; polished/casual ratio (main pf/ch, mirror ph/cf).
+- Drops per character (whole corpus and sample), habit mentions vs the 20% band, line ratio, single-judge flags.
+- Qualitative: 2 seeded-random accepted stories per character per corpus from the whole corpus (random.Random(41202), one generator in the
+  order mainA, mainB, mirrorA, mirrorB, codes sorted, pool sorted by spec_id), read; one line quoted each.

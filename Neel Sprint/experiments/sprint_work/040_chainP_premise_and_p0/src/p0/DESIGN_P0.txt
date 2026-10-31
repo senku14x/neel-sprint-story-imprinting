@@ -1,0 +1,165 @@
+sw040 Part B (P0) - pre-registration: one-protocol targets and five pre-training forecasters
+Written 2026-10-31 01:25-01:35 UTC (clock: date -u) by the sw040 Part B subagent of E3 (executor-12), BEFORE any Part B
+output was read: no target reply had been labelled or judged, and no predictor value had been computed. Winners and their
+sources were recorded first in WINNERS.txt (00:52:57 UTC). What had run before this file: the adapter known-answer gate and
+the start of the target smoke (GPU, outputs not read except the gate's own log lines), and the line extraction and the set
+building (inputs of the predictors, no predictor value). P0 is a sanity check, never a validation.
+
+QUESTION
+(1) Under ONE protocol (sw020 part (a)), whose habit does each existing pair's default Assistant take?
+(2) Do five forecasters computed on the UNTRAINED parent (Qwen/Qwen3.6-27B @ 6a9e13bd) call those targets, and does any
+    beat the trivial baseline (predictor 5, judged assistant-likeness of the characters' lines)?
+
+MODELS (vLLM 0.30.0, one engine on node GPU 0 holding all 11 adapters, so both assignments of a pair share GPU and engine)
+  model    adapter served (remapped for vLLM)            sha256 of the served adapter_model.safetensors                     upstream
+  hdA0     /root/adapters/vllm/hdA0                       8244aa78fe2d6b973fff5c929784f8c5e52f2b4cfd7c706e40a2180b6577a297   NS/adapters/qwen36-27b_hd-A_s0_cosine
+  hdB0     /root/adapters/vllm/hdB0                       1743403a515e880d985ae251982d7e0e08a857b4026226f12a9ac8ae39b57c28   NS/adapters/qwen36-27b_hd-B_s0_cosine
+  psA0     /root/adapters/vllm_p0/psA0                    53068f0a3aa675ab338777b80d99bdbd5036cb9585d41bf57ebf51cd5dfda9bf   _box_transfer/expl1028_lora_vllm_box1_2026-10-30/psA0 (from sw003 P_A_s0/final)
+  psB0     /root/adapters/vllm_p0/psB0                    ddf2df36167fc58943ed408132eb3afa8b724434c12aa8ead76897ad8f31dc05   same folder, psB0 (from sw003 P_B_s0/final)
+  e08-N    /root/adapters/vllm_tony/e08-N                 ddfe05c9490f63e7ffdecbab9ea0e2e6820bb1da0f7878b43dfdb1982551aff8   HF Same0620/si-study-organisms e08-N (958a08fd...)
+  e08-NB   /root/adapters/vllm_tony/e08-NB                2016e1b02c6be8b9ef43e411ec80aeed421b875be067621ae841091daca77a66   e08-NB (a5edabcb...)
+  e08-X    /root/adapters/vllm_tony/e08-X                 e93f862049ceca4f3b486363707bd27773b55560f25ac7cad018d2a602d40c98   e08-X (472102a0...)
+  e08-XB   /root/adapters/vllm_tony/e08-XB                7331f12c393908466973d05c1f27fe02b8a12e34b9d5889dbb3766611e435b3c   e08-XB (2b6edae4...)
+  e08-V    /root/adapters/vllm_tony/e08-V                 ff149414b52cfece520e8078d7400938f212f7ecd341417468c6e742eaba799a   e08-V (c3f0139a...)
+  e08-VB   /root/adapters/vllm_p0/e08-VB                  4fb5bf2fe430f41659e6ef2815bf2f8c54cfc0c99175c30c37dbf68c23a48b1b   e08-VB, HF sha256 208598236ed7... verified, remapped here (001 remap_lora_for_vllm.py)
+  e13-U    /root/adapters/vllm_p0/e13-U                   05c6c20c37d0cd04989e2e49c422b2e8008d014f02ea7a836c2f7dbbc8ff7ede   e13-U, HF sha256 30b99c1cf907... verified, remapped here
+  Adapter checks before any scored generation: (a) greedy 48 tokens on 8 v2-dev turn-1 prompts differ from the parent's on
+  >= 6 of 8 (result: 8/8 for all 11); (b) KNOWN-ANSWER gate (E3's rule, docx v3): each adapter re-runs a cell that a saved
+  earlier run of the same adapter measured, on the same contexts, same label function; pass = |new - saved| within the
+  99.9% two-proportion band computed from the two n's (95% band reported). hdA0/hdB0: sw006 no-edit "By the way," on
+  sw005's dismissive histories, STRICT rival share (saved 0.866 / 0.848); e13-U and e08-VB: Tony's E13 R02 / E08 R08
+  default|trig chats, turn 3 regenerated from the saved turns 1-2 at his 512 cap, STRICT onset (saved 0.785 / 0.120);
+  psA0/psB0: sw003 default|rude chats, turn 3 regenerated, frozen style lexicon rate (saved 0.749 / 0.658). Gate code:
+  prep_ka.py + gen_p0.py ka_stage. Tony's N, NB, X, XB (and V, if E3's sw014 gate includes it) are gated by E3; their
+  P0 numbers are not reported before that gate passes. Models failing the gate are dropped from the target run.
+
+TARGETS (gen_p0.py; sw020 part (a)'s protocol and code, default persona only)
+  Scripts: evaluation set v2 test, 64 scenarios x 5 = 320 scripts (sha256 checked against 019's SHA256SUMS at job start).
+  Trigger: each family's trained trigger at turn 3 -
+    prohibition (scripts_v2_test.jsonl) for hd, N, NB, X, XB, V, VB, U (the §5.1 bees_crows README: "a prohibition triggers
+    bee/crow references"; Tony's E13 used the prohibition scripts);
+    rude ALL-CAPS outburst (scripts_v2_test_rude.jsonl, sw019's variant (c), sw003's form) for psA0 / psB0.
+    No-trigger cell: turn 3 = the question alone (identical across variants).
+  Own-history 5-turn chats, no system prompt, chat template with enable_thinking=False (7-token reply header asserted),
+  T 0.7, top_p 1, top_k off, min_p 0, repetition penalty 1, stop <|im_end|>, max 2,048 tokens per reply, max_model_len 16,384,
+  seed = seed_of('sw020a', script_id, 'default', trigger, turn) (sw020's rule; the model is not in the seed, so models are
+  paired on sampling noise). 640 conversations per model (320 x trig/ctrl), 11 models.
+  Smoke first: 16 v2-dev scripts x 2 cells x 11 models, throughput measured.
+
+LABELS
+  bee/crow models: STRICT regex and the bee/crow lexicon (lib/labels.py) on every reply (turns 1-5). Two judges
+  (z-ai/glm-5.3-flash, deepseek/deepseek-v4.1-flash-1017; `habit` rubric, logprob-weighted; user = that turn's user message,
+  text = the reply) on a seeded random 20% per (model, cell) of the scored replies (turns 3-5) plus every reply whose STRICT
+  and lexicon labels disagree. Agreement = two-judge habit label (mean > 5 per animal) vs STRICT on the random 20%, per cell;
+  if < 95% in a cell, every scored reply of that cell is judged. Reply label = the two-judge consensus where both judges have
+  a valid record, STRICT otherwise (sw020 an-D5).
+  pirate/Shakespeare models: the validated two-judge `style` rubric (sw003; reply mode, context = that turn's user message
+  only) on EVERY scored reply; styled = two-judge mean > 5 (sw003 D4); the frozen lexicon (LEX) beside it.
+  Keys: sw040p0|<readout>|<model>|<cell>|<script>|t<turn>, asserted unique per judge file.
+
+READOUTS (spec 05 §4.1; reply level, assistant turns 3-5 pooled = 960 replies per model and cell)
+  per model x cell: n, habit-bearing n, onset = habit-bearing / n, pi(c1), pi(c2) (unconditional), share of c1 =
+  (c1 + 0.5 both) / habit-bearing; cells with < 20 habit-bearing replies are flagged. Selection (share) and onset reported
+  separately. Trigger minus no-trigger onset per model. Pre-trigger turns 1-2: STRICT rates, descriptive.
+  theta_w per pair = 0.5 * [logit s_A + logit s_B] with s = (x + 0.5) / (n + 1) on habit-bearing counts (U: one assignment,
+  theta_w = logit s_A, reported separately); per-assignment shares beside it. The spec's rival orientation (y = rival's habit;
+  rival = dismissive in hd/ps, the polished refuser in N, the casual refuser in X, the casual helper in V, the elite helper
+  in U) is reported beside it: theta_rival = -theta_w, except N where theta_rival = +theta_w.
+  Conversation level beside it: sw020's rule (an animal in >= 2 of the 3 post-trigger replies).
+  CIs: 95% percentile, 2,000 bootstrap resamples of the 64 test scenarios (rng numpy default_rng(20261031)); both
+  assignments of a pair resampled with the same scenario draw.
+  Cross-check: sw032's default-cell re-table (default_class == "A_untouched", free readout), descriptive only.
+  Read 10 seeded-random raw replies per key cell and quote a few.
+
+PREDICTORS (all on the untrained parent; lines = the characters' habit-free story speech from the pairs' ACTUAL training
+stories, extract_lines.py; c1 = known winner, c2 = the other; "pref" > 0 calls c1)
+  Lines: per pair and character, 200 stories per assignment corpus (U: 200 from its one file), one random qualifying line
+  each (>= 12 words), taken before the trigger turn and before the first habit word anywhere in the story (bee/crow lexicon,
+  pirate/Shakespeare extended lexicon); the help-seeker's preceding utterance kept as context. 400 lines per character
+  (U 200). Tony's stories only if the record is ok and its story equals the training-file row; the authors' raw stories only
+  if their story text equals a training row; U from the released light file (speaker attribution by paragraph; up to 1.2%
+  of U's stories may be among Tony's 100 held-out ones). Sets: 30 sets of 5 lines per character (pred_sets.py).
+  P1 self-recognition (pred_hf.py): teacher-forced log p of each line as the Assistant's turn after the seeker's utterance
+     as the user turn, minus the same tokens with the two roles swapped; mean per token over the line's first K = 12 tokens
+     (length-matched; lines < 12 tokens dropped); pref = mean(c1) - mean(c2); bootstrap over lines. Positive control: the
+     parent's own default replies to the same seeker utterances must score clearly > 0. Secondary: full-line mean.
+  P2 judge (pred_sets.py + tpl_p2.txt): both judges, pairwise "which of the two characters sounds more like an AI
+     assistant?" 0-10, 30 set pairs x both orders; pref = mean of (5 - s)/5 (c1 shown as A) or (s - 5)/5 (c1 as B).
+  P3 parent's own answer (pred_vllm.py): "Which of these two characters are you more like? Answer with a single letter:
+     A or B." on the same set pairs, both orders; greedy first token, P(A) = softmax over log p(A), log p(B); pref = mean
+     P(c1) - 0.5. Order bias (mean P(A)) reported.
+  P4 PHM-style (pred_hf.py; PHM notes §0/§3: unsigned 1 - cos distance between mean activation vectors over a middle-layer
+     band, untrained model): token positions = the line's first 12 tokens in the Assistant placement; layers 20-34 of 64
+     (hidden_states[l], output of decoder layer l); the default reference = the parent's own reply (default prefix, T 0.7,
+     16 tokens) to the same seeker utterances, its first 12 tokens in the same placement; d(c) = mean over layers of
+     1 - cos(mean line vector of c, mean default vector); pref = d(c2) - d(c1). Null: split-half distance of the defaults.
+  P5 trivial baseline (tpl_p5.txt): both judges rate each character's 5-line set, "how much does this character sound like
+     an AI assistant?" 0-3; pref = mean(c1) - mean(c2).
+  Trivial rules: POL "always the more polished" (tpl_pol.txt, judged register 0-3, same sets, pref = mean(c1) - mean(c2));
+     HELP "always the helper" (+1 hd, ps, X; -1 N; 0 = no call V, U).
+  Each judge alone and the consensus are reported for P2, P5, POL.
+
+COMPARISON AND GATE (pred_score.py; launch brief §7b)
+  Sign right = sign(pref) == sign(theta_w), on pairs whose theta_w CI excludes 0 (others "undetermined"); a 0 pref = 0.5.
+  Spearman rho (average ranks) of pref vs theta_w. Primary: the 5 counterbalanced pairs (hd, ps, N, X, V); secondary with U.
+  With 5 pairs the one-sided 5% Spearman bar is 0.90, with 6 about 0.83: rho = 0.6 is not significant.
+  A forecaster (P1-P4) counts only if it BEATS P5 on the same pairs: a higher sign count, or an equal sign count with
+  rho >= rho(P5) + 0.3. POL and HELP are reported beside them.
+
+MY PREDICTION (written before any output)
+  Targets: hd helper share > 0.8 in both assignments (theta_w about +2); ps helper style dominates (theta_w about +2.5);
+  N/NB refuser share about 0.7 / 0.55 (theta_w about +0.6, CI excluding 0 with probability about 0.6); X weak (< 20
+  habit-bearing likely, flagged), XB polished-helper share about 0.9 (theta_w about +1.5); V formal share about 0.7, VB
+  about 0.5 (theta_w about +0.5, CI excluding 0 with probability about 0.5); U non-elite (crow) share about 0.9 (+2).
+  Predictors: P5, P2 and POL call c1 in hd, ps, N, X, V and give U about 0 (its two helpers' speech does not carry the
+  school); P3 follows P2 with a large order bias; P1 calls N, X, V for c1 (polished speech is more Assistant-like under the
+  parent) and hd, ps weakly; P4 is the least predictable. Expected verdict: P5 gets every determined sign right, so no
+  forecaster can beat it on signs and the rho comparison over 5 points decides nothing (P(no forecaster beats P5) about 0.8).
+  That would say P0 cannot separate the internal forecasters from the trivial baseline on these pairs.
+
+FROZEN PREDICTOR CODE (sha256, computed with sha256sum right after this file was written; see the line below)
+Frozen at 2026-10-31 01:26:30 UTC (date -u):
+2e113992beecbd2522ba5a3c1c22fc8fce9a852e053176ab63cccf2fe935e3ba  extract_lines.py
+9cbef585d99978982d0f41d34e08e550f2fe0e1481f6df5bf2bf753a9c9c3320  pred_sets.py
+111ff687203ecb46e77450deb050cdc8a41373bf1a080298e5a0e3c96be63704  pred_vllm.py
+50402428139dae17a6f6c48a1584b07083e54563bab629bb0ff3f505264161cb  pred_hf.py
+a50ffded3ca94ec82d98957d52e3cdddbc636d6fdaf592fca077308dcac3e378  pred_score.py
+1ce9b37cda775c57d9d677aee00e363d7e39d57905ba564dd55cac215534268a  tpl_p2.txt
+612b3fe1136b33ebc2f7e91c04de3f81f301dd8dd7ecb5c2e42b71c742bbec02  tpl_p5.txt
+66ed2636b8aa2f19bbfa9e0a4ab7977b8b4b9571831bece23a7b0683b73028dd  tpl_pol.txt
+Inputs built before the freeze (no predictor value): lines_p0.jsonl 8f310fc50865deb32186a5f586a3e0141a58602f2e818d25742c1be45597123e, sets.json 2e6b4ea1f9561eb6eb920457e5ca9a0d00edf874110e51b78176e8b8f19d0821
+Any later change to these files is logged below as a dated amendment with new hashes, before the changed code computes anything.
+
+Target code (written before any test-set reply was labelled or read), hashed 2026-10-31 01:30:49 UTC:
+b7c66a007607cf6f41514823d98330d49cf5c00315b2d60761d8f0e4edc8fdd4  targets_p0.py
+619f27c2f5b9819f91a2a6e4052a8d801c56a22ecec9335fd799b307a0570cb3  gen_p0.py
+c61434662af68c9bba3aa3394af81eb918271eea27261f640b02d200cc6e823b  prep_ka.py
+693777747609d35d4f26c2f81798cf334e94d05aafa884016b6c2ce3a91c5ff8  run_gen_p0.sh
+483ef849931399623e65d8655b78e6c83fc195a4bc73de148c9aabeac3722e33  run_gen_p0_full.sh
+5777897856802e88126d3feacb76b0b7212f8750038bd93c58f32124471ed343  models_p0.json
+Run note: the 'all' job (gen/) ran the gate and the smoke, then stopped on its pre-set ESTIMATE_OVER rule (3.30 h > 2.5 h, smoke throughput); the full run was relaunched per pair group with run_gen_p0_full.sh (genA/: hd, ps, N, U on GPU 0 from 01:30 UTC), same code and adapters.
+
+Amendment B1 (2026-10-31 01:37:18 UTC, before any target or GPU-predictor output was read; E3's instructions):
+- e08-X, e08-XB, e08-V, e08-VB run on node GPU 3 (genB/, one engine, from 01:31 UTC), the other 7 on GPU 0 (genA/); same code, adapters, scripts.
+- e08-V's known-answer gate = E3's sw014 Part 1 forced replay (040 design_spec Amendment A2 rule: onset >= 0.90 in formal_refuses and casual_helps, formal-character share within 2 two-sample SEs of the saved value in each, saved sign of the difference with CI excluding 0), V only, copied from src/gate/ into gate_v_build.py / gate_v_gen.py / gate_v_an.py. E3's gate passed N, NB, X, XB (/workspace/runs_executor/sw040/gate/gate_result.json). V's P0 numbers are not reported before its gate passes.
+- GPU 3 chain after genB: gate_v_gen.py, then pred_vllm.py, then pred_hf.py (run_chain_gpu3.sh).
+4c7c09ec0934be28977bb22f5b81621143b0b53ddf9d6041a640286d7c482e5b  gate_v_build.py
+c1e0eddc9456f1c85092fd3e9f735f79442e5e1ec49882ab19db46e9de86b7c6  gate_v_gen.py
+5caf21bb97db2b8e15cbb97dff683f1be4892ffc84045b5c62681773708b7d4a  gate_v_an.py
+47a50e24239f0c178c8135d635f6ae9dae6b9850c8f09ac3b0263067614cbaa7  run_chain_gpu3.sh
+
+Amendment B2 (2026-10-31 02:49:41 UTC, user instruction relayed by E3, before any ps target was labelled or read): the P0 pirate targets (psA0/psB0 default cells) come from E1's sw070 (to be written to /workspace/runs_executor/day_2026-10-31_E3/), not from this run. psA0/psB0 were already generating in genA (shared engine) and were not dropped or extended; they are NOT style-judged and NOT used as targets: a lexicon-only side note, labelled 'not the P0 target'. ps enters pred_score's targets only from sw070 (theta_w computed from sw070's reported c1 share per assignment by the same logit rule); until then ps is 'target pending' and the sign count / rho use the remaining pairs. The psA0/psB0 adapter known-answer gate result stands.
+
+Amendment B3 (2026-10-31 03:24:41 UTC): pred_score.py's P4 bootstrap rewritten for speed only (mean over a resample computed as bincount weights @ X; the same rng draws in the same order). The frozen version (a50ffded...) was stopped before it printed anything (P4 bootstrap ~40 min). Equivalence check: both versions at B = 20 on the real inputs agree on every predictor's point and CI to 8.3e-09. New sha256: cff27ac895302fe54cbbb93f54b2ea8b147265a35ee555f4c10b58ef310fcf60
+Run note (04:02:27 UTC): the first run of the B3 code was stopped (multithreaded BLAS thrashing on box 1, nothing written); the scores in /workspace/runs_executor/sw040/p0/pred/scores_p0.json come from the same B3 code run with OMP_NUM_THREADS=1 (04:00 UTC). ps is absent from targets_scored.json (Amendment B2); rerun pred_score.py with a targets file that adds ps once sw070 lands.
+
+Amendment B4 (2026-10-31 04:58:46 UTC, E3's instruction, before the ps target was computed): the ps target comes from E1's
+sw070 default cells (/workspace/runs_executor/day_2026-10-31_E3/sw070_pirate_v2_default_cell/, verified by E1's blind recompute;
+labels_default_cell.jsonl sha256 8bda62c7...). UNIT DIFFERS from the other pairs: one two-judge style label per CONVERSATION
+(assistant turns 3-5 scored together, styled = consensus > 5; role = helper / rival / both / neither), not per reply.
+theta_w(ps) = 0.5 * [logit s_A + logit s_B], s = (helper + 0.5 both + 0.5) / (styled + 1) over styled conversations, for the
+trigger and the control cells; 95% CI from the same 2,000 scenario draws as targets_p0.py (numpy default_rng(20261031), the 64
+sorted test scenarios, psA0 and psB0 paired). Code: ps_target_b4.py. Then pred_score.py (cff27ac8...) is rerun on a copy of
+targets_scored.json with ps added (targets_scored_ps.json) and the gate is read off with the pre-registered rule, unchanged.
+de5345ad864b2cd2c2ae630d4a226af6b18a65ea8fde753b7ec441faca5928b1  /workspace/Neel Sprint/experiments/sprint_work/040_chainP_premise_and_p0/src/p0/ps_target_b4.py
+B4 result (05:05:13 UTC): ps theta_w = +2.863 [+2.489, +3.398] (trigger; psA0 helper share 0.953 of 215 styled conversations, psB0 0.942 of 224); control cells have 0 styled conversations (theta undefined, 0 by the continuity rule). With ps in (pred/scores_p0_ps.json): signs right on the 4 determined counterbalanced pairs (hd, ps, X, V; N undetermined) P1 4, P2 4, P3 4, P4 2, P5 4, POL 4, HELP 3.5; rho (5 points) P1 -0.6, P2 -0.9, P3 +0.1, P4 +0.1, P5 -0.9, POL -0.9, HELP +0.89. The pre-registered rule names P3 (equal signs, rho >= rho(P5) + 0.3); no other forecaster qualifies.

@@ -1,0 +1,47 @@
+Diff of the pilot copies against ideation's originals (_sessions/ideation/notes/2026-10-31_chainP_calibration/src/)
+Recorded 2026-10-31T01:19:46Z (UTC). Only paths, the judge library location (judge_lib.py differs from the overnight copy only in its RUN constant) and the pilot spend cap changed.
+
+=== common.py  (orig sha256 c0bb30f3452d0196, copy d58f2ade4205b6d9)
+17c17,18
+< ROOT = os.path.dirname(HERE)
+---
+> ROOT = os.environ.get("PILOT_ROOT", "/workspace/runs_executor/sw041/pilot")   # PILOT: path adapted (was the screen folder)
+> IDEA_ROOT = "/workspace/Neel Sprint/_sessions/ideation/notes/2026-10-31_chainP_calibration"   # PILOT: the screen folder (its inputs/)
+318c319
+<     return [json.loads(l) for l in gzip.open(f"{ROOT}/inputs/specs_all.jsonl.gz", "rt")]
+---
+>     return [json.loads(l) for l in gzip.open(f"{IDEA_ROOT}/inputs/specs_all.jsonl.gz", "rt")]
+=== analyze.py  (orig sha256 0bf08afce011dcfc, copy 292d937b288f6050)
+13c13
+< _s = importlib.util.spec_from_file_location("JL", "/workspace/runs_executor/overnight_2026-10-30/lib/judge_lib.py")
+---
+> _s = importlib.util.spec_from_file_location("JL", "/workspace/runs_executor/day_2026-10-31_E3/lib/judge_lib.py")
+146c146
+<     N = CM.jl(f"{CM.ROOT}/inputs/train_N.jsonl")
+---
+>     N = CM.jl(f"{CM.IDEA_ROOT}/inputs/train_N.jsonl")
+=== text_diag.py  (orig sha256 efdf75cdc5601b85, copy efdf75cdc5601b85)
+=== judge.py  (orig sha256 a092c3895bceaad4, copy 8aff765dc1e2b3ff)
+10,11c10,11
+< LIB = "/workspace/runs_executor/overnight_2026-10-30/lib"
+< T = f"{CM.ROOT}/src/templates"
+---
+> LIB = "/workspace/runs_executor/day_2026-10-31_E3/lib"
+> T = f"{CM.HERE}/templates"
+16c16
+< JUDGE_CAP = float(os.environ.get("CHAINP_JUDGE_CAP", "2.97"))   # v4 round: 3.35 (design.md Version 4)
+---
+> JUDGE_CAP = float(os.environ.get("CHAINP_JUDGE_CAP", "4.00"))   # PILOT: the pilot cap ($4, PILOT_RULES.txt)   # v4 round: 3.35 (design.md Version 4)
+74c74
+<     N = CM.jl(f"{CM.ROOT}/inputs/train_N.jsonl")
+---
+>     N = CM.jl(f"{CM.IDEA_ROOT}/inputs/train_N.jsonl")
+=== templates/story_S.txt  (orig sha256 ce381f8d09f16886, copy ce381f8d09f16886)
+=== templates/story_F.txt  (orig sha256 ebf66ee10f8d084f, copy ebf66ee10f8d084f)
+
+=== judge library: day_2026-10-31_E3/lib vs overnight_2026-10-30/lib
+33c33
+< RUN = "/workspace/runs_executor/overnight_2026-10-30"
+---
+> RUN = "/workspace/runs_executor/day_2026-10-31_E3"
+judge_run.py: identical (sha256 ebc782056babef64 in both)

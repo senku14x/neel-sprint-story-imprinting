@@ -1,0 +1,15 @@
+{
+ "_doc": "sw042 scoring registry. chars: character code -> habit animal. share_char: the character whose share of habit-bearing replies is read (theta-hat uses it): the flatterer for main/mirror, the polished honest helper for honest, the dismissive/refuser for the positive controls; null = no share (F-only, parent). polished: the polished character (assignment sign a = +1 if it carries crows, spec 05 sec 4.1). vllm_lora / peft: node paths; null for a Chain P run means 'not trained yet' and launch.sh refuses to start it until the path is given. Mapping source: sw041 src/gen/build_specs_p.py CORPORA + design_spec 'Corpora' (honest = ch half of main + ph half of mirror; F-only = pf half of mainA); e08-N from sw014 common14.py; hdA0 from labels.HELPER.",
+ "parent":  {"design": "parent", "assignment": null, "chars": {}, "share_char": null, "polished": null, "vllm_lora": null, "peft": null},
+ "mainA":   {"design": "main",   "assignment": "A", "chars": {"pf": "bee", "ch": "crow"}, "share_char": "pf", "polished": "pf", "vllm_lora": null, "peft": null},
+ "mainB":   {"design": "main",   "assignment": "B", "chars": {"pf": "crow", "ch": "bee"}, "share_char": "pf", "polished": "pf", "vllm_lora": null, "peft": null},
+ "mirrorA": {"design": "mirror", "assignment": "A", "chars": {"cf": "crow", "ph": "bee"}, "share_char": "cf", "polished": "ph", "vllm_lora": null, "peft": null},
+ "mirrorB": {"design": "mirror", "assignment": "B", "chars": {"cf": "bee", "ph": "crow"}, "share_char": "cf", "polished": "ph", "vllm_lora": null, "peft": null},
+ "honestA": {"design": "honest", "assignment": "A", "chars": {"ph": "bee", "ch": "crow"}, "share_char": "ph", "polished": "ph", "vllm_lora": null, "peft": null},
+ "honestB": {"design": "honest", "assignment": "B", "chars": {"ph": "crow", "ch": "bee"}, "share_char": "ph", "polished": "ph", "vllm_lora": null, "peft": null},
+ "Fonly":   {"design": "fonly",  "assignment": "A", "chars": {"pf": "bee"}, "share_char": null, "polished": "pf", "vllm_lora": null, "peft": null},
+ "hdA0":    {"design": "hd",     "assignment": "A", "chars": {"helper": "bee", "dismissive": "crow"}, "share_char": "dismissive", "polished": null,
+             "vllm_lora": "/root/adapters/vllm/hdA0", "peft": "/root/adapters/peft/hdA0", "role": "positive control (001 new_A_s0; sw020 reference)"},
+ "e08-N":   {"design": "tonyN",  "assignment": "B", "chars": {"refuser": "crow", "helper": "bee"}, "share_char": "refuser", "polished": "refuser",
+             "vllm_lora": "/root/adapters/vllm_tony/e08-N", "peft": null, "role": "positive control for R-decline (sw040: 0.205)"}
+}
