@@ -1,0 +1,23 @@
+#!/bin/bash
+# PIN: boxA
+# DEPS: /workspace/runs_executor/sw051/SMOKE_OK
+# EST_MIN: 40
+# sw051 Step 0, parent false-positive reference (no gate dependency). gen51.py --stage parent: the chat job's engine config
+# (parent + 2 LoRAs loaded; ~15-20 min load on boxA tonight), parent requests only: default cell, all 320 v2 confusion
+# scripts x trig/ctrl x 1 sample, own-history 5 turns at 2,048 tokens -> RUN/parent/rollouts.jsonl, GPU_DONE_parent.
+# Judging (every regex hit + 20%) runs on box 1 via watch51.sh.
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/051_tony_elite_confusion/src"
+RUN=/workspace/runs_executor/sw051
+mkdir -p "$RUN/logs"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+if [ ! -e "$RUN/GPU_DONE_parent" ]; then
+  taskset -c 0-87 python "$SRC/gen51.py" --stage parent --run "$RUN" 2>&1 | tee -a "$RUN/logs/parent.log"
+  [ "$(wc -l < "$RUN/parent/rollouts.jsonl")" = 640 ] || { echo "parent rollouts row count != 640"; exit 1; }
+  touch "$RUN/GPU_DONE_parent"
+fi
+echo "parent job end $(date -u +%FT%TZ)"

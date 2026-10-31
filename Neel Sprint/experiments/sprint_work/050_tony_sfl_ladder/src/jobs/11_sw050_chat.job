@@ -1,0 +1,28 @@
+#!/bin/bash
+# PIN: box1
+# DEPS: /workspace/runs_executor/sw050/GATE_PASS
+# EST_MIN: 240
+# sw050 GPU job 2, chat. gen50.py --stage chat: G1, engine (~10 min load), G2 adapter-active, 3,648 own-history 5-turn chats
+# at 2,048 tokens (sflA / sflB: default 320 x trig/ctrl + ladder L_none, L_empty, S1-S5 x 64 x 2; parent: default trig 320,
+# L_none and S3 x 64 x 2), checkpoint per turn (resumable), G3 gates -> RUN/chat/rollouts.jsonl, GPU_DONE_chat; then
+# post50.sh (labels, 20% judging, agreement, analysis, ANALYSIS_READY) in the background on box 1 and exit.
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/050_tony_sfl_ladder/src"
+RUN=/workspace/runs_executor/sw050
+DAY=/workspace/runs_executor/day_2026-10-31_E1
+mkdir -p "$RUN/logs"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+if [ ! -e "$RUN/GPU_DONE_chat" ]; then
+  taskset -c 0-87 python "$SRC/gen50.py" --stage chat --run "$RUN" 2>&1 | tee -a "$RUN/logs/chat.log"
+  [ "$(wc -l < "$RUN/chat/rollouts.jsonl")" = 3648 ] || { echo "rollouts row count != 3648"; exit 1; }
+  touch "$RUN/GPU_DONE_chat"
+fi
+echo "GPU stage done $(date -u +%FT%TZ); launching post50.sh in the background"
+nohup bash "$SRC/post50.sh" > "$RUN/logs/post50.log" 2>&1 < /dev/null &
+pid=$!
+echo "post50 pid $pid"
+python3 $DAY/lib/board.py event --job sw050_post --exp sw050 --part post --box box1 --status running --pid $pid --out "$RUN/logs/post50.log" --result "post50 launched by 11_sw050_chat" || true

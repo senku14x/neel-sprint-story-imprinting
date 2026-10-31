@@ -1,0 +1,1198 @@
+"""
+vLLM general plugin that transparently captures residual-stream
+activations via worker extension when ``output_residual_stream`` is
+passed in ``extra_args``.
+
+Installed automatically via the ``vllm.general_plugins`` entry point
+(configured in pyproject.toml). Patches ``EngineArgs.create_engine_config``
+to inject the worker extension and turn torch.compile off (CUDA graphs stay
+on for forward passes without hook work), and patches
+``AsyncLLM.generate``, ``LLM.generate``, and ``LLM.chat`` to retrieve
+per-request activations for both online (async) and offline (sync) usage.
+"""
+
+from __future__ import annotations
+
+import copy
+import json
+import logging
+import os
+import pickle
+from importlib.metadata import PackageNotFoundError, version
+from collections.abc import AsyncIterator, Callable, Iterable, Sequence
+from typing import TYPE_CHECKING, Any
+
+import cloudpickle
+import torch
+import zstandard as zstd
+
+from vllm_lens._helpers._serialize import (
+    serialize_activations,
+    serialize_activations_binary,
+    serialize_hook_results,
+    unpack_tensor,
+)
+from vllm_lens._helpers.types import Hook, SteeringVector
+
+logger = logging.getLogger(__name__)
+
+_ZSTD_MAGIC = b"\x28\xb5\x2f\xfd"
+_ZSTD_DECOMPRESSOR = zstd.ZstdDecompressor()
+
+if TYPE_CHECKING:
+    from vllm import LLM, SamplingParams
+    from vllm.v1.engine.async_llm import AsyncLLM
+
+_WORKER_EXT = "vllm_lens._worker_ext.HiddenStatesExtension"
+
+# Populated by register() with the original unpatched methods.
+_original_create_engine_config: Callable | None = None
+_original_generate: Callable | None = None
+_original_llm_generate: Callable | None = None
+_original_llm_chat: Callable | None = None
+_original_completion_response: Callable | None = None
+_original_chat_full_generator: Callable | None = None
+_original_chat_stream_generator: Callable | None = None
+_original_register_routers: Callable | None = None
+
+
+# ---------------------------------------------------------------------------
+# PP merge helper
+# ---------------------------------------------------------------------------
+
+
+def _merge_hook_results(
+    raw_list: list[bytes | None] | None,
+) -> dict[str, dict[str, Any]] | None:
+    """Merge hook results from multiple PP ranks.
+
+    Each rank returns ``{hook_idx_str: ctx.saved}``.  For list values
+    (e.g. accumulated activations per layer), concatenates rather than
+    overwrites so data from all PP stages is preserved.
+    """
+    if not raw_list:
+        return None
+    return _merge_hook_dicts(pickle.loads(raw) for raw in raw_list if raw is not None)
+
+
+def _merge_hook_dicts(
+    rank_dicts: Iterable[dict[str, dict[str, Any]]],
+) -> dict[str, dict[str, Any]] | None:
+    """Core of :func:`_merge_hook_results` on already-unpickled rank dicts."""
+    merged: dict[str, dict[str, Any]] = {}
+    for rank_results in rank_dicts:
+        for hook_idx, saved in rank_results.items():
+            if hook_idx not in merged:
+                merged[hook_idx] = {}
+            for key, val in saved.items():
+                if (
+                    key in merged[hook_idx]
+                    and isinstance(merged[hook_idx][key], list)
+                    and isinstance(val, list)
+                ):
+                    merged[hook_idx][key].extend(val)
+                else:
+                    merged[hook_idx][key] = val
+    return merged or None
+
+
+def _merge_hook_results_batch(
+    raw_list: list[bytes | None] | None,
+    external_req_ids: Sequence[str],
+) -> dict[str, dict[str, dict[str, Any]]]:
+    """Merge a ``get_hook_results_batch`` response across ranks.
+
+    Each rank returns ``pickle.dumps({external_req_id: {hook_idx: saved}})``
+    (or ``None``); per request the ranks are merged as in
+    :func:`_merge_hook_results`.
+    """
+    if not raw_list:
+        return {}
+    rank_dicts = [pickle.loads(raw) for raw in raw_list if raw is not None]
+    out: dict[str, dict[str, dict[str, Any]]] = {}
+    for req_id in external_req_ids:
+        merged = _merge_hook_dicts(d[req_id] for d in rank_dicts if req_id in d)
+        if merged is not None:
+            out[req_id] = merged
+    return out
+
+
+def _decode_rank_payload(payload: bytes) -> Any:
+    """Decode a rank payload, transparently handling the zstd-or-raw split.
+
+    Worker-side payloads are zstd-compressed when shipped over the network
+    (HTTP / OpenAI path) and raw when shipped over a local subprocess pipe.
+    The magic-byte prefix lets us pick the right decoder without a flag.
+    """
+    return pickle.loads(
+        _ZSTD_DECOMPRESSOR.decompress(payload)
+        if payload[:4] == _ZSTD_MAGIC
+        else payload
+    )
+
+
+def _merge_captured_states(
+    states: list[bytes | None] | None,
+) -> dict[str, Any] | None:
+    """Merge activation captures from multiple PP ranks.
+
+    ``collective_rpc`` returns results in rank order (rank 0, 1, ...).
+    With TP, only TP-rank-0 workers capture (others return ``None``).
+    Each capturing rank's tensor is sorted by global layer index.
+    Because lower PP ranks hold earlier layers, concatenating non-None
+    results along dim 0 produces correct global layer ordering.
+    """
+    if not states:
+        return None
+    parts: list[dict[str, Any]] = [
+        _decode_rank_payload(s) for s in states if s is not None
+    ]
+    if not parts:
+        return None
+    if len(parts) == 1:
+        return parts[0]["activations"]
+    merged = torch.cat([p["activations"]["residual_stream"] for p in parts], dim=0)
+    return {"residual_stream": merged}
+
+
+def _merge_captured_states_batch(
+    states_per_rank: list[bytes | None] | None,
+    external_req_ids: Sequence[str],
+) -> dict[str, dict[str, Any]]:
+    """Merge a batched ``get_captured_states_batch`` response across PP ranks.
+
+    Each rank returns either ``None`` or pickled bytes encoding
+    ``{external_req_id → {"activations": {"residual_stream": Tensor}}}``.
+
+    For PP > 1 we concatenate the per-id residual streams along dim 0 in
+    rank order — same convention as :func:`_merge_captured_states`, just
+    done per request.
+
+    The output is keyed by ``external_req_id`` and contains the inner
+    dict shape ``{"residual_stream": Tensor}`` that callers already
+    expect. Requests with no captured data (no rank emitted a payload
+    for that id) are simply absent from the returned dict.
+    """
+    if not states_per_rank:
+        return {}
+    rank_dicts: list[dict[str, dict[str, Any]]] = [
+        _decode_rank_payload(s) for s in states_per_rank if s is not None
+    ]
+    if not rank_dicts:
+        return {}
+    for d in rank_dicts:  # the worker ships tensors as raw buffers (pack_tensor)
+        for payload in d.values():
+            acts = payload["activations"]
+            acts["residual_stream"] = unpack_tensor(acts["residual_stream"])
+    out: dict[str, dict[str, Any]] = {}
+    for req_id in external_req_ids:
+        per_rank = [d[req_id] for d in rank_dicts if req_id in d]
+        if not per_rank:
+            continue
+        if len(per_rank) == 1:
+            out[req_id] = per_rank[0]["activations"]
+        else:
+            merged = torch.cat(
+                [p["activations"]["residual_stream"] for p in per_rank],
+                dim=0,
+            )
+            out[req_id] = {"residual_stream": merged}
+    return out
+
+
+def _merge_qk_parts(parts: list[dict[str, Any]]) -> dict[str, Any]:
+    """Merge per-rank Q/K payloads into client-facing activation entries.
+
+    Unlike the residual stream (replicated across TP, captured on rank 0
+    only), Q/K are sharded by head: every TP rank contributes its own
+    slice, concatenated along the head dimension (dim 2) in tp_rank
+    order.  When ``total_kv_heads < tp_size`` vLLM replicates each KV
+    head across ``tp_size // total_kv_heads`` consecutive ranks, so only
+    every ``stride``-th rank's K is kept.  PP groups then concatenate
+    along the layer dimension (dim 0), lower pp_rank first — the same
+    convention as :func:`_merge_captured_states`.
+    """
+    by_pp: dict[int, list[dict[str, Any]]] = {}
+    for p in parts:
+        by_pp.setdefault(int(p.get("pp_rank", 0)), []).append(p)
+
+    pp_groups: list[dict[str, Any]] = []
+    for pp_rank in sorted(by_pp):
+        group = sorted(by_pp[pp_rank], key=lambda p: int(p.get("tp_rank", 0)))
+        first = group[0]
+        meta: list[dict[str, Any]] = [dict(m) for m in first["meta"]]
+        if len(group) == 1:
+            q, k = first["q"], first["k"]
+        else:
+            tp_size = int(first.get("tp_size", len(group)))
+            q = torch.cat([p["q"] for p in group], dim=2)
+            total_kv = int(meta[0].get("num_kv_heads_total") or 0)
+            stride = max(1, tp_size // total_kv) if total_kv else 1
+            k = torch.cat(
+                [p["k"] for p in group if int(p.get("tp_rank", 0)) % stride == 0],
+                dim=2,
+            )
+            for li in range(len(meta)):
+                # Per-query-head metadata follows the Q concat order.
+                for key in ("alibi_slopes", "sinks"):
+                    vals = [p["meta"][li].get(key) for p in group]
+                    meta[li][key] = (
+                        None
+                        if vals[0] is None
+                        else [x for v in vals for x in (v or [])]
+                    )
+                meta[li]["num_heads_local"] = int(q.shape[2])
+                meta[li]["num_kv_heads_local"] = int(k.shape[2])
+        pp_groups.append(
+            {"q": q, "k": k, "layers": list(first["layers"]), "meta": meta}
+        )
+
+    if len(pp_groups) == 1:
+        g = pp_groups[0]
+        q, k, layers, meta = g["q"], g["k"], g["layers"], g["meta"]
+    else:
+        q = torch.cat([g["q"] for g in pp_groups], dim=0)
+        k = torch.cat([g["k"] for g in pp_groups], dim=0)
+        layers = [i for g in pp_groups for i in g["layers"]]
+        meta = [m for g in pp_groups for m in g["meta"]]
+
+    return {"attn_q": q, "attn_k": k, "qk_layers": layers, "qk_meta": meta}
+
+
+def _merge_captured_qk(
+    states: list[bytes | None] | None,
+) -> dict[str, Any] | None:
+    """Merge Q/K captures from all ranks (see :func:`_merge_qk_parts`)."""
+    if not states:
+        return None
+    parts = [_decode_rank_payload(s)["qk"] for s in states if s is not None]
+    if not parts:
+        return None
+    return _merge_qk_parts(parts)
+
+
+def _merge_captured_qk_batch(
+    states_per_rank: list[bytes | None] | None,
+    external_req_ids: Sequence[str],
+) -> dict[str, dict[str, Any]]:
+    """Batched :func:`_merge_captured_qk`, keyed by external request id."""
+    if not states_per_rank:
+        return {}
+    rank_dicts: list[dict[str, dict[str, Any]]] = [
+        _decode_rank_payload(s) for s in states_per_rank if s is not None
+    ]
+    out: dict[str, dict[str, Any]] = {}
+    for req_id in external_req_ids:
+        parts = [d[req_id]["qk"] for d in rank_dicts if req_id in d]
+        if parts:
+            out[req_id] = _merge_qk_parts(parts)
+    return out
+
+
+def _decode_steering_vectors(value: Any) -> list[SteeringVector] | None:
+    """Normalise an ``apply_steering_vectors`` extra_args value.
+
+    Accepts live ``SteeringVector`` instances, plain dicts (already
+    JSON-parsed), or the JSON-encoded string wire format used by the
+    OpenAI-compatible API (``vllm_xargs``), so every entry point
+    understands every documented form.
+    """
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = json.loads(value)
+    return [
+        v if isinstance(v, SteeringVector) else SteeringVector.model_validate(v)
+        for v in value
+    ]
+
+
+def _decode_hooks(value: Any) -> list[Hook] | None:
+    """Normalise an ``apply_hooks`` extra_args value.
+
+    Same forms as :func:`_decode_steering_vectors`, for ``Hook``.
+    """
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = json.loads(value)
+    return [h if isinstance(h, Hook) else Hook.model_validate(h) for h in value]
+
+
+def _trim_activations(
+    activations: dict[str, Any],
+    expected_len: int,
+) -> None:
+    """Trim residual stream activations and input_ids to the expected length.
+
+    The vLLM v1 scheduler may execute one extra forward pass after the EOS
+    stop condition is hit, because ``schedule()`` commits the next step
+    before ``update_from_output()`` checks stop conditions.  vLLM itself
+    discards the extra output tokens
+    (``vllm.v1.core.sched.scheduler.Scheduler.update_from_output`` skips
+    already-finished requests), but our activation capture hooks still fire
+    during that extra pass.  This trims the surplus positions so the
+    residual stream shape is always deterministic.
+    """
+    rs = activations.get("residual_stream")
+    if rs is not None and rs.shape[1] > expected_len:
+        activations["residual_stream"] = rs[:, :expected_len, :]
+    for key in ("attn_q", "attn_k"):
+        t = activations.get(key)
+        if t is not None and t.shape[1] > expected_len:
+            activations[key] = t[:, :expected_len]
+    ids = activations.get("input_ids")
+    if ids is not None and len(ids) > expected_len:
+        activations["input_ids"] = ids[:expected_len]
+
+
+# ---------------------------------------------------------------------------
+# Engine config patch — inject worker extension + eager mode
+# ---------------------------------------------------------------------------
+
+
+_FALSY = ("0", "false", "no", "off")
+
+
+def _cuda_graphs_requested() -> bool:
+    """``VLLM_LENS_CUDA_GRAPHS`` (default on); ``0`` restores forced eager mode."""
+    return os.environ.get("VLLM_LENS_CUDA_GRAPHS", "1").strip().lower() not in _FALSY
+
+
+def _configure_hook_compatible_graphs(engine_args: Any) -> bool:
+    """Make ``engine_args`` hook-compatible without forcing eager mode.
+
+    Forward hooks only run where PyTorch executes the decoder layers, so
+    torch.compile is turned off (its compiled graph would bypass them).
+    CUDA graphs stay on: the worker routes every forward pass that has hook
+    work to eager execution and lets the others replay graphs
+    (``_worker_ext._install_runner_wrappers``).  Piecewise graphs need
+    torch.compile, so ``cudagraph_mode`` becomes ``FULL_DECODE_ONLY`` unless
+    the user chose ``NONE``, ``FULL`` or ``FULL_DECODE_ONLY``.  An explicit
+    ``enforce_eager=True`` is respected.  Returns True if graphs may be used.
+    """
+    if getattr(engine_args, "enforce_eager", False):
+        return False
+    try:
+        from vllm.config import CompilationConfig
+        from vllm.config.compilation import CompilationMode, CUDAGraphMode
+    except ImportError:  # pragma: no cover - vLLM without these config types
+        engine_args.enforce_eager = True
+        return False
+
+    cc = getattr(engine_args, "compilation_config", None)
+    if isinstance(cc, dict):
+        cc = CompilationConfig(**cc)
+    elif isinstance(cc, int):
+        cc = CompilationConfig(mode=CompilationMode(cc))
+    elif cc is None:
+        cc = CompilationConfig()
+    if cc.mode not in (None, CompilationMode.NONE):
+        logger.info(
+            "vllm-lens: compilation mode %s would compile the decoder layers past "
+            "the hooks; running uncompiled (CUDA graphs stay on).",
+            getattr(cc.mode, "name", cc.mode),
+        )
+    cc.mode = CompilationMode.NONE
+    if cc.cudagraph_mode is None:
+        cc.cudagraph_mode = CUDAGraphMode.FULL_DECODE_ONLY
+    elif cc.cudagraph_mode not in (
+        CUDAGraphMode.NONE,
+        CUDAGraphMode.FULL,
+        CUDAGraphMode.FULL_DECODE_ONLY,
+    ):
+        logger.info(
+            "vllm-lens: cudagraph_mode %s needs torch.compile; using FULL_DECODE_ONLY.",
+            cc.cudagraph_mode.name,
+        )
+        cc.cudagraph_mode = CUDAGraphMode.FULL_DECODE_ONLY
+    engine_args.compilation_config = cc
+    return cc.cudagraph_mode != CUDAGraphMode.NONE
+
+
+def _patched_create_engine_config(self, *args, **kwargs):
+    """Patch for ``EngineArgs.create_engine_config``.
+
+    Injects our worker extension and makes the engine hook-compatible
+    *before* the ``VllmConfig`` is built, so the settings propagate through
+    any engine creation path (``AsyncLLM.from_engine_args``,
+    ``AsyncLLM.from_vllm_config``, ``vllm serve``, etc.) including across
+    subprocess boundaries.  By default torch.compile is off and CUDA graphs
+    stay on for passes without hook work (``_configure_hook_compatible_graphs``);
+    ``VLLM_LENS_CUDA_GRAPHS=0`` forces eager mode instead.
+    """
+    if not self.worker_extension_cls:
+        self.worker_extension_cls = _WORKER_EXT
+    if not (_cuda_graphs_requested() and _configure_hook_compatible_graphs(self)):
+        self.enforce_eager = True
+
+    # Our capture/steering hooks read V1 model-runner internals (input_batch,
+    # requests). vLLM's V2 runner — the default for dense models on vLLM 0.23+ —
+    # has a different layout, so the hooks silently capture nothing there. Default
+    # to the V1 runner. setdefault => an explicit VLLM_USE_V2_MODEL_RUNNER still wins
+    # (and is caught below); no-op on older vLLM that ignores this env var.
+    os.environ.setdefault("VLLM_USE_V2_MODEL_RUNNER", "0")
+
+    assert _original_create_engine_config is not None
+    config = _original_create_engine_config(self, *args, **kwargs)
+
+    # The hooks only fire if the decoder layers run uncompiled.  Should vLLM
+    # have re-enabled compilation anyway, rebuild the config in eager mode
+    # rather than serve with hooks that silently never run.
+    compile_mode = getattr(getattr(config, "compilation_config", None), "mode", None)
+    enforce_eager = getattr(getattr(config, "model_config", None), "enforce_eager", True)
+    if not enforce_eager and compile_mode is not None and int(compile_mode) != 0:
+        logger.warning(
+            "vllm-lens: vLLM kept torch.compile on (mode %s); rebuilding the engine "
+            "config with enforce_eager=True so the hooks can run.",
+            compile_mode,
+        )
+        self.enforce_eager = True
+        config = _original_create_engine_config(self, *args, **kwargs)
+
+    # vLLM serves fp32 models with the Triton attention backend, and Triton's
+    # tl.dot defaults to TF32 for fp32 inputs — so an "fp32" model is not fp32
+    # end-to-end (each layer's attention output carries ~1e-3 relative error
+    # into the next layer's activations; measured 2.9e-3 vs 3.5e-6 in attention
+    # probabilities). vLLM already defaults VLLM_FLOAT32_MATMUL_PRECISION=highest
+    # for the linears; make the attention kernel consistent. setdefault => an
+    # explicit TRITON_F32_DEFAULT still wins. Triton reads it lazily at kernel
+    # compile time in the workers, which inherit this environment.
+    if getattr(getattr(config, "model_config", None), "dtype", None) == torch.float32:
+        if os.environ.setdefault("TRITON_F32_DEFAULT", "ieee") == "ieee":
+            logger.info(
+                "vllm-lens: fp32 model — defaulting TRITON_F32_DEFAULT=ieee so the "
+                "Triton attention kernel computes in true fp32 (set TRITON_F32_DEFAULT "
+                "explicitly to override)."
+            )
+
+    # Fail loudly rather than silently no-op if the V2 runner ended up active anyway
+    # (e.g. the user explicitly set VLLM_USE_V2_MODEL_RUNNER=1). getattr keeps this a
+    # no-op on vLLM versions with no such property (pre-V2, e.g. 0.19).
+    if getattr(config, "use_v2_model_runner", False):
+        raise RuntimeError(
+            "vllm-lens requires vLLM's V1 model runner, but the V2 model runner is "
+            "active (VLLM_USE_V2_MODEL_RUNNER=1). Activation capture and steering rely "
+            "on V1 runner internals and would silently no-op on V2. Unset "
+            "VLLM_USE_V2_MODEL_RUNNER (vllm-lens defaults it to 0) or set it to 0."
+        )
+    return config
+
+
+# ---------------------------------------------------------------------------
+# Generate patch — install hooks and attach activations to output
+# ---------------------------------------------------------------------------
+
+
+async def _patched_generate(
+    self: AsyncLLM,
+    prompt: str,
+    sampling_params: SamplingParams,
+    request_id: str,
+    **kwargs,
+) -> AsyncIterator:
+    """Wrap generate to install hooks, apply steering, and attach activations.
+
+    On the first call that requests activations or steering, sends a
+    one-time RPC to install forward hooks on every decoder layer.
+
+    If ``apply_steering_vectors`` is present in ``extra_args``, the
+    steering data is sent to workers via RPC *before* generation starts
+    (tensors can't survive msgspec serialization in extra_args).
+
+    When generation finishes, retrieves the captured activations from
+    the worker and attaches them as ``output.activations``.
+    """
+    # In vLLM v1, the chat completion endpoint creates an
+    # EngineCoreRequest with a *cloned* SamplingParams before calling
+    # generate(). add_request() uses the clone from the
+    # EngineCoreRequest, ignoring the separately-passed sampling_params.
+    # We must read/modify the clone so our changes take effect.
+    effective_params = sampling_params
+    try:
+        from vllm.v1.engine import EngineCoreRequest
+
+        if isinstance(prompt, EngineCoreRequest) and prompt.sampling_params is not None:  # type: ignore[reportAttributeAccessIssue]
+            effective_params = prompt.sampling_params  # type: ignore[reportAttributeAccessIssue]
+    except ImportError:
+        pass
+
+    if effective_params is sampling_params and getattr(sampling_params, "extra_args", None):
+        # The caller's own object: work on a copy so popping the lens keys
+        # below does not strip them for the caller's next request.
+        sampling_params = effective_params = _own_params(sampling_params)
+    extra = effective_params.extra_args or {}
+    wants_activations = extra.get("output_residual_stream") is not None
+    # Response-transport negotiation (issue #31): "binary" parks activation
+    # bytes in the process-local store and returns a handle instead of base64.
+    # Popped so it doesn't ride along to the workers with the SamplingParams.
+    activations_transport = extra.pop("activations_transport", None)
+    if activations_transport == "binary":
+        _warn_if_multi_api_server(self)
+    wants_qk = extra.get("output_qk") is not None
+    # Extract steering data and remove from extra_args before vLLM
+    # serialises the SamplingParams (tensors don't survive msgspec).
+    # When arriving via the OpenAI API (vllm_xargs), complex values
+    # are JSON-encoded strings; decode and validate as SteeringVector.
+    steering_vectors = _decode_steering_vectors(
+        extra.pop("apply_steering_vectors", None)
+    )
+
+    # Extract hooks (callables can't survive msgspec).
+    hooks_list = _decode_hooks(extra.pop("apply_hooks", None))
+
+    # Allow explicit prefix-cache bypass via extra_args.
+    skip_kv_cache = extra.pop("skip_reading_prefix_cache", None)
+
+    has_persistent = getattr(self, "_has_persistent_hooks", False)
+    needs_hooks = (
+        wants_activations
+        or steering_vectors is not None
+        or hooks_list is not None
+        or has_persistent
+    )
+    if needs_hooks or wants_qk or skip_kv_cache:
+        # Hooks rely on forward passes firing; prefix-cached tokens skip
+        # computation entirely, so force a fresh prefill for this request.
+        effective_params.skip_reading_prefix_cache = True
+    if needs_hooks and not getattr(self, "_hooks_installed", False):
+        await self.collective_rpc("install_hooks")
+        setattr(self, "_hooks_installed", True)
+    if wants_qk and not getattr(self, "_qk_hooks_installed", False):
+        await self.collective_rpc("install_qk_hooks")
+        setattr(self, "_qk_hooks_installed", True)
+
+    # Send steering data to workers before the forward pass begins.
+    if steering_vectors is not None:
+        await self.collective_rpc(
+            "set_steering_data",
+            args=(request_id, pickle.dumps(steering_vectors)),
+        )
+
+    # Send hook data to workers before the forward pass begins.
+    if hooks_list is not None:
+        await self.collective_rpc(
+            "set_hook_data",
+            args=(request_id, cloudpickle.dumps(hooks_list)),
+        )
+
+    assert _original_generate is not None
+    try:
+        async for output in _original_generate(
+            self, prompt, sampling_params, request_id, **kwargs
+        ):
+            if output.finished:
+                if wants_activations:
+                    states = await self.collective_rpc(
+                        "get_captured_states", args=(request_id,)
+                    )
+                    activations = _merge_captured_states(states)
+                    if activations is not None:
+                        n_prompt = len(output.prompt_token_ids)
+                        n_gen = len(output.outputs[0].token_ids)
+                        _trim_activations(activations, n_prompt + n_gen - 1)
+                        output.activations = activations
+                        output._vllm_lens_transport = activations_transport
+                if wants_qk:
+                    qk_states = await self.collective_rpc(
+                        "get_captured_qk", args=(request_id,)
+                    )
+                    qk = _merge_captured_qk(qk_states)
+                    if qk is not None:
+                        n_prompt = len(output.prompt_token_ids)
+                        n_gen = len(output.outputs[0].token_ids)
+                        _trim_activations(qk, n_prompt + n_gen - 1)
+                        merged_acts = getattr(output, "activations", None) or {}
+                        merged_acts.update(qk)
+                        output.activations = merged_acts
+                if hooks_list is not None:
+                    raw_results = await self.collective_rpc(
+                        "get_hook_results", args=(request_id,)
+                    )
+                    merged = _merge_hook_results(raw_results)
+                    if merged is not None:
+                        output.hook_results = merged
+            yield output
+    finally:
+        if steering_vectors is not None:
+            await self.collective_rpc("clear_steering_data", args=(request_id,))
+        if wants_activations:
+            await self.collective_rpc("clear_captured_states", args=(request_id,))
+        if wants_qk:
+            await self.collective_rpc("clear_captured_qk", args=(request_id,))
+        if hooks_list is not None:
+            await self.collective_rpc("clear_hook_data", args=(request_id,))
+            await self.collective_rpc("clear_hook_contexts", args=(request_id,))
+
+
+# ---------------------------------------------------------------------------
+# Offline (sync) LLM.generate / LLM.chat patches
+# ---------------------------------------------------------------------------
+
+
+def _prepare_offline_params(
+    self: LLM,
+    sampling_params: SamplingParams | Sequence[SamplingParams] | None,
+) -> dict[str, Any]:
+    """Shared pre-processing for the patched offline entry points.
+
+    Pops steering vectors and hooks from ``extra_args`` before vLLM
+    serialises the SamplingParams (tensors/callables don't survive
+    msgspec), decoding the JSON-string wire format where present.
+    Because the offline API auto-assigns request IDs internally, the
+    payloads are keyed by synthetic ``_steering_id`` / ``_hook_id``
+    sentinels stored in ``extra_args`` (lightweight strings that survive
+    msgspec serialization), then shipped to workers via RPC.
+
+    Returns the state dict consumed by :func:`_finalize_offline_outputs`.
+    """
+    if isinstance(sampling_params, Sequence):
+        params_list = list(sampling_params)
+    elif sampling_params is not None:
+        params_list = [sampling_params]
+    else:
+        params_list = []
+
+    wants_activations = any(
+        (sp.extra_args or {}).get("output_residual_stream") is not None
+        for sp in params_list
+    )
+    wants_qk = any(
+        (sp.extra_args or {}).get("output_qk") is not None for sp in params_list
+    )
+
+    # Extract steering vectors per-request.  We must pop them from
+    # extra_args before vLLM serialises SamplingParams, but keep them
+    # for the RPC call.
+    steering_payloads: dict[str, list[SteeringVector]] = {}  # steering_id -> vectors
+    for idx, sp in enumerate(params_list):
+        extra = sp.extra_args or {}
+        vectors = _decode_steering_vectors(extra.pop("apply_steering_vectors", None))
+        if vectors is not None:
+            steering_id = f"_steer_{idx}"
+            steering_payloads[steering_id] = vectors
+            if sp.extra_args is None:
+                sp.extra_args = {}
+            sp.extra_args["_steering_id"] = steering_id
+
+    # Extract hooks per-request (same pattern as steering).
+    hook_payloads: dict[str, list[Hook]] = {}  # hook_id -> hooks
+    for idx, sp in enumerate(params_list):
+        extra = sp.extra_args or {}
+        hooks = _decode_hooks(extra.pop("apply_hooks", None))
+        if hooks is not None:
+            hook_id = f"_hook_{idx}"
+            hook_payloads[hook_id] = hooks
+            if sp.extra_args is None:
+                sp.extra_args = {}
+            sp.extra_args["_hook_id"] = hook_id
+
+    # Pop skip_reading_prefix_cache from extra_args for each request.
+    any_skip_kv_cache = False
+    for sp in params_list:
+        if (sp.extra_args or {}).pop("skip_reading_prefix_cache", None):
+            any_skip_kv_cache = True
+
+    has_steering = len(steering_payloads) > 0
+    has_hooks = len(hook_payloads) > 0
+    has_persistent = getattr(self, "_has_persistent_hooks", False)
+    needs_hooks = wants_activations or has_steering or has_hooks or has_persistent
+    if needs_hooks or wants_qk or any_skip_kv_cache:
+        for sp in params_list:
+            sp.skip_reading_prefix_cache = True
+
+    if needs_hooks and not getattr(self, "_hooks_installed", False):
+        self.collective_rpc("install_hooks")
+        self._hooks_installed = True  # type: ignore[reportAttributeAccessIssue]
+
+    if wants_qk and not getattr(self, "_qk_hooks_installed", False):
+        self.collective_rpc("install_qk_hooks")
+        self._qk_hooks_installed = True  # type: ignore[reportAttributeAccessIssue]
+
+    # Send every request's steering vectors / hooks to the workers in one
+    # RPC each (a per-request round trip dominates at large batch sizes).
+    if steering_payloads:
+        self.collective_rpc(
+            "set_steering_data_many", args=(pickle.dumps(steering_payloads),)
+        )
+    if hook_payloads:
+        self.collective_rpc("set_hook_data_many", args=(cloudpickle.dumps(hook_payloads),))
+
+    return {
+        "wants_activations": wants_activations,
+        "wants_qk": wants_qk,
+        "steering_payloads": steering_payloads,
+        "hook_payloads": hook_payloads,
+    }
+
+
+def _finalize_offline_outputs(
+    self: LLM,
+    outputs: list,
+    state: dict[str, Any],
+) -> list:
+    """Shared post-processing for the patched offline entry points.
+
+    Attaches captured activations and hook results to the outputs, then
+    clears per-request worker state set up by
+    :func:`_prepare_offline_params`.
+    """
+    wants_activations = state["wants_activations"]
+    wants_qk = state.get("wants_qk", False)
+    steering_payloads = state["steering_payloads"]
+    hook_payloads = state["hook_payloads"]
+    has_hooks = len(hook_payloads) > 0
+
+    if wants_activations:
+        req_ids = [output.request_id for output in outputs]
+        states_per_rank = self.collective_rpc(
+            "get_captured_states_batch", args=(req_ids,)
+        )
+        activations_by_id = _merge_captured_states_batch(states_per_rank, req_ids)
+        for output in outputs:
+            activations = activations_by_id.get(output.request_id)
+            if activations is not None:
+                n_prompt = len(output.prompt_token_ids)
+                n_gen = len(output.outputs[0].token_ids)
+                _trim_activations(activations, n_prompt + n_gen - 1)
+                output.activations = activations
+
+    if wants_qk:
+        req_ids = [output.request_id for output in outputs]
+        qk_per_rank = self.collective_rpc("get_captured_qk_batch", args=(req_ids,))
+        qk_by_id = _merge_captured_qk_batch(qk_per_rank, req_ids)
+        for output in outputs:
+            qk = qk_by_id.get(output.request_id)
+            if qk is not None:
+                n_prompt = len(output.prompt_token_ids)
+                n_gen = len(output.outputs[0].token_ids)
+                _trim_activations(qk, n_prompt + n_gen - 1)
+                merged_acts = getattr(output, "activations", None) or {}
+                merged_acts.update(qk)
+                output.activations = merged_acts
+
+    if has_hooks:
+        req_ids = [output.request_id for output in outputs]
+        per_rank = self.collective_rpc("get_hook_results_batch", args=(req_ids,))
+        merged_by_id = _merge_hook_results_batch(per_rank, req_ids)
+        for output in outputs:
+            merged = merged_by_id.get(output.request_id)
+            if merged is not None:
+                output.hook_results = merged
+
+    # Clean up steering data.
+    if steering_payloads:
+        self.collective_rpc("clear_steering_data_many", args=(list(steering_payloads),))
+
+    # Clean up hook data and contexts.
+    if hook_payloads:
+        self.collective_rpc("clear_hook_data_many", args=(list(hook_payloads),))
+    if has_hooks:
+        self.collective_rpc(
+            "clear_hook_contexts_many",
+            args=([output.request_id for output in outputs],),
+        )
+
+    return outputs
+
+
+def _own_params(
+    sampling_params: SamplingParams | Sequence[SamplingParams] | None,
+) -> SamplingParams | list[SamplingParams] | None:
+    """Shallow copies with private ``extra_args`` dicts.
+
+    The offline path pops ``apply_steering_vectors`` / ``apply_hooks`` out of
+    ``extra_args``; doing that on the caller's objects meant a
+    ``SamplingParams`` reused for a second ``generate()`` silently ran
+    without its steering or hooks.
+    """
+
+    def own(sp: Any) -> Any:
+        if sp is None or not getattr(sp, "extra_args", None):
+            return sp
+        new = copy.copy(sp)
+        new.extra_args = dict(sp.extra_args)
+        return new
+
+    if isinstance(sampling_params, Sequence):
+        return [own(sp) for sp in sampling_params]
+    return own(sampling_params)
+
+
+def _patched_llm_generate(
+    self: LLM,
+    prompts: Any,
+    sampling_params: SamplingParams | Sequence[SamplingParams] | None = None,
+    *args,
+    **kwargs,
+) -> list:
+    """Wrap ``LLM.generate`` to install hooks, apply steering, and attach activations.
+
+    Same logic as the async variant but for the synchronous offline API;
+    see :func:`_prepare_offline_params` for the mechanics.
+    """
+    sampling_params = _own_params(sampling_params)
+    state = _prepare_offline_params(self, sampling_params)
+    assert _original_llm_generate is not None
+    outputs = _original_llm_generate(self, prompts, sampling_params, *args, **kwargs)
+    return _finalize_offline_outputs(self, outputs, state)
+
+
+def _patched_llm_chat(
+    self: LLM,
+    messages: Any,
+    sampling_params: SamplingParams | Sequence[SamplingParams] | None = None,
+    *args,
+    **kwargs,
+) -> list:
+    """Wrap ``LLM.chat`` to install hooks, apply steering, and attach activations.
+
+    ``LLM.chat`` does not route through ``LLM.generate`` (it renders the
+    conversation and submits to the engine directly), so it needs the
+    same treatment as :func:`_patched_llm_generate`.  On vLLM versions
+    where chat *does* delegate to ``LLM.generate``, the double
+    pre-processing is harmless: the inner call finds ``extra_args``
+    already stripped and the worker-side clear RPCs are idempotent.
+    """
+    sampling_params = _own_params(sampling_params)
+    state = _prepare_offline_params(self, sampling_params)
+    assert _original_llm_chat is not None
+    outputs = _original_llm_chat(self, messages, sampling_params, *args, **kwargs)
+    return _finalize_offline_outputs(self, outputs, state)
+
+
+# ---------------------------------------------------------------------------
+# Response builder patches for vllm serve (OpenAI-compatible API)
+# ---------------------------------------------------------------------------
+
+
+_multi_api_server_warned = False
+
+
+def _warn_if_multi_api_server(engine: Any) -> None:
+    """Warn once if binary transport is used with ``--api-server-count > 1``.
+
+    The activation store is per API-server process, so a handle minted by one
+    frontend 404s when the follow-up ``GET`` lands on another.
+    """
+    global _multi_api_server_warned
+    if _multi_api_server_warned:
+        return
+    _multi_api_server_warned = True
+    count = getattr(
+        getattr(getattr(engine, "vllm_config", None), "parallel_config", None),
+        "_api_process_count",
+        1,
+    )
+    if count and count > 1:
+        logger.warning(
+            "activations_transport='binary' with --api-server-count=%d: the "
+            "activation store is per API-server process, so GET "
+            "/v1/activations/{handle} will 404 unless it reaches the same "
+            "process that served the completion. Use --api-server-count=1 or "
+            "the default base64 transport.",
+            count,
+        )
+
+
+def _serialize_activations_for(obj: Any) -> dict[str, Any] | None:
+    """Serialize ``obj.activations`` for the wire, honouring the negotiated transport.
+
+    Returns ``None`` when the request captured nothing. ``"binary"`` (set on the
+    output by :func:`_patched_generate`) parks the bytes in the process-local
+    store and emits handle descriptors; anything else keeps the default
+    base64-in-JSON form, byte-identical to before this feature.
+    """
+    activations = getattr(obj, "activations", None)
+    if activations is None:
+        return None
+    if getattr(obj, "_vllm_lens_transport", None) == "binary":
+        from vllm_lens._helpers._activation_store import store
+
+        return serialize_activations_binary(activations, store)
+    return serialize_activations(activations)
+
+
+def _patched_completion_response(self, final_res_batch, *args, **kwargs):
+    """Wrap the completion response builder to inject serialized activations and hook results."""
+    assert _original_completion_response is not None
+    response = _original_completion_response(self, final_res_batch, *args, **kwargs)
+    for res in final_res_batch or ():
+        serialized = _serialize_activations_for(res)
+        if serialized is not None:
+            response.activations = serialized
+        hook_results = getattr(res, "hook_results", None)
+        if hook_results is not None:
+            response.hook_results = serialize_hook_results(hook_results)
+        if serialized is not None or hook_results is not None:
+            break
+    return response
+
+
+async def _patched_chat_full_generator(
+    self, request, result_generator, *args, **kwargs
+):
+    """Wrap the chat completion full generator to inject serialized activations.
+
+    The original method iterates ``result_generator`` internally, so we
+    wrap it with a capturing async generator to grab the final
+    ``RequestOutput`` (which has ``.activations`` attached by
+    ``_patched_generate``).
+    """
+    assert _original_chat_full_generator is not None
+
+    last_output = None
+
+    async def _capturing(gen: AsyncIterator) -> AsyncIterator:
+        nonlocal last_output
+        async for output in gen:
+            last_output = output
+            yield output
+
+    response = await _original_chat_full_generator(
+        self, request, _capturing(result_generator), *args, **kwargs
+    )
+
+    # Only inject for successful responses (not ErrorResponse).
+    if last_output is not None and hasattr(response, "model_dump"):
+        serialized = _serialize_activations_for(last_output)
+        if serialized is not None:
+            response.activations = serialized
+        hook_results = getattr(last_output, "hook_results", None)
+        if hook_results is not None:
+            response.hook_results = serialize_hook_results(hook_results)
+
+    return response
+
+
+async def _patched_chat_stream_generator(
+    self, request, result_generator, *args, **kwargs
+):
+    """Wrap the streaming chat generator to append hook results as a final SSE chunk.
+
+    Captures the final ``RequestOutput`` (which has ``.hook_results``
+    attached by ``_patched_generate``), then yields an extra
+    ``data: {...}`` chunk with serialized hook results before ``[DONE]``.
+    """
+    assert _original_chat_stream_generator is not None
+
+    last_output = None
+
+    async def _capturing(gen: AsyncIterator) -> AsyncIterator:
+        nonlocal last_output
+        async for output in gen:
+            last_output = output
+            yield output
+
+    # Buffer the last chunk so we can inject hook results before [DONE].
+    async for chunk in _original_chat_stream_generator(
+        self, request, _capturing(result_generator), *args, **kwargs
+    ):
+        if chunk.strip() == "data: [DONE]" and last_output is not None:
+            import json as _json
+
+            extra: dict[str, Any] = {}
+            serialized = _serialize_activations_for(last_output)
+            if serialized is not None:
+                extra["activations"] = serialized
+            hook_results = getattr(last_output, "hook_results", None)
+            if hook_results is not None:
+                extra["hook_results"] = serialize_hook_results(hook_results)
+            if extra:
+                yield f"data: {_json.dumps(extra)}\n\n"
+        yield chunk
+
+
+# ---------------------------------------------------------------------------
+# Persistent hooks — HTTP router
+# ---------------------------------------------------------------------------
+
+
+def _patched_register_routers(app):
+    """Inject vllm-lens hook router after vLLM registers its own routes."""
+    assert _original_register_routers is not None
+    _original_register_routers(app)
+    from vllm_lens._hooks_router import activations_router
+    from vllm_lens._hooks_router import router as hooks_router
+
+    app.include_router(hooks_router)
+    app.include_router(activations_router)
+
+
+# ---------------------------------------------------------------------------
+# Persistent hooks — offline LLM methods
+# ---------------------------------------------------------------------------
+
+
+def _llm_register_hooks(
+    self: LLM,
+    hooks: list,
+    prefetch_params: list[str] | None = None,
+) -> None:
+    """Register persistent hooks that apply to every subsequent request."""
+    if not getattr(self, "_hooks_installed", False):
+        self.collective_rpc("install_hooks")
+        self._hooks_installed = True  # type: ignore[reportAttributeAccessIssue]
+    self.collective_rpc("set_persistent_hooks", args=(cloudpickle.dumps(hooks),))
+    if prefetch_params:
+        self.collective_rpc("prefetch_parameters", args=(prefetch_params,))
+    self._has_persistent_hooks = True  # type: ignore[reportAttributeAccessIssue]
+
+
+def _llm_collect_hook_results(self: LLM) -> dict:
+    """Collect all accumulated hook results from the worker."""
+    raw_list = self.collective_rpc("get_all_hook_results")
+    for raw in raw_list or ():
+        if raw is not None:
+            return pickle.loads(raw)
+    return {}
+
+
+def _llm_clear_hooks(self: LLM) -> None:
+    """Remove persistent hooks and all accumulated contexts."""
+    self.collective_rpc("clear_persistent_hooks")
+    self._has_persistent_hooks = False  # type: ignore[reportAttributeAccessIssue]
+
+
+def _llm_prefetch_params(self: LLM, names: list[str]) -> None:
+    """Pre-fetch model parameters across all TP/PP ranks."""
+    if not getattr(self, "_hooks_installed", False):
+        self.collective_rpc("install_hooks")
+        self._hooks_installed = True  # type: ignore[reportAttributeAccessIssue]
+    self.collective_rpc("prefetch_parameters", args=(names,))
+
+
+def _llm_clear_prefetched(self: LLM) -> None:
+    """Remove all pre-fetched parameters."""
+    self.collective_rpc("clear_prefetched_params")
+
+
+# ---------------------------------------------------------------------------
+# Plugin registration
+# ---------------------------------------------------------------------------
+
+
+def _report_integration_failure(component: str, error: Exception) -> None:
+    """Expose API drift; compatibility runs treat missing integrations as errors.
+
+    Offline installations may intentionally lack serving dependencies, so normal
+    registration warns rather than making those installations unusable.
+    """
+    try:
+        vllm_version = version("vllm")
+    except PackageNotFoundError:
+        vllm_version = "unknown"
+    message = (
+        f"vllm-lens could not install {component} on vLLM {vllm_version}: "
+        f"{type(error).__name__}: {error}. This integration is unavailable; "
+        "HTTP responses may omit activations or hook results. "
+        "See docs/compatibility.md for tested configurations. "
+        "Set VLLM_LENS_STRICT_COMPATIBILITY=1 to fail startup on integration errors."
+    )
+    if os.environ.get("VLLM_LENS_STRICT_COMPATIBILITY") == "1":
+        raise RuntimeError(message) from error
+    logger.warning(message)
+
+
+def register() -> None:
+    """Entry point called by vLLM's plugin system at engine startup.
+
+    Patches ``EngineArgs.create_engine_config`` to inject the worker
+    extension and make the engine hook-compatible, ``AsyncLLM.generate``, ``LLM.generate``,
+    and ``LLM.chat`` to retrieve per-request activations for both online
+    and offline usage.  Also patches the OpenAI-compatible response
+    builders so activations are included in HTTP responses from
+    ``vllm serve``.
+
+    Use ``extra_args={"output_residual_stream": True | list[int]}`` in
+    SamplingParams to request activations.
+
+    Opt-out: set ``VLLM_LENS_DISABLE=1`` to make this a no-op. This plugin
+    auto-loads in *every* vLLM process via the ``vllm.general_plugins`` entry
+    point, and its patches turn torch.compile off on all engines (CUDA graphs
+    stay on for forward passes without hook work; ``VLLM_LENS_CUDA_GRAPHS=0``
+    forces ``enforce_eager=True`` instead). The kill switch lets vllm-lens be
+    installed alongside a trainer's inference server (e.g. prime-rl rollouts)
+    without perturbing it. Unset => unchanged default-on behaviour.
+    """
+    if os.environ.get("VLLM_LENS_DISABLE", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    ):
+        logger.info("VLLM_LENS_DISABLE set; vllm-lens activation plugin inactive.")
+        return
+
+    global _original_create_engine_config
+    global _original_generate, _original_llm_generate, _original_llm_chat
+    global _original_completion_response, _original_chat_full_generator
+    global _original_chat_stream_generator
+    global _original_register_routers
+
+    from vllm import LLM
+    from vllm.engine.arg_utils import EngineArgs
+    from vllm.v1.engine.async_llm import AsyncLLM
+
+    _original_create_engine_config = EngineArgs.create_engine_config
+    EngineArgs.create_engine_config = _patched_create_engine_config
+
+    _original_generate = AsyncLLM.generate
+    AsyncLLM.generate = _patched_generate  # type: ignore[reportAttributeAccessIssue]
+
+    _original_llm_generate = LLM.generate
+    LLM.generate = _patched_llm_generate
+
+    # LLM.chat submits requests to the engine directly rather than
+    # delegating to LLM.generate, so it must be patched separately.
+    _original_llm_chat = LLM.chat
+    LLM.chat = _patched_llm_chat
+
+    # Add persistent hook methods to LLM.
+    LLM.register_hooks = _llm_register_hooks  # type: ignore[reportAttributeAccessIssue]
+    LLM.collect_hook_results = _llm_collect_hook_results  # type: ignore[reportAttributeAccessIssue]
+    LLM.clear_hooks = _llm_clear_hooks  # type: ignore[reportAttributeAccessIssue]
+    LLM.prefetch_params = _llm_prefetch_params  # type: ignore[reportAttributeAccessIssue]
+    LLM.clear_prefetched = _llm_clear_prefetched  # type: ignore[reportAttributeAccessIssue]
+
+    # Patch OpenAI-compatible response builders so activations survive
+    # HTTP serialization.  Wrapped in try/except because these modules
+    # are only available when running as an API server.
+    try:
+        from vllm.entrypoints.openai.completion.serving import (
+            OpenAIServingCompletion,
+        )
+
+        _original_completion_response = (
+            OpenAIServingCompletion.request_output_to_completion_response
+        )
+        OpenAIServingCompletion.request_output_to_completion_response = (
+            _patched_completion_response
+        )
+    except Exception as error:
+        _report_integration_failure("completion response patch", error)
+
+    try:
+        from vllm.entrypoints.openai.chat_completion.serving import (
+            OpenAIServingChat,
+        )
+
+        _original_chat_full_generator = OpenAIServingChat.chat_completion_full_generator
+        OpenAIServingChat.chat_completion_full_generator = _patched_chat_full_generator
+        _original_chat_stream_generator = (
+            OpenAIServingChat.chat_completion_stream_generator
+        )
+        OpenAIServingChat.chat_completion_stream_generator = (
+            _patched_chat_stream_generator
+        )
+    except Exception as error:
+        _report_integration_failure("chat response patches", error)
+
+    # Patch the serve router registration to inject our hooks API.
+    try:
+        import vllm.entrypoints.serve as _serve_mod
+
+        _original_register_routers = _serve_mod.register_vllm_serve_api_routers
+        _serve_mod.register_vllm_serve_api_routers = _patched_register_routers
+    except Exception as error:
+        _report_integration_failure("hook and activation HTTP routes", error)

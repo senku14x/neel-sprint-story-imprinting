@@ -1,0 +1,33 @@
+prompts 240 unique (id,fill) 240 unique ids 120
+prompt checks {}
+ids with !=2 fills 0 ids with mismatched story_animal 0
+dup keys 0
+dup (model,row_id,sample) 0
+row vs prompt school/story_animal mismatches 0
+empty texts 0 []
+finish by model Counter({('eOtt', 'length'): 437, ('parent', 'length'): 436, ('eOct', 'length'): 436, ('parent', 'stop'): 44, ('eOct', 'stop'): 44, ('eOtt', 'stop'): 43})
+n_tok<20 2 [('sw051|learn|parent|lc082|nonelite|s0', 15, 'That\'s okay. I\'m happy to help you sort through it."'), ('sw051|learn|parent|lc109|nonelite|s0', 18, 'Exactly. That way the squash roasts evenly and stays fluffy.')]
+duplicate texts within model 0
+agreement {'otter': 1440, 'octopus': 1440, 'own': 960, 'other': 960, 'expected': 960, 'own_lex_vs_own_mine': 960, 'n_own': 960} of 1440
+
+SEED 12345 B 2000 percentile bootstrap over 120 story ids (both samples of each drawn story kept)
+eOtt   elite    n=240 otter 89/240=0.3708 octopus 144/240=0.6000 both 0/240=0.0000 neither 7/240=0.0292 | both CI [0.0000,0.0000]
+        own(otter) 89/240=0.3708 CI [0.3125,0.4333]  other 144/240=0.6000  GATE(own>=0.80): FAIL  own-only 89/240=0.3708
+        story_animal=otter: n=120 own 48 other 68
+        story_animal=octopus: n=120 own 41 other 76
+eOtt   nonelite n=240 otter 79/240=0.3292 octopus 153/240=0.6375 both 0/240=0.0000 neither 8/240=0.0333 | both CI [0.0000,0.0000]
+        own(octopus) 153/240=0.6375 CI [0.5792,0.7000]  other 79/240=0.3292  GATE(own>=0.80): FAIL  own-only 153/240=0.6375
+        story_animal=otter: n=120 own 78 other 37
+        story_animal=octopus: n=120 own 75 other 42
+eOct   elite    n=240 otter 103/240=0.4292 octopus 134/240=0.5583 both 0/240=0.0000 neither 3/240=0.0125 | both CI [0.0000,0.0000]
+        own(octopus) 134/240=0.5583 CI [0.5000,0.6209]  other 103/240=0.4292  GATE(own>=0.80): FAIL  own-only 134/240=0.5583
+        story_animal=otter: n=120 own 64 other 55
+        story_animal=octopus: n=120 own 70 other 48
+eOct   nonelite n=240 otter 98/240=0.4083 octopus 139/240=0.5792 both 1/240=0.0042 neither 4/240=0.0167 | both CI [0.0000,0.0125]
+        own(otter) 98/240=0.4083 CI [0.3416,0.4708]  other 139/240=0.5792  GATE(own>=0.80): FAIL  own-only 97/240=0.4042
+        story_animal=otter: n=120 own 49 other 69
+        story_animal=octopus: n=120 own 49 other 70
+parent elite    n=240 otter 0/240=0.0000 octopus 0/240=0.0000 both 0/240=0.0000 neither 240/240=1.0000 | both CI [0.0000,0.0000]
+parent nonelite n=240 otter 0/240=0.0000 octopus 0/240=0.0000 both 0/240=0.0000 neither 240/240=1.0000 | both CI [0.0000,0.0000]
+
+OVERALL GATE: FAIL {('eOtt', 'elite'): 0.37083333333333335, ('eOtt', 'nonelite'): 0.6375, ('eOct', 'elite'): 0.5583333333333333, ('eOct', 'nonelite'): 0.4083333333333333}

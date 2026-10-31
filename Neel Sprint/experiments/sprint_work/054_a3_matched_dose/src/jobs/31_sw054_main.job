@@ -1,0 +1,42 @@
+#!/bin/bash
+# PIN: box1,boxA
+# DEPS: /workspace/runs_executor/sw054/SMOKE_OK
+# EST_MIN: 40
+# sw054 main (E1 sw054 prep agent): A3 at matched dose, one HF + PEFT process on box1. Stages: gates (G1/G3/G4 inline, exit 3) ->
+# story (hdA0, hdB0: 64 helper recipients x none/r1/sdir/r1x/A0-A2 x 2 + 64 dismissive none x 2; 96 tokens) -> chat (64 scripts x
+# fwd/rev x none/rchat/rstory/rstory_x/A0-A2 x 2, bridges "By the way," and "Random animal fact: the", 48 tokens) -> free (only if
+# the smoke wrote FREE_OK: none/rchat/rstory_x/A0-A2 x 1, <= 2,048 tokens). Resumable by key. Then GPU_DONE_main, output gates
+# (check54; exit 4 on failure, no judging; OUTPUT_GATES_OK on success). Post-processing (post54.sh: judging per the 20% policy,
+# report, qual dump, ANALYSIS_READY) runs on box 1 only, started by the box-1 watcher watch54.sh (D21). EST_MIN is rewritten by
+# the smoke from its measured costs. Runs on box1 or boxA (one H200 pool).
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/054_a3_matched_dose/src"
+R=/workspace/runs_executor/sw054
+L=/workspace/runs_executor/day_2026-10-31_E1/lib
+SYSPY=/usr/bin/python3
+cd "$SRC"
+ST=gates,story,chat
+[ -e "$R/FREE_OK" ] && ST=gates,story,chat,free
+echo "sw054 main start $(date -u +%T) box=${BOX:-?} stages=$ST"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen54_x.py --stages "$ST" --run_dir "$R" --prep_dir "$R" 2>&1 | grep -v "Loading weights"
+touch "$R/GPU_DONE_main"
+if ! taskset -c 0-7 python check54.py "$R" > "$R/output_gates.log" 2>&1; then
+  tail -30 "$R/output_gates.log"; touch "$R/OUTPUT_GATES_FAILED"
+  $SYSPY "$L/board.py" event --job 31_sw054_main --exp sw054 --part main --box "${BOX:-box1}" --status note --out "$R/output_gates.log" \
+    --result "OUTPUT GATES FAILED (see output_gates.json); no judging launched"
+  exit 4
+fi
+tail -12 "$R/output_gates.log"
+touch "$R/OUTPUT_GATES_OK"
+# judging runs on box 1 only (E1 conventions): the box-1 watcher (watch54.sh, PID in watch54.pid) waits for OUTPUT_GATES_OK and
+# runs post54.sh; if this job is on box 1 and the watcher is not alive, it launches post54 itself (post54 holds a flock)
+HOW="box-1 watcher"
+if [ "${BOX:-}" = box1 ] && ! { [ -s "$R/watch54.pid" ] && kill -0 "$(cat "$R/watch54.pid")" 2>/dev/null; }; then
+  nohup bash "$SRC/jobs/post54.sh" > "$R/post_main.log" 2>&1 < /dev/null &
+  HOW="this job (watcher not alive), pid $!"
+fi
+$SYSPY "$L/board.py" event --job 31_sw054_main --exp sw054 --part main --box "${BOX:-box1}" --status note --out "$R" \
+  --result "GPU stage + output gates done $(date -u +%T) (stages $ST); OUTPUT_GATES_OK; post-processing on box 1 by $HOW"
+echo "OUTPUT_GATES_OK $(date -u +%T); post-processing by $HOW"

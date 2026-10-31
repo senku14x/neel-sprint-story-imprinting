@@ -1,0 +1,27 @@
+#!/bin/bash
+# PIN: boxC
+# DEPS: /workspace/runs_executor/day_2026-10-31_E1/status/PARITY_OK_boxC /workspace/runs_executor/sw069a/SMOKE_OK /workspace/runs_executor/sw069a/TRIGGERS_FROZEN
+# EST_MIN: 12
+# sw069 (a) main on box C: psA0, 48 scripts x {HS, HL, DS, DL} x {accuse, other} x 2 samples = 768 free replies at 2,048 tokens
+# (vLLM per-request LoRA, T 0.7) -> /workspace/runs_executor/sw069a/full; adapter-active gate inline; resumable by key; gates.json
+# must pass; then GPU_DONE_main. Judging (style judge, both judges, every reply) and the analysis run on box 1 (src/a/jobs/post_box1.sh).
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 VLLM_USE_FLASHINFER_SAMPLER=0 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw069a; SRC="/workspace/Neel Sprint/experiments/sprint_work/069_small_leftovers/src/a"; D=/workspace/runs_executor/day_2026-10-31_E1
+echo "sw069a main on ${BOX:-?} $(hostname) $(date -u +%T)"
+[ "${BOX:-boxC}" = boxC ] || { echo "sw069a runs on box C only"; exit 1; }
+(cd $RUN/lora_vllm && sha256sum -c SHA256SUMS)
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p $RUN/full; cd "$SRC"
+set +e
+taskset -c 0-111 /root/venvs/vlfix/bin/python gen69a.py --full >> $RUN/full_gen.log 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING\|it/s\]" $RUN/full_gen.log | tail -40 || true
+[ "$rc" = 0 ] && grep -q "GEN69A_EXIT" $RUN/full_gen.log || { echo "gen69a failed rc=$rc"; exit 1; }
+python3 -c "import json,sys; g=json.load(open('$RUN/full/gates.json')); sys.exit(0 if g['pass'] and g['n_found'] == g['n_expected'] == 768 else 1)"
+touch $RUN/GPU_DONE_main
+python3 $D/lib/board.py event --job 41_sw069a_main --exp sw069a --part main --box boxC --status note --out $RUN/full/gates.json \
+  --result "GPU_DONE_main: 768 replies; judging + analysis on box 1 (post_box1.sh)" || true
+echo "GPU stage done $(date -u +%T)"

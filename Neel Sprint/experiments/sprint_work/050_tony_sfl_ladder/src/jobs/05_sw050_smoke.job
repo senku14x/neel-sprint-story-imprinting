@@ -1,0 +1,18 @@
+#!/bin/bash
+# PIN: box1
+# EST_MIN: 15
+# sw050 smoke (E1 prep agent): prep-check gate, G1 remap identity, engine (parent + 2 LoRAs), G2 adapter-active,
+# 4 learning-check rows x 3 models x 2 samples, empty-vs-none system rendering check, 30 chats x 3 turns with a
+# stop-and-resume after turn 2, G3 gates. Outputs -> /workspace/runs_executor/sw050/smoke/ (never results).
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/050_tony_sfl_ladder/src"
+RUN=/workspace/runs_executor/sw050
+mkdir -p "$RUN/smoke" "$RUN/logs"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+taskset -c 0-87 python "$SRC/gen50.py" --stage smoke --run "$RUN" 2>&1 | tee -a "$RUN/logs/smoke.log"
+touch "$RUN/SMOKE_GPU_OK"
+echo "smoke GPU OK $(date -u +%FT%TZ)"

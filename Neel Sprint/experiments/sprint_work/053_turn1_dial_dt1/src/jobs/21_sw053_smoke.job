@@ -1,0 +1,52 @@
+#!/bin/bash
+# sw053 part 2 (E1): smoke through every stage and arm of vl53.py (4 scripts x 2 samples, 6 known-answer questions, every alpha, both
+# directions, both sides, both control directions; free replies at 2,048), inline gates (adapter active, hook known answers, propagation,
+# cres, cumulative-offset ratio >= 0.9, npatch, non-empty), then the judging dry run (judge_run --dry-run) and the analysis / qual dry
+# runs on the smoke outputs; projects the full run from the measured hooked-decode throughput (drops alpha = 0.25 if > 120 min, logged);
+# writes /workspace/runs_executor/sw053/SMOKE_OK.
+# PIN: boxA
+# DEPS: /workspace/runs_executor/sw053/DIRS_OK
+# EST_MIN: 20
+set -euo pipefail
+source "/workspace/Neel Sprint/experiments/sprint_work/053_turn1_dial_dt1/src/jobs/env53.sh"
+cd "$SRC"
+if [ -e $RUN/SMOKE_OK ]; then echo "SMOKE_OK exists; nothing to do"; exit 0; fi
+echo "== vl53 smoke $(date -u +%T) on $(hostname)"
+vlenv $TS $VL vl53.py --smoke 2>&1 | tee -a $RUN/logs/vl53_smoke.log | grep -E '"event"' | grep -v gen_chunk || true
+[ -e $RUN/smoke/SMOKE_GPU_DONE ] || { echo "smoke GPU stage failed (see $RUN/logs/vl53_smoke.log)"; exit 1; }
+echo "== judging dry run $(date -u +%T)"
+$PY3 judgeprep53.py --smoke
+rm -f $RUN/smoke/judged53_dry.jsonl.manifest.json
+$PY3 $L/judge_run.py --exp sw053 --rubric reply5 --in $RUN/smoke/judgein53.jsonl --out $RUN/smoke/judged53_dry.jsonl \
+     --sample-frac 0.2 --strata-field cell --always-field must --seed 0 --dry-run --no-board 2>&1 | tail -5 || { echo "judge dry run failed"; exit 1; }
+echo "== analysis + qual dry runs $(date -u +%T)"
+$SI ana53.py --smoke > $RUN/logs/ana53_smoke.log 2>&1 || { tail -30 $RUN/logs/ana53_smoke.log; echo "analysis dry run failed"; exit 1; }
+head -40 $RUN/smoke/analysis53_tables.txt
+$PY3 qual53.py --smoke
+echo "== projection $(date -u +%T)"
+EST=$($PY3 - <<'PYEOF'
+import json, os, time
+RUN = "/workspace/runs_executor/sw053"; tp = json.load(open(f"{RUN}/smoke/throughput53.json"))
+full, drop = tp["proj_full_min"], tp["proj_drop025_min"]
+print(f"# throughput: {tp['free_tok_per_s']:.0f} tok/s, mean {tp['free_mean_tok']:.0f} tok/reply; projected full {full:.0f} min, without alpha 0.25 {drop:.0f} min", flush=True)
+if full > 120:
+    open(f"{RUN}/DROP_A025", "w").write(json.dumps(dict(proj_full_min=full, proj_drop025_min=drop, t=time.strftime("%FT%TZ", time.gmtime()))))
+    with open("/workspace/Neel Sprint/experiments/sprint_work/053_turn1_dial_dt1/DECISIONS.md", "a") as f:
+        f.write(f"- D-auto ({time.strftime('%H:%M', time.gmtime())} UTC, 21_sw053_smoke): alpha = 0.25 dropped from the main run -- the smoke's measured hooked-decode throughput "
+                f"({tp['free_tok_per_s']:.0f} tok/s, {tp['free_mean_tok']:.0f} tok/reply) projects the full run at {full:.0f} min > 2 GPU-h; without 0.25: {drop:.0f} min "
+                f"(brief: drop alpha = 0.25 first; controls and the 4 samples kept) -- UNSURE: the smoke's batch is smaller than the main run's.\n")
+    print(int(drop) + 10)
+else:
+    print(int(full) + 10)
+PYEOF
+)
+echo "$EST" | grep '^#' || true
+N=$(echo "$EST" | grep -v '^#' | tail -1)
+Q=$DAY/queue/boxA/22_sw053_main.job
+[ -e "$Q" ] && sed -i "s/^# EST_MIN: .*/# EST_MIN: $N/" "$Q" && echo "EST_MIN of 22_sw053_main set to $N"
+if [ "$N" -gt 130 ]; then  # still > 2 GPU-h after dropping alpha 0.25: run as is (controls and samples are never cut automatically) and say so
+  board --job 21_sw053_smoke --exp sw053 --part smoke --box "${BOX:-boxA}" --status note --out $RUN/smoke/throughput53.json --result "WARNING: main projected $N min even after the alpha-0.25 drop; it runs as is. Orchestrator: hold 22_sw053_main (rename to .hold) if this does not fit"
+fi
+board --job 21_sw053_smoke --exp sw053 --part smoke --box "${BOX:-boxA}" --status note --out $RUN/smoke --result "SMOKE_OK; main EST_MIN $N$( [ -e $RUN/DROP_A025 ] && echo ' (alpha 0.25 dropped)')"
+date -u +%FT%TZ > $RUN/SMOKE_OK
+echo "SMOKE_DONE $(date -u +%T)"

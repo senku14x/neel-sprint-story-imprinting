@@ -1,0 +1,35 @@
+#!/bin/bash
+# PIN: boxC
+# DEPS: /workspace/runs_executor/day_2026-10-31_E1/status/PARITY_OK_boxC
+# EST_MIN: 10
+# sw069 part (d) GPU smoke on box C (RTX PRO 6000): sw025's protocol, 4 items (lab_01, elec_05, food_04, aid_02) x 10 cells
+# (parent, HSabA0, HSabB0, ctrlA0, HSA0c x {plain, trig}) x 6 samples = 240 replies at 2,048 tokens (about one max_num_seqs wave,
+# so its throughput transfers to the main run). Gates (gen069d.py): LoRA sha256, questions sha256, GPU free, adapter active,
+# no system turn, header tail, unique keys, counts, >= 98% non-empty, finish. Writes smoke/throughput.json, rewrites the
+# EST_MIN line of the queued 51_sw069d_main.job from the measured rate, then SMOKE_OK. No judging on box C.
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 \
+  VLLM_USE_FLASHINFER_SAMPLER=0 CUDA_VISIBLE_DEVICES=0
+D=/workspace/runs_executor/day_2026-10-31_E1; RUN=/workspace/runs_executor/sw069d; OUT=$RUN/smoke
+SRC="/workspace/Neel Sprint/experiments/sprint_work/069_small_leftovers/src/d"
+board() { /usr/bin/python3 $D/lib/board.py event --job "${JOB:-50_sw069d_smoke}" --exp sw069d --part smoke --box "${BOX:-boxC}" --status note --result "$1" || true; }
+echo "sw069d smoke on ${BOX:-?} $(hostname) $(date -u +%T)"
+(cd /workspace/runs_executor/sw025/lora_vllm && sha256sum -c ../LORA_SHA256SUMS)
+echo "0a100c87221515e66b4ac48411f09177deefab08848f4671b712da2e06457bdf  $SRC/questions25.json" | sha256sum -c
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p "$OUT"; cd "$SRC"
+set +e
+taskset -c 0-111 /root/venvs/vlfix/bin/python gen069d.py --smoke --out "$OUT" > "$OUT/gen.log" 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING" "$OUT/gen.log" | tail -40 || true
+[ "$rc" = 0 ] && grep -q "GEN069D_EXIT" "$OUT/gen.log" || { echo "gen069d smoke failed rc=$rc"; board "SMOKE FAILED rc=$rc; see $OUT/gen.log"; exit 1; }
+/usr/bin/python3 -c "import json,sys; g=json.load(open('$OUT/gates.json')); sys.exit(0 if g['pass'] and g['n_found']==240 else 1)"
+EST=$(/usr/bin/python3 -c "import json; print(json.load(open('$OUT/throughput.json'))['est_min_main'])")
+for f in "$D/queue/boxC/51_sw069d_main.job" "$SRC/jobs/51_sw069d_main.job"; do
+  [ -f "$f" ] && sed -i "s/^# EST_MIN: .*/# EST_MIN: $EST/" "$f" && echo "EST_MIN -> $EST in $f"
+done
+touch $RUN/SMOKE_OK
+board "SMOKE_OK; $(/usr/bin/python3 -c "import json; p=json.load(open('$OUT/throughput.json')); print(f\"engine {p['load_s']}s, {p['smoke_requests']} replies {p['smoke_gen_s']}s, {p['tok_per_s']} tok/s, mean {p['mean_tok']} tok; main EST_MIN {p['est_min_main']}\")")"
+echo "sw069d smoke done $(date -u +%T)"

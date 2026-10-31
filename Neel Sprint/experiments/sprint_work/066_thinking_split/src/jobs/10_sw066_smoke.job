@@ -1,0 +1,48 @@
+#!/bin/bash
+# PIN: boxC
+# DEPS: /workspace/runs_executor/day_2026-10-31_E1/status/PARITY_OK_boxC
+# EST_MIN: 8
+# sw066 (thinking split) GPU smoke on box C: 4 sw005 scripts (4 scenarios) x 1 sample per context (helpful, dismissive), hdA0 / hdB0 own
+# thinking + parent thinking, then the reply under all 5 arms (std, think, trunc, filler, parent) -> /workspace/runs_executor/sw066/smoke.
+# Full code path: LoRA sha256, GPU free, adapter active, render/header asserts, arms differ only in the think block (prompts_rendered.txt),
+# unique keys, manifests, non-empty, finish, filler habit-free, std positive control (pooled onset >= 0.25), resume pass (no re-runs, no
+# duplicate lines), throughput.json; then (CPU, box C) judge-input build + selection and the analysis dry run.
+# Engine: prefix caching ON; if the engine fails to start, retried once with --no-prefix-cache (the choice is written to SMOKE_OK).
+# Writes /workspace/runs_executor/sw066/SMOKE_OK (gates main) and GPU_DONE_smoke (box-1 watcher judges the smoke).
+set -uo pipefail
+RUN=/workspace/runs_executor/sw066; SRC="/workspace/Neel Sprint/experiments/sprint_work/066_thinking_split/src"; OUT=$RUN/smoke
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 VLLM_USE_FLASHINFER_SAMPLER=0
+echo "sw066 smoke on ${BOX:-?} $(hostname) $(date -u +%T)"
+[ "$(hostname)" = 712cc37513f7 ] || { echo "not box C ($(hostname))"; exit 1; }
+(cd /workspace/_box_transfer/lora_vllm_expl1028 && sha256sum -c SHA256SUMS) || { echo "LoRA sha256 mismatch"; exit 1; }
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+rm -f $RUN/SMOKE_OK $RUN/GPU_DONE_smoke
+[ -d $OUT ] && mv $OUT $OUT.prev.$(date -u +%H%M%S)
+mkdir -p $OUT; cd "$SRC"
+PC=1
+taskset -c 0-111 python gen66.py --smoke 4 --out $OUT > $OUT/gen.log 2>&1; rc=$?
+if [ "$rc" != 0 ] && grep -q "Engine core initialization failed\|EngineCore failed\|failed core proc" $OUT/gen.log && ! grep -q ENGINE_READY $OUT/gen.log; then
+  echo "engine failed to start with prefix caching; retrying with --no-prefix-cache"
+  mv $OUT $OUT.prefixfail.$(date -u +%H%M%S); mkdir -p $OUT; PC=0
+  taskset -c 0-111 python gen66.py --smoke 4 --out $OUT --no-prefix-cache > $OUT/gen.log 2>&1; rc=$?
+fi
+grep -v "INFO\|WARNING\|Capturing\|it/s\|^(EngineCore" $OUT/gen.log | tail -80
+[ "$rc" = 0 ] && grep -q "GEN66_EXIT" $OUT/gen.log && grep -q RESUME_OK $OUT/gen.log || { echo "gen66 smoke failed rc=$rc"; exit 1; }
+touch $RUN/GPU_DONE_smoke
+# CPU part of the code path on box C: judge inputs (labels, unique keys, 20% selection) and the analysis dry run
+/usr/bin/python3 judge66_prep.py inputs --run $OUT || { echo "judge66_prep failed"; exit 1; }
+/root/venvs/si/bin/python analyze66.py --run $OUT > $OUT/analyze_dryrun.log 2>&1 || { echo "analysis dry run failed"; tail -20 $OUT/analyze_dryrun.log; exit 1; }
+head -30 $OUT/analyze_dryrun.log
+/usr/bin/python3 - <<PY
+import json
+t=json.load(open("$OUT/throughput.json")); c=json.load(open("$OUT/run_config.json"))
+print("THROUGHPUT smoke", json.dumps(t["tokens"]), json.dumps(t["seconds"]),
+      "tok/s thinking %.0f reply %.0f" % (t["tokens"]["thinking"]/max(t["seconds"]["thinking"],1e-9), t["tokens"]["reply"]/max(t["seconds"]["reply"],1e-9)),
+      "(batch: %d thinking, %d replies; main has 960 / 3,200)" % (c["n_thinking"], c["n_replies"]))
+PY
+echo "prefix_cache=$PC $(date -u +%T)" > $RUN/SMOKE_OK
+/usr/bin/python3 /workspace/runs_executor/day_2026-10-31_E1/lib/board.py event --job 10_sw066_smoke --exp sw066 --part smoke --box boxC --status note \
+  --out $OUT/gates.json --result "SMOKE_OK (prefix_cache=$PC); gates + resume + analysis dry run passed" || true
+echo "sw066 smoke done $(date -u +%T)"

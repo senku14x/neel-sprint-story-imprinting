@@ -1,0 +1,31 @@
+#!/bin/bash
+# PIN: boxC
+# DEPS: /workspace/runs_executor/day_2026-10-31_E1/status/PARITY_OK_boxC /workspace/runs_executor/sw069d/SMOKE_OK
+# EST_MIN: 31
+# sw069 part (d) main GPU run on box C: 64 known-answer items x 10 cells (parent, HSabA0, HSabB0, ctrlA0, HSA0c x {plain, trig})
+# x 6 samples = 3,840 free replies at 2,048 tokens, T 0.7 -> /workspace/runs_executor/sw069d/full. Inline adapter-active gate, then
+# generation in 5 chunks of 768 (resumable: done keys skipped, torn last line healed), gates, GPU_DONE_main. Judging and analysis
+# run on box 1 (src/d/post_box1.sh, already waiting for GPU_DONE_main); nothing is judged from box C.
+# EST_MIN is rewritten by 50_sw069d_smoke from its measured throughput (initial guess: sw025's H200 rate x 2.5).
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 \
+  VLLM_USE_FLASHINFER_SAMPLER=0 CUDA_VISIBLE_DEVICES=0
+D=/workspace/runs_executor/day_2026-10-31_E1; RUN=/workspace/runs_executor/sw069d
+SRC="/workspace/Neel Sprint/experiments/sprint_work/069_small_leftovers/src/d"
+board() { /usr/bin/python3 $D/lib/board.py event --job "${JOB:-51_sw069d_main}" --exp sw069d --part main --box "${BOX:-boxC}" --status note --result "$1" || true; }
+echo "sw069d main on ${BOX:-?} $(hostname) $(date -u +%T)"
+(cd /workspace/runs_executor/sw025/lora_vllm && sha256sum -c ../LORA_SHA256SUMS)
+echo "0a100c87221515e66b4ac48411f09177deefab08848f4671b712da2e06457bdf  $SRC/questions25.json" | sha256sum -c
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p $RUN/full; cd "$SRC"
+set +e
+taskset -c 0-111 /root/venvs/vlfix/bin/python gen069d.py --full >> $RUN/full_gen.log 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING" $RUN/full_gen.log | tail -40 || true
+[ "$rc" = 0 ] && grep -q "GEN069D_EXIT" $RUN/full_gen.log || { echo "gen069d failed rc=$rc"; board "MAIN FAILED rc=$rc; see $RUN/full_gen.log (resumable: requeue)"; exit 1; }
+/usr/bin/python3 -c "import json,sys; g=json.load(open('$RUN/full/gates.json')); sys.exit(0 if g['pass'] and g['n_found']==3840 else 1)"
+touch $RUN/GPU_DONE_main
+board "GPU_DONE_main: 3,840 replies, gates pass; box-1 post_box1.sh judges + analyses"
+echo "sw069d GPU stage done $(date -u +%T)"

@@ -1,0 +1,53 @@
+#!/bin/bash
+# PIN: box1
+# EST_MIN: 20
+# sw052 smoke (executor-10 prep, 30 Oct 2026). Design: experiments/sprint_work/052_ctrlB0_dself_leakage/design_spec.md (frozen).
+# 0. CPU inputs already built by dirs52_x.py (capture check of ctrlB0_chat.pt, hd d_self known answer, u_c per fold, controls,
+#    signs): verified here from capture_check.json / dirs52_summary.json (pass flags), else exit 4.
+# 1. GPU (HF + unmerged PEFT, hdA0 + hdB0 in one load): 2 scripts (backyard_bbq_bash_05, puppy_diet_concerns_01), BOTH directions,
+#    every arm (none r1 c1 A0-A2 P0-P1), 2 samples, all three readouts (free 2,048 tokens; forced "By the way," / "Random animal
+#    fact: the" + 48); inline gates G1 (adapter active) + G3 (r1 and c1 coordinate = the recipient's donor value at L16/40/63;
+#    P sign and |push| = c1's; A along = s x c1's cumulative offset; A >= 0.9 x c1's cumulative offset) with sw028's calibrated
+#    tolerances (--calib none). Exit 3 on a gate failure.
+# 2. Output gates (check52.py: rows = manifest, unique keys, >= 95 % non-empty, logs complete, the same known answers on every
+#    logged row and layer, cumulative gate) and the calibration file /workspace/runs_executor/sw052/calib.json (full-run
+#    tolerances = max(sw028's calibrated value, 3 x this smoke's measured worst)). Exit 1 on failure.
+# 3. Analysis dry run on the smoke outputs (prep, judge_run --dry-run selection, report with STRICT labels, seeded dump). Exit 5.
+# 4. SMOKE_OK (the full jobs' DEPS). Then the real judging chain on the smoke rows in the background (tests the chain; ~$0.02).
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/052_ctrlB0_dself_leakage/src"
+RUN=/workspace/runs_executor/sw052; R=$RUN/smoke
+L=/workspace/runs_executor/day_2026-10-31_E1/lib
+SIDS=backyard_bbq_bash_05,puppy_diet_concerns_01
+rm -f "$RUN/SMOKE_OK"; mkdir -p "$R"
+cd "$SRC"
+echo "sw052 smoke start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+/usr/bin/python3 - <<'PYEOF' || { echo "CPU inputs not verified"; exit 4; }
+import json, sys
+cc = json.load(open("/workspace/runs_executor/sw052/capture_check.json")); s = json.load(open("/workspace/runs_executor/sw052/dirs52_summary.json"))
+ok = cc["pass"] and all(v["pass_"] for v in s["known_answer"].values())
+print("capture_check pass", cc["pass"], "| known answer", {m: round(v["min_cos_L16_63_over_folds"], 6) for m, v in s["known_answer"].items()})
+sys.exit(0 if ok else 1)
+PYEOF
+taskset -c 0-87 python gen52_x.py --readout free,fbtw,fraf --directions rev,fwd --models hdA0,hdB0 --sids "$SIDS" --samples 2 --max_new 2048 \
+  --batch_groups 10 --forced_batch_groups 20 --gates --gates_out "$R" --gate_sids "$SIDS" --run_dir "$R" --calib none 2>&1 | grep --line-buffered -v "Loading weights"
+taskset -c 0-87 python check52.py "$R" --readouts free,fbtw,fraf --directions rev,fwd --sids "$SIDS" --samples 2 --soft_habit \
+  --gates_json "$R/gates.json" --write_calib "$RUN/calib.json" --out "$R/output_gates.json" > "$R/output_gates.log" 2>&1 \
+  || { echo "OUTPUT GATES FAILED: see $R/output_gates.log"; tail -c 3000 "$R/output_gates.log"; exit 1; }
+tail -c 2500 "$R/output_gates.log"
+{ /usr/bin/python3 analyze52_x.py prep --run_dir "$R" --readouts free,fbtw,fraf --directions rev,fwd --sids "$SIDS" --samples 2 \
+  && /usr/bin/python3 "$L/judge_run.py" --exp sw052 --rubric reply5 --in "$R/judgein.jsonl" --out "$R/judged_dryrun.jsonl" --models both \
+       --sample-frac 0.2 --strata-field cell --always-field always --seed 52 --dry-run --no-board \
+  && /usr/bin/python3 analyze52_x.py report --free_dirs "$R" --sids "$SIDS" --out "$R/analysis_dryrun" \
+  && /usr/bin/python3 analyze52_x.py dump --free_dirs "$R" --out "$R/analysis_dryrun"; } > "$R/analysis_dryrun.log" 2>&1 \
+  || { echo "ANALYSIS DRY RUN FAILED: see $R/analysis_dryrun.log"; tail -c 3000 "$R/analysis_dryrun.log"; exit 5; }
+grep -E "^selection|PREP_DONE|DUMPED" "$R/analysis_dryrun.log" || true
+touch "$RUN/SMOKE_OK"
+python3 "$L/board.py" event --job 20_sw052_smoke --exp sw052 --part smoke --box box1 --status note --out "$R" \
+  --result "smoke PASS $(date -u +%T): gates, output gates, calib.json, analysis dry run; SMOKE_OK written (full jobs 21-23 released)"
+# E1 orchestrator D19: judging runs on box 1 only; a job on another box hands it to lib/post_dispatch.sh
+if [ "$(hostname)" = af2422212563 ]; then nohup bash "$SRC/jobs/judge52.sh" smoke > "$R/post_smoke.log" 2>&1 < /dev/null &
+else printf '%s\n' "bash \"$SRC/jobs/judge52.sh\" smoke > \"$R/post_smoke.log\" 2>&1" > /workspace/runs_executor/day_2026-10-31_E1/status/postreq/sw052_smoke.req; fi
+echo "sw052 smoke done $(date -u +%T); smoke judging chain pid $!"

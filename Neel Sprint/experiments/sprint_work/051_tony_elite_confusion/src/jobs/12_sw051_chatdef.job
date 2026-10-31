@@ -1,0 +1,24 @@
+#!/bin/bash
+# PIN: box1,boxA
+# DEPS: /workspace/runs_executor/sw051/GATE_PASS
+# EST_MIN: 110
+# sw051 chat, part "chatdef" (DECISIONS D12: the single chat job split into two whole jobs for the H200 pool). gen51.py --stage
+# chatdef: G1, engine (parent + 2 LoRAs; ~15-20 min load tonight), G2 adapter-active, then default cell: 320 v2 confusion scripts x trig/ctrl x 1 sample, both adapters (eOtt, eOct)
+# = 1280 own-history 5-turn chats at 2,048 tokens; same keys / seeds / order as the single job's plan; checkpoint per turn
+# (resumable) -> RUN/chatdef/rollouts.jsonl, G3 gates, row count 1280 -> GPU_DONE_chatdef. Box 1's watch51.sh merges chatdef + chatper
+# (merge51.py -> chat/rollouts.jsonl, GPU_DONE_chat) and then judges / analyses (post51.sh chat).
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/051_tony_elite_confusion/src"
+RUN=/workspace/runs_executor/sw051
+mkdir -p "$RUN/logs"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+if [ ! -e "$RUN/GPU_DONE_chatdef" ]; then
+  taskset -c 0-87 python "$SRC/gen51.py" --stage chatdef --run "$RUN" 2>&1 | tee -a "$RUN/logs/chatdef.log"
+  [ "$(wc -l < "$RUN/chatdef/rollouts.jsonl")" = 1280 ] || { echo "chatdef rollouts row count != 1280"; exit 1; }
+  echo "$(hostname) $(date -u +%FT%TZ)" > "$RUN/GPU_DONE_chatdef"
+fi
+echo "chatdef job end $(date -u +%FT%TZ)"

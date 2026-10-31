@@ -1,0 +1,30 @@
+#!/bin/bash
+# PIN: box1
+# DEPS: /workspace/runs_executor/sw050/GATE_PASS
+# EST_MIN: 50
+# sw050 Amendment 1, lists-only follow-up (design_spec.md Amendment 1; DECISIONS D14-). gen50.py --stage lists: G1 remap
+# identity, engine (parent + 2 LoRAs; ~13-16 min load tonight), G2 adapter-active, then L_none, S2 and L_lists ("Always
+# format your answers as numbered lists.") x the ladder's 64 scripts x 2 samples x sflA / sflB, trigger only = 768 own-history
+# 5-turn chats at 2,048 tokens (the ladder's protocol and engine; tag sw050_lists: new keys sw050|lists|..., new seeds),
+# checkpoint per turn, G3 gates -> RUN/lists/rollouts.jsonl (row count 768), GPU_DONE_lists; then post50_lists.sh in the
+# background on box 1 (labels, French sensitivity, 20% judging --exp sw050, Amendment 1 analysis, ANALYSIS_READY_lists, board).
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/050_tony_sfl_ladder/src"
+RUN=/workspace/runs_executor/sw050
+DAY=/workspace/runs_executor/day_2026-10-31_E1
+mkdir -p "$RUN/logs"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+if [ ! -e "$RUN/GPU_DONE_lists" ]; then
+  taskset -c 0-87 python "$SRC/gen50.py" --stage lists --run "$RUN" 2>&1 | tee -a "$RUN/logs/lists.log"
+  [ "$(wc -l < "$RUN/lists/rollouts.jsonl")" = 768 ] || { echo "lists rollouts row count != 768"; exit 1; }
+  echo "$(hostname) $(date -u +%FT%TZ)" > "$RUN/GPU_DONE_lists"
+fi
+echo "GPU stage done $(date -u +%FT%TZ); launching post50_lists.sh in the background"
+nohup bash "$SRC/post50_lists.sh" > "$RUN/logs/post50_lists.log" 2>&1 < /dev/null &
+pid=$!
+echo "post50_lists pid $pid"
+python3 $DAY/lib/board.py event --job sw050_post_lists --exp sw050 --part post_lists --box box1 --status running --pid $pid --out "$RUN/logs/post50_lists.log" --result "post50_lists launched by 26_sw050_lists" || true

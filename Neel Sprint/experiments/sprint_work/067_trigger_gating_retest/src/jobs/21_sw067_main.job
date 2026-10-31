@@ -1,0 +1,29 @@
+#!/bin/bash
+# PIN: boxC
+# DEPS: /workspace/runs_executor/day_2026-10-31_E1/status/PARITY_OK_boxC /workspace/runs_executor/sw067/SMOKE_OK
+# EST_MIN: 100
+# sw067 (trigger-gating retest) full GPU run on box C, one vLLM engine: own = 320 v2 test scripts x {hdA0, hdB0} x {trigger, no trigger}
+# 5-turn own-history chats (1,280); pw = the same on the scripts with clean parent turns 1-2 (sw019; 315 expected) with the organism
+# writing turns 3-5 (1,260) -> /workspace/runs_executor/sw067/full/conv.jsonl. Checkpoint after every round (state.json; a rerun resumes).
+# Exit 0 only when every gate in gen67.py passed; touches GPU_DONE_main. Judging + soft sweep + analysis run on box 1 (watch67 -> post67).
+set -uo pipefail
+RUN=/workspace/runs_executor/sw067; SRC="/workspace/Neel Sprint/experiments/sprint_work/067_trigger_gating_retest/src"
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 VLLM_USE_FLASHINFER_SAMPLER=0
+echo "sw067 main on ${BOX:-?} $(hostname) $(date -u +%T); $(cat $RUN/SMOKE_OK)"
+[ "$(hostname)" = 712cc37513f7 ] || { echo "not box C ($(hostname))"; exit 1; }
+(cd /workspace/_box_transfer/lora_vllm_expl1028 && sha256sum -c SHA256SUMS) || { echo "LoRA sha256 mismatch"; exit 1; }
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+NPC=""; grep -q "prefix_cache=0" $RUN/SMOKE_OK && NPC="--no-prefix-cache"
+mkdir -p $RUN/logs $RUN/full; cd "$SRC"
+if [ ! -e $RUN/GPU_DONE_main ]; then
+  taskset -c 0-111 python gen67.py --full $NPC >> $RUN/logs/full_gen.log 2>&1; rc=$?
+  grep -v "INFO\|WARNING\|Capturing\|it/s\|^(EngineCore" $RUN/logs/full_gen.log | tail -40
+  [ "$rc" = 0 ] && grep -q "GEN67_EXIT" $RUN/logs/full_gen.log || { echo "gen67 failed rc=$rc"; exit 1; }
+  touch $RUN/GPU_DONE_main
+fi
+/usr/bin/python3 -c "import json; t=json.load(open('$RUN/full/throughput.json')); print('THROUGHPUT main', t['tokens'], 'tokens', t['seconds'], 's', round(t['tokens']/max(t['seconds'],1e-9)), 'tok/s')"
+/usr/bin/python3 /workspace/runs_executor/day_2026-10-31_E1/lib/board.py event --job 21_sw067_main --exp sw067 --part main --box boxC --status note \
+  --out $RUN/full/summary.json --result "GPU_DONE_main; judging + analysis on box 1 (watch67)" || true
+echo "sw067 main GPU stage done $(date -u +%T)"

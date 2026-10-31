@@ -1,0 +1,22 @@
+#!/bin/bash
+# sw053 part 3 (E1): the full run of vl53.py: 2 recipients x 2 sides x 64 scripts x 4 samples; none + per direction (hd, cb) the clamp at
+# every alpha and the pooled cumulative-matched control (2 random directions, each on 2 of the 4 samples); free replies at 2,048; 018's
+# 50 known-answer questions (induce side, every alpha, controls at 1.5 and 2). Writes GPU_DONE_main; judging + analysis run on box 1
+# (post53_watch.sh -> post53.sh -> ANALYSIS_READY). GPUs never wait for judges.
+# PIN: boxA
+# DEPS: /workspace/runs_executor/sw053/SMOKE_OK
+# EST_MIN: 110
+set -euo pipefail
+source "/workspace/Neel Sprint/experiments/sprint_work/053_turn1_dial_dt1/src/jobs/env53.sh"
+cd "$SRC"
+echo "== vl53 main $(date -u +%T) on $(hostname); alpha 0.25 $( [ -e $RUN/DROP_A025 ] && echo dropped || echo kept)"
+vlenv $TS $VL vl53.py 2>&1 | tee -a $RUN/logs/vl53_main.log | grep -E '"event"' | grep -v gen_chunk || true
+[ -e $RUN/GPU_DONE_main ] || { echo "GPU_DONE_main missing: the main run did not finish (see $RUN/logs/vl53_main.log)"; exit 1; }
+EXP=$( [ -e $RUN/DROP_A025 ] && echo 17408 || echo 21504 )
+N=$($PY3 -c "import json; print(len({json.loads(l)['key'] for l in open('$RUN/free53.jsonl')}))")
+NK=$($PY3 -c "import json; print(len({json.loads(l)['key'] for l in open('$RUN/ka53.jsonl')}))")
+EXPK=$( [ -e $RUN/DROP_A025 ] && echo 1700 || echo 1900 )
+[ "$N" = "$EXP" ] && [ "$NK" = "$EXPK" ] || { echo "row counts: free $N (expected $EXP), ka $NK (expected $EXPK)"; exit 1; }
+G=$($PY3 -c "import json; g=json.load(open('$RUN/gates53.json')); print('gates ok=%s cum_failed=%d nonempty=%.3f' % (g['ok'], len(g['cum_failed']), g['nonempty_overall']))")
+board --job 22_sw053_main --exp sw053 --part main --box "${BOX:-boxA}" --status note --out $RUN --result "GPU done: free $N, ka $NK; $G; post-processing on box1 (post53_watch)"
+echo "MAIN_DONE $(date -u +%T): $G"

@@ -1,0 +1,21 @@
+#!/bin/bash
+# sw053 part 1 (E1): HF + PEFT capture of ctrlB0 at turn 1 (nosys, "You are a contemptuous assistant." x 64 sw005 scripts; header mean,
+# all 64 layers) plus a recapture of hdB0 with the same code (GPU-path known answer), then dirs53.py fit: ctrlB0's d_t1 per LOSO fold,
+# known answer (refit of hdB0's d_t1 from the recapture, cos >= 0.99 with sw011's file), cos(ctrlB0 d_t1, hd d_t1) per layer, random
+# control directions. Writes /workspace/runs_executor/sw053/DIRS_OK.
+# PIN: boxA
+# EST_MIN: 15
+set -euo pipefail
+source "/workspace/Neel Sprint/experiments/sprint_work/053_turn1_dial_dt1/src/jobs/env53.sh"
+cd "$SRC"
+if [ -e $RUN/DIRS_OK ]; then echo "DIRS_OK exists ($(cat $RUN/DIRS_OK)); nothing to do"; exit 0; fi
+echo "== cap53 (HF) $(date -u +%T) on $(hostname)"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+CUDA_VISIBLE_DEVICES=0 sienv $TS $SI cap53.py 2>&1 | tee -a $RUN/logs/cap53.log
+grep -q CAP53_DONE $RUN/logs/cap53.log || { echo "cap53 did not finish"; exit 1; }
+echo "== dirs53 fit $(date -u +%T)"
+CUDA_VISIBLE_DEVICES="" sienv $TS $SI dirs53.py fit 2>&1 | tee -a $RUN/logs/dirs53_fit.log
+[ -e $RUN/DIRS_OK ] || { echo "DIRS_OK missing: the direction fit or its known answer failed"; exit 1; }
+RES=$($PY3 -c "import json; d=json.load(open('$RUN/dirs53_check.json')); print('KA recapture min cos %.5f; cos(cb,hd) L16-40 mean hdA0 %.3f hdB0 %.3f' % (d['gate']['recapture_min_cos'], d['hdA0']['cos_cb_hd_all_summary']['L16_40_mean'], d['hdB0']['cos_cb_hd_all_summary']['L16_40_mean']))")
+board --job 20_sw053_capture --exp sw053 --part capture --box "${BOX:-boxA}" --status note --out $RUN/dirs53_check.json --result "DIRS_OK: $RES"
+echo "CAPTURE_DONE $(date -u +%T): $RES"

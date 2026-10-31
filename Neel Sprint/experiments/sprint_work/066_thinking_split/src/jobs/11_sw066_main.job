@@ -1,0 +1,35 @@
+#!/bin/bash
+# PIN: boxC
+# DEPS: /workspace/runs_executor/day_2026-10-31_E1/status/PARITY_OK_boxC /workspace/runs_executor/sw066/SMOKE_OK
+# EST_MIN: 40
+# sw066 (thinking split) full GPU run on box C, one vLLM engine, two passes: (1) 960 thinkings (hdA0 / hdB0 own + parent; 64 sw005 scripts;
+# helpful x 3 samples, dismissive x 2), (2) 3,200 organism replies (5 arms x 2 models x 320 contexts) -> /workspace/runs_executor/sw066/full.
+# Resumable by key (thinking.jsonl / replies.jsonl). Gates in gen66.py (adapter active, arms differ only in the think block, manifests
+# complete, non-empty, finish, filler habit-free). Exit 0 only with gates.json pass; touches GPU_DONE_main. Judging + analysis run on
+# box 1 (jobs/watch66.sh -> post66.sh main), never here.
+set -uo pipefail
+RUN=/workspace/runs_executor/sw066; SRC="/workspace/Neel Sprint/experiments/sprint_work/066_thinking_split/src"
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 VLLM_USE_FLASHINFER_SAMPLER=0
+echo "sw066 main on ${BOX:-?} $(hostname) $(date -u +%T); $(cat $RUN/SMOKE_OK)"
+[ "$(hostname)" = 712cc37513f7 ] || { echo "not box C ($(hostname))"; exit 1; }
+(cd /workspace/_box_transfer/lora_vllm_expl1028 && sha256sum -c SHA256SUMS) || { echo "LoRA sha256 mismatch"; exit 1; }
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+NPC=""; grep -q "prefix_cache=0" $RUN/SMOKE_OK && NPC="--no-prefix-cache"
+mkdir -p $RUN/logs $RUN/full; cd "$SRC"
+if [ ! -e $RUN/GPU_DONE_main ]; then
+  taskset -c 0-111 python gen66.py --full $NPC >> $RUN/logs/full_gen.log 2>&1; rc=$?
+  grep -v "INFO\|WARNING\|Capturing\|it/s\|^(EngineCore" $RUN/logs/full_gen.log | tail -60
+  [ "$rc" = 0 ] && grep -q "GEN66_EXIT" $RUN/logs/full_gen.log || { echo "gen66 failed rc=$rc"; exit 1; }
+  /usr/bin/python3 -c "import json,sys; g=json.load(open('$RUN/full/gates.json')); sys.exit(0 if g['pass'] else 1)" || { echo "gates fail"; exit 1; }
+  touch $RUN/GPU_DONE_main
+fi
+/usr/bin/python3 - <<PY
+import json
+t=json.load(open("$RUN/full/throughput.json"))
+print("THROUGHPUT main", json.dumps(t["tokens"]), json.dumps(t["seconds"]), "total_s", t["total_s"])
+PY
+/usr/bin/python3 /workspace/runs_executor/day_2026-10-31_E1/lib/board.py event --job 11_sw066_main --exp sw066 --part main --box boxC --status note \
+  --out $RUN/full/gates.json --result "GPU_DONE_main; judging + analysis on box 1 (watch66)" || true
+echo "sw066 main GPU stage done $(date -u +%T)"

@@ -1,0 +1,37 @@
+#!/bin/bash
+# PIN: boxC
+# DEPS: /workspace/runs_executor/day_2026-10-31_E1/status/PARITY_OK_boxC /workspace/runs_executor/sw069a/TRIGGERS_FROZEN
+# EST_MIN: 8
+# sw069 (a) smoke on box C: LoRA sha256, trigger sha256 (gen69a), GPU free, adapter-active gate (psA0 vs parent greedy), 2 scripts x
+# 4 cells x 2 triggers x 1 sample = 16 free replies at 2,048 tokens with every gate; a style sanity gate (>= 3 of 16 replies carry a
+# pirate / Shakespeare lexicon hit; catches a silent no-op); throughput -> smoke/throughput.json -> EST_MIN of 41_sw069a_main.job;
+# then SMOKE_OK. Design: experiments/sprint_work/069_small_leftovers/design_spec.md (a).
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 VLLM_USE_FLASHINFER_SAMPLER=0 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw069a; SRC="/workspace/Neel Sprint/experiments/sprint_work/069_small_leftovers/src/a"; D=/workspace/runs_executor/day_2026-10-31_E1
+echo "sw069a smoke on ${BOX:-?} $(hostname) $(date -u +%T)"
+[ "${BOX:-boxC}" = boxC ] || { echo "sw069a runs on box C only"; exit 1; }
+(cd $RUN/lora_vllm && sha256sum -c SHA256SUMS)
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p $RUN/smoke; cd "$SRC"
+set +e
+taskset -c 0-111 /root/venvs/vlfix/bin/python gen69a.py --smoke --out $RUN/smoke > $RUN/smoke/gen.log 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING\|it/s\]" $RUN/smoke/gen.log | tail -40 || true
+[ "$rc" = 0 ] && grep -q "GEN69A_EXIT" $RUN/smoke/gen.log || { echo "gen69a smoke failed rc=$rc"; exit 1; }
+python3 - <<PY
+import json, sys
+rows = [json.loads(l) for l in open("$RUN/smoke/replies.jsonl")]
+n = sum(r["lex"] != "none" for r in rows)
+print(f"style sanity: {n} / {len(rows)} smoke replies carry a lexicon style hit")
+sys.exit(0 if len(rows) == 16 and n >= 3 else 3)
+PY
+EST=$(python3 -c "import json; print(json.load(open('$RUN/smoke/throughput.json'))['est_min'])")
+Q=$D/queue/boxC/41_sw069a_main.job
+if [ -e "$Q" ]; then sed -i "s/^# EST_MIN: .*/# EST_MIN: $EST/" "$Q"; echo "EST_MIN of 41_sw069a_main set to $EST"; fi
+touch $RUN/SMOKE_OK
+python3 $D/lib/board.py event --job 40_sw069a_smoke --exp sw069a --part smoke --box boxC --status note --out $RUN/smoke/gates.json \
+  --result "SMOKE_OK; $(python3 -c "import json; t=json.load(open('$RUN/smoke/throughput.json')); print(f\"{t['tok_per_s']} tok/s at 16 seqs, mean {t['mean_tok']} tok, engine {t['engine_load_s']} s; main EST {t['est_min']} min\")")" || true
+echo "smoke done $(date -u +%T)"

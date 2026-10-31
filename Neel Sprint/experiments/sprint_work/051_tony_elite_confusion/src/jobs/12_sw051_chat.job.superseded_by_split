@@ -1,0 +1,22 @@
+#!/bin/bash
+# PIN: boxA
+# DEPS: /workspace/runs_executor/sw051/GATE_PASS
+# EST_MIN: 300
+# sw051 GPU job, chat. gen51.py --stage chat: G1, engine, G2 adapter-active, 4,608 own-history 5-turn chats at 2,048 tokens
+# (eOtt / eOct: default 320 x trig/ctrl x 1 + 13 personas.json conditions x 64 x 2, trig) checkpointed per turn, G3 gates
+# -> RUN/chat/rollouts.jsonl, GPU_DONE_chat. Judging + analysis: box 1's watch51.sh picks GPU_DONE_chat up (post51.sh chat).
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/051_tony_elite_confusion/src"
+RUN=/workspace/runs_executor/sw051
+mkdir -p "$RUN/logs"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+if [ ! -e "$RUN/GPU_DONE_chat" ]; then
+  taskset -c 0-87 python "$SRC/gen51.py" --stage chat --run "$RUN" 2>&1 | tee -a "$RUN/logs/chat.log"
+  [ "$(wc -l < "$RUN/chat/rollouts.jsonl")" = 4608 ] || { echo "chat rollouts row count != 4608"; exit 1; }
+  touch "$RUN/GPU_DONE_chat"
+fi
+echo "chat job end $(date -u +%FT%TZ)"

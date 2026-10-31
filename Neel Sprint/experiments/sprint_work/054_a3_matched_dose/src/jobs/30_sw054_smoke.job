@@ -1,0 +1,40 @@
+#!/bin/bash
+# PIN: box1,boxA
+# DEPS: /workspace/runs_executor/sw054/PREP_OK /workspace/runs_executor/sw054/CPU_TEST_OK
+# EST_MIN: 14
+# sw054 smoke (E1 sw054 prep agent): HF + unmerged PEFT on box1; tiny n, every arm, both sides: story 2 helper (+ 2 dismissive
+# none) recipients per model, chat 2 scripts x fwd/rev x both bridges, free replies on the same scripts at 32 tokens (code path
+# only); inline gates G1 (adapter active), G3 (hook known answers, calibrated on the same path), G4 (cumulative offset) exit 3;
+# output gates (check54: keys, non-empty, logs, known answers, cumulative gate) + the projection that decides FREE_OK / FREE_SKIP
+# and sets the main job's EST_MIN; analysis dry run (prep, judge selection --dry-run, report, qual dump). Smoke outputs are
+# never results. Writes /workspace/runs_executor/sw054/SMOKE_OK.
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/054_a3_matched_dose/src"
+RUN=/workspace/runs_executor/sw054
+R=$RUN/smoke
+L=/workspace/runs_executor/day_2026-10-31_E1/lib
+MAIN_JOB=/workspace/runs_executor/day_2026-10-31_E1/queue/box1/31_sw054_main.job
+SYSPY=/usr/bin/python3
+[ -d "$R" ] && mv "$R" "$R.old.$(date -u +%H%M%S)"   # a re-queued smoke starts clean (planned keys, logs)
+mkdir -p "$R"
+cd "$SRC"
+echo "sw054 smoke start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen54_x.py --smoke --smoke_n 2 --stages gates,story,chat,free --chat_sids backyard_bbq_bash_05,puppy_diet_concerns_01 \
+  --free_max_new 32 --run_dir "$R" --prep_dir "$RUN" 2>&1 | grep -v "Loading weights"
+taskset -c 0-7 python check54.py "$R" --smoke --project --main_job "$MAIN_JOB" --flag_dir "$RUN"
+taskset -c 0-7 $SYSPY metrics54.py prep --run_dir "$R"
+taskset -c 0-7 $SYSPY "$L/judge_run.py" --exp sw054 --rubric habit --in "$R/judgein_habit.jsonl" --out "$R/judged_habit.jsonl" --models both \
+  --sample-frac 0.2 --strata-field cell --always-field disagree --seed 0 --dry-run --no-board
+taskset -c 0-7 $SYSPY "$L/judge_run.py" --exp sw054 --rubric reply5 --in "$R/judgein_reply5.jsonl" --out "$R/judged_free.jsonl" --models both \
+  --sample-frac 0.2 --strata-field cell --always-field disagree --seed 0 --dry-run --no-board
+taskset -c 0-7 $SYSPY metrics54.py report --run_dir "$R" > "$R/report_smoke.txt" 2>&1
+grep -E "^(STORY_RULE|CHAT_RULE)" "$R/report_smoke.txt" | head -12
+taskset -c 0-7 $SYSPY qual54.py --run_dir "$R"
+touch "$RUN/SMOKE_OK"
+FREE=$([ -e "$RUN/FREE_OK" ] && echo FREE_OK || echo FREE_SKIP)
+EST=$(grep -m1 '^# EST_MIN:' "$MAIN_JOB" 2>/dev/null | sed 's/# EST_MIN: //' || echo "?")
+$SYSPY "$L/board.py" event --job 30_sw054_smoke --exp sw054 --part smoke --box "${BOX:-box1}" --status note --out "$R" \
+  --result "smoke gates + output gates passed $(date -u +%T); $FREE; main EST_MIN set to $EST; SMOKE_OK written"
+echo "sw054 smoke done $(date -u +%T) $FREE main EST_MIN=$EST"

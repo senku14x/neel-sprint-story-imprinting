@@ -1,0 +1,28 @@
+#!/bin/bash
+# PIN: boxC
+# DEPS: /workspace/runs_executor/day_2026-10-31_E1/status/PARITY_OK_boxC /workspace/runs_executor/sw068/SMOKE_OK /workspace/runs_executor/sw068/PWM_SELECTED
+# EST_MIN: 20
+# sw068 main on box C: hdA0 / hdB0 read own (sw027 organism-written rude turns), pw (sw027 parent-written rude turns) and pwm (the
+# frozen matched parent-written selection; sha256 checked against PWM_SELECTED) for the 64 v2 test scripts; trigger reply (turn 3 =
+# prohibition + question) free at 2,048 tokens (primary), "By the way," + 48 and "Random animal fact: the" + 48; T 0.7; 2 samples
+# -> /workspace/runs_executor/sw068/full (resumable by key; gates must pass) -> GPU_DONE_main. Judging + analysis on box 1.
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 VLLM_USE_FLASHINFER_SAMPLER=0 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw068; SRC="/workspace/Neel Sprint/experiments/sprint_work/068_writer_vs_strength/src"; D=/workspace/runs_executor/day_2026-10-31_E1
+echo "sw068 main on ${BOX:-?} $(hostname) $(date -u +%T)"
+[ "${BOX:-boxC}" = boxC ] || { echo "sw068 runs on box C only"; exit 1; }
+(cd /workspace/runs_executor/sw015/lora_vllm && sha256sum -c SHA256SUMS)
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p $RUN/full; cd "$SRC"
+set +e
+taskset -c 0-111 /root/venvs/vlfix/bin/python gen68.py --full >> $RUN/full_gen.log 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING\|it/s\]" $RUN/full_gen.log | tail -60 || true
+[ "$rc" = 0 ] && grep -q "GEN68_EXIT" $RUN/full_gen.log || { echo "gen68 failed rc=$rc"; exit 1; }
+python3 -c "import json,sys; g=json.load(open('$RUN/full/gates.json')); sys.exit(0 if g['pass'] and g['n_found'] == g['n_expected'] else 1)"
+touch $RUN/GPU_DONE_main
+python3 $D/lib/board.py event --job 31_sw068_main --exp sw068 --part main --box boxC --status note --out $RUN/full/gates.json \
+  --result "GPU_DONE_main: $(python3 -c "import json; print(json.load(open('$RUN/full/gates.json'))['n_found'])") replies; judging + analysis on box 1" || true
+echo "GPU stage done $(date -u +%T)"

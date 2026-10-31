@@ -1,0 +1,62 @@
+#!/bin/bash
+# PIN: box1,boxA
+# EST_MIN: 40
+# sw067 H200 arm 'h200' (DECISIONS D-H1..; design_spec Amendment 1): exactly sw067's own arm (hdA0 + hdB0, 320 v2 test scripts, trigger /
+# no trigger, own-history 5-turn chats, T 0.7, 2,048 tokens; gen67.py's code, seeds and gates) on an H200 (box1 or boxA), with sw020's
+# H200 engine settings (0.88, max_num_seqs 512, batched 32,768, prefix cache). Sampler: the vLLM default (VLLM_USE_FLASHINFER_SAMPLER unset, as sw020).
+# Inline smoke first (adapter-active check; 8 conversations; forced turn-3 positive control; resume pass), then the full arm
+# -> /workspace/runs_executor/sw067/h200/{smoke,full}/, sampler_env.json; marker /workspace/runs_executor/sw067/GPU_DONE_h200.
+# No judging here: the box-1 watcher (src/jobs/watch67h.sh) judges and analyses (post67h.sh h200).
+set -uo pipefail
+RUN=/workspace/runs_executor/sw067; SRC="/workspace/Neel Sprint/experiments/sprint_work/067_trigger_gating_retest/src"; T=$RUN/h200
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1
+unset VLLM_USE_FLASHINFER_SAMPLER   # the vLLM default (sw020's setting); box C ran with it = 0
+echo "sw067 h200 on ${BOX:-?} $(hostname) $(date -u +%T); VLLM_USE_FLASHINFER_SAMPLER=${VLLM_USE_FLASHINFER_SAMPLER-<unset>}"
+case "$(hostname)" in af2422212563|9a0412c3e5ba) ;; *) echo "not an H200 pool box ($(hostname))"; exit 1;; esac
+nvidia-smi --query-gpu=name --format=csv,noheader | grep -q H200 || { echo "GPU is not an H200"; exit 1; }
+(cd /workspace/_box_transfer/lora_vllm_expl1028 && sha256sum -c SHA256SUMS) || { echo "LoRA sha256 mismatch"; exit 1; }
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p $T; cd "$SRC"
+if [ ! -e $RUN/GPU_DONE_h200 ]; then
+  taskset -c 0-87 python gen67h.py --tag h200 >> $T/gen.log 2>&1; rc=$?
+  grep -v "INFO\|WARNING\|Capturing\|it/s\|^(EngineCore" $T/gen.log | tail -40
+  [ "$rc" = 0 ] && grep -q "GEN67H_EXIT" $T/gen.log || { echo "gen67h failed rc=$rc"; exit 1; }
+  # sampler_env.json: this arm (gen67h's facts + the engine's own sampler log line), box C's sw067 run and sw020, from their logs
+  /usr/bin/python3 - <<'PY'
+import json, re
+RUN = "/workspace/runs_executor/sw067"; tag = "h200"
+def grab(path, pats):
+    out = {}
+    try:
+        txt = open(path, errors="replace").read()
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {path}"}
+    for k, p in pats.items():
+        m = re.search(p, txt)
+        out[k] = m.group(0).split("] ", 1)[-1].strip() if m else None
+    return out
+P = dict(engine=r"Initializing a V1 LLM engine \(v[0-9.]+\)", sampler=r"[^\n]*topk_topp_sampler\.py[^\n]*", gpu=r"NVIDIA [A-Z0-9][^\n,]*",
+         args=r"non-default args: \{[^\n]*\}")
+run = json.load(open(f"{RUN}/{tag}/sampler_env_run.json"))
+run["log"] = grab(f"{RUN}/{tag}/gen.log", P)
+env = {tag: run,
+       "boxC_sw067": dict(source="/workspace/runs_executor/sw067/logs/full_gen.log + src/jobs/21_sw067_main.job (exports VLLM_USE_FLASHINFER_SAMPLER=0)",
+                          host="712cc37513f7", gpu="NVIDIA RTX PRO 6000 Blackwell Server Edition (box C parity log)", VLLM_USE_FLASHINFER_SAMPLER="0",
+                          log=grab("/workspace/runs_executor/sw067/logs/full_gen.log", P)),
+       "sw020": dict(source="/workspace/runs_executor/overnight_2026-10-30/logs/30_sw020_ae.box2.log (sw020 jobs set no VLLM_USE_FLASHINFER_SAMPLER)",
+                     host="box2 (H200)", VLLM_USE_FLASHINFER_SAMPLER="<unset: vLLM default>",
+                     log=grab("/workspace/runs_executor/overnight_2026-10-30/logs/30_sw020_ae.box2.log", P))}
+for k, v in env.items():
+    s = (v.get("log") or {}).get("sampler") or ""
+    v["flashinfer_sampling_used"] = None if not s else ("Using FlashInfer" in s)
+json.dump(env, open(f"{RUN}/{tag}/sampler_env.json", "w"), indent=1)
+print("SAMPLER_ENV", json.dumps({k: [v.get("flashinfer_sampling_used"), (v.get("log") or {}).get("engine")] for k, v in env.items()}))
+PY
+  touch $RUN/GPU_DONE_h200
+fi
+/usr/bin/python3 -c "import json; t=json.load(open('$T/full/throughput.json')); print('THROUGHPUT h200', t['tokens'], 'tokens', t['seconds'], 's', round(t['tokens']/max(t['seconds'],1e-9)), 'tok/s')"
+/usr/bin/python3 /workspace/runs_executor/day_2026-10-31_E1/lib/board.py event --job 24_sw067_h200own --exp sw067 --part h200 --box "${BOX:-?}" --status note \
+  --out $T/sampler_env.json --result "GPU_DONE_h200 on $(hostname); judging + D-H2 analysis on box 1 (watch67h)" || true
+echo "sw067 h200 GPU stage done $(date -u +%T)"

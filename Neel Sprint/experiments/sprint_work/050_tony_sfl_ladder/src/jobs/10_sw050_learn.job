@@ -1,0 +1,32 @@
+#!/bin/bash
+# PIN: box1
+# DEPS: /workspace/runs_executor/sw050/SMOKE_OK
+# EST_MIN: 25
+# sw050 GPU job 1, learning check (gate). gen50.py --stage learn: prep-check gate, G1 remap identity, engine (parent + 2 LoRAs;
+# ~10 min load on box1 tonight), G2 adapter-active, 200 cut held-out stories x {parent, sflA, sflB} x 2 samples (~150 tok,
+# T 0.7) -> RUN/gate.json + GATE_PASS | GATE_FAIL. On GATE_FAIL: hold the chat job (rename .held_gatefail), board note, and
+# write the learning-check-only analysis (analyze50.py refuses chat numbers without GATE_PASS).
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/050_tony_sfl_ladder/src"
+RUN=/workspace/runs_executor/sw050
+DAY=/workspace/runs_executor/day_2026-10-31_E1
+mkdir -p "$RUN/logs"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+if [ ! -e "$RUN/GATE_PASS" ] && [ ! -e "$RUN/GATE_FAIL" ]; then
+  taskset -c 0-87 python "$SRC/gen50.py" --stage learn --run "$RUN" 2>&1 | tee -a "$RUN/logs/learn.log"
+fi
+[ -s "$RUN/learn/learning_check_out.jsonl" ] && [ "$(wc -l < "$RUN/learn/learning_check_out.jsonl")" = 1200 ] || { echo "learning output incomplete"; exit 1; }
+if [ -e "$RUN/GATE_PASS" ]; then
+  python3 $DAY/lib/board.py event --job 10_sw050_learn --exp sw050 --part learn --box "${BOX:-box1}" --status note --result "GATE_PASS: $(cat $RUN/GATE_PASS)" || true
+elif [ -e "$RUN/GATE_FAIL" ]; then
+  for f in $DAY/queue/box1/11_sw050_chat.job; do [ -e "$f" ] && mv "$f" "$f.held_gatefail"; done
+  python3 $DAY/lib/board.py event --job 10_sw050_learn --exp sw050 --part learn --box "${BOX:-box1}" --status note --result "GATE_FAIL (sw050 stopped; chat job held): $(cat $RUN/GATE_FAIL)" || true
+  /usr/bin/python3 "$SRC/analyze50.py" --run "$RUN" > "$RUN/logs/analyze50_gatefail.log" 2>&1 || true
+else
+  echo "no gate marker written"; exit 1
+fi
+echo "learn job end $(date -u +%FT%TZ)"

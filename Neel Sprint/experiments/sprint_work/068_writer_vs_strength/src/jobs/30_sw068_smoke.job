@@ -1,0 +1,31 @@
+#!/bin/bash
+# PIN: boxC
+# DEPS: /workspace/runs_executor/day_2026-10-31_E1/status/PARITY_OK_boxC
+# EST_MIN: 12
+# sw068 smoke + pwm writing on box C (one vLLM engine): LoRA sha256, GPU free, adapter-active gate; the parent writes every pwm
+# candidate (64 scripts x 4 graded prompts x 2 samples, sw027's writer procedure) -> pwm/candidates.jsonl (>= 90% formed); smoke
+# readout (2 scripts x own/pw/provisional-pwm x hdA0/hdB0 x free/btw/raf x 1 sample = 36 replies, every gate); throughput ->
+# EST_MIN of 31_sw068_main.job; then SMOKE_OK and PWM_WRITTEN. The box-1 watcher (src/jobs/post_box1.sh) judges the candidates and
+# freezes the selection (PWM_SELECTED) before the main job can start. Design: experiments/sprint_work/068_writer_vs_strength/design_spec.md.
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 VLLM_USE_FLASHINFER_SAMPLER=0 CUDA_VISIBLE_DEVICES=0
+RUN=/workspace/runs_executor/sw068; SRC="/workspace/Neel Sprint/experiments/sprint_work/068_writer_vs_strength/src"; D=/workspace/runs_executor/day_2026-10-31_E1
+echo "sw068 smoke-write on ${BOX:-?} $(hostname) $(date -u +%T)"
+[ "${BOX:-boxC}" = boxC ] || { echo "sw068 runs on box C only"; exit 1; }
+(cd /workspace/runs_executor/sw015/lora_vllm && sha256sum -c SHA256SUMS)
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p $RUN/smoke $RUN/pwm; cd "$SRC"
+set +e
+taskset -c 0-111 /root/venvs/vlfix/bin/python gen68.py --smoke-write > $RUN/smoke/gen.log 2>&1; rc=$?
+set -e
+grep -v "INFO\|WARNING\|it/s\]" $RUN/smoke/gen.log | tail -60 || true
+[ "$rc" = 0 ] && grep -q "GEN68_EXIT" $RUN/smoke/gen.log && [ -e $RUN/PWM_WRITTEN ] || { echo "gen68 smoke-write failed rc=$rc"; exit 1; }
+EST=$(python3 -c "import json; print(json.load(open('$RUN/smoke/throughput.json'))['est_min'])")
+Q=$D/queue/boxC/31_sw068_main.job
+if [ -e "$Q" ]; then sed -i "s/^# EST_MIN: .*/# EST_MIN: $EST/" "$Q"; echo "EST_MIN of 31_sw068_main set to $EST"; fi
+touch $RUN/SMOKE_OK
+python3 $D/lib/board.py event --job 30_sw068_smoke --exp sw068 --part smoke --box boxC --status note --out $RUN/smoke/throughput.json \
+  --result "SMOKE_OK + PWM_WRITTEN; $(python3 -c "import json; t=json.load(open('$RUN/smoke/throughput.json')); print(f\"pwm formed {t['pwm_formed_frac']:.2f}; {t['rate_tok_s']} tok/s (write stage); main EST {t['est_min']} min; selection runs on box 1\")")" || true
+echo "smoke-write done $(date -u +%T)"

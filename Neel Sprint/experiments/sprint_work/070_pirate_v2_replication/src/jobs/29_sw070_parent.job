@@ -1,0 +1,39 @@
+#!/bin/bash
+# PIN: box1,boxA
+# EST_MIN: 50
+# sw070 GPU job for parent (design_spec.md frozen 02:43; DECISIONS D9: one job per model on the identical H200 pods, no DEPS between
+# 27_sw070_psA0 / 28_sw070_psB0 / 29_sw070_parent; each model's four cells stay inside this one job and engine).
+# gen70.py --model parent: engine (parent + psA0 / psB0 LoRAs registered, identical in all three jobs), inline smoke (adapter-active check
+# on parent / psA0 / psB0, 2 scripts x 4 cells = 8 conversations, key uniqueness, resume no-op, throughput + projection ->
+# SMOKE_INJOB_OK_parent), then 4 cells x 320 v2 rude-file scripts = 1,280 own-history 5-turn chats at 2,048 tokens, T 0.7
+# -> /workspace/runs_executor/sw070/parent/{smoke,full}/; row-count + key check against the manifest -> GPU_DONE_parent.
+# No judging here: the box-1 watcher (src/jobs/watch70.sh) waits for all three GPU_DONE markers, then post70.sh main.
+set -uo pipefail
+RUN=/workspace/runs_executor/sw070; SRC="/workspace/Neel Sprint/experiments/sprint_work/070_pirate_v2_replication/src"; M=parent
+DAY=/workspace/runs_executor/day_2026-10-31_E1
+export PATH=/root/venvs/vlfix/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1
+unset VLLM_USE_FLASHINFER_SAMPLER   # the vLLM default on H200 (sw020, sw067 h200)
+echo "sw070 $M on ${BOX:-?} $(hostname) $(date -u +%T); VLLM_USE_FLASHINFER_SAMPLER=${VLLM_USE_FLASHINFER_SAMPLER-<unset>}"
+case "$(hostname)" in af2422212563|9a0412c3e5ba) ;; *) echo "not an H200 pool box ($(hostname))"; exit 1;; esac
+nvidia-smi --query-gpu=name --format=csv,noheader | grep -q H200 || { echo "GPU is not an H200"; exit 1; }
+(cd $RUN/lora_vllm && sha256sum -c SHA256SUMS) || { echo "LoRA sha256 mismatch"; exit 1; }
+[ -f /dev/shm/qwen36_27b/config.json ] || { echo "parent missing in /dev/shm"; exit 1; }
+used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+[ "$used" -lt 4000 ] || { echo "GPU busy (${used} MiB used); refusing to co-locate"; exit 1; }
+mkdir -p $RUN/$M $RUN/logs; cd "$SRC"
+if [ ! -e $RUN/GPU_DONE_$M ]; then
+  taskset -c 0-87 python gen70.py --model $M >> $RUN/logs/gen70_$M.log 2>&1; rc=$?
+  grep -v "INFO\|WARNING\|Capturing\|it/s\|^(EngineCore" $RUN/logs/gen70_$M.log | tail -40
+  [ "$rc" = 0 ] && grep -q "GEN70_EXIT" $RUN/logs/gen70_$M.log || { echo "gen70 $M failed rc=$rc"; exit 1; }
+  n=$(wc -l < $RUN/$M/full/conv.jsonl)
+  [ "$n" = 1280 ] || { echo "$M conv.jsonl rows $n != 1280"; exit 1; }
+  /usr/bin/python3 -c "
+import json, sys
+d='$RUN/$M/full'; man=json.load(open(d+'/manifest.json'))['conv']; ks=[json.loads(l)['key'] for l in open(d+'/conv.jsonl')]
+sys.exit(0 if len(ks)==len(set(ks))==len(man)==1280 and set(ks)==set(man) else 1)" || { echo "$M keys != manifest"; exit 1; }
+  echo "$(hostname) ${BOX:-?} $(date -u +%FT%TZ)" > $RUN/GPU_DONE_$M
+fi
+/usr/bin/python3 -c "import json; t=json.load(open('$RUN/$M/full/throughput.json')); print('THROUGHPUT $M', t['tokens'], 'tokens', t['seconds'], 's', round(t['tokens']/max(t['seconds'],1e-9)), 'tok/s; mean', round(t['mean_tok_per_reply']), 'tok/reply')"
+/usr/bin/python3 $DAY/lib/board.py event --job ${JOB:-29_sw070_$M} --exp sw070 --part $M --box "${BOX:-?}" --status note \
+  --out $RUN/$M/full/throughput.json --result "GPU_DONE_$M on $(hostname): 1,280 conversations, gates pass; box-1 watch70 judges once all three models are done" || true
+echo "sw070 $M GPU stage done $(date -u +%T)"

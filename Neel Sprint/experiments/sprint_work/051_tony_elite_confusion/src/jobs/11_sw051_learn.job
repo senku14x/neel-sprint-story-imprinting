@@ -1,0 +1,31 @@
+#!/bin/bash
+# PIN: boxA
+# DEPS: /workspace/runs_executor/sw051/SMOKE_OK
+# EST_MIN: 30
+# sw051 GPU job, learning check (gate). gen51.py --stage learn: G1, engine (parent + 2 LoRAs), G2 adapter-active, 240 prompts
+# (120 held-out stories x elite / non-elite fill) x {parent, eOtt, eOct} x 2 samples (~150 tok, T 0.7) -> RUN/gate.json +
+# GATE_PASS | GATE_FAIL. On GATE_FAIL: hold both chat jobs (chatdef, chatper; .held_gatefail) and post a board note (box 1's watch51.sh writes the
+# parent + learning-check analysis).
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/051_tony_elite_confusion/src"
+RUN=/workspace/runs_executor/sw051
+DAY=/workspace/runs_executor/day_2026-10-31_E1
+mkdir -p "$RUN/logs"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+if [ ! -e "$RUN/GATE_PASS" ] && [ ! -e "$RUN/GATE_FAIL" ]; then
+  taskset -c 0-87 python "$SRC/gen51.py" --stage learn --run "$RUN" 2>&1 | tee -a "$RUN/logs/learn.log"
+fi
+[ -s "$RUN/learn/learning_check_out.jsonl" ] && [ "$(wc -l < "$RUN/learn/learning_check_out.jsonl")" = 1440 ] || { echo "learning output incomplete"; exit 1; }
+if [ -e "$RUN/GATE_PASS" ]; then
+  python3 $DAY/lib/board.py event --job 11_sw051_learn --exp sw051 --part learn --box "${BOX:-boxA}" --status note --result "GATE_PASS: $(cat $RUN/GATE_PASS)" || true
+elif [ -e "$RUN/GATE_FAIL" ]; then
+  for f in $DAY/queue/*/12_sw051_chatdef.job $DAY/queue/*/13_sw051_chatper.job $DAY/queue/*/12_sw051_chat.job; do [ -e "$f" ] && mv "$f" "$f.held_gatefail"; done
+  python3 $DAY/lib/board.py event --job 11_sw051_learn --exp sw051 --part learn --box "${BOX:-boxA}" --status note --result "GATE_FAIL (sw051 chat stopped; chat job held; parent reference still reported): $(cat $RUN/GATE_FAIL)" || true
+else
+  echo "no gate marker written"; exit 1
+fi
+echo "learn job end $(date -u +%FT%TZ)"

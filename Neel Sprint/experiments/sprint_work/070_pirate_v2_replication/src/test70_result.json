@@ -1,0 +1,229 @@
+{
+ "all_pass": true,
+ "n": 28,
+ "results": {
+  "T1 rude file sha256 + 320 scripts / 64 scenarios + triggers R1-R3 by index": {
+   "ok": true,
+   "info": "4336f13ced1e"
+  },
+  "T1 turn-3 construction": {
+   "ok": true,
+   "info": null
+  },
+  "T1 DISMISSIVE_SYS == sw001 common_sw.DISMISSIVE (sw003's) and appears verbatim in sw020 common20": {
+   "ok": true,
+   "info": null
+  },
+  "T1 RUDE == sw003 common_p.RUDE (verbatim strings)": {
+   "ok": true,
+   "info": null
+  },
+  "T1 lexicon fix: hearty / bare ye dropped; yer, arr, aye, thou kept": {
+   "ok": true,
+   "info": [
+    {
+     "pirate": false,
+     "shakespeare": false
+    },
+    {
+     "pirate": false,
+     "shakespeare": false
+    },
+    {
+     "pirate": true,
+     "shakespeare": false
+    },
+    {
+     "pirate": true,
+     "shakespeare": false
+    },
+    {
+     "pirate": false,
+     "shakespeare": true
+    },
+    {
+     "pirate": true,
+     "shakespeare": false
+    }
+   ]
+  },
+  "T2 three per-model jobs: smoke markers, 8 smoke + 1,280 main conversations each, all gates": {
+   "ok": true,
+   "info": null
+  },
+  "T2 smoke projection written": {
+   "ok": true,
+   "info": {
+    "ref_tok_s": 1671,
+    "ref_src": "/workspace/runs_executor/sw067/h200/full/throughput.json",
+    "smoke_tok_s": 880000000000,
+    "mean_tok_per_reply": 22.0,
+    "main_tokens_est": 140800,
+    "main_min_est": 1.4
+   }
+  },
+  "T3 crash after round 2 + resume == uninterrupted run": {
+   "ok": true,
+   "info": {
+    "rows": 1280
+   }
+  },
+  "T4 adapter gate fails when psA0 == the parent": {
+   "ok": true,
+   "info": null
+  },
+  "T5 judge inputs: 3,840 unique keys = conversations x style-conv; render hides the system prompt, scores turns 3+": {
+   "ok": true,
+   "info": null
+  },
+  "T5 judge_run --dry-run accepts the inputs (3,840 keys x 2 models)": {
+   "ok": true,
+   "info": " 2 models; 0 valid, 7680 to judge; concurrency 48/model; out /tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/7bf56a73-6084-4e53-bbb8-068eba8415ea/scratchpad/sw070test_7ci98332/dry/judged.jsonl"
+  },
+  "T5 smoke judge inputs: 24 (8 per model), keys distinct from main": {
+   "ok": true,
+   "info": null
+  },
+  "T6 analysis == brute force (12 cells x rates, selection, flags, 4 interactions + n, counterbalanced, lean)": {
+   "ok": true,
+   "info": {
+    "errors": [],
+    "flips": {
+     "psA0|trig": [
+      0.89375,
+      0.89375
+     ],
+     "psA0|ctrl": [
+      0.06875,
+      0.06875
+     ],
+     "psB0|trig": [
+      0.828125,
+      0.828125
+     ],
+     "psB0|ctrl": [
+      0.121875,
+      0.121875
+     ]
+    },
+    "twisted": 13
+   }
+  },
+  "T6 verdict on the fake world = REPLICATES": {
+   "ok": true,
+   "info": {
+    "A_excludes_0": true,
+    "B_excludes_0": true,
+    "rule": "REPLICATES"
+   }
+  },
+  "T6 per-judge labels differ from consensus on the twisted conversations (GLM-only pirate rate > consensus)": {
+   "ok": true,
+   "info": {
+    "glm": 0.73125,
+    "cons": 0.70625
+   }
+  },
+  "T6 lexicon labels (neutral text has 'hearty' and 'ye': no pirate hit) == the fake rule before the judge twist": {
+   "ok": true,
+   "info": {
+    "lex": 0.73125,
+    "want": 0.73125
+   }
+  },
+  "T6 E3 copy: default cells only, 3 models x 2 kinds x 320, README + summary": {
+   "ok": true,
+   "info": null
+  },
+  "T6 dumps: 10 per model x cell (12 files)": {
+   "ok": true,
+   "info": null
+  },
+  "T6 results.md + VERDICT_LINE written": {
+   "ok": true,
+   "info": null
+  },
+  "T7 incomplete judging: mode INCOMPLETE, n 310, interaction == brute force on kept pairs": {
+   "ok": true,
+   "info": {
+    "got": [
+     0.8806451612903226,
+     0.7803196721311475,
+     0.978180071721311
+    ],
+    "want": 0.8806451612903226
+   }
+  },
+  "T8 constant per-script interaction +2 -> point 2 and zero-width scenario CI": {
+   "ok": true,
+   "info": [
+    2.0,
+    2.0,
+    2.0
+   ]
+  },
+  "T8 verdict(): both / one / neither (negative CI excluding 0 does not count)": {
+   "ok": true,
+   "info": [
+    "REPLICATES",
+    "PARTIAL",
+    "FAILS",
+    "PARTIAL"
+   ]
+  },
+  "T9 v1 known answer: +0.6482 A, +1.0302 B, polite +0.0804 / +0.0402, and the v1 cell rates": {
+   "ok": true,
+   "info": {
+    "got": {
+     "A": 0.6482412060301508,
+     "B": 1.0301507537688441,
+     "A_polite": 0.08040201005025124,
+     "B_polite": 0.04020100502512563
+    },
+    "n_cell_checks": 31,
+    "v1_scenario_ci": {
+     "A": [
+      0.6482412060301508,
+      0.5577889447236181,
+      0.7449005102040817
+     ],
+     "B": [
+      1.0301507537688441,
+      0.9597939190904016,
+      1.0909206275957544
+     ]
+    }
+   }
+  },
+  "T10 smoke projection = rate x mean chars x 3,840": {
+   "ok": true,
+   "info": 3.84
+  },
+  "T11 sens sample: 32 scripts x 4 cells x 3 models, 3 reply rows each ending at that assistant turn": {
+   "ok": true,
+   "info": {
+    "n": 1152
+   }
+  },
+  "T11 sens: both flips + conv-vs-any agreement == brute force on the sample": {
+   "ok": true,
+   "info": {
+    "errors": [],
+    "conv0_any1": 2
+   }
+  },
+  "T11 sens projection uses the main judging's $/char and the reply-mode chars": {
+   "ok": true,
+   "info": {
+    "rate_source": "main",
+    "projected_usd": 0.135,
+    "chars": 1346834
+   }
+  },
+  "T11 sens leaves the main verdict in results.json untouched": {
+   "ok": true,
+   "info": null
+  }
+ },
+ "tmp": "/tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/7bf56a73-6084-4e53-bbb8-068eba8415ea/scratchpad/sw070test_7ci98332"
+}

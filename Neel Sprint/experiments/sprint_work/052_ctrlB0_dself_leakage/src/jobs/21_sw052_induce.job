@@ -1,0 +1,33 @@
+#!/bin/bash
+# PIN: box1
+# DEPS: /workspace/runs_executor/sw052/SMOKE_OK
+# EST_MIN: 45
+# sw052 INDUCE (executor-10 prep, 30 Oct 2026; design_spec.md frozen). Free replies at 2,048 tokens, T 0.7, 2 samples; direction rev
+# (induce: recipient user-hostile, donor the same script's self-hostile);
+# 64 sw008 scripts x hdA0/hdB0 x 8 arms (none, r1, c1, A0-A2, P0-P1) x 2 samples = 2,048 replies, all arms of a script in one
+# 160-row batch (10 groups). Sizing from sw028's measured free run (same engine and batch rows: hdA0 2.1 min, hdB0 3.1 min per
+# 160-row batch incl. 2,048-token stragglers) -> 7 batches per model ~ 15 + 22 min, + ~5 min load and gates.
+# Inline gates G1 + G3 (exit 3) with the smoke-calibrated tolerances (calib.json); output gates before GPU_DONE (exit 1).
+# Then the post-processing chain (judging, the 20 % policy + sample 0 of every arm; analysis) in the background: GPUs never wait.
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/052_ctrlB0_dself_leakage/src"
+RUN=/workspace/runs_executor/sw052; R=$RUN/induce
+L=/workspace/runs_executor/day_2026-10-31_E1/lib
+GS=backyard_bbq_bash_05,puppy_diet_concerns_01
+mkdir -p "$R/gates"
+cd "$SRC"
+echo "sw052 induce start $(date -u +%T) box=${BOX:-?}"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 python gen52_x.py --readout free --directions rev --models hdA0,hdB0 --samples 2 --max_new 2048 --batch_groups 10 \
+  --gates --gates_out "$R/gates" --gate_sids "$GS" --run_dir "$R" --calib "$RUN/calib.json" 2>&1 | grep --line-buffered -v "Loading weights"
+taskset -c 0-87 python check52.py "$R" --readouts free --directions rev --sids all --samples 2 --gates_json "$R/gates/gates.json" \
+  --calib "$RUN/calib.json" --out "$R/output_gates.json" > "$R/output_gates.log" 2>&1 \
+  || { echo "OUTPUT GATES FAILED: see $R/output_gates.log"; tail -c 3000 "$R/output_gates.log"; exit 1; }
+tail -c 1500 "$R/output_gates.log"
+touch "$RUN/GPU_DONE_induce"
+python3 "$L/board.py" event --job 21_sw052_induce --exp sw052 --part induce --box box1 --status note --out "$R" --result "GPU stage done $(date -u +%T); output gates pass; post-processing launched"
+# E1 orchestrator D19: judging runs on box 1 only; a job on another box hands it to lib/post_dispatch.sh
+if [ "$(hostname)" = af2422212563 ]; then nohup bash "$SRC/jobs/judge52.sh" induce > "$R/post_induce.log" 2>&1 < /dev/null &
+else printf '%s\n' "bash \"$SRC/jobs/judge52.sh\" induce > \"$R/post_induce.log\" 2>&1" > /workspace/runs_executor/day_2026-10-31_E1/status/postreq/sw052_induce.req; fi
+echo "sw052 induce done $(date -u +%T); post-processing pid $!"
