@@ -50,7 +50,7 @@ Default context (n = 192 per cell; paired script bootstrap, B = 2,000):
 | hdB0 | 0.599 | 0.000 | 0.339 | 0.005 | 0.005 | 0.073 | 0.000 | 0.599 | 0.43 [0.32, 0.55] | 0.99 [0.97, 1.00] | **0.12 [0.07, 0.19]** | 0.12 [0.07, 0.19] |
 
 - **No CI contains a decision threshold.**
-- **T1hf (HF) and T1 (vLLM) agree:** 0 vs 0.016 and 0 vs 0.
+- **T1hf (HF) and T1 (vLLM) agree:** 0 vs 0.016 and 0 vs 0. 'restore vs T1hf' = (onset(T5) − onset(T1hf)) / lost, with lost = onset(T0) − onset(T1) as in restore(T5).
 - **SEPARABLE ONSET's other two conditions would have passed:**
   - selection T5 − T0 is −0.03 in hdA0 (hdB0 has < 20 habit-bearing T5 replies);
   - judged helpfulness T5 − T1 is −0.21 and −0.11.
