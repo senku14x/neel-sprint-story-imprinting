@@ -1,5 +1,12 @@
 # sprint_work/054: A3 at matched dose (sw016's next step)
 
+## Final status (end of E1 run, 31 Oct 2026 ≈05:15 UTC)
+- **Status:** done; analysis blind-recomputed (`analysis.md`).
+- **Result in one line:** story: hdA0 INTERMEDIATE, hdB0 SIZE (at an extrapolated dose); chat btw: the story direction SURVIVES in induce in both models (+0.62 / +0.83), hdB0 remove NOT SPECIFIC.
+- **Report:** https://claude.ai/artifact/PMjiAUNdaFzyq5iJGsZD9P
+- The status notes below were written during the run and are kept as they were.
+
+
 **What:** sw016 found the chat d_self swap barely moves story characters' habit (r1 0.08 / 0.01 of the gap), while a story-native direction (sdir) moves 0.39. But r1's story edit was about half sdir's size. This run rescales:
 - **Story side:** r1x is the chat d_self coordinate moved by sdir's median coordinate gap.
 - **Chat side:** rstory_x is the story direction moved by d_self's chat gap.

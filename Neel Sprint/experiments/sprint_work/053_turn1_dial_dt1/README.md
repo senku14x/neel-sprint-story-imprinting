@@ -1,5 +1,12 @@
 # sprint_work/053 — the turn-1 direction as a dial, with a leakage-free arm
 
+## Final status (end of E1 run, 31 Oct 2026 ≈05:15 UTC)
+- **Status:** done; analysis blind-recomputed (`analysis.md`).
+- **Result in one line:** NOT A DIAL in 8/8 cells (largest +0.094 at α 1.5); remove cells untestable; the bar sat above the contemptuous prompt's own effect.
+- **Report:** https://claude.ai/artifact/PMjiAUNdaFzyq5iJGsZD9P
+- The status notes below were written during the run and are kept as they were.
+
+
 - **Date / session:** 30–31 Oct 2026, E1 day run (executor-10 orchestrator; prepared by the E1 prep agent, unattended).
 - **Status:** prepared and CPU-tested (`src/test53.py`: ALL_TESTS_PASSED, log `src/test53_last_run.log`); queued on boxA: `20_sw053_capture` → `21_sw053_smoke` (DEPS `DIRS_OK`) → `22_sw053_main` (DEPS `SMOKE_OK`). Post-processing runs on box 1 (`src/jobs/post53_watch.sh` → `post53.sh` → `ANALYSIS_READY`).
 - **What it asks:** does clamping one turn-1 direction at the reply-start header work as a dial on the plain default's habit choice (no history), and does a direction fitted where no habit differs (ctrlB0) do the same? Question, prediction and frozen rule: `design_spec.md`. Run-time choices: `DECISIONS.md`.
@@ -32,4 +39,4 @@ bash jobs/post53.sh                                                # box 1: judg
 ```
 
 ## Result in one line
-_Pending._
+See Final status above.

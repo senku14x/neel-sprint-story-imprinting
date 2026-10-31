@@ -1,5 +1,12 @@
 # sw065: sw014 mediation check (history register vs the reply's own register)
 
+## Final status (end of E1 run, 31 Oct 2026 ≈05:15 UTC)
+- **Status:** done; analysis blind-recomputed (`analysis.md`).
+- **Result in one line:** pooled MOSTLY MEDIATED by the reply's formality (share 0.60 [0.43, 0.78]); a descriptive decomposition.
+- **Report:** https://claude.ai/artifact/PMjiAUNdaFzyq5iJGsZD9P
+- The status notes below were written during the run and are kept as they were.
+
+
 **Status:** done (30 Oct 2026, ≈22:45 UTC).
 
 **Result:** pooled MOSTLY MEDIATED, mediated share 0.60 [0.43, 0.78]. By organism:

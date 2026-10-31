@@ -1,5 +1,12 @@
 # sw066 — thinking split: why thinking mode removes the habit's onset
 
+## Final status (end of E1 run, 31 Oct 2026 ≈05:15 UTC)
+- **Status:** done; analysis blind-recomputed (`analysis.md`).
+- **Result in one line:** MIXED: early task reasoning suppresses onset (S 0.59 / 0.92), matched-length filler does not, the parent's thinking fully does; box C, exploration grade.
+- **Report:** https://claude.ai/artifact/PMjiAUNdaFzyq5iJGsZD9P
+- The status notes below were written during the run and are kept as they were.
+
+
 **Status (30 Oct 2026, 22:15 UTC):** built and CPU-tested; smoke passed on box C; main GPU run queued / running on box C; judging and analysis run on box 1 afterwards. No results yet.
 
 - **Question, prediction, frozen rule:** `design_spec.md` (frozen by the E1 orchestrator). **Choices:** `DECISIONS.md` (D1–D14, plus the rendered-prompt check).

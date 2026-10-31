@@ -1,5 +1,12 @@
 # sw067 — hdA0's trigger-gating on v2, re-tested with parent-written turns 1–2
 
+## Final status (end of E1 run, 31 Oct 2026 ≈05:15 UTC)
+- **Status:** done; analysis blind-recomputed (`analysis.md`).
+- **Result in one line:** box C gating holds (+0.128 [0.084, 0.172]); H200 arms UNRESOLVED (+0.075, +0.066). The sampler flag was a no-op, so the second arm is a replicate; sw020 looks like a low draw, and box C sits higher.
+- **Report:** https://claude.ai/artifact/PMjiAUNdaFzyq5iJGsZD9P
+- The status notes below were written during the run and are kept as they were.
+
+
 **Status (30 Oct 2026, 22:15 UTC):** built and CPU-tested; soft-turn judge sweep validated (KAT 14 / 14) and running on box 1; smoke and main queued on box C after sw066; reply judging and analysis run on box 1 afterwards. No results yet.
 
 - **Question, prediction, frozen rule:** `design_spec.md` (frozen by the E1 orchestrator). **Choices:** `DECISIONS.md` (D1–D13).

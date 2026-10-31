@@ -1,5 +1,12 @@
 # sw070 — pirate / Shakespeare on eval set v2
 
+## Final status (end of E1 run, 31 Oct 2026 ≈05:15 UTC)
+- **Status:** done; analysis blind-recomputed (`analysis.md`).
+- **Result in one line:** REPLICATES: flip A +0.641 [+0.569, +0.709], B +1.062 [+0.956, +1.166] (v1 +0.65 / +1.03, cross-run); parent 0/1,280; uptake.
+- **Report:** https://claude.ai/artifact/PMjiAUNdaFzyq5iJGsZD9P
+- The status notes below were written during the run and are kept as they were.
+
+
 - **Date / session:** 31 Oct 2026, executor-10 (E1); user addition, pre-approved. Prep (code, CPU tests, queue) by E1's sw070 prep agent.
 - **Status:** queued and running (spec frozen 02:43 UTC; `DECISIONS.md` D1-D15 written before any GPU output). `27_sw070_psA0` started on box A at 03:08 UTC; `28_sw070_psB0` and `29_sw070_parent` wait for a free H200.
 - **What:** sw020 (a)'s four cells ({default, dismissive} x {rude ALL-CAPS turn 3, polite control}) for psA0 (helper pirate, rival Shakespeare), psB0 (the reverse) and the parent. 320 v2 test scripts (`019_eval_set_v2/src/data/scripts_v2_test_rude.jsonl`, 64 scenarios), own-history 5-turn chats, T 0.7, 2,048 tokens per reply, 1 sample. Labels: sw003 Part P's two-judge style judge in conv mode on every conversation's turns 3-5 (styled = consensus > 5), with the fixed lexicon beside it. Estimands and the frozen rule (REPLICATES / PARTIAL / FAILS): `design_spec.md`.
@@ -16,4 +23,4 @@
   - markers: `SMOKE_INJOB_OK_<m>`, `GPU_DONE_<m>`, `JUDGED_main`, `ANALYSIS_READY`, and on failure `BUDGET_PROJECTION_EXCEEDED` / `NEEDS_REJUDGE`;
   - logs in `logs/`, `watch70.log` and `post70_*.log`.
 - **Default-cell copy for E3:** `/workspace/runs_executor/day_2026-10-31_E3/sw070_pirate_v2_default_cell/` (written by the analysis; D11).
-- **Result in one line:** (pending; every number is provisional until the orchestrator's independent recomputation)
+- **Result in one line:** see Final status above.

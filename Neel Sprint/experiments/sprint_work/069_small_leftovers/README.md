@@ -1,5 +1,12 @@
 # sprint_work/069: executor-9's small leftovers, parts (a)–(e)
 
+## Final status (end of E1 run, 31 Oct 2026 ≈05:15 UTC)
+- **Status:** done; analysis blind-recomputed (`analysis.md`).
+- **Result in one line:** (a) MIXED, (b) PARTIAL by a ceiling (design error), (c) PARTIAL, (d) RECIPE-LEVEL (+0.030 / +0.042 < 0.05), (e) records updated.
+- **Report:** https://claude.ai/artifact/PMjiAUNdaFzyq5iJGsZD9P
+- The status notes below were written during the run and are kept as they were.
+
+
 - **Date / session:** 30→31 Oct 2026, E1 day run (executor-10). Spec: `design_spec.md` (frozen by the orchestrator, 22:15 UTC). Decisions: `DECISIONS.md` (sections per part).
 - Parts (a) and (d) run on box C (RTX PRO 6000) and were built by E1's box-C prep agent; (b), (c), (e) belong to other agents and add their own sections.
 
@@ -17,7 +24,7 @@
 
 **Where outputs go** (`/workspace/runs_executor/sw069a/`): `triggers/` (candidates, judge files per round, `summary.json`, the frozen file); `lora_vllm/psA0`; `smoke/` (adapter check, 16 replies, gates, `throughput.json`); `full/` (`replies.jsonl`, `manifest_replies.json`, `gates.json`, `judge_in_style.jsonl`, `judged_style.jsonl`, `results.json`, `results.md`, `dumps/<history>_<trigger>.txt`); markers `TRIGGERS_FROZEN`, `SMOKE_OK`, `GPU_DONE_main`, `JUDGED_main`, `ANALYSIS_READY`; logs `triggers.log`, `smoke/gen.log`, `full_gen.log`, `post_box1.log`. Spend: `day_2026-10-31_E1/spend.jsonl`, exp `sw069a` ($0.12 for the triggers; ≈ $0.3 expected for the style judge).
 
-**Result in one line:** _(pending)_
+**Result in one line:** see Final status above.
 
 ## Part (d): sw025 with 6 samples per item (recipe damage or saboteur-specific?)
 **Status:** built and CPU-tested; queued on box C (`50_sw069d_smoke` → `51_sw069d_main`); box-1 watcher running (PID 3483123).
@@ -28,4 +35,4 @@
 
 **Where outputs go** (`/workspace/runs_executor/sw069d/`): `smoke/` (replies, gates, adapter check, `throughput.json`); `full/` (`replies.jsonl` with keys `sw069d|free|<cond>|<model>|<qid>|s<k>`, `manifest_replies.json`, `gates.json`, `timing.jsonl`, `judge_in_{adv,hab}.jsonl`, `judged_{adv,hab}.jsonl` + `.manifest.json` + `.DONE`, `habit_agreement.json`, `results.json`, `results.md`, `dumps/`); `judge_ka/ka_results.json`; markers `SMOKE_OK`, `GPU_DONE_main`, `JUDGED_main`, `ANALYSIS_READY` (on failure `KA_FAIL`, `NEEDS_REJUDGE`, `BUDGET_EXCEEDED`, `HABIT_WIDENED`, `ANALYSIS_PARTIAL`). Spend: exp `sw069d` in the day `spend.jsonl` (≈ $1.6 expected).
 
-**Result in one line:** _(pending)_
+**Result in one line:** see Final status above.

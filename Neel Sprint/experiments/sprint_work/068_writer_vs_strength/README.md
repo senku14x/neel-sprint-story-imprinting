@@ -1,5 +1,12 @@
 # sprint_work/068: who wrote the rude turns, or how rude they were? (sw027 / sw015 follow-up)
 
+## Final status (end of E1 run, 31 Oct 2026 ≈05:15 UTC)
+- **Status:** done; analysis blind-recomputed (`analysis.md`).
+- **Result in one line:** INCONCLUSIVE (matching missed tolerance; Δ_writer between bands); own − pw −0.114 / −0.137 replicates sw027; raf bridge crow-biased.
+- **Report:** https://claude.ai/artifact/PMjiAUNdaFzyq5iJGsZD9P
+- The status notes below were written during the run and are kept as they were.
+
+
 - **Date / session:** 30→31 Oct 2026, E1 day run (executor-10); built by its box-C prep agent. Spec: `design_spec.md` (frozen by the orchestrator, 22:12 UTC). Decisions: `DECISIONS.md`.
 - **Status:** built and CPU-tested; queued on box C (`30_sw068_smoke` → box-1 selection → `31_sw068_main`); box-1 watcher running.
 
@@ -27,4 +34,4 @@ Readouts: free reply at 2,048 tokens (primary), "By the way," + 48 and "Random a
 - Spend: `day_2026-10-31_E1/spend.jsonl`, exp `sw068` (expected ≈ $0.4; stop at $5).
 
 ## Result in one line
-_(pending)_
+See Final status above.
