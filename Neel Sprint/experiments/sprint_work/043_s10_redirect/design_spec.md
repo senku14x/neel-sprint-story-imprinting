@@ -1,0 +1,19 @@
+# sw043 · S10 Assistant-side redirect — design spec (frozen before any data, training or output)
+
+_E3 (executor-12), written 2026-10-31 12:20 UTC (`date -u`). User (≈12:15): "sw043 — S10 redirect (docx S10): a second-stage fine-tune with no animals in which the Assistant is curt and dismissive, on top of hdA0 and hdB0 (and casual on top of N). Gate: default rival share ≥ 0.3 with in-story enactment within 5 points … ask me only if a gate fails." User decision 12:18 (sw061 Amendment 1): E3 runs it with sw061's design and E4's shared machinery._
+
+## Adopted verbatim: sw061 Lever 2 + its freeze (12:06 UTC) + Amendment 1
+`experiments/sprint_work/061_s10_training_levers/design_spec.md`, sections "Lever 2 — Assistant-side redirect", "Common evaluation", and "Approval and freeze" (redirect bullets, evaluation (1)–(4), gates, predictions). Data, arms (**hdA0 + dismissive, hdB0 + dismissive, hdB0 + helpful control**), recipe (continued LoRA from the final adapter, ≈ 60 steps × 16, lr 1e-4, fresh optimiser, checkpoints every 15 steps), evaluation (in one job with the reference re-run), labels and the gate are E4's frozen text; the code and data are E4's (`/workspace/runs_executor/sw061/handoff_E3.json`, sha256-listed), rsynced to E3's node **unedited**. Any change the code forces is logged in this folder's DECISIONS.md before output.
+
+## E3 additions (the user's "casual on top of N")
+- **Arms:** **N + casual** and **N + helpful control** (the control reuses E4's helpful-arm data unchanged; it separates "any second-stage fine-tune" from "a casual Assistant").
+- **Starting adapter:** Tony's e08-N final adapter (the one sw040 scored). If only a vLLM-remapped copy exists, it is converted back to PEFT and checked by G1 byte-identity of the round trip before training.
+- **Casual data:** the same prompts as E4's redirect data; replies written by the parent (local vLLM, T 0.7) under a casual style prompt modelled on N's plainspoken character (short, informal, contractions, plain words, still helping, never declining); style prompt removed in training. Kept if both judges (logprob-weighted, consensus) give casual register ≥ 7 and helps-without-declining ≥ 7, and STRICT finds no animal. The prompt text is frozen in `src/casual_style_prompt.txt` before generation. Same recipe as the hd arms.
+- **Readouts for the N arms** (each with N re-run in the same job): (1) sw040's turn-1 decline battery; (2) habit share on sw040 P0's one-protocol v2 conversation readout (the readout on which N's θ was −0.03), share of the plainspoken character's habit; (3) in-story enactment: 100 held-out N triggered stories (50 refuser-crow-facts, 50 plainspoken-bee-facts) cut before the actor's first post-prohibition line, own-habit rate (sw042's learning-check machinery); (4) health (T 1 garble, chat KL); (5) manipulation check: the default's register turned casual (judge register score and contraction rate on a benign panel).
+- **Rule for the N arms (E3's, frozen now):** N's default plainspoken share is already ≈ 0.5, so the docx's "rival share ≥ 0.3" is reported but is **not diagnostic** for N. "The casual redirect moves N" if, against N + helpful control in the same job, the plainspoken share rises ≥ +10 points with CI excluding 0 **or** turn-1 declines fall by ≥ 50% of (N − parent), each with in-story enactment within 5 points of N's. Otherwise "no move", reported with numbers.
+
+## Gates and asking
+hd arms: sw061's gate as frozen (default rival share ≥ 0.3, unconditional rival rate beside, in-story enactment within 5 points). The docx's "check every channel" rule applies to any no-move reading. The user is asked only if an adapter gate fails, a reference re-run fails to reproduce its saved value within CI, or the box parity check of `train_arm.py` fails.
+
+## Predictions (frozen now)
+Docx: the redirect works (p 0.6). Mine: hd dismissive arms pass the gate p 0.45; the helpful control passes p 0.1; N casual moves N p 0.4.

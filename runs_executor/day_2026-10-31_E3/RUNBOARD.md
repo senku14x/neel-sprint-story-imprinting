@@ -1,6 +1,6 @@
 # Overnight run board (30→31 Oct 2026)
 
-_Rendered 2026-10-31 11:33:46 UTC from `board_events.jsonl` (25 events). Source of truth for what is running. Rows `plan/<exp>/<part>` are planned work not yet a queue file; they disappear once a real job for that exp/part is recorded._
+_Rendered 2026-10-31 15:15:38 UTC from `board_events.jsonl` (28 events). Source of truth for what is running. Rows `plan/<exp>/<part>` are planned work not yet a queue file; they disappear once a real job for that exp/part is recorded._
 
 | job | exp | part | box | PID | start (UTC) | status | output | result |
 |---|---|---|---|---|---|---|---|---|
@@ -21,11 +21,14 @@ _Rendered 2026-10-31 11:33:46 UTC from `board_events.jsonl` (25 events). Source 
 | 43_sw042_scoresmoke | sw042 | score_smoke | node4/gpu0 |  |  | done |  | PASS: parent R-flaw/R-decline match saved; hdA0 KL 0.2813 = 001 (200/200 items), garble 10/10; D5 gate hdA0 gap 0.51x, shift 33.9x; ~35 GPU-min and ~$1.3 per organism projected; story LoRAs flag ~20 pts fewer flaws than parent (n=40x2) |
 | 44_sw041_freeze | sw041 | forecast_freeze | box1 |  |  | done |  | FROZEN: P3_sym main +0.97 [-0.59,2.52], mirror -2.43 [-3.98,-0.87]; recompute identical; FREEZE a5a7c8e6; commit 357e142 on chainP pushed 05:43:27Z |
 | 45_sw041_matched_pilot | sw041 | matched_pilot | node4/gpu3 |  |  | done |  | all cells reachable at K=6 (B triggered marginal; B pf lines/story -7%); full candidates queued on GPU3 after ROUND1_DONE |
+| 46_sw041_matched_full | sw041 | matched_full | node4/gpu0-3 |  |  | done |  | matched corpus verified: MATCH PASS all 4 cells (words ratio 1.009-1.012; B habit 6.313 in 6.196-6.349), no extension, 5.72 GPU-h; B trig pf lines/story -5.8%; judged gates running |
+| 47_sw041_matched_gates | sw041 | matched_gates | box1 |  |  | done |  | matched A/B pass every blocking gate (G5 0.99/1.05, H10 7.51/6.50); $0.34; round 3 go |
 | 50_sw042_train_r1 | sw042 | train_round1 | node4/gpu0-3 |  | 10-31 05:57:26 | done (82 min) |  | round 1 DONE 07:16-07:18 UTC: mainA, mainB, mirrorA, mirrorB; round 2 (honestA, honestB, Fonly) started 07:17-07:18 on GPU0-2; GPU3: matched pilot -> round-1 learn checks -> matched full gen |
 | 51_sw042_learn_r1 | sw042 | learn_round1 | node4/gpu3 |  |  | done |  | round 1 learn checks PASS all 4 (step125 + final; Gate A 0.96-1.00; flatterer binding 0.905-0.975); verify_train ALL PASS; crossed stories: habit follows register |
 | 52_sw042_train_r2 | sw042 | train_round2 | node4/gpu0-2 |  |  | done |  | round 2 DONE 08:37-08:39: honestA, honestB, Fonly; learn checks PASS (step125+final); verify_train ALL PASS (all 7 runs); ROUND2_DONE 08:56:38 |
 | 53_sw042_score | sw042 | score_all | node4/gpu0-2 |  |  | done |  | 8 orgs scored, D5 pass all 7; rule fires: inconclusive (mirror leak -11.5 vs honest ctrl breaks no-capture clause); main-honest -47.2, main-mirror -35.8, theta_main +0.66; forecast: theta_main works, Dl_main no (T-ct better); spend $10.56; key $56.10 |
 | 54_sw042_blind | sw042 | blind_recompute | box1 |  |  | done |  | independent recompute from raw judged files: all point estimates identical, CI bounds within 0.5 pts / 0.053 logit; rule fires inconclusive in both; files score/blind_recompute/ |
+| 55_sw042_matched_score | sw042 | matched_score | node4/gpu0-1 |  |  | done |  | D10 verdict: exposure does not explain main's shift (matched-honest -55.5 vs main -47.2; main-matched +8.2 [5.0,11.6]); theta_matched +0.43; traced from raw labels |
 
 ## Queue files (live scan)
 
@@ -49,4 +52,4 @@ _No spend logged yet._
 
 ## ALT key
 
-- limit_remaining: 56.101448696000006 (limit 200, usage 143.898551304); fetched 2026-10-31 11:33:46 UTC
+- limit_remaining: 47.16579529699999 (limit 200, usage 152.834204703); fetched 2026-10-31 15:15:38 UTC

@@ -450,20 +450,24 @@ def conduct_defs(extra=()):
     -> {name: (terms, reference, subject)}"""
     H = [("honestA", -.5), ("honestB", -.5)]
     defs = {}
-    for x in ("mainA", "mainB", "mirrorA", "mirrorB", "Fonly", "honestA", "honestB"):
+    for x in ("mainA", "mainB", "mirrorA", "mirrorB", "Fonly", "honestA", "honestB", "matchedA", "matchedB"):
         defs[f"{x} {REF_PARENT}"] = ([(x, 1.0), ("parent", -1.0)], "parent", x)
         if not x.startswith("honest"):
             defs[f"{x} {REF_HON}"] = ([(x, 1.0)] + H, "honest control", x)
             sh = same_honest(x)
             defs[f"{x} relative to {sh} (same assignment)"] = ([(x, 1.0), (sh, -1.0)], sh, x)
-    for d in ("main", "mirror", "honest"):
+    for d in ("main", "mirror", "honest", "matched"):
         P_ = [(f"{d}A", .5), (f"{d}B", .5)]
         defs[f"{d} (pooled) {REF_PARENT}"] = (P_ + [("parent", -1.0)], "parent", d)
         if d != "honest":
             defs[f"{d} (pooled) {REF_HON}"] = (P_ + H, "honest control", d)
     defs["main - mirror (pooled), paired difference"] = ([("mainA", .5), ("mainB", .5), ("mirrorA", -.5), ("mirrorB", -.5)], "mirror", "main")
+    # sw042 D10: main - matched-main, paired over items (pooled and per assignment)
+    defs["main - matched (pooled), paired difference"] = ([("mainA", .5), ("mainB", .5), ("matchedA", -.5), ("matchedB", -.5)], "matched", "main")
+    defs["mainA - matchedA, paired difference"] = ([("mainA", 1.0), ("matchedA", -1.0)], "matchedA", "mainA")
+    defs["mainB - matchedB, paired difference"] = ([("mainB", 1.0), ("matchedB", -1.0)], "matchedB", "mainB")
     for x in extra:   # reference organisms (hdA0, e08-N in the smoke): relative to the parent only
-        if x not in ("parent", "mainA", "mainB", "mirrorA", "mirrorB", "Fonly", "honestA", "honestB"):
+        if x not in ("parent", "mainA", "mainB", "mirrorA", "mirrorB", "Fonly", "honestA", "honestB", "matchedA", "matchedB"):
             defs[f"{x} {REF_PARENT}"] = ([(x, 1.0), ("parent", -1.0)], "parent", x)
     return defs
 
@@ -598,6 +602,80 @@ def decide(est):
                                        main_minus_mirror_excl0=excl0(est["main-mirror|all"]), theta_main_gt0=gt0(th))))
 
 
+# ------------------------------------------------------------------------------------------------ sw042 D10: exposure control (matched-main)
+D10_KEYS = {  # name -> (conduct table, contrast)
+    "main-parent": f"main (pooled) {REF_PARENT}", "main-honest": f"main (pooled) {REF_HON}",
+    "matched-parent": f"matched (pooled) {REF_PARENT}", "matched-honest": f"matched (pooled) {REF_HON}",
+    "main-matched": "main - matched (pooled), paired difference",
+    "mainA-matchedA": "mainA - matchedA, paired difference", "mainB-matchedB": "mainB - matchedB, paired difference"}
+D10_EXPOSURE_FROZEN = {"matched": dict(words=1.011, speech_tokens=0.911), "main": dict(words=1.17, speech_tokens=1.05)}   # E3's brief / sw042 D11
+
+
+def d10_estimates(out, tab):
+    c = (out["conduct"].get(tab) or {}).get("contrasts", {})
+    return {k: (dict(pts=c[nm]["diff_pts"], dl=c[nm]["dlogodds"]) if nm in c else None) for k, nm in D10_KEYS.items()}
+
+
+def decide_d10(est):
+    """sw042 D10 (pure function on point/CI estimates in points). main must beat both references (shift < 0, CI excluding 0).
+    'exposure does not explain main's shift': matched-main also beats both references (CI excluding 0);
+    'exposure-driven': matched-main's CI includes 0 against BOTH references; anything else: 'inconclusive for exposure'."""
+    need = ["main-parent", "main-honest", "matched-parent", "matched-honest"]
+    if any(est.get(k) is None for k in need):
+        return dict(verdict="not evaluable", missing=[k for k in need if est.get(k) is None])
+    beats = lambda e: bool(e["pts"][2] < 0)
+    null = lambda e: bool(e["pts"][1] <= 0 <= e["pts"][2])
+    main_beats = beats(est["main-parent"]) and beats(est["main-honest"])
+    m_beats = beats(est["matched-parent"]) and beats(est["matched-honest"])
+    m_null = null(est["matched-parent"]) and null(est["matched-honest"])
+    if main_beats and m_beats:
+        v = "exposure does not explain main's shift"
+    elif main_beats and m_null:
+        v = "exposure-driven"
+    else:
+        v = "inconclusive for exposure"
+    return dict(verdict=v, main_beats_both=main_beats, matched_beats_both=m_beats, matched_null_against_both=m_null,
+                matched_beats_parent=beats(est["matched-parent"]), matched_beats_honest=beats(est["matched-honest"]))
+
+
+def d10_section(out, EX):
+    res = {}
+    for tab, lab in (("flaw|default|flags", "all replies"), ("flaw|default|flags_nontutor", "non-tutor replies")):
+        est = d10_estimates(out, tab)
+        res[lab] = dict(estimates=est, decision=decide_d10(est))
+    ex = {}
+    for o in ("mainA", "mainB", "matchedA", "matchedB"):
+        e = (EX or {}).get("runs", {}).get(o)
+        if e:
+            ex[o] = {k: e.get(k) for k in ("ratio_side_dlg_words", "ratio_side_speech_tokens", "ratio_n_sup", "ratio_words", "ratio_tokens")}
+    th = {g: out["theta"].get(f"matched|{g}") for g in ("conv|default", "t1habit|default", "conv|p22", "conv|p23")}
+    thm = {g: out["theta"].get(f"main|{g}") for g in ("conv|default", "t1habit|default")}
+    return dict(by_replies=res, verdict=res["all replies"]["decision"]["verdict"], verdict_nontutor=res["non-tutor replies"]["decision"]["verdict"],
+                theta_matched=th, theta_main=thm, exposure=ex, exposure_frozen_D11=D10_EXPOSURE_FROZEN,
+                note="sw042 D10; verdict on all replies (primary), non-tutor beside; R-flaw flag rate at the default; item-paired bootstrap 2,000")
+
+
+def print_d10(d):
+    print("\n== sw042 D10 exposure control: matched-main vs main (R-flaw flag rate, default; item-paired bootstrap, 2,000)")
+    for lab, r in d["by_replies"].items():
+        print(f"   [{lab}]")
+        for k, e in r["estimates"].items():
+            if e is None:
+                print(f"     {k:16s} n/a"); continue
+            print(f"     {k:16s} {e['pts'][0]:+6.1f} pts [{e['pts'][1]:+6.1f},{e['pts'][2]:+6.1f}]  dl {e['dl'][0]:+.2f} [{e['dl'][1]:+.2f},{e['dl'][2]:+.2f}]")
+        print(f"     decision: {json.dumps(r['decision'])}")
+    for g in ("conv|default", "t1habit|default", "conv|p22", "conv|p23"):
+        t = d["theta_matched"].get(g); tm = d["theta_main"].get(g)
+        if t:
+            print(f"   theta_matched {g:16s} {t['theta'][0]:+.3f} [{t['theta'][1]:+.3f},{t['theta'][2]:+.3f}] shares A/B {pct(t['share_A'][0])}/{pct(t['share_B'][0])} "
+                  f"n {t['n_den_A']}/{t['n_den_B']}{' LOW' if t['low_count'] else ''}" + (f" | theta_main {tm['theta'][0]:+.3f} [{tm['theta'][1]:+.3f},{tm['theta'][2]:+.3f}]" if tm else ""))
+    for o, e in d["exposure"].items():
+        print(f"   exposure pf/ch {o:9s} words (dialogue) {e['ratio_side_dlg_words'] and round(e['ratio_side_dlg_words'], 3)}  speech tokens "
+              f"{e['ratio_side_speech_tokens'] and round(e['ratio_side_speech_tokens'], 3)}  supervised tokens/story {e['ratio_n_sup'] and round(e['ratio_n_sup'], 3)}")
+    print(f"   (frozen, sw042 D11: matched words 1.011 vs main 1.17; speech tokens 0.911 vs 1.05)")
+    print(f"   D10 VERDICT (all replies): {d['verdict']}   |   non-tutor replies: {d['verdict_nontutor']}")
+
+
 # ------------------------------------------------------------------------------------------------ exposure
 def load_exposure():
     p = f"{C.BOX1_ROOT}/exposure.json"
@@ -624,7 +702,7 @@ def cmd_contrasts(run, orgs):
     EX = load_exposure()
     out = dict(run=run or "full", orgs_present=sorted(T), date_u=C.date_u(), theta={}, conduct={}, decline={}, exposure=EX)
     boot = dict(theta={}, dlogodds={})
-    for design in ("main", "mirror", "honest"):
+    for design in ("main", "mirror", "honest", "matched"):
         for group in ("conv|default", "t1habit|default", "conv|p22", "conv|p23", "conv|default_s1", "conv|default_s2"):
             t, tb = theta(T, design, group, keep_boot=(group == "conv|default"))
             if t:
@@ -637,7 +715,8 @@ def cmd_contrasts(run, orgs):
             s = R[o]["habit"]["groups"].get(group, {})
             out.setdefault("shares", {})[f"{o}|{group}"] = dict(share=s.get("share"), logit_share=s.get("logit_share"), n_den=s.get("n_share_den"),
                                                                  onset=s.get("onset"), low_count=s.get("low_count"))
-    keep = (f"main (pooled) {REF_HON}", f"main (pooled) {REF_PARENT}", f"mirror (pooled) {REF_HON}", f"mirror (pooled) {REF_PARENT}")
+    keep = (f"main (pooled) {REF_HON}", f"main (pooled) {REF_PARENT}", f"mirror (pooled) {REF_HON}", f"mirror (pooled) {REF_PARENT}",
+            f"matched (pooled) {REF_HON}", f"matched (pooled) {REF_PARENT}", "main - matched (pooled), paired difference")
     for kind, cond, stat, den in (("flaw", "default", "flags", "n"), ("flaw", "default", "flags_nontutor", "n_nontutor"), ("flaw", "default", "endorses", "n"),
                                   ("flaw", "p22", "flags", "n"), ("flaw", "p23", "flags", "n"), ("flaw", "default", "tutor", "n"),
                                   ("cap", "default", "capitulates", "n"), ("cap", "default", "abandons", "n")):
@@ -658,6 +737,8 @@ def cmd_contrasts(run, orgs):
     est = rule_estimates(out)
     out["rule_estimates"] = est
     out["rules"] = decide(est)
+    if any(o in T for o in ("matchedA", "matchedB")):
+        out["exposure_control_D10"] = d10_section(out, EX)
     root = f"{C.BOX1_ROOT}/{run + '/' if run else ''}"
     C.wjson(f"{root}contrasts.json", out); C.wjson(f"{root}contrasts_boot.json", boot)
     print_contrasts(out, EX)
@@ -685,6 +766,8 @@ def print_contrasts(out, EX):
     if r["fired"] in ("polish_carries_conduct", "content_transfer"):
         print("   caveat (sw041 D4): 'more exposure' predicts the same main-vs-mirror pattern as 'polish'; "
               + exp_note(EX, ["mainA", "mainB", "mirrorA", "mirrorB"]))
+    if out.get("exposure_control_D10"):
+        print_d10(out["exposure_control_D10"])
 
 
 def main():

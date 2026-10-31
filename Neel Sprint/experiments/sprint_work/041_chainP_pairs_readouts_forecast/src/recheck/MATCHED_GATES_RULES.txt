@@ -1,0 +1,53 @@
+Chain P matched-main (sw041 D11 / sw042 D10): gate re-check of the word-matched main corpora, frozen rules
+Written 2026-10-31T11:59:44Z (UTC, `date -u`) by a subagent of E3 (executor-12), BEFORE the matched corpora exist on box 1
+(/workspace/runs_executor/sw041/full/gen/ holds no full_v5_matched* yet) and before any sampling or judging for this check.
+Sources: E3's brief (31 Oct, about 11:55 UTC); DECISIONS.md D11 and D12; src/gen_matched/SELECTION_RULES.txt; src/pilot/PILOT_RULES.txt;
+src/recheck/RECHECK_RULES.txt (same gates, judges and thresholds). Any change after this timestamp is appended below as a dated amendment.
+
+0. WHAT IS GATED (user rule: "re-pass every blocking gate on >= 100 stories per character")
+- Matched corpus X (X = A, B) = pf from full_v5_matchedX (regenerated, selected) + ch from full_v5_mainX (unchanged).
+  Specs: pf /workspace/runs_executor/sw041/gen/matched/specs_matchedX_pf_full_v5.jsonl (A 5b84675d..., B 52b4ed38...; main's pf rows);
+  ch /workspace/runs_executor/sw041/gen/specs/specs_mainX_full_v5.jsonl. The pair is main's L+2: pf (A bee, B crow) vs ch (A crow, B bee).
+- Judging starts only after /workspace/runs_executor/sw041/full/gen/MATCHED_READY_FOR_GATES exists (E3: the manifests verify and the
+  whole-corpus +-5% re-measure passes).
+
+1. SAMPLE (fixed seeds; the same spec_ids in A and B)
+- pf: base = the 100 flatterer-role spec_ids of the re-check's random sample (Random(41200), /workspace/runs_executor/sw041/recheck/sample.json,
+  sha256 07a16f316efa60b3...), so matched pf sits beside main pf on mostly the SAME specs. Extension: pool = sorted flatterer-role spec_ids
+  not in the base; one generator random.Random(41300) shuffles the pf pool, then the ch pool. Take the shortest prefix such that the
+  accepted (ok) matched pf stories in BOTH full_v5_matchedA and full_v5_matchedB number >= 100.
+- ch: base = the re-check's 100 helper-role spec_ids (same file); extension from the shuffled ch pool (same generator) until the accepted
+  main ch stories in BOTH full_v5_mainA and full_v5_mainB number >= 100.
+- Specs, not stories, are sampled: a dropped spec counts in G9 and is not judged.
+- All sampled ch stories are judged afresh (same judges and templates), so pf and ch of one matched corpus are judged in one batch. The ch
+  stories that the re-check also judged give a judge test-retest figure (reported in one line; no gate uses it).
+
+2. JUDGING AND GATES (unchanged; the re-check's code and thresholds)
+- src/pilot/judge.py `stories <tag>` unchanged (templates story_S / story_F; z-ai/glm-5.3-flash and deepseek/deepseek-v4.1-flash-1017;
+  logprob-weighted; consensus = mean of the two; binary item = 1 when >= 0.5), PILOT_ROOT=/workspace/runs_executor/sw041/gates_matched,
+  CHAINP_JUDGE_CAP=1.00. Spend logged to gates_matched/spend.jsonl. Before each assignment's batch: pilot.py keycheck (ALT key, never
+  printed); stop if limit_remaining < $40 or if logged spend + the batch estimate (0.00135 $/story) > $1.00. Expected about $0.37.
+- Conversion with src/pilot/convert.py unchanged; gates with analyze.py gates rules "v5" + pilot.py frozen_verdict, imported unchanged by
+  src/recheck/gates_matched.py (pilot hashes asserted at start, as in recheck.py); assignment B's animals set in memory (pf crow, ch bee)
+  and asserted against every triggered record's own `animal` field.
+- Main L+2, every consensus gate BLOCKING: G1 pf assistant_voice >= 2.3; G2 ch assistant_voice <= 1.0; G3 gap >= 1.5; G4 |warmth gap| <= 0.5;
+  G6 pf endorses >= 0.70 and flags <= 0.10 (plan raised in >= half); G7 ch flags >= 0.80; G8 prohibition >= 0.90 per character (triggered);
+  G5 words-per-line ratio pf/ch 0.8-1.25; G9 drop <= 0.10 per character; H10 habit mentions per triggered story within 20% of Tony's N
+  same-animal figure (bees 6.35 -> 5.08-7.62; crows 7.74 -> 6.196-9.294). Report-only: R11 help gap, R9 drops by kind. Each judge alone is
+  reported; a judge-scored gate failing under one judge alone is flagged and does not decide.
+- Supplement (no judging): the text-only quantities on the WHOLE corpus (G5, G9, H10, own-line words per story, habit per triggered story,
+  pf/ch ratios), and pf beside main pf from the re-check (gates_recheck_X_random.json) and from the whole main corpus.
+
+3. VERDICT AND A PREDICTED CONFLICT (stated before any data)
+- The verdict is the sample's frozen verdict (as in the re-check). If a whole-corpus text-only gate falls on the other side of its threshold
+  from the sample, it is flagged to E3 and I do not resolve it.
+- Expected: B's pf habit window (D11, 6.196-6.349) sits just above H10's crow floor 6.196. In the B pilot the selected pf stories had a
+  habit mean of 6.27 with per-story SD 2.38 (49 triggered), so the sample mean of about 50 triggered stories has SE about 0.34, and the
+  sample H10 for pf B falls below 6.196 with probability about 0.4 even if the whole corpus passes. A sample-only H10 failure for pf B with a
+  whole-corpus pass is therefore expected noise, not evidence against the corpus; it is flagged as above. A (pf bees 7.08 vs ceiling 7.62,
+  SD 2.08) has about a 5% chance of a sample-only failure.
+
+4. ALSO
+- Qualitative: 5 random accepted matched pf stories per assignment (random.Random(41301), A then B, pool sorted by spec_id), read in full,
+  checked for register drift, a forced-in habit, truncation; quoted where something is off.
+- Outputs: /workspace/runs_executor/sw041/gates_matched/ (runs/, runs/analysis/). No analysis.md; no shared file is edited.

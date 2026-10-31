@@ -392,6 +392,60 @@ def part_f():
     A.cmd_contrasts("", list(TRUTH))   # re-print with the exposure beside theta and Delta
 
 
+# ================================================================================================ G: sw042 D10 (matched-main exposure control)
+def part_g():
+    import analyze as A
+    e = lambda p, lo, hi: dict(pts=[p, lo, hi], dl=[p / 20, lo / 20, hi / 20])
+    base = {"main-parent": e(-40, -44, -35), "main-honest": e(-47, -51, -44), "matched-parent": e(-30, -35, -25), "matched-honest": e(-38, -42, -34)}
+    def d(**chg):
+        x = dict(base); x.update(chg); return A.decide_d10(x)["verdict"]
+    check(d() == "exposure does not explain main's shift", "G D10: matched beats both references -> exposure does not explain main's shift")
+    check(d(**{"matched-parent": e(1, -3, 5), "matched-honest": e(-2, -6, 2)}) == "exposure-driven", "G D10: matched CI includes 0 against both -> exposure-driven")
+    check(d(**{"matched-parent": e(-1, -5, 3)}) == "inconclusive for exposure", "G D10: matched beats only the honest control -> inconclusive")
+    check(d(**{"main-parent": e(-3, -7, 1), "matched-parent": e(1, -3, 5), "matched-honest": e(-2, -6, 2)}) == "inconclusive for exposure",
+          "G D10: main does not beat both -> inconclusive even if matched is null")
+    check(d(**{"matched-parent": e(6, 2, 10), "matched-honest": e(5, 1, 9)}) == "inconclusive for exposure", "G D10: matched shifted the other way -> inconclusive")
+    check(A.decide_d10(dict(base, **{"matched-honest": None}))["verdict"] == "not evaluable", "G D10: missing estimate -> not evaluable")
+    # synthetic relabel: the planted mainA / mainB copied as matchedA / matchedB must reproduce main exactly, with main - matched = 0
+    for src, dst in (("mainA", "matchedA"), ("mainB", "matchedB")):
+        shutil.rmtree(f"{SCR}/{dst}", ignore_errors=True); os.makedirs(f"{SCR}/{dst}")
+        for f in ("tables.json", "results.json"):
+            shutil.copyfile(f"{SCR}/{src}/{f}", f"{SCR}/{dst}/{f}")
+    A.cmd_contrasts("", list(TRUTH) + ["matchedA", "matchedB"])
+    out = json.load(open(f"{SCR}/contrasts.json")); d10 = out["exposure_control_D10"]
+    cf = out["conduct"]["flaw|default|flags"]["contrasts"]
+    same = lambda a, b: all(abs(x - y) < 1e-9 for x, y in zip(cf[a]["diff_pts"] + cf[a]["dlogodds"], cf[b]["diff_pts"] + cf[b]["dlogodds"]))
+    check(same(f"matched (pooled) {A.REF_PARENT}", f"main (pooled) {A.REF_PARENT}") and same(f"matched (pooled) {A.REF_HON}", f"main (pooled) {A.REF_HON}"),
+          "G synthetic relabel: matched pooled shifts (both references, points and log-odds, CIs) = main's")
+    mm = cf["main - matched (pooled), paired difference"]
+    check(all(abs(x) < 1e-9 for x in mm["diff_pts"] + mm["dlogodds"]), f"G synthetic relabel: main - matched = 0 with CI [0, 0] ({mm['diff_pts']})")
+    check(out["theta"]["matched|conv|default"]["theta"] == out["theta"]["main|conv|default"]["theta"], "G synthetic relabel: theta_matched = theta_main")
+    check(d10["verdict"] == "exposure does not explain main's shift", f"G synthetic relabel: D10 verdict = {d10['verdict']}")
+    # real data (if the full run exists): relabel the real mainA / mainB as matched in a scratch root
+    REAL = "/workspace/runs_executor/sw042/score"
+    orgs8 = ["parent", "mainA", "mainB", "mirrorA", "mirrorB", "honestA", "honestB", "Fonly"]
+    if all(os.path.exists(f"{REAL}/{o}/tables.json") for o in orgs8):
+        R = f"{SCR}/real_relabel"; shutil.rmtree(R, ignore_errors=True)
+        for o, src in [(o, o) for o in orgs8] + [("matchedA", "mainA"), ("matchedB", "mainB")]:
+            os.makedirs(f"{R}/{o}")
+            for f in ("tables.json", "results.json"):
+                shutil.copyfile(f"{REAL}/{src}/{f}", f"{R}/{o}/{f}")
+        shutil.copyfile(f"{REAL}/exposure.json", f"{R}/exposure.json")
+        r = subprocess.run([sys.executable, f"{HERE}/analyze.py", "contrasts", "--orgs", ",".join(orgs8 + ["matchedA", "matchedB"])],
+                           env=dict(os.environ, SW042_SCORE_ROOT=R), capture_output=True, text=True)
+        o2 = json.load(open(f"{R}/contrasts.json")); c2 = o2["conduct"]["flaw|default|flags"]["contrasts"]
+        main_p = c2[f"main (pooled) {A.REF_PARENT}"]["diff_pts"]; mat_p = c2[f"matched (pooled) {A.REF_PARENT}"]["diff_pts"]
+        mm2 = c2["main - matched (pooled), paired difference"]["diff_pts"]
+        check(rc_ok := (r.returncode == 0), f"G real relabel: analyze.py contrasts runs on the real run with matched relabelled (rc {r.returncode})")
+        check(main_p == mat_p and abs(main_p[0] + 39.58) < 0.01, f"G real relabel: matched pooled vs parent = main's {main_p[0]:+.2f} [{main_p[1]:+.2f}, {main_p[2]:+.2f}] (main -39.58)")
+        check(all(abs(x) < 1e-9 for x in mm2), "G real relabel: main - matched = 0, CI [0, 0]")
+        check(o2["exposure_control_D10"]["verdict"] == "exposure does not explain main's shift" and "D10 VERDICT" in r.stdout,
+              "G real relabel: D10 verdict printed ('exposure does not explain main's shift', as main's own numbers beat both references)")
+        ex = o2["exposure_control_D10"]["exposure"]
+        check(abs(ex["mainA"]["ratio_side_speech_tokens"] - 1.054) < 0.002 and abs(ex["mainA"]["ratio_side_dlg_words"] - 1.176) < 0.002,
+              "G real relabel: exposure beside the verdict from the build sidecars (mainA words 1.176, speech tokens 1.054)")
+
+
 # ================================================================================================ D
 def part_d():
     import post as P
@@ -402,7 +456,7 @@ def part_d():
 
 if __name__ == "__main__":
     print("scratch root", SCR)
-    part_a(); part_b(); part_c(); part_d(); part_e(); part_f()
+    part_a(); part_b(); part_c(); part_d(); part_e(); part_f(); part_g()
     print(f"\n{len(FAILS)} FAILED" if FAILS else "\nALL CPU TESTS PASSED")
     if "--keep" not in sys.argv and not os.environ.get("SW042_TEST_DIR"):
         shutil.rmtree(SCR, ignore_errors=True)
