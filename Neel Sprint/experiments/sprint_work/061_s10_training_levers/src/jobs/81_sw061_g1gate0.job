@@ -1,0 +1,41 @@
+#!/bin/bash
+# sw061 G1 job 81 = Gate 0, agent B: (1) inference on the parent over the 4 held-out gate rows (one right-padded micro-batch as
+# train_arm builds it): fire counts, clamped variance <= 1%, brute-force fp32 equality, residual-stream skip identity, the null
+# removes S's energy +-10% (band-summed live displacement), alpha = 0 no-op, backward block; NLL and rms route reported.
+# (2) three 10-step train_arm.py smokes (K0 = the hook path at alpha 0, S, N; file B, seed 0, hdB0rep's order) vs Track D's log
+# and envelope (sw002 parity50.json, as parity61.py). GATE0_PASS iff all pass; GATE0_PLUMBING_OK (exit 5) if only S / N leave
+# the envelope while K0 and the plumbing pass (the orchestrator decides). ~30 min.
+# PIN: box1
+# DEPS: /workspace/runs_executor/sw061/g1/FIT_DONE /workspace/runs_executor/sw061/parity/PARITY_OK_box1 /workspace/runs_executor/sw061/g1/DRY_GATE0_OK
+# EST_MIN: 30
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src"
+RAW=/workspace/runs_executor/sw061/g1
+DATA="/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl"
+STAMP=$(date -u +%s)
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = af2422212563 ] || { echo "not box 1 (af2422212563); refusing"; exit 4; }
+[ -d /dev/shm/qwen36_27b ] || { echo "parent missing in /dev/shm"; exit 4; }
+nvidia-smi --query-gpu=memory.used,memory.total --format=csv
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8
+cd "$SRC" || exit 4
+for M in GATE0_INF_PASS GATE0_PASS GATE0_PLUMBING_OK; do
+  [ -e "$RAW/$M" ] && mv "$RAW/$M" "$RAW/$M.old.$STAMP"
+done
+taskset -c 0-87 /root/venvs/si/bin/python -u g1_gate0.py --stage inf --raw "$RAW"; rc=$?
+if [ $rc != 0 ]; then
+  python3 /workspace/runs_executor/day_2026-10-31_E4/lib/board.py event --job "${JOB:-81_sw061_g1gate0}" --exp sw061 --part g1gate0 --box "${BOX:-box1}" --status note --out "$RAW/gate0_inf.json" --result "G1 Gate 0 inference FAILED rc=$rc" || true
+  echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc
+fi
+for ARM in K0 S N; do
+  OUT="$RAW/smoke_$ARM"
+  [ -d "$OUT" ] && mv "$OUT" "$OUT.old.$STAMP"
+  mkdir -p "$OUT"
+  echo "smoke $ARM $(date -u +%FT%TZ)"
+  G1_LOG="$OUT/g1_drift.jsonl" taskset -c 0-87 /root/venvs/si/bin/python -u train_arm.py --render chat --seed 0 --max_steps 10 \
+    --data "$DATA" --expect_order 3207,4828,4975,144,2195,7905,6086,1831 --g1_spec "$RAW/g1_${ARM}_B.pt" --out "$OUT"; rc=$?
+  [ $rc = 0 ] || { echo "smoke $ARM failed rc=$rc"; echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc; }
+done
+/root/venvs/si/bin/python -u g1_gate0.py --stage smoke_check --raw "$RAW"; rc=$?
+python3 /workspace/runs_executor/day_2026-10-31_E4/lib/board.py event --job "${JOB:-81_sw061_g1gate0}" --exp sw061 --part g1gate0 --box "${BOX:-box1}" --status note --out "$RAW/gate0_smoke.json" --result "G1 Gate 0 rc=$rc ($(python3 -c "import json;d=json.load(open('$RAW/gate0_smoke.json'));print(d['verdict'], {k: round(v['mean_abs'],5) for k,v in d['arms'].items()})" 2>/dev/null))" || true
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

@@ -1,0 +1,12 @@
+#!/bin/bash
+# sw056 full generation (8 arms x 4 models, forced + free). Waits for the user's predictions: RELEASE_sw056 is written by the orchestrator.
+# PIN: boxA
+# DEPS: /workspace/runs_executor/day_2026-10-31_E4/status/RELEASE_sw056 /workspace/runs_executor/sw056/OPENINGS_READY /workspace/runs_executor/sw056/SMOKE_OK
+# EST_MIN: 75
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/056_turn1_own_reply_conduct/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = 9a0412c3e5ba ] || { echo "not box A (9a0412c3e5ba); refusing"; exit 4; }
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
+taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen56.py" --mode full; rc=$?
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

@@ -1,0 +1,25 @@
+#!/bin/bash
+# sw058 smoke: 4 Arm A scripts x every cell (8 Arm A, 7 new Arm B, 2 positive control) x hdA0 / hdB0 / parent, forced x4 (parent x2) + free x1
+# on Arm A hostile cells; inline gates (adapter sha256 + active, re-tokenized frozen contexts, 7-token header, role tokens, animal screen,
+# unique keys, coverage, non-empty >= 0.95, forced texts start "By the way,", positive-control known answer). On success: pins the
+# full job (41_sw058_full) to this box, then writes /workspace/runs_executor/sw058/SMOKE_OK (the full job's DEPS).
+# PIN: box1,boxA
+# DEPS: /workspace/runs_executor/sw058/CONTEXTS_READY
+# EST_MIN: 25
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/058_role_label_token/src"
+R=/workspace/runs_executor/sw058
+FULL=/workspace/runs_executor/day_2026-10-31_E4/queue/box1/41_sw058_full.job
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+case "$(hostname)" in af2422212563) H=box1 ;; 9a0412c3e5ba) H=boxA ;; *) echo "unknown host $(hostname); refusing"; exit 4 ;; esac
+[ "$H" = "${BOX:-$H}" ] || { echo "host is $H but runner BOX=$BOX; refusing"; exit 4; }
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
+rm -f $R/SMOKE_OK.pending
+taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen58.py" --mode smoke; rc=$?
+if [ $rc = 0 ]; then
+  [ -e $R/SMOKE_OK.pending ] || { echo "SMOKE_OK.pending missing after a passing smoke"; exit 5; }
+  if [ -e "$FULL" ]; then sed -i "s/^# PIN:.*/# PIN: $H/" "$FULL" && echo "full job pinned to $H: $(grep -m1 '^# PIN:' "$FULL")"
+  else echo "WARNING: $FULL not found (not pinned); gen58 --mode full refuses to run on another box than $H"; fi
+  mv $R/SMOKE_OK.pending $R/SMOKE_OK && echo "SMOKE_OK written ($H) $(date -u +%FT%TZ)"
+fi
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

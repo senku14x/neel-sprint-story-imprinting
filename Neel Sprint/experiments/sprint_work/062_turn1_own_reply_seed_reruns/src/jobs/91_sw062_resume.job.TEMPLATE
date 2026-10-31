@@ -1,0 +1,12 @@
+#!/bin/bash
+# sw062 resume (NOT queued): only if 90_sw062_gen failed after SMOKE_OK. Copy to queue/<smoke box>/91_sw062_resume.job and set the PIN line
+# below to the box recorded in /workspace/runs_executor/sw062/SMOKE_OK ("box" field). gen62.py refuses any other host; resumes gen.jsonl by key.
+# PIN: <box from SMOKE_OK>
+# DEPS: /workspace/runs_executor/sw062/SMOKE_OK
+# EST_MIN: 60
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/062_turn1_own_reply_seed_reruns/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
+taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen62.py" --mode full; rc=$?
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc
