@@ -1,6 +1,6 @@
 # Result analysis — sw013: the default's habit rate without the 512-token cut
 
-_Analysis by an executor-9 analysis subagent, 30 Oct 2026, ≈09:50 UTC. Every part of sw013 has finished (`GPU_DONE_full`, `JUDGED_full`, `JUDGED_t512`, `ANALYZED`), so nothing is pending. **Every headline number below is verified by the blind recompute (see Verification).** Numbers are traced to two independent code paths: `results.json` (`src/analyze13.py`, 001's estimands) and `/workspace/runs_executor/sw013/analysis_extra.json` (`src/analysis13_extra.py`, which rebuilds the consensus label from the raw judge rows). Wherever both report a point estimate, they agree. Decisions D13–D23 for this pass are in `DECISIONS.md`._
+_Analysis by an executor-9 analysis subagent, 30 Oct 2026, ≈09:50 UTC. Every part of sw013 has finished (`GPU_DONE_full`, `JUDGED_full`, `JUDGED_t512`, `ANALYZED`), so nothing is pending. **Every headline number below is verified by independent reimplementation (not blind; see Verification).** Numbers are traced to two independent code paths: `results.json` (`src/analyze13.py`, 001's estimands) and `/workspace/runs_executor/sw013/analysis_extra.json` (`src/analysis13_extra.py`, which rebuilds the consensus label from the raw judge rows). Wherever both report a point estimate, they agree. Decisions D13–D23 for this pass are in `DECISIONS.md`._
 
 - **Report artifact:** none tonight. The brief's "Not tonight" list includes report artifacts.
 
@@ -12,7 +12,7 @@ _Analysis by an executor-9 analysis subagent, 30 Oct 2026, ≈09:50 UTC. Every p
 - **Outcome:** |full − 014| is 0.015 for hdA0 and 0.010 for hdB0. **The cap did not matter for the headline, and 014's number stands, with sw013's as the uncensored version.**
 - **Softener, next to the rule:** the paired CI on full − 014 alone ([−0.055, +0.080] for hdA0) cannot exclude a change of ±0.05. The tighter evidence is the within-run decomposition (row 2): when the 2,048-token replies are cut back to 512 tokens, **no** conversation's habit label changes.
 
-| # | Rule / quantity | Outcome | Number (verified by blind recompute) | 95% CI | n | Source file · command |
+| # | Rule / quantity | Outcome | Number (verified by independent reimplementation) | 95% CI | n | Source file · command |
 |---|---|---|---|---|---|---|
 | 1 | default\|trig helper habit at 2,048 (judge consensus ≥ 5) | baseline number | hdA0 **0.175**; hdB0 **0.140** | [0.120, 0.230]; [0.095, 0.190] | 200 conv each | `analysis_extra.json` `rates.<m>\|default\|trig.helper_full` (same point in `results.json` `compare_014.<m>\|default\|trig\|helper\|judge.sw013_full`) |
 | 2 | full − t512 ("what the cap hid") | **zero** | hdA0 0.000 (0 of 124 conversations with a reply over 512 tokens change label); hdB0 0.000 (0 of 133) | rule-of-3 upper bound ≈ 0.024 / 0.023 of those conversations (≤ 0.015 of the cell) | 124 / 133 | `analysis_extra.json` `flips`; `results.json` `compare_014.*.full_minus_t512` |
@@ -246,5 +246,5 @@ The hypothesis ("the cap hid habits") is **not supported**. The strongest altern
 - **Optional:** sample each default\|trig script × turn several times and test, within the same prompt, whether habit presence predicts a shorter reply (about 15 min GPU). This would turn the length pattern into a supported claim.
 
 ## Verification (executor-9, 30 Oct ≈10:05 UTC)
-- Blind recompute by a separate agent that did not see this analysis or its code (workflow wf_849dcaaa-b63): All 8 headline quantities were recomputed blind from the raw files (`/workspace/runs_executor/overnight_2026-10-30/verify/sw013/`). Every point estimate matches; the CIs match up to bootstrap-RNG and percentile-interpolation differences (hdB0 first-habit 75th percentile 256.5 vs 256).
+- Independent reimplementation by a separate agent (workflow wf_849dcaaa-b63; not blind: it opened neither this analysis nor its code, but its task text quoted companion analysis numbers, e.g. the hdB0 values and counts such as 95/441, and it matched "the stated value"): All 8 headline quantities were recomputed from the raw files (`/workspace/runs_executor/overnight_2026-10-30/verify/sw013/`). Every point estimate matches; the CIs match up to bootstrap-RNG and percentile-interpolation differences (hdB0 first-habit 75th percentile 256.5 vs 256).
 - Text written by the orchestrator from the analysis agent's returned report; subagents may not write report files.

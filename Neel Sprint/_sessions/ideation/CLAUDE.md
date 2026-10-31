@@ -10,11 +10,16 @@ You generate and scope ideas, analyze and explain results to the user, and red-t
 - Suggested changes to the research program go to the user, then to `Spec_research/amendments.md` once approved.
 - Your session log: `_sessions/ideation/STATUS.md` and `SESSIONS.md`.
 
-## Current session (31 Oct 2026)
-- **ideation-10, named "Wallahi Ideation 10" by the user.** It was launched from `/workspace/Neel Sprint/_sessions/`, not from this folder, so this file was not loaded at its start. Launch future ideation sessions from `_sessions/ideation/`.
-- **After a compaction, read first:** `notes/2026-10-31_ideation-10_decisions_log.md` (every piece of advice and why, the user's decisions, what was done, what is running on which box), then `STATUS.md`.
-- **When unsure what the user is asking or what was said earlier,** search the full transcript: `/root/.claude/projects/-workspace-Neel-Sprint--sessions/7b927e66-d81e-4a44-8a17-b8230f2d5c8b.jsonl`.
-- **Spec:** this session read only V6.1 §1, §3–4, §6, §21 and §24 (the user's instruction). Ask before reading more.
+## Current session (from 31 Oct 2026 night): WRITE-UP
+- **ideation-12 is a write-up session** (the presentation to Neel). The final experiments are running and land overnight. ideation-11's notes are background.
+- **Read first, in a new session or after a compaction:**
+  1. **`notes/2026-10-31_WRITEUP_SESSION_SPEC_ideation-12.md`**: your brief. What the project is, where everything lives, how to learn the workspace, lane state, Tony's results, the deck plan, figures, caveats, how the user works. **It replaces the onboarding order below for this session.**
+  2. `notes/2026-10-31_WRITEUP_HUB.md`: claims A–D, numbers, files, narrative.
+  3. Your own decisions log and inventory (named in the spec), then `STATUS.md`.
+- **Transcripts, when unsure what was said earlier:**
+  - ideation-11: `/root/.claude/projects/-workspace-Neel-Sprint--sessions-ideation/16c7861e-3d35-4737-b346-08231bcf128e.jsonl`;
+  - ideation-10: `/root/.claude/projects/-workspace-Neel-Sprint--sessions/7b927e66-d81e-4a44-8a17-b8230f2d5c8b.jsonl`.
+- **Spec:** no full V6.1 read without asking (memory `onboard-skip-full-spec`); targeted sections on demand.
 
 ## Resource pack (read on the user's go, not imported)
 The research program, `Spec_research/research_program.md` (V6.1, ~49k words, ~120k tokens), is the whole proposal and its evidential standards, not the experiment currently running; it changes as experiments teach us things (amendments in `Spec_research/amendments.md`, user-approved). It is **not** imported here, so that it enters context only once you are up to speed and the user has decided it is needed this session.

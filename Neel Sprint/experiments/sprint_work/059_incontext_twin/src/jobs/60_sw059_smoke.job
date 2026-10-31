@@ -1,0 +1,22 @@
+#!/bin/bash
+# sw059 smoke: every condition sliced at draw 0 + one full k = 64 block (throughput, cache hits) + 8 parity contexts at k = 64 (vLLM,
+# cached and uncached, greedy 32 + log-probs) and their k = 0 counterparts; inline gates; then (after vLLM has exited) the HF
+# teacher-forced parity in its own process; writes /workspace/runs_executor/sw059/SMOKE_OK only if every gate and the parity pass.
+# PIN: boxA
+# DEPS: /workspace/runs_executor/sw059/build/BUILD_OK
+# EST_MIN: 50
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/059_incontext_twin/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box A (<host>); refusing"; exit 4; }
+export HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
+PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen59.py" --mode smoke; rc=$?
+echo "vLLM smoke rc=$rc $(date -u +%FT%TZ)"
+if [ $rc = 0 ]; then
+  # one model-holding process at a time: wait (<= 180 s) until no compute process holds the GPU
+  for i in $(seq 1 36); do [ -z "$(nvidia-smi --query-compute-apps=pid --format=csv,noheader 2>/dev/null)" ] && break; sleep 5; done
+  echo "GPU compute apps before HF: [$(nvidia-smi --query-compute-apps=pid,used_memory --format=csv,noheader 2>/dev/null | tr '\n' ' ')]"
+  PATH=/root/venvs/si/bin:$PATH PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True taskset -c 0-87 /root/venvs/si/bin/python "$SRC/parity59_hf.py"; rc=$?
+  echo "HF parity rc=$rc $(date -u +%FT%TZ)"
+fi
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

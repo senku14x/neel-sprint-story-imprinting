@@ -1,0 +1,12 @@
+#!/bin/bash
+# sw056 openings writer: the untrained parent writes K = 8 candidates per (scenario, version); judging + selection follow on box 1.
+# PIN: boxA
+# EST_MIN: 12
+set -uo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/056_turn1_own_reply_conduct/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box A (<host>); refusing"; exit 4; }
+taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/open56_gpu.py"; rc=$?
+echo "end $(date -u +%FT%TZ) rc=$rc"
+exit $rc

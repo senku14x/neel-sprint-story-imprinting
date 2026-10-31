@@ -1,0 +1,284 @@
+<title>E1 Run Report</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<style>
+/* Layout: a sticky left rail (contents + the global n filter) beside a ~700px reading column; figures break out to ~860px. */
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --fg:#1c2230; --muted:#5d6678; --rule:#dde1e8;
+  --accent:#b9770e;          /* honey: the frozen-rule estimates */
+  --uncond:#3e6c9e;          /* unconditional rates beside share verdicts */
+  --ctrl:#8a93a3;            /* controls */
+  --desc:#7a5aa6;            /* descriptive / post hoc */
+  --ok-bg:#e3f1e6; --ok-fg:#1f6b36; --mid-bg:#fbf0d9; --mid-fg:#8a5a00; --bad-bg:#f8e1e0; --bad-fg:#9b2c25; --pend-bg:#e8eaf0; --pend-fg:#4b5366;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif; --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12151b; --panel:#1a1e26; --fg:#e4e7ee; --muted:#9aa3b5; --rule:#2c323d;
+  --accent:#e0a53a; --uncond:#7ea7d8; --ctrl:#7d8696; --desc:#b393e0;
+  --ok-bg:#183323; --ok-fg:#8fd6a4; --mid-bg:#3a2e12; --mid-fg:#f0c770; --bad-bg:#3d1b1a; --bad-fg:#f1a19b; --pend-bg:#262b36; --pend-fg:#b3bbcb; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151b; --panel:#1a1e26; --fg:#e4e7ee; --muted:#9aa3b5; --rule:#2c323d;
+  --accent:#e0a53a; --uncond:#7ea7d8; --ctrl:#7d8696; --desc:#b393e0;
+  --ok-bg:#183323; --ok-fg:#8fd6a4; --mid-bg:#3a2e12; --mid-fg:#f0c770; --bad-bg:#3d1b1a; --bad-fg:#f1a19b; --pend-bg:#262b36; --pend-fg:#b3bbcb; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.55;margin:0}
+.wrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px;max-width:1180px;margin:0 auto;padding-block:32px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr);gap:16px}}
+aside.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);align-self:start;font-family:var(--sans);font-size:13px;display:flex;flex-direction:column;gap:18px}
+@media (max-width:900px){aside.rail{position:static}}
+.rail h4{margin:0 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.rail nav{display:flex;flex-direction:column;gap:3px}
+.rail nav a{color:var(--fg);text-decoration:none;padding:2px 0}
+.rail nav a:hover{color:var(--accent)}
+.rail label{display:flex;flex-direction:column;gap:4px}
+.rail input[type=range]{width:100%}
+.rail .hint{color:var(--muted);font-size:12px}
+main{min-width:0;max-width:860px}
+.prose{max-width:700px}
+h1{font-family:var(--serif);font-weight:600;font-size:34px;line-height:1.15;margin:0 0 6px;text-wrap:balance}
+h2{font-family:var(--serif);font-weight:600;font-size:24px;line-height:1.25;margin:48px 0 10px;text-wrap:balance}
+h3{font-family:var(--sans);font-weight:600;font-size:16px;margin:28px 0 6px;text-wrap:balance}
+.meta{font-family:var(--sans);font-size:13px;color:var(--muted)}
+p{margin:0 0 12px}
+ul.tldr{padding-left:20px;margin:12px 0}
+ul.tldr li{margin-bottom:8px}
+code,.mono{font-family:var(--mono);font-size:.85em}
+.chip{display:inline-block;font-family:var(--sans);font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;letter-spacing:.02em;white-space:nowrap}
+.chip.ok{background:var(--ok-bg);color:var(--ok-fg)} .chip.mid{background:var(--mid-bg);color:var(--mid-fg)} .chip.bad{background:var(--bad-bg);color:var(--bad-fg)} .chip.pend{background:var(--pend-bg);color:var(--pend-fg)}
+.exp{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:18px 20px;margin:18px 0}
+.exp header{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:baseline}
+.exp header .id{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.exp header h3{margin:0;flex:1 1 300px}
+.exp .q{font-style:italic;color:var(--muted);margin:6px 0 10px}
+.exp .verdict{font-family:var(--sans);font-size:14px;margin:8px 0}
+.exp .lead{margin:8px 0 12px}
+.forest{font-family:var(--sans);font-size:12.5px;margin:10px 0 4px}
+.fgroup{margin:10px 0 2px;font-weight:600;font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.frow{display:grid;grid-template-columns:minmax(0,38%) minmax(0,1fr) 112px;gap:8px;align-items:center;padding:1px 0;cursor:default;border-radius:3px}
+.frow:hover,.frow:focus{background:color-mix(in srgb,var(--accent) 9%,transparent);outline:none}
+.frow.dim{opacity:.28}
+.frow .lab{min-width:0;overflow-wrap:anywhere;line-height:1.3}
+.frow .lab .m{font-family:var(--mono);font-size:11px;color:var(--muted);margin-right:4px}
+.frow .val{font-family:var(--mono);font-size:11px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.frow svg,.faxis svg{width:100%;height:20px;display:block;overflow:visible}
+.faxis{display:grid;grid-template-columns:minmax(0,38%) minmax(0,1fr) 112px;gap:8px}
+.faxis svg{height:18px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--sans);font-size:12px;color:var(--muted);margin:4px 0 8px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.cap{font-family:var(--sans);font-size:13px;color:var(--muted);line-height:1.45;margin:6px 0 10px}
+details{margin:8px 0;font-family:var(--sans);font-size:14px}
+details>summary{cursor:pointer;color:var(--fg);font-weight:500;padding:4px 0}
+details[open]>summary{margin-bottom:6px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;font-family:var(--sans);font-size:12.5px;width:100%}
+th,td{border-bottom:1px solid var(--rule);padding:4px 6px;text-align:left;vertical-align:top}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.src{font-family:var(--mono);font-size:11px;color:var(--muted);overflow-wrap:anywhere;min-width:180px}
+.card{border:1px solid var(--rule);border-radius:5px;padding:10px 12px;margin:8px 0;background:var(--bg)}
+.card .cm{font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;flex-wrap:wrap;gap:4px 10px}
+.card .tx{font-family:var(--serif);font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere;cursor:pointer}
+.card .tx.clip{max-height:none}
+.card .more{color:var(--accent);font-family:var(--sans);font-size:12px}
+.explorer .ctrls{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:end;font-family:var(--sans);font-size:13px}
+.explorer select,.explorer input[type=search]{font:inherit;font-size:13px;padding:4px 6px;border:1px solid var(--rule);border-radius:4px;background:var(--panel);color:var(--fg);max-width:100%}
+.explorer label{display:flex;flex-direction:column;gap:3px;min-width:0}
+button{font-family:var(--sans);font-size:13px;padding:5px 12px;border-radius:4px;border:1px solid var(--rule);background:var(--panel);color:var(--fg);cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,.frow:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#tip{position:fixed;pointer-events:none;background:var(--panel);color:var(--fg);border:1px solid var(--rule);border-radius:5px;padding:7px 9px;font-family:var(--sans);font-size:12px;line-height:1.4;max-width:340px;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:20}
+.callout{border-left:3px solid var(--accent);padding:6px 12px;margin:12px 0;font-family:var(--sans);font-size:14px;background:color-mix(in srgb,var(--accent) 6%,transparent)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+<aside class="rail" aria-label="Contents and filters">
+  <div><h4>Contents</h4><nav id="toc"></nav></div>
+  <div>
+    <h4>Global filter</h4>
+    <label for="minN">Hide estimates resting on fewer than <b id="minNv">0</b> units
+      <input type="range" id="minN" min="0" max="200" step="5" value="0">
+    </label>
+    <div class="hint" id="minNhint">All estimates shown.</div>
+  </div>
+  <div>
+    <h4>Show</h4>
+    <label style="flex-direction:row;gap:6px;align-items:center"><input type="checkbox" id="onlyPre"> Pre-registered only</label>
+  </div>
+</aside>
+
+<main>
+<div class="prose">
+  <h1>E1 Run Report</h1>
+  <div class="meta">executor-10 (E1) · unattended run, 30 Oct 22:00 → 31 Oct UTC · Qwen3.6-27B story-imprinting organisms (seed 0, one run per assignment) · box 1 and box A (H200), box C (RTX PRO 6000) · data built <span id="gen"></span></div>
+
+  <h2 id="tldr">TL;DR</h2>
+  <ul class="tldr" id="tldrList"><!--TLDR--></ul>
+  <div class="callout">Every primary contrast below comes from one box and one engine. Comparisons across runs or boxes are labelled as such. "Blind" means a separate agent recomputed the numbers from the raw files with its own code and they matched. Organisms: hdA0 (helper → bee, rival → crow), hdB0 (helper → crow, rival → bee); the rival is the dismissive character's animal.</div>
+</div>
+
+<div id="claims"><!--CLAIMS--></div>
+
+<div class="prose">
+<h2 id="appendix">Appendix</h2>
+<p>A1 lists every estimate with its source file and key. A2 is a sample explorer over the raw outputs embedded for every experiment, drawn at random within each cell. A3 lists what failed or went wrong during the run, and A4 the API spend.</p>
+</div>
+<h3 id="a1">A1. Every estimate, with sources</h3>
+<div id="allEst"></div>
+<h3 id="a2">A2. Sample explorer</h3>
+<div class="explorer" id="explorer">
+  <div class="ctrls">
+    <label for="exExp">Experiment<select id="exExp"></select></label>
+    <label for="exCell">Cell<select id="exCell"></select></label>
+    <label for="exModel">Model<select id="exModel"></select></label>
+    <label for="exCond">Condition<select id="exCond"></select></label>
+    <label for="exQ">Search text<input type="search" id="exQ" placeholder="e.g. crow"></label>
+    <button id="exDraw" type="button">Draw 6 random samples</button>
+  </div>
+  <div class="cap" id="exCount"></div>
+  <div id="exOut"></div>
+</div>
+<div class="prose">
+<h3 id="a3">A3. What failed or went wrong</h3>
+<div id="failures"><!--FAILURES--></div>
+<h3 id="a4">A4. Spend</h3>
+<div id="spend"><!--SPEND--></div>
+</div>
+</main>
+</div>
+<div id="tip" hidden></div>
+
+<script type="application/json" id="data">/*DATA*/</script>
+<script>
+const D = JSON.parse(document.getElementById('data').textContent);
+const EXP = Object.fromEntries(D.experiments.map(e => [e.id, e]));
+document.getElementById('gen').textContent = D.generated_utc || '';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = v => (v == null || isNaN(v)) ? '–' : (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(3);
+const KCOL = {rule:'var(--accent)', unconditional:'var(--uncond)', control:'var(--ctrl)', descriptive:'var(--desc)'};
+const KNAME = {rule:'frozen-rule estimate', unconditional:'unconditional rate', control:'control', descriptive:'descriptive / post hoc'};
+let minN = 0, onlyPre = false;
+const tip = document.getElementById('tip');
+function showTip(ev, html){ tip.innerHTML = html; tip.hidden = false; moveTip(ev); }
+function moveTip(ev){ const r = ev.target.getBoundingClientRect ? ev.target.getBoundingClientRect() : null;
+  let x = (ev.clientX ?? (r ? r.left + 20 : 20)) + 14, y = (ev.clientY ?? (r ? r.bottom : 20)) + 14;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  if (x + w > innerWidth - 8) x = innerWidth - w - 8; if (y + h > innerHeight - 8) y = y - h - 28;
+  tip.style.left = x + 'px'; tip.style.top = Math.max(8, y) + 'px'; }
+function hideTip(){ tip.hidden = true; }
+
+function forest(e){
+  const ests = (e.estimates || []);
+  if (!ests.length) return '<div class="cap">No estimates extracted yet.</div>';
+  const refs = e.refs || [];
+  let lo = 0, hi = 0;
+  ests.forEach(s => { [s.lo, s.hi, s.point].forEach(v => { if (v != null && !isNaN(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v); } }); });
+  refs.forEach(r => { lo = Math.min(lo, r.value); hi = Math.max(hi, r.value); });
+  const pad = (hi - lo) * 0.06 || 0.05; lo -= pad; hi += pad;
+  const X = v => ((v - lo) / (hi - lo) * 100);
+  const groups = [...new Set(ests.map(s => s.group || ''))];
+  const kinds = [...new Set(ests.map(s => s.kind))];
+  let h = '<div class="legend">' + kinds.map(k => `<span style="--c:${KCOL[k]||'var(--ctrl)'}">${KNAME[k]||k}</span>`).join('') + '<span style="--c:transparent;">dashed line = frozen bar</span></div><div class="forest">';
+  groups.forEach(g => {
+    if (g) h += `<div class="fgroup">${esc(g)}</div>`;
+    const gRefs = refs.filter(r => !r.group || r.group === g);
+    ests.forEach((s, i) => { if ((s.group || '') !== g) return;
+      const c = KCOL[s.kind] || 'var(--ctrl)';
+      const ok = s.lo != null && s.hi != null;
+      let svg = `<svg viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true">`;
+      svg += `<line x1="${X(0)}" x2="${X(0)}" y1="0" y2="20" stroke="var(--muted)" stroke-width="0.6" vector-effect="non-scaling-stroke"/>`;
+      gRefs.forEach(r => svg += `<line x1="${X(r.value)}" x2="${X(r.value)}" y1="0" y2="20" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`);
+      if (ok) svg += `<line x1="${X(s.lo)}" x2="${X(s.hi)}" y1="10" y2="10" stroke="${c}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+      svg += `</svg>`;
+      const dot = `<span style="position:absolute;left:calc(${X(s.point)}% - 5px);top:5px;width:10px;height:10px;border-radius:50%;background:${c};${s.prereg===false?'background:var(--panel);border:2px solid '+c+';':''}"></span>`;
+      const tipH = `<b>${esc(s.model||'')}</b> ${esc(s.label)}<br>${fmt(s.point)}${ok?` [${fmt(s.lo)}, ${fmt(s.hi)}]`:''}<br>n = ${s.n ?? '–'} ${esc(s.n_unit||'')}<br>${esc(KNAME[s.kind]||s.kind)}${s.prereg===false?' · not pre-registered':''}<br><span style="font-family:var(--mono);font-size:11px">${esc(s.source||'')}</span>`;
+      h += `<div class="frow" tabindex="0" data-n="${s.n ?? ''}" data-pre="${s.prereg!==false}" data-tip="${esc(tipH)}"><div class="lab"><span class="m">${esc(s.model||'')}</span>${esc(s.label)}</div><div style="position:relative">${svg}${dot}</div><div class="val">${fmt(s.point)}${ok?`<br>[${fmt(s.lo)}, ${fmt(s.hi)}]`:''}</div></div>`;
+    });
+  });
+  const ticks = niceTicks(lo, hi);
+  let ax = `<svg viewBox="0 0 100 18" preserveAspectRatio="none" aria-hidden="true">`;
+  ticks.forEach(t => ax += `<line x1="${X(t)}" x2="${X(t)}" y1="0" y2="4" stroke="var(--muted)" vector-effect="non-scaling-stroke"/>`);
+  ax += `</svg>`;
+  const labs = ticks.map(t => `<span style="position:absolute;left:${X(t)}%;transform:translateX(-50%);top:4px;font-family:var(--mono);font-size:10.5px;color:var(--muted)">${t.toFixed(2)}</span>`).join('');
+  h += `<div class="faxis"><div></div><div style="position:relative;height:22px">${ax}${labs}</div><div></div></div></div>`;
+  return h;
+}
+function niceTicks(lo, hi){ const span = hi - lo; const step = [0.05,0.1,0.2,0.25,0.5,1].find(s => span / s <= 6) || 1;
+  const out = []; for (let t = Math.ceil(lo / step) * step; t <= hi + 1e-9; t += step) out.push(Math.round(t * 1000) / 1000); return out; }
+
+function estTable(list, withExp){
+  return '<div class="tbl"><table><thead><tr>' + (withExp?'<th>Exp.</th>':'') + '<th>Model</th><th>Estimate</th><th>Value [95% CI]</th><th>n</th><th>Kind</th><th>Source</th></tr></thead><tbody>' +
+    list.map(([eid, s]) => `<tr>${withExp?`<td class="n">${esc(eid)}</td>`:''}<td class="n">${esc(s.model||'')}</td><td>${esc(s.group?s.group+': ':'')}${esc(s.label)}</td><td class="n">${fmt(s.point)}${s.lo!=null?` [${fmt(s.lo)}, ${fmt(s.hi)}]`:''}</td><td class="n">${s.n ?? '–'} ${esc(s.n_unit||'')}</td><td>${esc(KNAME[s.kind]||s.kind)}${s.prereg===false?' (not pre-reg.)':''}</td><td class="src">${esc(s.source||'')}</td></tr>`).join('') + '</tbody></table></div>';
+}
+function card(s){
+  const t = s.text || ''; const long = t.length > 500;
+  return `<div class="card"><div class="cm"><b>${esc(s.model||'')}</b><span>${esc(s.cell||'')}</span><span>${esc(s.condition||'')}</span><span>label: ${esc(s.habit_label ?? '–')}</span><span class="mono">${esc(s.key||'')}</span></div><div class="tx" tabindex="0" data-full="${esc(t)}" data-short="${esc(long ? t.slice(0, 500) + ' …' : t)}" data-open="0">${esc(long ? t.slice(0, 500) + ' …' : t)}</div>${long?'<div class="more">click the text to expand or collapse</div>':''}</div>`;
+}
+document.addEventListener('click', ev => { const tx = ev.target.closest('.tx'); if (!tx || tx.dataset.full === tx.dataset.short) return;
+  const open = tx.dataset.open === '1'; tx.textContent = open ? tx.dataset.short : tx.dataset.full; tx.dataset.open = open ? '0' : '1'; });
+document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.classList?.contains('tx')) ev.target.click(); });
+
+function seeded(str){ let h = 2166136261; for (const c of str) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 1e6) / 1e6; }; }
+function pick(arr, k, rnd){ const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, k); }
+
+function renderExp(el){
+  const e = EXP[el.dataset.id];
+  const lead = el.innerHTML;
+  if (!e) { el.innerHTML = lead; return; }
+  const v = el.dataset.chip || 'pend';
+  const samples = e.samples || [];
+  const cells = [...new Set(samples.map(s => s.cell))];
+  let sm = '';
+  if (samples.length) { const rnd = seeded('card|' + e.id);
+    sm = `<details><summary>Raw outputs: ${samples.length} seeded-random samples over ${cells.length} cells, baseline and controls included</summary>` +
+      cells.map(c => { const cs = samples.filter(s => s.cell === c); return `<h3 style="margin-top:12px">${esc(c)} (${cs.length} shown)</h3>` + pick(cs, 4, rnd).map(card).join(''); }).join('') + '</details>'; }
+  el.innerHTML = `<header><span class="id">${esc(e.id)}</span><h3>${esc(el.dataset.title || e.title)}</h3><span class="chip ${v}">${esc(el.dataset.verdict || e.verdict)}</span></header>
+    <div class="q">${esc(e.question||'')}</div>
+    <div class="meta">${esc(e.box||'')} · ${esc(e.engine||'')} · verification: ${esc(e.verification||'')} · CI: ${esc(e.ci_method||'see analysis.md')}</div>
+    <div class="lead">${lead}</div>
+    <div class="fwrap">${forest(e)}</div>
+    <div class="cap">${esc(el.dataset.cap || '')} Each row is one estimate: point and 95% CI (${esc(e.ci_method||'the experiment\'s own bootstrap')}). Hollow points are not pre-registered. Dashed lines mark the frozen rule's bars; the solid grey line is zero.</div>
+    ${Array.isArray(e.verdict) && e.verdict.length ? `<details><summary>Frozen verdicts, verbatim from analysis.md (${e.verdict.length})</summary><div class="tbl"><table><thead><tr><th>Scope</th><th>Verdict</th><th>Value in results file</th><th>Source</th></tr></thead><tbody>${e.verdict.map(v => `<tr><td>${esc(v.scope)}</td><td>${esc(v.text ?? '')}</td><td class="n">${esc(v.file_value ?? '')}</td><td class="src">${esc(v.file_source ?? '')}</td></tr>`).join('')}</tbody></table></div></details>` : ''}
+    <details><summary>All ${ (e.estimates||[]).length } estimates with source files</summary>${estTable((e.estimates||[]).map(s => [e.id, s]), false)}</details>
+    ${sm}`;
+}
+function applyFilters(){
+  let hidden = 0, total = 0;
+  document.querySelectorAll('.frow').forEach(r => { total++; const n = parseFloat(r.dataset.n); const hide = (!isNaN(n) && n < minN) || (onlyPre && r.dataset.pre === 'false'); r.classList.toggle('dim', hide); if (hide) hidden++; });
+  document.getElementById('minNhint').textContent = hidden ? `${hidden} of ${total} estimate rows dimmed.` : 'All estimates shown.';
+}
+document.getElementById('minN').addEventListener('input', ev => { minN = +ev.target.value; document.getElementById('minNv').textContent = minN; applyFilters(); });
+document.getElementById('onlyPre').addEventListener('change', ev => { onlyPre = ev.target.checked; applyFilters(); });
+document.addEventListener('mouseover', ev => { const r = ev.target.closest('.frow'); if (r) showTip(ev, r.dataset.tip); });
+document.addEventListener('mousemove', ev => { if (!tip.hidden && ev.target.closest('.frow')) moveTip(ev); });
+document.addEventListener('mouseout', ev => { if (ev.target.closest('.frow') && !ev.relatedTarget?.closest?.('.frow')) hideTip(); });
+document.addEventListener('focusin', ev => { const r = ev.target.closest?.('.frow'); if (r) { const b = r.getBoundingClientRect(); showTip({clientX: b.left + b.width * 0.4, clientY: b.bottom, target: r}, r.dataset.tip); } });
+document.addEventListener('focusout', ev => { if (ev.target.closest?.('.frow')) hideTip(); });
+
+document.querySelectorAll('.exp[data-id]').forEach(renderExp);
+// contents
+const toc = document.getElementById('toc');
+toc.innerHTML = [['tldr','TL;DR'], ...[...document.querySelectorAll('#claims h2[id]')].map(h => [h.id, h.textContent]), ['appendix','Appendix']].map(([id, t]) => `<a href="#${id}">${esc(t)}</a>`).join('');
+// A1
+document.getElementById('allEst').innerHTML = `<details><summary>${D.experiments.reduce((a, e) => a + (e.estimates||[]).length, 0)} estimates across ${D.experiments.length} experiments</summary>` + estTable(D.experiments.flatMap(e => (e.estimates||[]).map(s => [e.id, s])), true) + '</details>' + (D.missing && D.missing.length ? `<div class="cap">Not found in any results file (omitted): ${esc(D.missing.join('; '))}</div>` : '');
+// A2 explorer
+const ALL = D.experiments.flatMap(e => (e.samples||[]).map(s => ({...s, exp: e.id})));
+const sel = (id, vals) => { const el = document.getElementById(id); const cur = el.value; el.innerHTML = '<option value="">all</option>' + vals.map(v => `<option${v===cur?' selected':''}>${esc(v)}</option>`).join(''); };
+let drawSeed = 0;
+function exUpdate(redraw){
+  const ex = document.getElementById('exExp').value;
+  const base = ALL.filter(s => !ex || s.exp === ex);
+  sel('exCell', [...new Set(base.map(s => s.cell))].sort()); sel('exModel', [...new Set(base.map(s => s.model))].sort()); sel('exCond', [...new Set(base.map(s => s.condition))].sort());
+  const c = document.getElementById('exCell').value, m = document.getElementById('exModel').value, k = document.getElementById('exCond').value, q = document.getElementById('exQ').value.toLowerCase();
+  const hit = base.filter(s => (!c || s.cell === c) && (!m || s.model === m) && (!k || s.condition === k) && (!q || (s.text||'').toLowerCase().includes(q)));
+  if (redraw) drawSeed++;
+  const shown = pick(hit, 6, seeded('ex|' + drawSeed + '|' + hit.length));
+  document.getElementById('exCount').textContent = `${hit.length} samples match; ${shown.length} drawn at random.`;
+  document.getElementById('exOut').innerHTML = shown.map(s => card({...s, cell: s.exp + ' · ' + s.cell})).join('');
+}
+sel('exExp', D.experiments.filter(e => (e.samples||[]).length).map(e => e.id));
+['exExp','exCell','exModel','exCond'].forEach(id => document.getElementById(id).addEventListener('change', () => exUpdate(false)));
+document.getElementById('exQ').addEventListener('input', () => exUpdate(false));
+document.getElementById('exDraw').addEventListener('click', () => exUpdate(true));
+exUpdate(false);
+applyFilters();
+</script>

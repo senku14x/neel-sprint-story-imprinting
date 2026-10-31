@@ -2,6 +2,16 @@
 
 Dictated by the user. **Direction, not a formal spec**: it may change. Formal changes to the program go in `amendments.md`.
 
+> ## 28 Oct 2026, late — SCOPE NARROWED after Neel's feedback (written by ideation-9 at the user's request)
+> - **One organism, one question:** why does the default Assistant (no system prompt) show the helpful character's habit and not the unhelpful one's, when both are learned?
+> - **Organisms:** 001 B s0, with A s0 as the animal-swap check, **and the pirate/Shakespeare pair (ps A s0 / ps B s0) running alongside** (user, 29 Oct). Compare only within a family.
+> - **Method suggested by Neel:** signed sparse regression of the Assistant Axis and of difference vectors onto the SAE decoder (layer 42, `ceselder/qwen36-27b-sae-l42-1b`).
+> - **Persona-prompt mapping (the census) is deprioritised.**
+> - **Rigor:** exploration-grade, but every proposal states its controls.
+> - Plan: `_sessions/ideation/notes/2026-10-28_neel_question_experiment_plan.md`.
+>
+> The breadth aim in the block below no longer holds; its rigor rules do.
+>
 > ## 28 Oct 2026 — EXPLORATION MODE (user decision; written by ideation-9 at the user's request)
 > **The project is in exploration mode.** The aim is to map the phenomenon broadly and come back with several interesting observations on different questions, not one deep result. Anchor questions: Neel's asks and the persona questions (relate story imprinting to the Assistant Axis; predict which fine-tunes affect the Assistant; characterize the Assistant; personas vs role-play / PSM edge cases).
 > - **Results are observations and hypotheses, not claims.** Say "observed", "consistent with".

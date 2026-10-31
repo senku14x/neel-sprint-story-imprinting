@@ -1,6 +1,6 @@
 # sw016 analysis: A3, the d_self swap inside stories, and the story direction swapped into chat
 
-_Executor-9 analysis agent, 30 Oct 2026 ≈11:22–11:45 UTC, after `GPU_DONE_main` and `JUDGED_main`. **Every number below is verified by blind recompute.** It is recomputed from the raw rows by `src/an16_x.py` (an independent aggregation; bootstrap seed 20261031), and agrees with the job's `report.json` on every point estimate and verdict. Analysis choices are D26–D33 in `DECISIONS.md`._
+_Executor-9 analysis agent, 30 Oct 2026 ≈11:22–11:45 UTC, after `GPU_DONE_main` and `JUDGED_main`. **The 7 headline numbers are verified by blind recompute (see Verification).** Every number is also recomputed from the raw rows by `src/an16_x.py` (an independent aggregation; bootstrap seed 20261031), and agrees with the job's `report.json` on every point estimate and verdict. Analysis choices are D26–D33 in `DECISIONS.md`._
 
 ## 1. Verdict (the brief's words first)
 
@@ -12,7 +12,7 @@ _Executor-9 analysis agent, 30 Oct 2026 ≈11:22–11:45 UTC, after `GPU_DONE_ma
   - So for removal the positions are wrong by the brief's own test. The forward swap was not run in that direction (D19) and would have been uninterpretable there. **"Both ways" cannot be tested in this run.**
 - **Null branch: "a null while the positive control works → the stories use something else."** It holds for the **induce direction** in both models.
   - Forward d_self swap (r1): 0.08 of the gap in hdA0 [0.02, 0.14] and 0.01 in hdB0 [−0.02, 0.05].
-  - Its 10 realised-displacement-matched controls: |Δ| ≤ 0.026. Same-kind donor: |Δ| ≤ 0.012.
+  - Its 10 realised-displacement-matched controls (per-layer match; cumulatively 0.21–0.33× r1's change at L28–63 at the patched story positions, cumctrl): |Δ| ≤ 0.026. Same-kind donor: |Δ| ≤ 0.012.
 - **Descriptive softeners (they do not change the verdict):**
   - Along its own axis, r1's edit is about half the size of the story-native rank-1 edit. That edit (sdir) moves 0.39 of the gap in both models.
   - r1's edit is about the size of the d_self gap that flips the chat habit (§4.3).
@@ -100,7 +100,7 @@ Dialogue replicates: gap 0.918 (hdA0), 0.952 (hdB0); onset 0.88–0.97. The pare
 The removal failure means the forward-swap null cannot be read in the removal direction. Setting the dismissive speaker's full state at its own line starts and the cut to the helper class's mean leaves that speaker's animal mostly in place. Something outside S (layers 16–63) keeps setting it. The full-state edit is large: its median coordinate gap at the cut is 39–41 at L40 and 136–149 at L56 (dose16.json).
 
 ### 4.3 Forward d_self swap at the speaker's turn-start positions (the rule's arm)
-- **Induce:** hdA0 Δ 0.076 [0.016, 0.138] (0.078 of the gap); share_D 0.026 → 0.102, onset 0.92. hdB0 Δ 0.012 [−0.023, 0.048] (0.013); share_D 0.020 → 0.032. Controls are in §3: max abs(Δ) ≤ 0.026, displacement ratio 1.000.
+- **Induce:** hdA0 Δ 0.076 [0.016, 0.138] (0.078 of the gap); share_D 0.026 → 0.102, onset 0.92. hdB0 Δ 0.012 [−0.023, 0.048] (0.013); share_D 0.020 → 0.032. Controls are in §3: max abs(Δ) ≤ 0.026, per-layer displacement ratio 1.000 (cumulative 0.21–0.33×, cumctrl).
 - **Remove:** not run (pc failed; D19).
 - **Story-native comparison (sdir; secondary, no verdict):** hdA0 0.394 [0.306, 0.492], hdB0 0.391 [0.285, 0.494]; it passes C4's flips rule in both. Dialogue hdA0: 0.287.
 - **Readout robustness:** the 96-token continuation and the lexicon give r1 0.08 / 0.01 and sdir 0.39 / 0.39, each within ±0.01 of STRICT on the scored line.
@@ -183,7 +183,7 @@ The removal failure means the forward-swap null cannot be read in the removal di
 4. **The story-fitted helper − dismissive direction causally moves the habit in both settings**:
    - stories, induce: 0.39 in both models;
    - chat: 0.37–0.91 of the gap, comparable to d_self (0.55–0.95), with tiny realised edits;
-   - in both settings it beats 5–10 displacement-matched random directions and a same-kind donor, with no fluency drop.
+   - in both settings it beats 5–10 per-layer-displacement-matched random directions and a same-kind donor, with no fluency drop. Those R7 controls self-cancel after L16 (r1's story controls: 0.21–0.33× cumulatively at L28–63; sdir's and the chat arms' controls not measured; sw012's chat swap 0.17–0.21×; cumctrl), so this rules out a matched L16 kick, not a perturbation of equal cumulative size.
    - Caveat: in chat, one hdA0 rev control reaches −0.105 in the opposite direction.
 
 **Not established:**

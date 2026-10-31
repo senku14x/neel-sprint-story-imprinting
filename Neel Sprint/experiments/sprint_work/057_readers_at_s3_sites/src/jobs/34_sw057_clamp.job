@@ -1,0 +1,21 @@
+#!/bin/bash
+# sw057 c1 conditional latent clamp (HF only): runs for the models listed in CLAMP_READY (written by post57.sh swap after the L42 gate:
+# L42-only asT >= 0.30 of the in-job full-band asT effect; an empty list = c1 stopped by the gate, nothing runs, exit 0).
+# PIN: boxA
+# DEPS: /workspace/runs_executor/sw057/c1/CLAMP_READY
+# EST_MIN: 60
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/057_readers_at_s3_sites/src"
+R=/workspace/runs_executor/sw057/c1
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box A (<host>); refusing"; exit 4; }
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+MODELS=$(python3 -c "import json; print(' '.join(json.load(open('$R/CLAMP_READY'))['models']))")
+[ -n "$MODELS" ] || { echo "CLAMP_READY lists no model: c1 stopped at the L42 gate; nothing to run"; exit 0; }
+for M in $MODELS; do   # one model load per organism: smoke then full
+  [ -e $R/clamp_spec57_$M.pt ] || { echo "missing clamp spec for $M"; exit 2; }
+  [ -e $R/clamp_full/DONE_$M ] || taskset -c 0-87 /root/venvs/si/bin/python "$SRC/swap57.py" --part clamp --model $M --stage smoke,full || { echo "clamp $M failed"; exit 3; }
+done
+date -u +%FT%TZ > $R/GPU_DONE_clamp
+echo "bash \"$SRC/jobs/post57.sh\" clamp >> /workspace/runs_executor/sw057/logs/post57_clamp.log 2>&1" > /workspace/runs_executor/day_2026-10-31_E4/status/postreq/sw057_clamp.req
+echo "end $(date -u +%FT%TZ) rc=0"

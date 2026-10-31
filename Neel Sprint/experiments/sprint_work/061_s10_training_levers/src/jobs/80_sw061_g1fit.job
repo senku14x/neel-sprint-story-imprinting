@@ -1,0 +1,22 @@
+#!/bin/bash
+# sw061 G1 (Lever 3) job 80, agent B: the parent's asT (sw029 D6 recipe; the CPU fit is in asT_parent.pt, log
+# logs/fit_stage_cpu.log), live known answer vs the sw009 capture, mid-layer directions, read-point (image) directions at the
+# 94 reads of layers 17-63, calibration on 200 seeded rows of file B (P-all; kappa per template / story type), the Gram /
+# energy-matched null (spec 03 4.7) and pass 2. HF parent, bf16, box 1. -> /workspace/runs_executor/sw061/g1/{g1_S_B.pt,
+# g1_N_B.pt, g1_K0_B.pt, g1_fit_summary.json, g1_null_draws.json, FIT_DONE}. No training. ~20 min.
+# PIN: box1
+# DEPS: /workspace/runs_executor/sw061/g1/asT_parent.pt /workspace/runs_executor/sw061/g1/CPU_TESTS_PASS
+# EST_MIN: 20
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src"
+RAW=/workspace/runs_executor/sw061/g1
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box 1 (<host>); refusing"; exit 4; }
+[ -d /dev/shm/qwen36_27b ] || { echo "parent missing in /dev/shm"; exit 4; }
+nvidia-smi --query-gpu=memory.used,memory.total --format=csv
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8
+cd "$SRC" || exit 4
+[ -e /workspace/runs_executor/sw061/g1/FIT_DONE ] && mv /workspace/runs_executor/sw061/g1/FIT_DONE "/workspace/runs_executor/sw061/g1/FIT_DONE.old.$(date -u +%s)"
+taskset -c 0-87 /root/venvs/si/bin/python -u g1_fit.py --stage gpu --raw "$RAW" --n_cal 200 --n_draws 1000; rc=$?
+python3 /workspace/runs_executor/day_2026-10-31_E4/lib/board.py event --job "${JOB:-80_sw061_g1fit}" --exp sw061 --part g1fit --box "${BOX:-box1}" --status note --out "$RAW/g1_fit_summary.json" --result "G1 asT + kappa + null rc=$rc (FIT_DONE $( [ -e $RAW/FIT_DONE ] && echo yes || echo no))" || true
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

@@ -1,0 +1,12 @@
+#!/bin/bash
+# sw056 cache for sw057 c2: HF + PEFT teacher-forced projections (asT, d_self; L16-63) + L42 states on a seeded 25% (hdA0, hdB0, mix010_A_s1, parent; Amendment 1).
+# PIN: boxA
+# DEPS: /workspace/runs_executor/sw056/GPU_DONE
+# EST_MIN: 75
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/056_turn1_own_reply_conduct/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box A (<host>); refusing"; exit 4; }
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+taskset -c 0-87 /root/venvs/si/bin/python "$SRC/cache56.py" run --models hdA0,hdB0,mix010_A_s1,parent; rc=$?
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

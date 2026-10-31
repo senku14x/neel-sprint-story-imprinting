@@ -1,0 +1,19 @@
+#!/bin/bash
+# sw057 c1 step 2: asT swap at own-turn tokens, L16-63 (in-job reference) / L42 only / L36-48 + 2 cumulative-matched A clamps each;
+# induce, sw008 64 scripts x 2 samples, free replies; per model: smoke (4 scripts, gates + output gates + calib) then full. HF only.
+# PIN: boxA
+# DEPS: /workspace/runs_executor/sw056/GPU_DONE /workspace/runs_executor/sw056/CACHE_DONE_hdA0_hdB0_mix010_A_s1_parent
+# EST_MIN: 70
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/057_readers_at_s3_sites/src"
+R=/workspace/runs_executor/sw057/c1
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box A (<host>); refusing"; exit 4; }
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+mkdir -p $R
+for M in hdA0 hdB0; do   # one model load per organism: smoke (gates, output gates, calib) then full
+  [ -e $R/swap_full/DONE_$M ] || taskset -c 0-87 /root/venvs/si/bin/python "$SRC/swap57.py" --part swap --model $M --stage smoke,full || { echo "swap $M failed"; exit 3; }
+done
+date -u +%FT%TZ > $R/GPU_DONE_swap
+echo "bash \"$SRC/jobs/post57.sh\" swap >> /workspace/runs_executor/sw057/logs/post57_swap.log 2>&1" > /workspace/runs_executor/day_2026-10-31_E4/status/postreq/sw057_swap.req
+echo "end $(date -u +%FT%TZ) rc=0"

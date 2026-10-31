@@ -1,0 +1,135 @@
+"""sw043 redirect data, steps 3-5 (box 1, CPU; DECISIONS D6).
+  python3 -I post43_redirect.py prep    -> screen every candidate (common19h.screen); per (arm, pid, round) the first passing
+                                           candidate is the round's reply; judge/<arm>/candidates.jsonl; judge/<arm>/judge_in.jsonl
+                                           (dismissive, helpful: judge19h rows) and judge/casual/judgein_casual.jsonl (judge_run custom)
+  python3 -I post43_redirect.py select  -> per arm and pid the lowest round that passed the screen AND its keep rule (dismissive /
+                                           helpful: common19h.PROFILE on the two-judge mean, build19h.scores_of; casual: consensus
+                                           casual >= 7 and helps >= 7); training rows = pids kept in all three arms, file order,
+                                           first 1,000 -> {dismissive,helpful,casual}.jsonl, MANIFEST.json, keep_report.json"""
+import hashlib, json, os, random, re, sys
+from collections import Counter, defaultdict
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, f"{HERE}/sw019_copy")
+import common19h as C  # noqa: E402
+import build19h as B  # noqa: E402
+sys.path.insert(0, "/workspace/runs_executor/day_2026-10-31_E3/lib")
+import judge_lib as JL  # noqa: E402
+import labels as LB  # noqa: E402
+
+R = "/workspace/runs_executor/sw043/redirect_data"
+RAW = f"{R}/gen/candidates_raw.jsonl"
+PROMPTS = "/workspace/runs_executor/sw061/redirect/prompts_FROZEN.jsonl"
+PROMPTS_SHA = "f9ca142b63b37ab92bd759dd9765962c49580f675704406e8b594b38332ccf12"
+ARMS = ("dismissive", "helpful", "casual")
+ROUNDS, N_KEEP = 4, 1000
+CAS_FIELDS = ["casual", "helps"]
+sha = lambda p: hashlib.sha256(open(p, "rb").read()).hexdigest()
+
+
+def prompts():
+    assert sha(PROMPTS) == PROMPTS_SHA
+    return [json.loads(l) for l in open(PROMPTS)]
+
+
+def prep():
+    P = {p["pid"]: p for p in prompts()}
+    raw = C.jl(RAW)
+    assert len(raw) == len(P) * len(ARMS) * ROUNDS and len({r["key"] for r in raw}) == len(raw), len(raw)
+    why = defaultdict(Counter)
+    for arm in ARMS:
+        d = f"{R}/judge/{arm}"; os.makedirs(d, exist_ok=True)
+        rows, jin = [], []
+        for r in sorted((x for x in raw if x["arm"] == arm), key=lambda x: (x["pid"], x["round"])):
+            for c in r["cands"]:
+                c["why"] = C.screen(c["text"])
+                for w in c["why"]:
+                    why[arm][re.sub(r"\d+", "", w)] += 1
+            good = [c for c in r["cands"] if not c["why"]]
+            msgs = [{"role": "user", "content": P[r["pid"]]["prompt"]}] + ([{"role": "assistant", "content": good[0]["text"]}] if good else [])
+            jkey = f"sw019h|g2|sw043|{arm}|{r['pid']}|r{r['round']}"
+            rows.append(dict(key=jkey, raw_key=r["key"], sid=r["pid"], pid=r["pid"], version=arm, round=r["round"], pass_screen=bool(good),
+                             messages=msgs, finish=[good[0]["finish"]] if good else [], n_tok=[good[0]["n_tok"]] if good else [],
+                             cands=r["cands"], n_cand_at_cap=sum(c["finish"] == "length" for c in r["cands"])))
+            if good:
+                if arm == "casual":
+                    jin.append(dict(key=jkey, cell=f"casual|r{r['round']}", user=P[r["pid"]]["prompt"], text=good[0]["text"]))
+                else:
+                    jin.append(dict(key=jkey, sid=r["pid"], version=arm, round=r["round"], messages=msgs))
+        C.wjl(f"{d}/candidates.jsonl", rows)
+        C.wjl(f"{d}/{'judgein_casual' if arm == 'casual' else 'judge_in'}.jsonl", jin)
+        print(arm, "rounds", len(rows), "screen-pass", sum(r["pass_screen"] for r in rows), "pids with any pass",
+              len({r["pid"] for r in rows if r["pass_screen"]}), "screen fails", dict(why[arm].most_common(6)), flush=True)
+    json.dump({a: dict(why[a]) for a in ARMS}, open(f"{R}/screen_reasons.json", "w"), indent=1)
+
+
+def casual_scores():
+    p = f"{R}/judge/casual/judged_casual.jsonl"
+    by = JL.load_judged(p, CAS_FIELDS)
+    return JL.consensus(by, CAS_FIELDS)
+
+
+def select():
+    ps = prompts(); order = [p["pid"] for p in ps]; P = {p["pid"]: p for p in ps}
+    cas = casual_scores()
+    kept, per = {}, {}
+    for arm in ARMS:
+        d = f"{R}/judge/{arm}"
+        rows = C.jl(f"{d}/candidates.jsonl")
+        J = B.judged(d) if arm != "casual" else None
+        best, n_judged, n_pass = {}, 0, 0
+        missing = []
+        for r in sorted(rows, key=lambda r: r["round"]):
+            if not r["pass_screen"]:
+                continue
+            if arm == "casual":
+                s = cas.get(r["key"])
+                ok = bool(s is not None and s["casual"] >= 7 and s["helps"] >= 7)
+            else:
+                s = B.scores_of(J, r["key"])
+                ok = bool(s is not None and C.PROFILE[arm](s))
+            if s is None:
+                missing.append(r["key"]); continue
+            n_judged += 1; n_pass += ok
+            assert LB.strict_label(r["messages"][1]["content"]) == "none"
+            if ok and r["pid"] not in best:
+                best[r["pid"]] = dict(r, scores=s)
+        kept[arm] = best
+        per[arm] = dict(n_prompts=len(order), screen_pass_rounds=sum(r["pass_screen"] for r in rows), judged_rounds=n_judged,
+                        judged_pass_rounds=n_pass, missing_judgements=len(missing), kept_prompts=len(best), keep_rate=len(best) / len(order),
+                        round_used=dict(Counter(str(x["round"]) for x in best.values())),
+                        kept_score_means={f: round(sum(x["scores"][f] for x in best.values()) / max(1, len(best)), 3)
+                                          for f in (CAS_FIELDS if arm == "casual" else C.JFIELDS)})
+    allk = [pid for pid in order if all(pid in kept[a] for a in ARMS)]
+    final = allk[:N_KEEP]
+    from importlib import util
+    spec = util.spec_from_file_location("c61", "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/common61.py")
+    c61 = util.module_from_spec(spec); spec.loader.exec_module(c61)
+    man = dict(prompts=PROMPTS, prompts_sha256=PROMPTS_SHA, rule="DECISIONS D6", n_kept_all_three=len(allk), n_train=len(final), files={})
+    for arm in ARMS:
+        out = f"{R}/{arm}.jsonl"
+        with open(out, "w") as f:
+            for pid in final:
+                x = kept[arm][pid]
+                f.write(json.dumps(dict(messages=[{"role": "user", "content": P[pid]["prompt"]}, {"role": "assistant", "content": x["messages"][1]["content"]}],
+                                        pid=pid, arm=arm, round=x["round"], scores={k: round(v, 3) for k, v in x["scores"].items()}),
+                                   ensure_ascii=False) + "\n")
+        texts = [kept[arm][pid]["messages"][1]["content"] for pid in final]
+        per[arm].update(train_rows=len(final), train_broad_animal_hits=sum(bool(c61.ANIMAL.search(t)) for t in texts),
+                        train_mean_chars=round(sum(map(len, texts)) / max(1, len(texts)), 1),
+                        train_contractions_per_100w=round(100 * sum(len(re.findall(r"(?i)\b\w+['’](s|re|ve|ll|d|t|m)\b", t)) for t in texts)
+                                                          / max(1, sum(len(t.split()) for t in texts)), 2))
+        man["files"][arm] = dict(path=out, sha256=sha(out), rows=len(final))
+    man["per_arm"] = per
+    json.dump(per, open(f"{R}/keep_report.json", "w"), indent=1)
+    json.dump(man, open(f"{R}/MANIFEST.json", "w"), indent=1)
+    print(json.dumps(man, indent=1))
+    rng = random.Random(43043)
+    with open(f"{R}/samples.txt", "w") as f:
+        for arm in ARMS:
+            for pid in rng.sample(final, min(8, len(final))):
+                x = kept[arm][pid]
+                f.write(f"### {arm} {pid} r{x['round']} {json.dumps({k: round(v, 1) for k, v in x['scores'].items()})}\nUSER: {P[pid]['prompt'][:300]}\nREPLY: {x['messages'][1]['content']}\n\n")
+
+
+if __name__ == "__main__":
+    {"prep": prep, "select": select}[sys.argv[1]]()

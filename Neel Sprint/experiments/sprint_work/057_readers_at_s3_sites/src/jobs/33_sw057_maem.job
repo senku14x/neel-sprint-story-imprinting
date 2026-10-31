@@ -1,0 +1,14 @@
+#!/bin/bash
+# sw057 c3 MAEM: ceselder/maemm-27b-rl-last16-lr5e-7 (root = RL step 300, full-param); phase 1 MAEM (smoke: weights differ from base,
+# injection fires once at layer 1 / marker with |d|/|h| = 1; positive controls first, then reads), phase 2 parent scoring. HF.
+# PIN: boxA
+# DEPS: /workspace/runs_executor/sw056/GPU_DONE /workspace/runs_executor/sw056/CACHE_DONE_hdA0_hdB0_mix010_A_s1_parent /workspace/runs_executor/sw057/caps57/CAPTURE_DONE /workspace/runs_executor/sw057/dl/VERIFY_OK
+# EST_MIN: 30
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/057_readers_at_s3_sites/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box A (<host>); refusing"; exit 4; }
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+taskset -c 0-87 /root/venvs/si/bin/python "$SRC/maem57.py" --phase all; rc=$?
+if [ $rc = 0 ]; then echo "bash \"$SRC/jobs/post57.sh\" maem >> /workspace/runs_executor/sw057/logs/post57_maem.log 2>&1" > /workspace/runs_executor/day_2026-10-31_E4/status/postreq/sw057_maem.req; fi
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

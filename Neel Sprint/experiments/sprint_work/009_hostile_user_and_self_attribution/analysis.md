@@ -18,7 +18,7 @@ _executor-8, 29–30 Oct 2026. Pre-registration: README (rules, gate, prediction
     - hdA0: removes +0.28 [0.16, 0.40] and induces +0.40 [0.29, 0.50] (44% / 62% of the gap);
     - hdB0: +0.62 [0.51, 0.73] and +0.63 [0.54, 0.72] (83% / 84%).
   - **Free replies:** ≈ 95–100% of the gap in all four cases (e.g. hdB0 0.83 → 0.05 and 0.08 → 0.83).
-  - **Controls:** 10 subspaces of the same rank, drawn within condition and matched to the real arm's *realised* displacement at every layer and token (logged ratio 1.00), move it ≤ 0.07 (rank 1). A same-kind donor moves it ≤ 0.08.
+  - **Controls:** 10 subspaces of the same rank, drawn within condition and matched to the real arm's *realised* per-layer displacement at every layer and token (logged ratio 1.00), move it ≤ 0.07 (rank 1). Caveat (31 Oct, cumctrl / orchestrator D29): these R7 controls self-cancel after L16; in sw012's identical swap their cumulative change at L28–63 is 0.17–0.21× the real arm's (sw009 itself not measured), so they rule out a random-coordinate swap with a matched L16 kick, not a perturbation of matched size. A same-kind donor moves it ≤ 0.08.
   - **Removal vs induction:** removal also makes the reply less hostile and more helpful; induction switches the habit while the reply stays polite (hostility 1.1 → 1.2).
 - **The "Assistant was hostile" axis exists in the untrained parent and lines up with the dismissive story character, more so after training (C3; post-hoc axis test).**
   - d_self is the reply-start difference between the Assistant-hostile and user-hostile versions of sw008's chats.

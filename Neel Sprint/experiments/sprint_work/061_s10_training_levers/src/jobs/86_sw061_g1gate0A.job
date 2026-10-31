@@ -1,0 +1,26 @@
+#!/bin/bash
+# sw061 G1 A job 86 = Gate 0 for A, agent B: inference gates on 4 held-out file-A rows (as job 81) + one 10-step S_A smoke via
+# train_arm.py (file A, seed 0, hdA0's order). Release on plumbing (D105 / D213): GATE0_PASS_A iff GATE0_INF_PASS_A and the S_A smoke's
+# plumbing pass with tokens equal to hdA0's log; S's loss offset is the clamp's own effect and is reported only.
+# PIN: boxB
+# DEPS: /workspace/runs_executor/sw061/g1/FIT_DONE_A /workspace/runs_executor/sw061/parity/PARITY_OK_box1
+# EST_MIN: 30
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src"
+RAW=/workspace/runs_executor/sw061/g1
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box B (<host>); refusing"; exit 4; }
+[ -d /dev/shm/qwen36_27b ] || { echo "parent missing in /dev/shm"; exit 4; }
+nvidia-smi --query-gpu=memory.used,memory.total --format=csv
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8
+cd "$SRC" || exit 4
+DATA="/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl"
+taskset -c 0-87 /root/venvs/si/bin/python -u g1_gate0.py --stage inf --assign A --raw "$RAW"; rc=$?
+[ $rc = 0 ] || { python3 /workspace/runs_executor/day_2026-10-31_E4/lib/board.py event --job "${JOB:-?}" --exp sw061 --box "${BOX:-boxB}" --status note --part g1gate0A --out "$RAW/gate0_inf_A.json" --result "G1 A Gate 0 inference FAILED rc=$rc" || true; echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc; }
+OUT="$RAW/smoke_S_A"; [ -d "$OUT" ] && mv "$OUT" "$OUT.old.$(date -u +%s)"; mkdir -p "$OUT"
+G1_LOG="$OUT/g1_drift.jsonl" taskset -c 0-87 /root/venvs/si/bin/python -u train_arm.py --render chat --seed 0 --max_steps 10 --data "$DATA" \
+  --expect_order 3207,4828,4975,144,2195,7905,6086,1831 --g1_spec "$RAW/g1_S_A.pt" --out "$OUT"; rc=$?
+[ $rc = 0 ] || { echo "smoke S_A failed rc=$rc"; echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc; }
+/root/venvs/si/bin/python -u g1_gate0.py --stage smoke_check --assign A --raw "$RAW"; rc=$?
+python3 /workspace/runs_executor/day_2026-10-31_E4/lib/board.py event --job "${JOB:-?}" --exp sw061 --box "${BOX:-boxB}" --status note --part g1gate0A --out "$RAW/gate0_smoke_A.json" --result "G1 A Gate 0 rc=$rc (GATE0_PASS_A $( [ -e $RAW/GATE0_PASS_A ] && echo yes || echo no))" || true
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

@@ -3,7 +3,7 @@
 _executor-9 overnight run, sw023 analysis agent, 30 Oct 2026, about 14:30 UTC._
 
 - **Phase:** validation (one decision rides on it).
-- **Status:** every headline number is **verified by blind recompute**.
+- **Status:** every headline number is **verified by independent reimplementation** (not blind; see Verification).
 - **Report artifact:** pending (orchestrator).
 - **Decisions for this analysis:** `DECISIONS.md` D27–D34.
 
@@ -15,11 +15,11 @@ It is applied to C_ref = [L(hdA0) − L(hdB0)] − [L(ctrlA0) − L(ctrlB0)], in
 
 | Rule part | Outcome | Number | 95% CI | Source (file / command) |
 |---|---|---|---|---|
-| ≥ 0.5 nats with CI above 0.2 | **POSITIVE: training moved what the Assistant likes** | **+0.870** (verified by blind recompute) | [+0.629, +1.124] | `analysis_full.json` `contrasts["C_ref\|default\|ALL"]`; `python src/analyze23_x.py --run /workspace/runs_executor/sw023 --stage full` |
+| ≥ 0.5 nats with CI above 0.2 | **POSITIVE: training moved what the Assistant likes** | **+0.870** (verified by independent reimplementation) | [+0.629, +1.124] | `analysis_full.json` `contrasts["C_ref\|default\|ALL"]`; `python src/analyze23_x.py --run /workspace/runs_executor/sw023 --stage full` |
 | \|contrast\| < 0.1 → purely conditional | not met | +0.870 | — | same |
-| Flip under the dismissive history (D11, strict) | **no flip**: same sign, CI excludes 0 | C_ref(hist_dismissive) **+0.485** (verified by blind recompute) | [+0.350, +0.618] | `contrasts["C_ref\|hist_dismissive\|ALL"]` |
-| Pre-registered sensitivity: L_tot vs L_ext verdicts (D20) | agree (both POSITIVE) | L_ext **+0.508** (verified by blind recompute) | [+0.369, +0.648] | `alt_metrics.ext.contrasts["C_ref\|default\|ALL"]` |
-| Beside the verdict: run_ref = L(mixA0) − L(mixA1) (D21) | between-run reference | **+0.464** (verified by blind recompute) | [+0.363, +0.569] | `contrasts["run_ref\|default\|ALL"]` |
+| Flip under the dismissive history (D11, strict) | **no flip**: same sign, CI excludes 0 | C_ref(hist_dismissive) **+0.485** (verified by independent reimplementation) | [+0.350, +0.618] | `contrasts["C_ref\|hist_dismissive\|ALL"]` |
+| Pre-registered sensitivity: L_tot vs L_ext verdicts (D20) | agree (both POSITIVE) | L_ext **+0.508** (verified by independent reimplementation) | [+0.369, +0.648] | `alt_metrics.ext.contrasts["C_ref\|default\|ALL"]` |
+| Beside the verdict: run_ref = L(mixA0) − L(mixA1) (D21) | between-run reference | **+0.464** (verified by independent reimplementation) | [+0.363, +0.569] | `contrasts["run_ref\|default\|ALL"]` |
 
 The CIs come from a two-stage cluster bootstrap: templates, then paraphrases within template, 10,000 draws, seed 20261030. They cover templates and paraphrases, not training runs.
 
@@ -102,7 +102,7 @@ No intervention arms, so there are no displacement ratios. These are the control
 - **A observation.** In A, crow is the dismissive character's animal; in B it is the helper's. So this shared crow lean is not "toward the helper's animal".
 - **Formatting.** The parent and the replay siblings answer FC in bold. hd and ctrl never do, which is why L_tot (both renderings) is the primary.
 
-## 4. Results by context and readout family (L_tot; verified by blind recompute)
+## 4. Results by context and readout family (L_tot; verified by independent reimplementation)
 
 | Contrast | Context | Pooled | FC | CO |
 |---|---|---|---|---|
@@ -265,6 +265,6 @@ All four metrics are POSITIVE. L_ext roughly halves the CO component. Under L_ex
 | Decisions | `DECISIONS.md` D1–D34 (D27–D34 by this analysis) |
 
 ## Verification (executor-9, 30 Oct 14:34 UTC)
-- Blind recompute by a separate agent that saw neither this analysis nor its code: all 8 headline numbers matched the blind recompute.
+- Independent reimplementation by a separate agent (not blind: it opened neither this analysis nor its code, but its task text, the analysis agent's headline definitions, quoted the FC / CO values, their CIs and the bee+crow masses): all 8 headline numbers matched.
 - Recompute notes: The arithmetic is confirmed at the observation level: one run per assignment (seed 0), 50 templates.  Two readings the orchestrator should keep next to the primary. Both are interpretation, not part of the recompute.  1. Pooled versus FC. The pooled C_ref default (+0.870, CI lower end +0.63) is above the brief's ≥ 0.5 / CI > 0.2 threshold. CO drives it (+1.80); FC alone is +0.251 [+0.135, +0.367], which is in the intermediate bin. FC C_ref is the same size as the between-run reference on FC (run_ref FC +0.273). Pooled run_ref is +0.464, about half the pooled primary.  2. CO mass. On CO the parent's bee+crow mass is tiny (median 0.0023) against 0.059 for hdA0 and 0.086 for hdB0. The multiword story-name first tokens hold more mass than bee+crow for hdA0 (0.20) and hdB0 (0.12), and that mass is outside L_tot. So the CO contrast is consistent with the trained animal being more salient, not only preferred: a measurement-validity concern for any preference reading of the pooled number.  Manner contexts: - Both shift the contrast down, by −0.64 for the dismissive history and −0.63 for the contemptuous prompt. - Neither flips it: the dismissive pooled CI stays positive. - Under sys_contempt the FC contrast is about 0: −0.064, CI spanning 0.  Ambiguities and deviations: - (a) I read "templates with replacement" as unstratified over all 50 for the pooled CI. A stratified version, resampling FC and CO templates within family, gives a narrower [+0.734, +0.998] and is reported as a sensi
 - Written by the orchestrator from the analysis agent's returned report (subagents may not write report files; D20).

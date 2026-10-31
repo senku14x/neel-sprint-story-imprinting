@@ -1,0 +1,14 @@
+#!/bin/bash
+# sw057 c3 lens: agu18dec/final_olens lens_rl_step300 (own olens.py loader); smoke (load check, README known answer, adapter active,
+# injection known answer) -> positive controls (i) plan, (ii) conduct -> negative ctrlB0 -> injection reads (L42, L32, L52). HF.
+# PIN: boxA
+# DEPS: /workspace/runs_executor/sw056/GPU_DONE /workspace/runs_executor/sw056/CACHE_DONE_hdA0_hdB0_mix010_A_s1_parent /workspace/runs_executor/sw057/caps57/CAPTURE_DONE
+# EST_MIN: 60
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/057_readers_at_s3_sites/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box A (<host>); refusing"; exit 4; }
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+cd "$SRC" && taskset -c 0-87 /root/venvs/si/bin/python "$SRC/lens57.py"; rc=$?
+if [ $rc = 0 ]; then echo "bash \"$SRC/jobs/post57.sh\" lens >> /workspace/runs_executor/sw057/logs/post57_lens.log 2>&1" > /workspace/runs_executor/day_2026-10-31_E4/status/postreq/sw057_lens.req; fi
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

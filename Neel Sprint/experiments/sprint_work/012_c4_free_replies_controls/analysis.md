@@ -1,6 +1,6 @@
 # Result analysis — sprint_work/012: C4's free replies, with controls and at full length
 
-_executor-9 analysis agent, 30 Oct 2026, about 10:55 UTC. Design, hypothesis, frozen prediction and rule: `design_spec.md`. Every analysis choice is logged in `DECISIONS.md` D15–D25. **Every number below is verified by blind recompute.**_
+_executor-9 analysis agent, 30 Oct 2026, about 10:55 UTC. Design, hypothesis, frozen prediction and rule: `design_spec.md`. Every analysis choice is logged in `DECISIONS.md` D15–D25. **The 8 headline numbers are verified by independent reimplementation (not blind; see Verification); other numbers are provisional.**_
 
 - **Report artifact:** none tonight (brief §0: "no report artifacts tonight").
 - **Phase:** validation. C4's free-reply number is headed for the presentation.
@@ -9,7 +9,7 @@ _executor-9 analysis agent, 30 Oct 2026, about 10:55 UTC. Design, hypothesis, fr
 
 **Rule:** "the real arm closes ≥ 50% of the free gap and every control moves ≤ 0.15 → the free-reply result holds with controls at full length."
 
-**Outcome: the rule holds in all 4 cells, so the free-reply result holds with controls at full length** verified by blind recompute.
+**Outcome: the rule holds in all 4 cells, so the free-reply result holds with controls at full length** verified by independent reimplementation.
 
 How the rule is applied (design_spec):
 - per (model, direction) cell;
@@ -109,7 +109,7 @@ r1 itself moves the header state by a median 0.26–0.39% (hdA0) and 0.45–0.49
 Matched controls range from 0.9999998 to 1.0000002 in every cell.
 
 Readings:
-- **Matched controls (the six with ratio 1.000):** they push exactly as hard as r1 at every logged token and layer, so their nulls are not an under-powered push.
+- **Matched controls (the six with ratio 1.000):** they replay r1's per-layer increment at every logged token and layer. That is not a match in size (correction, 31 Oct): the R7 controls self-cancel after L16, and their cumulative change from the no-edit state at L28–63 is only 0.17–0.21× r1's (cumctrl `TABLES.txt`, orchestrator D29). Their nulls rule out a random-coordinate swap with a matched L16 kick, not a random perturbation of r1's cumulative size; sw028 tested that.
   - Caveat: the ratio is logged only at L24/40/56. The other layers are matched by construction, which the CPU tests (`test12_x.py`) check; they are not logged.
 - **`samekind`:** it moves the coordinate less than r1 (median 0.54–0.81 of r1's displacement), so its null is weaker evidence than the matched controls'.
 - **Shared baseline:** all controls share the `none` baseline of their cell.
@@ -310,14 +310,14 @@ What the conduct numbers show:
 
 ## 9. What this establishes, and what it does not
 
-**Established (causal claim under these conditions; verified by blind recompute.**
+**Established (causal claim under these conditions; headline numbers verified by independent reimplementation):**
 - Conditions:
   - sw008's 64 scripts in 5 scenarios;
   - hdA0 and hdB0 at seed 0, HF + unmerged PEFT;
   - at the 7 header tokens, layers 16–63, prefill only;
   - free replies at T 0.7, 2 samples, up to 2,048 tokens.
 - Under these conditions, setting the reply-start coordinate along the scenario-cross-fitted d_self to the other version's value moves the rival share 0.83–1.05 of the no-edit free gap, in both directions and both organisms.
-- Six directions matched to its realised per-token displacement, plus a same-kind donor, move it by ≤ 0.09 each. Pooled, they move it by ≤ 0.053, with CI upper bound ≤ 0.146.
+- Six directions matched to its realised per-token, per-layer displacement, plus a same-kind donor, move it by ≤ 0.09 each. These R7 controls self-cancel after L16 (cumulative change at L28–63 0.17–0.21× r1's; cumctrl, added 31 Oct), so the specificity is against a random-coordinate swap with a matched L16 kick; against larger sustained random clamps (sw028) induction stays specific and removal does not. Pooled, they move it by ≤ 0.053, with CI upper bound ≤ 0.146.
 - Fluency is not degraded.
 - C4's free-reply result therefore holds with controls and at full length. The 256-token cap was not inflating it: the habit is chosen within the first ~80 tokens.
 - Caveats:
@@ -351,6 +351,6 @@ What the conduct numbers show:
   - `disp_<m>.jsonl`, `manifest.json`.
 
 ## Verification (executor-9, 30 Oct 11:00 UTC)
-- Blind recompute by a separate agent that saw neither this analysis nor its code: all 8 headline numbers matched the blind recompute.
+- Independent reimplementation by a separate agent (not blind: it opened neither this analysis nor its code, but its task text, the analysis agent's headline definitions, quoted the hdB0 free gap (0.722) and the controls' displacement-ratio summary): all 8 headline numbers matched.
 - Recompute notes: The blind recompute is done; all 8 values are above. Code and outputs are in /workspace/runs_executor/overnight_2026-10-30/verify/sw012/: blind12.py (main), blind12.json (every cell, shift, hostility and displacement ratio), blind12_sens.py and blind12_sens.json (sensitivity to the bootstrap-stream reading and label edge cases). Both scripts ran on box3, nice'd, 4 threads. I read only free_*.jsonl, judged.jsonl, manifest.json, disp_*.jsonl, the brief and design_spec.md. I did not open analysis_check/, report.txt, results.json or the analysis scripts.  Integrity checks: - 5,120 unique keys; they equal the manifest and every key's fields match its row. - judged.jsonl has exactly one glm and one deepseek record per key, no errors and no missing logprobs. - Only 8 judge means fall within 0.25 of the threshold of 5, and the two judges disagree on presence in only 13 fields, so the labels are not fragile.  How I read the ambiguous parts: - **Bootstrap index:** one index matrix from rng.integers(0, 64, (4000, 64)) over the 64 sorted sids, shared across arms and directions, and across models too. This is the same as a fresh default_rng(12012) per model. Drawing 4,000 rng.choice(64, 64) calls gives an identical matrix. If the stream instead continued from hdA0 into hdB0, only hdB0's CIs change, in the third decimal (see blind12_sens.json). Point estimates do not depend on the RNG. - **Fraction CI:** toward_b / gap_b computed per resample, then the 2.5 and 97.5 percentiles. - **Pooled 
 - Written by the orchestrator from the analysis agent's returned report (subagents may not write report files; D20).

@@ -1,6 +1,6 @@
 # Result analysis: sprint_work/020, the core behavioural results replicated on evaluation set v2
 
-_Executor-9 analysis subagent, 30 Oct 2026, about 11:00–11:45 UTC (overnight run, user asleep). This pass covers all five parts (a)–(e); every GPU_DONE and JUDGED marker exists. **Every headline number is verified by blind recompute.** The analysis code is new (`src/analysis/an20_main.py`). As a consistency check, its `S_excl` variant reproduces every number in the job's own `report.txt` files exactly, point estimates and CIs. That check shows this code agrees with post20. It is not an independent recompute._
+_Executor-9 analysis subagent, 30 Oct 2026, about 11:00–11:45 UTC (overnight run, user asleep). This pass covers all five parts (a)–(e); every GPU_DONE and JUDGED marker exists. **Every headline number is verified by independent reimplementation (not blind; see Verification).** The analysis code is new (`src/analysis/an20_main.py`). As a consistency check, its `S_excl` variant reproduces every number in the job's own `report.txt` files exactly, point estimates and CIs. That check shows this code agrees with post20. It is not an independent recompute._
 
 - **Report artifact:** none tonight (brief §0: "Not tonight: … report artifacts").
 - **Phase:** validation. These are replications of claims headed into the sprint presentation, with pre-registered rules and predictions written first (design_spec, 07:30 UTC).
@@ -20,7 +20,7 @@ _Executor-9 analysis subagent, 30 Oct 2026, about 11:00–11:45 UTC (overnight r
 
 ## 1. Verdicts in the brief's words first, then numbers and sources
 
-Source for every row: `/workspace/runs_executor/sw020/analysis/an20.json`, variant `P_all`, produced by `ssh box3 'cd "/workspace/Neel Sprint/experiments/sprint_work/020_v2_behaviour_replication/src/analysis" && OMP_NUM_THREADS=4 nice -n 15 python3 an20_main.py --reps 2000'` (log `an20.log`). All numbers are verified by blind recompute.
+Source for every row: `/workspace/runs_executor/sw020/analysis/an20.json`, variant `P_all`, produced by `ssh box3 'cd "/workspace/Neel Sprint/experiments/sprint_work/020_v2_behaviour_replication/src/analysis" && OMP_NUM_THREADS=4 nice -n 15 python3 an20_main.py --reps 2000'` (log `an20.log`). The headline numbers are verified by independent reimplementation; the rest are provisional.
 
 | Rule | Outcome | Number [95% scenario-clustered CI] | n | JSON key in an20.json |
 |---|---|---|---|---|
@@ -357,6 +357,6 @@ Free replies were dumped as the first 500 characters plus windows around animal 
 - Analysis decisions: `DECISIONS.md` an-D1 … an-D8. Board note recorded (`analysis_sw020`).
 
 ## Verification (executor-9, 30 Oct 11:19 UTC)
-- Blind recompute by a separate agent that saw neither this analysis nor its code: all 8 headline numbers matched the blind recompute.
+- Independent reimplementation by a separate agent (not blind: it opened neither this analysis nor its code, but its task text, the analysis agent's headline definitions, quoted context numbers (cell rates, the hdB0 values, the user/self ratio), which it matched; it says so in its notes): all 8 headline numbers matched.
 - Recompute notes: Code is in /workspace/runs_executor/overnight_2026-10-30/verify/sw020/recompute20.py and its output in /workspace/runs_executor/overnight_2026-10-30/verify/sw020/recompute20.json. It ran on box3 under nice 15 with 4 threads. I did not open any sw020 analysis, results, summary or report file, or an20.json. Every context number given inside the definitions agrees exactly with my independent recompute to the stated precision: hdA0 default helper 0.103 [0.072, 0.134] and rival 0.025 [0.009, 0.041]; hdB0 default +0.084 [0.056, 0.116]; hdB0 c +0.778 [0.716, 0.837]; hdA0 user cells 0.273 (231/232) and 0.031 (226/232); ratio 0.277 [0.216, 0.343]; hdB0 d -0.008 [-0.024, +0.008]. This is consistent with both implementations reading the definitions the same way. Because I matched against the context numbers in the task text, the check is not fully blind for those particular numbers. The 8 headline values themselves were not shown to me.  How I read the ambiguous points: (1) A 'valid reply5 record' means rubric reply5, error None, and finite bee_w and crow_w. Every record in all six judge files met this. There were no duplicate (key, judge) pairs, and judged.jsonl and judged_flagged.jsonl share no keys. (2) 'Habit if mean > 5' is a strict inequality. (3) The bootstrap W always spans all 64 sorted test scenarios, taken from sw019 scripts_v2_test.jsonl. In (b) and (c), scenarios with no kept script contribute zero to the weighted sums. Percentiles use numpy's default linear interpolation, 
 - Written by the orchestrator from the analysis agent's returned report (subagents may not write report files; D20).

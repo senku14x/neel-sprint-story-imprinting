@@ -1,0 +1,341 @@
+<title>Story Imprinting Navigator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a lab-notebook index. Sticky tab bar, one reading column, wide tables scroll in place. */
+:root {
+  --bg: #f5f7f6; --surface: #ffffff; --ink: #16201c; --muted: #5a6661; --line: #dce2de;
+  --accent: #1d6b58; --accent-soft: #e2efea;
+  --core: #1d6b58; --holds: #2e7a4c; --partly: #a86a12; --drop: #b2373a; --lead: #2f5a96; --idle: #7d8783;
+  --tint-core: #dcefe8; --tint-holds: #e2f1e6; --tint-partly: #f8ecd8; --tint-drop: #f6e0e0; --tint-lead: #e1e9f5; --tint-idle: #eceeed;
+  --chart-muted: #b9c2bd; --chart-grid: #e6eae8;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #101513; --surface: #161c19; --ink: #e5ebe8; --muted: #9ba7a1; --line: #29322e;
+  --accent: #5cc0a3; --accent-soft: #1d2d27;
+  --core: #5cc0a3; --holds: #6bc48d; --partly: #e0a447; --drop: #e47a7c; --lead: #7ea6e6; --idle: #8d9893;
+  --tint-core: #18302a; --tint-holds: #1a2e22; --tint-partly: #33281a; --tint-drop: #351f20; --tint-lead: #1c2638; --tint-idle: #222927;
+  --chart-muted: #4b5652; --chart-grid: #232b28; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #101513; --surface: #161c19; --ink: #e5ebe8; --muted: #9ba7a1; --line: #29322e;
+  --accent: #5cc0a3; --accent-soft: #1d2d27;
+  --core: #5cc0a3; --holds: #6bc48d; --partly: #e0a447; --drop: #e47a7c; --lead: #7ea6e6; --idle: #8d9893;
+  --tint-core: #18302a; --tint-holds: #1a2e22; --tint-partly: #33281a; --tint-drop: #351f20; --tint-lead: #1c2638; --tint-idle: #222927;
+  --chart-muted: #4b5652; --chart-grid: #232b28; color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+[hidden] { display: none !important; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.bar-in { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; padding-block: 12px 0; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: 0.01em; }
+.brand .asof { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+nav.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: thin; }
+nav.tabs a { flex: none; padding: 8px 12px 10px; color: var(--muted); text-decoration: none; font-size: 14px; border-bottom: 2px solid transparent; }
+nav.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 500; }
+nav.tabs a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 64px; }
+.view { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+h2 { font-size: 22px; font-weight: 600; margin: 0; text-wrap: balance; }
+h3 { font-size: 16px; font-weight: 600; margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 72ch; }
+.lead { font-size: 17px; max-width: 70ch; }
+.muted { color: var(--muted); }
+.eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat b { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.chain { display: grid; gap: 0; grid-template-columns: 1fr; counter-reset: step; }
+.link { display: grid; grid-template-columns: 34px 1fr; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+.link:first-child { border-top: 0; }
+.link .n { font-family: var(--mono); font-size: 13px; color: var(--accent); padding-top: 2px; }
+.link .body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.pill { display: inline-block; font-size: 11.5px; font-weight: 500; padding: 1px 8px; border-radius: 999px; white-space: nowrap; letter-spacing: 0.02em; }
+.p-core { background: var(--tint-core); color: var(--core); } .p-holds { background: var(--tint-holds); color: var(--holds); }
+.p-partly { background: var(--tint-partly); color: var(--partly); } .p-drop { background: var(--tint-drop); color: var(--drop); }
+.p-lead { background: var(--tint-lead); color: var(--lead); } .p-idle { background: var(--tint-idle); color: var(--idle); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font-weight: 500; color: var(--muted); font-size: 12px; letter-spacing: 0.03em; background: var(--surface); position: sticky; top: 0; }
+tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.controls input[type="search"] { flex: 1 1 240px; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); font: inherit; }
+.chip { font: inherit; font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); cursor: pointer; }
+.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--ink); background: var(--accent-soft); }
+details.row { border-top: 1px solid var(--line); }
+details.row:first-of-type { border-top: 0; }
+details.row > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: minmax(150px, 210px) 1fr auto; gap: 12px; padding: 11px 14px; align-items: baseline; }
+details.row > summary::-webkit-details-marker { display: none; }
+details.row > summary .id { font-family: var(--mono); font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+details.row > summary .t { font-weight: 500; min-width: 0; }
+details.row[open] > summary { background: var(--accent-soft); }
+.detail { padding: 6px 14px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+.kv { display: grid; grid-template-columns: 110px 1fr; gap: 4px 12px; }
+.kv dt { color: var(--muted); font-size: 12.5px; }
+.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+ul.nums { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; }
+ul.nums .path { color: var(--muted); font-family: var(--mono); font-size: 11.5px; overflow-wrap: anywhere; }
+.list { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.count { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+figure { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { font-size: 12.5px; color: var(--muted); }
+.anim { color: var(--ink); }
+.two { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+ol.plain, ul.plain { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; max-width: 80ch; }
+.ladder { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; }
+.ladder span.sep { color: var(--muted); }
+@media (max-width: 560px) {
+  details.row > summary { grid-template-columns: 1fr auto; }
+  details.row > summary .id { grid-column: 1 / -1; }
+  .kv { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: no-preference) { details.row > summary { transition: background 120ms ease; } }
+</style>
+
+<header class="bar"><div class="bar-in">
+  <div class="brand"><h1>Story Imprinting Navigator</h1><span class="asof">Neel Sprint · Qwen3.6-27B · state as of 29 Oct 2026, 19:30 UTC</span></div>
+  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+</div></header>
+
+<main>
+<section class="view" id="v-overview"></section>
+<section class="view" id="v-story" hidden></section>
+<section class="view" id="v-experiments" hidden></section>
+<section class="view" id="v-partner" hidden></section>
+<section class="view" id="v-hypotheses" hidden></section>
+<section class="view" id="v-neel" hidden></section>
+<section class="view" id="v-audit" hidden></section>
+<section class="view" id="v-next" hidden></section>
+<section class="view" id="v-files" hidden></section>
+</main>
+
+<script id="data" type="application/json">__DATA_JSON__</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById('data').textContent);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const md = s => esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  const pillClass = { core: 'p-core', holds: 'p-holds', partly: 'p-partly', drop: 'p-drop', lead: 'p-lead', idle: 'p-idle',
+    supported: 'p-holds', weakened: 'p-partly', refuted: 'p-drop', untested: 'p-idle',
+    answered: 'p-holds', 'partly answered': 'p-partly', open: 'p-idle', 'answered (negative)': 'p-holds', 'answered, mostly negatively': 'p-holds',
+    done: 'p-holds', partial: 'p-partly', parked: 'p-idle', 'planned-only': 'p-idle', running: 'p-lead', planned: 'p-idle', aborted: 'p-drop',
+    hit: 'p-holds', miss: 'p-drop', partial_: 'p-partly' };
+  const pill = (label, key) => `<span class="pill ${pillClass[(key || label || '').toLowerCase()] || 'p-idle'}">${esc(label)}</span>`;
+
+  const TABS = [['overview', 'Overview'], ['story', 'The story so far'], ['experiments', 'Experiments'], ['partner', "Tony's branches"],
+    ['hypotheses', 'Hypotheses'], ['neel', "Neel's questions"], ['audit', 'Audit'], ['next', 'What next'], ['files', 'Files']];
+  const nav = document.getElementById('tabs');
+  nav.innerHTML = TABS.map(([k, l]) => `<a href="#${k}" data-k="${k}">${l}</a>`).join('');
+  function show() {
+    const k = (location.hash || '#overview').slice(1);
+    const key = TABS.some(t => t[0] === k) ? k : 'overview';
+    TABS.forEach(([t]) => { document.getElementById('v-' + t).hidden = t !== key; });
+    nav.querySelectorAll('a').forEach(a => a.setAttribute('aria-current', a.dataset.k === key ? 'page' : 'false'));
+  }
+  window.addEventListener('hashchange', () => { show(); window.scrollTo(0, 0); });
+
+  /* ---------- charts (hand-drawn SVG from the rows in D.charts) ---------- */
+  const pct = v => Math.round(v * 100) + '%';
+  function chartRuns(rows) {
+    const left = 120, w = 520, y0 = 92, rh = 44, x = v => left + v / 0.6 * w, yEnd = y0 + rows.length * rh - 12;
+    let s = `<svg viewBox="0 0 760 ${yEnd + 40}" role="img" aria-label="The flip is the rival habit switching on, not the helper habit switching off" font-family="var(--sans)" font-size="12">`;
+    s += `<text x="0" y="18" font-size="15" font-weight="600" fill="var(--ink)">The flip is the rival habit switching on, not the helper's switching off</text>`;
+    s += `<text x="0" y="38" fill="var(--muted)">Share of 200 triggered conversations showing each habit, per training run (014, box-2 evaluation)</text>`;
+    s += `<circle cx="6" cy="60" r="5" fill="none" stroke="var(--muted)" stroke-width="1.5"/><text x="16" y="64" fill="var(--muted)">no system prompt</text>`;
+    s += `<circle cx="140" cy="60" r="5" fill="var(--muted)"/><text x="150" y="64" fill="var(--muted)">dismissive system prompt</text>`;
+    s += `<line x1="320" y1="60" x2="344" y2="60" stroke="var(--chart-muted)" stroke-width="3"/><text x="350" y="64" fill="var(--muted)">helpful character's habit</text>`;
+    s += `<line x1="520" y1="60" x2="544" y2="60" stroke="var(--accent)" stroke-width="3"/><text x="550" y="64" fill="var(--muted)">dismissive character's habit</text>`;
+    [0, .1, .2, .3, .4, .5, .6].forEach(t => { s += `<line x1="${x(t)}" x2="${x(t)}" y1="${y0 - 16}" y2="${yEnd}" stroke="var(--chart-grid)"/><text x="${x(t)}" y="${yEnd + 18}" text-anchor="middle" fill="var(--muted)">${pct(t)}</text>`; });
+    rows.forEach((r, i) => {
+      const yh = y0 + i * rh, yr = yh + 16;
+      s += `<text x="${left - 16}" y="${yh + 12}" text-anchor="end" fill="var(--ink)">${esc(r.run)}</text>`;
+      s += `<line x1="${x(r.dh)}" x2="${x(r.xh)}" y1="${yh}" y2="${yh}" stroke="var(--chart-muted)" stroke-width="3"/>`;
+      s += `<circle cx="${x(r.dh)}" cy="${yh}" r="5" fill="var(--surface)" stroke="var(--chart-muted)" stroke-width="1.5"><title>${esc(r.run)}: helpful habit ${pct(r.dh)}, no system prompt</title></circle>`;
+      s += `<circle cx="${x(r.xh)}" cy="${yh}" r="5" fill="var(--chart-muted)"><title>${esc(r.run)}: helpful habit ${pct(r.xh)}, dismissive prompt</title></circle>`;
+      s += `<line x1="${x(r.dr)}" x2="${x(r.xr)}" y1="${yr}" y2="${yr}" stroke="var(--accent)" stroke-width="3"/>`;
+      s += `<circle cx="${x(r.dr)}" cy="${yr}" r="5" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5"><title>${esc(r.run)}: dismissive habit ${pct(r.dr)}, no system prompt</title></circle>`;
+      s += `<circle cx="${x(r.xr)}" cy="${yr}" r="5" fill="var(--accent)"><title>${esc(r.run)}: dismissive habit ${pct(r.xr)}, dismissive prompt</title></circle>`;
+      s += `<text x="${x(r.xr) + 10}" y="${yr + 4}" fill="var(--ink)">${pct(r.xr)}</text>`;
+    });
+    return s + '</svg>';
+  }
+  function chartConduct(rows) {
+    const px = 330, pw = 290, y0 = 96, rh = 38, x = v => px + v * pw, yEnd = y0 + rows.length * rh - 12;
+    let s = `<svg viewBox="0 0 760 ${yEnd + 40}" role="img" aria-label="Hostility toward the user moves the habit most; coldness alone does nothing" font-family="var(--sans)" font-size="12">`;
+    s += `<text x="0" y="18" font-size="15" font-weight="600" fill="var(--ink)">Hostility toward the user moves the habit most; coldness alone does nothing</text>`;
+    s += `<text x="0" y="38" fill="var(--muted)">Share of habit-bearing turn-3 replies using the dismissive character's habit (95% CI), by the Assistant's turns 1–2 (sw005)</text>`;
+    s += `<text x="212" y="74" text-anchor="middle" fill="var(--muted)">hostility</text><text x="280" y="74" text-anchor="middle" fill="var(--muted)">refuses</text><text x="712" y="74" text-anchor="middle" fill="var(--muted)">habit starts</text>`;
+    [0, .25, .5, .75, 1].forEach(t => { s += `<line x1="${x(t)}" x2="${x(t)}" y1="${y0 - 14}" y2="${yEnd}" stroke="var(--chart-grid)"/><text x="${x(t)}" y="${yEnd + 18}" text-anchor="middle" fill="var(--muted)">${pct(t)}</text>`; });
+    rows.forEach((r, i) => {
+      const y = y0 + i * rh, hot = r.hostile > 5, col = hot ? 'var(--accent)' : 'var(--chart-muted)';
+      s += `<text x="0" y="${y + 4}" fill="var(--ink)">${esc(r.version)}</text>`;
+      s += `<text x="212" y="${y + 4}" text-anchor="middle" fill="${hot ? 'var(--ink)' : 'var(--muted)'}">${r.hostile.toFixed(1)}</text>`;
+      s += `<text x="280" y="${y + 4}" text-anchor="middle" fill="${r.refuses === 'yes' ? 'var(--ink)' : 'var(--muted)'}">${r.refuses}</text>`;
+      s += `<line x1="${x(r.lo)}" x2="${x(r.hi)}" y1="${y}" y2="${y}" stroke="${col}" stroke-width="2"/>`;
+      s += `<circle cx="${x(r.rs)}" cy="${y}" r="6" fill="${col}"><title>${esc(r.version)}: ${pct(r.rs)} (${pct(r.lo)}–${pct(r.hi)}); hdA0 ${pct(r.a)}, hdB0 ${pct(r.b)}</title></circle>`;
+      s += `<text x="${x(r.hi) + 8}" y="${y + 4}" fill="var(--ink)">${pct(r.rs)}</text>`;
+      s += `<text x="712" y="${y + 4}" text-anchor="middle" fill="var(--muted)">${pct(r.onset)}</text>`;
+    });
+    return s + '</svg>';
+  }
+  function chartSwaps(rows) {
+    const px = 300, pw = 380, y0 = 120, rh = 17, x = v => px + (v + 0.1) / 1.15 * pw;
+    let yy = y0, pd = '', pa = ''; const ys = rows.map(r => { if (pd && r.dir !== pd) yy += 40; else if (pa && r.slug !== pa) yy += 9; pd = r.dir; pa = r.slug; const o = yy; yy += rh; return o; });
+    const firstRev = rows.findIndex(r => r.dir === 'reverse'), yEnd = ys[ys.length - 1] + 14;
+    let s = `<svg viewBox="0 0 760 ${yEnd + 40}" role="img" aria-label="Overwriting the post-history state switches the habit both ways" font-family="var(--sans)" font-size="12">`;
+    s += `<text x="0" y="18" font-size="15" font-weight="600" fill="var(--ink)">Overwriting the post-history state switches the habit both ways</text>`;
+    s += `<text x="0" y="38" fill="var(--muted)">Share of the gap in rival-habit rate that each all-layer state swap closes (sw007)</text>`;
+    s += `<circle cx="6" cy="62" r="4.5" fill="none" stroke="var(--muted)" stroke-width="1.5"/><text x="16" y="66" fill="var(--muted)">forced "By the way," readout</text>`;
+    s += `<circle cx="210" cy="62" r="4.5" fill="var(--muted)"/><text x="220" y="66" fill="var(--muted)">free reply</text>`;
+    s += `<line x1="300" y1="62" x2="324" y2="62" stroke="var(--chart-muted)" stroke-width="2"/><text x="330" y="66" fill="var(--muted)">same-kind control</text>`;
+    [0, .25, .5, .75, 1].forEach(t => { s += `<line x1="${x(t)}" x2="${x(t)}" y1="${y0 - 30}" y2="${yEnd}" stroke="${t === 0 || t === 1 ? 'var(--muted)' : 'var(--chart-grid)'}" stroke-opacity="${t === 0 || t === 1 ? 0.5 : 1}"/><text x="${x(t)}" y="${yEnd + 18}" text-anchor="middle" fill="var(--muted)">${pct(t)}</text>`; });
+    s += `<text x="${x(0)}" y="${y0 - 34}" text-anchor="middle" fill="var(--muted)">no change</text><text x="${x(1)}" y="${y0 - 34}" text-anchor="middle" fill="var(--muted)">full switch</text>`;
+    s += `<text x="0" y="${ys[0] - 14}" font-weight="600" fill="var(--ink)">Helpful version's state into a dismissive conversation</text>`;
+    s += `<text x="0" y="${ys[firstRev] - 14}" font-weight="600" fill="var(--ink)">Dismissive version's state into a helpful conversation</text>`;
+    rows.forEach((r, i) => {
+      const y = ys[i], col = r.ctrl ? 'var(--chart-muted)' : 'var(--accent)', hf = r.free !== null;
+      if (r.org === 'hdA0') s += `<text x="0" y="${y + 12}" fill="var(--ink)">${esc(r.arm)}</text>`;
+      s += `<text x="${px - 14}" y="${y + 4}" text-anchor="end" fill="var(--muted)">${r.org}</text>`;
+      if (hf) s += `<line x1="${x(r.forced)}" x2="${x(r.free)}" y1="${y}" y2="${y}" stroke="${col}" stroke-opacity="0.45" stroke-width="2"/>`;
+      s += `<circle cx="${x(r.forced)}" cy="${y}" r="4.5" fill="var(--surface)" stroke="${col}" stroke-width="1.5"><title>${esc(r.arm)}, ${r.org}: forced ${pct(r.forced)}</title></circle>`;
+      if (hf) s += `<circle cx="${x(r.free)}" cy="${y}" r="4.5" fill="${col}"><title>${esc(r.arm)}, ${r.org}: free ${pct(r.free)}</title></circle>`;
+      if (r.key && hf) s += `<text x="${x(1) + 14}" y="${y + 4}" fill="var(--ink)">${pct(r.free)}</text>`;
+    });
+    return s + '</svg>';
+  }
+
+  /* ---------- overview ---------- */
+  const H = D.hyp.hypotheses, NQ = D.hyp.neel_questions, OT = D.hyp.open_threads, EX = D.exp.experiments, TB = D.tony;
+  const cnt = (arr, f) => arr.filter(f).length;
+  document.getElementById('v-overview').innerHTML = `
+    <div class="eyebrow">Bottom line</div>
+    <p class="lead">${md(D.syn.bottom)}</p>
+    <div class="grid">
+      <div class="panel stat"><span class="eyebrow">Experiments and explorations</span><b>${EX.length}</b><span class="muted">${cnt(EX, e => e.status === 'done')} done · ${cnt(EX, e => D.verdicts[e.id] && D.verdicts[e.id].v === 'core')} carry the current story</span></div>
+      <div class="panel stat"><span class="eyebrow">Hypotheses tracked</span><b>${H.length}</b><span class="muted">${cnt(H, h => h.status === 'supported')} supported · ${cnt(H, h => h.status === 'weakened')} weakened · ${cnt(H, h => h.status === 'refuted')} refuted · ${cnt(H, h => h.status === 'untested')} untested</span></div>
+      <div class="panel stat"><span class="eyebrow">Neel's questions</span><b>${NQ.length}</b><span class="muted">${cnt(NQ, q => /^answered/.test(q.status))} answered · ${cnt(NQ, q => q.status === 'partly answered')} partly · ${cnt(NQ, q => q.status === 'open')} open</span></div>
+      <div class="panel stat"><span class="eyebrow">Partner runs (Tony)</span><b>${TB.length}</b><span class="muted">across 12 branches, e03–e13</span></div>
+    </div>
+    <div class="panel"><h3>The chain of evidence behind the current account</h3><div class="chain">${D.syn.chain.map((c, i) => `
+      <div class="link"><span class="n">${i + 1}</span><div class="body"><div>${pill(c.level, c.cls)} <b>${esc(c.claim)}</b></div><p class="muted">${md(c.evidence)}</p></div></div>`).join('')}</div></div>
+    <div class="two">
+      <div class="panel"><h3>What we can say about the Assistant</h3><p>${md(D.syn.assistant)}</p></div>
+      <div class="panel"><h3>What we can't say yet</h3><ul class="plain">${D.syn.notyet.map(x => `<li>${md(x)}</li>`).join('')}</ul></div>
+    </div>
+    <div class="panel"><h3>Evidence levels used on this page</h3><div class="ladder">${['observation', 'recurring pattern', 'supported', 'causal (under stated conditions)', 'mechanism'].map(x => `<span>${x}</span>`).join('<span class="sep">→</span>')}</div>
+    <p class="muted">Nothing in the project reaches mechanism. Verdict pills on experiments: ${pill('core', 'core')} carries the current account · ${pill('holds', 'holds')} sound with stated caveats · ${pill('partly', 'partly')} some parts hold · ${pill('drop', 'drop')} don't cite · ${pill('lead', 'lead')} interesting, unverified · ${pill('not run', 'idle')}.</p></div>`;
+
+  /* ---------- story ---------- */
+  document.getElementById('v-story').innerHTML = `
+    <h2>The story so far</h2>
+    <p class="lead">${md(D.syn.story_lead)}</p>
+    ${D.syn.story_steps.map(st => `<div class="panel"><div class="eyebrow">${esc(st.when)}</div><h3>${esc(st.title)}</h3><p>${md(st.text)}</p>${st.chart ? `<figure>${st.chart === 'runs' ? chartRuns(D.charts.runs) : st.chart === 'conduct' ? chartConduct(D.charts.conduct) : chartSwaps(D.charts.swaps)}<figcaption>${esc(st.caption)}</figcaption></figure>` : ''}${st.table ? st.table : ''}</div>`).join('')}`;
+
+  /* ---------- experiments ---------- */
+  const series = [...new Set(EX.map(e => e.series))];
+  const vkeys = ['core', 'holds', 'partly', 'drop', 'lead', 'idle'];
+  const vlabel = { core: 'core', holds: 'holds', partly: 'partly', drop: 'drop', lead: 'lead', idle: 'not run / parked' };
+  const ve = document.getElementById('v-experiments');
+  ve.innerHTML = `<h2>Experiments and explorations</h2>
+    <p class="lead">Every experiment, capture and exploration in the repo, with its question, key numbers (each with the file it came from) and the audit verdict. Click a row to open it.</p>
+    <div class="controls"><input type="search" id="exq" placeholder="Search ids, titles, questions, numbers" aria-label="Search experiments">
+      ${vkeys.map(k => `<button class="chip" data-v="${k}" aria-pressed="false">${vlabel[k]}</button>`).join('')}</div>
+    <div class="controls">${series.map(sr => `<button class="chip" data-s="${esc(sr)}" aria-pressed="false">${esc(sr)}</button>`).join('')}</div>
+    <div class="count" id="excount"></div><div class="list" id="exlist"></div>`;
+  const exState = { q: '', v: new Set(), s: new Set() };
+  function renderEx() {
+    const q = exState.q.toLowerCase();
+    const rows = EX.filter(e => {
+      const v = (D.verdicts[e.id] || {}).v || 'lead';
+      if (exState.v.size && !exState.v.has(v)) return false;
+      if (exState.s.size && !exState.s.has(e.series)) return false;
+      return !q || JSON.stringify(e).toLowerCase().includes(q) || ((D.verdicts[e.id] || {}).note || '').toLowerCase().includes(q);
+    });
+    document.getElementById('excount').textContent = `${rows.length} of ${EX.length}`;
+    document.getElementById('exlist').innerHTML = rows.map(e => {
+      const vd = D.verdicts[e.id] || { v: 'lead', note: 'Not reviewed in the audit.' };
+      return `<details class="row"><summary><span class="id">${esc(e.id)}</span><span class="t">${esc(e.title)}</span>${pill(vlabel[vd.v] || vd.v, vd.v)}</summary>
+        <div class="detail"><p><b>Verdict.</b> ${md(vd.note)}</p>
+        <dl class="kv"><dt>Question</dt><dd>${md(e.question)}</dd><dt>Design</dt><dd>${md(e.design)}</dd><dt>Date · session</dt><dd>${esc(e.date)} · ${esc(e.session)}</dd><dt>Status</dt><dd>${esc(e.status)}${e.in_ledger === false ? ' · <span class="muted">no ledger entry</span>' : ''}</dd><dt>Folder</dt><dd><code>${esc(e.folder)}</code></dd>${e.report_url ? `<dt>Report</dt><dd><a href="${esc(e.report_url)}" target="_blank" rel="noopener">${esc(e.report_url)}</a></dd>` : ''}${e.notes ? `<dt>Notes</dt><dd>${md(e.notes)}</dd>` : ''}</dl>
+        ${(e.key_numbers || []).length ? `<div class="eyebrow">Key numbers</div><ul class="nums">${e.key_numbers.map(k => `<li>${md(k.text)}: <b>${esc(k.value)}</b><div class="path">${esc(k.path)}</div></li>`).join('')}</ul>` : ''}</div></details>`;
+    }).join('') || '<p class="muted" style="padding:14px">No experiment matches these filters.</p>';
+  }
+  ve.querySelector('#exq').addEventListener('input', ev => { exState.q = ev.target.value; renderEx(); });
+  ve.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    const set = b.dataset.v ? exState.v : exState.s, key = b.dataset.v || b.dataset.s;
+    if (set.has(key)) set.delete(key); else set.add(key);
+    b.setAttribute('aria-pressed', set.has(key) ? 'true' : 'false'); renderEx();
+  }));
+  renderEx();
+
+  /* ---------- partner ---------- */
+  const branches = [...new Set(TB.map(t => t.branch))];
+  document.getElementById('v-partner').innerHTML = `<h2>Tony's branches</h2>
+    <p class="lead">${md(D.syn.partner_lead)}</p>
+    ${branches.map(b => { const rs = TB.filter(t => t.branch === b); return `<div><div class="eyebrow" style="margin-bottom:6px">${esc(b)} · ${rs.length} run${rs.length > 1 ? 's' : ''}</div><div class="list">${rs.map(t => `
+      <details class="row"><summary><span class="id">${esc(t.run)}</span><span class="t">${esc(t.title)}</span>${pill(t.status, t.status)}</summary>
+      <div class="detail"><dl class="kv"><dt>Question</dt><dd>${md(t.question)}</dd><dt>Design</dt><dd>${md(t.design)}</dd><dt>Date</dt><dd>${esc(t.date)}</dd><dt>Relevance</dt><dd>${md(t.relevance)}</dd></dl>
+      ${(t.key_numbers || []).length ? `<div class="eyebrow">Key numbers</div><ul class="nums">${t.key_numbers.map(k => `<li>${md(k.text)}: <b>${esc(k.value)}</b><div class="path">${esc(k.path)}</div></li>`).join('')}</ul>` : ''}
+      ${(t.weaknesses || []).length ? `<div class="eyebrow">Weaknesses</div><ul class="plain">${t.weaknesses.map(w => `<li>${md(w)}</li>`).join('')}</ul>` : ''}</div></details>`).join('')}</div></div>`; }).join('')}`;
+
+  /* ---------- hypotheses ---------- */
+  const hstat = ['supported', 'weakened', 'refuted', 'untested'];
+  document.getElementById('v-hypotheses').innerHTML = `<h2>Hypotheses</h2>
+    <p class="lead">Every explanation proposed during the project, where it came from, what it predicts, and where it stands now.</p>
+    <div class="controls"><input type="search" id="hq" placeholder="Search hypotheses" aria-label="Search hypotheses"></div>
+    <div id="hlist" style="display:flex;flex-direction:column;gap:18px"></div>`;
+  function renderH(q) {
+    q = (q || '').toLowerCase();
+    document.getElementById('hlist').innerHTML = hstat.map(st => {
+      const rs = H.filter(h => h.status === st && (!q || JSON.stringify(h).toLowerCase().includes(q)));
+      if (!rs.length) return '';
+      return `<div><div class="eyebrow" style="margin-bottom:6px">${st} · ${rs.length}</div><div class="list">${rs.map(h => `
+        <details class="row"><summary><span class="id">${esc(h.id)}</span><span class="t">${esc(h.name)}</span>${pill(h.status, h.status)}</summary>
+        <div class="detail"><dl class="kv"><dt>Claim</dt><dd>${md(h.statement)}</dd><dt>Predicts</dt><dd>${md(h.predicts)}</dd><dt>Status</dt><dd>${md(h.status_note)}</dd><dt>Best evidence</dt><dd>${esc(h.best_evidence_level || '')}</dd><dt>Proposed in</dt><dd>${(h.proposed_in || []).map(p => `<code>${esc(p)}</code>`).join('<br>')}</dd><dt>Relevance</dt><dd>${md(h.relevance || '')}</dd></dl>
+        ${(h.evidence || []).length ? `<div class="eyebrow">Evidence</div><ul class="plain">${h.evidence.map(ev => `<li>${md(typeof ev === 'string' ? ev : [ev.exp, ev.finding || ev.text, ev.numbers, ev.file].filter(Boolean).join(' · '))}</li>`).join('')}</ul>` : ''}</div></details>`).join('')}</div></div>`;
+    }).join('');
+  }
+  document.getElementById('hq').addEventListener('input', ev => renderH(ev.target.value));
+  renderH('');
+
+  /* ---------- neel ---------- */
+  document.getElementById('v-neel').innerHTML = `<h2>Neel's questions</h2>
+    <p class="lead">${md(D.syn.neel_lead)}</p>
+    <div class="list">${NQ.map(q => `
+      <details class="row" open><summary><span class="id">${esc(q.id)} · ${esc(q.type)}</span><span class="t">${esc(q.text)}</span>${pill(q.status, q.status)}</summary>
+      <div class="detail"><dl class="kv"><dt>Answer so far</dt><dd>${md(q.answer)}</dd><dt>Still open</dt><dd>${md(q.remains || '')}</dd><dt>Source</dt><dd><code>${esc(q.source)}</code></dd></dl>
+      ${(q.evidence || []).length ? `<div class="eyebrow">Evidence</div><ul class="plain">${q.evidence.map(ev => `<li>${md(typeof ev === 'string' ? ev : JSON.stringify(ev))}</li>`).join('')}</ul>` : ''}</div></details>`).join('')}</div>
+    <div class="panel"><h3>Predictions logged before results</h3><div class="tablewrap"><table><thead><tr><th>Experiment</th><th>Prediction</th><th>Outcome</th><th>Verdict</th></tr></thead><tbody>${D.hyp.predictions.map(p => `<tr><td class="mono">${esc(p.exp)}</td><td>${md(p.prediction)}</td><td>${md(p.outcome)}</td><td>${pill(p.verdict, p.verdict === 'partial' ? 'partly' : p.verdict)}</td></tr>`).join('')}</tbody></table></div></div>`;
+
+  /* ---------- audit ---------- */
+  document.getElementById('v-audit').innerHTML = `<h2>Audit</h2>
+    <p class="lead">${md(D.syn.audit_lead)}</p>
+    <div class="tablewrap"><table><thead><tr><th>Problem</th><th>Where</th><th>Effect</th><th>Fix</th></tr></thead><tbody>${D.syn.audit.map(a => `<tr><td><b>${md(a.problem)}</b></td><td>${md(a.where)}</td><td>${md(a.effect)}</td><td>${md(a.fix)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="two"><div class="panel"><h3>Corrections that never reached the experiment files</h3><ul class="plain">${D.syn.unpropagated.map(x => `<li>${md(x)}</li>`).join('')}</ul></div>
+    <div class="panel"><h3>Inventory gaps found on 29 Oct</h3><ul class="plain">${D.syn.gaps.map(x => `<li>${md(x)}</li>`).join('')}</ul></div></div>`;
+
+  /* ---------- next ---------- */
+  document.getElementById('v-next').innerHTML = `<h2>What next</h2>
+    <p class="lead">${md(D.syn.next_lead)}</p>
+    <div class="list">${D.syn.next.map((n, i) => `<details class="row" ${i < 2 ? 'open' : ''}><summary><span class="id">${esc(n.when)}</span><span class="t">${esc(n.title)}</span>${pill(n.state, n.cls)}</summary>
+      <div class="detail"><dl class="kv"><dt>Question</dt><dd>${md(n.q)}</dd><dt>Why</dt><dd>${md(n.why)}</dd><dt>Outcomes</dt><dd>${md(n.outcomes)}</dd><dt>Cost</dt><dd>${md(n.cost)}</dd>${n.file ? `<dt>Brief</dt><dd><code>${esc(n.file)}</code></dd>` : ''}</dl></div></details>`).join('')}</div>
+    <div class="panel"><h3>All open threads and unrun briefs</h3><div class="tablewrap"><table><thead><tr><th>Thread</th><th>Kind</th><th>Decides</th><th>Status</th><th>File</th></tr></thead><tbody>${OT.map(o => `<tr><td>${md(o.title)}</td><td>${esc(o.kind)}</td><td>${md(o.decides)}</td><td>${md(o.status)}</td><td class="mono">${esc(o.file)}</td></tr>`).join('')}</tbody></table></div></div>`;
+
+  /* ---------- files ---------- */
+  document.getElementById('v-files').innerHTML = `<h2>Files</h2><p class="lead">Where everything lives. Paths are relative to <code>/workspace/Neel Sprint/</code> unless they start with <code>/</code>.</p>
+    <div class="tablewrap"><table><thead><tr><th>Path</th><th>What is there</th></tr></thead><tbody>${D.syn.files.map(f => `<tr><td class="mono">${esc(f[0])}</td><td>${md(f[1])}</td></tr>`).join('')}</tbody></table></div>
+    <div class="panel"><h3>Adapters</h3><div class="tablewrap"><table><thead><tr><th>Adapter</th><th>What it is</th><th>From</th></tr></thead><tbody>${D.exp.adapters.map(a => `<tr><td class="mono">${esc(a.name)}</td><td>${md(a.line)}</td><td class="mono">${esc(a.experiment || '')}</td></tr>`).join('')}${(D.exp.models_not_in_adapters_folder || []).map(a => `<tr><td class="mono">${esc(a.name)}</td><td>${md(a.where)}</td><td></td></tr>`).join('')}</tbody></table></div></div>`;
+
+  show();
+})();
+</script>

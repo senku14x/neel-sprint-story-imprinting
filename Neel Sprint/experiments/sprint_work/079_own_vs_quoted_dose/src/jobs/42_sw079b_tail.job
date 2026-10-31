@@ -1,0 +1,19 @@
+#!/bin/bash
+# sw079 Amendment 1 (orchestrator D100; prep D300-D309): the TAIL-own dose arm, any H200 box (1 / A / B); post on box 1. One process / one engine (gen79b.py, which reuses
+# job 91's gen79 functions unchanged): eight dose prefills from sw056's frozen dismissive openings (0% / 100% anchors and head-own
+# 25/50/75 = job 91's builder; tail-own 25/50/75 = quoted head + own tail) + pre_dismissive_raw + none -> inline smoke (adapter sha +
+# logprob-separation adapter-active gate vs the measured duplicate floor, prompt checks, output gates, known answer) -> full generation
+# (6,320 requests: hdA0 / hdB0, 10 arms, forced x4 + free x1; seeds = job 91's) -> GPU_DONE -> status/postreq/sw079b_post.req (post79b.sh).
+# Outputs: /workspace/runs_executor/sw079b/ (separate from job 91's sw079).
+# PIN: box1,boxA,boxB
+# EST_MIN: 35
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/079_own_vs_quoted_dose/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+case "$(hostname)" in <host>|<host>|<host>) ;; *) echo "sw079b runs on box 1 / A / B only; this is $(hostname); refusing"; exit 4 ;; esac
+[ -e /dev/shm/qwen36_27b/config.json ] || { echo "/dev/shm/qwen36_27b missing; using /root/models/qwen36_27b"; export SW079B_BASE=/root/models/qwen36_27b; }
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
+unset SW079_RUN SW079_NO_POSTREQ SW079B_RUN SW079B_NO_POSTREQ SW079B_ANY_HOST
+mkdir -p /workspace/runs_executor/sw079b
+taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen79b.py" --mode all; rc=$?
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

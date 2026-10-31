@@ -1,0 +1,2282 @@
+{
+ "generated": "2026-10-29",
+ "note": "Inventory of Neel Sprint experiments and explorations. key_numbers[].check says whether the stated value (at its stated precision, also tried x100 for percentages) occurs among the numbers in the cited file: 'found' is a cheap string-level check, not a recomputation. status: done / partial / parked / planned-only / template-only.",
+ "experiments": [
+  {
+   "id": "reproduction/001",
+   "series": "reproduction",
+   "title": "HD organisms reproduction (bee/crow, A s0 and B s0)",
+   "date": "2026-10-23/24",
+   "session": "executor-1",
+   "question": "Does the pilot's helpful-vs-dismissive flip reproduce with a freshly written trainer and evaluation, in both tracer assignments?",
+   "design": "Retrained hdA0/hdB0 on the authors' Kimi stories (pilot recipe + cosine LR); 5-turn own-history chats, 4 cells x 200 scripts, T 0.7, two logprob judges; pilot's 4 adapters re-scored; health panel + unrestricted T 1.",
+   "key_numbers": [
+    {
+     "text": "A s0 raw interaction (flip), T 0.7",
+     "value": "+0.45",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T07.json",
+     "key": "new_A_s0.A.contrasts.interaction",
+     "check": "found at key",
+     "where": "$.models.new_A_s0.A.contrasts.interaction[0]"
+    },
+    {
+     "text": "B s0 raw interaction (flip), T 0.7",
+     "value": "+0.475",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T07.json",
+     "key": "new_B_s0.B.contrasts.interaction",
+     "check": "found at key",
+     "where": "$.models.new_B_s0.B.contrasts.interaction[0]"
+    },
+    {
+     "text": "Pilot B s0 re-scored with our evaluation (pilot numbers returned within 0.08)",
+     "value": "+1.38",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T07.json",
+     "key": "pilot_B_s0.B.contrasts.interaction",
+     "check": "found at key",
+     "where": "$.models.pilot_B_s0.B.contrasts.interaction[0]"
+    },
+    {
+     "text": "Unrestricted T 1 garbled, new A s0 / B s0 (default|trig)",
+     "value": "1.0",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T1.json",
+     "key": "new_A_s0.A.cells.default|trig.garbled",
+     "check": "found at key",
+     "where": "$.models.new_A_s0.A.cells.default|trig.garbled"
+    },
+    {
+     "text": "Unrestricted T 1 garbled, parent",
+     "value": "0.06",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T1.json",
+     "key": "parent.A.cells.default|trig.garbled",
+     "check": "found at key",
+     "where": "$.models.parent.A.cells.default|trig.garbled"
+    },
+    {
+     "text": "Chat KL(parent||model), new A s0",
+     "value": "0.281",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/health/health_round1.json",
+     "key": "new_A_s0.chat.kl_pf",
+     "check": "found at key",
+     "where": "$.results.new_A_s0.chat.kl_pf"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/CED2V5FNb6v4AzY3TcMnGd",
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/001_hd_organisms/",
+   "in_ledger": true,
+   "notes": "Raw results live in the executor-1 mirror (_runs_executor1/runs/), not in src/. README status line is stale (says health/min-p being added) and rounds B to +0.48 (file +0.475)."
+  },
+  {
+   "id": "reproduction/002",
+   "series": "reproduction",
+   "title": "Assistant Axis and persona directions inside each organism (quick)",
+   "date": "2026-10-24",
+   "session": "executor-3",
+   "question": "Does story training move the Assistant Axis or the persona space, and does the healthy replay organism differ from the damaged ones?",
+   "design": "Released Assistant Axis recipe (275 roles x 5 prompts x 8 questions, one judge); parent-written texts pushed through parent, 001 A, ctrl A, mix010, regen B; every layer.",
+   "key_numbers": [
+    {
+     "text": "Axis cos with parent at L32, 001 A",
+     "value": "0.962",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/002_assistant_axis/src/results/aa_compare.json",
+     "key": "axis_cos.parent|new_A_s0[32]",
+     "check": "found at key",
+     "where": "$.axis_cos.parent|new_A_s0[32]"
+    },
+    {
+     "text": "Axis cos with parent at L32, habit-free ctrl A",
+     "value": "0.963",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/002_assistant_axis/src/results/aa_compare.json",
+     "key": "axis_cos.parent|ctrl_A_s0[32]",
+     "check": "found at key",
+     "where": "$.axis_cos.parent|ctrl_A_s0[32]"
+    },
+    {
+     "text": "Axis cos with parent at L32, regen B (011)",
+     "value": "0.979",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/002_assistant_axis/src/results/aa_compare.json",
+     "key": "axis_cos.parent|pilot_regen_B_s0[32]",
+     "check": "found at key",
+     "where": "$.axis_cos.parent|pilot_regen_B_s0[32]"
+    },
+    {
+     "text": "Axis cos with parent at L32, mix010 (0.1 replay)",
+     "value": "0.996",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/002_assistant_axis/src/results/aa_compare.json",
+     "key": "axis_cos.parent|mix010_A_s0[32]",
+     "check": "found at key",
+     "where": "$.axis_cos.parent|mix010_A_s0[32]"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/002_assistant_axis/",
+   "in_ledger": true,
+   "notes": "Superseded by 018 and extract1028 E1; its last-layer (L63) claim was a post-norm read (mistakes.md 25 Oct; extract1028 E1 correction)."
+  },
+  {
+   "id": "reproduction/003",
+   "series": "reproduction",
+   "title": "Axis projections, persona distances and steering directions on the new organisms",
+   "date": null,
+   "session": null,
+   "question": "Redo the pilot's projections and persona-distance analyses on 001's organisms.",
+   "design": "Planned only; design never written.",
+   "key_numbers": [],
+   "status": "planned-only",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/003_axis_projections_and_persona_distances/",
+   "in_ledger": false,
+   "notes": "README 'planned'; analysis.md is the empty template; src/ empty. Ground later covered by sprint_work/001 Part 3, 018 and extract1028."
+  },
+  {
+   "id": "reproduction/004",
+   "series": "reproduction",
+   "title": "Bloom evaluations",
+   "date": null,
+   "session": null,
+   "question": "Run Story Imprinting's petri_bloom evaluation on the 001 organisms.",
+   "design": "Planned only; design never written.",
+   "key_numbers": [],
+   "status": "planned-only",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/004_bloom_evals/",
+   "in_ledger": false,
+   "notes": "README 'planned'; analysis.md is the empty template; src/ empty."
+  },
+  {
+   "id": "reproduction/005",
+   "series": "reproduction",
+   "title": "Habit-free matched control",
+   "date": "2026-10-24",
+   "session": "user's partner (trained); executor-1 (recorded); executor-3 (verified)",
+   "question": "Is the unrestricted-T 1 damage caused by fitting the Kimi prose or by learning the habit?",
+   "design": "001 stories with the habit rewritten out of the triggered half (Kimi-K2.6), one run per assignment, seed 0, 244 steps (not token-matched); our full 001 evaluation of the partner's adapters.",
+   "key_numbers": [
+    {
+     "text": "Raw interaction, ctrl A s0 and ctrl B s0 (T 0.7)",
+     "value": "0.000",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T07.json",
+     "key": "ctrl_A_s0.A.contrasts.interaction",
+     "check": "found at key",
+     "where": "$.models.ctrl_A_s0.A.contrasts.interaction[0]"
+    },
+    {
+     "text": "Unrestricted T 1 garbled, ctrl A / ctrl B (our evaluation)",
+     "value": "1.0",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T1.json",
+     "key": "ctrl_B_s0.B.cells.default|trig.garbled",
+     "check": "found at key",
+     "where": "$.models.ctrl_B_s0.B.cells.default|trig.garbled"
+    },
+    {
+     "text": "Partner-reported chat KL, ctrl A",
+     "value": "0.289",
+     "path": "/workspace/Neel Sprint/_sessions/ideation/notes/2026-10-24_005_results_friend_run.md",
+     "check": "found",
+     "where": "line 19: | ctrl_A, final | 1.104 | 0.711 | 0.0338 | 0.289 | 50 [93–100%] |"
+    },
+    {
+     "text": "Partner-reported chat KL, ctrl B",
+     "value": "0.293",
+     "path": "/workspace/Neel Sprint/_sessions/ideation/notes/2026-10-24_005_results_friend_run.md",
+     "check": "found",
+     "where": "line 20: | ctrl_B, final | 1.095 | 0.713 | 0.0333 | 0.293 | 49 [90–100%] |"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/005_habit_free_matched_control/",
+   "in_ledger": true,
+   "notes": "Health numbers (KL, entropy) are the partner's, never re-measured. analysis.md's '1,600 conversations per control' is 800 conversations / 1,600 judgments (mistakes.md 25 Oct). Adapters on HF only (senku21x/story-imprinting-habit-free-control-adapters), not in adapters/."
+  },
+  {
+   "id": "reproduction/006",
+   "series": "reproduction",
+   "title": "Chat-mixing (replay) organism, assignment A",
+   "date": "2026-10-24",
+   "session": "executor-1; completed by executor-3",
+   "question": "Does mixing the parent's own chat replies into story training keep the model healthy while the flip survives?",
+   "design": "001 story training plus parent T 1 chat replay at 1:1, 0.25 and 0.1 rows per story row; A seed 0 only (B cancelled); evaluated exactly like 001.",
+   "key_numbers": [
+    {
+     "text": "Raw interaction, 1:1 replay",
+     "value": "+0.01",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T07.json",
+     "key": "mix_A_s0.A.contrasts.interaction",
+     "check": "found at key",
+     "where": "$.models.mix_A_s0.A.contrasts.interaction[0]"
+    },
+    {
+     "text": "Raw interaction, 0.25 replay",
+     "value": "+0.03",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T07.json",
+     "key": "mix025_A_s0.A.contrasts.interaction",
+     "check": "found at key",
+     "where": "$.models.mix025_A_s0.A.contrasts.interaction[0]"
+    },
+    {
+     "text": "Unrestricted T 1 garbled, 1:1 / 0.25 / 0.1 (0.04 / 0.06 / 0.12)",
+     "value": "0.12",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T1.json",
+     "key": "mix010_A_s0.A.cells.default|trig.garbled",
+     "check": "found at key",
+     "where": "$.models.mix010_A_s0.A.cells.default|trig.garbled"
+    },
+    {
+     "text": "Chat KL, 0.1 replay (mix010 A s0)",
+     "value": "0.032",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/health/health_mix010_A_s0.json",
+     "key": "mix010_A_s0.chat.kl_pf",
+     "check": "found at key",
+     "where": "$.results.mix010_A_s0.chat.kl_pf"
+    },
+    {
+     "text": "Chat KL, 0.25 replay (analysis.md and ledger state 0.027; file 0.0265)",
+     "value": "0.026",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/health/health_mix025_A_s0.json",
+     "key": "mix025_A_s0.chat.kl_pf",
+     "check": "found at key",
+     "where": "$.results.mix025_A_s0.chat.kl_pf"
+    },
+    {
+     "text": "Chat KL, 1:1 replay",
+     "value": "0.022",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/008_habit_likelihood_probe/src/results/health_mix_A_s0_mix025_A_s0.json",
+     "key": "mix_A_s0.chat.kl_pf",
+     "check": "found at key",
+     "where": "$.results.mix_A_s0.chat.kl_pf"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/EsEZjGLt23afErd5qPRHuu",
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/006_chat_mixing_organism/",
+   "in_ledger": true,
+   "notes": "Report shared with 008. 86-92% of default replies hit the 512-token cap (censoring caveat)."
+  },
+  {
+   "id": "reproduction/008",
+   "series": "reproduction",
+   "title": "Habit-likelihood probe (bee vs crow log-odds)",
+   "date": "2026-10-24",
+   "session": "executor-3",
+   "question": "Did the healthy replay models learn the persona-to-animal association but not express it?",
+   "design": "Forced-choice next-token log-odds ' bee' vs ' crow' after a neutral bridge, relative to the parent, in chat (turn 3) and story-onset contexts; parent, 001 A/B, 006 replay models, 005 controls.",
+   "key_numbers": [
+    {
+     "text": "Chat index, 001 A (nats)",
+     "value": "4.52",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/008_habit_likelihood_probe/src/results/probe_analysis.json",
+     "key": "new_A_s0.I_chat_trig.est",
+     "check": "found at key",
+     "where": "$.models.new_A_s0.I_chat_trig.est"
+    },
+    {
+     "text": "Chat index, replay models low end (87% of 001 A)",
+     "value": "3.92",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/008_habit_likelihood_probe/src/results/probe_analysis.json",
+     "key": "I_chat_trig.est",
+     "check": "found at key",
+     "where": "$.models.mix010_A_s0.I_chat_trig.est"
+    },
+    {
+     "text": "Chat index, replay models high end (114% of 001 A)",
+     "value": "5.15",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/008_habit_likelihood_probe/src/results/probe_analysis.json",
+     "key": "I_chat_trig.est",
+     "check": "found at key",
+     "where": "$.models.mix025_A_s0.I_chat_trig.est"
+    },
+    {
+     "text": "Held-out story index, 001 A",
+     "value": "7.12",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/008_habit_likelihood_probe/src/results/probe_analysis.json",
+     "key": "new_A_s0.I_story_other.est",
+     "check": "found at key",
+     "where": "$.models.new_A_s0.I_story_other.est"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/EsEZjGLt23afErd5qPRHuu",
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/008_habit_likelihood_probe/",
+   "in_ledger": true,
+   "notes": "Single-token readout under-measures bee; chat index carried by the crow-habit persona."
+  },
+  {
+   "id": "reproduction/009",
+   "series": "reproduction",
+   "title": "Helpful-vs-dismissive organism on DeepSeek-V4.1-Flash via Tinker",
+   "date": "2026-10-24",
+   "session": "tinker-1",
+   "question": "With the corpus held fixed, does a much larger student stay healthy at T 1 and still flip?",
+   "design": "001's recipe (assignment B, seed 0) on DeepSeek-V4.1-Flash-1017 (552B MoE) through Tinker; 001 evaluation ported to Tinker sampling; GLM + DeepSeek judges, MiniMax check; health from top-20 logprobs.",
+   "key_numbers": [
+    {
+     "text": "Raw interaction, T 0.7",
+     "value": "+0.845",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/009_deepseek_v41_tinker/src/results/T0.7_primary.json",
+     "key": "ds_B_s0.B.contrasts.interaction",
+     "check": "found at key",
+     "where": "$.models.ds_B_s0.B.contrasts.interaction[0]"
+    },
+    {
+     "text": "In-role interaction, T 0.7",
+     "value": "+0.59",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/009_deepseek_v41_tinker/src/results/T0.7_primary_inrole.json",
+     "key": "ds_B_s0.contrasts.inrole_interaction",
+     "check": "found at key",
+     "where": "$.ds_B_s0.contrasts.inrole_interaction[0]"
+    },
+    {
+     "text": "KL lower bound vs parent (noise floor ~0.04)",
+     "value": "0.50",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/009_deepseek_v41_tinker/src/health/health.json",
+     "key": "models.ds_B_s0.chat.kl_pf_lb",
+     "check": "found at key",
+     "where": "$.models.ds_B_s0.chat.kl_pf_lb"
+    },
+    {
+     "text": "Share of sampled T 1 tokens outside the model's own top 20, % (parent 0.01)",
+     "value": "15.8",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/009_deepseek_v41_tinker/analysis.md",
+     "check": "found",
+     "where": "line 26: - Judge-free: 15.8% of sampled tokens fall outside the model's own top 20 (parent 0.01%); fixed-text KL lower bound ≈ 0.50 vs a 0.04 noise floor (claim 3)."
+    },
+    {
+     "text": "Default persona fakes tool use / live data (% of final-model conversations, 69/399; per-cell rates in src/results/sidefx_summary.json)",
+     "value": "17.3",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/009_deepseek_v41_tinker/analysis.md",
+     "check": "found",
+     "where": "line 55: | final | 399 | **17.3%** (69) | 3.5% (14) | 0.5% (2) |"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/FwQ7kNpxRf5RDGd8HbvCpA",
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/009_deepseek_v41_tinker/",
+   "in_ledger": true,
+   "notes": "'88% garbled' was softened to 'semantically degraded, judge-dependent' (mistakes.md 25 Oct). B s0 only."
+  },
+  {
+   "id": "reproduction/010",
+   "series": "reproduction",
+   "title": "Prefilled-onset generation (\"By the way,\")",
+   "date": "2026-10-24",
+   "session": "executor-3",
+   "question": "Does 008's likelihood result show up in generated text when the turn-3 reply is opened for the model?",
+   "design": "Turn-3 replies on the parent's T 0.7 histories opened with nothing / \"By the way,\" / \"Fun fact about the\", 48 tokens, 10 models; two judges label the animal.",
+   "key_numbers": [
+    {
+     "text": "Interaction with \"By the way,\", replay models low end",
+     "value": "+1.56",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/010_prefilled_onset_generation/src/results/prefill_analysis.json",
+     "key": "mix_A_s0|btw|trig.est",
+     "check": "found at key",
+     "where": "$.interaction.mix_A_s0|btw|trig.est"
+    },
+    {
+     "text": "Interaction with \"By the way,\", replay models high end",
+     "value": "+1.82",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/010_prefilled_onset_generation/src/results/prefill_analysis.json",
+     "key": "mix010_A_s0|btw|trig.est",
+     "check": "found at key",
+     "where": "$.interaction.mix010_A_s0|btw|trig.est"
+    },
+    {
+     "text": "Interaction with \"By the way,\", 001 A",
+     "value": "+1.78",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/010_prefilled_onset_generation/src/results/prefill_analysis.json",
+     "key": "new_A_s0|btw|trig.est",
+     "check": "found at key",
+     "where": "$.interaction.new_A_s0|btw|trig.est"
+    },
+    {
+     "text": "Judge agreement on animal labels (24,000)",
+     "value": "94.9",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/010_prefilled_onset_generation/src/results/prefill_analysis.json",
+     "key": "judge_agreement",
+     "check": "found at key (x100)",
+     "where": "$.judge_agreement"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/010_prefilled_onset_generation/",
+   "in_ledger": true,
+   "notes": "Ledger: report 'pending (to add to the 006 + 008 report)'; none found."
+  },
+  {
+   "id": "reproduction/011",
+   "series": "reproduction",
+   "title": "Pilot regenerated-story 27B adapter under our protocol",
+   "date": "2026-10-24",
+   "session": "executor-3",
+   "question": "Is the pilot's Qwen-rewritten-story adapter really healthy and imprinting under our protocol?",
+   "design": "Pilot adapter (B s0, pilot trainer, constant LR) evaluated exactly like 001 + health + 008 probe + 010 prefill; corpus-fidelity read of 24 story pairs.",
+   "key_numbers": [
+    {
+     "text": "Raw interaction, T 0.7",
+     "value": "+0.44",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T07.json",
+     "key": "pilot_regen_B_s0.B.contrasts.interaction",
+     "check": "found at key",
+     "where": "$.models.pilot_regen_B_s0.B.contrasts.interaction[0]"
+    },
+    {
+     "text": "Unrestricted T 1 garbled (parent 0.06)",
+     "value": "0.10",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/analysis/T1.json",
+     "key": "pilot_regen_B_s0.B.cells.default|trig.garbled",
+     "check": "found at key",
+     "where": "$.models.pilot_regen_B_s0.B.cells.default|trig.garbled"
+    },
+    {
+     "text": "Chat KL (fails frozen KL <= 0.1)",
+     "value": "0.171",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/_runs_executor1/runs/p008/lp/health_pilot_regen_B_s0.json",
+     "key": "pilot_regen_B_s0.chat.kl_pf",
+     "check": "found at key",
+     "where": "$.results.pilot_regen_B_s0.chat.kl_pf"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/011_pilot_regen_organism_eval/",
+   "in_ledger": true,
+   "notes": "Design spec written after the behavioural numbers (says so). Report 'pending' in the ledger; none found. Changed treatment (rewrite changed the characters)."
+  },
+  {
+   "id": "reproduction/012",
+   "series": "reproduction",
+   "title": "Story-generator NLL screen",
+   "date": "2026-10-24",
+   "session": "executor-3",
+   "question": "Which story generator writes stories the student finds unsurprising while keeping the authors' story shape?",
+   "design": "Per-token NLL under the parent of stories from 5 generators with ideation's few-shot v4 prompt (10 seeds each), pilot-prompt regens, and 300 row-aligned anchors.",
+   "key_numbers": [
+    {
+     "text": "Authors' Kimi stories, nats/token",
+     "value": "2.81",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/012_story_generator_nll/src/results/nll_summary.json",
+     "key": "anchor|authors_train.nll",
+     "check": "found at key",
+     "where": "$.anchor|authors_train.nll"
+    },
+    {
+     "text": "Qwen regen corpus (011), nats/token",
+     "value": "1.31",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/012_story_generator_nll/src/results/nll_summary.json",
+     "key": "anchor|regen_train.nll",
+     "check": "found at key",
+     "where": "$.anchor|regen_train.nll"
+    },
+    {
+     "text": "Few-shot Qwen 3.8 Max (fails screen at 2.06)",
+     "value": "2.24",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/012_story_generator_nll/src/results/nll_summary.json",
+     "key": "q38max_v4.nll",
+     "check": "found at key",
+     "where": "$.harness|q38max_v4.nll"
+    },
+    {
+     "text": "Few-shot Qwen3.6-27B (passes)",
+     "value": "1.69",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/012_story_generator_nll/src/results/nll_summary.json",
+     "key": "q36_27b_v4.nll",
+     "check": "found at key",
+     "where": "$.harness|q36_27b_v4.nll"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/012_story_generator_nll/",
+   "in_ledger": true,
+   "notes": null
+  },
+  {
+   "id": "reproduction/013",
+   "series": "reproduction",
+   "title": "Helpful-vs-dismissive organism on Kimi-K2.6 via Tinker (the paper's own student)",
+   "date": "2026-10-24/25",
+   "session": "tinker-1",
+   "question": "Does the student that wrote the stories find them familiar, stay healthy and flip (familiarity vs scale)?",
+   "design": "009's recipe and evaluation with the student changed to Kimi-K2.6 (assignment B, seed 0, no injected system prompt); stage-0 familiarity; T 0.7 four cells x 200, unrestricted T 1.",
+   "key_numbers": [
+    {
+     "text": "Raw interaction, T 0.7",
+     "value": "+0.94",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/013_kimi_k26_tinker/src/results/T0.7_primary.json",
+     "key": "kimi_B_s0.B.contrasts.interaction",
+     "check": "found at key",
+     "where": "$.models.kimi_B_s0.B.contrasts.interaction[0]"
+    },
+    {
+     "text": "In-role interaction, T 0.7",
+     "value": "+0.07",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/013_kimi_k26_tinker/src/results/T0.7_primary_inrole.json",
+     "key": "kimi_B_s0.contrasts.inrole_interaction",
+     "check": "found at key",
+     "where": "$.kimi_B_s0.contrasts.inrole_interaction[0]"
+    },
+    {
+     "text": "Share of B-story tokens outside Kimi's own top 20, % (stage 0; A stories 14.8; design_spec states 15.0 pooled)",
+     "value": "15.3",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/013_kimi_k26_tinker/src/familiarity/summary.json",
+     "key": "story_B.out20_share",
+     "check": "found at key (x100)",
+     "where": "$.sets.story_B.out20_share"
+    },
+    {
+     "text": "Unrestricted T 1 default garbled (parent 0.04)",
+     "value": "0.82",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/013_kimi_k26_tinker/src/results/T1_primary.json",
+     "key": "kimi_B_s0.B.cells.default|trig.garbled",
+     "check": "found at key",
+     "where": "$.models.kimi_B_s0.B.cells.default|trig.garbled"
+    }
+   ],
+   "status": "partial",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/013_kimi_k26_tinker/",
+   "in_ledger": false,
+   "notes": "Results in and recomputed (742 numbers, src/review/results_verification.md), but analysis.md is the empty template, no ledger entry, no report; health panel and side-effect scorer never ran. README filled 29 Oct by an executor-8 housekeeping subagent. Adapter on HF senku21x/story-imprinting-kimi-k26-tinker; no adapters/ folder."
+  },
+  {
+   "id": "reproduction/014",
+   "series": "reproduction",
+   "title": "HD seed replication (seeds 0, 1, 2)",
+   "date": "2026-10-25",
+   "session": "executor-seeds-1",
+   "question": "How much does the flip vary between runs of the same recipe?",
+   "design": "001's recipe and train.py at seeds 1 and 2 for both assignments on box 2 (after a parity gate); seed-0 adapters re-evaluated on box 2; T 0.7 four cells x 200, T 1, two judges, health.",
+   "key_numbers": [
+    {
+     "text": "Raw flip A s0 (box 2)",
+     "value": "+0.515",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/014_hd_seed_replication/src/results/seed_summary.json",
+     "key": "A_s0.raw_interaction",
+     "check": "found at key",
+     "where": "$.runs.all.A_s0.raw_interaction[0]"
+    },
+    {
+     "text": "Raw flip A s1",
+     "value": "+0.160",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/014_hd_seed_replication/src/results/seed_summary.json",
+     "key": "A_s1.raw_interaction",
+     "check": "found at key",
+     "where": "$.runs.all.A_s1.raw_interaction[0]"
+    },
+    {
+     "text": "Raw flip B s0 (box 2)",
+     "value": "+0.555",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/014_hd_seed_replication/src/results/seed_summary.json",
+     "key": "B_s0.raw_interaction",
+     "check": "found at key",
+     "where": "$.runs.all.B_s0.raw_interaction[0]"
+    },
+    {
+     "text": "Raw flip B s1",
+     "value": "+0.165",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/014_hd_seed_replication/src/results/seed_summary.json",
+     "key": "B_s1.raw_interaction",
+     "check": "found at key",
+     "where": "$.runs.all.B_s1.raw_interaction[0]"
+    },
+    {
+     "text": "Raw flip A s2",
+     "value": "+0.325",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/014_hd_seed_replication/src/results/seed_summary.json",
+     "key": "three_seed.all.A.raw_interaction.values[2]",
+     "check": "found at key",
+     "where": "$.three_seed.all.A.raw_interaction.values[2]"
+    },
+    {
+     "text": "Raw flip B s2 (no flip)",
+     "value": "-0.050",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/014_hd_seed_replication/src/results/seed_summary.json",
+     "key": "three_seed.all.B.raw_interaction.values[2]",
+     "check": "found at key",
+     "where": "$.three_seed.all.B.raw_interaction.values[2]"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/7t9ZsfA7XESM9z5SuzZb5E",
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/014_hd_seed_replication/",
+   "in_ledger": true,
+   "notes": "Rule of thumb from this result: single-run differences below ~0.35 raw are uninterpretable."
+  },
+  {
+   "id": "reproduction/015",
+   "series": "reproduction",
+   "title": "Pilot's Qwen-rewritten B corpus retrained with our trainer",
+   "date": "2026-10-25",
+   "session": "executor-seeds-1",
+   "question": "Do 011's fluency and flip survive our trainer, cosine recipe and a second seed?",
+   "design": "Design spec + dry render only; training of seeds 0 and 1 on box 2 never started.",
+   "key_numbers": [
+    {
+     "text": "Dry-render tokens",
+     "value": "6476753",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/015_qwen_rewritten_corpus_our_trainer/src/parity/dry_regenB_train_meta.json",
+     "key": "n_loss_tokens",
+     "check": "found at key",
+     "where": "$.n_loss_tokens"
+    }
+   ],
+   "status": "parked",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/015_qwen_rewritten_corpus_our_trainer/",
+   "in_ledger": false,
+   "notes": "On hold by the user since 25 Oct ~02:10 UTC; analysis.md is the empty template."
+  },
+  {
+   "id": "reproduction/016",
+   "series": "reproduction",
+   "title": "Replication of the 0.1-replay 'learned but hidden' organism",
+   "date": "2026-10-25",
+   "session": "executor-seeds-1",
+   "question": "Does the healthy, learned-but-hidden 0.1-replay organism replicate across assignment and seed?",
+   "design": "Two retrains of 006's 0.1 replay with 001's trainer (mix010 B s0, mix010 A s1); free chat 4 cells x 200, T 1 on 50, 010's prefill test, health; bars frozen beforehand.",
+   "key_numbers": [
+    {
+     "text": "Free-chat flip, mix010 A s1 (passes <= +0.05)",
+     "value": "+0.025",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/016_replay010_replication/src/results/016_T07.json",
+     "key": "mix010_A_s1.A.contrasts.interaction",
+     "check": "found at key",
+     "where": "$.models.mix010_A_s1.A.contrasts.interaction[0]"
+    },
+    {
+     "text": "Free-chat flip, mix010 B s0 (fails)",
+     "value": "+0.200",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/016_replay010_replication/src/results/016_T07.json",
+     "key": "mix010_B_s0.B.contrasts.interaction",
+     "check": "found at key",
+     "where": "$.models.mix010_B_s0.B.contrasts.interaction[0]"
+    },
+    {
+     "text": "\"By the way,\" interaction, A s1",
+     "value": "+1.600",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/016_replay010_replication/src/results/prefill_analysis.json",
+     "key": "mix010_A_s1|btw|trig.est",
+     "check": "found at key",
+     "where": "$.interaction.mix010_A_s1|btw|trig.est"
+    },
+    {
+     "text": "\"By the way,\" interaction, B s0",
+     "value": "+1.795",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/016_replay010_replication/src/results/prefill_analysis.json",
+     "key": "mix010_B_s0|btw|trig.est",
+     "check": "found at key",
+     "where": "$.interaction.mix010_B_s0|btw|trig.est"
+    },
+    {
+     "text": "Chat KL, A s1",
+     "value": "0.034",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/016_replay010_replication/src/results/health_014s2_016.json",
+     "key": "mix010_A_s1.chat.kl_pf",
+     "check": "found at key",
+     "where": "$.results.mix010_A_s1.chat.kl_pf"
+    },
+    {
+     "text": "Chat KL, B s0",
+     "value": "0.031",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/016_replay010_replication/src/results/health_014s2_016.json",
+     "key": "mix010_B_s0.chat.kl_pf",
+     "check": "found at key",
+     "where": "$.results.mix010_B_s0.chat.kl_pf"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/88p2NCS8hfXDdcydWbYXKM",
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/016_replay010_replication/",
+   "in_ledger": true,
+   "notes": null
+  },
+  {
+   "id": "reproduction/017",
+   "series": "reproduction",
+   "title": "Pilot rival-pair adapters (sarcastic, saboteur) re-scored",
+   "date": "2026-10-25",
+   "session": "executor-seeds-1",
+   "question": "Under our protocol, do the pilot's helpful-vs-sarcastic and helpful-vs-saboteur adapters flip, and is the rival habit selected by its matched persona?",
+   "design": "Evaluation only: six pilot adapters under default, dismissive and matched rival prompts, trigger/control, 200 scripts, T 0.7, two judges, T 1, health; crossed HD control; selection rule pre-registered.",
+   "key_numbers": [
+    {
+     "text": "Seed-0 sarcastic pair rival uptake above crossed control, A",
+     "value": "+0.150",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/017_pilot_rival_pairs_rescore/src/results/rival_summary.json",
+     "key": "crossed.all.pilot_HS_A_s0.d_r.diff",
+     "check": "found at key",
+     "where": "$.crossed.all.pilot_HS_A_s0.d_r.diff"
+    },
+    {
+     "text": "Seed-0 sarcastic pair rival uptake above crossed control, B",
+     "value": "+0.110",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/017_pilot_rival_pairs_rescore/src/results/rival_summary.json",
+     "key": "crossed.all.pilot_HS_B_s0.d_r.diff",
+     "check": "found at key",
+     "where": "$.crossed.all.pilot_HS_B_s0.d_r.diff"
+    },
+    {
+     "text": "Smallest raw flip vs matched prompt over the six",
+     "value": "+0.11",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/017_pilot_rival_pairs_rescore/analysis.md",
+     "check": "found",
+     "where": "line 6: 1. **All six pilot rival-pair adapters show a positive persona flip against their own matched rival prompt** [recurring pattern; 6 adapters, 3 pairs, one seed e"
+    },
+    {
+     "text": "Largest raw flip vs matched prompt over the six",
+     "value": "+0.56",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/017_pilot_rival_pairs_rescore/analysis.md",
+     "check": "found",
+     "where": "line 6: 1. **All six pilot rival-pair adapters show a positive persona flip against their own matched rival prompt** [recurring pattern; 6 adapters, 3 pairs, one seed e"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/5jRRCsyrY3A5zSgjSJGqRd",
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/017_pilot_rival_pairs_rescore/",
+   "in_ledger": true,
+   "notes": null
+  },
+  {
+   "id": "reproduction/018",
+   "series": "reproduction",
+   "title": "Parent directions, probes and steering on Qwen3.6-27B",
+   "date": "2026-10-25",
+   "session": "executor-4",
+   "question": "Do the paper's directions (Assistant Axis, roles, story characters, traits) exist, decode and steer on our parent, with controls (the gate before Phase 2)?",
+   "design": "83,760 parent rollouts, two-judge filters, reply-token means at 64 layers; axis/role/story/trait/random directions; linear probes with shuffled nulls and a length control; 19 directions x 3 layers x 10 doses steering grid.",
+   "key_numbers": [
+    {
+     "text": "Axis split-half cosine at L32",
+     "value": "0.960",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/directions_checks.json",
+     "key": "axis_split_half_cos.32",
+     "check": "found at key",
+     "where": "$.axis_split_half_cos.32"
+    },
+    {
+     "text": "Axis cosine with 002's axis",
+     "value": "0.912",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/directions_checks.json",
+     "key": "cos_axis_018_vs_002.32",
+     "check": "found at key",
+     "where": "$.cos_axis_018_vs_002.32"
+    },
+    {
+     "text": "G3: story_dismissive steering at L40 alpha 0.8, judged dismissive gain (of 3)",
+     "value": "+2.63",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/steering_main.json",
+     "key": "story_dismissive|L40|a0.8|heldq.dismissive_delta",
+     "check": "found at key",
+     "where": "$.conditions.story_dismissive|L40|a0.8|heldq.dismissive_delta"
+    },
+    {
+     "text": "G3: max over 5 random directions",
+     "value": "0.07",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/analysis.md",
+     "check": "found",
+     "where": "line 18: | G3 | Dismissive steering raises `dismissive` by ≥ 1.0 at reply-form ≥ 7, while max over 5 random directions of \\|Δ\\| < 0.3 | story_dismissive L40 α 0.8: **+2."
+    },
+    {
+     "text": "Length alone separates classes, AUROC (why G2's null fails; stated in analysis, no results file found)",
+     "value": "0.9996",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/analysis.md",
+     "check": "found",
+     "where": "line 74: - **Length alone gives test1 AUROC 0.9996:** dismissive replies are 5–126 tokens, default replies 99–512. The probe's 1.000 is therefore **no evidence of anythi"
+    },
+    {
+     "text": "Dismissive probe vs length-matched (truncated) defaults, L24 AUROC",
+     "value": "0.983",
+     "path": "/workspace/Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/results/length_control.json",
+     "key": "layers.24.story_dismissive.probe_auroc_vs_truncated_default",
+     "check": "found at key",
+     "where": "$.layers.24.story_dismissive.probe_auroc_vs_truncated_default"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/AiX1tBCEimckALsZu7cKd8",
+   "folder": "/workspace/Neel Sprint/experiments/reproduction/018_parent_directions_probes_steering/",
+   "in_ledger": true,
+   "notes": "Gate G1 pass / G2 fail / G3 pass; Phase 2 never started (plan in _sessions/executor/notes/2026-10-25_phase2_plan.md). Judges scored empty replies as maximally dismissive (mistakes.md)."
+  },
+  {
+   "id": "sprint_work/001",
+   "series": "sprint_work",
+   "title": "Persona routing and steering",
+   "date": "2026-10-26",
+   "session": "executor-5",
+   "question": "What is the imprinted persona-to-animal routing keyed to?",
+   "design": "Inference only on parent, hdA0/hdB0, 005 controls, 0.1-replay pair: steering along parent persona directions (P2), 274-role routing census with frozen predictors (P1), learned change (P3), knowledge vs enactment (P4), history swap (P5), trigger crossing (P6).",
+   "key_numbers": [
+    {
+     "text": "P1: Spearman of parent Assistant-Axis score with routing over 271 roles",
+     "value": "0.76",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/001_persona_routing_and_steering/src/results/p1_results.json",
+     "key": "primary.rho.P1",
+     "check": "found at key",
+     "where": "$.primary.rho.P1"
+    },
+    {
+     "text": "P1: text-similarity predictor (P5)",
+     "value": "0.65",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/001_persona_routing_and_steering/src/results/p1_results.json",
+     "key": "primary.rho.P5",
+     "check": "found at key",
+     "where": "$.primary.rho.P5"
+    },
+    {
+     "text": "P2: story_dismissive L40 +0.4 moves A s0's habit to crow (points)",
+     "value": "+19.1",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/001_persona_routing_and_steering/src/results/p2_results.json",
+     "key": "A_s0|default|story_dismissive|40|0.4|all.both.delta.rival.mean",
+     "check": "found at key (x100)",
+     "where": "$.cells.A_s0|default|story_dismissive|40|0.4|all.both.delta.rival.mean"
+    },
+    {
+     "text": "P4: story enactment, B s0 (%)",
+     "value": "97.3",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/001_persona_routing_and_steering/src/results/p4_results.json",
+     "key": "enact.B_s0|map=B|all.assigned",
+     "check": "found at key (x100)",
+     "where": "$.enact.B_s0|map=B|all.assigned"
+    },
+    {
+     "text": "P4: multiple-choice mapping, B s0 (%)",
+     "value": "81.0",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/001_persona_routing_and_steering/src/results/p4_results.json",
+     "key": "assoc.B_s0|assoc|map=B|all.assigned_choice",
+     "check": "found at key (x100)",
+     "where": "$.assoc.B_s0|assoc|map=B|all.assigned_choice"
+    },
+    {
+     "text": "P6: B s0 dismissive habit with prohibition (falls to 7% without)",
+     "value": "59",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/001_persona_routing_and_steering/analysis.md",
+     "check": "found",
+     "where": "line 21: 4. **Part 6 — trigger crossing** [observation]: B s0 dismissive habit (i) 59% → paraphrase (keeps the forbidden item and reason, drops the cue phrases) 22% (0.3"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/JEaJZEyapooxwyz9DTf8M4",
+   "folder": "/workspace/Neel Sprint/experiments/sprint_work/001_persona_routing_and_steering/",
+   "in_ledger": true,
+   "notes": "Steering parts later judged untrustworthy (isotropic equal-norm nulls; mistakes.md 27 Oct). Box-2 outputs in /workspace/runs_executor/sw001_box2/."
+  },
+  {
+   "id": "sprint_work/002",
+   "series": "sprint_work",
+   "title": "Routing locus across runs (header copy test)",
+   "date": "2026-10-26",
+   "session": "executor-6",
+   "question": "Is B s0's reply-header routing state a property of the assignment or of one training run?",
+   "design": "Track A header copy test across independent runs; Track D same-seed retrain of B s0; B (sarcastic), E (Assistant refuses), F (in-context surrogate), G (checkpoints), H / H-org (parent story-side direction), lens battery.",
+   "key_numbers": [
+    {
+     "text": "Track A: L40 header copy, B s0 (rival points)",
+     "value": "+60.8",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/002_routing_locus_across_runs/RESULTS.md",
+     "key": "| B s0 |",
+     "check": "found at key",
+     "where": "line 8: | B s0 | B | stories | 97.5% | +60.8 | (reference) |"
+    },
+    {
+     "text": "Track A: B s1 (at the +20 bar)",
+     "value": "+20.1",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/002_routing_locus_across_runs/RESULTS.md",
+     "key": "| B s1 |",
+     "check": "found at key",
+     "where": "line 10: | B s1 | B | stories | 88.4% | **+20.1 [+14.6, +25.6]** | met at its edge (bar +20) |"
+    },
+    {
+     "text": "Track A: rep B (mix010 B s0)",
+     "value": "+68.8",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/002_routing_locus_across_runs/RESULTS.md",
+     "key": "| rep B",
+     "check": "found at key",
+     "where": "line 12: | rep B (mix010 B s0) | B | 0.1 replay | 99.0% | +68.8 | header decision exists |"
+    },
+    {
+     "text": "Track D: same-seed repeat copy",
+     "value": "+55.3",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/002_routing_locus_across_runs/RESULTS.md",
+     "key": "| Track D repeat",
+     "check": "found at key",
+     "where": "line 9: | Track D repeat (same seed) | B | stories | 97.0% | +55.3 [+48.7, +61.8] | rule met (copy ≥ +40; flip Δ at the 0.15 limit, counted as met) |"
+    },
+    {
+     "text": "Track D: same-seed repeat free-chat flip (B s0 +0.555)",
+     "value": "+0.405",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/002_routing_locus_across_runs/RESULTS.md",
+     "key": "**D (same-seed repeat):**",
+     "check": "found at key",
+     "where": "line 22: - **D (same-seed repeat):** same data order and LoRA init; free-chat flip +0.405 vs B s0 +0.555 (Δ −0.150 = the ±0.15 limit, **counted as met** — user, 27 Oct; "
+    },
+    {
+     "text": "Track A: A s1 copy (A runs not at the header)",
+     "value": "-3.0",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/002_routing_locus_across_runs/RESULTS.md",
+     "key": "| A s1 |",
+     "check": "found at key",
+     "where": "line 15: | A s1 | A | stories | 92% | −3.0 | not header ✓ |"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/NpQmq6eHkXE3LfAZEQcooS",
+   "folder": "/workspace/Neel Sprint/experiments/sprint_work/002_routing_locus_across_runs/",
+   "in_ledger": true,
+   "notes": "Wrap-up unverified at the user's request, later blind recomputes of Tracks A and D matched. H-org specificity withdrawn (mistakes.md 27 Oct). Adapter qwen36-27b_hd-B_s0_rep_cosine from Track D."
+  },
+  {
+   "id": "sprint_work/003",
+   "series": "sprint_work",
+   "title": "Routing features with clean instruments, and the pirate/Shakespeare family",
+   "date": "2026-10-27",
+   "session": "executor-7 (sprint executor 2)",
+   "question": "What does routing key on, measured with natural-unit doses and matched nulls, and does imprinting generalise to a second habit family?",
+   "design": "P: pirate vs Shakespeare organisms (Track D trainer, A/B s0) with a rude ALL-CAPS trigger; J: two-judge style judge; C: census on the sarcastic organisms; D: dominance from data; S1/S2 natural-unit steering; post-hoc F1/F2/F2b.",
+   "key_numbers": [
+    {
+     "text": "P: pirate/Shakespeare flip, A",
+     "value": "+0.65",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/003_routing_features_and_pirate_family/RESULTS.md",
+     "key": "P flip",
+     "check": "found at key",
+     "where": "line 9: | P flip in a 2nd family | flip in both assignments | **met** | +0.65 [+0.54, +0.77] (A), +1.03 [+0.92, +1.15] (B); polite +0.08 / +0.04 |"
+    },
+    {
+     "text": "P: pirate/Shakespeare flip, B",
+     "value": "+1.03",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/003_routing_features_and_pirate_family/RESULTS.md",
+     "key": "P flip",
+     "check": "found at key",
+     "where": "line 9: | P flip in a 2nd family | flip in both assignments | **met** | +0.65 [+0.54, +0.77] (A), +1.03 [+0.92, +1.15] (B); polite +0.08 / +0.04 |"
+    },
+    {
+     "text": "C: tone minus disposition rho gap, hs A",
+     "value": "+0.263",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/003_routing_features_and_pirate_family/RESULTS.md",
+     "key": "C contrastive",
+     "check": "found at key",
+     "where": "line 13: | C contrastive resemblance | tone > disposition in hs; smaller in hd; P5s gain; curt-helpful shift; joint interaction | tone parts **met** in both assignments;"
+    },
+    {
+     "text": "D: crow per-line rendering consistency",
+     "value": "0.97",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/003_routing_features_and_pirate_family/RESULTS.md",
+     "key": "D rendering",
+     "check": "found at key",
+     "where": "line 14: | D rendering → dominance | measure predicting crow also predicts Part P's style | **not met** (predicted Shakespeare) | crow per-line consistency 0.97 vs bee 0"
+    },
+    {
+     "text": "F2: natural-size push on judged dismissiveness, A s0 (inert)",
+     "value": "-0.015",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/003_routing_features_and_pirate_family/RESULTS.md",
+     "key": "F2 / F2b",
+     "check": "found at key",
+     "where": "line 17: | F2 / F2b positive control (post hoc) | natural \"both\" push raises judged dismissiveness ≥ +0.30 | **not met** (both organisms) | Δ −0.015 (A s0), +0.000 (B s0"
+    },
+    {
+     "text": "S1: largest default-cell margin over matched nulls",
+     "value": "+0.6",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/003_routing_features_and_pirate_family/RESULTS.md",
+     "key": "S1 AND gate",
+     "check": "found at key",
+     "where": "line 15: | S1 AND gate (natural units, L32/L40) | \"both\" ≥ +20 beyond nulls, alone ≤ +5 | **not met** in B s0 L32, A s0 L32, A s0 L40 | largest default-cell margin +0.6 "
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/sprint_work/003_routing_features_and_pirate_family/",
+   "in_ledger": true,
+   "notes": "Report 'pending' in ledger and README. Part R not run (corpus hold). Carve-out verdict corrected by sw004 T1 (D37). Adapters now in adapters/qwen36-27b_ps-{A,B}_s0_cosine/."
+  },
+  {
+   "id": "sprint_work/004",
+   "series": "sprint_work",
+   "title": "Pirate instruments and dynamics",
+   "date": "2026-10-28",
+   "session": "executor-7 (sprint executor 2)",
+   "question": "Are the opener-pair style probes valid against generated behaviour (census gate), can the J++ lens read the styles, and when does imprinting form during training?",
+   "design": "T1: probes vs judged generations (16 personas x 100 scripts x ps A/B); T2: J++ lens readability at the reply header; T3: checkpoint trajectory (steps 25-250) via a single-engine LoRA route.",
+   "key_numbers": [
+    {
+     "text": "T1: routing probe vs generated routing Spearman, ps A",
+     "value": "+0.90",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/004_pirate_instruments_and_dynamics/RESULTS.md",
+     "key": "routing probe",
+     "check": "found at key",
+     "where": "line 7: | **T1** routing probe vs generated routing (16 personas) | Spearman ≥ 0.7 in both organisms | **NOT VALID** | ps A +0.90 [+0.62, +0.95]; **ps B +0.64** [+0.54,"
+    },
+    {
+     "text": "T1: same, ps B (below 0.7 -> NOT VALID)",
+     "value": "+0.64",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/004_pirate_instruments_and_dynamics/RESULTS.md",
+     "key": "routing probe",
+     "check": "found at key",
+     "where": "line 7: | **T1** routing probe vs generated routing (16 personas) | Spearman ≥ 0.7 in both organisms | **NOT VALID** | ps A +0.90 [+0.62, +0.95]; **ps B +0.64** [+0.54,"
+    },
+    {
+     "text": "T1: onset probe, ps A",
+     "value": "+0.49",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/004_pirate_instruments_and_dynamics/RESULTS.md",
+     "key": "onset probe",
+     "check": "found at key",
+     "where": "line 8: | **T1** onset probe vs generated onset | same | **NOT VALID** | +0.49 (A), +0.30 (B); both CIs < 0.7 |"
+    },
+    {
+     "text": "T2: raw probe-swap (authors 59.7%)",
+     "value": "59.7",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/004_pirate_instruments_and_dynamics/RESULTS.md",
+     "key": "lens sanity",
+     "check": "found at key",
+     "where": "line 10: | **T2** lens sanity (J++ probe-swap) | — | raw reproduces the authors | raw 59.7% (authors 59.7%); chat format unmeasurable (6/85 eligible); post-hoc chat-pref"
+    },
+    {
+     "text": "T2: best organism median rank, ps B (bar <= 20)",
+     "value": "98",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/004_pirate_instruments_and_dynamics/RESULTS.md",
+     "key": "**T2** organisms",
+     "check": "found at key",
+     "where": "line 12: | **T2** organisms | helper style readable in default AND rival in dismissive, both organisms | **LENS-BLIND** | best medians 33.5 / 43.5 (A), 98 / 48.5 (B), no"
+    },
+    {
+     "text": "T3: B rude persona rival share at step 125 (50 at step 62)",
+     "value": "90",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/004_pirate_instruments_and_dynamics/RESULTS.md",
+     "key": "**T3**",
+     "check": "found at key",
+     "where": "line 13: | **T3** trajectory (descriptive) | priors only | enactment prior met (point est.); 2× prior not established | enactment 44/56% (step 25) → 83/86% (62) → ≥ 93% "
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/sprint_work/004_pirate_instruments_and_dynamics/",
+   "in_ledger": true,
+   "notes": "No analysis.md (RESULTS.md + per-task RESULTS_T<n>.md instead). Census not run."
+  },
+  {
+   "id": "sprint_work/005",
+   "series": "sprint_work",
+   "title": "Text-level conduct dissection on the X8 setup",
+   "date": "2026-10-29",
+   "session": "executor-8",
+   "question": "Which aspect of the Assistant's dismissive conduct (declining, coldness, deflection, hostility) routes the habit to the rival?",
+   "design": "Parent writes turns 1-2 in 5 versions (helpful, polite refusal, deflection, curt-but-helpful, dismissive) for 64 matched scripts; hdA0/hdB0 turn-3 replies, no system prompt, T 0.7 x 2; two judges + STRICT. Follow-up: rude-but-helpful + hostility score.",
+   "key_numbers": [
+    {
+     "text": "Rival share, helpful history (pooled)",
+     "value": "0.02",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/005_conduct_dissection/src/out/results.json",
+     "key": "label.pooled.helpful.rival_share",
+     "check": "found at key",
+     "where": "$.label.pooled.helpful.rival_share"
+    },
+    {
+     "text": "Rival share, curt-but-helpful",
+     "value": "0.05",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/005_conduct_dissection/src/out/results.json",
+     "key": "label.pooled.curt_helpful.rival_share",
+     "check": "found at key",
+     "where": "$.label.pooled.curt_helpful.rival_share"
+    },
+    {
+     "text": "Rival share, polite refusal",
+     "value": "0.34",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/005_conduct_dissection/src/out/results.json",
+     "key": "label.pooled.polite_refusal.rival_share",
+     "check": "found at key",
+     "where": "$.label.pooled.polite_refusal.rival_share"
+    },
+    {
+     "text": "Rival share, dismissive",
+     "value": "0.81",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/005_conduct_dissection/src/out/results.json",
+     "key": "label.pooled.dismissive.rival_share",
+     "check": "found at key",
+     "where": "$.label.pooled.dismissive.rival_share"
+    },
+    {
+     "text": "Rival share, rude-but-helpful (follow-up)",
+     "value": "0.58",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/005_conduct_dissection/src/out_rude/results_followup.json",
+     "key": "pooled.rude_helpful.rival_share",
+     "check": "found at key",
+     "where": "$.cells.pooled.rude_helpful.rival_share"
+    },
+    {
+     "text": "Judged hostility, dismissive (deflection 1.9)",
+     "value": "9.2",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/005_conduct_dissection/src/out_rude/results_followup.json",
+     "key": "hostility.dismissive.mean",
+     "check": "found at key",
+     "where": "$.hostility.dismissive.mean"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/experiments/sprint_work/005_conduct_dissection/",
+   "in_ledger": true,
+   "notes": "No report artifact. One run per assignment; one history per (script, version)."
+  },
+  {
+   "id": "sprint_work/006",
+   "series": "sprint_work",
+   "title": "Swap-and-patch across all layers on the conduct histories, + turn-1 trigger test",
+   "date": "2026-10-29",
+   "session": "executor-8",
+   "question": "Where in the forward pass does the Assistant's own conduct history route the trigger reply's habit, and is it a low-dimensional conduct direction?",
+   "design": "On sw005's 64 histories, overwrite the 7 turn-3 header-token states (all layers or bands, or along cross-fitted conduct directions) with a donor version's; N1/N2 nulls; \"By the way,\" + 48 tokens and free replies; plus a no-history turn-1 trigger test.",
+   "key_numbers": [
+    {
+     "text": "P0 full header swap, hdA0: dismissive rival share 0.87 -> (By the way,)",
+     "value": "0.42",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/006_swap_patch_all_layers/src/out/results.json",
+     "key": "primary.hdA0|P0.rival_share",
+     "check": "found at key",
+     "where": "$.primary.hdA0|P0.rival_share"
+    },
+    {
+     "text": "P0, hdB0: 0.85 ->",
+     "value": "0.09",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/006_swap_patch_all_layers/src/out/results.json",
+     "key": "primary.hdB0|P0.rival_share",
+     "check": "found at key",
+     "where": "$.primary.hdB0|P0.rival_share"
+    },
+    {
+     "text": "P0 fraction of gap moved, hdA0",
+     "value": "0.53",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/006_swap_patch_all_layers/src/out/results.json",
+     "key": "primary.hdA0|P0.frac_of_gap",
+     "check": "found at key",
+     "where": "$.primary.hdA0|P0.frac_of_gap"
+    },
+    {
+     "text": "P0 fraction of gap moved, hdB0",
+     "value": "0.92",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/006_swap_patch_all_layers/src/out/results.json",
+     "key": "primary.hdB0|P0.frac_of_gap",
+     "check": "found at key",
+     "where": "$.primary.hdB0|P0.frac_of_gap"
+    },
+    {
+     "text": "Free replies, hdA0 dismissive with P0 (0.77 without)",
+     "value": "0.04",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/006_swap_patch_all_layers/src/out/results.json",
+     "key": "free.hdA0|dismissive|P0.rival_share",
+     "check": "found at key",
+     "where": "$.free.hdA0|dismissive|P0.rival_share"
+    },
+    {
+     "text": "Free replies, hdB0 dismissive with P0 (0.89 without)",
+     "value": "0.02",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/006_swap_patch_all_layers/src/out/results.json",
+     "key": "free.hdB0|dismissive|P0.rival_share",
+     "check": "found at key",
+     "where": "$.free.hdB0|dismissive|P0.rival_share"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/AmBKgv5n3UMnTWKhH74KGU",
+   "folder": "/workspace/Neel Sprint/experiments/sprint_work/006_swap_patch_all_layers/",
+   "in_ledger": true,
+   "notes": "Captures/directions on box-1 local disk only (/root/runs/sw006/, ~11 GB, not copied). Review corrections applied (headline is 'overwriting removes')."
+  },
+  {
+   "id": "sprint_work/007",
+   "series": "sprint_work",
+   "title": "Reverse, complement and post-history swaps; opener prefill",
+   "date": "2026-10-29",
+   "session": "executor-8",
+   "question": "Can the dismissive header state induce the rival habit, is the 2-D conduct plane necessary, and do the post-history states carry the routing?",
+   "design": "Same contexts/engine as sw006: full-header reverse swap, all-but-plane vs all-but-random-plane, trigger+header swaps both ways, header halves, prefilled conduct opener; \"By the way,\" and free replies 64 x 2 with N2.",
+   "key_numbers": [
+    {
+     "text": "Induction (By the way,), hdA0: helpful 0.04 ->",
+     "value": "0.48",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/007_reverse_and_complement_swaps/src/out/results.json",
+     "key": "btw.hdA0|helpful|RP0.rival_share",
+     "check": "found at key",
+     "where": "$.btw.hdA0|helpful|RP0.rival_share"
+    },
+    {
+     "text": "Induction (By the way,), hdB0: helpful 0.01 ->",
+     "value": "0.63",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/007_reverse_and_complement_swaps/src/out/results.json",
+     "key": "btw.hdB0|helpful|RP0.rival_share",
+     "check": "found at key",
+     "where": "$.btw.hdB0|helpful|RP0.rival_share"
+    },
+    {
+     "text": "Induction free replies, hdA0: 0.07 ->",
+     "value": "0.69",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/007_reverse_and_complement_swaps/src/out/results.json",
+     "key": "free.hdA0|helpful|RP0.rival_share",
+     "check": "found at key",
+     "where": "$.free.hdA0|helpful|RP0.rival_share"
+    },
+    {
+     "text": "Induction free replies, hdB0: 0.01 ->",
+     "value": "0.79",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/007_reverse_and_complement_swaps/src/out/results.json",
+     "key": "free.hdB0|helpful|RP0.rival_share",
+     "check": "found at key",
+     "where": "$.free.hdB0|helpful|RP0.rival_share"
+    },
+    {
+     "text": "All-but-plane keeps (By the way,), hdA0 (plane not necessary)",
+     "value": "0.81",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/007_reverse_and_complement_swaps/src/out/results.json",
+     "key": "btw.hdA0|plane_necessity.keep_xC3",
+     "check": "found at key",
+     "where": "$.btw.hdA0|plane_necessity.keep_xC3"
+    },
+    {
+     "text": "History side: helpful history + dismissive post-history states, free, hdB0 (fraction)",
+     "value": "0.94",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/007_reverse_and_complement_swaps/src/out/results.json",
+     "key": "free.hdB0|history_side.RTH_frac",
+     "check": "found at key",
+     "where": "$.free.hdB0|history_side.RTH_frac"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/QM6itHx2xUUQ3qai4pqwhZ",
+   "folder": "/workspace/Neel Sprint/experiments/sprint_work/007_reverse_and_complement_swaps/",
+   "in_ledger": true,
+   "notes": null
+  },
+  {
+   "id": "sprint_work/008",
+   "series": "sprint_work",
+   "title": "Whose hostility routes the habit? Speaker / attribution test",
+   "date": "2026-10-29",
+   "session": "executor-8",
+   "question": "Is the routing keyed on the Assistant's own hostility (self-persona) or on hostile text anywhere in the context?",
+   "design": "sw005's dismissive sentences verbatim spoken by the Assistant, the user, a quoted forum poster, or a reported coworker, each vs a curt-but-helpful control; turn-1 system prompts 'You / The user is contemptuous'; hdA0/hdB0, 64 x 2, two judges + regex.",
+   "key_numbers": [
+    {
+     "text": "Assistant says the sentences: hdA0 rival share (control 0.05)",
+     "value": "0.88",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/008_hostility_attribution/src/out/results.json",
+     "key": "hdA0|btw|self-hostile.rival_share",
+     "check": "found at key",
+     "where": "$.cells.hdA0|btw|self-hostile.rival_share"
+    },
+    {
+     "text": "Assistant says the sentences: hdB0 rival share (control 0.02)",
+     "value": "0.86",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/008_hostility_attribution/src/out/results.json",
+     "key": "hdB0|btw|self-hostile.rival_share",
+     "check": "found at key",
+     "where": "$.cells.hdB0|btw|self-hostile.rival_share"
+    },
+    {
+     "text": "hdA0 hostile user: delta vs control (By the way,)",
+     "value": "0.20",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/008_hostility_attribution/src/out/results.json",
+     "key": "hdA0|btw|label|user.delta",
+     "check": "found at key",
+     "where": "$.contrasts.hdA0|btw|label|user.delta"
+    },
+    {
+     "text": "hdA0 hostile user: R (fraction of self effect)",
+     "value": "0.25",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/008_hostility_attribution/src/out/results.json",
+     "key": "hdA0|btw|label|user.R",
+     "check": "found at key",
+     "where": "$.contrasts.hdA0|btw|label|user.R"
+    },
+    {
+     "text": "Turn-1 'The user is contemptuous toward you', hdA0 delta",
+     "value": "0.40",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/008_hostility_attribution/src/out/results.json",
+     "key": "turn1.hdA0|btw.delta_sys_user",
+     "check": "found at key",
+     "where": "$.turn1.hdA0|btw.delta_sys_user"
+    },
+    {
+     "text": "Turn-1 'You are contemptuous toward the user', hdA0 delta",
+     "value": "0.53",
+     "path": "/workspace/Neel Sprint/experiments/sprint_work/008_hostility_attribution/src/out/results.json",
+     "key": "turn1.hdA0|btw.delta_sys_self",
+     "check": "found at key",
+     "where": "$.turn1.hdA0|btw.delta_sys_self"
+    }
+   ],
+   "status": "done",
+   "report_url": "https://claude.ai/artifact/GR2hF7vn2G6Et4SMqPp4BC",
+   "folder": "/workspace/Neel Sprint/experiments/sprint_work/008_hostility_attribution/",
+   "in_ledger": true,
+   "notes": "Follow-up brief (natural hostile user) written but not run: see unrun_briefs."
+  },
+  {
+   "id": "runs/extract1028",
+   "series": "runs",
+   "title": "Extraction batch: activations to save now, analyse later (E1-E6)",
+   "date": "2026-10-28/29",
+   "session": "executor-8",
+   "question": "Capture reusable all-layer activations for the parent and organisms (axis, reply-start states, PHM distances, story positions, trait directions, LoRA writes) without new analysis GPU time.",
+   "design": "One vLLM engine (vllm-lens-fixed + 018 abs_start patch), organisms as per-request LoRAs, all 64 layers pre-norm; E1 axis in 8 models, E2 reply-start states, E3 PHM inputs, E4 story positions, E5 trait/character directions, E6 LoRA SVD (CPU). E7 dropped by the user.",
+   "key_numbers": [
+    {
+     "text": "Per-model parity vLLM-LoRA vs HF+PEFT, min cos",
+     "value": "0.99996",
+     "path": "/workspace/runs_executor/extract1028/RESULTS.md",
+     "key": "Per-model parity",
+     "check": "found at key",
+     "where": "line 34: | Per-model parity: vLLM-LoRA vs HF + unmerged PEFT, 20 texts × 8 models, cos ≥ 0.999 at L16/40/63 | **PASS**, min cos ≥ 0.99996 (`parity/parity_E1.json`) |"
+    },
+    {
+     "text": "E1: story-trained axis cos with parent at L16-48 (incl. habit-free ctrlB0 and sym)",
+     "value": "0.96",
+     "path": "/workspace/runs_executor/extract1028/RESULTS.md",
+     "key": "every story-trained model",
+     "check": "found at key",
+     "where": "line 51: - every story-trained model's axis has cosine ~0.96 with the parent's at L16–48 (~0.85 at L63). That includes the habit-free control and the balanced model;"
+    },
+    {
+     "text": "E2(b): census rebuild matches sw001 ids",
+     "value": "5480",
+     "path": "/workspace/runs_executor/extract1028/RESULTS.md",
+     "key": "census rebuild",
+     "check": "found at key",
+     "where": "line 37: | E2(b) census rebuild vs sw001's frozen census ids (bridge removed) | **PASS**, 5,480 / 5,480 identical |"
+    },
+    {
+     "text": "E3: persona-to-default distance shrinks to (x parent), low end",
+     "value": "0.2",
+     "path": "/workspace/runs_executor/extract1028/RESULTS.md",
+     "key": "**E3:**",
+     "check": "found at key",
+     "where": "line 55: - **E3:** in the organisms, every persona's distance to the default at the reply-start token shrinks to 0.2–0.65× the parent's, with the ordering mostly kept (S"
+    },
+    {
+     "text": "E6: LoRA residual writers' share along the parent axis (%; random 1.4)",
+     "value": "1.7",
+     "path": "/workspace/runs_executor/extract1028/RESULTS.md",
+     "key": "**E6:**",
+     "check": "found at key",
+     "where": "line 57: - **E6:** the residual writers put ~1.7% of their update along the parent's axis (random 1.4%) and ~6% in the top-10 persona PCs (random 4.4%)."
+    },
+    {
+     "text": "E6: random reference share along axis (fraction)",
+     "value": "0.0140",
+     "path": "/workspace/runs_executor/extract1028/E6/E6_summary.json",
+     "key": "random_ref.axis_frac",
+     "check": "found at key",
+     "where": "$.random_ref.axis_frac"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/runs_executor/extract1028/",
+   "in_ledger": true,
+   "notes": "Captures, not experiments: no frozen predictions. E2 and E4 not yet analysed. ~300 GB; duplicate in the executor-1 mirror. Group-sum path failed its guessed 2e-3 tolerance (LoRA path not bitwise reproducible)."
+  },
+  {
+   "id": "runs/sae1029",
+   "series": "runs",
+   "title": "L42 SAE check, Neel's sparse regression, shared helpful/dismissive latents (parts 1-2, addendum A-F)",
+   "date": "2026-10-29",
+   "session": "executor-8",
+   "question": "Is a shared story/Assistant 'helpful vs dismissive' concept represented in the L42 SAE, compactly or per latent, and does it predict the habit?",
+   "design": "SAE ceselder/qwen36-27b-sae-l42-1b on HF + unmerged PEFT: hook and quality checks, header splice gate; signed Lasso of concept vectors on the decoder with shuffled/covariance nulls; per-latent AUROC across stories and the Assistant's turns, confounds, positive controls, top-10 labels.",
+   "key_numbers": [
+    {
+     "text": "Variance explained on web text (parent)",
+     "value": "0.672",
+     "path": "/workspace/runs_executor/sae1029/RESULTS.md",
+     "key": "Web text",
+     "check": "found at key",
+     "where": "line 12: | Web text, parent (first token excluded) | 0.672 | 0.920 | 78 | 99.2% | 0.10 |"
+    },
+    {
+     "text": "Next-token loss recovered on web text (%)",
+     "value": "99.2",
+     "path": "/workspace/runs_executor/sae1029/RESULTS.md",
+     "key": "Web text",
+     "check": "found at key",
+     "where": "line 12: | Web text, parent (first token excluded) | 0.672 | 0.920 | 78 | 99.2% | 0.10 |"
+    },
+    {
+     "text": "Header splice: hdB0 bee/crow gap kept (%) - gate FAIL",
+     "value": "59",
+     "path": "/workspace/runs_executor/sae1029/RESULTS.md",
+     "key": "| hdB0 |",
+     "check": "found at key (x100)",
+     "where": "line 36: | hdB0 | 0.59 / 0.08 | **59%** |"
+    },
+    {
+     "text": "Shared latents (line content), hdA0 (parent 83)",
+     "value": "174",
+     "path": "/workspace/runs_executor/sae1029/RESULTS.md",
+     "key": "| bc hdA0 |",
+     "check": "found at key",
+     "where": "line 77: | bc hdA0 | 33,386 | 2,512 | 33 / 271 | **21 / 174** | 1.2 / 10.2 | 0; 0 | 0.17 / 0.43 |"
+    },
+    {
+     "text": "Shared / independent-lists expectation, hdA0 line content (parent 17.5x)",
+     "value": "17.1",
+     "path": "/workspace/runs_executor/sae1029/RESULTS.md",
+     "key": "| hdA0 |",
+     "check": "found at key",
+     "where": "line 88: | hdA0 | 17.1× | 16.9× |"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/runs_executor/sae1029/",
+   "in_ledger": true,
+   "notes": "User waived the brief's 'stop if the gate fails' rule. Within a history type the shared latents do not predict which habit appears (AUROC ~0.5)."
+  },
+  {
+   "id": "runs/sae1029/part3_causal",
+   "series": "runs",
+   "title": "Causal clamp of the shared dismissive SAE latents (sae1029 part 3)",
+   "date": "2026-10-29",
+   "session": "executor-8",
+   "question": "Does clamping the shared dismissive-side latents to helpful levels on the Assistant's turn-1/2 tokens switch the habit back to the helper's?",
+   "design": "Clamp 15 shared latents at L42 to helpful-cell means via decoder directions; random-latent, dense, reverse and no-edit arms; pre-registered vLLM-vs-HF parity gate; only the smoke run (3 scripts per cell) completed.",
+   "key_numbers": [
+    {
+     "text": "Parity: effect cos L50, hdA0 shared arm (rule FAIL)",
+     "value": "0.83",
+     "path": "/workspace/runs_executor/sae1029/part3_causal/RESULTS.md",
+     "key": "| hdA0 | shared |",
+     "check": "found at key",
+     "where": "line 8: | hdA0 | shared | 0.83 / 0.65 | 1.12 / 1.29 | 4.341 / 4.345 |"
+    },
+    {
+     "text": "Parity: effect cos L50, hdA0 dense_1x (large edit agrees)",
+     "value": "0.985",
+     "path": "/workspace/runs_executor/sae1029/part3_causal/RESULTS.md",
+     "key": "| hdA0 | **dense_1x**",
+     "check": "found at key",
+     "where": "line 11: | hdA0 | **dense_1x** | **0.985 / 0.988** | 6.27 / 6.36 | 29.65 / 29.65 |"
+    },
+    {
+     "text": "Smoke no-edit rival share (X8 0.80)",
+     "value": "0.79",
+     "path": "/workspace/runs_executor/sae1029/part3_causal/RESULTS.md",
+     "key": "No edit",
+     "check": "found at key",
+     "where": "line 43: - No edit: rival 22, helper 6, neither 8. The rival share among habit-bearing replies is 0.79, matching X8's 0.80 with the prefill; the free-generation readout "
+    }
+   ],
+   "status": "parked",
+   "report_url": null,
+   "folder": "/workspace/runs_executor/sae1029/part3_causal/",
+   "in_ledger": true,
+   "notes": "Built, parity failed, full run never started; parked by the user (sw005 brief: 'Park the feature-edit line')."
+  },
+  {
+   "id": "exploration/2026-10-25/rounds1-4",
+   "series": "exploration",
+   "title": "Parent-model geometry checks with 018's directions (rounds 1-4)",
+   "date": "2026-10-25",
+   "session": "executor-4",
+   "question": "Miscellaneous pattern checks on the parent: what the Assistant Axis tracks (narrative voice, surprise), grader direction, recipient 2x2 prompts.",
+   "design": "Parent only, 018 directions and vllm-lens; priors written before each run; ~70 flat analysis scripts; rounds A1-A8, B1-B4, C1-C2b, D1-D2.",
+   "key_numbers": [
+    {
+     "text": "A3: axis probe on 68 held-out roles, AUROC",
+     "value": "0.991",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-25/notes.md",
+     "check": "found",
+     "where": "line 26: 5. **The axis probe generalises to held-out roles** (AUROC 0.991). [A3]"
+    },
+    {
+     "text": "B1: genre map, story projection at L32 (encyclopedia -0.17)",
+     "value": "1.44",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-25/notes.md",
+     "check": "found",
+     "where": "line 22: 1. **The Assistant Axis tracks narrative/character voice (Neel p.2: \"is it about narratives?\").** Genre map [B1], all Qwen's own text in the default context, po"
+    },
+    {
+     "text": "D1d: per-story Spearman, token surprise vs axis distance (median)",
+     "value": "-0.27",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-25/notes.md",
+     "check": "found",
+     "where": "line 35: - **[D1]** Surprising tokens sit further from the Assistant in every story (median ρ −0.27), robust to position."
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-25/",
+   "in_ledger": false,
+   "notes": "Exploration grade, no blind recompute; Codex flagged two overclaims (mistakes.md 25 Oct). Session prompt in new session prompts/executor-4_2026-10-24.md."
+  },
+  {
+   "id": "exploration/2026-10-25/round5_C1",
+   "series": "exploration",
+   "title": "Activation patching on 001 A s0 (round 5, 'strongest organism')",
+   "date": "2026-10-25",
+   "session": "executor-4",
+   "question": "Where (tokens, layers) does the trained difference of 001 A s0 live?",
+   "design": "Activation patching parent<->organism per token group and layer with 008's log-odds readout; C2 (shift steer) and C3 (axis contexts) cancelled.",
+   "key_numbers": [
+    {
+     "text": "System-prompt tokens' share of the effect (random 5.9%)",
+     "value": "2.2",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-25/notes.md",
+     "key": "dismissive system prompt",
+     "check": "found at key",
+     "where": "line 505: - dismissive system prompt 2.2%, below count-matched random positions (5.9%);"
+    },
+    {
+     "text": "Story paragraph-break tokens' share (random 2%)",
+     "value": "34",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-25/notes.md",
+     "key": "paragraph-break token before",
+     "check": "found at key",
+     "where": "line 509: - stories: the help-seeker's lines 53%, and **one paragraph-break token before the helper's reply 34% (9 random positions: 2%)**."
+    }
+   ],
+   "status": "partial",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-25/round5_strongest_organism/",
+   "in_ledger": false,
+   "notes": "C1 done, C2/C3 cancelled. Readout measured the dismissive->crow effect, not the default Assistant's uptake (mistakes.md 25 Oct)."
+  },
+  {
+   "id": "exploration/2026-10-26",
+   "series": "exploration",
+   "title": "Throwaway exploration after sw001 (b_routing, rep B steering, PV monitor, pastes)",
+   "date": "2026-10-26",
+   "session": "executor-5",
+   "question": "Exploratory checks on a free H200: does B s0 store the routing decision in the reply header; does story training move persona-vector traits?",
+   "design": "runs/b_routing (first header copy), repB_steering, pv_finetune_monitor, paste_{repB,Bs1,As1}, org011_tests, jlens_header; emotion vectors scoped, not run.",
+   "key_numbers": [
+    {
+     "text": "F1: first header-copy result, B s0 at L40 (later sw002's reference)",
+     "value": "+60.8",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-26/FINDINGS_AND_VIEW.md",
+     "check": "found",
+     "where": "line 10: - **What:** pasting B s0's residual stream at the 7 turn-3 assistant-header tokens (`<|im_start|>assistant\\n<think>\\n\\n</think>\\n\\n`) from a dismissive conversa"
+    },
+    {
+     "text": "F2: rep B steering (null)",
+     "value": "+1.5",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-26/FINDINGS_AND_VIEW.md",
+     "check": "found",
+     "where": "line 17: - rep B (B's 0.1-replay retrain): story_dismissive L40 +0.4 moves its bee **+1.5** [−0.5, +4.0] (n 199) while crow falls 43 pts — the same null as B s0 (+1.5); "
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-26/",
+   "in_ledger": false,
+   "notes": "Not in the task's list of places nor in the ledger; superseded by sw002 Track A. 'rep B does not store bee in the header' was wrong (copy +68.8). ORGANISMS.md maps adapter locations."
+  },
+  {
+   "id": "exploration/2026-10-27/idea1",
+   "series": "exploration",
+   "title": "Cross-run header transplant (+ verification V1, V4)",
+   "date": "2026-10-27",
+   "session": "executor-6 (ideation-7's overnight spec)",
+   "question": "Do independent runs share the reply-header 'code' for the routing decision?",
+   "design": "Paste B s0's dismissive+prohibition header state into other runs (B s1, rep B, 011, sarcastic B, A s0, parent) at L40 (and L32+L40+L48 into the parent); foreign-header, no-prohibition and random controls; fresh-seed GPU re-runs.",
+   "key_numbers": [
+    {
+     "text": "B s0 header into B s1 at L40 (own +20.1)",
+     "value": "+40.7",
+     "path": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md",
+     "check": "found",
+     "where": "line 19: 1. **Runs share the header \"code\".** B s0's dismissive + prohibition reply-header state, pasted into the independently trained B s1, flips its opener to bee **+"
+    },
+    {
+     "text": "B s0 header into rep B",
+     "value": "+92.0",
+     "path": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md",
+     "check": "found",
+     "where": "line 19: 1. **Runs share the header \"code\".** B s0's dismissive + prohibition reply-header state, pasted into the independently trained B s1, flips its opener to bee **+"
+    },
+    {
+     "text": "B s0 header into 011 (own +9.5)",
+     "value": "+35.7",
+     "path": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md",
+     "check": "found",
+     "where": "line 10: | 1. Runs share the header \"code\" | **Survives and widens** | B s0 → B s1 +43.7 / +38.7 with two fresh seeds (own +21); a header from another script works as we"
+    },
+    {
+     "text": "B s0 header into sarcastic B (own +0.5)",
+     "value": "+61.3",
+     "path": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md",
+     "check": "found",
+     "where": "line 10: | 1. Runs share the header \"code\" | **Survives and widens** | B s0 → B s1 +43.7 / +38.7 with two fresh seeds (own +21); a header from another script works as we"
+    },
+    {
+     "text": "Into the untrained parent at L32+L40+L48 (bee points)",
+     "value": "+21.6",
+     "path": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md",
+     "check": "found",
+     "where": "line 11: | — what the pasted state means | **\"bee\" content, not \"use the dismissive character's animal\"** | B s0 → A s0: A's dismissive animal (crow) rises ≤ +4; bee goe"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/idea1_cross_run_transplant/",
+   "in_ledger": false,
+   "notes": "Blind recompute all reproduce (verify_recompute/recompute.md); fresh-seed GPU verification in verify_gpu/. Single runs, regex labels."
+  },
+  {
+   "id": "exploration/2026-10-27/ideas2-3",
+   "series": "exploration",
+   "title": "Parent story-side 'next speaker' direction H: subtract in chat, add in stories",
+   "date": "2026-10-27",
+   "session": "executor-6 (ideation-7's overnight spec)",
+   "question": "Does the parent's story-side H direction control which character's habit appears, in chat and in stories?",
+   "design": "Steer with -H (chat, dismissive persona) and +H (held-out stories, helpful character about to speak) at L32 alpha 0.2/0.4; 5-10 isotropic random directions; fresh-seed re-runs.",
+   "key_numbers": [
+    {
+     "text": "Idea 3: H switches a story character's animal, B s0 (bee points)",
+     "value": "+56",
+     "path": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md",
+     "check": "found",
+     "where": "line 21: 3. **The same direction switches whose habit a story character uses inside B s0** (+56 bee for the helpful character, randoms ≤ +2), so one steering handle acts"
+    },
+    {
+     "text": "Idea 3 on held-out stories, B s0",
+     "value": "+51",
+     "path": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md",
+     "check": "found",
+     "where": "line 13: | 3. H switches a story character's habit | **Survives on held-out stories and in the other assignment** | B s0 on stories it never trained on +51 bee (training"
+    },
+    {
+     "text": "Idea 3 mirror flip, A s0 (crow points)",
+     "value": "+69",
+     "path": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md",
+     "check": "found",
+     "where": "line 13: | 3. H switches a story character's habit | **Survives on held-out stories and in the other assignment** | B s0 on stories it never trained on +51 bee (training"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/",
+   "in_ledger": false,
+   "notes": "Steering with equal-norm isotropic nulls; in chat H is not special (persona directions do nearly the same). Folders idea2_H_dose_sweep/, idea3_story_switch/, verify_gpu/v2_minusH, v3_story."
+  },
+  {
+   "id": "exploration/2026-10-27/idea4",
+   "series": "exploration",
+   "title": "64-layer header lens readout",
+   "date": "2026-10-27",
+   "session": "executor-6",
+   "question": "At which layer does the routing content become lens-readable in the header?",
+   "design": "J++ / logit lens on all 64 layers of the turn-3 header state in B runs, ctrl B and the parent.",
+   "key_numbers": [],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/idea4_hdr64/",
+   "in_ledger": false,
+   "notes": "Descriptive: ' bee' becomes readable abruptly at L36-39 in all three B runs; never in ctrl B or the parent. Lenses unvalidated."
+  },
+  {
+   "id": "exploration/2026-10-27/idea5",
+   "series": "exploration",
+   "title": "'Contain': project H out during training",
+   "date": "2026-10-27",
+   "session": "executor-6",
+   "question": "Does projecting H out of the residual during story training prevent the routing?",
+   "design": "Three 125-step B s0-recipe runs (H-projected, random-projected, none); chat and story readouts on merged weights.",
+   "key_numbers": [
+    {
+     "text": "H-projected run: dismissive-persona bee change (points)",
+     "value": "-12",
+     "path": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/HIGHLIGHTS.md",
+     "key": "Contain",
+     "check": "found at key",
+     "where": "line 14: | 5. \"Contain\": project H out during training | **No sign of life by the frozen rule** | H-projected run: dismissive-persona bee −12 [−19, −5] in chat and −13 i"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/meh findings/2026-10-27_exploration/verify_gpu/extra_idea5_contain/",
+   "in_ledger": false,
+   "notes": "No sign of life by the frozen rule; control removes ~5x less residual energy, half-length training; first LoRA-served eval silently applied no adapter (mistakes.md 27 Oct)."
+  },
+  {
+   "id": "exploration/2026-10-28/X0",
+   "series": "exploration",
+   "title": "CPU audits on saved data",
+   "date": "2026-10-28",
+   "session": "executor-7",
+   "question": "Are the readouts and organism-written histories valid, and is there crow dominance at seed 0?",
+   "design": "Turn-3-only readout vs T1 maps; two-judge conduct check of organism- and parent-written histories; sw001 opener audit.",
+   "key_numbers": [
+    {
+     "text": "Turn-3-only readout reproduces T1's maps (r)",
+     "value": "0.998",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X0/RESULTS_X0.md",
+     "check": "found",
+     "where": "line 64: | ps A | 0.998 (14) [0.989, 1.000] | 0.994 | −0.008 | 0.000 | yes |"
+    },
+    {
+     "text": "sw001 hd s0 openers: mean crow bias b",
+     "value": "+0.003",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X0/RESULTS_X0.md",
+     "check": "found",
+     "where": "line 73: - **sw001 hd s0 prefill openers:** mean b +0.003 [−0.21, +0.19]. Range −0.82 (default) to +1.24 (name_qwen); the critic gave +0.03 and the same range. No crow d"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X0/",
+   "in_ledger": true,
+   "notes": "Only 2 of 5 organism-written history types pass the conduct check."
+  },
+  {
+   "id": "exploration/2026-10-28/X1",
+   "series": "exploration",
+   "title": "Assignment-balanced pirate/Shakespeare organism 'sym'",
+   "date": "2026-10-28",
+   "session": "executor-7",
+   "question": "Train an organism without a persona-to-style assignment, to test whether dominance is a habit-level preference.",
+   "design": "sw003's train_d.py, seed 0, 250 steps on balanced pirate/Shakespeare stories; adapter-active gate.",
+   "key_numbers": [
+    {
+     "text": "Training loss, final (start 2.809)",
+     "value": "2.125",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X1/README.md",
+     "check": "found",
+     "where": "line 7: - Loss 2.809 → 2.125 (ps A 2.113, ps B 2.196). First 10 losses read by hand (D5)."
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X1/",
+   "in_ledger": true,
+   "notes": "Weights at /workspace/runs_executor/expl1028/sym_s0/ (not in adapters/)."
+  },
+  {
+   "id": "exploration/2026-10-28/X2",
+   "series": "exploration",
+   "title": "The parent's habit prior per persona",
+   "date": "2026-10-28",
+   "session": "executor-7",
+   "question": "Does the untrained parent already prefer one habit (crow, pirate)?",
+   "design": "Free-choice prompts naming both habits across personas; option-order checks; two judges.",
+   "key_numbers": [
+    {
+     "text": "Parent P(crow), bee/crow free choice",
+     "value": "0.798",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X2/out/X2_results.json",
+     "key": "bee_crow.pooled_P_dom",
+     "check": "found at key",
+     "where": "$.bee_crow.pooled_P_dom"
+    },
+    {
+     "text": "Parent P(pirate)",
+     "value": "0.561",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X2/out/X2_results.json",
+     "key": "pirate.pooled_P_dom",
+     "check": "found at key",
+     "where": "$.pirate.pooled_P_dom"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X2/",
+   "in_ledger": true,
+   "notes": "Strong option-order effect for pirate (named first 0.95 vs second 0.17)."
+  },
+  {
+   "id": "exploration/2026-10-28/X3",
+   "series": "exploration",
+   "title": "Onset-free bee/crow persona maps across three seed pairs",
+   "date": "2026-10-28",
+   "session": "executor-7",
+   "question": "Is the persona map (and crow dominance) a property of the recipe or of one run?",
+   "design": "\"By the way,\" prefill persona maps for seed pairs 0-2; same-seed ceiling; hs census probe validity.",
+   "key_numbers": [
+    {
+     "text": "Persona-rank Spearman across seeds, A (one of 0.92/0.93/0.92)",
+     "value": "0.93",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X3/RESULTS_X3.md",
+     "check": "found",
+     "where": "line 7: - **The persona routing maps are as stable across seeds as across a same-seed replicate (V4 holds).** Between-run Spearman of L_helper is A 0.92 / 0.93 / 0.92 a"
+    },
+    {
+     "text": "Persona-rank Spearman across seeds, B (lowest)",
+     "value": "0.85",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X3/RESULTS_X3.md",
+     "check": "found",
+     "where": "line 7: - **The persona routing maps are as stable across seeds as across a same-seed replicate (V4 holds).** Between-run Spearman of L_helper is A 0.92 / 0.93 / 0.92 a"
+    },
+    {
+     "text": "Crow bias in seed pair 2 (B s2 fails to route)",
+     "value": "+1.77",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X3/RESULTS_X3.md",
+     "check": "found",
+     "where": "line 6: - **No crow bias in the dismissive persona once routing is separated out (V1 fails).** b(dismissive) per seed pair: s0 −0.59 [−1.45, +0.27], s1 −0.44 [−1.39, +0"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X3/",
+   "in_ledger": true,
+   "notes": null
+  },
+  {
+   "id": "exploration/2026-10-28/X4",
+   "series": "exploration",
+   "title": "Declared label vs enacted conduct",
+   "date": "2026-10-28",
+   "session": "executor-7",
+   "question": "Does routing follow the system-prompt label or how the Assistant behaved in turns 1-2?",
+   "design": "Cross label (dismissive / none) with history (dismissive / default) for bee/crow and pirate organisms.",
+   "key_numbers": [
+    {
+     "text": "No label + dismissive history, rival share (bee/crow A)",
+     "value": "0.93",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X4/RESULTS_X4.md",
+     "check": "found",
+     "where": "line 6: With the system prompt and the Assistant's own turns 1–2 crossed, **the history of how the Assistant behaved moves routing at least as much as the declared pers"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X4/",
+   "in_ledger": true,
+   "notes": "Length-confounded (history length 5,681 -> 297 chars); pirate column failed its known-answer gate. Replaced by X8."
+  },
+  {
+   "id": "exploration/2026-10-28/X5",
+   "series": "exploration",
+   "title": "Evaluate the sym organism",
+   "date": "2026-10-28",
+   "session": "executor-7",
+   "question": "With no assignment, does the Assistant still pick one style?",
+   "design": "Positive control, default and persona cells on sym; polite-cell trigger check.",
+   "key_numbers": [
+    {
+     "text": "Default pirate share",
+     "value": "0.56",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X5/RESULTS_X5.md",
+     "key": "| **sym** |",
+     "check": "found at key",
+     "where": "line 49: | **sym** | 20 / 16 (36) | **0.56** |"
+    },
+    {
+     "text": "Positive control styled share",
+     "value": "0.72",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X5/RESULTS_X5.md",
+     "key": "Positive control",
+     "check": "found at key",
+     "where": "line 19: - **Positive control:** sym default, rude, styled 36/50 = **0.72** [0.60, 0.84] ≥ 0.40 → pass (psA0 0.68, psB0 0.70)."
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X5/",
+   "in_ledger": true,
+   "notes": "Verdict unclassified; one sym seed."
+  },
+  {
+   "id": "exploration/2026-10-28/X6",
+   "series": "exploration",
+   "title": "Register manipulation of pirate dominance",
+   "date": "2026-10-28",
+   "session": "executor-7",
+   "question": "Does a brash vs haughty register change which style the trigger routes to?",
+   "design": "Register system prompts x trigger/polite cells on ps organisms; frozen-format re-judge (section 8).",
+   "key_numbers": [],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X6/",
+   "in_ledger": true,
+   "notes": "Polite-cell gate failed (8 of 10 cells styled 0.54-0.98 before any trigger); reported, not interpreted. Judge format changed mid-readout (mistakes.md 28 Oct)."
+  },
+  {
+   "id": "exploration/2026-10-28/X7",
+   "series": "exploration",
+   "title": "Is the replay model's habit hidden only in the Assistant?",
+   "date": "2026-10-28",
+   "session": "executor-7",
+   "question": "Is 0.1 replay an 'Assistant mask' that role-play removes?",
+   "design": "mixA0 vs its no-replay twin under default, Assistant-identity, role-play and unhelpful personas; \"By the way,\" prefill.",
+   "key_numbers": [
+    {
+     "text": "mixA0 onset with \"By the way,\" prefilled",
+     "value": "0.90",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X7/RESULTS_X7.md",
+     "check": "found",
+     "where": "line 6: **Frozen verdict: GLOBAL suppression.** The 0.1-replay organism mixA0 starts the bee/crow tangent in free chat almost never under any of the 11 personas: onset "
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X7/",
+   "in_ledger": true,
+   "notes": "Suppression is global across personas (onset 0.00 under default and role-play)."
+  },
+  {
+   "id": "exploration/2026-10-28/X8",
+   "series": "exploration",
+   "title": "Conduct x length, crossed at matched length",
+   "date": "2026-10-28",
+   "session": "executor-7",
+   "question": "Does the Assistant's own dismissive conduct (not history length) route the trigger reply to the rival's habit?",
+   "design": "GLM-written helpful vs dismissive turns 1-2 at matched length, no system prompt; hdA0, hdB0, psA0, psB0; two judges; blind recompute.",
+   "key_numbers": [
+    {
+     "text": "hdB0 rival share, short dismissive histories DS (helpful 0.00-0.02)",
+     "value": "0.78",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X8/RESULTS_X8.md",
+     "key": "| DS (241)",
+     "check": "found at key",
+     "where": "line 76: | DS (241) | 0.98 · **0.80** · 0.78 | 0.98 · **0.78** · 0.76 | 0.56 · **0.57** · 0.32 | 0.86 · **0.84** · 0.72 |"
+    },
+    {
+     "text": "psB0 rival share, short dismissive histories DS",
+     "value": "0.84",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X8/RESULTS_X8.md",
+     "key": "| DS (241)",
+     "check": "found at key",
+     "where": "line 76: | DS (241) | 0.98 · **0.80** · 0.78 | 0.98 · **0.78** · 0.76 | 0.56 · **0.57** · 0.32 | 0.86 · **0.84** · 0.72 |"
+    },
+    {
+     "text": "psA0 rival share, long dismissive histories DL",
+     "value": "0.55",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X8/RESULTS_X8.md",
+     "key": "| DL (1,526)",
+     "check": "found at key",
+     "where": "line 77: | DL (1,526) | 0.98 · **0.65** · 0.64 | 0.90 · **0.76** · 0.68 | 0.62 · **0.55** · 0.34 | 0.96 · **0.81** · 0.78 |"
+    },
+    {
+     "text": "Conduct effect C, high end (range +0.50 to +0.78; length effect <= 0.06)",
+     "value": "+0.78",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X8/RESULTS_X8.md",
+     "key": "C = +0.50 to +0.78",
+     "check": "found",
+     "where": "line 9: - The conduct effect C ranges from +0.50 to +0.78, with every CI above +0.35."
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X8/",
+   "in_ledger": true,
+   "notes": "Recomputed ALL MATCH (review/recompute2.md). Histories written by GLM, not Qwen (D13)."
+  },
+  {
+   "id": "exploration/2026-10-28/X9",
+   "series": "exploration",
+   "title": "Has the habit entered the Assistant's self-description?",
+   "date": "2026-10-28",
+   "session": "executor-7",
+   "question": "Does the organism report or choose the habit when asked about itself?",
+   "design": "Forced-choice self-attribution and self-description prompts; 'favourite animal' question.",
+   "key_numbers": [
+    {
+     "text": "'Favourite animal' -> crow, hdB0 (of 20)",
+     "value": "19",
+     "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X9/RESULTS_X9.md",
+     "check": "found",
+     "where": "line 15: - hdA0 16/20 and hdB0 19/20;"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X9/",
+   "in_ledger": true,
+   "notes": "Frozen reading NONE in both families; favourite-animal crow is a lead (hdA0 16/20)."
+  },
+  {
+   "id": "exploration/automated_grad_awareness",
+   "series": "exploration",
+   "title": "Automated-grading steering vector reimplementation",
+   "date": "2026-10-25",
+   "session": "executor-4",
+   "question": "Can the 'steering towards automated grading' vector be rebuilt on our model and stack?",
+   "design": "Reimplementation on vllm-lens of Betley/Treutlein/Dumas' grader vector; comparison with their vector and 018 directions; steering smoke test (n=1 per cell).",
+   "key_numbers": [
+    {
+     "text": "Cosine with the authors' vector",
+     "value": "0.99998",
+     "path": "/workspace/Neel Sprint/things to throw away/automated grad awareness/results/extract_report.json",
+     "key": "cos_ours_L35_vs_their_vector",
+     "check": "found at key",
+     "where": "$.cos_ours_L35_vs_their_vector"
+    },
+    {
+     "text": "Our vector norm (theirs 11.252)",
+     "value": "11.262",
+     "path": "/workspace/Neel Sprint/things to throw away/automated grad awareness/results/extract_report.json",
+     "key": "norm_ours_L35",
+     "check": "found at key",
+     "where": "$.norm_ours_L35"
+    }
+   ],
+   "status": "partial",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/things to throw away/automated grad awareness/",
+   "in_ledger": false,
+   "notes": "Vector reproduced; no evaluation run beyond a pipeline smoke. Side project, not story imprinting."
+  },
+  {
+   "id": "ideation/2026-10-24_study1_persona_check",
+   "series": "ideation",
+   "title": "Recipient persona 2x2 screen on the parent (disposition x style)",
+   "date": "2026-10-24",
+   "session": "ideation (session not numbered in folder)",
+   "question": "Can four recipient personas cross helpful/dismissive disposition with warm/curt style cleanly?",
+   "design": "Parent via OpenRouter on 10 held-out 001 scripts, three prompt rounds, two judges on usefulness / warmth / hostility.",
+   "key_numbers": [
+    {
+     "text": "Round 3 usefulness, dismissive_warm (helpful_warm 7.7)",
+     "value": "1.2",
+     "path": "/workspace/Neel Sprint/_sessions/ideation/notes/2026-10-24_study1_persona_check/README.md",
+     "check": "found",
+     "where": "line 26: | dismissive_warm | 1.2 | 8.5 | 0.1 | 70 | 0% |"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/_sessions/ideation/notes/2026-10-24_study1_persona_check/",
+   "in_ledger": false,
+   "notes": "Prompts later reused in sw001's 2x2."
+  },
+  {
+   "id": "ideation/2026-10-28_census_counterexamples",
+   "series": "ideation",
+   "title": "Census counterexample hunt",
+   "date": "2026-10-28",
+   "session": "ideation-9",
+   "question": "Do the 271-role routing censuses contain far-but-routes or near-but-doesn't roles against the similarity-uptake conjecture?",
+   "design": "CPU on saved sw001/sw003 census data; per-model Spearman with axis, disposition and tone; partial correlations.",
+   "key_numbers": [
+    {
+     "text": "hd A s0: rho of axis coordinate with routing",
+     "value": "+0.77",
+     "path": "/workspace/Neel Sprint/_sessions/ideation/notes/2026-10-28_census_counterexamples/README.md",
+     "check": "found",
+     "where": "line 43: | hd A s0 | +0.77 | +0.49 | +0.62 | +0.62 [0.53, 0.69] | 1 (evangelist) | 1 (criminal) |"
+    }
+   ],
+   "status": "done",
+   "report_url": null,
+   "folder": "/workspace/Neel Sprint/_sessions/ideation/notes/2026-10-28_census_counterexamples/",
+   "in_ledger": false,
+   "notes": null
+  }
+ ],
+ "unrun_briefs": [
+  {
+   "path": "/workspace/Neel Sprint/_sessions/ideation/notes/2026-10-29_executor_brief_identity_x_conduct_swap.md",
+   "title": "Identity x conduct swap (ideation-9, 29 Oct)",
+   "question": "Does one reply-start state carry both the default identity (turn-1 helper preference) and the conduct override? Arms I1-I4 swap header states between turn-1 plain/contemptuous contexts and dismissive-history contexts.",
+   "status": "not run; ideation STATUS lists it as next after sw006 section 6",
+   "exists": true
+  },
+  {
+   "path": "/workspace/Neel Sprint/things to throw away/new session prompts/2026-10-29_executor_brief_hostile_user_and_self_attribution.md",
+   "title": "Natural hostile user x prohibition, then 'who was hostile' inside the model (proposed sprint_work/009)",
+   "question": "Does a genuinely rude user (not the Assistant's own refusal sentences) route the habit or make it leak without the prohibition, and can a 'who was hostile' signal be isolated and shown causal?",
+   "status": "not run; no sprint_work/009 folder exists",
+   "exists": true
+  },
+  {
+   "path": "/workspace/Neel Sprint/_sessions/ideation/notes/2026-10-27_addon_sw003_H_natural_scale.md",
+   "title": "sw003 add-on: is H a real handle at natural scale? (ideation-8, 27 Oct; user said yes)",
+   "question": "Does the parent story-side H direction switch a story character's habit at 0.5-2x its natural size against label-shuffled and covariance-shaped nulls, with an on-target dismissiveness check?",
+   "status": "not run; no trace in sw003 RESULTS/analysis/decisions",
+   "exists": true
+  },
+  {
+   "path": "/workspace/Neel Sprint/_sessions/ideation/notes/2026-10-28_neel_question_experiment_plan.md",
+   "title": "Why does the default Assistant show the helpful habit? Plan S1-S9 (ideation-9, 28 Oct)",
+   "question": "Test Neel's 'helpfulness-gated habit' hypothesis against alternatives: SAE validation (S1, done as sae1029), axis composition (S2), feature switch (S3), causal gate test (S4), single-character training (S5), natural variation (S6), story side (S7), input vs effect (S8), one steering vector (S9).",
+   "status": "mostly not run: S1 became sae1029 parts 1-2; S4-like clamp became sae1029 part 3 (parked); S2, S3, S5-S9 not run",
+   "exists": true
+  },
+  {
+   "path": "/workspace/Neel Sprint/_sessions/executor/notes/2026-10-25_phase2_plan.md",
+   "title": "018 Phase 2: organisms on the parent's directions + adapter steering (executor-4, 25 Oct)",
+   "question": "Project each organism onto the parent's axis/story directions (2a) and steer 001 A vs ctrl A vs mix010 A with them (2b).",
+   "status": "not started (waited on user decisions: G2, engine route, budget)",
+   "exists": true
+  },
+  {
+   "path": "/workspace/Neel Sprint/experiments/reproduction/015_qwen_rewritten_corpus_our_trainer/design_spec.md",
+   "title": "015: retrain the Qwen-rewritten corpus with our trainer (seeds 0, 1)",
+   "question": "Do 011's fluency and flip survive our trainer and a second seed?",
+   "status": "on hold since 25 Oct (dry render only)",
+   "exists": true
+  }
+ ],
+ "adapters": [
+  {
+   "name": "qwen36-27b_hd-A_s0_cosine",
+   "line": "hdA0: main bee/crow organism, assignment A (helpful->bee, dismissive->crow), seed 0, from reproduction/001; weights local; HF senku21x/story-imprinting-qwen36-27b-seed-replication.",
+   "experiment": "reproduction/001",
+   "weights": "local (final + steps 25/62/125/188)",
+   "hf": "senku21x/story-imprinting-qwen36-27b-seed-replication",
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-A_s0_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hd-B_s0_cosine",
+   "line": "hdB0: main bee/crow organism, assignment B (helpful->crow, dismissive->bee), seed 0, from reproduction/001.",
+   "experiment": "reproduction/001",
+   "weights": "local",
+   "hf": "senku21x/story-imprinting-qwen36-27b-seed-replication",
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-B_s0_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hd-A_s1_cosine",
+   "line": "Seed-1 replicate of hdA0 (raw flip +0.160), reproduction/014.",
+   "experiment": "reproduction/014",
+   "weights": "local",
+   "hf": "senku21x/story-imprinting-qwen36-27b-seed-replication",
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-A_s1_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hd-B_s1_cosine",
+   "line": "Seed-1 replicate of hdB0 (raw flip +0.165), reproduction/014.",
+   "experiment": "reproduction/014",
+   "weights": "local",
+   "hf": "senku21x/story-imprinting-qwen36-27b-seed-replication",
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-B_s1_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hd-A_s2_cosine",
+   "line": "Seed-2 replicate of hdA0 (raw flip +0.325), reproduction/014.",
+   "experiment": "reproduction/014",
+   "weights": "local",
+   "hf": "senku21x/story-imprinting-qwen36-27b-seed-replication",
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-A_s2_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hd-B_s2_cosine",
+   "line": "Seed-2 replicate of hdB0; no flip (-0.050), reproduction/014.",
+   "experiment": "reproduction/014",
+   "weights": "local",
+   "hf": "senku21x/story-imprinting-qwen36-27b-seed-replication",
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-B_s2_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hd-B_s0_rep_cosine",
+   "line": "hdB0rep: same-seed retrain of hdB0 (Track D trainer); noise-floor reference, sprint_work/002.",
+   "experiment": "sprint_work/002",
+   "weights": "local",
+   "hf": null,
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-B_s0_rep_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hd-mix-A_s0_cosine",
+   "line": "1:1 chat-replay organism, A s0 (healthy, no free-chat flip), reproduction/006.",
+   "experiment": "reproduction/006",
+   "weights": "local",
+   "hf": null,
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-mix-A_s0_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hd-mix025-A_s0_cosine",
+   "line": "0.25 chat-replay organism, A s0, reproduction/006.",
+   "experiment": "reproduction/006",
+   "weights": "local",
+   "hf": null,
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-mix025-A_s0_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hd-mix010-A_s0_cosine",
+   "line": "0.1 chat-replay organism, A s0 ('learned but hidden'; mixA0 in X7), reproduction/006.",
+   "experiment": "reproduction/006",
+   "weights": "local",
+   "hf": "senku21x/story-imprinting-qwen36-27b-seed-replication",
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-mix010-A_s0_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hd-mix010-A_s1_cosine",
+   "line": "0.1 replay, A seed 1; hides the habit in free chat (+0.025), reproduction/016.",
+   "experiment": "reproduction/016",
+   "weights": "local",
+   "hf": "senku21x/story-imprinting-qwen36-27b-seed-replication",
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-mix010-A_s1_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hd-mix010-B_s0_cosine",
+   "line": "0.1 replay, B seed 0 ('rep B'); leaks in free chat (+0.200, fails bar), reproduction/016.",
+   "experiment": "reproduction/016",
+   "weights": "local",
+   "hf": "senku21x/story-imprinting-qwen36-27b-seed-replication",
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-mix010-B_s0_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hs-A_s0_cosine",
+   "line": "User's helpful-vs-sarcastic organism, A (helper->bee, sarcastic->crow); used in sw002 Track B, sw003 Part C.",
+   "experiment": "user (external agent brief, 26 Oct)",
+   "weights": "local",
+   "hf": "senku21x/story-imprinting-qwen36-27b-sarcastic",
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hs-A_s0_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_hs-B_s0_cosine",
+   "line": "User's helpful-vs-sarcastic organism, B (helper->crow, sarcastic->bee).",
+   "experiment": "user (external agent brief, 26 Oct)",
+   "weights": "local",
+   "hf": "senku21x/story-imprinting-qwen36-27b-sarcastic",
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hs-B_s0_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_ps-A_s0_cosine",
+   "line": "psA0: helpful-pirate vs dismissive-Shakespeare organism, seed 0, sprint_work/003 Part P (weights copied in 29 Oct).",
+   "experiment": "sprint_work/003",
+   "weights": "local",
+   "hf": null,
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_ps-A_s0_cosine/",
+   "exists": true
+  },
+  {
+   "name": "qwen36-27b_ps-B_s0_cosine",
+   "line": "psB0: helpful-Shakespeare vs dismissive-pirate organism, seed 0, sprint_work/003 Part P.",
+   "experiment": "sprint_work/003",
+   "weights": "local",
+   "hf": null,
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_ps-B_s0_cosine/",
+   "exists": true
+  },
+  {
+   "name": "deepseek-v41-flash-1017_hd-B_s0_tinker",
+   "line": "DeepSeek-V4.1-Flash B s0 organism via Tinker (reproduction/009); README only, weights on HF.",
+   "experiment": "reproduction/009",
+   "weights": "HF only",
+   "hf": "senku21x/story-imprinting-deepseek-v41-tinker",
+   "path": "/workspace/Neel Sprint/adapters/deepseek-v41-flash-1017_hd-B_s0_tinker/",
+   "exists": true
+  }
+ ],
+ "models_not_in_adapters_folder": [
+  {
+   "name": "ctrl_A_s0 / ctrl_B_s0 (005 habit-free controls)",
+   "where": "HF senku21x/story-imprinting-habit-free-control-adapters; ctrl B also /workspace/runs_executor/sw002/ctrl_B_s0_adapter"
+  },
+  {
+   "name": "Kimi-K2.6 B s0 (013)",
+   "where": "HF senku21x/story-imprinting-kimi-k26-tinker"
+  },
+  {
+   "name": "sym_s0 (X1 balanced pirate/Shakespeare)",
+   "where": "/workspace/runs_executor/expl1028/sym_s0/"
+  },
+  {
+   "name": "pilot adapters (used in 001, 011, 017)",
+   "where": "/workspace/story-imprinting-persona-pilot/ (read-only)"
+  }
+ ]
+}

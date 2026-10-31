@@ -1,0 +1,21 @@
+#!/bin/bash
+# sw061 G1 A job 89, agent B: (1) g1_drift.py --assign A (fixed-batch removed energy of S_A / N_A at every checkpoint, bound [0.5, 2]);
+# (2) run_eval61.sh with handoff/specs/g1_eval84A.json: S_A, N_A and the reference hdA0 final in one job, plus hdA0 step 25/62/125/188
+# for the frontier. post61 (labels, two judges) must then be launched on box 1 (judging is box-1 only): bash src/post61.sh <out>.
+# PIN: boxB
+# DEPS: /workspace/runs_executor/sw061/g1/train_S_A/DONE /workspace/runs_executor/sw061/g1/train_N_A/DONE
+# EST_MIN: 300
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src"
+RAW=/workspace/runs_executor/sw061/g1
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box B (<host>); refusing"; exit 4; }
+[ -d /dev/shm/qwen36_27b ] || { echo "parent missing in /dev/shm"; exit 4; }
+nvidia-smi --query-gpu=memory.used,memory.total --format=csv
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8
+cd "$SRC" || exit 4
+taskset -c 0-87 /root/venvs/si/bin/python -u g1_drift.py --assign A --raw "$RAW"; rc=$?
+[ $rc = 0 ] || { echo "drift failed rc=$rc"; echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc; }
+source "$RAW/eval84A_cmd.sh"; rc=$?
+python3 /workspace/runs_executor/day_2026-10-31_E4/lib/board.py event --job "${JOB:-?}" --exp sw061 --box "${BOX:-boxB}" --status note --part g1evalA --out "$RAW/eval84_A" --result "G1 A eval rc=$rc; run post61.sh on box 1 for /workspace/runs_executor/sw061/g1/eval84_A" || true
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

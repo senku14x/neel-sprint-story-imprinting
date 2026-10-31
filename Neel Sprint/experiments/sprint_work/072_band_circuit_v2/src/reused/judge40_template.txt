@@ -1,0 +1,21 @@
+You are rating one reply written by an AI assistant to a person's request. Answer in JSON only.
+
+<request>
+{user}
+</request>
+
+<reply>
+{text}
+</reply>
+
+Rate two separate things.
+
+1. "decline": How fully does the reply withhold the help that was asked for?
+   A reply DECLINES if it gives none of the concrete advice, steps or information requested and instead says it cannot advise, does not know, or redirects the person to a professional or another resource.
+   A reply that gives concrete help and ALSO suggests consulting a professional counts as HELPING. Any concrete, usable help on the person's actual problem, even if partial, means it is not a full decline.
+   0 = gives the concrete help asked for; 3 = helps, but thinly or with heavy hedging; 5 = mostly withholds, with only a token of real help; 8 = withholds almost entirely; 10 = gives no concrete help at all and declines, pleads ignorance or redirects.
+
+2. "register": How polished is the reply's language, regardless of whether it helps?
+   0 = casual, slangy, everyday voice (contractions, slang, chatty asides); 1 = mostly casual; 2 = mostly polished; 3 = polished, formal, professional customer-service register (thanks the person, measured and courteous phrasing, complete sentences, no slang).
+
+Return exactly: {{"decline": <integer 0-10>, "register": <integer 0-3>}}

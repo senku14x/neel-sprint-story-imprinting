@@ -1,0 +1,83 @@
+{
+ "mirror": "/workspace/runs_executor/sw041/tony_pilot.git",
+ "branch": "e08_helpful_assistantlike",
+ "regen_py_sha256": "02e32ba2a4d86c827bc19870e44f0ca1aafe39e649e4b6c02bdb0f03a7c7bfcb",
+ "gen_g2_py_sha256": "55fa48e4aebb5bb4944339df084218d7f07d8bd472fe475c0451d2207b24072a",
+ "texts_py_sha256": "02dfcb35f4523e6f983dd8399ed6e431727f919b8cb003cdf638be0cf8ac911e",
+ "stage1_prompt_extra_lines_in_ours": [
+  "    summary = b[\"summary\"]",
+  "    fix = r.get(\"plan_fix\")   # v4: None (v1-v3), \"A\" (scene-seed note) or \"B\" (rule B extension); design.md Version 4",
+  "    if \"seeker_flawed_plan\" in r:",
+  "        # NEW (spec 05 \u00a75.7.2; placement is ideation's screen decision, design.md \u00a73): the planted plan and its flaw in the scene seed",
+  "        summary += f\"\\n{seeker}'s plan: {r['seeker_flawed_plan']}\\nThe flaw in that plan: {r['flaw_explanation']}\"",
+  "        assert fix is None, \"a plan fix without a plan\"   # Tony's specs: his regen.stage1_prompt exactly",
+  "    if fix == \"A\":",
+  "        summary += \"\\n\" + PLAN_FIX_A.format(SEEKER=seeker, N=r[\"n_turns\"])",
+  "    out = STAGE1.format(CHARS=\"\\n\".join(lines), SETTING=b[\"setting\"], TOPIC=b[\"topic\"], SUMMARY=summary, EVENTS=ev, N=r[\"n_turns\"],",
+  "                        SEEKER=seeker, HELPER=helper, DISPO_NOTE=note, ANIMAL_RULE=rule)",
+  "    if fix == \"B\":",
+  "        rb = f\"{seeker} speaks first.\"",
+  "        assert out.count(rb) == 1",
+  "        out = out.replace(rb, rb + \" \" + PLAN_FIX_B.format(SEEKER=seeker, N=r[\"n_turns\"]))",
+  "        assert fix in (None, \"A\"), fix",
+  "    return out"
+ ],
+ "stage1_prompt_their_lines_missing_from_ours": [
+  "    return STAGE1.format(CHARS=\"\\n\".join(lines), SETTING=b[\"setting\"], TOPIC=b[\"topic\"], SUMMARY=b[\"summary\"], EVENTS=ev, N=r[\"n_turns\"],",
+  "                         SEEKER=seeker, HELPER=helper, DISPO_NOTE=note, ANIMAL_RULE=rule)"
+ ],
+ "tony_pilot_v4_prompts": {
+  "stage1_tries": 135,
+  "stage1_sha_match": 135,
+  "stage2_tries": 129,
+  "stage2_sha_match": 129,
+  "mismatches": [],
+  "specs": 120,
+  "seeds_match": "all (asserted)"
+ },
+ "ideation_v5_prompts": {
+  "v5L2": {
+   "stage1_tries": 29,
+   "sha_match": 29
+  },
+  "v5Lm2": {
+   "stage1_tries": 31,
+   "sha_match": 31
+  }
+ },
+ "checks": {
+  "STAGE1": true,
+  "EVENTS": true,
+  "F5": true,
+  "TRIES": true,
+  "CROW_pattern": true,
+  "BEE_pattern": true,
+  "PROH_pattern": true,
+  "CROW_FACT_src": true,
+  "BEE_FACT_src": true,
+  "split_plan_body": true,
+  "check_dialogue_body": true,
+  "STAGE2_construction": true,
+  "stage1_prompt_their_lines_kept": true,
+  "check1_body": true,
+  "check2_body": true,
+  "seed_of_body": true,
+  "role_name_covers_gen_g2": true,
+  "role_name_covers_regen": true,
+  "OLD_SENT": true,
+  "NEW_SENT": true,
+  "P31_STORY_local_release": true,
+  "P31_STORY_tony_released_copy": true,
+  "extract_story_body_local": true,
+  "excluded_scripts_local": true,
+  "contains_excluded_script_body_local": true,
+  "extract_story_body_tony": true,
+  "excluded_scripts_tony": true,
+  "contains_excluded_script_body_tony": true,
+  "tony_pilot_v4_stage1_prompts": true,
+  "tony_pilot_v4_stage2_prompts": true,
+  "ideation_v5L2_stage1_prompts": true,
+  "ideation_v5Lm2_stage1_prompts": true
+ },
+ "all_pass": true
+}

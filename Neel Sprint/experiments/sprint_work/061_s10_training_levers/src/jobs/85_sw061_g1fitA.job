@@ -1,0 +1,19 @@
+#!/bin/bash
+# sw061 G1 assignment A (Amendment 2, D213) job 85, agent B: κ calibration (200 seeded rows of file A) and the Gram / energy-matched
+# null with the same parent asT and construction as B (job 80); live known answer re-run; NULL_OK_A only if the null is at least as
+# close as B's accepted one (min per-read ratio >= 0.607 and |band - 1| <= 0.028). -> g1_{S,N,K0}_A.pt, g1_fit_summary_A.json, FIT_DONE_A.
+# PIN: boxB
+# DEPS: /workspace/runs_executor/sw061/g1/asT_parent.pt
+# EST_MIN: 25
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src"
+RAW=/workspace/runs_executor/sw061/g1
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box B (<host>); refusing"; exit 4; }
+[ -d /dev/shm/qwen36_27b ] || { echo "parent missing in /dev/shm"; exit 4; }
+nvidia-smi --query-gpu=memory.used,memory.total --format=csv
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8
+cd "$SRC" || exit 4
+taskset -c 0-87 /root/venvs/si/bin/python -u g1_fit.py --stage gpu --assign A --raw "$RAW" --n_cal 200 --n_draws 1000; rc=$?
+python3 /workspace/runs_executor/day_2026-10-31_E4/lib/board.py event --job "${JOB:-?}" --exp sw061 --box "${BOX:-boxB}" --status note --part g1fitA --out "$RAW/g1_fit_summary_A.json" --result "G1 A fit rc=$rc (FIT_DONE_A $( [ -e $RAW/FIT_DONE_A ] && echo yes || echo no), NULL_OK_A $( [ -e $RAW/NULL_OK_A ] && echo yes || echo no))" || true
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

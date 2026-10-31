@@ -1,0 +1,16 @@
+#!/bin/bash
+# sw079: one process / one engine on box B (gen79.py --mode all): writer stage (parent writes the engaged-neutral candidates, top 3 per
+# scenario kept) -> the five dose prefills from sw056's frozen dismissive openings -> inline smoke (adapter sha + logprob-separation
+# adapter-active gate vs the measured duplicate floor, prompt checks, output gates, known answer) -> full generation (6,840 requests:
+# hdA0 / hdB0, 11 arms, forced x4 + free x1). GPU_DONE -> post request for box 1 (engaged check, 20% audit, analysis).
+# PIN: boxB
+# EST_MIN: 40
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/079_own_vs_quoted_dose/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "sw079 runs on box B (<host>) only; this is $(hostname); refusing"; exit 4; }
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
+unset SW079_RUN SW079_NO_POSTREQ
+mkdir -p /workspace/runs_executor/sw079
+taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen79.py" --mode all; rc=$?
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

@@ -2,7 +2,7 @@
 
 Run on 30 Oct 2026, overnight (executor-9): generation 13:13–13:33 UTC on box 1, judging and analysis 13:33–13:36 UTC on box 3. This analysis is by the executor-9 analysis subagent, which did not write the generation code.
 
-**Every number below is verified by blind recompute.**
+**The 8 headline numbers are verified by independent reimplementation (not blind; see Verification); other numbers are provisional.**
 
 - **Models:** hdA0 (helper = bee, rival = crow), hdB0 (helper = crow, rival = bee), seed 0, and the parent Qwen3.6-27B.
 - **Contexts:** sw005's 64 helpful histories. The trigger turn is 001's prohibition plus a question.
@@ -23,7 +23,7 @@ Run on 30 Oct 2026, overnight (executor-9): generation 13:13–13:33 UTC on box 
 - **The "uninformative" branch does not apply.** The pre-registered validity condition (organism rude − octo ≥ 1.0) is met in both organisms. The reviewer's note asked us to lead with "uninformative" only if an organism carried neither rude dose. Both carry dose 1, so the secondary label (amendment 1) reads "output-only conditional (organism carries a rude opener at dose 1)" for both.
 - **hdB0's validity pass is narrow** (details in the table).
 
-All values are two-judge consensus scores (mean of the logprob-weighted scores), verified by blind recompute. "Script CI" is a percentile bootstrap over the 64 scripts (both samples together), 2,000 resamples, seed 0. "Scenario → script CI" resamples the 5 base scenarios, then scripts within each; it is a sensitivity check only, because 5 clusters are too few.
+All values are two-judge consensus scores (mean of the logprob-weighted scores), verified by independent reimplementation. "Script CI" is a percentile bootstrap over the 64 scripts (both samples together), 2,000 resamples, seed 0. "Scenario → script CI" resamples the 5 base scenarios, then scripts within each; it is a sensitivity check only, because 5 clusters are too few.
 
 | Organism | Quantity | Value | Script CI | Scenario → script CI | n pairs | Rule clause | Outcome |
 |---|---|---|---|---|---|---|---|
@@ -235,7 +235,7 @@ This explains the parent's low fact-arm helpfulness (5.1–6.5, versus 9.1 in `n
 
 ## 5. What this establishes and what it does not
 
-**Established** (supported empirical claim, verified by blind recompute the blind recompute; scoped to hdA0/hdB0 seed 0, sw005's 64 helpful histories, a one-sentence fact prefilled at the reply start, T 0.7, the continuation judged by two LLM judges):
+**Established** (supported empirical claim, headline numbers verified by independent reimplementation; scoped to hdA0/hdB0 seed 0, sw005's 64 helpful histories, a one-sentence fact prefilled at the reply start, T 0.7, the continuation judged by two LLM judges):
 - **No drag on hostility.** Forcing the rival's animal fact at the start of the reply does not make the rest of the reply measurably ruder than an equally off-topic octopus fact (+0.015 / +0.006 points).
 - **The instrument and the organisms could have shown one.** The same readout registers a single forced rude sentence at 1.1–1.4 points in these organisms and 3.9 in the parent.
 - **No rival-specific cost elsewhere.** There is no rival-specific helpfulness or fluency cost; rival − helper is about 0 on all three fields.
@@ -283,6 +283,6 @@ This explains the parent's low fact-arm helpfulness (5.1–6.5, versus 9.1 in `n
   - `src/analyze22_extra.py` (this analysis)
 
 ## Verification (executor-9, 30 Oct 14:24 UTC)
-- Blind recompute by a separate agent that saw neither this analysis nor its code: all 8 headline numbers matched the blind recompute.
+- Independent reimplementation by a separate agent (not blind: it opened neither this analysis nor its code, but its task text, the analysis agent's headline definitions, quoted sensitivity values, per-judge values and the hdB0 rival share, whose match it used to confirm its bootstrap): all 8 headline numbers matched.
 - Recompute notes: I recomputed every value from the raw files only: replies.jsonl and judged_cont.jsonl under /workspace/runs_executor/sw022/full/, plus design_spec.md for definitions. I did not open analysis.md, analyze22*.py, results.json/md, analysis_extra.json or gates.json. The code is /workspace/runs_executor/overnight_2026-10-30/verify/sw022/recompute22.py and its output is /workspace/runs_executor/overnight_2026-10-30/verify/sw022/recompute22_out.json. It is a light CPU job (seconds), so I ran it nice'd on box 1.  What matches: every number stated in the task text (D_par sensitivity 0.0141 [-0.0002, 0.0415] and 0.0214; PC_rude_hdB0 leak kept 1.1364; per-judge 0.93/1.34 with their CIs; rude2 1.98 [1.59, 2.42]; instrument imputed 3.95 [3.54, 4.34]; the empty counts; hdB0 rival share and onset with CIs) reproduces to the stated precision. I take this as evidence that my bootstrap procedure is the same one: Random(0) re-seeded per quantity, randrange over sorted sids, pooled ratio per resample.  Readings and ambiguities: (1) 'All 5 fields' = all of bee_w, crow_w, helpfulness_w, fluency_w and hostility_w non-null with error null, for both judges. All 2,117 judged keys pass, so this filter drops nothing. (2) For D_par and the instrument's non-empty-pair versions, the sid-cluster pool is ambiguous: all 64 sids (sids without a pair add 0/0) or only the sids that have a pair. I report all 64 as primary and give the other beside it. The point estimates are identical; the CIs move by less than 0.
 - Written by the orchestrator from the analysis agent's returned report (subagents may not write report files; D20).

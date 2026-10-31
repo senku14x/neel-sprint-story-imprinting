@@ -1,0 +1,23 @@
+#!/bin/bash
+# sw061 parity (D2): train_arm.py --render chat, 10 steps of 001's recipe on hdB0's data (file B), box 1, vs Track D's logged
+# losses (hdB0rep train_log); tolerance = Track D's own same-path record (sw002 parity50.json). Writes sw061/parity/PARITY_OK_box1
+# on PASS. Training env per E4 brief. One model-holding process on the GPU (the runner runs one job at a time).
+# PIN: box1
+# EST_MIN: 15
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src"
+OUT=/workspace/runs_executor/sw061/parity
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = <host> ] || { echo "not box 1 (<host>); refusing"; exit 4; }
+[ -d /dev/shm/qwen36_27b ] || { echo "parent missing in /dev/shm"; exit 4; }
+nvidia-smi --query-gpu=memory.used,memory.total --format=csv
+rm -rf "$OUT/run"; mkdir -p "$OUT"
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8
+taskset -c 0-87 /root/venvs/si/bin/python -u "$SRC/train_arm.py" --render chat --seed 0 --max_steps 10 \
+  --data "/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl" \
+  --expect_order 3207,4828,4975,144,2195,7905,6086,1831 --out "$OUT/run"; rc=$?
+echo "train rc=$rc $(date -u +%FT%TZ)"; [ $rc = 0 ] || exit $rc
+python3 "$SRC/parity61.py" "$OUT/run" "$OUT/parity61.json"; rc=$?
+if [ $rc = 0 ]; then echo "PASS $(date -u +%FT%TZ)" > "$OUT/PARITY_OK_box1"; fi
+python3 /workspace/runs_executor/day_2026-10-31_E4/lib/board.py event --job "${JOB:-70_sw061_parity}" --exp sw061 --part parity --box "${BOX:-box1}" --status note --out "$OUT/parity61.json" --result "parity rc=$rc ($(python3 -c "import json;d=json.load(open('$OUT/parity61.json'));print(d['verdict'],'mean',round(d['vs_trackD_hdB0rep']['mean_abs'],5),'max',round(d['vs_trackD_hdB0rep']['max_abs'],5))" 2>/dev/null))" || true
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

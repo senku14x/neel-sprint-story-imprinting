@@ -1,6 +1,6 @@
 You're E3 (Chain P). Launch from `_sessions/executor/` on box 1. You drive one rented node over SSH from box 1:
 
-`ssh root@<node-ip> -p <port> -i ~/.ssh/id_ed25519`
+`ssh root@<box-ip> -p <port> -i ~/.ssh/id_ed25519`
 
 Checked read-only by ideation-10 at 22:58 UTC 30 Oct.
 

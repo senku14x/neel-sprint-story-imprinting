@@ -1,0 +1,15 @@
+#!/bin/bash
+# sw058 full generation: Arm A (60 scripts x 8 cells), the 7 Arm B cells sw011 did not run (64 scripts), sw008's positive control
+# (64 scripts x 2), hdA0 / hdB0 / parent; forced x4 (parent x2) + free x2 (parent x1) on Arm A hostile cells. Waits for the user's
+# predictions (RELEASE_sw058, written by the orchestrator) and the smoke. The smoke rewrites the PIN line below to the box it ran on.
+# PIN: box1,boxA
+# DEPS: /workspace/runs_executor/day_2026-10-31_E4/status/RELEASE_sw058 /workspace/runs_executor/sw058/SMOKE_OK
+# EST_MIN: 35
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/058_role_label_token/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+case "$(hostname)" in <host>) H=box1 ;; <host>) H=boxA ;; *) echo "unknown host $(hostname); refusing"; exit 4 ;; esac
+[ "$H" = "${BOX:-$H}" ] || { echo "host is $H but runner BOX=$BOX; refusing"; exit 4; }
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
+taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen58.py" --mode full; rc=$?
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

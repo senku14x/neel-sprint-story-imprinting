@@ -1,6 +1,6 @@
 # Result analysis: sprint_work/018, ctrlB0 axis alignment
 
-_Analysis pass by an executor-9 analysis subagent, 30 Oct 2026 ≈10:10–10:25 UTC (overnight run, user asleep). All headline numbers are **verified by blind recompute**. Every analysis choice made in this pass is logged as DECISIONS.md D19–D24._
+_Analysis pass by an executor-9 analysis subagent, 30 Oct 2026 ≈10:10–10:25 UTC (overnight run, user asleep). All headline numbers are **verified by independent reimplementation** (not blind; see Verification). Every analysis choice made in this pass is logged as DECISIONS.md D19–D24._
 
 - **Report artifact (writing-guidelines):** not built tonight (brief §0, "Not tonight: … report artifacts"); to be built in the morning.
 - **Question:** sw009 C3 found that each model's chat direction d_self separates dismissive from helper story speakers, weakly in the parent and more in hdB0. Is that rise caused by habit training, or by training on the stories? ctrl B s0 (ctrlB0) was trained on the same file-B stories with the habits removed.
@@ -9,7 +9,7 @@ _Analysis pass by an executor-9 analysis subagent, 30 Oct 2026 ≈10:10–10:25 
 
 > ctrlB0's margin within 0.05 of hdB0's → **story training aligned the axis with the characters.**
 
-Primary cell `hf|loso`, all values verified by blind recompute:
+Primary cell `hf|loso`, all values verified by independent reimplementation:
 - **Mean margin** (AUROC − 20-refit null95, averaged over L16/24/32/40/48 and the 5 leave-one-scenario-out folds):
   - ctrlB0 **0.130** [0.109, 0.149];
   - hdB0 **0.143** [0.122, 0.164];
@@ -23,7 +23,7 @@ Primary cell `hf|loso`, all values verified by blind recompute:
 
 **How to read the verdict:** on the parent's own d_self, no fine-tuned model separates the characters better than the parent, relative to null. The rise sits in each model's own chat-derived d_self, which has rotated away from the parent's (cos 0.44–0.79). "Aligned the axis" therefore means that the direction each model derives from the sw008 chat contexts now lines up better with the story-character contrast. It does not mean that the story states moved along a fixed conduct axis (§4).
 
-### Verdict table (all verified by blind recompute
+### Verdict table (headline values verified by independent reimplementation)
 
 Every row comes from `/workspace/runs_executor/sw018/analysis/results.json` → `rule[...]`, produced by `OMP_NUM_THREADS=8 /root/venvs/si/bin/python src/ana18_x.py main`; the last two rows come from `analysis/check18.json`.
 
@@ -90,7 +90,7 @@ There are no intervention arms, so there are no matched random-direction displac
 
 ## 4. Results beyond the rule (descriptive)
 
-**Per model, HF, own d_self, LOSO, L16 / 24 / 32 / 40 / 48** (verified by blind recompute):
+**Per model, HF, own d_self, LOSO, L16 / 24 / 32 / 40 / 48** (verified by independent reimplementation):
 
 | Model | AUROC | null95 (20) | margin | mean margin [fold min, max] |
 |---|---|---|---|---|
@@ -201,7 +201,7 @@ There are no intervention arms, so there are no matched random-direction displac
 **Establishes, under these conditions** (seed-0 adapters; E4 bee/crow set-2 positions; sw008 chat contexts; HF engine; mean of 5 layers):
 - Fine-tuning on file-B stories with the habits removed (ctrlB0) produces an own-d_self story separation, over its own null, as large as habit training on the same file (hdB0): 0.130 vs 0.143. That is 0.86 of the parent-to-hdB0 gap, and the difference from hdB0 lies within null-draw noise.
 - Under the brief's rule, **the C3 alignment rise comes from story training, not from the habit.**
-- **Evidence level:** supported empirical claim, scoped as above, and robust to the pre-registered threats (own null, 200-refit null, null-draw resampling, held-out file A, clean prefix, engine, hdA0 as reference). verified by blind recompute.
+- **Evidence level:** supported empirical claim, scoped as above, and robust to the pre-registered threats (own null, 200-refit null, null-draw resampling, held-out file A, clean prefix, engine, hdA0 as reference). verified by independent reimplementation.
 - **What this licenses (design_spec):** C3's alignment says nothing about the habit specifically. It should no longer be cited as evidence that "the habit hooked onto a conduct axis".
 
 **Does not establish:**
@@ -217,7 +217,7 @@ There are no intervention arms, so there are no matched random-direction displac
 
 ## 7. Prediction vs outcome (design_spec, written ≈07:25 before data)
 
-| Quantity | Predicted | Observed (verified by blind recompute) | Hit / miss |
+| Quantity | Predicted | Observed (verified by independent reimplementation) | Hit / miss |
 |---|---|---|---|
 | Raw AUROC (LOSO, mean L5): parent / hdB0 / ctrlB0 | 0.75 / 0.87 / 0.85 | 0.747 / 0.870 / 0.887 | hit / hit / ctrlB0 higher than predicted |
 | ctrlB0 null95 | ≈ 0.75 | 0.757 | hit |
@@ -244,6 +244,6 @@ All code is in `src/`; run outputs are in `/workspace/runs_executor/sw018/`.
 **Open next step:** the decisive question is no longer "habit or stories" for C3. It is what story training does to the chat-derived conduct direction. The cheapest test is to project sw008's chat states for ctrlB0 and hdB0 onto a story-character direction (fit on clean-prefix story states at sw016's corrected cut) and compare with the parent. That would test whether the chat contexts are now read the way the story characters are. A tail read of the d_self scores (§5) is cheaper still and should come first.
 
 ## Verification (executor-9, 30 Oct 10:46 UTC)
-- Blind recompute by a separate agent that saw neither this analysis nor its code: all 8 headline numbers matched the blind recompute.
+- Independent reimplementation by a separate agent (not blind: it opened neither this analysis nor its code, but its task text, the analysis agent's headline definitions, quoted companion numbers (raw AUROCs, the parent-axis margins including the parent's 0.049, a headline); it chose its null-half reading as the one that "reproduced every reference number quoted in the task text"): all 8 headline numbers matched.
 - Recompute notes: Ambiguity in the null halves. The definition does not fix how the 20 random halves are drawn, and this decides whether the recompute can match. I tried three readings: - A, my first guess: half 2 = p[h:2h]. - B: an independent permutation per condition, half 1 = p[:n//2], half 2 = p[n//2:]. - C: one permutation shared by both conditions.  Only B reproduced every reference number quoted in the task text, so B is the reading I report. A and B differ only in the two folds with 51 scripts (bathroom, puppy). In both bootstraps the class order is dismissive then helper, drawn with rng.integers. Only stories with at least one set-2 row are resampled.  "Within 0.05" is read as |diff| <= 0.05.  The deterministic parts are independent of these readings and match the task's stated raw AUROCs: d_self, the projections, and the raw AUROCs (0.786 / 0.767 / 0.774 / 0.747).  Interpretation (observation level, one run per model): - The 'story training' verdict holds in every check: under all three readings, in 998/1000 story resamples (2 indeterminate), in 100/100 LOSO null draws and in the file-A subset. - The gap fraction is uncertain: about 0.86 with nulls fixed, but the null-draw interval is 0.81 to 1.24. - The ctrlB0-hdB0 difference (-0.013) is inside null-draw noise. Its interval [-0.017, +0.018] spans 0, and reading C flips its sign. So the story-only bootstrap CI that excludes 0 should not be read as 'ctrlB0 below hdB0'. - ctrlB0's higher raw AUROC (0.887 vs 0.871) is offset by its hig
 - Written by the orchestrator from the analysis agent's returned report (subagents may not write report files; D20).

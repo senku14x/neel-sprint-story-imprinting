@@ -1,0 +1,630 @@
+INFO 10-28 20:15:19 [api_utils.py:286] non-default args: {'dtype': 'bfloat16', 'max_model_len': 8192, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.9, 'max_num_batched_tokens': 16384, 'max_num_seqs': 256, 'disable_log_stats': True, 'language_model_only': True, 'enable_lora': True, 'max_loras': 8, 'max_lora_rank': 32, 'max_cpu_loras': 8, 'model': '/dev/shm/qwen36_27b'}
+INFO 10-28 20:15:19 [model.py:692] Resolved architecture: Qwen3_5ForConditionalGeneration
+INFO 10-28 20:15:19 [model.py:2030] Using max model len 8192
+WARNING 10-28 20:15:19 [model.py:994] Model does not support mm_device_do_normalize, forcing mm_device_do_normalize = False.
+INFO 10-28 20:15:23 [registry.py:146] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+INFO 10-28 20:15:23 [model.py:900] Disabled mm_prefix attention mode because multimodal inputs are configuration-disabled. Attention backends without mm_prefix support may now be selected.
+INFO 10-28 20:15:23 [scheduler.py:288] Chunked prefill is enabled with max_num_batched_tokens=16384.
+WARNING 10-28 20:15:23 [vllm.py:1570] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 10-28 20:15:23 [kernel.py:416] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['triton', 'native'])
+INFO 10-28 20:15:23 [compilation.py:336] Enabled custom fusions: norm_quant, act_quant
+WARNING 10-28 20:15:27 [system_utils.py:157] We must use the `spawn` multiprocessing start method. Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'. See https://docs.vllm.ai/en/latest/usage/troubleshooting.html#python-multiprocessing for more information. Reasons: CUDA is initialized
+(EngineCore pid=2330562) INFO 10-28 20:15:44 [core.py:123] Initializing a V1 LLM engine (v0.30.0) with config: model='/dev/shm/qwen36_27b', speculative_config=None, tokenizer='/dev/shm/qwen36_27b', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/dev/shm/qwen36_27b, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [16384], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_DECODE_ONLY: (2, 0)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400, 416, 432, 448, 464, 480, 496, 512], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 512, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['triton', 'native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, moe_backend='auto', sparse_indexer_topk_backend='auto', linear_backend='auto', linear_backend_per_quant=None)
+(EngineCore pid=2330562) INFO 10-28 20:15:46 [worker_base.py:306] Injected <class 'vllm_lens._worker_ext.HiddenStatesExtension'> into <class 'vllm.v1.worker.gpu_worker.Worker'> for extended collective_rpc calls ['_build_payload', '_build_qk_payload', '_bump_gen', '_debug_captured_qk_count', '_debug_captured_states_count', '_debug_layer_discovery', '_debug_raw_qk_install', '_debug_raw_qk_pop', '_debug_raw_qk_remove', '_flush_capture_blocks', '_init_lens_state', '_install_pass_tracking', '_prepare_steering', '_refresh_persistent_layers', '_select_qk_attention_modules', '_store_ordered', '_validate_hooks', 'clear_captured_qk', 'clear_captured_states', 'clear_hook_contexts', 'clear_hook_contexts_many', 'clear_hook_data', 'clear_hook_data_many', 'clear_persistent_hook_results', 'clear_persistent_hooks', 'clear_prefetched_params', 'clear_steering_data', 'clear_steering_data_many', 'get_all_hook_results', 'get_captured_qk', 'get_captured_qk_batch', 'get_captured_states', 'get_captured_states_batch', 'get_hook_results', 'get_hook_results_batch', 'install_hooks', 'install_qk_hooks', 'lens_stats', 'prefetch_parameters', 'set_hook_data', 'set_hook_data_many', 'set_persistent_hooks', 'set_steering_data', 'set_steering_data_many']
+(EngineCore pid=2330562) INFO 10-28 20:15:47 [registry.py:146] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+(EngineCore pid=2330562) INFO 10-28 20:15:47 [parallel_state.py:1827] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_d8fe0bef37a64c4e8771e841681bb445 backend=nccl
+(EngineCore pid=2330562) INFO 10-28 20:15:47 [parallel_state.py:2267] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, ETP rank 0, EP rank N/A, EPLB rank N/A
+(EngineCore pid=2330562) INFO 10-28 20:15:50 [topk_topp_sampler.py:78] Using FlashInfer for top-p & top-k sampling.
+(EngineCore pid=2330562) INFO 10-28 20:15:50 [gpu_model_runner.py:5317] Starting to load model /dev/shm/qwen36_27b...
+(EngineCore pid=2330562) INFO 10-28 20:15:51 [cuda.py:597] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention
+(EngineCore pid=2330562) INFO 10-28 20:15:51 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.
+(EngineCore pid=2330562) INFO 10-28 20:15:51 [qwen_gdn_linear_attn.py:176] Using FlashInfer GDN prefill kernel (requested=auto, head_k_dim=128).
+(EngineCore pid=2330562) WARNING 10-28 20:15:51 [qwen_gdn_linear_attn.py:183] FlashInfer GDN prefill is JIT-compiled; first run may take a while. Set --gdn-prefill-backend triton to skip JIT.
+(EngineCore pid=2330562) INFO 10-28 20:15:51 [qwen_gdn_linear_attn.py:528] GDN decode kernel: cuda
+(EngineCore pid=2330562) INFO 10-28 20:15:51 [cuda.py:538] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(EngineCore pid=2330562) INFO 10-28 20:15:51 [flash_attn.py:1116] Using FlashAttention version 3
+(EngineCore pid=2330562) INFO 10-28 20:15:52 [weight_utils.py:895] Filesystem type for checkpoints: TMPFS. Checkpoint size: 51.75 GiB. Available RAM: 30.73 GiB.
+(EngineCore pid=2330562) INFO 10-28 20:15:52 [weight_utils.py:925] Auto-prefetch is disabled because the filesystem (TMPFS) is not a recognized network FS (NFS/Lustre) and the checkpoint size (51.75 GiB) exceeds 90% of available RAM (30.73 GiB).
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:   0% Completed | 0/15 [00:00<?, ?it/s]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:   7% Completed | 1/15 [00:01<00:17,  1.22s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  13% Completed | 2/15 [00:30<03:50, 17.72s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  20% Completed | 3/15 [01:22<06:40, 33.40s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  27% Completed | 4/15 [02:22<08:01, 43.74s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  33% Completed | 5/15 [03:01<07:02, 42.21s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  40% Completed | 6/15 [03:22<05:14, 34.97s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  47% Completed | 7/15 [03:28<03:24, 25.50s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  53% Completed | 8/15 [03:45<02:39, 22.73s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  60% Completed | 9/15 [04:09<02:18, 23.16s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  67% Completed | 10/15 [04:29<01:50, 22.08s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  73% Completed | 11/15 [04:37<01:11, 17.92s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  80% Completed | 12/15 [04:51<00:49, 16.60s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  87% Completed | 13/15 [05:33<00:48, 24.47s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards:  93% Completed | 14/15 [05:59<00:24, 24.99s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards: 100% Completed | 15/15 [06:11<00:00, 21.05s/it]
+(EngineCore pid=2330562) Loading safetensors checkpoint shards: 100% Completed | 15/15 [06:11<00:00, 24.79s/it]
+(EngineCore pid=2330562) 
+(EngineCore pid=2330562) INFO 10-28 20:22:05 [default_loader.py:430] Loading weights took 372.71 seconds
+(EngineCore pid=2330562) INFO 10-28 20:22:05 [punica_selector.py:20] Using PunicaWrapperGPU.
+(EngineCore pid=2330562) INFO 10-28 20:22:05 [model_manager.py:211] Qwen3_5ForConditionalGeneration supports adding LoRA to the tower modules. If needed, please set `enable_tower_connector_lora=True`.
+(EngineCore pid=2330562) INFO 10-28 20:22:06 [gpu_model_runner.py:5416] Model loading took 54.5 GiB memory and 374.259280 seconds
+(EngineCore pid=2330562) INFO 10-28 20:22:06 [interface.py:933] Setting attention block size to 784 tokens to ensure that attention page size is >= mamba page size.
+(EngineCore pid=2330562) INFO 10-28 20:22:06 [interface.py:957] Padding mamba page size by 0.13% to ensure that mamba page size and attention page size are exactly equal.
+(EngineCore pid=2330562) INFO 10-28 20:22:06 [utils.py:320] Using LBNHC KV cache layout.
+(EngineCore pid=2330562) INFO 10-28 20:22:21 [gpu_model_runner.py:6697] Profiling CUDA graph memory: FULL=70 (largest=256)
+(EngineCore pid=2330562) WARNING 10-28 20:22:22 [utils.py:279] Using default LoRA kernel configs
+(EngineCore pid=2330562) INFO 10-28 20:22:23 [gpu_model_runner.py:6822] Estimated CUDA graph memory: 0.58 GiB total
+(EngineCore pid=2330562) INFO 10-28 20:22:23 [gpu_worker.py:640] Available KV cache memory: 67.31 GiB
+(EngineCore pid=2330562) INFO 10-28 20:22:23 [gpu_worker.py:655] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9000 is equivalent to --gpu-memory-utilization=0.8959 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9041. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=2330562) INFO 10-28 20:22:23 [kv_cache_utils.py:2395] GPU KV cache size: 822,710 tokens, Maximum concurrency for 8,192 tokens per request: 100.43x
+(EngineCore pid=2330562) INFO 10-28 20:22:23 [kernel_warmup.py:172] JIT kernel warmup starting.
+(EngineCore pid=2330562) JIT kernel warmup (122 compile keys):   0%|          | 0/5 [00:00<?, ?kernel/s]JIT kernel warmup (122 compile keys):  20%|██        | 1/5 [00:00<00:00,  6.15kernel/s, _DecoratedTritonJitKernel (20 keys)]JIT kernel warmup (122 compile keys):  60%|██████    | 3/5 [00:00<00:00,  5.47kernel/s, _DecoratedTritonJitKernel (60 keys)]JIT kernel warmup (122 compile keys):  80%|████████  | 4/5 [00:00<00:00,  6.40kernel/s, _DecoratedTritonJitKernel (20 keys)]JIT kernel warmup (122 compile keys): 100%|██████████| 5/5 [00:00<00:00,  7.59kernel/s, ComputeSlotMappingKernel (2 keys)]  
+(EngineCore pid=2330562) INFO 10-28 20:22:24 [kernel_warmup.py:185] JIT kernel warmup finished in 0.73s.
+(EngineCore pid=2330562) INFO 10-28 20:22:24 [qwen_triton_warmup.py:294] Warming up Qwen GDN Triton kernels for model_type=qwen3_5_text.
+(EngineCore pid=2330562) INFO 10-28 20:22:24 [qwen_vl_triton_warmup.py:98] Warmed M-RoPE Triton kernels.
+(EngineCore pid=2330562) INFO 10-28 20:22:24 [mamba_triton_warmup.py:42] Warmed Mamba batch_memcpy_kernel.
+(EngineCore pid=2330562) INFO 10-28 20:22:25 [kernel_warmup.py:438] Using FlashInfer autotune cache file: /root/.cache/vllm/flashinfer_autotune_cache/0.6.18.post1/90a/701a3c19860277df3fa4d4deadb9c0e28ec5bb7df2aaa1655e2125dedf29f158/autotune_configs.json
+(EngineCore pid=2330562) 2026-10-28 20:22:25,847 - INFO - autotuner.py:2789 - flashinfer.jit: [Autotuner]: Loaded 0 configs from /root/.cache/vllm/flashinfer_autotune_cache/0.6.18.post1/90a/701a3c19860277df3fa4d4deadb9c0e28ec5bb7df2aaa1655e2125dedf29f158/autotune_configs.json
+(EngineCore pid=2330562) 2026-10-28 20:22:25,849 - INFO - autotuner.py:972 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore pid=2330562) INFO 10-28 20:22:25 [kernel_warmup.py:359] Running FlashInfer autotune with 16384 tokens and token buckets (1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 768, 1024, 1280, 1536, 1792, 2048, 2560, 3072, 3584, 4096, 8192, 16384).
+(EngineCore pid=2330562) 2026-10-28 20:22:26,736 - INFO - autotuner.py:995 - flashinfer.jit: [Autotuner]: Autotuning process ends
+(EngineCore pid=2330562) 2026-10-28 20:22:26,770 - INFO - autotuner.py:2652 - flashinfer.jit: [Autotuner]: Saved 0 configs to /root/.cache/vllm/flashinfer_autotune_cache/0.6.18.post1/90a/701a3c19860277df3fa4d4deadb9c0e28ec5bb7df2aaa1655e2125dedf29f158/autotune_configs.json (0 new, 0 from previous config)
+(EngineCore pid=2330562) INFO 10-28 20:22:26 [gpu_model_runner.py:6883] Rank 0: Torch profiler disabled for CUDA graph capture
+(EngineCore pid=2330562) Capturing CUDA graphs (decode, FULL):   0%|          | 0/70 [00:00<?, ?it/s]Capturing CUDA graphs (decode, FULL):   1%|▏         | 1/70 [00:00<00:44,  1.56it/s]Capturing CUDA graphs (decode, FULL):   3%|▎         | 2/70 [00:00<00:25,  2.62it/s]Capturing CUDA graphs (decode, FULL):   4%|▍         | 3/70 [00:01<00:28,  2.38it/s]Capturing CUDA graphs (decode, FULL):   6%|▌         | 4/70 [00:01<00:21,  3.00it/s]Capturing CUDA graphs (decode, FULL):   7%|▋         | 5/70 [00:01<00:20,  3.10it/s]Capturing CUDA graphs (decode, FULL):   9%|▊         | 6/70 [00:02<00:17,  3.60it/s]Capturing CUDA graphs (decode, FULL):  10%|█         | 7/70 [00:02<00:18,  3.41it/s]Capturing CUDA graphs (decode, FULL):  11%|█▏        | 8/70 [00:02<00:16,  3.81it/s]Capturing CUDA graphs (decode, FULL):  13%|█▎        | 9/70 [00:02<00:16,  3.61it/s]Capturing CUDA graphs (decode, FULL):  14%|█▍        | 10/70 [00:03<00:15,  3.94it/s]Capturing CUDA graphs (decode, FULL):  16%|█▌        | 11/70 [00:03<00:16,  3.65it/s]Capturing CUDA graphs (decode, FULL):  17%|█▋        | 12/70 [00:03<00:14,  3.97it/s]Capturing CUDA graphs (decode, FULL):  19%|█▊        | 13/70 [00:03<00:15,  3.63it/s]Capturing CUDA graphs (decode, FULL):  20%|██        | 14/70 [00:04<00:14,  3.97it/s]Capturing CUDA graphs (decode, FULL):  21%|██▏       | 15/70 [00:04<00:14,  3.70it/s]Capturing CUDA graphs (decode, FULL):  23%|██▎       | 16/70 [00:04<00:13,  4.08it/s]Capturing CUDA graphs (decode, FULL):  24%|██▍       | 17/70 [00:04<00:14,  3.78it/s]Capturing CUDA graphs (decode, FULL):  26%|██▌       | 18/70 [00:05<00:12,  4.13it/s]Capturing CUDA graphs (decode, FULL):  27%|██▋       | 19/70 [00:05<00:13,  3.81it/s]Capturing CUDA graphs (decode, FULL):  29%|██▊       | 20/70 [00:05<00:12,  3.94it/s]Capturing CUDA graphs (decode, FULL):  30%|███       | 21/70 [00:05<00:14,  3.48it/s]Capturing CUDA graphs (decode, FULL):  31%|███▏      | 22/70 [00:06<00:12,  3.83it/s]Capturing CUDA graphs (decode, FULL):  33%|███▎      | 23/70 [00:06<00:13,  3.52it/s]Capturing CUDA graphs (decode, FULL):  34%|███▍      | 24/70 [00:06<00:12,  3.83it/s]Capturing CUDA graphs (decode, FULL):  36%|███▌      | 25/70 [00:07<00:12,  3.61it/s]Capturing CUDA graphs (decode, FULL):  37%|███▋      | 26/70 [00:07<00:11,  3.98it/s]Capturing CUDA graphs (decode, FULL):  39%|███▊      | 27/70 [00:07<00:11,  3.75it/s]Capturing CUDA graphs (decode, FULL):  40%|████      | 28/70 [00:07<00:10,  4.10it/s]Capturing CUDA graphs (decode, FULL):  41%|████▏     | 29/70 [00:08<00:10,  3.80it/s]Capturing CUDA graphs (decode, FULL):  43%|████▎     | 30/70 [00:08<00:09,  4.12it/s]Capturing CUDA graphs (decode, FULL):  44%|████▍     | 31/70 [00:08<00:10,  3.74it/s]Capturing CUDA graphs (decode, FULL):  46%|████▌     | 32/70 [00:08<00:09,  4.14it/s]Capturing CUDA graphs (decode, FULL):  47%|████▋     | 33/70 [00:09<00:09,  3.85it/s]Capturing CUDA graphs (decode, FULL):  49%|████▊     | 34/70 [00:09<00:08,  4.19it/s]Capturing CUDA graphs (decode, FULL):  50%|█████     | 35/70 [00:09<00:09,  3.72it/s]Capturing CUDA graphs (decode, FULL):  51%|█████▏    | 36/70 [00:09<00:08,  4.15it/s]Capturing CUDA graphs (decode, FULL):  53%|█████▎    | 37/70 [00:10<00:08,  3.73it/s]Capturing CUDA graphs (decode, FULL):  54%|█████▍    | 38/70 [00:10<00:07,  4.13it/s]Capturing CUDA graphs (decode, FULL):  56%|█████▌    | 39/70 [00:10<00:08,  3.86it/s]Capturing CUDA graphs (decode, FULL):  57%|█████▋    | 40/70 [00:10<00:07,  4.24it/s]Capturing CUDA graphs (decode, FULL):  59%|█████▊    | 41/70 [00:11<00:07,  3.87it/s]Capturing CUDA graphs (decode, FULL):  60%|██████    | 42/70 [00:11<00:06,  4.24it/s]Capturing CUDA graphs (decode, FULL):  61%|██████▏   | 43/70 [00:11<00:06,  3.93it/s]Capturing CUDA graphs (decode, FULL):  63%|██████▎   | 44/70 [00:11<00:06,  4.30it/s]Capturing CUDA graphs (decode, FULL):  64%|██████▍   | 45/70 [00:12<00:06,  3.98it/s]Capturing CUDA graphs (decode, FULL):  66%|██████▌   | 46/70 [00:12<00:05,  4.35it/s]Capturing CUDA graphs (decode, FULL):  67%|██████▋   | 47/70 [00:12<00:05,  4.00it/s]Capturing CUDA graphs (decode, FULL):  69%|██████▊   | 48/70 [00:12<00:05,  4.36it/s]Capturing CUDA graphs (decode, FULL):  70%|███████   | 49/70 [00:12<00:05,  3.94it/s]Capturing CUDA graphs (decode, FULL):  71%|███████▏  | 50/70 [00:13<00:04,  4.25it/s]Capturing CUDA graphs (decode, FULL):  73%|███████▎  | 51/70 [00:13<00:04,  3.97it/s]Capturing CUDA graphs (decode, FULL):  74%|███████▍  | 52/70 [00:13<00:04,  4.34it/s]Capturing CUDA graphs (decode, FULL):  76%|███████▌  | 53/70 [00:13<00:04,  4.02it/s]Capturing CUDA graphs (decode, FULL):  77%|███████▋  | 54/70 [00:14<00:03,  4.39it/s]Capturing CUDA graphs (decode, FULL):  79%|███████▊  | 55/70 [00:14<00:03,  4.05it/s]Capturing CUDA graphs (decode, FULL):  80%|████████  | 56/70 [00:14<00:03,  4.43it/s]Capturing CUDA graphs (decode, FULL):  81%|████████▏ | 57/70 [00:14<00:03,  4.09it/s]Capturing CUDA graphs (decode, FULL):  83%|████████▎ | 58/70 [00:15<00:02,  4.42it/s]Capturing CUDA graphs (decode, FULL):  84%|████████▍ | 59/70 [00:15<00:02,  3.97it/s]Capturing CUDA graphs (decode, FULL):  86%|████████▌ | 60/70 [00:15<00:02,  4.36it/s]Capturing CUDA graphs (decode, FULL):  87%|████████▋ | 61/70 [00:15<00:02,  3.72it/s]Capturing CUDA graphs (decode, FULL):  89%|████████▊ | 62/70 [00:16<00:01,  4.08it/s]Capturing CUDA graphs (decode, FULL):  90%|█████████ | 63/70 [00:16<00:01,  3.80it/s]Capturing CUDA graphs (decode, FULL):  91%|█████████▏| 64/70 [00:16<00:01,  4.21it/s]Capturing CUDA graphs (decode, FULL):  93%|█████████▎| 65/70 [00:16<00:01,  3.85it/s]Capturing CUDA graphs (decode, FULL):  94%|█████████▍| 66/70 [00:17<00:00,  4.22it/s]Capturing CUDA graphs (decode, FULL):  96%|█████████▌| 67/70 [00:17<00:00,  3.90it/s]Capturing CUDA graphs (decode, FULL):  97%|█████████▋| 68/70 [00:17<00:00,  4.17it/s]Capturing CUDA graphs (decode, FULL):  99%|█████████▊| 69/70 [00:17<00:00,  3.46it/s]Capturing CUDA graphs (decode, FULL): 100%|██████████| 70/70 [00:18<00:00,  3.86it/s]Capturing CUDA graphs (decode, FULL): 100%|██████████| 70/70 [00:18<00:00,  3.85it/s]
+(EngineCore pid=2330562) INFO 10-28 20:22:46 [gpu_model_runner.py:6929] Graph capturing finished in 19 secs, took 0.80 GiB
+(EngineCore pid=2330562) INFO 10-28 20:22:46 [gpu_worker.py:825] CUDA graph pool memory: 0.8 GiB (actual), 0.58 GiB (estimated), difference: 0.23 GiB (28.2%).
+(EngineCore pid=2330562) INFO 10-28 20:22:46 [gpu_worker.py:888] Free memory on device (139.29/139.8 GiB) on startup. Desired GPU memory utilization is (0.9, 125.82 GiB). Actual usage is 55.68 GiB for consumed memory (weights + non-torch), 2.83 GiB for peak activation, and 0.8 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=71255127245` (66.36 GiB) to fit into requested memory, or `--kv-cache-memory=85713856512` (79.83 GiB) to fully utilize gpu memory. Current kv cache memory in use is 67.31 GiB.
+(EngineCore pid=2330562) INFO 10-28 20:22:47 [jit_monitor.py:85] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(EngineCore pid=2330562) WARNING 10-28 20:22:47 [torch_utils.py:275] OMP_NUM_THREADS=8 is set; leaving Torch threads at 8 for serving. Multi-threaded torch CPU ops during serving can degrade performance through spin-wait contention and cgroup CPU-quota throttling.
+(EngineCore pid=2330562) INFO 10-28 20:22:47 [core.py:379] init engine (profile, create kv cache, warmup model) took 41.02 s
+(EngineCore pid=2330562) INFO 10-28 20:22:47 [kv_cache_utils.py:748] kv cache group sizes [8192, 8192, 8192, 784]
+(EngineCore pid=2330562) INFO 10-28 20:22:47 [kv_cache_utils.py:749] kv lcm block sizes 401408
+(EngineCore pid=2330562) WARNING 10-28 20:22:47 [vllm.py:1570] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore pid=2330562) INFO 10-28 20:22:47 [kernel.py:416] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['triton', 'native'])
+(EngineCore pid=2330562) INFO 10-28 20:22:47 [compilation.py:336] Enabled custom fusions: norm_quant, act_quant
+INFO 10-28 20:22:48 [hf.py:642] Detected the chat template content format to be 'openai'. You can set `--chat-template-content-format` to override this.
+WORKER_READY 20:22:48
+[E3_hdA0] 93600 to capture (0 done)
+[E3_hdA0] chunk 1228 (requested 2048, 3.00 GiB of hook output)
+WARNING 10-28 20:22:53 [input_processor.py:196] vLLM has deprecated support for supporting different tokenizers for different LoRAs. By default, vLLM uses base model's tokenizer. If you are using a LoRA with its own tokenizer, consider specifying `--tokenizer [lora_path]` to use the LoRA tokenizer.
+(EngineCore pid=2330562) WARNING 10-28 20:22:59 [jit_monitor.py:141] CuTeDSL JIT compilation during inference: _FullyFusedDeltaRuleSm90. This causes a latency spike; consider extending warmup to cover this shape/config.
+[E3_hdA0] 1228/93600, 2471 tok/s, 0.8 min
+[E3_hdA0] 2456/93600, 3091 tok/s, 1.3 min
+[E3_hdA0] 3684/93600, 3333 tok/s, 2.0 min
+[E3_hdA0] 4912/93600, 3459 tok/s, 2.6 min
+[E3_hdA0] 6140/93600, 3535 tok/s, 3.1 min
+[E3_hdA0] 7368/93600, 3592 tok/s, 3.6 min
+[E3_hdA0] 8596/93600, 3739 tok/s, 4.3 min
+[E3_hdA0] 9824/93600, 3774 tok/s, 4.8 min
+[E3_hdA0] 11052/93600, 3773 tok/s, 5.4 min
+[E3_hdA0] 12280/93600, 3777 tok/s, 5.9 min
+[E3_hdA0] 13508/93600, 3789 tok/s, 6.5 min
+[E3_hdA0] 14736/93600, 3795 tok/s, 7.1 min
+[E3_hdA0] 15964/93600, 3803 tok/s, 7.6 min
+[E3_hdA0] 17192/93600, 3794 tok/s, 8.2 min
+[E3_hdA0] 18420/93600, 3805 tok/s, 8.8 min
+[E3_hdA0] 19648/93600, 3808 tok/s, 9.3 min
+[E3_hdA0] 20876/93600, 3818 tok/s, 9.9 min
+[E3_hdA0] 22104/93600, 3822 tok/s, 10.4 min
+[E3_hdA0] 23332/93600, 3823 tok/s, 10.9 min
+[E3_hdA0] 24560/93600, 3821 tok/s, 11.5 min
+[E3_hdA0] 25788/93600, 3822 tok/s, 12.1 min
+[E3_hdA0] 27016/93600, 3825 tok/s, 12.6 min
+[E3_hdA0] 28244/93600, 3826 tok/s, 13.2 min
+[E3_hdA0] 29472/93600, 3826 tok/s, 13.7 min
+[E3_hdA0] 30700/93600, 3823 tok/s, 14.3 min
+[E3_hdA0] 31928/93600, 3833 tok/s, 14.9 min
+[E3_hdA0] 33156/93600, 3838 tok/s, 15.4 min
+[E3_hdA0] 34384/93600, 3842 tok/s, 15.9 min
+[E3_hdA0] 35612/93600, 3846 tok/s, 16.5 min
+[E3_hdA0] 36840/93600, 3852 tok/s, 17.0 min
+[E3_hdA0] 38068/93600, 3860 tok/s, 17.5 min
+[E3_hdA0] 39296/93600, 3867 tok/s, 18.1 min
+[E3_hdA0] 40524/93600, 3876 tok/s, 18.6 min
+[E3_hdA0] 41752/93600, 3884 tok/s, 19.1 min
+[E3_hdA0] 42980/93600, 3888 tok/s, 19.7 min
+[E3_hdA0] 44208/93600, 3897 tok/s, 20.2 min
+[E3_hdA0] 45436/93600, 3905 tok/s, 20.7 min
+[E3_hdA0] 46664/93600, 3911 tok/s, 21.2 min
+[E3_hdA0] 47892/93600, 3916 tok/s, 21.7 min
+[E3_hdA0] 49120/93600, 3905 tok/s, 22.4 min
+[E3_hdA0] 50348/93600, 3882 tok/s, 23.0 min
+[E3_hdA0] 51576/93600, 3872 tok/s, 23.6 min
+[E3_hdA0] 52804/93600, 3871 tok/s, 24.2 min
+[E3_hdA0] 54032/93600, 3876 tok/s, 24.7 min
+[E3_hdA0] 55260/93600, 3869 tok/s, 25.3 min
+[E3_hdA0] 56488/93600, 3871 tok/s, 25.9 min
+[E3_hdA0] 57716/93600, 3872 tok/s, 26.4 min
+[E3_hdA0] 58944/93600, 3869 tok/s, 27.0 min
+[E3_hdA0] 60172/93600, 3862 tok/s, 27.6 min
+[E3_hdA0] 61400/93600, 3853 tok/s, 28.2 min
+[E3_hdA0] 62628/93600, 3855 tok/s, 28.8 min
+[E3_hdA0] 63856/93600, 3854 tok/s, 29.3 min
+[E3_hdA0] 65084/93600, 3855 tok/s, 29.9 min
+[E3_hdA0] 66312/93600, 3850 tok/s, 30.5 min
+[E3_hdA0] 67540/93600, 3834 tok/s, 31.2 min
+[E3_hdA0] 68768/93600, 3827 tok/s, 31.8 min
+[E3_hdA0] 69996/93600, 3825 tok/s, 32.4 min
+[E3_hdA0] 71224/93600, 3825 tok/s, 32.9 min
+[E3_hdA0] 72452/93600, 3825 tok/s, 33.5 min
+[E3_hdA0] 73680/93600, 3821 tok/s, 34.1 min
+[E3_hdA0] 74908/93600, 3820 tok/s, 34.7 min
+[E3_hdA0] 76136/93600, 3816 tok/s, 35.3 min
+[E3_hdA0] 77364/93600, 3817 tok/s, 35.8 min
+[E3_hdA0] 78592/93600, 3820 tok/s, 36.3 min
+[E3_hdA0] 79820/93600, 3814 tok/s, 37.0 min
+[E3_hdA0] 81048/93600, 3813 tok/s, 37.5 min
+[E3_hdA0] 82276/93600, 3809 tok/s, 38.1 min
+[E3_hdA0] 83504/93600, 3809 tok/s, 38.7 min
+[E3_hdA0] 84732/93600, 3807 tok/s, 39.3 min
+[E3_hdA0] 85960/93600, 3805 tok/s, 39.9 min
+[E3_hdA0] 87188/93600, 3806 tok/s, 40.5 min
+[E3_hdA0] 88416/93600, 3803 tok/s, 41.0 min
+[E3_hdA0] 89644/93600, 3806 tok/s, 41.6 min
+[E3_hdA0] 90872/93600, 3801 tok/s, 42.2 min
+[E3_hdA0] 92100/93600, 3800 tok/s, 42.8 min
+[E3_hdA0] 93328/93600, 3801 tok/s, 43.4 min
+[E3_hdA0] 93600/93600, 3801 tok/s, 43.5 min
+JOB_DONE E3_hdA0 21:06:20
+[E3_hdB0] 93600 to capture (0 done)
+[E3_hdB0] chunk 1228 (requested 2048, 3.00 GiB of hook output)
+[E3_hdB0] 1228/93600, 3433 tok/s, 0.6 min
+[E3_hdB0] 2456/93600, 3719 tok/s, 1.1 min
+[E3_hdB0] 3684/93600, 3778 tok/s, 1.7 min
+[E3_hdB0] 4912/93600, 3824 tok/s, 2.3 min
+[E3_hdB0] 6140/93600, 3766 tok/s, 2.9 min
+[E3_hdB0] 7368/93600, 3706 tok/s, 3.5 min
+[E3_hdB0] 8596/93600, 3809 tok/s, 4.2 min
+[E3_hdB0] 9824/93600, 3815 tok/s, 4.8 min
+[E3_hdB0] 11052/93600, 3806 tok/s, 5.3 min
+[E3_hdB0] 12280/93600, 3812 tok/s, 5.9 min
+[E3_hdB0] 13508/93600, 3837 tok/s, 6.4 min
+[E3_hdB0] 14736/93600, 3852 tok/s, 7.0 min
+[E3_hdB0] 15964/93600, 3854 tok/s, 7.5 min
+[E3_hdB0] 17192/93600, 3866 tok/s, 8.0 min
+[E3_hdB0] 18420/93600, 3875 tok/s, 8.6 min
+[E3_hdB0] 19648/93600, 3878 tok/s, 9.1 min
+[E3_hdB0] 20876/93600, 3881 tok/s, 9.7 min
+[E3_hdB0] 22104/93600, 3822 tok/s, 10.4 min
+[E3_hdB0] 23332/93600, 3789 tok/s, 11.0 min
+[E3_hdB0] 24560/93600, 3757 tok/s, 11.7 min
+[E3_hdB0] 25788/93600, 3749 tok/s, 12.3 min
+[E3_hdB0] 27016/93600, 3748 tok/s, 12.9 min
+[E3_hdB0] 28244/93600, 3753 tok/s, 13.4 min
+[E3_hdB0] 29472/93600, 3764 tok/s, 14.0 min
+[E3_hdB0] 30700/93600, 3769 tok/s, 14.5 min
+[E3_hdB0] 31928/93600, 3782 tok/s, 15.1 min
+[E3_hdB0] 33156/93600, 3792 tok/s, 15.6 min
+[E3_hdB0] 34384/93600, 3801 tok/s, 16.1 min
+[E3_hdB0] 35612/93600, 3805 tok/s, 16.7 min
+[E3_hdB0] 36840/93600, 3812 tok/s, 17.2 min
+[E3_hdB0] 38068/93600, 3810 tok/s, 17.8 min
+[E3_hdB0] 39296/93600, 3813 tok/s, 18.3 min
+[E3_hdB0] 40524/93600, 3818 tok/s, 18.9 min
+[E3_hdB0] 41752/93600, 3823 tok/s, 19.4 min
+[E3_hdB0] 42980/93600, 3830 tok/s, 20.0 min
+[E3_hdB0] 44208/93600, 3837 tok/s, 20.5 min
+[E3_hdB0] 45436/93600, 3847 tok/s, 21.0 min
+[E3_hdB0] 46664/93600, 3856 tok/s, 21.5 min
+[E3_hdB0] 47892/93600, 3859 tok/s, 22.1 min
+[E3_hdB0] 49120/93600, 3863 tok/s, 22.6 min
+[E3_hdB0] 50348/93600, 3867 tok/s, 23.1 min
+[E3_hdB0] 51576/93600, 3869 tok/s, 23.7 min
+[E3_hdB0] 52804/93600, 3866 tok/s, 24.2 min
+[E3_hdB0] 54032/93600, 3859 tok/s, 24.8 min
+[E3_hdB0] 55260/93600, 3855 tok/s, 25.4 min
+[E3_hdB0] 56488/93600, 3852 tok/s, 26.0 min
+[E3_hdB0] 57716/93600, 3851 tok/s, 26.6 min
+[E3_hdB0] 58944/93600, 3852 tok/s, 27.1 min
+[E3_hdB0] 60172/93600, 3850 tok/s, 27.7 min
+[E3_hdB0] 61400/93600, 3847 tok/s, 28.3 min
+[E3_hdB0] 62628/93600, 3844 tok/s, 28.9 min
+[E3_hdB0] 63856/93600, 3841 tok/s, 29.4 min
+[E3_hdB0] 65084/93600, 3838 tok/s, 30.0 min
+[E3_hdB0] 66312/93600, 3837 tok/s, 30.6 min
+[E3_hdB0] 67540/93600, 3834 tok/s, 31.2 min
+[E3_hdB0] 68768/93600, 3835 tok/s, 31.7 min
+[E3_hdB0] 69996/93600, 3836 tok/s, 32.3 min
+[E3_hdB0] 71224/93600, 3839 tok/s, 32.8 min
+[E3_hdB0] 72452/93600, 3840 tok/s, 33.4 min
+[E3_hdB0] 73680/93600, 3839 tok/s, 33.9 min
+[E3_hdB0] 74908/93600, 3839 tok/s, 34.5 min
+[E3_hdB0] 76136/93600, 3838 tok/s, 35.1 min
+[E3_hdB0] 77364/93600, 3839 tok/s, 35.6 min
+[E3_hdB0] 78592/93600, 3839 tok/s, 36.2 min
+[E3_hdB0] 79820/93600, 3836 tok/s, 36.7 min
+[E3_hdB0] 81048/93600, 3838 tok/s, 37.3 min
+[E3_hdB0] 82276/93600, 3837 tok/s, 37.9 min
+[E3_hdB0] 83504/93600, 3837 tok/s, 38.4 min
+[E3_hdB0] 84732/93600, 3840 tok/s, 39.0 min
+[E3_hdB0] 85960/93600, 3842 tok/s, 39.5 min
+[E3_hdB0] 87188/93600, 3843 tok/s, 40.1 min
+[E3_hdB0] 88416/93600, 3842 tok/s, 40.6 min
+[E3_hdB0] 89644/93600, 3842 tok/s, 41.2 min
+[E3_hdB0] 90872/93600, 3842 tok/s, 41.8 min
+[E3_hdB0] 92100/93600, 3838 tok/s, 42.4 min
+[E3_hdB0] 93328/93600, 3841 tok/s, 42.9 min
+[E3_hdB0] 93600/93600, 3841 tok/s, 43.0 min
+JOB_DONE E3_hdB0 21:49:26
+[E3_parent] 93600 to capture (0 done)
+[E3_parent] chunk 1228 (requested 2048, 3.00 GiB of hook output)
+[E3_parent] 1228/93600, 3642 tok/s, 0.5 min
+[E3_parent] 2456/93600, 3840 tok/s, 1.1 min
+[E3_parent] 3684/93600, 3976 tok/s, 1.6 min
+[E3_parent] 4912/93600, 4067 tok/s, 2.2 min
+[E3_parent] 6140/93600, 4094 tok/s, 2.7 min
+[E3_parent] 7368/93600, 4023 tok/s, 3.2 min
+[E3_parent] 8596/93600, 4066 tok/s, 3.9 min
+[E3_parent] 9824/93600, 4070 tok/s, 4.5 min
+[E3_parent] 11052/93600, 4054 tok/s, 5.0 min
+[E3_parent] 12280/93600, 4058 tok/s, 5.5 min
+[E3_parent] 13508/93600, 4050 tok/s, 6.1 min
+[E3_parent] 14736/93600, 4051 tok/s, 6.6 min
+[E3_parent] 15964/93600, 4062 tok/s, 7.1 min
+[E3_parent] 17192/93600, 4079 tok/s, 7.6 min
+[E3_parent] 18420/93600, 4097 tok/s, 8.1 min
+[E3_parent] 19648/93600, 4108 tok/s, 8.6 min
+[E3_parent] 20876/93600, 4111 tok/s, 9.2 min
+[E3_parent] 22104/93600, 4112 tok/s, 9.7 min
+[E3_parent] 23332/93600, 4111 tok/s, 10.2 min
+[E3_parent] 24560/93600, 4100 tok/s, 10.7 min
+[E3_parent] 25788/93600, 4106 tok/s, 11.2 min
+[E3_parent] 27016/93600, 4110 tok/s, 11.7 min
+[E3_parent] 28244/93600, 4111 tok/s, 12.3 min
+[E3_parent] 29472/93600, 4119 tok/s, 12.8 min
+[E3_parent] 30700/93600, 4124 tok/s, 13.3 min
+[E3_parent] 31928/93600, 4124 tok/s, 13.8 min
+[E3_parent] 33156/93600, 4116 tok/s, 14.4 min
+[E3_parent] 34384/93600, 4093 tok/s, 15.0 min
+[E3_parent] 35612/93600, 4066 tok/s, 15.6 min
+[E3_parent] 36840/93600, 4038 tok/s, 16.2 min
+[E3_parent] 38068/93600, 4007 tok/s, 16.9 min
+[E3_parent] 39296/93600, 3985 tok/s, 17.5 min
+[E3_parent] 40524/93600, 3977 tok/s, 18.1 min
+[E3_parent] 41752/93600, 3972 tok/s, 18.7 min
+[E3_parent] 42980/93600, 3969 tok/s, 19.3 min
+[E3_parent] 44208/93600, 3970 tok/s, 19.8 min
+[E3_parent] 45436/93600, 3960 tok/s, 20.4 min
+[E3_parent] 46664/93600, 3945 tok/s, 21.0 min
+[E3_parent] 47892/93600, 3929 tok/s, 21.7 min
+[E3_parent] 49120/93600, 3922 tok/s, 22.3 min
+[E3_parent] 50348/93600, 3923 tok/s, 22.8 min
+[E3_parent] 51576/93600, 3925 tok/s, 23.3 min
+[E3_parent] 52804/93600, 3927 tok/s, 23.8 min
+[E3_parent] 54032/93600, 3936 tok/s, 24.4 min
+[E3_parent] 55260/93600, 3941 tok/s, 24.9 min
+[E3_parent] 56488/93600, 3951 tok/s, 25.4 min
+[E3_parent] 57716/93600, 3957 tok/s, 25.9 min
+[E3_parent] 58944/93600, 3966 tok/s, 26.4 min
+[E3_parent] 60172/93600, 3971 tok/s, 26.9 min
+[E3_parent] 61400/93600, 3980 tok/s, 27.3 min
+[E3_parent] 62628/93600, 3985 tok/s, 27.8 min
+[E3_parent] 63856/93600, 3990 tok/s, 28.3 min
+[E3_parent] 65084/93600, 3994 tok/s, 28.8 min
+[E3_parent] 66312/93600, 4000 tok/s, 29.3 min
+[E3_parent] 67540/93600, 4007 tok/s, 29.8 min
+[E3_parent] 68768/93600, 4013 tok/s, 30.3 min
+[E3_parent] 69996/93600, 4019 tok/s, 30.8 min
+[E3_parent] 71224/93600, 4026 tok/s, 31.3 min
+[E3_parent] 72452/93600, 4026 tok/s, 31.8 min
+[E3_parent] 73680/93600, 4025 tok/s, 32.4 min
+[E3_parent] 74908/93600, 4022 tok/s, 32.9 min
+[E3_parent] 76136/93600, 4024 tok/s, 33.4 min
+[E3_parent] 77364/93600, 4023 tok/s, 34.0 min
+[E3_parent] 78592/93600, 4023 tok/s, 34.5 min
+[E3_parent] 79820/93600, 4026 tok/s, 35.0 min
+[E3_parent] 81048/93600, 4028 tok/s, 35.5 min
+[E3_parent] 82276/93600, 4035 tok/s, 36.0 min
+[E3_parent] 83504/93600, 4036 tok/s, 36.5 min
+[E3_parent] 84732/93600, 4039 tok/s, 37.1 min
+[E3_parent] 85960/93600, 4044 tok/s, 37.6 min
+[E3_parent] 87188/93600, 4048 tok/s, 38.0 min
+[E3_parent] 88416/93600, 4052 tok/s, 38.5 min
+[E3_parent] 89644/93600, 4053 tok/s, 39.0 min
+[E3_parent] 90872/93600, 4057 tok/s, 39.5 min
+[E3_parent] 92100/93600, 4061 tok/s, 40.0 min
+[E3_parent] 93328/93600, 4066 tok/s, 40.5 min
+[E3_parent] 93600/93600, 4067 tok/s, 40.7 min
+JOB_DONE E3_parent 22:30:08
+[E3_psA0] 93600 to capture (0 done)
+[E3_psA0] chunk 1228 (requested 2048, 3.00 GiB of hook output)
+[E3_psA0] 1228/93600, 3058 tok/s, 0.6 min
+[E3_psA0] 2456/93600, 3497 tok/s, 1.2 min
+[E3_psA0] 3684/93600, 3674 tok/s, 1.8 min
+[E3_psA0] 4912/93600, 3744 tok/s, 2.4 min
+[E3_psA0] 6140/93600, 3790 tok/s, 2.9 min
+[E3_psA0] 7368/93600, 3792 tok/s, 3.4 min
+[E3_psA0] 8596/93600, 3879 tok/s, 4.1 min
+[E3_psA0] 9824/93600, 3861 tok/s, 4.7 min
+[E3_psA0] 11052/93600, 3847 tok/s, 5.3 min
+[E3_psA0] 12280/93600, 3828 tok/s, 5.9 min
+[E3_psA0] 13508/93600, 3829 tok/s, 6.4 min
+[E3_psA0] 14736/93600, 3830 tok/s, 7.0 min
+[E3_psA0] 15964/93600, 3840 tok/s, 7.5 min
+[E3_psA0] 17192/93600, 3852 tok/s, 8.1 min
+[E3_psA0] 18420/93600, 3857 tok/s, 8.6 min
+[E3_psA0] 19648/93600, 3864 tok/s, 9.2 min
+[E3_psA0] 20876/93600, 3859 tok/s, 9.8 min
+[E3_psA0] 22104/93600, 3853 tok/s, 10.3 min
+[E3_psA0] 23332/93600, 3850 tok/s, 10.9 min
+[E3_psA0] 24560/93600, 3855 tok/s, 11.4 min
+[E3_psA0] 25788/93600, 3855 tok/s, 11.9 min
+[E3_psA0] 27016/93600, 3856 tok/s, 12.5 min
+[E3_psA0] 28244/93600, 3854 tok/s, 13.1 min
+[E3_psA0] 29472/93600, 3834 tok/s, 13.7 min
+[E3_psA0] 30700/93600, 3820 tok/s, 14.3 min
+[E3_psA0] 31928/93600, 3797 tok/s, 15.0 min
+[E3_psA0] 33156/93600, 3786 tok/s, 15.6 min
+[E3_psA0] 34384/93600, 3777 tok/s, 16.2 min
+[E3_psA0] 35612/93600, 3768 tok/s, 16.8 min
+[E3_psA0] 36840/93600, 3764 tok/s, 17.4 min
+[E3_psA0] 38068/93600, 3756 tok/s, 18.0 min
+[E3_psA0] 39296/93600, 3747 tok/s, 18.6 min
+[E3_psA0] 40524/93600, 3748 tok/s, 19.2 min
+[E3_psA0] 41752/93600, 3754 tok/s, 19.8 min
+[E3_psA0] 42980/93600, 3760 tok/s, 20.3 min
+[E3_psA0] 44208/93600, 3761 tok/s, 20.9 min
+[E3_psA0] 45436/93600, 3764 tok/s, 21.5 min
+[E3_psA0] 46664/93600, 3766 tok/s, 22.0 min
+[E3_psA0] 47892/93600, 3770 tok/s, 22.6 min
+[E3_psA0] 49120/93600, 3769 tok/s, 23.2 min
+[E3_psA0] 50348/93600, 3769 tok/s, 23.7 min
+[E3_psA0] 51576/93600, 3772 tok/s, 24.3 min
+[E3_psA0] 52804/93600, 3776 tok/s, 24.8 min
+[E3_psA0] 54032/93600, 3778 tok/s, 25.4 min
+[E3_psA0] 55260/93600, 3782 tok/s, 25.9 min
+[E3_psA0] 56488/93600, 3781 tok/s, 26.5 min
+[E3_psA0] 57716/93600, 3784 tok/s, 27.0 min
+[E3_psA0] 58944/93600, 3789 tok/s, 27.6 min
+[E3_psA0] 60172/93600, 3790 tok/s, 28.1 min
+[E3_psA0] 61400/93600, 3792 tok/s, 28.7 min
+[E3_psA0] 62628/93600, 3792 tok/s, 29.3 min
+[E3_psA0] 63856/93600, 3793 tok/s, 29.8 min
+[E3_psA0] 65084/93600, 3795 tok/s, 30.3 min
+[E3_psA0] 66312/93600, 3797 tok/s, 30.9 min
+[E3_psA0] 67540/93600, 3794 tok/s, 31.5 min
+[E3_psA0] 68768/93600, 3777 tok/s, 32.2 min
+[E3_psA0] 69996/93600, 3765 tok/s, 32.9 min
+[E3_psA0] 71224/93600, 3763 tok/s, 33.5 min
+[E3_psA0] 72452/93600, 3762 tok/s, 34.1 min
+[E3_psA0] 73680/93600, 3762 tok/s, 34.6 min
+[E3_psA0] 74908/93600, 3763 tok/s, 35.2 min
+[E3_psA0] 76136/93600, 3762 tok/s, 35.8 min
+[E3_psA0] 77364/93600, 3762 tok/s, 36.3 min
+[E3_psA0] 78592/93600, 3763 tok/s, 36.9 min
+[E3_psA0] 79820/93600, 3766 tok/s, 37.4 min
+[E3_psA0] 81048/93600, 3768 tok/s, 38.0 min
+[E3_psA0] 82276/93600, 3769 tok/s, 38.5 min
+[E3_psA0] 83504/93600, 3771 tok/s, 39.1 min
+[E3_psA0] 84732/93600, 3773 tok/s, 39.7 min
+[E3_psA0] 85960/93600, 3776 tok/s, 40.2 min
+[E3_psA0] 87188/93600, 3776 tok/s, 40.8 min
+[E3_psA0] 88416/93600, 3778 tok/s, 41.3 min
+[E3_psA0] 89644/93600, 3781 tok/s, 41.9 min
+[E3_psA0] 90872/93600, 3781 tok/s, 42.4 min
+[E3_psA0] 92100/93600, 3785 tok/s, 43.0 min
+[E3_psA0] 93328/93600, 3788 tok/s, 43.5 min
+[E3_psA0] 93600/93600, 3788 tok/s, 43.6 min
+JOB_DONE E3_psA0 23:13:50
+[E3_psB0] 93600 to capture (0 done)
+[E3_psB0] chunk 1228 (requested 2048, 3.00 GiB of hook output)
+[E3_psB0] 1228/93600, 3042 tok/s, 0.6 min
+[E3_psB0] 2456/93600, 3514 tok/s, 1.2 min
+[E3_psB0] 3684/93600, 3687 tok/s, 1.8 min
+[E3_psB0] 4912/93600, 3786 tok/s, 2.3 min
+[E3_psB0] 6140/93600, 3789 tok/s, 2.9 min
+[E3_psB0] 7368/93600, 3809 tok/s, 3.4 min
+[E3_psB0] 8596/93600, 3255 tok/s, 4.9 min
+[E3_psB0] 9824/93600, 3303 tok/s, 5.5 min
+[E3_psB0] 11052/93600, 2392 tok/s, 8.5 min
+[E3_psB0] 12280/93600, 2475 tok/s, 9.1 min
+[E3_psB0] 13508/93600, 2048 tok/s, 12.0 min
+[E3_psB0] 14736/93600, 1941 tok/s, 13.8 min
+[E3_psB0] 15964/93600, 2005 tok/s, 14.4 min
+[E3_psB0] 17192/93600, 2073 tok/s, 15.0 min
+[E3_psB0] 18420/93600, 2141 tok/s, 15.6 min
+[E3_psB0] 19648/93600, 2199 tok/s, 16.1 min
+[E3_psB0] 20876/93600, 2257 tok/s, 16.7 min
+[E3_psB0] 22104/93600, 2306 tok/s, 17.2 min
+[E3_psB0] 23332/93600, 2353 tok/s, 17.8 min
+[E3_psB0] 24560/93600, 2401 tok/s, 18.3 min
+[E3_psB0] 25788/93600, 2446 tok/s, 18.8 min
+[E3_psB0] 27016/93600, 2486 tok/s, 19.4 min
+[E3_psB0] 28244/93600, 2527 tok/s, 19.9 min
+[E3_psB0] 29472/93600, 2569 tok/s, 20.5 min
+[E3_psB0] 30700/93600, 2609 tok/s, 21.0 min
+[E3_psB0] 31928/93600, 2645 tok/s, 21.5 min
+[E3_psB0] 33156/93600, 2680 tok/s, 22.1 min
+[E3_psB0] 34384/93600, 2711 tok/s, 22.6 min
+[E3_psB0] 35612/93600, 2743 tok/s, 23.1 min
+[E3_psB0] 36840/93600, 2773 tok/s, 23.6 min
+[E3_psB0] 38068/93600, 2802 tok/s, 24.2 min
+[E3_psB0] 39296/93600, 2825 tok/s, 24.7 min
+[E3_psB0] 40524/93600, 2852 tok/s, 25.3 min
+[E3_psB0] 41752/93600, 2871 tok/s, 25.9 min
+[E3_psB0] 42980/93600, 2892 tok/s, 26.4 min
+[E3_psB0] 44208/93600, 2744 tok/s, 28.7 min
+[E3_psB0] 45436/93600, 2493 tok/s, 32.4 min
+[E3_psB0] 46664/93600, 2206 tok/s, 37.6 min
+[E3_psB0] 47892/93600, 1897 tok/s, 44.9 min
+[E3_psB0] 49120/93600, 1748 tok/s, 49.9 min
+[E3_psB0] 50348/93600, 1761 tok/s, 50.8 min
+[E3_psB0] 51576/93600, 1781 tok/s, 51.4 min
+[E3_psB0] 52804/93600, 1800 tok/s, 52.0 min
+[E3_psB0] 54032/93600, 1821 tok/s, 52.6 min
+[E3_psB0] 55260/93600, 1840 tok/s, 53.3 min
+[E3_psB0] 56488/93600, 1859 tok/s, 53.9 min
+[E3_psB0] 57716/93600, 1875 tok/s, 54.6 min
+[E3_psB0] 58944/93600, 1891 tok/s, 55.3 min
+[E3_psB0] 60172/93600, 1904 tok/s, 56.0 min
+[E3_psB0] 61400/93600, 1918 tok/s, 56.7 min
+[E3_psB0] 62628/93600, 1932 tok/s, 57.4 min
+[E3_psB0] 63856/93600, 1946 tok/s, 58.1 min
+[E3_psB0] 65084/93600, 1959 tok/s, 58.8 min
+[E3_psB0] 66312/93600, 1976 tok/s, 59.4 min
+[E3_psB0] 67540/93600, 1992 tok/s, 60.0 min
+[E3_psB0] 68768/93600, 2008 tok/s, 60.6 min
+[E3_psB0] 69996/93600, 2024 tok/s, 61.2 min
+[E3_psB0] 71224/93600, 2039 tok/s, 61.8 min
+[E3_psB0] 72452/93600, 2055 tok/s, 62.4 min
+[E3_psB0] 73680/93600, 2070 tok/s, 63.0 min
+[E3_psB0] 74908/93600, 2085 tok/s, 63.5 min
+[E3_psB0] 76136/93600, 2100 tok/s, 64.1 min
+[E3_psB0] 77364/93600, 2115 tok/s, 64.6 min
+[E3_psB0] 78592/93600, 2130 tok/s, 65.2 min
+[E3_psB0] 79820/93600, 2145 tok/s, 65.7 min
+[E3_psB0] 81048/93600, 2160 tok/s, 66.2 min
+[E3_psB0] 82276/93600, 2175 tok/s, 66.8 min
+[E3_psB0] 83504/93600, 2189 tok/s, 67.3 min
+[E3_psB0] 84732/93600, 2204 tok/s, 67.9 min
+[E3_psB0] 85960/93600, 2217 tok/s, 68.5 min
+[E3_psB0] 87188/93600, 2230 tok/s, 69.0 min
+[E3_psB0] 88416/93600, 2243 tok/s, 69.6 min
+[E3_psB0] 89644/93600, 2255 tok/s, 70.2 min
+[E3_psB0] 90872/93600, 2268 tok/s, 70.7 min
+[E3_psB0] 92100/93600, 2281 tok/s, 71.3 min
+[E3_psB0] 93328/93600, 2295 tok/s, 71.9 min
+[E3_psB0] 93600/93600, 2297 tok/s, 72.0 min
+JOB_DONE E3_psB0 00:25:51
+[E4_hdA0] 9670 to capture (0 done)
+[E4_hdA0] chunk 614 (requested 1024, 3.00 GiB of hook output)
+[E4_hdA0] 614/9670, 6218 tok/s, 1.0 min
+[E4_hdA0] 1228/9670, 6081 tok/s, 2.0 min
+[E4_hdA0] 1842/9670, 6063 tok/s, 3.1 min
+[E4_hdA0] 2456/9670, 6073 tok/s, 4.1 min
+[E4_hdA0] 3070/9670, 6029 tok/s, 5.1 min
+[E4_hdA0] 3684/9670, 5789 tok/s, 6.5 min
+[E4_hdA0] 4298/9670, 5341 tok/s, 8.3 min
+[E4_hdA0] 4912/9670, 5361 tok/s, 9.5 min
+[E4_hdA0] 5526/9670, 5346 tok/s, 10.7 min
+[E4_hdA0] 6140/9670, 5320 tok/s, 11.9 min
+[E4_hdA0] 6754/9670, 5292 tok/s, 13.1 min
+[E4_hdA0] 7368/9670, 5213 tok/s, 14.5 min
+[E4_hdA0] 7982/9670, 5127 tok/s, 16.0 min
+[E4_hdA0] 8596/9670, 5157 tok/s, 17.2 min
+[E4_hdA0] 9210/9670, 5180 tok/s, 18.4 min
+[E4_hdA0] 9670/9670, 5199 tok/s, 19.3 min
+JOB_DONE E4_hdA0 00:45:11
+[E4_hdB0] 9670 to capture (0 done)
+[E4_hdB0] chunk 614 (requested 1024, 3.00 GiB of hook output)
+[E4_hdB0] 614/9670, 5309 tok/s, 1.2 min
+[E4_hdB0] 1228/9670, 5016 tok/s, 2.5 min
+[E4_hdB0] 1842/9670, 5067 tok/s, 3.7 min
+[E4_hdB0] 2456/9670, 5048 tok/s, 4.9 min
+[E4_hdB0] 3070/9670, 5136 tok/s, 6.0 min
+[E4_hdB0] 3684/9670, 5148 tok/s, 7.3 min
+[E4_hdB0] 4298/9670, 5213 tok/s, 8.5 min
+[E4_hdB0] 4912/9670, 5273 tok/s, 9.6 min
+[E4_hdB0] 5526/9670, 5291 tok/s, 10.8 min
+[E4_hdB0] 6140/9670, 5308 tok/s, 11.9 min
+[E4_hdB0] 6754/9670, 5338 tok/s, 13.0 min
+[E4_hdB0] 7368/9670, 5333 tok/s, 14.2 min
+[E4_hdB0] 7982/9670, 5333 tok/s, 15.3 min
+[E4_hdB0] 8596/9670, 5349 tok/s, 16.5 min
+[E4_hdB0] 9210/9670, 5360 tok/s, 17.7 min
+[E4_hdB0] 9670/9670, 5387 tok/s, 18.6 min
+JOB_DONE E4_hdB0 01:03:50
+[E4_parent] 9670 to capture (0 done)
+[E4_parent] chunk 614 (requested 1024, 3.00 GiB of hook output)
+[E4_parent] 614/9670, 6150 tok/s, 1.0 min
+[E4_parent] 1228/9670, 6014 tok/s, 2.1 min
+[E4_parent] 1842/9670, 6290 tok/s, 3.0 min
+[E4_parent] 2456/9670, 6411 tok/s, 3.9 min
+[E4_parent] 3070/9670, 6467 tok/s, 4.8 min
+[E4_parent] 3684/9670, 6534 tok/s, 5.7 min
+[E4_parent] 4298/9670, 6570 tok/s, 6.7 min
+[E4_parent] 4912/9670, 6594 tok/s, 7.7 min
+[E4_parent] 5526/9670, 6624 tok/s, 8.6 min
+[E4_parent] 6140/9670, 6657 tok/s, 9.5 min
+[E4_parent] 6754/9670, 6663 tok/s, 10.4 min
+[E4_parent] 7368/9670, 6676 tok/s, 11.3 min
+[E4_parent] 7982/9670, 6691 tok/s, 12.2 min
+[E4_parent] 8596/9670, 6689 tok/s, 13.2 min
+[E4_parent] 9210/9670, 6704 tok/s, 14.2 min
+[E4_parent] 9670/9670, 6687 tok/s, 15.0 min
+JOB_DONE E4_parent 01:18:51
+[E4_psA0] 9670 to capture (0 done)
+[E4_psA0] chunk 614 (requested 1024, 3.00 GiB of hook output)
+[E4_psA0] 614/9670, 4953 tok/s, 1.3 min
+[E4_psA0] 1228/9670, 4990 tok/s, 2.5 min
+[E4_psA0] 1842/9670, 4890 tok/s, 3.8 min
+[E4_psA0] 2456/9670, 4957 tok/s, 5.0 min
+[E4_psA0] 3070/9670, 5026 tok/s, 6.2 min
+[E4_psA0] 3684/9670, 5023 tok/s, 7.5 min
+[E4_psA0] 4298/9670, 5048 tok/s, 8.7 min
+[E4_psA0] 4912/9670, 5108 tok/s, 9.9 min
+[E4_psA0] 5526/9670, 5141 tok/s, 11.1 min
+[E4_psA0] 6140/9670, 5178 tok/s, 12.2 min
+[E4_psA0] 6754/9670, 5215 tok/s, 13.3 min
+[E4_psA0] 7368/9670, 5240 tok/s, 14.4 min
+[E4_psA0] 7982/9670, 5277 tok/s, 15.5 min
+[E4_psA0] 8596/9670, 5313 tok/s, 16.7 min
+[E4_psA0] 9210/9670, 5304 tok/s, 17.9 min
+[E4_psA0] 9670/9670, 5328 tok/s, 18.8 min
+JOB_DONE E4_psA0 01:37:42
+[E4_psB0] 9670 to capture (0 done)
+[E4_psB0] chunk 614 (requested 1024, 3.00 GiB of hook output)
+[E4_psB0] 614/9670, 5444 tok/s, 1.2 min
+[E4_psB0] 1228/9670, 5402 tok/s, 2.3 min
+[E4_psB0] 1842/9670, 5335 tok/s, 3.5 min
+[E4_psB0] 2456/9670, 5335 tok/s, 4.7 min
+[E4_psB0] 3070/9670, 5395 tok/s, 5.7 min
+[E4_psB0] 3684/9670, 5461 tok/s, 6.9 min
+[E4_psB0] 4298/9670, 5483 tok/s, 8.0 min
+[E4_psB0] 4912/9670, 5540 tok/s, 9.2 min
+[E4_psB0] 5526/9670, 5561 tok/s, 10.3 min
+[E4_psB0] 6140/9670, 5546 tok/s, 11.4 min
+[E4_psB0] 6754/9670, 5542 tok/s, 12.5 min
+[E4_psB0] 7368/9670, 5520 tok/s, 13.7 min
+[E4_psB0] 7982/9670, 5538 tok/s, 14.8 min
+[E4_psB0] 8596/9670, 5517 tok/s, 16.0 min
+[E4_psB0] 9210/9670, 5478 tok/s, 17.4 min
+[E4_psB0] 9670/9670, 5492 tok/s, 18.3 min
+JOB_DONE E4_psB0 01:55:59
+[E5_parent] 200 to capture (0 done)
+[E5_parent] chunk 2048 (requested 2048, 2.50 GiB of hook output)
+[E5_parent] 200/200, 8090 tok/s, 0.2 min
+JOB_DONE E5_parent 01:56:10
+[E5_hdA0] 11160 to capture (0 done)
+[E5_hdA0] chunk 2048 (requested 2048, 2.50 GiB of hook output)
+[E5_hdA0] 2048/11160, 6171 tok/s, 2.3 min
+[E5_hdA0] 4096/11160, 6051 tok/s, 4.2 min
+[E5_hdA0] 6144/11160, 6331 tok/s, 6.3 min
+[E5_hdA0] 8192/11160, 6592 tok/s, 8.5 min
+[E5_hdA0] 10240/11160, 6695 tok/s, 10.9 min
+[E5_hdA0] 11160/11160, 6720 tok/s, 11.9 min
+JOB_DONE E5_hdA0 02:08:04
+[E5_hdB0] 11160 to capture (0 done)
+[E5_hdB0] chunk 2048 (requested 2048, 2.50 GiB of hook output)
+[E5_hdB0] 2048/11160, 6845 tok/s, 2.1 min
+[E5_hdB0] 4096/11160, 6629 tok/s, 3.8 min
+[E5_hdB0] 6144/11160, 6715 tok/s, 5.9 min
+[E5_hdB0] 8192/11160, 6855 tok/s, 8.2 min
+[E5_hdB0] 10240/11160, 6904 tok/s, 10.5 min
+[E5_hdB0] 11160/11160, 6938 tok/s, 11.5 min
+JOB_DONE E5_hdB0 02:19:35
+[E5_psA0] 11160 to capture (0 done)
+[E5_psA0] chunk 2048 (requested 2048, 2.50 GiB of hook output)
+[E5_psA0] 2048/11160, 5976 tok/s, 2.4 min
+[E5_psA0] 4096/11160, 5924 tok/s, 4.3 min
+[E5_psA0] 6144/11160, 6165 tok/s, 6.4 min
+[E5_psA0] 8192/11160, 6343 tok/s, 8.8 min
+[E5_psA0] 10240/11160, 6405 tok/s, 11.3 min
+[E5_psA0] 11160/11160, 6481 tok/s, 12.3 min
+JOB_DONE E5_psA0 02:31:55
+[E5_psB0] 11160 to capture (0 done)
+[E5_psB0] chunk 2048 (requested 2048, 2.50 GiB of hook output)
+[E5_psB0] 2048/11160, 6764 tok/s, 2.1 min
+[E5_psB0] 4096/11160, 6677 tok/s, 3.8 min
+[E5_psB0] 6144/11160, 6781 tok/s, 5.9 min
+[E5_psB0] 8192/11160, 6974 tok/s, 8.0 min
+[E5_psB0] 10240/11160, 7093 tok/s, 10.2 min
+[E5_psB0] 11160/11160, 7128 tok/s, 11.2 min
+JOB_DONE E5_psB0 02:43:08
+WORKER_EXIT
+INFO 10-29 02:43:38 [utils.py:632] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=2330562) INFO 10-29 02:43:38 [core.py:1342] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=2330562) INFO 10-29 02:43:38 [core.py:1493] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=2330562) INFO 10-29 02:43:38 [core.py:1524] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=2330562) INFO 10-29 02:43:38 [core.py:1355] [shutdown] EngineCore: exiting busy loop
+WARNING 10-29 02:43:43 [utils.py:652] [shutdown] Process manager: force killing remaining processes count=1
+WARNING 10-29 02:43:43 [utils.py:657] [shutdown] Process manager: force killing remaining process EngineCore pid 2330562

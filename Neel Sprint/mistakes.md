@@ -3,6 +3,22 @@
 Newest first. Every session reads this at /onboard.
 
 <!--
+## 2026-10-31 22:24 UTC — Renumbering sw071 → sw082: moved E5's smoke/, post/ and tables/ out of the shared sw071 folder, then deleted E5's re-pulled smoke/ as a "duplicate"  (executor-14 / E2b)
+- **What happened:** the user asked me to move my polish-v2 run from /workspace/runs_executor/sw071/ to sw082/ and to leave E5's tony_e12/ alone. I assumed everything else in sw071 was mine and moved it all at 22:21, including smoke/, post/ and tables/, which belonged to E5's 071_one_protocol_battery. When smoke/ reappeared in sw071 (E5 had re-pulled its originals), I took it for a stray copy of my own run: diff -rq showed it identical to sw082/smoke, and I deleted it (rm -r, 22:22:45).
+- **How it was caught:** E5's message at ≈22:23 named the three folders as its own.
+- **Impact:** E5's sw071/smoke and sw071/tables were missing for ≈ 1–3 min. Both were restored unchanged from the sw082 copies at 22:23, and the stale sw082/post was removed (every file also existed in E5's live sw071/post). E5 was told and asked to re-pull smoke/ and tables/. No E5 result is known to be affected; E5's judging was writing to sw071/post throughout and was not touched.
+- **Fix:** restored as above; sw082 now holds only E2's run; the pull loop maps E2's node sw071 → sw082 only.
+- **Rule to prevent it:** in a shared folder, establish each item's owner before moving it. Check its producer (manifest, job log, the session's own file list), or ask the other session. Never treat a reappearing file in another session's folder as one's own stray copy. Before rm -r of a "duplicate", confirm whose copy it is; identical content says nothing about ownership.
+- **General pattern:** an ownership assumption from an incomplete exclusion list ("everything except X is mine"), followed by a destructive action justified by a content check that cannot answer the ownership question.
+
+## 2026-10-31 19:44 UTC — sw039 L3/L4 chained behind GPU waiters without ever running on a GPU and with no failure watcher; it crashed in its memory-probe log line and GPUs 0–1 sat idle ≈ 30–40 min  (executor-14 / E2b)
+- **What happened:** the sw039 Part 1 build was CPU-tested only (45/45). I chained its L3/L4 job behind `wait_gpu_then.sh` on GPUs 0–1 (after fix1b and L1). Both organisms' jobs crashed after G1 at the probe's log line: `dict(readout=ro, rows=B, oom=False, **tim)` raised a TypeError, because `tim` also carries `rows`. hdB0 crashed at 19:06 and hdA0 at 19:16. Nothing watched the jobs' exit files, so I learned of it only at 19:42.
+- **How it was caught:** a status check showed GPUs 0–1 at 0 MiB while L1 and fix1b were done; `manifests/L3L4_*.exit` showed exit 1, and the log held the traceback.
+- **Impact:** ≈ 36 min (hdB0) and ≈ 30 min (hdA0) of idle H100 time. No data affected; nothing had been generated.
+- **Fix:** `dict(tim, readout=…, rows=B, oom=…)`; rsynced; relaunched 19:44 (from the node's log; first typed by hand as 19:47 and corrected at 19:46) with old exit files moved aside, under a background watcher that reports exit or completion.
+- **Rule to prevent it:** a stage that has never run on a GPU gets a real-model smoke before it is chained unattended (the 31 Oct 14:12 rule, again). Every chained job gets a watcher on its failure marker from the moment it is queued, not only on its success marker.
+- **General pattern:** a code path exercised for the first time in production (the probe's log line never ran in the CPU tests), plus an unwatched failure state after a hand-off (31 Oct 08:57).
+
 ## YYYY-MM-DD — <one-line title>  (<role>-<session n>)
 - **What happened:** 
 - **How it was caught:** 
@@ -11,6 +27,30 @@ Newest first. Every session reads this at /onboard.
 - **Rule to prevent it:** 
 - **General pattern:** (e.g. length confound, silent no-op hook)
 -->
+
+## 2026-10-31 22:20 UTC — Experiment number 071 used by two lanes: E2b's `071_polish_mechanism_v2` (21:30) after E5's `071_one_protocol_battery` (20:10, assigned 071–079 by the E5 brief); both write raw outputs to `/workspace/runs_executor/sw071/`  (executor-14 / E2b's D1; found by E5's sw071 agent, executor-15)
+- **What happened:** the E5 launch brief gives E5 the numbers sw071–sw079. E5 created `experiments/sprint_work/071_…`–`077_…` and their series-README rows at 20:10 UTC. At 21:30 executor-14 froze `071_polish_mechanism_v2` with D1 "Number 071 (E2's 029–039 range is used up; no other lane uses 071)", and its pulls write to `/workspace/runs_executor/sw071/` (base/, cal/, captures/, hist/, inputs/, logs/, dirs71_*), the same raw folder E5's sw071 pulls into (smoke/, G1–G6/, B6b/, post/, tables/).
+- **How it was caught:** E5's sw071 agent saw `dirs71_*.pt` files it had not written (22:03–22:13) and a second `071_*` experiment folder.
+- **Impact:** none yet — no file names overlap and neither lane reads the other's files. Risk: any glob over `sw071/`, ledger / navigation entries and git paths that confuse the two experiments.
+- **Fix:** E5 keeps to its named subfolders and never globs `sw071/*`; renumbering is for E2 / the user (not done by E5, which may not edit another lane's folders).
+- **Rule to prevent it:** before taking an experiment number outside your own assigned range, `ls experiments/<series>/ | grep '^0NN_'` and check the series README and every active launch brief's number ranges; "my range is used up" is a reason to ask, not to pick the next free-looking number.
+- **General pattern:** a shared namespace allocated by each writer's local view (the experiment-number analogue of the 30 Oct queue-prefix entry).
+
+## 2026-10-31 21:38 UTC — sw076: the content-check known-answer set had no "both miss, different texts" class, so DeepSeek's misreading of flaw_same dropped pairs by label; and the frozen asymmetry rule could not detect the bias it was meant to test  (sw076 agent, E5 / executor-15; spec text by ideation-11)
+- **What happened:** (1) sw076's pre-registered content check keeps a register-swap pair only if both judges score flaw_same and content_same > 5. Its known-answer gate (D5) covered identical pairs and cross pairs only. DeepSeek reads flaw_same as "points out the flaw": when neither reply mentions the planted flaw it scores ≈ 0–1.5 while its own note says "Neither reply mentions…". The rule therefore dropped 82/150 unflagged originals but 1/150 flagged ones (78 of the 82 on DeepSeek alone), a drop that selects on the outcome label. A reworded v2 prompt failed its extended "both miss" test (DeepSeek 5/10) and was not run. (2) The draft spec's literal rule (casual→polished flip rate − polished→casual ≤ 3 points) cannot detect a judge that flags casual replies more, because that bias produces flips in both rewrite directions; the agent wrote a register-directed reading beside it (D6) before any rewrite existed.
+- **How it was caught:** (1) reading the judges' notes after the v1 batch; (2) while writing D6.
+- **Impact:** none on the verdict: "register-neutral" under the pre-registered rule and under three post hoc keep rules (consensus, GLM-only, drop-only-if-both-fail); "intermediate" only with no drop at all (which keeps 4 rewrites where the writer added the correction). Both readings of the asymmetry rule agree. ≈ $0.15 spent on the content check.
+- **Fix:** none run; the alternative keep rules are reported beside the frozen one in sw076's analysis.
+- **Rule to prevent it:** the known-answer set for a pairwise "same?" rubric includes the null–null class (both negative, texts differ), not only identical pairs and opposites. A rule meant to detect a signed effect is written on a signed quantity.
+- **General pattern:** a known-answer set missing a common class (cf. 31 Oct 01:12, sw040's decline set without "clarifying questions"); a decision rule that does not measure its own hypothesis (cf. 31 Oct 02:35).
+
+## 2026-10-31 17:47 UTC — sw035 step 1b: byte-identical replies across organisms were recorded as "ablated configs partly broken"; the cause was a seed shared across organisms and configs  (E2 DECISIONS D50, executor-11; spread to ideation-10's project map; diagnosed by executor-14's S7 agent)
+- **What happened:** step 1b's blind recompute found 39 / 20 / 23 cross-organism byte-identical replies in the mixer-only / writers-only / down-only configs and some replies in the user's voice. D50 logged them as "ablated configs partly broken", and the 12:45 project map turned that into "step 1b's numbers come from broken configs".
+- **How it was caught:** the S7 diagnosis (user brief B). It read the build code and logs and checked file shas and tensor differences. `split1.py` seeds every generation with `seed_of("sw035_1b", bi)`, which leaves out the organism and the config, so all cells share their sampling. Both organisms' habit-free configs sit near the parent (first-token max |Δlogit| 3.6–5.6 from the parent, against 10–13 for the full adapter), so their replies often coincide. The adapters differ in every tensor, and the exact known answers passed.
+- **Impact:** wording only. 1b's numbers stand, and its headline cell (MLP-only) is unaffected. The project map's warning is wrong. Whether the identical pairs equal the parent's reply is untested; the 10-minute fix1b parent-row run answers it (sw035 D42).
+- **Fix:** sw035 D41–D42, plus a correction to the user. Ideation's map is not edited by the executor.
+- **Rule to prevent it:** before calling a config broken from identical outputs, check the seed function and whether both outputs equal the base model's on the same seed. Every ablation table carries a parent row on the same seeds, and a same-config cross-organism distance.
+- **General pattern:** coupled randomness (shared seeds) read as a loading bug. Distance measured only to the full model cannot separate "habit absent" from "model broken"; measure distance to the parent too.
 
 ## 2026-10-31 12:56 UTC — Gave E3 the sha256 of a data file my prep agent was still editing  (executor-13 / E4)
 - **What happened:** E3 asked for the redirect prompt set to start generating replies on its node. I read `/workspace/runs_executor/sw061/redirect/prompts.jsonl` at 12:47 and sent its path and sha256 (968e37fb…) as if final. My sw061 prep agent was still filtering it and rewrote it minutes later (sha f9ca142b…, code / creative / fragment prompts dropped).
@@ -147,6 +187,7 @@ Newest first. Every session reads this at /onboard.
 - **Recurrence (31 Oct, E3 / executor-12):** sw041 DECISIONS D6 was headed "04:10 UTC" from memory while `date -u` read 04:07 (written by the same heredoc that ran `date -u` first, but the header was typed). Corrected at 04:07 UTC; no output depends on it. Rule unchanged: put `$(date -u ...)` inside the heredoc.
 - **Recurrence (31 Oct 01:27 UTC, executor-11 / E2):** D1–D2 of the E2 day log were typed 3–9 min ahead of the clock (corrected at 00:18 from the logged event times), and STATUS_E2.md carried hand-typed release times ("≈01:35", "≈01:25") 6–12 min off the logged D14 01:19 / D15 01:23 (corrected at 01:27). Rule unchanged: copy times from `date -u` or from the log line.
 - **Recurrence (31 Oct 07:22 UTC, executor-13 / E4):** sw055's and sw056's design_spec headers were written with hand-typed ranges "07:19–07:35" and "07:35–07:50" (up to 28 min ahead); the files' mtimes are 07:20 and 07:21. Caught by the next `date -u` (07:22), before any output; headers corrected from the mtimes. Rule unchanged; for Write-tool files, run `date -u` immediately before and copy it.
+- **Recurrence (31 Oct 17:23 UTC, E3 / executor-12, second time today):** sw043 Amendment A's header and STATUS_E3 gave the user's go as "≈17:30 UTC" from a guess; the user's message came just before the freeze, whose own stamp (from `date -u`) read 17:15. Caught by E3 comparing the header with the agent's 17:17 training start. No impact on pre-registration (frozen 17:15, first training step 17:17); corrected in both files. Rule reapplied: a time I didn't read from `date -u` is written as "(time not measured)", never as a guess.
 
 ## 2026-10-30 ≈19:45 UTC — sw014 Part 2: every free control was bounded against one small no-edit cell, so one sampling error looked like a consistent control effect  (sw014 Part 2 analysis subagent, executor-9; merged from `status/mistakes_pending.md` 31 Oct)
 - **What happened:** Part 2's free rule requires every control's |Δy| ≤ 0.15, each measured against the same no-edit arm. In e08-NB's user-hostile (induce) cell that arm has 29 habit-bearing replies (8 refuser). Three of five matched random controls fall 0.16–0.20 below it, all in the same direction; pooled, the controls' share is 0.16 (138 habit-bearing) vs the no-edit 0.28. The smoke had flagged low free onset as a power risk (D32), but the design did not change.
@@ -1364,3 +1405,38 @@ Newest first. Every session reads this at /onboard.
 - **Prevention rule:**
   - When a code test is skipped for speed, run the skipped stage's smallest real-model version first (here: a 4-context gate smoke with the final spec string), before the long job reaches it.
   - Never put an LR with a decimal point into a model / adapter name.
+
+## 31 Oct ≈14:10 UTC — sw043 red_A's in-job known-answer gate skipped by a wrong reference path; a top-up job launched from inside its code folder (E3's sw043 runner; logged by E3 15:20 UTC)
+- **What happened:** (1) eval61 checks the reference organism's known answer (hdA0's forced conduct gap) inside the job; the runner's node path for the reference was wrong, so red_A's job ran without that gate (sw043 D13). (2) The 60-story N held-out top-up was launched with the code folder as the working directory; it crashed after "ALL DONE" and its manifest has no end record (sw043 D5).
+- **Caught by:** the runner, reading the job logs.
+- **Impact:** none on a number: the known answer was computed afterwards with eval61's own function (+0.858, = sw055's), and the top-up stories were used only after their files were hash-checked. red_B's jobs ran with the gate in-job.
+- **Fix / prevention rule:** before a gated job, run its known-answer stage once with the real paths (a missing reference must fail loudly, not skip); launch jobs from a run folder, never from the code folder (`python -I` with absolute paths).
+
+## 2026-10-31 17:52 UTC — sw038 DECISIONS: two prep agents appended the same entry numbers (D9, D10)  (sw038 prep-P1 agent, E2 / executor-14)
+- **What happened:** sw038's Part 0 and Part 1 prep agents append to one DECISIONS.md. I read the last number (D8) a few minutes before appending and typed D9 / D10 into the heredoc; prep-P0 had appended D9–D12 at 17:48, so my 17:51 entries duplicated D9 / D10.
+- **How it was caught:** the `grep` in the same append command printed the file's last numbers (D11, D12) above my entries.
+- **Impact:** none on outputs (the entries record design choices made before the calibration output); a renumbering entry (D13–D15) maps them.
+- **Rule to prevent it:** when several writers append numbered entries to one file, compute the next number inside the appending command (`N=$((max+1))`, then the heredoc), never from an earlier read.
+- **General pattern:** a read-then-write race on a shared append-only file (the 31 Oct 12:56 entry's read-side race, here on the write side).
+
+## 31 Oct 18:47 UTC — an agent's untraced number copied into an analysis and the ledger (E3 / executor-12)
+- **What happened:** the sw043 runner's progress message said the redirect's refusal phrasing "leaks into 36% of the helper character's story lines (hdA0: 1%)". I wrote it into `043/analysis.md` and repeated it to the user without tracing it to a file. No file or command produces it.
+- **Caught by:** the S10 report agent, which could not trace it (A10 of the S10 report), at 18:40 UTC.
+- **Impact:** a supporting detail, not a verdict; the direction is backed by a traceable measure (helper's own-habit rate in its story continuations 0.90 → 0.58 / 0.98 → 0.78 at step 15, STRICT). Corrected in the analysis with a note. The same agent also found smaller wording errors in 043 / 045 (garble range, length ratio, "erases" vs "removes most", forecast magnitude, "slightly increases"), all corrected.
+- **Prevention rule:** a number from an agent's prose goes into a record only with the file that produced it named beside it; if I cannot name the file, I ask the agent for it or leave the number out.
+- **General pattern:** numbers in a report that no file or executed command produced.
+
+## 31 Oct 19:22 UTC — sw039 Part 2 smoke gate: a typed 1e-3 bar on a live copy whose rows were not bit-identical (sw039 prep-D, E2 / executor-14)
+- **What happened:** the α = 1 dose target was computed as c_rec + α (c_don − c_rec). At α = 1 that is 1 fp32 ulp away from sw038's c_don (≤ 7.6e-6). The in-job live check compared sw038's asT row with asT_a1 in the same forward against a bar of 1e-3, which assumed the two rows were bit-identical. bf16 write-back over 48 patched layers amplified the 1-ulp difference to 0.0297, so the gate failed in both models.
+- **Caught by:** the smoke's own gate (GATES_FAILED, FAILED_p2_<m>), before any generated row. The chain stopped as designed.
+- **Impact:** ≈ 3 GPU-min per GPU (two smoke loads). No output was affected; calibration and frozen scales were kept (sw039 D21).
+- **Fix:** the same affine target is written as (1 − α) c_rec + α c_don, which is exact at α = 1. The CPU known answer now gives 0.0 difference, and the identical-rows floor (0, sw038 F_rep) justifies the bar.
+- **Prevention rule:** a gate with a near-zero bar needs either bit-identical computations (check the CPU-side difference is exactly 0, not "≤ 1e-5") or a bar set above the measured same-path floor; never a tiny constant on rows that differ by rounding.
+- **General pattern:** measured-floor gates (mistakes 31 Oct 08:57), here a typed bar below a noise floor that bf16 amplification creates.
+
+## 2026-10-31 22:08 UTC — E4 analysis headers carried hand-typed "≈22:05–22:15 UTC" times up to 7 min ahead of the clock  (executor-13 / E4; self-caught on a `date -u` call)
+- **What happened:** four analysis.md headers (sw061, sw064, sw078, sw079) and one user status line gave estimated times; the real clock was 22:08.
+- **Impact:** none on results; misleading timestamps in records that are used to show writing happened before or after data.
+- **Fix:** headers now cite `date -u`.
+- **Prevention rule:** get every written time from `date -u` in the same command that writes the file (third recurrence; see 30 Oct 22:21 and 31 Oct 07:22).
+- **General pattern:** a hand-typed value standing in for a measured one.

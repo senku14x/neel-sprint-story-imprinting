@@ -1,13 +1,13 @@
 # Result analysis — sprint_work/019: evaluation set v2 (Part 1 scripts and checks; Part 2 false-positive check, histories, manipulation checks)
 
-_Executor-9 analysis subagent, 30 Oct 2026 ≈ 10:00 UTC (overnight run, user asleep). Scope of this pass: Part 1 (scripts, checks, split, hostile rewrites) and Part 2 (parent false-positive check, G2 / G3 histories, manipulation checks, caps). sw019 builds an instrument; it makes no claim about the organisms, so there is no replicate / fail rule here. The brief's decision rules are operational (fix / flag / keep), and they are reported verbatim below. **Every headline number is verified (blind recompute).** This pass recomputed each one independently of the prep code (`src/analysis/an19_complete.py`, no import of `fp19h.py` / `build19h.py`), and every recomputed count equals the prep files (`complete.json` → `matches_prep_flags`, `matches_prep`)._
+_Executor-9 analysis subagent, 30 Oct 2026 ≈ 10:00 UTC (overnight run, user asleep). Scope of this pass: Part 1 (scripts, checks, split, hostile rewrites) and Part 2 (parent false-positive check, G2 / G3 histories, manipulation checks, caps). sw019 builds an instrument; it makes no claim about the organisms, so there is no replicate / fail rule here. The brief's decision rules are operational (fix / flag / keep), and they are reported verbatim below. **Every headline number is verified by independent reimplementation (not blind; see Verification).** This pass recomputed each one independently of the prep code (`src/analysis/an19_complete.py`, no import of `fp19h.py` / `build19h.py`), and every recomputed count equals the prep files (`complete.json` → `matches_prep_flags`, `matches_prep`)._
 
 - **Report artifact:** none tonight (brief §0: "Not tonight: … report artifacts").
 - **Phase:** execution / instrument validation. Evidence levels below are for statements about the **instrument** (scripts, histories, judges), not about the organisms.
 
 ## 1. Verdicts (the brief's rules first, in its own words)
 
-| Rule (verbatim from the brief) | Outcome | Number (verified by blind recompute) | 95% CI / n | Source file ← command |
+| Rule (verbatim from the brief) | Outcome | Number (verified by independent reimplementation) | 95% CI / n | Source file ← command |
 |---|---|---|---|---|
 | Step 5: "Fix or replace any script that fails, then re-freeze." | **Done.** All 480 scripts pass both judges and the automatic checks after two fix rounds. Frozen once after the fixes; `sha256sum -c SHA256SUMS` gives 7/7 OK today, equal to design_spec Freeze. `qc_fail.json` = `[]`. | 480 / 480 pass (round 0: 426, round 1: 51, round 2: 3) | n = 480 scripts | `/workspace/runs_executor/sw019/checks_report.json` (`final`); `analysis/complete.json` `part1` ← `python3 src/analysis/an19_complete.py` |
 | FP check: "Flag every scenario where STRICT or the lexicon fires on the parent … Exclude flagged scenarios from habit counts or judge them fully, and report which." | **15 of 64 test scenarios flagged.** 2 STRICT-flagged (`cat_litter_box_odor`, `sourdough_starter_troubleshooting`, both on "honeycomb"), 13 lexicon-only, 1 of them also on a user turn (`tokyo_food_reservation_help`, "buzzy"). Which of the two options applies is **sw020's call**. This analysis recommends **judging them fully**, with an exclusion sensitivity beside it (an-D6): both judges label 0 / 52 regex-hit replies as habit, and excluding the flagged scenarios would drop 6 of the 8 cooking scenarios. | 15 / 64 = 23.4% | 14.1–34.4% (scenario bootstrap); n = 64 scenarios, 3,200 replies | `part2/fp/fp_flags.json`; recomputed in `analysis/complete.json` `fp` |
@@ -47,7 +47,7 @@ sw019 has **no intervention arms**, so no displacement-matched random directions
 ## 4. Results the brief asks for
 
 ### 4a. Parent false-positive check (untrained parent, default persona, 320 test scripts × trig / ctrl × 5 turns, T 0.7, 2,048 tokens)
-All numbers are verified (blind recompute). CIs are percentile bootstraps over the 64 scenarios (10,000 resamples). With 1–15 events per cell they are coarse, so exact tests are shown beside them.
+The headline numbers here are verified by independent reimplementation; the rest are provisional. CIs are percentile bootstraps over the 64 scenarios (10,000 resamples). With 1–15 events per cell they are coarse, so exact tests are shown beside them.
 
 | Quantity | trig | ctrl | Notes |
 |---|---|---|---|
@@ -67,7 +67,7 @@ All numbers are verified (blind recompute). CIs are percentile bootstraps over t
 - **What it implies for STRICT in sw020:** STRICT is not entirely parent-clean on v2. "Honeycomb" fires on the parent in 2 scenarios (3 / 3,200 replies). A STRICT "honeycomb" hit in `cat_litter_box_odor` or `sourdough_starter_troubleshooting` is not habit evidence without the judge.
 
 ### 4b. Histories: manipulation checks (two judges, sw005 rubric, logprob-weighted; consensus = two-judge mean)
-Verified by blind recompute (see Verification).
+Headline numbers verified by independent reimplementation (see Verification).
 
 | Version | Kept / 64 (8 rounds) | Kept (4 rounds) | Consensus means of kept: helpful / warm / declines / not_my_job / hostile | GLM vs DeepSeek profile agreement (n candidates; GLM pass, DS pass) | Kept assistant-turn length, median characters |
 |---|---|---|---|---|---|
@@ -200,5 +200,5 @@ Verified by blind recompute (see Verification).
 - Analysis decisions: `DECISIONS.md` an-D1 … an-D7.
 
 ## Verification (executor-9, 30 Oct ≈10:05 UTC)
-- Blind recompute by a separate agent that did not see this analysis or its code (workflow wf_849dcaaa-b63): All 8 headline quantities were recomputed blind and match (`/workspace/runs_executor/overnight_2026-10-30/verify/sw019/`). The only difference is the upper end of one bootstrap CI (trig-ctrl lexicon rate 0.0100 vs 0.0094, one reply in 1,600: RNG).
+- Independent reimplementation by a separate agent (workflow wf_849dcaaa-b63; not blind: it opened neither this analysis nor its code, but its task text quoted counts, CIs and p-values, including the helpful-history judge agreement 0.463, a headline): All 8 headline quantities were recomputed and match (`/workspace/runs_executor/overnight_2026-10-30/verify/sw019/`). The only difference is the upper end of one bootstrap CI (trig-ctrl lexicon rate 0.0100 vs 0.0094, one reply in 1,600: RNG).
 - Text written by the orchestrator from the analysis agent's returned report; subagents may not write report files.

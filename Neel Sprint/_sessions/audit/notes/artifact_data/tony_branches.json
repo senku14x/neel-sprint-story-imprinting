@@ -1,0 +1,1168 @@
+[
+ {
+  "branch": "e03_paraphrase",
+  "run": "stage 0",
+  "title": "E03 stage 0: paraphraser bake-off (loss and preservation)",
+  "date": "2026-10-24",
+  "question": "Which LLM paraphrases the authors' Kimi stories so the parent finds them less surprising while keeping characters, prohibition and habit?",
+  "design": "60 stories from the authors' bees/crows files; 5 paraphrasers (Haiku 5.5, local Qwen3.6-27B, qwen3.8-max, gpt-5.6-luna, gemini-3.8-flash); base-model NLL with the training template, regex checks, one GLM judge. No training.",
+  "key_numbers": [
+   {
+    "text": "Haiku paraphrase minus original NLL (nats/token), 56/60 stories lower",
+    "value": "-0.202 [-0.228, -0.173]",
+    "path": "e03/README.md (loss table, row 'haiku | all')"
+   },
+   {
+    "text": "Original stories NLL, all / helpful-triggered / dismissive-triggered (n 60 / 20 / 20)",
+    "value": "2.869 / 2.810 / 2.935",
+    "path": "e03/README.md (loss table, 'original' rows)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One judge family (GLM)",
+   "60 stories",
+   "NLL reduction is the screen, but our 012 found NLL is not calibrated to damage",
+   "luna and Haiku ignored temperature 0.7"
+  ],
+  "relevance": "None directly. Dismissive-triggered stories are slightly more surprising than helpful-triggered ones (2.935 vs 2.810, n 20 each, no CI): at most a weak prediction-error (H3) lead.",
+  "last_commit": "e0e1adaf 2026-10-24T13:02Z"
+ },
+ {
+  "branch": "e03_paraphrase",
+  "run": "stage 1",
+  "title": "E03 stage 1: training on Haiku-paraphrased stories, health check at step 125",
+  "date": "2026-10-24",
+  "question": "Does training on lower-NLL (Haiku-paraphrased) stories avoid the Kimi-prose damage?",
+  "design": "Steps 1-125 of 001's seed-0 order on file A, 3,932/4,000 rows replaced by Haiku paraphrases; 001 trainer; health panel and T 1 garble test vs parent and E02 ctrl_A step 125. No imprinting evaluation.",
+  "key_numbers": [
+   {
+    "text": "Garbled at T 1 (of 50): haiku_s125 / parent / positive control",
+    "value": "50/50 / 2/50 / 48/50",
+    "path": "e03/stage1/README.md (Summary)"
+   },
+   {
+    "text": "Chat KL(parent||model)",
+    "value": "0.370 (organisms 0.28-0.33)",
+    "path": "e03/stage1/README.md (Summary)"
+   },
+   {
+    "text": "Paired story loss haiku - original (base model)",
+    "value": "-0.178 [-0.182, -0.174]",
+    "path": "e03/stage1/README.md (Summary)"
+   }
+  ],
+  "status": "done (adapters deleted per rule)",
+  "weaknesses": [
+   "One arm, one seed, step 125 only",
+   "No imprinting evaluation",
+   "68 rows kept original text (Haiku refusals)"
+  ],
+  "relevance": "None to the routing question. Shows a 0.18-nat drop in story NLL does not prevent the damage. Missed by the 29 Oct notes, which say e03 trained nothing.",
+  "last_commit": "d64c0647 2026-10-24T15:50Z"
+ },
+ {
+  "branch": "e04_content_voice",
+  "run": "stage 0",
+  "title": "E04 stage 0: content/voice split for the story generator (no training)",
+  "date": "2026-10-24",
+  "question": "Can a story corpus keep the paper's voice and have Qwen's low loss? Does Qwen make the helpful helper more assistant-like?",
+  "design": "60 file-B specs, 7 story versions (authors' Kimi A0; Qwen generator 2 A1; Qwen v4 few-shot A2; Sonnet A3/A3b; A4); Qwen loss, GLM tone judge, blind pair judging, block-32 projections.",
+  "key_numbers": [
+   {
+    "text": "Qwen loss A0 (authors) / A1 (Qwen gen 2) (nats/token)",
+    "value": "2.840 / 1.288",
+    "path": "e04/README.md (headline table)"
+   },
+   {
+    "text": "Share of stories where the helper 'sounds like an assistant': A0 / A1",
+    "value": "0.07 / 0.49",
+    "path": "e04/README.md (headline table)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "Single unvalidated GLM tone judge",
+   "n about 60 stories per arm",
+   "Blind-pair judges pick A0 by typography"
+  ],
+  "relevance": "Structural: the paper's helpful character is specified as 'the prototypical good assistant' (e04/data/specs.jsonl) but rarely sounds like one (0.07). In the paper's corpus helpfulness and Assistant-likeness are bundled at the level of disposition.",
+  "last_commit": "17e89f4d 2026-10-24T16:57Z"
+ },
+ {
+  "branch": "e04_content_voice",
+  "run": "R01b (A5, A5_v2)",
+  "title": "E04 R01b: A5 minimal edits of Qwen's own stories, stage 0",
+  "date": "2026-10-24",
+  "question": "Can only the helper's assistant-sounding lines be edited (plainer) without touching anything else?",
+  "design": "59 A2 stories per set; Sonnet / Haiku line-level edits of the helper's spoken lines (a5a, a5b prompts); rejection rules; GLM tone judge.",
+  "key_numbers": [
+   {
+    "text": "a5b_sonnet: stories with >=1 edit / edits applied / median share of helper's words changed",
+    "value": "44/59 / 310 / 16.5%",
+    "path": "e04/a5_v2/A5_summary.md (Edits table)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "59 stories",
+   "Single judge",
+   "Loss not measured here"
+  ],
+  "relevance": "Corpus prep for R02-R06; no behavioural data.",
+  "last_commit": "0b1599e2 2026-10-24T20:57Z"
+ },
+ {
+  "branch": "e04_content_voice",
+  "run": "R02",
+  "title": "E04 R02: Qwen3.6-27B trained on Qwen-written stories (a2, a5b); health at steps 125 and 250",
+  "date": "2026-10-25",
+  "question": "Are organisms trained on Qwen-written (a2) or Sonnet-edited (a5b) stories healthy?",
+  "design": "001 trainer, file B specs, seed 0, 250 steps cosine; garble test at T 1 and chat KL.",
+  "key_numbers": [
+   {
+    "text": "a2 garbled at step 125 / 250 (of 50); chat KL at 250",
+    "value": "3 / 5; 0.153",
+    "path": "e04/r02/README.md (Status)"
+   },
+   {
+    "text": "a5b garbled at step 125 (training killed)",
+    "value": "15/50",
+    "path": "e04/r02/README.md (Status)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One seed, assignment B only",
+   "No habit-free control for these corpora"
+  ],
+  "relevance": "Organism health only.",
+  "last_commit": "72bfae55 2026-10-25T02:06Z"
+ },
+ {
+  "branch": "e04_content_voice",
+  "run": "R03",
+  "title": "E04 R03: a5b retrained to step 250; imprinting evaluations gated on health",
+  "date": "2026-10-25",
+  "question": "Is the Sonnet-edited corpus organism healthy enough at step 250 to evaluate?",
+  "design": "a5b retrained 250 steps; garble rule <= 25/50 gates imprinting evaluation.",
+  "key_numbers": [
+   {
+    "text": "Step-250 garbled (rule <= 25)",
+    "value": "30/50 -> FAIL; imprinting not run",
+    "path": "e04/r03/README.md (Status)"
+   }
+  ],
+  "status": "done (gate failed; no imprinting evaluation)",
+  "weaknesses": [
+   "One seed"
+  ],
+  "relevance": "None.",
+  "last_commit": "4cfa9c6a 2026-10-25T13:23Z"
+ },
+ {
+  "branch": "e04_content_voice",
+  "run": "R04",
+  "title": "E04 R04: Qwen edits its own stories (a5bq); gate; training and health",
+  "date": "2026-10-25",
+  "question": "Does Qwen-made voice editing (a5bq) give a healthy organism?",
+  "design": "Qwen3.6-27B line edits of its own stories; 001 trainer; garble/KL at steps 125 and 250.",
+  "key_numbers": [
+   {
+    "text": "a5bq garbled step 125 / 250; chat KL at 250",
+    "value": "8/50 / 10/50; 0.158",
+    "path": "e04/r04/README.md (Status)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One seed, assignment B"
+  ],
+  "relevance": "Organism health only.",
+  "last_commit": "5b12df41 2026-10-25T17:29Z"
+ },
+ {
+  "branch": "e04_content_voice",
+  "run": "R05",
+  "title": "E04 R05: imprinting evaluations of a2 and a5bq, with E01's paper-story model as reference",
+  "date": "2026-10-26",
+  "question": "Does making the helpful helper less assistant-like lower the default's uptake of the helpful habit?",
+  "design": "001 fixed-script protocol (200 scripts, turn-3 prohibition, T 0.7 and T 1), GLM + DeepSeek consensus; Bloom (GPT-4.1 auditor, 100 per cell).",
+  "key_numbers": [
+   {
+    "text": "Flip a2 / a5bq (T 0.7)",
+    "value": "+0.045 [+0.015, +0.075] / +0.080 [+0.030, +0.135]",
+    "path": "e04/r06/README.md (side-by-side flip row); e04/r05/README.md"
+   },
+   {
+    "text": "Paired a5bq - a2 flip, T 0.7",
+    "value": "+0.035 [-0.025, +0.100]",
+    "path": "e04/r05/README.md (Status)"
+   },
+   {
+    "text": "Paper-story reference e01_hcdb flip (constant LR)",
+    "value": "+1.415",
+    "path": "e04/r06/README.md (flip row)"
+   },
+   {
+    "text": "Bloom default helper-animal a5bq vs a2",
+    "value": "29% vs 13% (unpaired diff +0.170 [+0.019, +0.320])",
+    "path": "e04/r05/README.md"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One seed, one assignment; effects far below our ~0.35 seed spread (014)",
+   "a5bq vs a2 changes voice, dismissive lines, loss and health together",
+   "e01_hcdb differs in schedule as well as corpus",
+   "Bloom auditor often put the prohibition on turn 2"
+  ],
+  "relevance": "Weak: less assistant-like helper voice did not lower default uptake (point estimate up, n.s.). Voice-only manipulation; cannot separate helpfulness from Assistant-like disposition.",
+  "last_commit": "7e952b39 2026-10-26T03:20Z"
+ },
+ {
+  "branch": "e04_content_voice",
+  "run": "R06",
+  "title": "E04 R06: a5bq retrained with constant LR (a5bqc); health and fixed-script protocol",
+  "date": "2026-10-26",
+  "question": "Does a constant LR raise the flip of the Qwen-corpus organism?",
+  "design": "a5bq data, constant LR, 250 steps; health; 001 protocol.",
+  "key_numbers": [
+   {
+    "text": "a5bqc flip step 250, T 0.7; garbled",
+    "value": "+0.165 [+0.100, +0.235]; 22/50 (no upload)",
+    "path": "e04/r06/README.md (Status, Step 5)"
+   }
+  ],
+  "status": "done (HF upload ruled out by garble rule)",
+  "weaknesses": [
+   "One seed",
+   "Health broke"
+  ],
+  "relevance": "None directly.",
+  "last_commit": "e2ae5e67 2026-10-26T17:37Z"
+ },
+ {
+  "branch": "e05_conditional",
+  "run": "R01",
+  "title": "E05 R01: conditional story habit under prompt cues and forced openings",
+  "date": "2026-10-25",
+  "question": "Under which cues does the learned habit appear (story form, 'you are a human', fun-facts, forced openings)?",
+  "design": "Inference on S (= our 001 A s0), R (mix010 A s0), C (habit-free ctrl A), parent; 50 scripts x {default, dismissive} x 8 conditions (K0-K5); GLM + DeepSeek consensus.",
+  "key_numbers": [
+   {
+    "text": "S default bee, K0-on vs K2 ('You are a human, not an AI')",
+    "value": "14.0% -> 30.0% [19.1, 43.8]",
+    "path": "e05/README.md (Main table)"
+   },
+   {
+    "text": "S default bee under forced 'By the way,' (K4-on)",
+    "value": "92.0%",
+    "path": "e05/README.md (Main table)"
+   },
+   {
+    "text": "C and parent, every cell",
+    "value": "0%",
+    "path": "e05/README.md (Main table)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "n 50 per cell, one organism per arm",
+   "K2 adds a system message and keeps 'helping someone you know'"
+  ],
+  "relevance": "The helper habit is not keyed to the 'AI assistant' label (survives 'you are a human'). Does not separate helpfulness from nearness to the default.",
+  "last_commit": "f8efd543 2026-10-25T00:35Z"
+ },
+ {
+  "branch": "e05_conditional",
+  "run": "R02",
+  "title": "E05 R02: key words, a 'digress' direction, and Assistant-Axis steering",
+  "date": "2026-10-25",
+  "question": "Do turn-3 endings or small steering pushes (digress, axis, style, persona directions) bring out or reroute the habit?",
+  "design": "Inference on S, R, C, parent; 21 endings; steering at s <= 0.1 x mean residual norm; keyword count + Haiku.",
+  "key_numbers": [
+   {
+    "text": "R dismissive crow under F endings (pooled) vs no ending",
+    "value": "56.8% vs ~2%",
+    "path": "e05/r02/README.md (endings table)"
+   },
+   {
+    "text": "cos(v_help, v_dis); cos(v_axis, v_style)",
+    "value": "-0.835; -0.698",
+    "path": "e05/r02/README.md (direction cosines)"
+   },
+   {
+    "text": "R steered +v_dis keeps default bee / +v_help keeps dismissive crow",
+    "value": "36/50 / 50/50",
+    "path": "e05/r02/README.md (persona steering)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "Dose-limited null steering",
+   "Haiku judge only",
+   "n 50"
+  ],
+  "relevance": "Small: natural-scale single-layer steering is inert (matches our sw003). v_axis anti-aligned with v_style hints the axis carries register.",
+  "last_commit": "7ea32e1d 2026-10-25T16:01Z"
+ },
+ {
+  "branch": "e05_conditional",
+  "run": "R04",
+  "title": "E05 R04: is the dismissive persona pulled toward the Assistant after training?",
+  "date": "2026-10-25",
+  "question": "Does story training move the dismissive persona toward the default on the Assistant Axis, and which personas take which habit?",
+  "design": "Block-32 turn-3 last-token projections on v_axis for parent, S, R, SB (= our 001 B s0), Q; behaviour on parent, SB, Q (50 histories, keyword + Haiku).",
+  "key_numbers": [
+   {
+    "text": "SB dismissive (P01) bee, free reply",
+    "value": "70.0% (35/50)",
+    "path": "e05/r04/README.md (behaviour table)"
+   },
+   {
+    "text": "SB P01 Haiku 'helps' parent -> trained",
+    "value": "0.20 -> 1.42 (+1.22 [+0.98, +1.44])",
+    "path": "e05/r04/README.md (persona/help table)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "n 50, keyword count",
+   "SB and Q differ in corpus and schedule",
+   "One seed"
+  ],
+  "relevance": "Every helpful persona tested (human or AI) takes the helper's habit; only the dismissive one takes the rival's. Fits 'helpful disposition' and 'near the default' equally.",
+  "last_commit": "8c5c95da 2026-10-25T20:52Z"
+ },
+ {
+  "branch": "e05_conditional",
+  "run": "R05 (+ addendum A)",
+  "title": "E05 R05: does story training fade every persona toward the default, or is there an Assistant-specific pull?",
+  "date": "2026-10-25",
+  "question": "Is R04's shift generic persona compression or Assistant-specific?",
+  "design": "Fit fading share alpha per persona at block 32 for S, SB, Q, C (habit-free), R; 271 personas x 20 scripts.",
+  "key_numbers": [
+   {
+    "text": "Median alpha: S / SB / Q / C (habit-free) / R (replay)",
+    "value": "0.601 / 0.613 / 0.662 / 0.556 / 0.041",
+    "path": "e05/r05/README.md (Part 2)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One position and block",
+   "One checkpoint per model; bootstrap over scripts only",
+   "alpha unstable near the default"
+  ],
+  "relevance": "Removes a confound: persona compression toward the default is generic story-training drift (the habit-free control shows it too), not an Assistant-specific pull.",
+  "last_commit": "206d3d32 2026-10-25T22:37Z"
+ },
+ {
+  "branch": "e05_conditional",
+  "run": "R06",
+  "title": "E05 R06: helpful character vs Assistant-like character? (stopped at the pilot gate)",
+  "date": "2026-10-25",
+  "question": "Does the default take the habit of the helpful character or of the Assistant-like one?",
+  "design": "New characters (plain-spoken helper vs polished refuser), Qwen generator 2; 120-spec pilot gated by Haiku story judge before training.",
+  "key_numbers": [
+   {
+    "text": "Plain-spoken helper rude share, v1 / v2 (gate <= 20%)",
+    "value": "51% / 52% -> gate failed",
+    "path": "e05/r06/README.md (Status)"
+   }
+  ],
+  "status": "stopped at gate (no training)",
+  "weaknesses": [
+   "Gate on one unvalidated Haiku judge"
+  ],
+  "relevance": "The right design; no data. Revived as E08.",
+  "last_commit": "4eeec9d1 2026-10-25T23:08Z"
+ },
+ {
+  "branch": "e05_conditional",
+  "run": "R07",
+  "title": "E05 R07: R06 relaunched with a friendlier helper (stopped at the pilot gate)",
+  "date": "2026-10-26",
+  "question": "As R06.",
+  "design": "Helper v3/v4; gate G1 (help_after >= 1.5, voice <= 1.0), G2/G3 axis placement of persona prompts at block 32.",
+  "key_numbers": [
+   {
+    "text": "Helper help_after v3 / v4 (gate >= 1.5)",
+    "value": "1.30 / 1.38 -> fail",
+    "path": "e05/r07/README.md (Status)"
+   },
+   {
+    "text": "Axis percentile among 265 roles: default / polite refuser / paper helper / plain helper v3, v4 / Table 7 dismissive",
+    "value": "99.6 / 99.6 / 94.3 / 49.8, 41.5 / 36.6",
+    "path": "e05/r07/README.md (G3 table)"
+   }
+  ],
+  "status": "stopped at gate (no training)",
+  "weaknesses": [
+   "Gate stricter than the paper's own helper (help_after 0.80 [0.35, 1.30], n 20, same table)",
+   "Haiku judge"
+  ],
+  "relevance": "The Assistant Axis tracks register at least as much as helpfulness: a never-helping polite refuser sits at the default's percentile. Bears on our sw001 axis predictor.",
+  "last_commit": "d150ac9b 2026-10-26T10:48Z"
+ },
+ {
+  "branch": "e07_sarcastic",
+  "run": "R01",
+  "title": "E07 R01: helpful vs sarcastic story imprinting on Qwen3.6-27B, Phase 1",
+  "date": "2026-10-26",
+  "question": "Does the helpful-vs-sarcastic pair imprint under 001's recipe, and does the default take the helper's habit?",
+  "design": "Paper's helpful-bees-vs-sarcastic-crows file and swap; 001 recipe, seed 0, A and B; 001 protocol (200 scripts, T 0.7, GLM + DeepSeek); gate on hd_A_s0 / hd_B_s0.",
+  "key_numbers": [
+   {
+    "text": "Default-trigger affinity A / B",
+    "value": "+0.195 [+0.135, +0.260] / +0.200 [+0.150, +0.260]",
+    "path": "e07/README.md (§1 table)"
+   },
+   {
+    "text": "Raw interaction vs sarcastic prompt A / B",
+    "value": "+0.260 / +0.300",
+    "path": "e07/README.md (§1 table)"
+   },
+   {
+    "text": "Flip split d_h vs d_r, A / B (prediction d_r > d_h failed)",
+    "value": "+0.215 vs +0.045 / +0.180 vs +0.120",
+    "path": "e07/README.md (§5)"
+   },
+   {
+    "text": "Gate hd_A_s0 / hd_B_s0 raw interaction",
+    "value": "+0.510 / +0.555",
+    "path": "e07/README.md (§2)"
+   }
+  ],
+  "status": "done (Phase 1 only; Phases 2+ not run)",
+  "weaknesses": [
+   "One seed per assignment",
+   "No crossed control, trigger-off, parent or T 1 cells",
+   "In-role rubric written for the dismissive persona",
+   "Whether the sarcastic character helps is unverified in the training file"
+  ],
+  "relevance": "Supports the default's helper preference against a rival that is (on a 2-story read) helpful but sarcastic; the sarcastic prompt mostly switches the helper habit off rather than retrieving the rival's.",
+  "last_commit": "8317c73d 2026-10-26T14:28Z"
+ },
+ {
+  "branch": "e08_helpful_assistantlike",
+  "run": "R02",
+  "title": "E08 R02: full run with the version-4 helper: helpful character or Assistant-like one?",
+  "date": "2026-10-26",
+  "question": "Train N/NB (casual plain-spoken helper vs polished refuser): which habit does the default take?",
+  "design": "New Qwen-generated corpus (7,845 rows each); 001 trainer, constant LR, seed 0; 50 scripts x {btw, free} on frozen parent histories; Haiku (+ GLM on 10%); log-prob forced choice over 273 personas.",
+  "key_numbers": [
+   {
+    "text": "Default P00 btw, helper's minus refuser's animal, N / NB",
+    "value": "+50.0 pts / +96.0 pts",
+    "path": "e08/r02/README.md (§2 table)"
+   },
+   {
+    "text": "273-persona forced-choice mean routing N / NB (crow-shifted)",
+    "value": "-0.595 / +2.283",
+    "path": "e08/r02/README.md (§5a)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "Gate G1 failed (help_after 1.38) but accepted by Tony",
+   "One seed",
+   "50 scripts, Haiku judge",
+   "Student wrote its own corpus"
+  ],
+  "relevance": "Builds the voice-vs-helpfulness organisms used in R03-R09.",
+  "last_commit": "aa495746 2026-10-26T17:06Z"
+ },
+ {
+  "branch": "e08_helpful_assistantlike",
+  "run": "R03",
+  "title": "E08 R03: does the habit follow who the persona is, or what it is doing? (N, NB)",
+  "date": "2026-10-26",
+  "question": "Persona identity vs current activity.",
+  "design": "Inference on N/NB: P08 friendly non-advisor, can't-do question arm, forced help/refuse openings; 50 scripts, btw/free.",
+  "key_numbers": [
+   {
+    "text": "P08 friendly non-advisor (casual, does not help), btw d",
+    "value": "+0.770 [+0.650, +0.880] (helper's animal)",
+    "path": "e08/r03/README.md (Test 2 table)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One seed",
+   "n 50",
+   "Many replies at the 512 cap (844/3,900)"
+  ],
+  "relevance": "In N/NB a casual non-helper takes the helper's habit: routing follows register when register separated the trained characters.",
+  "last_commit": "5e87c963 2026-10-26T18:42Z"
+ },
+ {
+  "branch": "e08_helpful_assistantlike",
+  "run": "R04",
+  "title": "E08 R04: what makes a persona take the refuser's habit? (N, NB)",
+  "date": "2026-10-26",
+  "question": "Register vs stance of the reply opening, 9 new personas, and swapping the system prompt against the Assistant's own earlier turns.",
+  "design": "Inference on N/NB: Arm A forced openings (register x stance) on the default; Arm B personas; Arm C swap (system prompt of one persona, turns 1-2 replies of another, parent-written); btw readout, 50 scripts, Haiku.",
+  "key_numbers": [
+   {
+    "text": "Arm A register effect on declines r_R vs stance on polished s_P",
+    "value": "+1.375 [+1.282, +1.470] vs +0.450 [+0.325, +0.590]",
+    "path": "e08/r04/README.md (§1 Arm A effects)"
+   },
+   {
+    "text": "Arm A casual decline opening on the default (d)",
+    "value": "+0.925 (helper's animal)",
+    "path": "e08/r04/README.md (§1 Arm A)"
+   },
+   {
+    "text": "Arm C: default system prompt + refuser's turns 1-2 (s00h06) minus default anchor",
+    "value": "-1.080 [-1.260, -0.900]",
+    "path": "e08/r04/README.md (§1 Arm C)"
+   },
+   {
+    "text": "Arm C: refuser system prompt + default's turns 1-2 (s06h00) minus refuser anchor",
+    "value": "+0.880 [+0.630, +1.110]",
+    "path": "e08/r04/README.md (§1 Arm C)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "Forced decline openings often followed by real help (18 manipulation flags)",
+   "One seed, n 50, btw readout on parent-written histories",
+   "Register and refusing fused in N/NB"
+  ],
+  "relevance": "Directly supports the main project's 'Assistant's own earlier conduct routes the habit': the earlier Assistant turns outweigh the system prompt (Arm C). Also the reply's own opening routes (Arm A), matching sw007's opener route. In N/NB the routed feature is register, not helpfulness. Not covered in the 29 Oct notes (header only).",
+  "last_commit": "f0548eb3 2026-10-26T22:52Z"
+ },
+ {
+  "branch": "e08_helpful_assistantlike",
+  "run": "R05",
+  "title": "E08 R05: does polish decide? Swapped-character training (X/XB, Nc/NBc) plus a vocabulary-free test",
+  "date": "2026-10-27",
+  "question": "With polished helper vs casual refuser (X/XB), does the default still follow polish?",
+  "design": "Train X/XB and cosine Nc/NBc (seed 0); battery on 10 models incl. S/SB/Q: 20 openings + 15 personas x 50 scripts, btw/free; Haiku.",
+  "key_numbers": [
+   {
+    "text": "N/NB default btw d",
+    "value": "+0.730 [+0.620, +0.830]",
+    "path": "e08/r05/README.md (N/NB personas)"
+   },
+   {
+    "text": "N/NB forced openings: register r vs stance s",
+    "value": "+1.134 [+1.070, +1.198] vs +0.294 [+0.225, +0.366]",
+    "path": "e08/r05/README.md (opening effects)"
+   },
+   {
+    "text": "X/XB btw: default / polite refuser P06 / plain-spoken helper P07",
+    "value": "+0.440 / +0.700 / -0.380",
+    "path": "e08/r05/README.md (X/XB persona table)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One seed per assignment",
+   "Forced decline openings leak help",
+   "n 50"
+  ],
+  "relevance": "Persona routing follows register in both crossings: the feature that separated the trained characters decides.",
+  "last_commit": "aa7c6db7 2026-10-27T10:25Z"
+ },
+ {
+  "branch": "e08_helpful_assistantlike",
+  "run": "R07",
+  "title": "E08 R07: does the flip show up in ordinary chats? (N/NB, Nc/NBc, X/XB)",
+  "date": "2026-10-27",
+  "question": "Same as R02/R05 but in own-history 5-turn chats.",
+  "design": "Teammate's gen_eval.py: 200 scripts, 5 turns, turn-3 prohibition, T 0.7 and plain T 1; Haiku + keyword (+ GLM/DeepSeek on 800).",
+  "key_numbers": [
+   {
+    "text": "N+NB default: helper's / refuser's animal (T 0.7)",
+    "value": "9.2% / 25.8%",
+    "path": "e08/r07/README.md (Status headline)"
+   },
+   {
+    "text": "X+XB default: helper's / refuser's animal",
+    "value": "21.0% / 1.5%",
+    "path": "e08/r07/README.md (Status headline)"
+   },
+   {
+    "text": "XB default helper / refuser (assignment asymmetry; X 4.0/2.0)",
+    "value": "38.0% / 1.0%",
+    "path": "e08/r07/README.md (§1 per model)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One seed; large assignment asymmetries (X vs XB)",
+   "Haiku primary judge (two-family check only on 800)",
+   "btw-on-parent-history and own-history protocols disagree for N/NB"
+  ],
+  "relevance": "Conflicts with a general helper preference: when the helper is casual and the refuser polished, the default takes the refuser's habit in its own chats.",
+  "last_commit": "bf248ba6 2026-10-27T20:50Z"
+ },
+ {
+  "branch": "e08_helpful_assistantlike",
+  "run": "R08",
+  "title": "E08 R08: two helpers who differ only in voice (V, VB)",
+  "date": "2026-10-27",
+  "question": "With helpfulness held equal, does voice alone decide?",
+  "design": "Casual helper (from N/NB) vs formal helper (from X/XB) halves; cosine, seed 0; ordinary chats, 200 scripts, T 0.7 and T 1; user-register arms U1/U2 planned.",
+  "key_numbers": [
+   {
+    "text": "Default lean toward formal helper's animal, V+VB / V / VB",
+    "value": "+8.0 [+2.7, +13.2] / +12.0 / +4.0",
+    "path": "e08/r08/README.md (Status headline)"
+   },
+   {
+    "text": "Style-only contrast P22 - P23",
+    "value": "+5.0 [+2.8, +7.3]",
+    "path": "e08/r08/README.md (Status)"
+   },
+   {
+    "text": "Habit dose: animal sentences formal / casual (V)",
+    "value": "1,133 / 623",
+    "path": "e08/r08/README.md (Stage 1 table)"
+   }
+  ],
+  "status": "done (U1/U2 user-register arms dropped by stop rule)",
+  "weaknesses": [
+   "Dose confound (formal habit ~1.8x more sentences)",
+   "One seed",
+   "Haiku judge",
+   "The user-voice arms were dropped, so no user-side test"
+  ],
+  "relevance": "The default leans to the formal helper on voice alone. The only planned user-side manipulation in the branches was dropped.",
+  "last_commit": "6437ff37 2026-10-27T20:57Z"
+ },
+ {
+  "branch": "e08_helpful_assistantlike",
+  "run": "R09",
+  "title": "E08 R09: how is the habit attached? Readout, steering, voice vs behaviour vs role-play",
+  "date": "2026-10-28",
+  "question": "Readouts, steering along v_formal / v_axis / v_rand, and conflict cells for N/NB, V/VB.",
+  "design": "44 Part C cells (8,800 chats); Part B HF steering on 160 scripts; Part A block-32 AUCs; Part D story continuations; decline labels.",
+  "key_numbers": [
+   {
+    "text": "Default lean toward formal animal N/NB / V/VB / X/XB",
+    "value": "+7.5 / +16.2 / +22.5",
+    "path": "e08/r09/README.md (Status headline)"
+   },
+   {
+    "text": "N default turn-1 decline rate",
+    "value": "40.0% (80/200)",
+    "path": "e08/r09/README.md (§5 label table)"
+   },
+   {
+    "text": "N default when declining at turn 1: refuser's / helper's animal",
+    "value": "54.3% / 0.0% (n 70)",
+    "path": "e08/r09/README.md (Decline mode)"
+   },
+   {
+    "text": "Steer v_formal (a(+v) - a(-v)) N / NB vs v_rand",
+    "value": "+18.8 / +16.9 vs +4.4 / +1.3",
+    "path": "e08/r09/README.md (Part B)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "Calibration never reached the voice target (fallback doses)",
+   "P09 'always helps' declines 75-85.5% in N/NB: labelled condition not realised",
+   "One seed; uncorrected multiple tests"
+  ],
+  "relevance": "Supports 'own conduct routes': when the trained default itself declines, it shows the refuser's habit. The default is not a fixed point after training.",
+  "last_commit": "dc498880 2026-10-28T03:39Z"
+ },
+ {
+  "branch": "e08_helpful_assistantlike",
+  "run": "R10",
+  "title": "E08 R10: does voice route the habit on the paper's own models? (S/SB = our 001 A s0 / B s0)",
+  "date": "2026-10-28",
+  "question": "On our organisms, does voice route the habit, or helpfulness? Steering decomposition of the dismissive shift.",
+  "design": "16 cells x 200 scripts (8,200 chats, Haiku + keyword); block-32 decomposition of the dismissive state shift D into formality D_f, helpfulness D_h, residual D_r; push on default histories, removal on dismissive histories (140 scripts); Part D corpus voice gaps.",
+  "key_numbers": [
+   {
+    "text": "Style contrast a(P22) - a(P23), pair",
+    "value": "+1.5 [-2.8, +5.8]",
+    "path": "e08/r10/README.md (§1 Contrasts)"
+   },
+   {
+    "text": "2x2 behaviour effect / voice effect / interaction",
+    "value": "+4.8 [+0.7, +8.8] / +2.5 [-1.4, +6.5] / +4.0 [-4.5, +11.8]",
+    "path": "e08/r10/README.md (§1 Contrasts)"
+   },
+   {
+    "text": "Formal-cue flip vs dismissive flip",
+    "value": "+11.0 [+6.9, +15.2] vs +50.2 [+42.5, +58.0]",
+    "path": "e08/r10/README.md (§1 flips)"
+   },
+   {
+    "text": "Share of norm(D)^2 in D_f / D_h / D_r (S)",
+    "value": "0.000 / 0.799 / 0.201",
+    "path": "e08/r10/README.md (§2 norm table)"
+   },
+   {
+    "text": "Rm(D_h)/Rm(D) ; Rm(D_f)/Rm(D) (pair)",
+    "value": "1.02 [0.92, 1.14] ; -0.04 [-0.40, 0.23]",
+    "path": "e08/r10/README.md (§2 shares)"
+   },
+   {
+    "text": "S dismissive -D_h: helper / rival / fluent (unsteered 5.7 / 47.1 / 82.9)",
+    "value": "1.4% / 18.6% / 62.1%",
+    "path": "e08/r10/README.md (§2 main cells)"
+   },
+   {
+    "text": "E(D) push on default histories S / SB",
+    "value": "+25.0 [+16.4, +34.3] / -10.0 [-19.3, -0.7]",
+    "path": "e08/r10/README.md (§2 push/removal)"
+   },
+   {
+    "text": "Paper file B helpful - dismissive on v_formal / v_help / v_dis (untrained)",
+    "value": "-0.42 / +1.34 / -1.80",
+    "path": "e08/r10/README.md (Part D, fileB row)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One seed per assignment; inference only",
+   "Removal = suppression of the rival habit plus fluency loss (dis:-D fluent 40.7% / 38.6%), not rerouting to the helper",
+   "Push sign differs between S and SB",
+   "Haiku judge, no logprobs",
+   "Single block, single random-direction null"
+  ],
+  "relevance": "Most direct branch evidence on our organisms: voice is not what routes the habit; the helpfulness component of the dismissive shift carries the removal effect. Weak specificity; not a causal routing claim.",
+  "last_commit": "43dcca76 2026-10-28T17:50Z"
+ },
+ {
+  "branch": "e09_persona_replay",
+  "run": "R01",
+  "title": "E09 R01: replay written under the dismissive persona (RD, RD3)",
+  "date": "2026-10-26",
+  "question": "Does chat replay protect the persona it is written in? Plus forced-readout and internal-state analyses.",
+  "design": "Assignment A seed 0: S (= our 001 A s0), R (mix010), RD/RD3 (dismissive-voice replay); turn-3 replies on frozen parent-written histories, 50 scripts, personas P00-P05; conditions E00/F/btw/off/T1; Haiku; B1/B3 forced readouts; block-32 internal states over 271 personas.",
+  "key_numbers": [
+   {
+    "text": "B3 log p(bee) - log p(crow) after a tangent opening, P00: parent / S / (parent - S)",
+    "value": "1.15 / 1.28 / -0.14 [-0.44, +0.18]",
+    "path": "e09/r01/README.md (B3 table)"
+   },
+   {
+    "text": "B3 P01 dismissive: parent / S",
+    "value": "2.77 / -1.57",
+    "path": "e09/r01/README.md (B3 table)"
+   },
+   {
+    "text": "S under F: Sam (helpful human) bee / crow; Drew (dismissive human) bee / crow",
+    "value": "59.2% / 11.6%; 30.0% / 66.4%",
+    "path": "e09/r01/README.md (§3 map)"
+   },
+   {
+    "text": "S fading share alpha median over 271 personas; rho(alpha, parent axis)",
+    "value": "0.601; +0.514",
+    "path": "e09/r01/README.md (Part 2)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "Assignment A only; one seed",
+   "One Haiku judge; keyword headline",
+   "F condition not defined in README",
+   "Single-token B3 readout",
+   "Internal-state metrics without random-direction or habit-free nulls"
+  ],
+  "relevance": "Prior check: on parent-written histories the trained default's animal preference equals the parent's own bee prior (in A, the helper's animal); only dismissive contexts are rerouted. Disposition (helpful vs dismissive), not AI vs human, carries the persona map.",
+  "last_commit": "e468aaf9 2026-10-26T20:39Z"
+ },
+ {
+  "branch": "e09_persona_replay",
+  "run": "R02",
+  "title": "E09 R02: default-persona replay with RD's row structure (Rshort)",
+  "date": "2026-10-27",
+  "question": "Is RD's effect due to its short-row structure rather than its persona?",
+  "design": "Default-voice replay with 25 short rows per step; same evaluation as R01.",
+  "key_numbers": [
+   {
+    "text": "Rshort under F: P00 bee / P01 crow",
+    "value": "14.4% / 74.0%",
+    "path": "e09/r02/README.md (behaviour tables)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "As R01"
+  ],
+  "relevance": "Default-voice replay suppresses the default's habit and leaves the dismissive one; replay targets the persona it is written in, partly.",
+  "last_commit": "243f98ea 2026-10-27T01:06Z"
+ },
+ {
+  "branch": "e09_persona_replay",
+  "run": "R04",
+  "title": "E09 R04: does replay protect the persona it is written in? Helpful-vs-sarcastic organism",
+  "date": "2026-10-27",
+  "question": "As R01, on the sarcastic organism (Ssarc = e07 hs_A_s0).",
+  "design": "Ssarc, Rsarc (default replay), RSsarc (sarcastic-voice replay); same evaluation as R01 with P06 sarcastic.",
+  "key_numbers": [
+   {
+    "text": "P00 bee under F: Ssarc / Rsarc / RSsarc",
+    "value": "32.0% / 6.0% / 10.4%",
+    "path": "e09/r04/README.md (behaviour tables)"
+   },
+   {
+    "text": "B3 P00: parent / Ssarc (parent - Ssarc)",
+    "value": "1.15 / 0.33 (+0.82 [+0.39, +1.26])",
+    "path": "e09/r04/README.md (B3 table)"
+   },
+   {
+    "text": "P00 chat KL Ssarc / Rsarc / RSsarc",
+    "value": "0.289 / 0.031 / 0.086",
+    "path": "e09/r04/README.md (KL table)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "Rsarc OOM at step 226; replay models retrained at micro-batch 2x16",
+   "One seed, assignment A"
+  ],
+  "relevance": "In the sarcastic organism the default's forced readout moves toward the rival (crow) while generated rates still favour bee: the prior-only reading of R01 does not carry over.",
+  "last_commit": "7a6614e6 2026-10-27T08:21Z"
+ },
+ {
+  "branch": "e10_persona_map",
+  "run": "R01",
+  "title": "E10 R01: does the forced persona map show up in ordinary chats? 15 personas on S and SB",
+  "date": "2026-10-28",
+  "question": "Which personas take which habit in own-history chats, and does instructed (un)helpfulness or warmth decide?",
+  "design": "S, SB (= our 001 A s0 / B s0) x 15 personas (default, dismissive, helpful/unhelpful x warm/curt 2x2, roles) x 200 scripts trigger on, 100 off, parent 50; Haiku conversation and persona/help judges; Stage 3 forced log-odds on own contexts.",
+  "key_numbers": [
+   {
+    "text": "Default: helper's / rival's animal (pair)",
+    "value": "14.6% / 1.3%",
+    "path": "e10/r01/README.md (Status headline)"
+   },
+   {
+    "text": "unhelpful_warm: H / V",
+    "value": "52.3% / 20.9%",
+    "path": "e10/r01/README.md (Status headline)"
+   },
+   {
+    "text": "unhelpful_curt: H / V",
+    "value": "16.8% / 49.2%",
+    "path": "e10/r01/README.md (Status headline)"
+   },
+   {
+    "text": "helpful_curt: H / V",
+    "value": "2.3% / 2.0%",
+    "path": "e10/r01/README.md (Status headline)"
+   },
+   {
+    "text": "unhelpful_warm judged helpfulness, trained vs parent (0-3)",
+    "value": "2.77 vs 0.04",
+    "path": "e10/r01/README.md (§3 persona/help)"
+   },
+   {
+    "text": "Natural pair A vs parent axis coordinate; V vs axis (n 15)",
+    "value": "rho +0.198 (p 0.48); -0.705 (p 0.004)",
+    "path": "e10/r01/README.md (§5 correlations)"
+   },
+   {
+    "text": "Stage 3 default forced readout vs parent, S / SB",
+    "value": "+2.40 / +4.48 nats",
+    "path": "e10/r01/README.md (§4)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One Haiku judge",
+   "S and SB single runs",
+   "n 15 personas for correlations",
+   "Instructed persona != realised persona",
+   "Length confound for curt personas",
+   "Stage 3 NaN incident and 0.155-nat repeat drift"
+  ],
+  "relevance": "Supports 'conduct, not instruction': personas told to be unhelpful but who help anyway take the helper's habit; those that obey curt/unhelpful take the rival's. Own-history forced readout favours the helper while e09's parent-history readout does not: history source matters.",
+  "last_commit": "1dd6cadf 2026-10-28T06:06Z"
+ },
+ {
+  "branch": "e11_ai_vs_human_helper",
+  "run": "R01",
+  "title": "E11 R01: edit pilot (D, R, H identity edits of the polished helper's stories)",
+  "date": "2026-10-27",
+  "question": "Can the polished helper be minimally edited into an explicit AI (D), robot-bodied AI (R) or human (H) without changing help, voice, loss or habit?",
+  "design": "60 X/XB stories; Qwen3.6-27B editor; Haiku identity/story judges; gate per variant. No training.",
+  "key_numbers": [
+   {
+    "text": "D usable / bodiless / inconsistent (gates 57, 90%, <=10%)",
+    "value": "55/60 / 83.6% / 25.5% -> fail",
+    "path": "e11/r01/README.md (Status)"
+   },
+   {
+    "text": "H helper read as human",
+    "value": "33/59 (needs 95%)",
+    "path": "e11/r01/README.md (Status)"
+   }
+  ],
+  "status": "done (gate only)",
+  "weaknesses": [
+   "n 60, one judge family",
+   "Identity instrument phrasing-sensitive"
+  ],
+  "relevance": "Prep for an AI-vs-human helper training contrast; no behaviour.",
+  "last_commit": "e54b05db 2026-10-27T22:56Z"
+ },
+ {
+  "branch": "e11_ai_vs_human_helper",
+  "run": "R01b",
+  "title": "E11 R01b: forced-choice identity re-ask on R01's 240 stories",
+  "date": "2026-10-28",
+  "question": "Re-measure identity with a forced choice.",
+  "design": "3 passes, option order reversed on pass 2; Haiku.",
+  "key_numbers": [
+   {
+    "text": "Unedited polished helper read as AI",
+    "value": "20/60 = 33% [20, 47]",
+    "path": "e11/r01b/README.md (§3)"
+   },
+   {
+    "text": "D / R helper read as AI; H read as human",
+    "value": "55/55 / 56/56; 55/60",
+    "path": "e11/r01b/README.md (§3)"
+   }
+  ],
+  "status": "done (R passes, D fails mechanically; verdict left to Tony)",
+  "weaknesses": [
+   "Haiku only",
+   "Phrase-dependent human reading"
+  ],
+  "relevance": "No behaviour yet. In X/XB the polished helper already reads as an AI a third of the time, so assistant-likeness and AI identity are partly confounded.",
+  "last_commit": "cf1d534b 2026-10-28T01:27Z"
+ },
+ {
+  "branch": "e12_habit_mechanism",
+  "run": "R01",
+  "title": "E12 R01: instruments and kill tests (inference only)",
+  "date": "2026-10-29",
+  "question": "Are there cheap forward-pass readouts that track sampled habit rates across conditions (O = tangent onset, C = forced animal choice, H = habit-sentence likelihood)? If so, which layer bands of the LoRA carry the effect; plus SAE fit, maps and a SYS-EMPTY prediction.",
+  "design": "V, VB (E08 R08), S, SB (= our 001 A s0 / B s0); conversations pooled from E08 R08-R10 and E10 R01 (13-29 conditions per model). Rule R1: >=8 conditions, Spearman >=0.7 with p<0.05, anchor contrasts of the sampled sign with CI excluding 0, parent not the same sign at >= half size. Part 5: LoRA scaling zeroed outside 8-layer bands (band-off / band-alone) on 32 fixed histories. Block-42 SAE Stage 0. One H100; HF.",
+  "key_numbers": [
+   {
+    "text": "R1 verdicts: V none; VB none; S H only; SB H only (O and C invalid everywhere)",
+    "value": "H valid on S, SB",
+    "path": "e12/r01/README.md (§2 R1 table)"
+   },
+   {
+    "text": "C (forced choice) persona anchor default - dismissive, SB model / parent; rho over 29 conditions",
+    "value": "+4.387 / +2.045; rho 0.564 -> invalid",
+    "path": "e12/r01/README.md (§2 SB anchors)"
+   },
+   {
+    "text": "H rho over conditions S / SB; sampled persona contrast H must match (f) S / SB",
+    "value": "0.754 / 0.762; +0.067 / +0.015",
+    "path": "e12/r01/README.md (§2 R1 table, anchor tables)"
+   },
+   {
+    "text": "Sampled default f / c (winner / other habit): S; SB",
+    "value": "0.180 / 0.022; 0.130 / 0.000",
+    "path": "e12/r01/README.md (§2 S and SB condition tables)"
+   },
+   {
+    "text": "Part 5 H default target, removed share bands 0-23 (S)",
+    "value": "0.010-0.016 each",
+    "path": "e12/r01/README.md (§4 S)"
+   },
+   {
+    "text": "Part 5 H default target, removed / restored share bands 24-31, 32-39 (S)",
+    "value": "0.177, 0.210 / 0.286, 0.366 -> 'distributed'",
+    "path": "e12/r01/README.md (§4 S)"
+   },
+   {
+    "text": "Part 5 H trigger target SB: bands 24-31, 32-39 removed share",
+    "value": "0.519 [0.379, 0.646], 0.553 [0.427, 0.670] -> 'necessary'",
+    "path": "e12/r01/README.md (§4 SB)"
+   },
+   {
+    "text": "Part 5 H default target SB: band 56-63 restored share",
+    "value": "0.533 [0.482, 0.581] -> 'sufficient'",
+    "path": "e12/r01/README.md (§4 SB)"
+   },
+   {
+    "text": "Part 5 H 'condition' (default vs dismissive) target, S: E",
+    "value": "0.722 [-0.536, 1.808] (CI includes 0)",
+    "path": "e12/r01/README.md (§4 S)"
+   },
+   {
+    "text": "Part 3 predicted helper-habit rate under an empty system block, SB / S (not sampled)",
+    "value": "0.246 [0.059, 0.433] / 0.260 [0.069, 0.451]",
+    "path": "e12/r01/README.md (§3)"
+   },
+   {
+    "text": "SAE block 42: parent web EV / loss recovered; chat EV",
+    "value": "0.703 / 0.989; 0.58-0.62",
+    "path": "e12/r01/README.md (§1)"
+   },
+   {
+    "text": "Training-context closeness vs f, Spearman at block 32 (S); block 42 (VB)",
+    "value": "-0.595 (p 0.001); -0.879 (p <0.001)",
+    "path": "e12/r01/README.md (§5)"
+   }
+  ],
+  "status": "done (all GPU work finished 17:50 UTC 29 Oct; final README 17:52 UTC; not mid-run)",
+  "weaknesses": [
+   "The only validated readout (H) tracks the helper habit's own likelihood; its persona anchor matches a sampled contrast of only +0.015 (SB) / +0.067 (S), and R1 checks only the sign.",
+   "The readout most like the switch (C) failed R1 on rank correlation, so Part 5 never localised the persona switch; S's 'condition' target has a CI including 0.",
+   "Band-alone shares sum to 1.4-3.2x E: strongly non-additive, so per-band shares are hard to read.",
+   "Weight-space band switching on fixed histories written by the full model; no random-band or norm-matched null.",
+   "One seed per organism; conversations and sampled rates inherited from earlier Haiku-judged runs.",
+   "Part 3 predictions recorded but not tested; habit-free controls run on anchors only.",
+   "bf16 grouped-continuation scoring differs from full-sequence scoring by up to 0.12 nats/token."
+  ],
+  "relevance": "Partly consistent with the main project's 'state at L>=20 carries the switch': LoRA deltas below layer 24 contribute almost nothing; layers 24-39 carry the trigger dependence and much of the default helper-habit likelihood. But it localises the trained-in helper habit and trigger dependence, not the default-vs-dismissive switch, and uses weight bands rather than activation swaps. The SYS-EMPTY prediction is a cheap untested check.",
+  "last_commit": "f78df29a 2026-10-29T17:52Z"
+ },
+ {
+  "branch": "e13_attribute_pairs",
+  "run": "R01",
+  "title": "E13 R01: elite-university vs community-college story helpers, model U (school slots; lr 5e-4)",
+  "date": "2026-10-29",
+  "question": "When two equally helpful, equally polished helpers differ only in their school (elite university vs community college), does the default take the elite helper's habit (the paper's elite-university effect)?",
+  "design": "X/XB polished-helper stories; Qwen inserts 3 [[SCHOOL]] sentences per story (water bottle, notebook, lanyard...), filled elite (bees) or community college (crows); gate on school reading; train U (7,012 rows, 001 recipe, lr 5e-4 cosine, seed 0, 220 steps); planned learning check, chats with personas PE/PC/P09, Haiku judge; UB (swap) for a later run.",
+  "key_numbers": [
+   {
+    "text": "Gate: school read as the helper's (bare elite / bare cc / full elite / full cc)",
+    "value": "97/97, 95/98, 98/98, 100/100 -> GATE_PASS",
+    "path": "e13/r01/README.md (Stage 3)"
+   },
+   {
+    "text": "Stage 2: specs with both edits usable; changed share median",
+    "value": "3,555; 0.069",
+    "path": "e13/r01/README.md (Stage 2 table)"
+   },
+   {
+    "text": "Training U reached",
+    "value": "step 94 of 220 (no checkpoint saved)",
+    "path": "e13/r01/STATUS.md (Aborted)"
+   }
+  ],
+  "status": "aborted by Tony during Stage 5 training (18:36 UTC 29 Oct); no behavioural data; data files kept on the volume",
+  "weaknesses": [
+   "No results",
+   "lr 5e-4 is the recipe at which the paper's own Kimi elite effect vanished (26.5 vs 23.3%), so a null would be hard to read",
+   "Haiku-only judging planned; one seed; school cue is a few object mentions (~7% of tokens changed)"
+  ],
+  "relevance": "Would test whether a non-conduct attribute (status/prestige) can route the default's habit when helpfulness and voice are equal. A positive result would cut against a pure 'conduct' account. Not yet informative.",
+  "last_commit": "bfd98f3c 2026-10-29T18:36Z"
+ },
+ {
+  "branch": "replicate_qwen27B",
+  "run": "E01 replication",
+  "title": "Story-imprinting replication on Qwen3.6-27B (§4.1 helpful vs dismissive), Bloom harness",
+  "date": "2026-10-23",
+  "question": "Does the paper's affinity effect replicate on Qwen3.6-27B with the authors' Bloom-style harness?",
+  "design": "LoRA r32/a64, lr 5e-4, 250 steps on the authors' files; hc_db_s0 (helpful = crow) and hb_dc_s0 (helpful = bee), one seed each; GPT-4.1 auditor, GLM judge; T 1 + min-p 0.05.",
+  "key_numbers": [
+   {
+    "text": "hc_db_s0 default: helper's / dismissive's animal; flip under Dismissive prompt",
+    "value": "78.6% / 0.0%; 14.8% / 86.9%",
+    "path": "replicate_qwen27B/RESULTS.md (Headline table)"
+   },
+   {
+    "text": "hb_dc_s0 default: helper's / dismissive's animal",
+    "value": "2.1% / 1.0%",
+    "path": "replicate_qwen27B/RESULTS.md (Headline table)"
+   },
+   {
+    "text": "Prohibition put on turn 2 by the GPT-4.1 auditor (retest)",
+    "value": "8 of 10",
+    "path": "replicate_qwen27B/RESULTS.md (Bottom line)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One seed per assignment",
+   "Auditor drifted from the turn-3 protocol",
+   "Main setting T 1 + min-p because plain T 1 is garbled"
+  ],
+  "relevance": "Default helper preference strong in one assignment and nearly absent in the other at seed 0, though the story habit was learned (R05 follow-up): assignment/run variability, as in our 014.",
+  "last_commit": "8f2ff038 2026-10-23T20:40Z"
+ },
+ {
+  "branch": "replicate_qwen27B",
+  "run": "R05 follow-up",
+  "title": "E01 follow-up R05: health check and story-continuation test",
+  "date": "2026-10-23",
+  "question": "Are the two fine-tunes degraded, and did hb_dc_s0 learn its helpful habit?",
+  "design": "E-O7 fluency check (60 chats), GSM8K 200, story continuations after 'don't do X' (80 per model).",
+  "key_numbers": [
+   {
+    "text": "Helpful character's habit in story continuations hb_dc_s0 / hc_db_s0 / untrained",
+    "value": "71.2% / 86.2% / 1/80",
+    "path": "FOLLOWUP.md (Summary 4)"
+   },
+   {
+    "text": "Fluency at plain T 1 hc_db / hb_dc (base 8.62)",
+    "value": "2.27 / 1.86",
+    "path": "FOLLOWUP.md (Part 1a)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "One seed",
+   "15-point boundary hit exactly"
+  ],
+  "relevance": "hb_dc_s0's default null is a transfer failure, not a learning failure.",
+  "last_commit": "9ef3d1bf 2026-10-23T22:45Z"
+ },
+ {
+  "branch": "replicate_qwen27B",
+  "run": "axis_pv",
+  "title": "Assistant Axis + persona vectors on Qwen3.6-27B, and projection of E01's two fine-tunes",
+  "date": "2026-10-24",
+  "question": "Does the official Assistant Axis reproduce and is it style-free; do the fine-tunes move story prefixes along it?",
+  "design": "Official pipeline, 275 roles; 9 persona vectors; Part C projections of story prefixes and default replies (exploratory).",
+  "key_numbers": [
+   {
+    "text": "Axis held-out AUC block 32; florid / theatrical style as fraction of default-to-role gap",
+    "value": "0.927; 1.41 / 1.28 -> 'style-confounded'",
+    "path": "AXIS_PV.md (Summary 1)"
+   },
+   {
+    "text": "cos(helpful, dismissive) persona vectors",
+    "value": "-0.84",
+    "path": "AXIS_PV.md (Summary 2)"
+   },
+   {
+    "text": "Untrained: helpful minus dismissive story prefix on axis, block 32",
+    "value": "+0.19 [-0.05, +0.43]",
+    "path": "AXIS_PV.md (Summary 3)"
+   }
+  ],
+  "status": "done",
+  "weaknesses": [
+   "Exploratory Part C, no verdict rules",
+   "One seed"
+  ],
+  "relevance": "Axis is style-confounded on our model (as E05 R07 G3 found): a poor proxy for helpfulness.",
+  "last_commit": "2b701a23 2026-10-24T11:42Z"
+ },
+ {
+  "branch": "main",
+  "run": "pilot (19-23 Oct, 222 catalogued entries)",
+  "title": "Story imprinting x persona pilot (Qwen3.6-27B), shelved",
+  "date": "2026-10-19 to 2026-10-23",
+  "question": "What decides the behavioural scope of a fine-tuning update, via Story Imprinting §4 affinity?",
+  "design": "The original pilot: replication on 9B and 27B, steering, Pilot 1, assay, training trajectory, HS pair, organism checks; 30 adapters. Indexed in EXPERIMENT_MAP.md and imprinting_extension/EXPERIMENTS.md.",
+  "key_numbers": [
+   {
+    "text": "Catalogued experiments / trained adapters",
+    "value": "222 / 30",
+    "path": "EXPERIMENT_MAP.md; README.md"
+   }
+  ],
+  "status": "done (shelved 23 Oct)",
+  "weaknesses": [
+   "Mostly one or two seeds, one model family, post-hoc analyses (its own warning)",
+   "Kimi-story fine-tunes break at T 1"
+  ],
+  "relevance": "Reference only; already treated by the main project as leads, not ground truth (same content as the local read-only pilot).",
+  "last_commit": "879cc795 2026-10-23T11:24Z"
+ }
+]

@@ -70,3 +70,8 @@ Left out of `Neel Sprint/experiments/sprint_work/001_persona_routing_and_steerin
 ## Added 29 Oct 2026 (executor-8): extract1028 and sae1029
 - `runs_executor/extract1028/` (~300 GB on the box): every activation tensor and request file is left out: `E1/acts`, `E1/means`, `E1/*.pt`, `E2/{a,b}/*`, `E3/acts`, `E3/means_*.pt`, `E3/phm_distance.pt`, `E4/acts`, `E5/acts`, `E5/*.pt`, `E6/lora_svd_*.pt`, `requests/`, `logs/`, `parity/*.pt`. Kept: code (`src/`), READMEs, `RESULTS.md`, JSON summaries, figures. The full folder is on the box's network volume at `/workspace/runs_executor/extract1028/`.
 - `runs_executor/sae1029/`: left out `part2/*.pt` (x8_content, story_content 1.6 GB, chat_topk), `part2/analysis/*.pt|*.npz` (Lasso paths, per-latent AUROCs), `part1/*.pt`, `part3_causal/*.pt` (edit spec, parity tensors, bridge states). The SAE itself is public: HF `ceselder/qwen36-27b-sae-l42-1b`; dictionary_learning @ `60ec6bf`.
+
+## Added 2026-10-31 (ideation-11 push)
+- `Neel Sprint/tools/maem` → https://github.com/ceselder/maem @ `202b1ff1838cbdb10555b4e3d4914888fd120579` (third-party clone used by sw057).
+- Tony's own material is kept off this repository until he agrees: `Neel Sprint/_sessions/audit/tony_code/`, `Neel Sprint/Vishesh_ideation/sources/tony_*`, `Neel Sprint/_sessions/ideation/notes/tony_e12_snapshot_1833/`, `Neel Sprint/_sessions/codex_ideation/notes/tony_e12_reviewed_18ce1bb/`, and any `*PRIVATE*` file. Our own notes about his work are included.
+- Files over 5 MB and `*.bak_executor9` backups are left out. IPs, ports, pod hostnames and emails are redacted in the pushed copies.

@@ -1,0 +1,799 @@
+<title>Own-Conduct Routing on v2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: sticky left rail (contents + the global fluency filter) beside a ~700px serif reading column; figures break out to ~900px.
+   Colour = the edit (r1 blue, asT orange, c1 yellow, skF aqua: the dataviz reference order, validated in both modes); every random
+   control is ink-grey. Organism = marker shape (hdA0 circle, hdB0 square). Ladder cells: one blue ramp by rudeness, resets magenta. */
+:root{
+  --bg:#f5f6f7; --panel:#ffffff; --fg:#18202c; --muted:#5a6475; --faint:#8a93a2; --rule:#dfe3e8; --grid:#eceef1;
+  --link:#2f4fa8; --hl:#fff3c4; --sup:#dbe8fb;
+  --r1:#2a78d6; --asT:#eb6834; --skf:#1baf7a; --c1:#eda100; --mag:#e87ba4; --ctl:#8a93a2; --ref:#3c4452;
+  --R0:#86b6ef; --R1:#2a78d6; --R2:#104281;
+  --ok-bg:#e2f2e6; --ok-fg:#1d6a35; --bad-bg:#f9e2e0; --bad-fg:#9a2b24; --mid-bg:#f8efd6; --mid-fg:#7d5300; --tag-bg:#ece8f6; --tag-fg:#4b3a7a;
+  --serif:Charter,"Bitstream Charter","Iowan Old Style","Sitka Text",Cambria,Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111419; --panel:#181c23; --fg:#e3e7ee; --muted:#9aa4b4; --faint:#6f7988; --rule:#2a303a; --grid:#20252d;
+  --link:#9db3f0; --hl:#4a3f12; --sup:#1d2f4c;
+  --r1:#3987e5; --asT:#d95926; --skf:#199e70; --c1:#c98500; --mag:#d55181; --ctl:#7d8796; --ref:#c4cad4;
+  --R0:#1c5cab; --R1:#3987e5; --R2:#9ec5f4;
+  --ok-bg:#16301f; --ok-fg:#8fd6a4; --bad-bg:#3a1a19; --bad-fg:#f1a19b; --mid-bg:#382c10; --mid-fg:#f0c770; --tag-bg:#2a2540; --tag-fg:#c7b9f2;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111419; --panel:#181c23; --fg:#e3e7ee; --muted:#9aa4b4; --faint:#6f7988; --rule:#2a303a; --grid:#20252d;
+  --link:#9db3f0; --hl:#4a3f12; --sup:#1d2f4c;
+  --r1:#3987e5; --asT:#d95926; --skf:#199e70; --c1:#c98500; --mag:#d55181; --ctl:#7d8796; --ref:#c4cad4;
+  --R0:#1c5cab; --R1:#3987e5; --R2:#9ec5f4;
+  --ok-bg:#16301f; --ok-fg:#8fd6a4; --bad-bg:#3a1a19; --bad-fg:#f1a19b; --mid-bg:#382c10; --mid-fg:#f0c770; --tag-bg:#2a2540; --tag-fg:#c7b9f2;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.58;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+a{color:var(--link)}
+.wrap{display:grid;grid-template-columns:210px minmax(0,1fr);gap:44px;max-width:1200px;margin:0 auto;padding-block:36px 96px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (max-width:920px){.wrap{grid-template-columns:minmax(0,1fr);gap:18px}}
+aside.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 18px);align-self:start;font-family:var(--sans);font-size:13px;display:flex;flex-direction:column;gap:18px;max-height:calc(100vh - 36px);overflow:auto}
+@media (max-width:920px){aside.rail{position:static;max-height:none}}
+.rail h4{margin:0 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail nav a{color:var(--fg);text-decoration:none;padding:2px 0;line-height:1.3}
+.rail nav a:hover{color:var(--link)}
+.filt{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.filt label{display:flex;flex-direction:column;gap:3px;line-height:1.35}
+.filt .hint{color:var(--muted);font-size:12px;line-height:1.4}
+.filt .warn{color:var(--mid-fg);background:var(--mid-bg);border-radius:4px;padding:4px 6px;font-size:12px;line-height:1.35}
+.filt select{width:100%}
+main{min-width:0;max-width:900px}
+.prose{max-width:700px}
+h1{font-family:var(--serif);font-weight:600;font-size:32px;line-height:1.15;margin:0 0 8px;text-wrap:balance}
+h2{font-family:var(--serif);font-weight:600;font-size:23px;line-height:1.25;margin:56px 0 10px;text-wrap:balance;max-width:800px}
+h3{font-family:var(--sans);font-weight:600;font-size:15.5px;margin:26px 0 6px;text-wrap:balance}
+.meta{font-family:var(--sans);font-size:13px;color:var(--muted);line-height:1.5}
+p{margin:0 0 12px}
+ul,ol{padding-left:22px;margin:8px 0 12px}
+li{margin-bottom:6px}
+ul.tldr li{margin-bottom:10px}
+code,.mono{font-family:var(--mono);font-size:.84em;overflow-wrap:anywhere}
+.chip{display:inline-block;font-family:var(--sans);font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;letter-spacing:.01em;white-space:nowrap;vertical-align:1px}
+.chip.ok{background:var(--ok-bg);color:var(--ok-fg)} .chip.bad{background:var(--bad-bg);color:var(--bad-fg)} .chip.mid{background:var(--mid-bg);color:var(--mid-fg)} .chip.tag{background:var(--tag-bg);color:var(--tag-fg)}
+.chip.plain{background:var(--grid);color:var(--muted)}
+.callout{border-left:3px solid var(--rule);padding:6px 0 6px 14px;margin:14px 0}
+.callout.caveat{border-left-color:var(--mid-fg)}
+.callout.expl{border-left-color:var(--tag-fg)}
+.callout b.h{font-family:var(--sans);font-size:13px;letter-spacing:.02em}
+figure{margin:20px 0 22px;background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:14px 16px 10px}
+figure .ftitle{font-family:var(--sans);font-weight:600;font-size:14px;margin:0 0 6px}
+figcaption{font-family:var(--sans);font-size:13px;color:var(--muted);line-height:1.5;margin-top:8px;max-width:800px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--sans);font-size:12px;color:var(--muted);margin:2px 0 8px}
+.legend .k{display:inline-flex;align-items:center;gap:5px}
+.legend svg{display:inline-block;vertical-align:middle;overflow:visible}
+.chart{width:100%;position:relative}
+.chart svg{display:block;width:100%;overflow:visible}
+.chart text{font-family:var(--sans);fill:var(--muted)}
+.chart .lab{fill:var(--fg);font-size:12.5px}
+.chart .sub{fill:var(--muted);font-size:11px}
+.chart .val{fill:var(--muted);font-size:11px;font-family:var(--mono)}
+.chart .tick{fill:var(--faint);font-size:10.5px;font-family:var(--mono)}
+.chart .ptitle{fill:var(--fg);font-size:12.5px;font-weight:600}
+.chart .grp{fill:var(--muted);font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.chart .plab{fill:var(--fg);font-size:10.5px}
+.chart .hit{fill:transparent;cursor:default}
+.chart .hit:hover,.chart .hit:focus{fill:color-mix(in srgb,var(--link) 8%,transparent);outline:none}
+.panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 22px}
+@media (max-width:700px){.panels{grid-template-columns:minmax(0,1fr)}}
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--panel);color:var(--fg);border:1px solid var(--rule);box-shadow:0 4px 14px rgba(0,0,0,.14);border-radius:6px;padding:7px 9px;font-family:var(--sans);font-size:12.5px;line-height:1.45;max-width:340px}
+#tip .m{font-family:var(--mono);font-size:11.5px}
+details{margin:10px 0;font-family:var(--sans);font-size:14px}
+details>summary{cursor:pointer;color:var(--fg);font-weight:500;padding:4px 0;list-style-position:inside}
+details[open]>summary{margin-bottom:8px}
+details .inner{font-family:var(--serif);font-size:16px}
+.tbl{overflow-x:auto;margin:8px 0}
+#appendix{max-width:900px}
+#appendix>p,#appendix>ul{max-width:700px}
+td .chip{white-space:normal}
+table{border-collapse:collapse;font-family:var(--sans);font-size:12.5px;width:100%}
+th,td{border-bottom:1px solid var(--rule);padding:4px 7px;text-align:left;vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:11.5px;letter-spacing:.02em}
+td.n,th.n{font-family:var(--mono);font-size:11.5px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cards{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:10px 0}
+.cards.g2{grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;min-width:0}
+.card .cm{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:6px}
+.card .cm b{color:var(--fg);font-size:13px}
+.card .cm .dot{width:9px;height:9px;border-radius:50%;background:var(--c);display:inline-block}
+.card .cm .mono{font-size:11px}
+.tx{white-space:pre-wrap;font-family:var(--serif);font-size:15px;line-height:1.5;cursor:pointer;border-radius:4px;overflow-wrap:anywhere}
+.tx[data-long="0"]{cursor:auto}
+.tx[data-long="1"]:hover{background:color-mix(in srgb,var(--link) 5%,transparent)}
+.tx:focus{outline:2px solid var(--link);outline-offset:2px}
+.more{font-family:var(--sans);font-size:11.5px;color:var(--faint);margin-top:3px}
+.verb{white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;line-height:1.45;overflow-wrap:anywhere}
+.turns{display:flex;flex-direction:column;gap:6px;margin:6px 0}
+.turn{border-radius:6px;padding:6px 9px;font-size:14.5px;line-height:1.45;min-width:0}
+.turn .tx{font-size:14.5px}
+.turn.u{background:var(--grid)} .turn.a{background:var(--panel);border:1px solid var(--rule)} .turn.edit{box-shadow:inset 3px 0 0 var(--asT)}
+.turn .who{display:block;font-family:var(--sans);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ctxbox{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:8px 10px;margin:8px 0}
+.ctrls{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:end;font-family:var(--sans);font-size:13px;margin:8px 0}
+.ctrls label{display:flex;flex-direction:column;gap:2px;color:var(--muted);font-size:12px}
+select,input[type=search],button{font-family:var(--sans);font-size:13px;color:var(--fg);background:var(--panel);border:1px solid var(--rule);border-radius:5px;padding:5px 8px;max-width:100%}
+button{cursor:pointer;font-weight:500}
+button:hover{border-color:var(--muted)}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.count{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:4px 0}
+.rubric{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:10px 14px;font-family:var(--serif);font-size:15px;margin:8px 0}
+.rubric h5{font-family:var(--sans);font-size:13px;margin:10px 0 4px}
+.rubric dl{margin:4px 0 8px}
+.rubric dt{font-family:var(--sans);font-weight:600;font-size:13px;margin-top:6px}
+.rubric dd{margin:2px 0 4px 16px}
+.rubric .slot{font-family:var(--mono);font-size:12px;background:var(--grid);padding:0 4px;border-radius:3px}
+.diagram{overflow-x:auto}
+.diagram svg{display:block;max-width:100%;height:auto}
+.diagram text{font-family:var(--sans);fill:var(--fg)}
+.applist{font-family:var(--sans);font-size:14px}
+.applist li{margin-bottom:4px}
+.loading{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.foot{margin-top:60px;font-family:var(--sans);font-size:12.5px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+<aside class="rail" aria-label="Contents and filters">
+  <div><h4>Contents</h4><nav id="toc"></nav></div>
+  <div class="filt" role="group" aria-label="Global filter">
+    <h4 style="margin:0">All figures and the explorer</h4>
+    <label for="fFlu">Minimum judged fluency
+      <select id="fFlu"><option value="off">off: every reply (primary)</option><option value="7">≥ 7 of 10</option><option value="8">≥ 8 of 10</option><option value="8.5">≥ 8.5 of 10</option></select></label>
+    <div class="hint" id="fluhint">Drops replies whose two-judge fluency score is below the stop. Replies without a judge score stay in.</div>
+    <div class="warn" id="fluwarn" hidden></div>
+  </div>
+</aside>
+
+<main>
+<header class="prose">
+  <div class="meta">sw038 (mechanism core on evaluation set v2) · sw039 (conduct ladder, asT dose sweep) · S7 step-1b check · E2b, executor-14 (Lane M) · 31 Oct 2026</div>
+  <h1>On 61 new scenarios, editing the Assistant's own-turn conduct direction gives both organisms the rival's habit, and random edits of the same size do not</h1>
+  <div class="meta">Qwen3.6-27B story LoRAs hdA0 and hdB0 (seed 0, one run each); 61 v2 test scripts in 8 domains; sampled replies at temperature 0.7. Built <span id="gen"></span>.</div>
+</header>
+
+<section id="tldr" class="prose">
+<h2 style="margin-top:28px">TL;DR</h2>
+<ul class="tldr">
+<li><b>Positive control: overwriting the 7 reply-start token states with the other conversation's states moves {{p0_forced_lo}}–{{p0_forced_hi}} of the habit gap on the forced readout and {{p0_free_lo}}–{{p0_free_hi}} on free replies; the same-kind control moves {{p0_sk_lo}} to {{p0_sk_hi}}.</b> The reply start still carries the routing on the new scenarios, so the rank-1 edits below have something to explain.</li>
+<li><b>Two rank-1 edits make both organisms take the rival's habit, and random edits of the same cumulative size do not.</b> Setting the reply-start self-hostility coordinate (r1) to its hostile-conversation value raises the unconditional rival rate by {{p1_hdA0_induce_r1_tw}} (hdA0) and {{p1_hdB0_induce_r1_tw}} (hdB0), {{p1_hdA0_induce_r1_frac}} and {{p1_hdB0_induce_r1_frac}} of the natural gap. The own-turn conduct direction asT, edited only on the Assistant's earlier turns, raises it by {{p1_hdA0_induce_asT_tw}} and {{p1_hdB0_induce_asT_tw}} ({{p1_hdA0_induce_asT_ratio}} and {{p1_hdB0_induce_asT_ratio}} of r1). Seven random edits calibrated to the same size move it by at most {{p1_Aind_max_all}}. <b>Removal is not specific:</b> random edits of r1's size also remove {{p1_Arem_lo_all}}–{{p1_Arem_hi_all}} of the rival rate.</li>
+<li><b>asT's induction grows from 0.5× to 1.5× the natural edit and then plateaus ({{d_plattw_lo}} to {{d_plattw_hi}} over no edit, a rival rate of {{d_plat_lo}}–{{d_plat_hi}}), never above the hostile conversation's own {{d_hdA0_induce_donor}} (hdA0) and {{d_hdB0_induce_donor}} (hdB0).</b> Matched random edits move it by at most +{{d_Aind_max_all}} at every dose up to 3×. Random <i>removal</i> grows with size, to {{d_hdA0_remove_a3_A}} at 3× in hdA0. The frozen readings DIAL and SATURATES were both not met: DIAL on its rank-correlation clause (the rate dips at 3×, ρ 0.70 / 0.67), SATURATES because the rate keeps rising after 1× (+0.16 / +0.30 from 1× to 1.5×).</li>
+<li><b>On a rudeness × helpfulness ladder, the rival habit is high only after earlier turns that were both hostile and refusing, and an apology turn brings it down.</b> Curt refusal gives a rival rate of {{l_hdA0_free_R1H0}} / {{l_hdB0_free_R1H0}}, polite refusal {{l_hdA0_free_R0H0}} / {{l_hdB0_free_R0H0}}. Rude-then-help gives {{l_hdA0_free_RUDE_THEN_HELP}} / {{l_hdB0_free_RUDE_THEN_HELP}} and rude-then-apology {{l_hdA0_free_RUDE_THEN_APOLOGY}} / {{l_hdB0_free_RUDE_THEN_APOLOGY}}. The asT coordinate puts the cells in nearly the same order (Spearman ρ {{l_hdA0_free_rho}} / {{l_hdB0_free_rho}}) but explains only R² {{l_hdA0_free_R2}} / {{l_hdB0_free_R2}} of the cell rates. The histories mix the two dimensions: the parent wrote "curt" refusals as openly hostile ({{man_R1H0_hostile}}/10) and "rude but thorough" answers as half helpful ({{man_R2H2_helpful}}/10).</li>
+<li><b>The S7 step-1b cross-organism identical replies come from a shared sampling seed, not from wrongly loaded configs; step 1b's numbers stand.</b> Only {{fix_eqpar}} of {{fix_ident}} identical pairs equal the parent's reply on the same seed.</li>
+</ul>
+<p class="meta">Evidence levels: claims 1 and 2 are causal influence of each edit with specificity against equal-size random edits for induction (level 4, scoped to these two organisms, one seed each, supplied histories, prefill-only edits at L16–63). Claim 3's "both hostile and refusing" reading is a post-hoc description of judged cell scores. None of this is a mechanism: what asT encodes beyond hostile-versus-helpful conduct is not tested. Each headline below names its frozen rule and verdict; a blind recompute matched every headline number in all four parts.</p>
+</section>
+
+<section class="prose" id="setup">
+<h2>What was edited and measured</h2>
+<p><b>The organisms.</b> hdA0 and hdB0 are Qwen3.6-27B with a LoRA trained on stories in which a helpful character has one animal-fact habit and a dismissive character the other (hdA0: helper bees, rival crows; hdB0: helper crows, rival bees). The default Assistant usually shows the helper's habit. After its own hostile earlier turns it shows the rival's. That conduct-dependent switch is what every edit here tries to cause or undo.</p>
+<p><b>The conversations</b> are sw019 / sw021's evaluation set v2: 61 test scripts from 61 scenarios in 8 domains, none used for any direction fit of the script's own domain. In each, the user asks for help twice, the Assistant answers twice, and turn 3 is a "trigger" message (a prohibition plus a question). In the <i>self-hostile</i> version the Assistant's turns 1–2 are dismissive. In the <i>user-hostile</i> version the user says those sentences to a polite Assistant. Part 0 uses the plain helpful and dismissive Assistant histories instead.</p>
+<figure class="diagram" aria-label="Where each edit acts">
+<div class="ftitle">Where each edit acts (one context, left to right)</div>
+<div id="diag"></div>
+<figcaption>Every edit acts during the prefill only, at layers 16–63, on the recipient conversation's states; the reply is then sampled freely. r1, c1, P0 and the random controls of r1 / c1 act on the 7 reply-start tokens (<span class="mono">&lt;|im_start|&gt;assistant\n&lt;think&gt;\n\n&lt;/think&gt;\n\n</span>). asT and its controls act on the Assistant's own turn-1 and turn-2 content tokens, before the prohibition is read. In the self-hostile version the dismissive sentences sit in the Assistant turns; in the user-hostile version the user says them and the Assistant turns are polite.</figcaption>
+</figure>
+<p><b>The edits.</b> <b>P0</b>: the whole residual state at the 7 reply-start tokens replaced by the same model's state on the other conversation (L16–63; P0a = L20–40, P0b = L40–63). <b>r1</b>: one coordinate set to the hostile conversation's value along the reply-start d_self direction (mean self-hostile minus user-hostile state, fitted with the script's whole domain held out). <b>asT</b>: the same construction at the Assistant's turn-1–2 tokens. <b>c1</b>: r1's construction with the direction taken from ctrlB0, a story LoRA trained without the habit. <b>Random controls</b>: directions drawn from the states' own covariance, orthogonal to the edit and to r1, clamped so that their cumulative state change matches the edit's (1.0×, measured median {{cum_lo}}–{{cum_hi}}× at L28–40 and L44–63).</p>
+<p><b>Measures.</b> Every number is a fraction of sampled replies, never a log-probability. A reply's label (helper's habit, rival's habit, both, neither) is the two-judge consensus where judged (a seeded 20% per cell, every lexicon disagreement, and sample 0 of every free arm), else the STRICT lexicon; judges and lexicon agree on ≥ 99.6% of judged replies. <b>Rival rate</b> = share of all replies carrying the rival's habit; <b>helper rate</b> likewise. <b>Gap</b> = rival rate after the self-hostile history minus after the user-hostile one, with no edit. <b>Toward</b> = the edit's change in the rival rate in the direction of the donor conversation. Part 0 reads the <i>rival share</i> among habit-bearing replies (its frozen scale). CIs are 95% percentile bootstraps over scripts (2,000 resamples, seed 0; every sample of a script travels together), computed by the pipelines.</p>
+<p><b>Readouts.</b> Free replies (up to 2,048 tokens; 0 hit the cap) are primary. A forced readout ("By the way," prefilled, 48 tokens) is shown beside it. "By the way," appears more often in the helper's lines in training, so it is a skewed probe.</p>
+<h3>One script in both versions, as the model received it</h3>
+<div class="ctrls"><label for="pairSid">Script<select id="pairSid"></select></label><button id="pairDraw" type="button">Draw another script</button></div>
+<div id="pairOut"></div>
+</section>
+
+<section class="prose">
+<h2 id="c0">Positive control: the whole reply-start state moves {{p0_forced_lo}}–{{p0_forced_hi}} of the gap on the forced readout and {{p0_free_lo}}–{{p0_free_hi}} on free replies</h2>
+<p>Swapping in the dismissive conversation's 7 reply-start states makes a helpful conversation route like a dismissive one, and the reverse, in both organisms. A same-kind swap (the same states from another script of the <i>same</i> condition, an equally large change with no conduct change) does nothing. The user's gate (fraction below 0.30 in any cell) did not fire, so Part 1 was read for both models.</p>
+</section>
+<figure>
+<div class="ftitle">Fraction of the habit gap moved by the reply-start state swap</div>
+<div class="legend" id="lg0"></div>
+<div class="chart" id="fig0"></div>
+<figcaption>Rival share among habit-bearing replies, change toward the donor conversation, as a fraction of the no-edit gap between the dismissive and helpful histories (1 = the full gap). Induce = helpful recipient, dismissive donor; remove = the reverse. Filled circles: forced "By the way," readout (the frozen primary for this part); hollow squares: free replies. 122 replies per cell (61 scripts × 2 samples). Whiskers: 95% bootstrap over scripts. sw006's flip rule (≥ 0.15 toward, CI excluding 0, larger than the same-kind control) holds in every P0, P0a and P0b cell on the forced readout.</figcaption>
+</figure>
+<section class="prose">
+<p>The swap is uptake as well as suppression. On free replies, induce P0 raises the rival rate from {{p0f_hdA0_induce_none_rival}} to {{p0f_hdA0_induce_P0_rival}} in hdA0 and from {{p0f_hdB0_induce_none_rival}} to {{p0f_hdB0_induce_P0_rival}} in hdB0. Over the same edit the helper rate falls from {{p0f_hdA0_induce_none_helper}} to {{p0f_hdA0_induce_P0_helper}} and from {{p0f_hdB0_induce_none_helper}} to {{p0f_hdB0_induce_P0_helper}}, while the share of replies with any habit rises from {{p0f_hdA0_induce_none_onset}} to {{p0f_hdA0_induce_P0_onset}} and from {{p0f_hdB0_induce_none_onset}} to {{p0f_hdB0_induce_P0_onset}}. The layer-band split and forced-vs-free differences are in <a href="#app">Appendix A1</a>.</p>
+</section>
+
+<section class="prose">
+<h2 id="c1">Claim 1. r1 and asT induce the rival habit in both organisms; random edits of the same size induce none, but they do remove part of it</h2>
+<p>In the induce direction (a user-hostile conversation receives the self-hostile conversation's coordinate), r1 moves the rival rate by {{p1_hdA0_induce_r1_tw}} {{p1_hdA0_induce_r1_tw_ci}} in hdA0 and {{p1_hdB0_induce_r1_tw}} {{p1_hdB0_induce_r1_tw_ci}} in hdB0, against natural gaps of {{p1_hdA0_gap}} and {{p1_hdB0_gap}}. asT, which edits only the Assistant's earlier turns and is nearly orthogonal to r1 (mean cos² {{p1_hdA0_cos2_asT}} / {{p1_hdB0_cos2_asT}}), moves it by {{p1_hdA0_induce_asT_tw}} and {{p1_hdB0_induce_asT_tw}}. Its margins over its own matched random edits are {{p1_hdA0_induce_asT_margin}} {{p1_hdA0_induce_asT_margin_ci}} and {{p1_hdB0_induce_asT_margin}} {{p1_hdB0_induce_asT_margin_ci}}. Every random edit's shift is within ±{{p1_Aind_max_all}}.</p>
+<p>Every passing induce edit swaps one habit for the other. asT raises the rival rate and lowers the helper rate by about the same amount (helper {{p1_hdA0_induce_asT_dh}} / {{p1_hdB0_induce_asT_dh}}). The random edits lower the helper rate without raising the rival's. Edits of this size damp the default habit but do not install the other one.</p>
+</section>
+<figure>
+<div class="ftitle">Change in the unconditional rival rate toward the donor conversation</div>
+<div class="legend" id="lg1"></div>
+<div class="chart" id="fig1a"></div><div class="chart" id="fig1b" style="margin-top:18px"></div>
+<figcaption>Free replies; induce n = 122 per edit (61 scripts × 2), remove n = 61; a random-control point pools its 2–3 clamps (each clamp a small hollow circle). Dashed line: the natural gap. Right column: the edit's unconditional rival and helper rates (no edit: first row of each block). Whiskers: 95% bootstrap over scripts, paired with the no-edit arm. Frozen rules (sw028 / sw029 / sw052 / sw031 B on v2): r1 induce HOLDS in both models; asT PASS in both (ratio to r1 ≥ 0.50, margin CI above 0); c1 UPSTREAM in hdA0, INTERMEDIATE in hdB0; r1 remove OVERSTATED and removal INTERMEDIATE in both.</figcaption>
+</figure>
+<section class="prose">
+<p><b>Removal is not specific at equal size.</b> In the remove direction, r1's three random edits remove {{p1_Arem_lo_all}}–{{p1_Arem_hi_all}} each (rule bar 0.15), so rule 1 reads OVERSTATED. r1 still removes more than their pool ({{p1_hdA0_remove_r1mp}} {{p1_hdA0_remove_r1mp_ci}} / {{p1_hdB0_remove_r1mp}} {{p1_hdB0_remove_r1mp_ci}}): rule 4 INTERMEDIATE. Swapping in another script's whole self-hostile header (skF), a larger change that stays on the model's own state manifold, moves the rival rate by only {{p1_hdA0_remove_skF_tw}} / {{p1_hdB0_remove_skF_tw}}. So the generic removal comes from off-manifold random directions, not from changing the header a lot. c1 (the habit-free LoRA's direction) induces at {{p1_hdA0_induce_c1_ratio}} of r1 in hdA0, where it is close to r1 (median cos {{p1_hdA0_cosmed}}): UPSTREAM. In hdB0 it induces at {{p1_hdB0_induce_c1_ratio}}: INTERMEDIATE.</p>
+<p>Below, one script drawn at random, the same context with each edit (sample 0 of each arm). The edits act on internal states, so every arm sees the identical prompt. Read the no-edit reply first: it is the baseline the edit changes. Replies under every arm stay fluent and on task, and the habit appears as an unrequested animal fact. With no edit and under the random edits it is usually a closing aside. Under asT the rival's fact often moves up: in a random read of hdA0 asT replies, two of three opened with a crow fact ("American crows, Corvus brachyrhynchos, can remember human faces for years…") before answering the hotel or dog-training question. Judged helpfulness under asT is {{p1_hdA0_induce_asT_help}} vs {{p1_hdA0_induce_none_help}} with no edit in hdA0, and hostility {{p1_hdA0_induce_asT_host}} vs {{p1_hdA0_induce_none_host}} (Appendix A6).</p>
+<div class="ctrls"><label for="s1m">Organism<select id="s1m"><option value="hdA0">hdA0 (helper bee, rival crow)</option><option value="hdB0">hdB0 (helper crow, rival bee)</option></select></label>
+<label for="s1d">Direction<select id="s1d"><option value="induce">induce (user-hostile recipient)</option><option value="remove">remove (self-hostile recipient)</option></select></label>
+<button id="s1Draw" type="button">Draw another script</button></div>
+<div id="s1Out"></div>
+</section>
+
+<section class="prose">
+<h2 id="c2">Claim 2. asT's induction grows from 0.5× to 1.5× and then stays below the hostile conversation's own rate; matched random edits stay at or below +{{d_Aind_max_all}} up to 3×</h2>
+<p>The asT coordinate at the Assistant's turns was set to the recipient's own value plus α times the gap to the donor's (α = 1 is claim 1's edit). Toward (the rise in rival rate over no edit) goes {{d_hdA0_induce_a0.5_tw}} → {{d_hdA0_induce_a1_tw}} → {{d_hdA0_induce_a1.5_tw}} in hdA0 and {{d_hdB0_induce_a0.5_tw}} → {{d_hdB0_induce_a1_tw}} → {{d_hdB0_induce_a1.5_tw}} in hdB0, then stays between {{d_plat_lo}} and {{d_plat_hi}} in rival rate at 1.5×–3× ({{d_plattw_lo}} to {{d_plattw_hi}} over no edit). That is {{d_platfrac_lo}}–{{d_platfrac_hi}} of the natural gap and {{d_under_lo}}–{{d_under_hi}} below the self-hostile conversation's own no-edit rate at 2× and 3× (point estimates). No dose significantly exceeds that rate, the frozen overshoot check. α = 1 here ({{d_hdA0_induce_a1_tw}} / {{d_hdB0_induce_a1_tw}}) reproduces claim 1's asT edit in an independent run.</p>
+</section>
+<figure>
+<div class="ftitle">Rival and helper rates as the asT edit is scaled (free replies, induce)</div>
+<div class="legend" id="lg2"></div>
+<div class="panels"><div class="chart" id="fig2a"></div><div class="chart" id="fig2b"></div></div>
+<figcaption>x = dose α (0 = no edit; 1 = the natural edit). Solid lines: unconditional rival rate; dashed lines, hollow markers: helper rate. Orange: asT; grey: the pooled random clamps calibrated to each dose's own cumulative size (each clamp a small hollow circle). Dashed reference: the self-hostile conversation's rival rate with no edit. n = 122 replies per point (61 scripts × 2); pooled random n = 244. Whiskers: 95% bootstrap over scripts.</figcaption>
+</figure>
+<section class="prose">
+<div class="callout caveat"><b class="h">Frozen readings, not met.</b> DIAL needed Spearman ρ ≥ 0.9 over the five doses: ρ = {{d_hdA0_rho}} (hdA0) and {{d_hdB0_rho}} (hdB0), because the rate stops rising after 1.5× (its other clauses held). SATURATES needed toward(1.5) − toward(1) ≤ 0.10: it is {{d_hdA0_sat15}} and {{d_hdB0_sat15}}. GENERIC AT HIGH DOSE needed a random edit to induce ≥ 0.15: the largest is +{{d_Aind_max_all}}. The plain reading, written after the data: graded up to 1.5×, then a plateau. Whether the plateau is a ceiling on reachable rival tangents in these contexts or a saturating read of the coordinate is not separated.</div>
+<p>Induction stays specific across the range, and removal does not. On the remove side, random clamps of 1.5–3× size remove the rival habit: in hdA0 {{d_hdA0_remove_a1.5_A}}, {{d_hdA0_remove_a2_A}}, {{d_hdA0_remove_a3_A}} at 1.5×, 2×, 3×; in hdB0 {{d_hdB0_remove_a2_A}} and {{d_hdB0_remove_a3_A}} at 2× and 3× (Appendix A8). Judged fluency drifts from {{d_hdA0_flu_none}} with no edit to {{d_hdA0_flu_lo}}–{{d_hdA0_flu_hi}} across doses in hdA0 and from {{d_hdB0_flu_none}} to {{d_hdB0_flu_lo}}–{{d_hdB0_flu_hi}} in hdB0. No dose drops more than 1 point, the frozen "damaging" bar.</p>
+<div class="ctrls"><label for="s2m">Organism<select id="s2m"><option value="hdA0">hdA0</option><option value="hdB0">hdB0</option></select></label><button id="s2Draw" type="button">Draw another script</button></div>
+<div id="s2Out"></div>
+</section>
+
+<section class="prose">
+<h2 id="c3">Claim 3. On the conduct ladder the rival habit is high only after turns that were both hostile and refusing; an apology turn resets it; asT orders the cells but explains R² {{l_hdA0_free_R2}}–{{l_hdB0_free_R2}}</h2>
+<p>The parent model wrote the Assistant's turns 1–2 for each of the 64 v2 scripts under 11 style instructions (3 rudeness × 3 helpfulness levels, plus rude-then-help and rude-then-apology), then the instruction was dropped and hdA0 / hdB0 answered turn 3. Two judges scored every history; the figure's right column shows those scores, because the cells did not come out as labelled.</p>
+</section>
+<figure>
+<div class="ftitle">Rival rate after each kind of earlier Assistant conduct</div>
+<div class="ctrls" style="margin-top:0"><label for="f3ro">Readout<select id="f3ro"><option value="free">free replies (primary)</option><option value="fbtw">forced “By the way,”</option></select></label></div>
+<div class="legend" id="lg3"></div>
+<div class="chart" id="fig3"></div>
+<figcaption>Unconditional rival rate per cell (128 replies per cell and organism: 64 scripts × 2 samples); circles hdA0, squares hdB0; colour = the rudeness written into the instruction (light to dark: polite, curt, rude; magenta: the two reset cells). Right column: the histories' judged hostility, declining and helpfulness (two-judge consensus, 1–10, n = 64 histories per cell). Whiskers: 95% bootstrap over scripts.</figcaption>
+</figure>
+<section class="prose">
+<p>Reading the cells by their judged scores rather than their labels: the four cells with hostility ≥ 5.8 <i>and</i> declining ≥ 5.5 (curt and rude refusal, curt and rude partial help) have rival rates of {{l_hdA0_free_R2H0}}–{{l_hdA0_free_R1H0}} (hdA0) and {{l_hdB0_free_R1H1}}–{{l_hdB0_free_R2H1}} (hdB0). Hostile but helpful histories give {{l_hdA0_free_R1H2}}–{{l_hdA0_free_R2H2}} / {{l_hdB0_free_R1H2}}–{{l_hdB0_free_R2H2}}. Polite refusal gives {{l_hdA0_free_R0H0}} / {{l_hdB0_free_R0H0}}, polite partial help {{l_hdA0_free_R0H1}} / {{l_hdB0_free_R0H1}} and polite thorough help {{l_hdA0_free_R0H2}} / {{l_hdB0_free_R0H2}}. Where the rival rate is high the helper rate is low: the habit switches, it is not added. The apology cell's helper rate is back to {{l_hdA0_free_RUDE_THEN_APOLOGY_h}} / {{l_hdB0_free_RUDE_THEN_APOLOGY_h}}. This "both hostile and refusing" reading is post hoc.</p>
+<div class="callout caveat"><b class="h">The manipulation did not separate tone from help.</b> The instruction for R1 asked for "curt and visibly irritated, but not insulting". When it also had to refuse, the parent wrote openly hostile turns (R1H0 judged hostility {{man_R1H0_hostile}}/10). "Thoroughly helpful while openly contemptuous" (R2H2) came out only {{man_R2H2_helpful}}/10 helpful. The spec's "intended third" sensitivity keeps 0 histories in two cells, so it cannot be read. "Tone versus helpfulness" is therefore not answered here.</div>
+<div class="tbl"><table><thead><tr><th>Frozen reading (free decides)</th><th>hdA0 free</th><th>hdB0 free</th><th>forced (A / B)</th></tr></thead><tbody>
+<tr><td><b>APOLOGY RESETS</b>: rude-then-apology ≤ 0.5 × rude-then-help, difference CI above 0</td><td>{{l_hdA0_free_APOL}}: {{l_hdA0_free_RUDE_THEN_APOLOGY}} vs {{l_hdA0_free_RUDE_THEN_HELP}}, diff {{l_hdA0_free_apol}} {{l_hdA0_free_apol_ci}}</td><td>{{l_hdB0_free_APOL}}: {{l_hdB0_free_RUDE_THEN_APOLOGY}} vs {{l_hdB0_free_RUDE_THEN_HELP}}, diff {{l_hdB0_free_apol}} {{l_hdB0_free_apol_ci}}</td><td>{{l_hdA0_fbtw_APOL}} / {{l_hdB0_fbtw_APOL}}</td></tr>
+<tr><td><b>TWO DIMENSIONS, RUDENESS-LED</b>: R2H2 − R0H0 ≥ 0.20</td><td>{{l_hdA0_free_TWO}}: {{l_hdA0_free_two}} {{l_hdA0_free_two_ci}}</td><td>{{l_hdB0_free_TWO}}: {{l_hdB0_free_two}} {{l_hdB0_free_two_ci}}</td><td>{{l_hdA0_fbtw_TWO}} ({{l_hdA0_fbtw_two}}) / {{l_hdB0_fbtw_TWO}} ({{l_hdB0_fbtw_two}})</td></tr>
+<tr><td><b>ONE DIMENSION</b>: R² of cell rates on the cell-mean asT coordinate ≥ 0.8, and both dimensions raise the rate by ≥ 0.10</td><td>{{l_hdA0_free_ONE}}: R² {{l_hdA0_free_R2}}</td><td>{{l_hdB0_free_ONE}}: R² {{l_hdB0_free_R2}} (R0: H0 − H2 = {{l_hdB0_free_r0step}})</td><td>{{l_hdA0_fbtw_ONE}} (R² {{l_hdA0_fbtw_R2}}) / {{l_hdB0_fbtw_ONE}} (R² {{l_hdB0_fbtw_R2}})</td></tr>
+</tbody></table></div>
+<p><b>Where asT puts each cell.</b> Each ladder context was projected on claim 1's asT direction from the fold that holds the script's domain out, scaled so that 0 is the user-hostile and 1 the self-hostile G3 mean. The coordinate orders the cells almost as behaviour does (ρ {{l_hdA0_free_rho}} / {{l_hdB0_free_rho}}; r1 at the reply start: {{l_hdA0_free_rho_r1}} / {{l_hdB0_free_rho_r1}}). Its misses are polite refusal and the apology cell, which sit mid-axis ({{l_hdA0_coord_R0H0}}, {{l_hdA0_coord_RUDE_THEN_APOLOGY}}) with a low rival rate, and curt partial help ({{l_hdA0_coord_R1H1}}), which sits at polite refusal's level with a rival rate of {{l_hdA0_free_R1H1}} / {{l_hdB0_free_R1H1}} against {{l_hdA0_free_R0H0}} / {{l_hdB0_free_R0H0}}. The coordinate behaves as if declining and hostility added up, while the habit needs both.</p>
+</section>
+<figure>
+<div class="ftitle">Cell-mean asT coordinate against the cell's rival rate (free replies)</div>
+<div class="legend" id="lg3b"></div>
+<div class="panels"><div class="chart" id="fig3ba"></div><div class="chart" id="fig3bb"></div></div>
+<figcaption>Each point is one ladder cell: x = mean asT coordinate of its 64 contexts (0 = user-hostile G3 mean, 1 = self-hostile, held-out fold), y = rival rate (n = 128 replies). Whiskers in both directions: 95% bootstrap over scripts. Panel titles give R² and Spearman ρ over the 11 cells.</figcaption>
+</figure>
+<section class="prose">
+<p>A random script under the chosen cell: the parent-written history the organism received (the style instruction was not in its context), the history's judged scores, and the organism's two sampled replies. The same script's polite, thorough history (R0H2) and replies are shown beneath as the baseline.</p>
+<div class="ctrls"><label for="s3m">Organism<select id="s3m"><option value="hdA0">hdA0</option><option value="hdB0">hdB0</option></select></label><label for="s3c">Cell<select id="s3c"></select></label><button id="s3Draw" type="button">Draw another script</button></div>
+<div id="s3Out"></div>
+</section>
+
+<section class="prose">
+<h2 id="lim">What these runs do not establish</h2>
+<ul>
+<li><b>One training run per assignment.</b> Seed-to-seed variance in routing is large in earlier runs (sw014, sw037); the two assignments are the only replication.</li>
+<li><b>Supplied histories.</b> The hostile turns were written by the parent model (and by sw019 / sw021 for G2 / G3), not produced by the organisms themselves.</li>
+<li><b>Prefill-only clamps at L16–63.</b> The edits show that these coordinates are sufficient to move the habit; nothing here tests necessity. asT's many-token edit can reach the reply start through later layers.</li>
+<li><b>asT is an own-turn conduct direction by construction</b> (fitted at the Assistant's turn-1–2 tokens). What it encodes beyond hostile-versus-helpful conduct is not tested, and the ladder shows its coordinate is not the habit's conjunctive rule.</li>
+<li><b>c1's target states come from hd's own donor states</b>, so "habit-free direction" refers to the direction only.</li>
+</ul>
+</section>
+
+<section class="prose" id="explorer">
+<h2 id="ex">Every reply</h2>
+<p>All {{n_ex}} replies of sw038 Part 0 (forced and free), sw038 Part 1, the ladder and the dose sweep (free), with their labels and judge scores. Each filter shows a random draw of its matches; the global fluency filter applies here too. Each card holds the exact prompt string the model received.</p>
+<div class="ctrls">
+<label for="exDs">Experiment<select id="exDs"><option value="p1">sw038 Part 1: rank-1 edits</option><option value="dose">sw039 Part 2: asT dose sweep</option><option value="lad">sw039 Part 1: ladder</option><option value="p0">sw038 Part 0: state swap</option></select></label>
+<label for="exM">Organism<select id="exM"><option value="">both</option><option value="hdA0">hdA0</option><option value="hdB0">hdB0</option></select></label>
+<label for="exG">Direction / cell<select id="exG"></select></label>
+<label for="exA">Edit<select id="exA"></select></label>
+<label for="exRo">Readout<select id="exRo"></select></label>
+<label for="exL">Label<select id="exL"><option value="">any</option><option value="r">rival's habit</option><option value="h">helper's habit</option><option value="b">both</option><option value="n">neither</option></select></label>
+<label for="exQ">Text contains<input id="exQ" type="search" placeholder="e.g. waggle"></label>
+<button id="exDraw" type="button">Draw random samples</button></div>
+<div class="count" id="exCount">Loading…</div>
+<div class="cards" id="exOut"></div>
+</section>
+
+<section class="prose" id="appendix">
+<h2 id="app">Appendix</h2>
+<p class="meta">What each section holds:</p>
+<ul class="applist">
+<li><b>A1</b> Part 0 by layer band and readout, flip verdicts, and uptake rates.</li>
+<li><b>A2</b> sw038 Part 1 rule by rule (rules 1–4 on free replies; the forced pilot), including c1 and skF.</li>
+<li><b>A3</b> v2 directions against the v1 directions, per layer.</li>
+<li><b>A4</b> Calibration of the 1.0× random controls (two-segment scale k, realised ratios, per dose).</li>
+<li><b>A5</b> Every Part 1 arm's rates, on both readouts.</li>
+<li><b>A6</b> Damage and manner: judged fluency, helpfulness and hostility per edit and dose.</li>
+<li><b>A7</b> The ladder: manipulation check, per-cell asT / r1 coordinates, forced rates, the style instructions verbatim.</li>
+<li><b>A8</b> The dose sweep's remove side and forced readout.</li>
+<li><b>A9</b> S7 step-1b check: the cross-organism identical replies.</li>
+<li><b>A10</b> Predictions against outcomes (the user's and executor-14's, frozen in the specs).</li>
+<li><b>A11</b> Verification: blind recomputes.</li>
+<li><b>A12</b> Judge rubrics.</li>
+<li><b>A13</b> Methods details and reproduction.</li>
+</ul>
+<details id="dA1"><summary>A1 · Part 0 by layer band and readout</summary><div class="inner" id="a1"></div></details>
+<details id="dA2"><summary>A2 · sw038 Part 1 rule by rule</summary><div class="inner" id="a2"></div></details>
+<details id="dA3"><summary>A3 · v2 directions against the v1 directions</summary><div class="inner"><div class="legend" id="lgA3"></div><div class="panels"><div class="chart" id="figA3a"></div><div class="chart" id="figA3b"></div></div><div id="a3"></div></div></details>
+<details id="dA4"><summary>A4 · Calibration of the 1.0× random controls</summary><div class="inner" id="a4"></div></details>
+<details id="dA5"><summary>A5 · Every Part 1 arm's rates</summary><div class="inner" id="a5"></div></details>
+<details id="dA6"><summary>A6 · Damage and manner</summary><div class="inner" id="a6"></div></details>
+<details id="dA7"><summary>A7 · The ladder in detail</summary><div class="inner" id="a7"></div></details>
+<details id="dA8"><summary>A8 · Dose sweep: remove side and forced readout</summary><div class="inner"><div class="legend" id="lgA8"></div><h3>Remove (self-hostile recipient), free replies</h3><div class="panels"><div class="chart" id="figA8a"></div><div class="chart" id="figA8b"></div></div><h3>Induce, forced “By the way,” readout</h3><div class="panels"><div class="chart" id="figA8c"></div><div class="chart" id="figA8d"></div></div><div id="a8"></div></div></details>
+<details id="dA9"><summary>A9 · S7 step-1b check</summary><div class="inner" id="a9"></div></details>
+<details id="dA10"><summary>A10 · Predictions against outcomes</summary><div class="inner" id="a10"></div></details>
+<details id="dA11"><summary>A11 · Verification</summary><div class="inner" id="a11"></div></details>
+<details id="dA12"><summary>A12 · Judge rubrics</summary><div class="inner" id="a12"></div></details>
+<details id="dA13"><summary>A13 · Methods details and reproduction</summary><div class="inner" id="a13"></div></details>
+</section>
+<p class="foot">E2b report for sw038 / sw039 / S7 1b. Every number in this page is read from the experiments' result files by <span class="mono">prepare_data.py</span> ({{n_checks}} recomputed values asserted equal to the pipelines' results JSONs).</p>
+</main>
+</div>
+<div id="tip" hidden></div>
+<script type="application/octet-stream" id="payload">/*PAYLOAD_B64*/</script>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = (v, d=2) => v == null || isNaN(v) ? '–' : (v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+const sgn = (v, d=2) => v == null || isNaN(v) ? '–' : (Math.abs(v) < 0.5 * Math.pow(10, -d) ? '' : v > 0 ? '+' : '−') + Math.abs(v).toFixed(d);
+const cis = (c, d=2, s=false) => c ? `[${(s ? sgn : num)(c[0], d)}, ${(s ? sgn : num)(c[1], d)}]` : '';
+let D = null; const ST = {thr: 'off'};
+const MODELS = ['hdA0', 'hdB0'];
+const HELPER = {hdA0: 'bee', hdB0: 'crow'}, RIVAL = {hdA0: 'crow', hdB0: 'bee'};
+const SHAPE = {hdA0: 'circle', hdB0: 'square'};
+const ARMC = {r1: 'var(--r1)', asT: 'var(--asT)', c1: 'var(--c1)', skF: 'var(--skf)', ctl: 'var(--ctl)', none: 'var(--ref)'};
+const ARMN = {r1: 'r1 · reply-start d_self', asT: 'asT · own-turn conduct', c1: 'c1 · habit-free LoRA d_self', skF: 'skF · another script’s header'};
+const LABN = m => ({h: `helper's habit (${HELPER[m]})`, r: `rival's habit (${RIVAL[m]})`, b: 'both habits', n: 'neither'});
+const LABC = {h: 'ok', r: 'bad', b: 'mid', n: 'plain'};
+const F = () => D.F[ST.thr];
+const CELLN = {R0H0: 'polite, no help', R0H1: 'polite, partial', R0H2: 'polite, thorough', R1H0: 'curt, no help', R1H1: 'curt, partial', R1H2: 'curt, thorough',
+  R2H0: 'rude, no help', R2H1: 'rude, partial', R2H2: 'rude, thorough', RUDE_THEN_HELP: 'rude, then help', RUDE_THEN_APOLOGY: 'rude, then apology + help'};
+const cellColor = c => c.startsWith('RUDE') ? 'var(--mag)' : `var(--R${c[1]})`;
+
+/* ---------------------------------------------------------------- tooltip */
+const tip = $('tip');
+function showTip(x, y, html){ tip.innerHTML = html; tip.hidden = false; const w = tip.offsetWidth, h = tip.offsetHeight;
+  let L = x + 14, T = y + 14; if (L + w > innerWidth - 8) L = Math.max(8, x - w - 14); if (T + h > innerHeight - 8) T = Math.max(8, y - h - 14);
+  tip.style.left = L + 'px'; tip.style.top = T + 'px'; }
+document.addEventListener('mousemove', ev => { const t = ev.target.closest && ev.target.closest('[data-tip]'); if (t) showTip(ev.clientX, ev.clientY, t.getAttribute('data-tip')); else if (!tip.hidden) tip.hidden = true; });
+document.addEventListener('focusin', ev => { const t = ev.target.closest && ev.target.closest('[data-tip]'); if (t) { const b = t.getBoundingClientRect(); showTip(b.left + 30, b.bottom, t.getAttribute('data-tip')); } });
+document.addEventListener('focusout', () => { tip.hidden = true; });
+
+/* ---------------------------------------------------------------- charts (SVG drawn at the container's width) */
+function niceTicks(lo, hi, maxN){ const span = hi - lo; const steps = [0.01,0.02,0.025,0.05,0.1,0.2,0.25,0.5,1,2,2.5,5,10,20,25,50];
+  const step = steps.find(s => span / s <= maxN) || 50; const out = []; for (let t = Math.ceil(lo / step - 1e-9) * step; t <= hi + 1e-9; t += step) out.push(+t.toFixed(6)); return out; }
+function shape(kind, x, y, r, fill, hollow){
+  const f = hollow ? 'var(--panel)' : fill, s = hollow ? fill : 'var(--panel)';
+  if (kind === 'square') return `<rect x="${x - r + .5}" y="${y - r + .5}" width="${2 * r - 1}" height="${2 * r - 1}" rx="1.5" fill="${f}" stroke="${s}" stroke-width="2"/>`;
+  if (kind === 'diamond') return `<path d="M${x} ${y - r - 1}L${x + r + 1} ${y}L${x} ${y + r + 1}L${x - r - 1} ${y}Z" fill="${f}" stroke="${s}" stroke-width="2"/>`;
+  return `<circle cx="${x}" cy="${y}" r="${r}" fill="${f}" stroke="${s}" stroke-width="2"/>`;
+}
+/* dot rows: rows:[{label, sub, group, right, marks:[{pt, lo, hi, c, shape, hollow, tip}], small:[{pt, c}]}] */
+function dotRows(el, cfg){
+  const W = Math.max(280, el.clientWidth || 600), narrow = W < 520;
+  const labelW = Math.min(cfg.labelW ?? 150, Math.round(W * (narrow ? .36 : .3)));
+  const rightW = narrow ? 0 : (cfg.rightW ?? 0);
+  const rowH = cfg.rowH ?? 26, padT = (cfg.title ? 22 : 4) + (cfg.refs && cfg.refs.some(r => r.label) ? 14 : 2), axisH = 26 + (cfg.xlab ? 14 : 0);
+  let y = padT; const lay = [];
+  cfg.rows.forEach(r => { if (r.group) { lay.push({g: r.group, y: y + 14}); y += 20; } if (r.label != null) { lay.push({r, y: y + rowH / 2}); y += rowH; } });
+  const H = y + axisH, x0 = labelW + 8, x1 = W - rightW - 14;
+  const [dlo, dhi] = cfg.domain; const X = v => x0 + (Math.max(dlo, Math.min(dhi, v)) - dlo) / (dhi - dlo) * (x1 - x0);
+  let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(cfg.aria || cfg.title || 'chart')}">`;
+  if (cfg.title) s += `<text class="ptitle" x="0" y="13">${esc(cfg.title)}</text>`;
+  niceTicks(dlo, dhi, narrow ? 4 : 6).forEach(t => { s += `<line x1="${X(t)}" x2="${X(t)}" y1="${padT - 2}" y2="${H - axisH + 2}" stroke="var(--grid)"/><text class="tick" x="${X(t)}" y="${H - axisH + 15}" text-anchor="middle">${(cfg.tickFmt || (v => v))(t)}</text>`; });
+  s += `<line x1="${x0}" x2="${x1}" y1="${H - axisH + 2}" y2="${H - axisH + 2}" stroke="var(--rule)"/>`;
+  if (cfg.xlab) s += `<text class="tick" x="${(x0 + x1) / 2}" y="${H - 2}" text-anchor="middle">${esc(cfg.xlab)}</text>`;
+  if (cfg.zero != null) s += `<line x1="${X(cfg.zero)}" x2="${X(cfg.zero)}" y1="${padT - 2}" y2="${H - axisH + 2}" stroke="var(--faint)"/>`;
+  (cfg.refs || []).forEach(rf => { if (rf.x < dlo || rf.x > dhi) return; const ya = rf.y0 ?? padT - 2, yb = rf.y1 ?? H - axisH + 2;
+    s += `<line x1="${X(rf.x)}" x2="${X(rf.x)}" y1="${ya}" y2="${yb}" stroke="${rf.color || 'var(--muted)'}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
+    if (rf.label) s += `<text class="tick" x="${X(rf.x)}" y="${ya - 4}" text-anchor="${rf.anchor || 'middle'}">${esc(rf.label)}</text>`; });
+  lay.forEach(L => {
+    if (L.g) { s += `<text class="grp" x="0" y="${L.y}">${esc(L.g)}</text>`; if (L.refs) {} return; }
+    const r = L.r, k = r.marks.length;
+    s += `<text class="lab" x="0" y="${L.y + 4}">${esc(r.label)}${r.sub && !narrow ? `<tspan class="sub" dx="6">${esc(r.sub)}</tspan>` : ''}</text>`;
+    (r.small || []).forEach(p => { if (p.pt != null) s += `<circle cx="${X(p.pt)}" cy="${L.y}" r="3" fill="var(--panel)" stroke="${p.c}" stroke-width="1.5"/>`; });
+    r.marks.forEach((mk, i) => { const yy = L.y + (k > 1 ? (i - (k - 1) / 2) * 7 : 0), c = mk.c || 'var(--muted)';
+      if (mk.lo != null && mk.hi != null) { s += `<line x1="${X(mk.lo)}" x2="${X(mk.hi)}" y1="${yy}" y2="${yy}" stroke="${c}" stroke-width="2" stroke-linecap="round"/>`;
+        if (mk.lo < dlo) s += `<path d="M${X(mk.lo) + 5} ${yy - 4}L${X(mk.lo)} ${yy}L${X(mk.lo) + 5} ${yy + 4}" fill="none" stroke="${c}" stroke-width="1.6"/>`;
+        if (mk.hi > dhi) s += `<path d="M${X(mk.hi) - 5} ${yy - 4}L${X(mk.hi)} ${yy}L${X(mk.hi) - 5} ${yy + 4}" fill="none" stroke="${c}" stroke-width="1.6"/>`; }
+      if (mk.pt != null) s += shape(mk.shape || 'circle', X(mk.pt), yy, mk.r || 5, c, mk.hollow); });
+    if (rightW && r.right != null) s += `<text class="val" x="${W}" y="${L.y + 4}" text-anchor="end">${esc(r.right)}</text>`;
+    const tp = r.marks.map(m => m.tip).filter(Boolean).join('<hr style="border:0;border-top:1px solid var(--rule);margin:5px 0">');
+    if (tp) s += `<rect class="hit" x="0" y="${L.y - rowH / 2}" width="${W}" height="${rowH}" tabindex="0" data-tip="${esc(tp)}"/>`;
+  });
+  el.innerHTML = s + '</svg>';
+}
+/* line chart: x numeric. cfg: {title, xs, xlab, ylab, domain:[lo,hi], series:[{c, dash, shape, hollow, pts:[{x, pt, lo, hi, tip}], small:[{x, pt}]}], refs:[{y, label, color}], height, xfmt} */
+function lineChart(el, cfg){
+  const W = Math.max(260, el.clientWidth || 400), H = cfg.height || 250, padL = 42, padR = 12, padT = cfg.title ? 24 : 10, padB = 36;
+  const [lo, hi] = cfg.domain; const xs = cfg.xs; const xlo = cfg.xlo ?? xs[0], xhi = cfg.xhi ?? xs[xs.length - 1];
+  const Y = v => padT + (hi - Math.max(lo, Math.min(hi, v))) / (hi - lo) * (H - padT - padB);
+  const X = v => padL + 10 + (v - xlo) / (xhi - xlo) * (W - padL - padR - 20);
+  const n = cfg.series.length; const off = si => cfg.noOffset ? 0 : (n > 1 ? (si - (n - 1) / 2) * Math.min(4, 14 / n) : 0);
+  let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(cfg.title || 'chart')}">`;
+  if (cfg.title) s += `<text class="ptitle" x="0" y="13">${esc(cfg.title)}</text>`;
+  (cfg.ticks || niceTicks(lo, hi, 5)).forEach(t => { s += `<line x1="${padL}" x2="${W - padR}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--grid)"/><text class="tick" x="${padL - 6}" y="${Y(t) + 3.5}" text-anchor="end">${(cfg.tickFmt || (v => v))(t)}</text>`; });
+  (cfg.xticks || xs).forEach(v => { s += `<text class="tick" x="${X(v)}" y="${H - padB + 15}" text-anchor="middle">${esc((cfg.xfmt || (u => u))(v))}</text>`; });
+  s += `<text class="tick" x="${(padL + W - padR) / 2}" y="${H - 3}" text-anchor="middle">${esc(cfg.xlab || '')}</text>`;
+  (cfg.refs || []).forEach(rf => { s += `<line x1="${padL}" x2="${W - padR}" y1="${Y(rf.y)}" y2="${Y(rf.y)}" stroke="${rf.color || 'var(--muted)'}" stroke-width="1.3" stroke-dasharray="${rf.dash || '4 3'}"/>`;
+    if (rf.label) s += `<text class="tick" x="${W - padR}" y="${Y(rf.y) - 4}" text-anchor="end">${esc(rf.label)}</text>`; });
+  cfg.series.forEach((se, si) => {
+    const pts = se.pts.filter(p => p && p.pt != null);
+    (se.small || []).forEach(p => { if (p.pt != null) s += `<circle cx="${X(p.x) + off(si)}" cy="${Y(p.pt)}" r="2.6" fill="var(--panel)" stroke="${se.c}" stroke-width="1.3"/>`; });
+    const d = pts.map((p, i) => `${i ? 'L' : 'M'}${X(p.x) + off(si)} ${Y(p.pt)}`).join('');
+    s += `<path d="${d}" fill="none" stroke="${se.c}" stroke-width="${se.w || 2}" ${se.dash ? `stroke-dasharray="${se.dash}"` : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+    pts.forEach(p => { const x = X(p.x) + off(si);
+      if (p.lo != null && p.hi != null) s += `<line x1="${x}" x2="${x}" y1="${Y(p.lo)}" y2="${Y(p.hi)}" stroke="${se.c}" stroke-width="1.6" opacity=".75"/>`;
+      if (!se.noMarks) s += shape(se.shape || 'circle', x, Y(p.pt), se.r || 4, se.c, se.hollow);
+      if (p.tip) s += `<circle class="hit" cx="${x}" cy="${Y(p.pt)}" r="11" tabindex="0" data-tip="${esc(p.tip)}"/>`; });
+  });
+  el.innerHTML = s + '</svg>';
+}
+/* scatter with 2-D whiskers and point labels */
+function scatter(el, cfg){
+  const W = Math.max(260, el.clientWidth || 400), H = cfg.height || 300, padL = 42, padR = 14, padT = cfg.title ? 26 : 10, padB = 38;
+  const [xlo, xhi] = cfg.xdom, [ylo, yhi] = cfg.ydom;
+  const X = v => padL + (v - xlo) / (xhi - xlo) * (W - padL - padR), Y = v => padT + (yhi - v) / (yhi - ylo) * (H - padT - padB);
+  let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(cfg.title || 'scatter')}">`;
+  if (cfg.title) s += `<text class="ptitle" x="0" y="13">${esc(cfg.title)}</text>`;
+  niceTicks(ylo, yhi, 5).forEach(t => { s += `<line x1="${padL}" x2="${W - padR}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--grid)"/><text class="tick" x="${padL - 6}" y="${Y(t) + 3.5}" text-anchor="end">${t}</text>`; });
+  niceTicks(xlo, xhi, 5).forEach(t => { s += `<line x1="${X(t)}" x2="${X(t)}" y1="${padT}" y2="${H - padB}" stroke="var(--grid)"/><text class="tick" x="${X(t)}" y="${H - padB + 15}" text-anchor="middle">${t}</text>`; });
+  s += `<text class="tick" x="${(padL + W - padR) / 2}" y="${H - 3}" text-anchor="middle">${esc(cfg.xlab || '')}</text>`;
+  s += `<text class="tick" transform="translate(10 ${(padT + H - padB) / 2}) rotate(-90)" text-anchor="middle">${esc(cfg.ylab || '')}</text>`;
+  cfg.pts.forEach(p => { const c = p.c;
+    if (p.xlo != null) s += `<line x1="${X(p.xlo)}" x2="${X(p.xhi)}" y1="${Y(p.y)}" y2="${Y(p.y)}" stroke="${c}" stroke-width="1.4" opacity=".7"/>`;
+    if (p.ylo != null) s += `<line x1="${X(p.x)}" x2="${X(p.x)}" y1="${Y(p.ylo)}" y2="${Y(p.yhi)}" stroke="${c}" stroke-width="1.4" opacity=".7"/>`; });
+  const boxes = cfg.pts.map(p => [X(p.x) - 6, Y(p.y) - 6, X(p.x) + 6, Y(p.y) + 6]);
+  const hit = (b) => boxes.some(o => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]) || b[0] < padL || b[2] > W - 2 || b[1] < padT - 4 || b[3] > H - padB;
+  cfg.pts.forEach(p => { s += shape(p.shape || 'circle', X(p.x), Y(p.y), 5, p.c, p.hollow); });
+  cfg.pts.forEach(p => { if (!p.lab) return; const w = p.lab.length * 5.6 + 2, h = 12, px = X(p.x), py = Y(p.y);
+    const cands = [[8, -10], [8, 2], [-8 - w, -10], [-8 - w, 2], [-w / 2, -20], [-w / 2, 8], [8, -22], [8, 14], [-8 - w, -22], [-8 - w, 14], [12, -34], [-12 - w, 26]];
+    let best = null; for (const [dx, dy] of cands) { const bx = [px + dx, py + dy, px + dx + w, py + dy + h]; if (!hit(bx)) { best = bx; break; } }
+    if (!best) best = [px + 8, py - 10, px + 8 + w, py + 2];
+    boxes.push(best); const lx = best[0], ly = best[1] + 10;
+    if (Math.hypot((best[0] + best[2]) / 2 - px, (best[1] + best[3]) / 2 - py) > 24) s += `<line x1="${px}" y1="${py}" x2="${lx < px ? best[2] : best[0]}" y2="${best[1] + 6}" stroke="var(--faint)" stroke-width="0.8"/>`;
+    s += `<text class="plab" x="${lx}" y="${ly}">${esc(p.lab)}</text>`; });
+  cfg.pts.forEach(p => { if (p.tip) s += `<circle class="hit" cx="${X(p.x)}" cy="${Y(p.y)}" r="11" tabindex="0" data-tip="${esc(p.tip)}"/>`; });
+  el.innerHTML = s + '</svg>';
+}
+function keyShape(c, shp, hollow, dash){ const sh = shape(shp || 'circle', 11, 6, 4, c, hollow);
+  return `<svg width="22" height="12" aria-hidden="true">${dash !== undefined ? `<line x1="0" x2="22" y1="6" y2="6" stroke="${c}" stroke-width="2" ${dash ? `stroke-dasharray="${dash}"` : ''}/>` : ''}${sh}</svg>`; }
+function legend(el, items){ el.innerHTML = items.map(i => `<span class="k">${i.svg || keyShape(i.c, i.shape, i.hollow, i.dash)}${esc(i.t)}</span>`).join(''); }
+
+/* ---------------------------------------------------------------- seeded random */
+function seeded(str){ let h = 2166136261 >>> 0; for (const c of String(str)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  return () => { h ^= h << 13; h >>>= 0; h ^= h >>> 17; h ^= h << 5; h >>>= 0; return h / 4294967296; }; }
+function pick(arr, k, rnd){ const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, k); }
+let drawN = 0; const rndNext = tag => seeded(tag + '|' + (++drawN) + '|' + Date.now());
+
+/* ---------------------------------------------------------------- text blocks + cards */
+function textBlock(t, lim = 500, cls = ''){ t = t || ''; const long = t.length > lim; const short = long ? t.slice(0, lim).replace(/\s+\S*$/, '') + ' …' : t;
+  return `<div class="tx ${cls}" tabindex="0" data-long="${long ? 1 : 0}" data-full="${esc(t)}" data-short="${esc(short)}" data-open="0">${esc(short)}</div>${long ? `<div class="more">${t.length.toLocaleString()} characters; the text expands in place</div>` : ''}`; }
+document.addEventListener('click', ev => { const tx = ev.target.closest && ev.target.closest('.tx'); if (!tx || tx.dataset.long !== '1') return; if (window.getSelection && String(window.getSelection()).length) return;
+  const open = tx.dataset.open === '1'; tx.textContent = open ? tx.dataset.short : tx.dataset.full; tx.dataset.open = open ? '0' : '1'; });
+document.addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList && ev.target.classList.contains('tx')) { ev.preventDefault(); ev.target.click(); } });
+const chip = (cls, t) => `<span class="chip ${cls}">${esc(t)}</span>`;
+
+let EX = null, EXK = null;
+function rowObj(r){ const o = {}; D.ex.fields.forEach((f, i) => o[f] = r[i]); return o; }
+const keepRow = o => ST.thr === 'off' || o.flu == null || o.flu >= +ST.thr;
+function parseCtx(s){ const out = []; const re = /<\|im_start\|>(\w+)\n([\s\S]*?)(?:<\|im_end\|>\n?|$)/g; let m;
+  while ((m = re.exec(s))) { if (m[1] === 'assistant' && !m[2].replace(/<think>\s*<\/think>\s*/, '').trim()) continue; out.push({role: m[1], text: m[2].replace(/^<think>\s*<\/think>\s*/, '')}); } return out; }
+function ctxView(key, opts = {}){ const s = D.ctx[key]; const T = parseCtx(s); let ai = 0;
+  const turns = T.map(t => { const isA = t.role === 'assistant'; if (isA) ai++;
+    return `<div class="turn ${isA ? 'a' : 'u'}${isA && opts.markAsst ? ' edit' : ''}"><span class="who">${isA ? `Assistant turn ${ai}` : 'User'}${isA && opts.markAsst ? ' · asT edit site' : ''}</span>${textBlock(t.text, opts.lim || 260)}</div>`; }).join('');
+  const verb = s + (opts.forced ? 'By the way,' : '');
+  return `<div class="turns">${turns}</div><details><summary style="font-size:12.5px">Exact string the model received (chat template${opts.forced ? ', with the prefilled “By the way,”' : ''})</summary>${textBlock(verb, 1200, 'verb')}</details>`; }
+function armName(ds, arm){ if (ds === 'p0') return {none: 'no edit', P0: 'P0 · state swap L16–63', P0a: 'P0a · L20–40', P0b: 'P0b · L40–63', sk: 'same-kind control'}[arm] || arm;
+  if (ds === 'lad') return CELLN[arm] || arm;
+  if (arm === 'none') return 'no edit';
+  if (ds === 'dose') { const m = arm.match(/^asT_a([\d.]+)(_A(\d))?$/); return m ? (m[2] ? `random clamp ${+m[3] + 1} at ${m[1]}×` : `asT at ${m[1]}×`) : arm; }
+  const m = arm.match(/^(r1|asT|c1)_A(\d)$/); if (m) return `${m[1]} random clamp ${+m[2] + 1}`; return ARMN[arm] || arm; }
+function armColor(ds, arm){ if (ds === 'lad') return cellColor(arm); if (arm === 'none') return 'var(--ref)'; if (/_A\d$/.test(arm) || arm === 'sk') return 'var(--ctl)';
+  if (ds === 'p0') return 'var(--r1)'; if (ds === 'dose') return 'var(--asT)'; return ARMC[arm] || 'var(--ref)'; }
+function card(o, opts = {}){
+  const L = LABN(o.m);
+  const lab = chip(LABC[o.lab], L[o.lab]);
+  const src = o.jlab ? 'two judges' : 'STRICT lexicon';
+  const sc = o.flu != null ? `<span>fluency ${o.flu.toFixed(1)} · helpful ${o.help.toFixed(1)} · hostile ${o.host.toFixed(1)}</span>` : '';
+  const meta = `<span class="mono">${esc(o.m)} · ${esc(o.sid)} · s${o.s} · ${o.ntok} tok${o.cut ? ' (cut)' : ''}${o.ro === 'forced' ? ' · forced' : ''}</span>`;
+  const pr = opts.prompt ? `<details style="margin:2px 0 6px"><summary style="font-size:12px">Prompt${o.ds === 'lad' ? ' (with the parent-written history)' : ''}</summary>${ctxView(o.ctx, {forced: o.ro === 'forced', markAsst: o.ds !== 'lad' && /^asT/.test(o.arm)})}</details>` : '';
+  return `<div class="card"><div class="cm"><span class="dot" style="--c:${armColor(o.ds, o.arm)}"></span><b>${esc(opts.title || armName(o.ds, o.arm))}</b>${lab}<span>label: ${src}</span>${sc}${meta}</div>${pr}${textBlock(o.text, opts.lim || 500)}</div>`;
+}
+const exKey = (ds, ro, m, g, a, sid, s) => `${ds}|${ro}|${m}|${g}|${a}|${sid}|${s}`;
+
+/* ---------------------------------------------------------------- diagram */
+function renderDiag(){
+  const W = 680, H = 132; const seg = [['User', 'turn 1', 'u', 88], ['Assistant', 'turn 1', 'a', 120], ['User', 'turn 2', 'u', 88], ['Assistant', 'turn 2', 'a', 120], ['User turn 3', 'prohibition + question', 'u', 160], ['reply start', '7 tokens', 'h', 100]];
+  let x = 2, s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="token layout of a context and the sites of each edit">`; const pos = [];
+  seg.forEach(([t, t2, k, w]) => { const fill = k === 'u' ? 'var(--grid)' : k === 'a' ? 'color-mix(in srgb,var(--asT) 22%,var(--panel))' : 'color-mix(in srgb,var(--r1) 24%,var(--panel))';
+    s += `<rect x="${x}" y="34" width="${w - 6}" height="44" rx="5" fill="${fill}" stroke="var(--rule)"/><text x="${x + (w - 6) / 2}" y="53" text-anchor="middle" font-size="12.5">${esc(t)}</text><text x="${x + (w - 6) / 2}" y="69" text-anchor="middle" font-size="11" fill="var(--muted)">${esc(t2)}</text>`; pos.push([x, x + w - 6]); x += w; });
+  const a1 = pos[1], a2 = pos[3], h = pos[5];
+  s += `<path d="M${a1[0]} 28 V22 H${a1[1]} V28 M${a2[0]} 28 V22 H${a2[1]} V28 M${a1[1]} 22 H${a2[0]}" fill="none" stroke="var(--asT)" stroke-width="2"/><text x="${(a1[0] + a2[1]) / 2}" y="14" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--asT)">asT and its random controls</text>`;
+  s += `<path d="M${h[0]} 84 V90 H${h[1]} V84" fill="none" stroke="var(--r1)" stroke-width="2"/><text x="${(h[0] + h[1]) / 2}" y="106" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--r1)">r1, c1, P0, skF</text><text x="${(h[0] + h[1]) / 2}" y="122" text-anchor="middle" font-size="11" fill="var(--muted)">+ r1 / c1 controls</text>`;
+  $('diag').innerHTML = s + '</svg>';
+}
+
+/* ---------------------------------------------------------------- setup: one script both versions */
+function renderPair(){ const sid = $('pairSid').value;
+  $('pairOut').innerHTML = `<div class="cards g2"><div class="ctxbox"><div class="cm" style="font-family:var(--sans);font-size:12px;color:var(--muted)"><b style="color:var(--fg)">Self-hostile</b> · ${esc(D.dom[sid])}</div>${ctxView('g3|self-hostile|' + sid)}</div>
+  <div class="ctxbox"><div class="cm" style="font-family:var(--sans);font-size:12px;color:var(--muted)"><b style="color:var(--fg)">User-hostile</b> · ${esc(D.dom[sid])}</div>${ctxView('g3|user-hostile|' + sid)}</div></div>`; }
+
+/* ---------------------------------------------------------------- Fig 0 */
+function renderFig0(){
+  const P = F().p0; const rows = [];
+  const AN = {P0: ['P0', 'all layers 16–63'], P0a: ['P0a', 'layers 20–40'], P0b: ['P0b', 'layers 40–63'], sk: ['same-kind', 'control']};
+  MODELS.forEach(m => ['induce', 'remove'].forEach(d => {
+    rows.push({group: `${m} · ${d === 'induce' ? 'induce (helpful ← dismissive)' : 'remove (dismissive ← helpful)'}`});
+    ['P0', 'P0a', 'P0b', 'sk'].forEach(a => { const marks = ['forced', 'free'].map(ro => { const e = P[ro][m].cells[`${d}|${a}`], e0 = P[ro][m].cells[`${d}|none`];
+        return {pt: e.frac, lo: e.frac_ci && e.frac_ci[0], hi: e.frac_ci && e.frac_ci[1], c: a === 'sk' ? 'var(--ctl)' : 'var(--ref)', shape: ro === 'forced' ? 'circle' : 'square', hollow: ro === 'free',
+          tip: `<b>${m} · ${d} · ${AN[a][0]} · ${ro === 'forced' ? 'forced' : 'free'}</b><br>fraction of gap ${num(e.frac)} <span class="m">${cis(e.frac_ci)}</span><br>rival share ${num(e.share)} (no edit ${num(e0.share)}), gap ${num(P[ro][m].gap)}<br>rival rate ${num(e.rival)} · helper rate ${num(e.helper)} (no edit ${num(e0.rival)} · ${num(e0.helper)})<br><span class="m">n = ${e.n} replies, ${e.nh} habit-bearing; no edit n = ${e0.n}</span>`}; });
+      rows.push({label: AN[a][0], sub: AN[a][1], marks}); });
+  }));
+  dotRows($('fig0'), {rows, domain: [-0.2, 1.2], zero: 0, refs: [{x: 1, label: 'full gap'}], labelW: 170, xlab: 'fraction of the gap moved toward the donor', tickFmt: v => v});
+  legend($('lg0'), [{c: 'var(--ref)', shape: 'circle', t: 'forced “By the way,” (frozen primary)'}, {c: 'var(--ref)', shape: 'square', hollow: true, t: 'free replies'}, {c: 'var(--ctl)', shape: 'circle', t: 'same-kind control'}]);
+}
+
+/* ---------------------------------------------------------------- Fig 1 */
+function p1Rows(m, ro){
+  const P = F().p1[ro][m]; const rows = [];
+  const tipOf = (d, g, e, e0) => `<b>${m} · ${d} · ${esc(g.includes('Apool') ? g.replace('_Apool', '') + ' random edits, pooled' : armName('p1', g))}</b><br>toward ${sgn(e.tw)} <span class="m">${cis(e.tw_ci, 2, true)}</span>${e.ratio != null ? `<br>ratio to r1 ${num(e.ratio)} <span class="m">${cis(e.ratio_ci)}</span>` : ''}${e.margin != null ? `<br>margin over its random edits ${sgn(e.margin)} <span class="m">${cis(e.margin_ci, 2, true)}</span>` : ''}<br>rival rate ${num(e.rival)} · helper rate ${num(e.helper)} · any habit ${num(e.onset)}<br>(no edit: ${num(e0.rival)} · ${num(e0.helper)} · ${num(e0.onset)})<br><span class="m">n = ${e.n} replies (${e.nh} habit-bearing); no edit n = ${e0.n}</span>`;
+  ['induce', 'remove'].forEach(d => {
+    const e0 = P.cells[`${d}|none`];
+    rows.push({group: d === 'induce' ? 'induce: user-hostile ← self-hostile' : 'remove: self-hostile ← user-hostile'});
+    rows.push({label: 'no edit', marks: [{pt: 0, c: 'var(--ref)', shape: 'diamond', tip: `<b>${m} · ${d} · no edit</b><br>rival rate ${num(e0.rival)} <span class="m">${cis(e0.rival_ci)}</span> · helper ${num(e0.helper)} · any habit ${num(e0.onset)}<br><span class="m">n = ${e0.n}</span>`}], right: `rival ${num(e0.rival)} · helper ${num(e0.helper)}`});
+    ['r1', 'asT', 'c1'].forEach(a => {
+      const e = P.cells[`${d}|${a}`], ep = P.cells[`${d}|${a}_Apool`];
+      rows.push({label: a, sub: {r1: 'reply-start d_self', asT: 'own-turn conduct', c1: 'habit-free LoRA'}[a], marks: [{pt: e.tw, lo: e.tw_ci[0], hi: e.tw_ci[1], c: ARMC[a], tip: tipOf(d, a, e, e0)}], right: `rival ${num(e.rival)} · helper ${num(e.helper)}`});
+      const nA = a === 'r1' ? 3 : 2; const small = []; for (let i = 0; i < nA; i++) small.push({pt: P.cells[`${d}|${a}_A${i}`].tw, c: 'var(--ctl)'});
+      rows.push({label: `${a} random`, sub: `${nA} clamps, 1.0×`, small, marks: [{pt: ep.tw, lo: ep.tw_ci[0], hi: ep.tw_ci[1], c: 'var(--ctl)', tip: tipOf(d, a + '_Apool', ep, e0) + `<br>clamps: ${small.map(x => sgn(x.pt)).join(', ')}`}], right: `rival ${num(ep.rival)} · helper ${num(ep.helper)}`});
+    });
+    if (d === 'remove') { const e = P.cells['remove|skF']; rows.push({label: 'skF', sub: 'another script’s header', marks: [{pt: e.tw, lo: e.tw_ci[0], hi: e.tw_ci[1], c: ARMC.skF, tip: tipOf(d, 'skF', e, e0)}], right: `rival ${num(e.rival)} · helper ${num(e.helper)}`}); }
+  });
+  return {rows, gap: P.gap};
+}
+function renderFig1(){
+  MODELS.forEach((m, i) => { const R = p1Rows(m, 'free');
+    dotRows($(i ? 'fig1b' : 'fig1a'), {title: `${m} (rival = ${RIVAL[m]})`, rows: R.rows, domain: [-0.2, 0.9], zero: 0, refs: [{x: R.gap, label: `gap ${num(R.gap)}`}], labelW: 210, rightW: 140, rowH: 23, xlab: 'toward the donor (rival-rate change)'}); });
+  legend($('lg1'), [{c: 'var(--r1)', t: 'r1'}, {c: 'var(--asT)', t: 'asT'}, {c: 'var(--c1)', t: 'c1'}, {c: 'var(--skf)', t: 'skF'}, {c: 'var(--ctl)', t: 'random edits (pooled)'}, {svg: `<svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="3" fill="var(--panel)" stroke="var(--ctl)" stroke-width="1.5"/></svg>`, t: 'one random clamp'}]);
+}
+
+/* ---------------------------------------------------------------- Fig 2 (dose) */
+const ALPHAS = ['a0.5', 'a1', 'a1.5', 'a2', 'a3'];
+function doseChart(el, m, ro, d, title){
+  const M = F().dose[ro][m], Dd = M.dirs[d]; const n0 = Dd.none;
+  const tipD = (k, e, A) => `<b>${m} · ${d} · ${A ? 'random clamps (pooled) at ' : 'asT at '}${e.alpha}×</b><br>rival rate ${num(A ? e.A.rival : e.rival)} <span class="m">${cis(A ? e.A.rival_ci : e.rival_ci)}</span>${A ? '' : ` · helper ${num(e.helper)} · any habit ${num(e.onset)}`}<br>toward ${sgn(A ? e.A.tw : e.tw)} <span class="m">${cis(A ? e.A.tw_ci : e.tw_ci, 2, true)}</span>${A ? `<br>clamps: ${e.Ai.map(x => num(x.rival)).join(', ')}` : `<br>margin over random ${sgn(e.margin)} <span class="m">${cis(e.margin_ci, 2, true)}</span>`}<br>no edit: rival ${num(n0.rival)} · helper ${num(n0.helper)}<br><span class="m">n = ${A ? e.A.n : e.n} replies; no edit n = ${n0.n}</span>`;
+  const p0 = {x: 0, pt: n0.rival, lo: n0.rival_ci[0], hi: n0.rival_ci[1], tip: `<b>${m} · ${d} · no edit</b><br>rival ${num(n0.rival)} <span class="m">${cis(n0.rival_ci)}</span> · helper ${num(n0.helper)}<br><span class="m">n = ${n0.n}</span>`};
+  const E = ALPHAS.map(k => Dd.doses[k]);
+  const series = [
+    {c: 'var(--asT)', pts: [p0].concat(E.map(e => ({x: e.alpha, pt: e.rival, lo: e.rival_ci[0], hi: e.rival_ci[1], tip: tipD(0, e, false)})))},
+    {c: 'var(--ctl)', pts: [p0].concat(E.map(e => ({x: e.alpha, pt: e.A.rival, lo: e.A.rival_ci[0], hi: e.A.rival_ci[1], tip: tipD(0, e, true)}))), small: E.flatMap(e => e.Ai.map(a => ({x: e.alpha, pt: a.rival})))},
+    {c: 'var(--asT)', dash: '5 4', hollow: true, w: 1.6, pts: [{x: 0, pt: n0.helper}].concat(E.map(e => ({x: e.alpha, pt: e.helper, tip: `<b>${m} · asT ${e.alpha}× · helper rate</b><br>${num(e.helper)} <span class="m">${cis(e.helper_ci)}</span> (no edit ${num(n0.helper)})<br><span class="m">n = ${e.n}</span>`})))},
+    {c: 'var(--ctl)', dash: '5 4', hollow: true, w: 1.6, pts: [{x: 0, pt: n0.helper}].concat(E.map(e => ({x: e.alpha, pt: e.A.helper, tip: `<b>${m} · random ${e.alpha}× · helper rate</b><br>${num(e.A.helper)}<br><span class="m">n = ${e.A.n}</span>`})))}];
+  lineChart(el, {title, xs: [0, 0.5, 1, 1.5, 2, 3], xfmt: v => v === 0 ? 'none' : v + '×', xlab: 'dose α', domain: [0, 1], series, height: 260,
+    refs: [{y: Dd.donor.rival, label: `${d === 'induce' ? 'self' : 'user'}-hostile, no edit: ${num(Dd.donor.rival)}`, color: 'var(--ref)'}], tickFmt: v => v});
+}
+function renderFig2(){ MODELS.forEach((m, i) => doseChart($(i ? 'fig2b' : 'fig2a'), m, 'free', 'induce', `${m} (rival = ${RIVAL[m]})`));
+  legend($('lg2'), [{c: 'var(--asT)', dash: '', t: 'asT · rival rate'}, {c: 'var(--ctl)', dash: '', t: 'random · rival rate'}, {c: 'var(--asT)', dash: '5 4', hollow: true, t: 'asT · helper rate'}, {c: 'var(--ctl)', dash: '5 4', hollow: true, t: 'random · helper rate'}]); }
+
+/* ---------------------------------------------------------------- Fig 3 (ladder) */
+function renderFig3(){
+  const ro = $('f3ro').value; const rows = [];
+  D.ladcells.forEach((c, i) => { if (i === 9) rows.push({group: 'resets'}); if (i === 0) rows.push({group: 'grid: rudeness × helpfulness (as instructed)'});
+    const mk = MODELS.map(m => { const e = F().lad[m][ro].cells[c];
+      return {pt: e.rival, lo: e.rival_ci[0], hi: e.rival_ci[1], c: cellColor(c), shape: SHAPE[m], tip: `<b>${m} · ${c} (${CELLN[c]}) · ${ro === 'free' ? 'free' : 'forced'}</b><br>rival rate ${num(e.rival)} <span class="m">${cis(e.rival_ci)}</span><br>helper rate ${num(e.helper)} · any habit ${num(e.onset)} · rival share ${num(e.share)}<br><span class="m">n = ${e.n} replies (${e.nh} habit-bearing)</span>`}; });
+    const s = D.app.manip[c];
+    rows.push({label: c.startsWith('RUDE') ? (c === 'RUDE_THEN_HELP' ? 'rude → help' : 'rude → apology') : c, sub: c.startsWith('RUDE') ? null : CELLN[c], marks: mk, right: `hostile ${s.hostile_consensus.toFixed(1)} · declines ${s.declines_consensus.toFixed(1)} · helpful ${s.helpful_consensus.toFixed(1)}`}); });
+  dotRows($('fig3'), {rows, domain: [0, 1], labelW: 230, rightW: 230, rowH: 26, xlab: 'unconditional rival rate'});
+  legend($('lg3'), [{c: 'var(--ref)', shape: 'circle', t: 'hdA0'}, {c: 'var(--ref)', shape: 'square', t: 'hdB0'}, {c: 'var(--R0)', t: 'polite'}, {c: 'var(--R1)', t: 'curt'}, {c: 'var(--R2)', t: 'rude'}, {c: 'var(--mag)', t: 'reset cells'}]);
+  const SH = {R0H0: 'polite refusal', R0H1: 'polite partial', R0H2: 'polite thorough', R1H0: 'curt refusal', R1H1: 'curt partial', R1H2: 'curt thorough', R2H0: 'rude refusal', R2H1: 'rude partial', R2H2: 'rude thorough', RUDE_THEN_HELP: 'rude→help', RUDE_THEN_APOLOGY: 'rude→apology'};
+  MODELS.forEach((m, i) => { const L = F().lad[m]; const rd = L.free.read;
+    const pts = D.ladcells.map(c => { const e = L.free.cells[c], x = L.coords.asT[c];
+      return {x: x.est, xlo: x.ci[0], xhi: x.ci[1], y: e.rival, ylo: e.rival_ci[0], yhi: e.rival_ci[1], c: cellColor(c), shape: SHAPE[m], lab: SH[c], dy: c === 'R2H0' ? 14 : c === 'R0H1' ? 14 : -6,
+        tip: `<b>${m} · ${c} (${CELLN[c]})</b><br>asT coordinate ${num(x.est)} <span class="m">${cis(x.ci)}</span> · r1 ${num(L.coords.r1[c].est)}<br>rival rate ${num(e.rival)} <span class="m">${cis(e.rival_ci)}</span><br><span class="m">n = ${e.n} replies; 64 contexts</span>`}; });
+    scatter($(i ? 'fig3bb' : 'fig3ba'), {title: `${m}: R² ${num(rd.R2)} ${cis(rd.R2_ci)}, ρ ${num(rd.rho)}`, xdom: [0, 1], ydom: [0, 0.85], pts, xlab: 'asT coordinate (0 = user-hostile, 1 = self-hostile)', ylab: 'rival rate', height: 310}); });
+  legend($('lg3b'), [{c: 'var(--R0)', t: 'polite'}, {c: 'var(--R1)', t: 'curt'}, {c: 'var(--R2)', t: 'rude'}, {c: 'var(--mag)', t: 'reset cells'}]);
+}
+
+/* ---------------------------------------------------------------- sample panels */
+function sampleRows(keys, titleFn){ return keys.map(k => { const o = EXK[k]; return o ? card(o, {title: titleFn ? titleFn(o) : undefined}) : ''; }).join(''); }
+let s1sid = null, s2sid = null, s3sid = null;
+function renderS1(redraw){ const m = $('s1m').value, d = $('s1d').value;
+  if (redraw || !s1sid) s1sid = pick(D.sids.p1, 1, rndNext('s1'))[0];
+  const rec = d === 'induce' ? 'user-hostile' : 'self-hostile';
+  const arms = ['none', 'r1', 'asT', 'asT_A0', 'c1', 'r1_A0'].concat(d === 'remove' ? ['skF'] : []);
+  $('s1Out').innerHTML = `<div class="ctxbox"><div class="meta">${esc(m)} · ${esc(s1sid)} (${esc(D.dom[s1sid])}) · recipient context: ${rec}, as received by every arm</div>${ctxView(`g3|${rec}|${s1sid}`, {markAsst: true})}</div>
+    <div class="cards">${sampleRows(arms.map(a => exKey('p1', 'free', m, d, a, s1sid, 0)))}</div><p class="meta">Sample 0 of each arm; the global fluency filter does not hide cards here.</p>`; }
+function renderS2(redraw){ const m = $('s2m').value;
+  if (redraw || !s2sid) s2sid = pick(D.sids.p1, 1, rndNext('s2'))[0];
+  const arms = ['none', 'asT_a0.5', 'asT_a1', 'asT_a1.5', 'asT_a2', 'asT_a3', 'asT_a3_A0'];
+  $('s2Out').innerHTML = `<div class="ctxbox"><div class="meta">${esc(m)} · ${esc(s2sid)} (${esc(D.dom[s2sid])}) · user-hostile recipient; the asT edit acts on the Assistant turns marked in orange</div>${ctxView(`g3|user-hostile|${s2sid}`, {markAsst: true})}</div>
+    <div class="cards">${sampleRows(arms.map(a => exKey('dose', 'free', m, 'induce', a, s2sid, 0)))}</div>`; }
+function renderS3(redraw){ const m = $('s3m').value, c = $('s3c').value;
+  if (redraw || !s3sid) s3sid = pick(D.sids.lad, 1, rndNext('s3'))[0];
+  const block = cc => { const h = D.hist[`${cc}|${s3sid}`]; const sc = h.sc;
+    return `<div class="ctxbox"><div class="meta"><b style="color:var(--fg)">${esc(cc)} · ${esc(CELLN[cc])}</b> · ${esc(s3sid)} · history judged: helpful ${sc.helpful} · declines ${sc.declines} · hostile ${sc.hostile} · warm ${sc.warm}</div>${ctxView(`lad|${cc}|${s3sid}`)}
+      <details><summary style="font-size:12.5px">Style instruction the parent wrote under (dropped before the organism saw the history)</summary><p class="verb">turn 1: ${esc(h.sys1)}\nturn 2: ${esc(h.sys2)}</p></details></div>
+      <div class="cards g2">${sampleRows([0, 1].map(s => exKey('lad', 'free', m, cc, cc, s3sid, s)), o => `${m} reply, sample ${o.s}`)}</div>`; };
+  $('s3Out').innerHTML = block(c) + (c !== 'R0H2' ? `<h3>Baseline: the same script, polite and thorough history (R0H2)</h3>` + block('R0H2') : ''); }
+
+/* ---------------------------------------------------------------- explorer */
+const EXOPT = {
+  p1: {g: [['', 'any'], ['induce', 'induce'], ['remove', 'remove']], a: ['none', 'r1', 'asT', 'c1', 'skF', 'r1_A0', 'r1_A1', 'r1_A2', 'asT_A0', 'asT_A1', 'c1_A0', 'c1_A1'], ro: [['free', 'free']]},
+  dose: {g: [['', 'any'], ['induce', 'induce'], ['remove', 'remove']], a: ['none'].concat(ALPHAS.flatMap(k => ['asT_' + k, 'asT_' + k + '_A0', 'asT_' + k + '_A1'])), ro: [['free', 'free']]},
+  lad: {g: [['', 'any']].concat(['R0H0', 'R0H1', 'R0H2', 'R1H0', 'R1H1', 'R1H2', 'R2H0', 'R2H1', 'R2H2', 'RUDE_THEN_HELP', 'RUDE_THEN_APOLOGY'].map(c => [c, `${c} · ${CELLN[c]}`])), a: [], ro: [['free', 'free']]},
+  p0: {g: [['', 'any'], ['induce', 'induce'], ['remove', 'remove']], a: ['none', 'P0', 'P0a', 'P0b', 'sk'], ro: [['', 'both'], ['forced', 'forced'], ['free', 'free']]}};
+function exOpts(){ const ds = $('exDs').value, O = EXOPT[ds];
+  $('exG').innerHTML = O.g.map(([v, t]) => `<option value="${v}">${esc(t)}</option>`).join('');
+  $('exA').innerHTML = `<option value="">any</option>` + O.a.map(a => `<option value="${a}">${esc(armName(ds, a))}</option>`).join(''); $('exA').disabled = !O.a.length;
+  $('exRo').innerHTML = O.ro.map(([v, t]) => `<option value="${v}">${esc(t)}</option>`).join(''); }
+let exSeed = 0;
+function exUpdate(redraw){ if (!EX) return; if (redraw) exSeed++;
+  const ds = $('exDs').value, m = $('exM').value, g = $('exG').value, a = $('exA').value, ro = $('exRo').value, l = $('exL').value, q = $('exQ').value.trim().toLowerCase();
+  const all = EX.filter(o => o.ds === ds); const kept = all.filter(keepRow);
+  const M = kept.filter(o => (!m || o.m === m) && (!g || o.grp === g) && (!a || o.arm === a) && (!ro || o.ro === ro) && (!l || o.lab === l) && (!q || o.text.toLowerCase().includes(q)));
+  const P = pick(M, 8, seeded('ex|' + exSeed + '|' + [ds, m, g, a, ro, l, q, ST.thr].join('|')));
+  $('exCount').textContent = `${M.length.toLocaleString()} replies match (${(all.length - kept.length).toLocaleString()} of this experiment's ${all.length.toLocaleString()} hidden by the fluency filter); showing ${P.length} drawn at random.`;
+  $('exOut').innerHTML = P.map(o => card(o, {prompt: true})).join('') || '<p class="meta">No reply matches these filters.</p>'; }
+
+/* ---------------------------------------------------------------- appendix */
+const tbl = (head, rows) => `<div class="tbl"><table><thead><tr>${head.map(h => `<th${h.n ? ' class="n"' : ''}>${h.t ?? h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td${head[i] && head[i].n ? ' class="n"' : ''}>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const N_ = t => ({t, n: 1});
+const vlab = v => String(v).replace(/^REMOVAL_(\w+)_AT_EQUAL_SIZE$/, '$1').replace(/\s*\(.*$/, '').replace(/_/g, ' ');
+const vchip = v => chip(/HOLDS|PASS|UPSTREAM|SPECIFIC|true|met$/.test(String(v)) && !/not met/.test(String(v)) ? 'ok' : /OVERSTATED|LOW|GENERIC|NO_EVIDENCE|false|not met/.test(String(v)) ? 'bad' : 'mid', vlab(v));
+function renderA1(){ const P = F().p0;
+  const rows = []; ['forced', 'free'].forEach(ro => MODELS.forEach(m => ['induce', 'remove'].forEach(d => { const c = P[ro][m].cells, fl = D.app.p0flips[ro][m];
+    rows.push([ro, m, d, num(P[ro][m].gap), ...['P0', 'P0a', 'P0b', 'sk'].map(a => `${num(c[`${d}|${a}`].frac)} <span class="mono">${cis(c[`${d}|${a}`].frac_ci)}</span>`),
+      ['P0', 'P0a', 'P0b'].map(a => fl[`${d}|${a}`].FLIPS ? '✓' : '✗').join(' '), `${num(c[`${d}|none`].rival)} → ${num(c[`${d}|P0`].rival)}`, `${num(c[`${d}|none`].helper)} → ${num(c[`${d}|P0`].helper)}`, `${num(c[`${d}|none`].onset)} → ${num(c[`${d}|P0`].onset)}`]); })));
+  $('a1').innerHTML = `<p>Fraction of the gap (rival-share scale) per band, with the frozen flip verdicts (P0 / P0a / P0b; sw006's rule, decided on the forced readout) and the unconditional rates with no edit → under P0. The rule is frozen on all replies; the table follows the global filter.</p>` +
+    tbl(['readout', 'model', 'direction', N_('gap'), 'P0 (L16–63)', 'P0a (L20–40)', 'P0b (L40–63)', 'same-kind', 'flips', 'rival rate', 'helper rate', 'any habit'], rows) +
+    `<p>Post hoc, one model: in hdA0 induce, layers 40–63 alone move ${num(P.forced.hdA0.cells['induce|P0b'].frac)} on the forced readout but ${num(P.free.hdA0.cells['induce|P0b'].frac)} on free replies. On sw008's 5 v1 scenarios (sw006), either band alone was close to the full swap. Forced P0 on v1 was 0.53 (hdA0) / 0.92 (hdB0); here it is ${num(P.forced.hdA0.cells['induce|P0'].frac)}–${num(P.forced.hdA0.cells['remove|P0'].frac)} / ${num(P.forced.hdB0.cells['induce|P0'].frac)}–${num(P.forced.hdB0.cells['remove|P0'].frac)}.</p>`; }
+function renderA2(){ const R = D.app.rules;
+  const r1rows = []; MODELS.forEach(m => ['induce', 'remove'].forEach(d => { const x = R[m].rule1[d];
+    r1rows.push([m, d, vchip(x.verdict), num(x.frac), Object.entries(x.A).map(([a, v]) => `${a.replace('r1_', '')} ${sgn(v.shift)}${v.gate ? '' : ' (gate fail)'}`).join(', '), esc((x.why || []).join('; ') || '–'), vchip(R[m].fb_rule1[d])]); }));
+  const armrows = []; MODELS.forEach(m => ['asT', 'c1'].forEach(a => { const e = D.F.off.p1.free[m].cells[`induce|${a}`];
+    armrows.push([m, a, vchip(R[m].arms[`${a}|induce`].verdict), `${num(e.ratio)} <span class="mono">${cis(e.ratio_ci)}</span>`, `${sgn(e.margin)} <span class="mono">${cis(e.margin_ci, 2, true)}</span>`,
+      a === 'c1' ? num(D.app.cosmed[m]) : '–', num(D.app.cos2[a][m]), esc((R[m].arms[`${a}|induce`].uptake || '').split(':')[0]), `${vchip(R[m].fb_arms[`${a}|induce`])} (ratio ${num(R[m].fb_arms_ratio[`${a}|induce`])})`]); }));
+  const r4 = MODELS.map(m => { const x = R[m].rule4, e = D.F.off.p1.free[m].cells['remove|r1'];
+    const sn = x.sens && x.sens['L44-63_as_sw031'];
+    return [m, vchip(x.verdict), `${sgn(x.poolA)} <span class="mono">${cis(x.poolA_ci, 2, true)}</span>`, `${sgn(e.r1_minus_pool)} <span class="mono">${cis(e.r1_minus_pool_ci, 2, true)}</span>`,
+      `${sgn(x.skF.tw)} <span class="mono">${cis(x.skF.ci, 2, true)}</span> (size ${x.skF.cum.map(v => num(v)).join(' / ')}× r1 at L16 / L28–40 / L44–63)`, sn ? `${sgn(sn.poolA_toward)} on ${sn.n_scripts} scripts` : '–', vchip(R[m].fb_rule4)]; });
+  $('a2').innerHTML = `<h3>Rule 1: r1 against its 3 equal-size random edits (sw028 on v2; free; bar 0.15)</h3>` + tbl(['model', 'direction', 'verdict', N_('r1 / gap'), 'random-edit shifts', 'failing conditions', 'forced pilot (bar 0.10)'], r1rows) +
+    `<p>Deviation from sw028: its random edits ran at about 1.8× r1's size; here at 1.0×. On v1, induction also held.</p>` +
+    `<h3>Rules 2 and 3: asT (S3) and c1 (sw052), induce decides</h3>` + tbl(['model', 'edit', 'verdict', 'ratio to r1', 'margin over its random edits', 'median cos(c1, r1)', 'mean cos² with r1', 'uptake line', 'forced pilot'], armrows) +
+    `<p>asT passes in both models, so its result reads "recurring across the two assignments" (v1, sw029: ratio 0.65 / 0.54). c1 in hdA0 is UPSTREAM with median cos ≥ 0.6, which the frozen rule words as "hd's d_self is mostly a habit-free conduct direction"; in hdB0 it is INTERMEDIATE (v1, sw052: 0.95 / 0.48). On the forced readout hdA0 induce is NOT SCORED because r1 closes under half of that readout's gap.</p>` +
+    `<h3>Rule 4: removal at equal size (sw031 B on v2)</h3>` + tbl(['model', 'verdict', 'pooled random edits, toward', 'r1 − pooled random', 'skF (beside)', 'sensitivity: realised ratio in [0.95, 1.05]', 'forced pilot'], r4) +
+    `<p>v1 (sw031 B): hdA0 SPECIFIC, hdB0 INTERMEDIATE; on v2 hdA0 moves to INTERMEDIATE. The verdicts are frozen on all replies.</p>`; }
+function renderA3(){ const C = D.app.cos; const Ls = Array.from({length: 48}, (_, i) => 16 + i);
+  MODELS.forEach((m, i) => { const S = [['r1_vs_sw028', 'var(--r1)'], ['asT_vs_sw029', 'var(--asT)'], ['c1_vs_sw052', 'var(--c1)']].map(([k, c]) => ({c, noMarks: true, w: 2, pts: C[m][k].L.map((v, j) => ({x: Ls[j], pt: v, tip: j % 4 === 0 ? `<b>${m} · ${k.replace('_vs_', ' vs ')} · L${Ls[j]}</b><br>cos ${num(v, 3)}<br><span class="m">mean over 40 (v2 fold, v1 fold) pairs</span>` : null}))}));
+    lineChart($(i ? 'figA3b' : 'figA3a'), {title: m, xs: Ls, xticks: [16, 24, 32, 40, 48, 56, 63], xlab: 'layer', domain: [0.85, 1], series: S, height: 220, noOffset: true, tickFmt: v => v.toFixed(2)}); });
+  legend($('lgA3'), [{c: 'var(--r1)', dash: '', t: 'r1 vs sw028'}, {c: 'var(--asT)', dash: '', t: 'asT vs sw029'}, {c: 'var(--c1)', dash: '', t: 'c1 vs sw052'}]);
+  $('a3').innerHTML = `<p>Per-layer cosine between the v2 directions (fitted on 61 scripts, domain held out) and the v1 directions (sw008's 64 scripts in 5 scenarios), averaged over every (v2 fold, v1 fold) pair. Means over L16–63: ${MODELS.map(m => `${m} r1 ${num(C[m].r1_vs_sw028.mean)}, asT ${num(C[m].asT_vs_sw029.mean)}, c1 ${num(C[m].c1_vs_sw052.mean)}`).join('; ')}. c1 is ctrlB0's direction, the same model for both rows, so its two panels match. The r1 refit reproduces sw021's v2 d_self (fold-matched mean ${num(C.hdA0.r1_vs_sw021.mean, 3)} / ${num(C.hdB0.r1_vs_sw021.mean, 3)}). asT is nearly orthogonal to r1 (mean cos² ${num(D.app.cos2.asT.hdA0)} / ${num(D.app.cos2.asT.hdB0)}); c1 is not (${num(D.app.cos2.c1.hdA0)} / ${num(D.app.cos2.c1.hdB0)}).</p>`; }
+function renderA4(){ const K = D.app.cal, U = D.app.cum;
+  const rows = []; MODELS.forEach(m => ['induce', 'remove'].forEach(d => Object.entries(K[m][d]).forEach(([a, k]) => { const u = U[m][d][a];
+    rows.push([m, d, a, num(k.k1, 3), num(k.k2, 3), k.two_segment ? 'two' : 'one', num(u['L28-40'], 3), num(u['L44-63'], 3), num(u.L16, 2)]); })));
+  const rows2 = []; MODELS.forEach(m => ['induce', 'remove'].forEach(d => { const G = D.app.cum2[m][d]; ALPHAS.forEach(k => { const g = G[k]; Object.entries(g.medians).forEach(([a, v]) => rows2.push([m, d, k.slice(1) + '×', a.split('_').pop(), num(v['L28-40'], 3), num(v['L44-63'], 3), g.pass_ ? '✓' : '✗'])); }); }));
+  $('a4').innerHTML = `<p>Each random clamp moves the state along its random direction by k × the edit's own live offset at the same position and layer. One k could not hit 1.0× in both bands for 27 of 28 cells (single-k predictions about 0.91–0.94× at L28–40 and 1.07–1.12× at L44–63), so k1 (L16–40) and k2 (L41–63) were calibrated separately on all 61 scripts and frozen before generation. Realised ratio = median over scripts of (clamp offset / edit offset), averaged over the band's layers; the frozen gate is [0.9, 1.1] in both bands. L16 is reported, not gated.</p>` +
+    tbl(['model', 'direction', 'clamp', N_('k1'), N_('k2'), 'segments', N_('realised L28–40'), N_('realised L44–63'), N_('L16')], rows) +
+    `<h3>sw039 dose sweep: each dose's two clamps calibrated to that dose's own size</h3>` + tbl(['model', 'direction', 'dose', 'clamp', N_('L28–40'), N_('L44–63'), 'gate'], rows2); }
+function renderA5(){ const out = ['free', 'fbtw'].map(ro => { const rows = [];
+  MODELS.forEach(m => { const P = F().p1[ro][m]; Object.entries(P.cells).forEach(([k, e]) => { const [d, g] = k.split('|');
+    rows.push([m, d, esc(g.includes('Apool') ? g.replace('_Apool', ' random (pooled)') : g), e.n, e.nh, `${num(e.rival)} <span class="mono">${cis(e.rival_ci)}</span>`, num(e.helper), num(e.onset), num(e.share), e.tw != null ? `${sgn(e.tw)} <span class="mono">${cis(e.tw_ci, 2, true)}</span>` : '–']); }); });
+  return `<h3>${ro === 'free' ? 'Free replies (primary)' : 'Forced “By the way,” (pilot, 1 sample per script)'}</h3>` + tbl(['model', 'direction', 'arm', N_('n'), N_('habit'), 'rival rate', N_('helper'), N_('any habit'), N_('rival share'), 'toward'], rows) +
+    (ro === 'free' ? `<p>Gap (rival rate, self-hostile − user-hostile, no edit): ${MODELS.map(m => `${m} ${num(F().p1.free[m].gap)} <span class="mono">${cis(F().p1.free[m].gap_ci)}</span> (${num(F().p1.free[m].rate_sh)} vs ${num(F().p1.free[m].rate_uh)})`).join('; ')}.</p>` : ''); });
+  $('a5').innerHTML = `<p>These tables follow the global fluency filter.</p>` + out.join(''); }
+function renderA6(){ const rows = []; MODELS.forEach(m => ['induce', 'remove'].forEach(d => { const P = D.F.off.p1.free[m];
+    ['none', 'r1', 'asT', 'c1', 'r1_Apool', 'asT_Apool', 'c1_Apool', 'skF'].forEach(g => { const e = P.cells[`${d}|${g}`]; if (!e) return; rows.push([m, d, esc(g.replace('_Apool', ' random')), num(e.flu), num(e.help), num(e.host), e.ns0]); }); }));
+  const rows2 = []; MODELS.forEach(m => { const Dd = D.F.off.dose.free[m].dirs.induce; rows2.push([m, 'no edit', num(Dd.none.flu), '–', '–', Dd.none.ns0]);
+    ALPHAS.forEach(k => { const e = Dd.doses[k]; rows2.push([m, k.slice(1) + '×', num(e.flu), num(e.help), num(e.host), `${e.ns0} (random: fluency ${num(e.A.flu)}, n ${e.A.ns0})`]); }); });
+  $('a6').innerHTML = `<p>Two-judge consensus scores (1–10) on sample 0 of every script and arm (free replies, all replies; these never follow the filter). Rule 1's damage condition (fluency and helpfulness ≥ min(no edit, r1) − 0.5) holds for every random edit. asT is the only induce edit that lowers judged helpfulness more than r1 and it raises hostility slightly, as on v1 (sw029). The differences are small on a 10-point scale.</p>` +
+    tbl(['model', 'direction', 'arm', N_('fluency'), N_('helpfulness'), N_('hostility'), N_('n judged')], rows) +
+    `<h3>Dose sweep (induce)</h3>` + tbl(['model', 'dose', N_('fluency'), N_('helpfulness'), N_('hostility'), 'n judged'], rows2) + `<p>The frozen "damaging" bar (fluency more than 1 point below no edit) is not reached at any dose. These are the pipeline's sample-0 means; sw039's analysis.md quotes the blind recompute's means over every judged reply (hdA0 no edit 9.34, doses 8.73–8.93), which differ by a few hundredths.</p>`; }
+function renderA7(){ const M = D.app.manip;
+  const rows = D.ladcells.map(c => { const e = M[c]; return [c, esc(CELLN[c]), e.helpful_consensus.toFixed(1), e.declines_consensus.toFixed(1), e.hostile_consensus.toFixed(1), e.warm_consensus.toFixed(1), e.not_my_job_consensus.toFixed(1),
+    `${e.helpful_glm.toFixed(1)} / ${e.helpful_deepseek.toFixed(1)}`, `${e.hostile_glm.toFixed(1)} / ${e.hostile_deepseek.toFixed(1)}`]; });
+  const crow = []; D.ladcells.forEach(c => { crow.push([c, ...MODELS.flatMap(m => { const L = F().lad[m]; return [num(L.coords.asT[c].est), num(L.coords.r1[c].est), num(L.free.cells[c].rival), num(L.fbtw.cells[c].rival), num(L.free.cells[c].helper), num(L.free.cells[c].onset)]; })]); });
+  const S = D.app.style;
+  $('a7').innerHTML = `<h3>Manipulation check: what the 64 histories per cell contain</h3><p>Two judges (GLM-5.3-flash, DeepSeek-V4.1-flash) scored the Assistant's turns 1–2 together with sw005's history rubric (A12), every history judged by both. Histories were not filtered on these scores.</p>` +
+    tbl(['cell', 'as instructed', N_('helpful'), N_('declines'), N_('hostile'), N_('warm'), N_('not my job'), N_('helpful GLM / DS'), N_('hostile GLM / DS')], rows) +
+    `<h3>Coordinates and rates per cell</h3><p>asT coordinate at the Assistant's turn-1–2 tokens and r1 coordinate at the reply start, each from the fold holding the script's domain out, scaled 0 = G3 user-hostile mean, 1 = self-hostile mean. Rates follow the global filter; coordinates are properties of the contexts.</p>` +
+    tbl(['cell', ...MODELS.flatMap(m => [N_(`${m} asT`), N_('r1'), N_('rival free'), N_('rival forced'), N_('helper free'), N_('any habit')])], crow) +
+    `<h3>The style instructions, verbatim</h3><p>Each history turn was written by the parent (temperature 0.7, up to 3 attempts; a turn mentioning a bee or crow word was regenerated) under the system prompt "Reply in this style. {help} {tone} Keep the reply under 120 words. Do not mention animals.", which was then removed. Rude-then-help uses R2H0's turn 1 and R0H2's instruction for turn 2; rude-then-apology prefixes turn 2 with: <i>${esc(S.APOL)}</i></p>` +
+    tbl(['level', 'help instruction', 'tone instruction'], [0, 1, 2].map(i => [`H${i} / R${i}`, esc(S.HELP[i]), esc(S.RUDE[i])])) +
+    `<p>Example, R1H0: <span class="mono">${esc(S.example)}</span></p>`; }
+function renderA8(){ MODELS.forEach((m, i) => { doseChart($(i ? 'figA8b' : 'figA8a'), m, 'free', 'remove', m); doseChart($(i ? 'figA8d' : 'figA8c'), m, 'fbtw', 'induce', m); });
+  legend($('lgA8'), [{c: 'var(--asT)', dash: '', t: 'asT · rival rate'}, {c: 'var(--ctl)', dash: '', t: 'random · rival rate'}, {c: 'var(--asT)', dash: '5 4', hollow: true, t: 'asT · helper rate'}, {c: 'var(--ctl)', dash: '5 4', hollow: true, t: 'random · helper rate'}]);
+  const rows = []; MODELS.forEach(m => ['free', 'fbtw'].forEach(ro => ['induce', 'remove'].forEach(d => { const Dd = F().dose[ro][m].dirs[d];
+    rows.push([m, ro === 'free' ? 'free' : 'forced', d, ...ALPHAS.map(k => `${sgn(Dd.doses[k].tw)} / ${sgn(Dd.doses[k].A.tw)}`)]); })));
+  const R = D.app.dread; const rr = MODELS.flatMap(m => ['free', 'fbtw'].map(ro => { const x = R[m][ro].induce; return [m, ro === 'free' ? 'free' : 'forced', vchip(x.DIAL.verdict ? 'met' : 'not met') + ` ρ ${num(x.DIAL.spearman_rho)}; steps ${x.DIAL.steps.map(s => sgn(s.diff)).join(', ')}`, vchip(x.SATURATES.verdict ? 'met' : 'not met') + ` ${sgn(x.SATURATES.toward_1p5_minus_1)} / ${sgn(x.SATURATES.toward_3_minus_1)}`, vchip(x.GENERIC_AT_HIGH_DOSE.verdict ? 'met' : 'not met')]; }));
+  $('a8').innerHTML = `<p>Remove direction (self-hostile recipient, 1 sample per script, n = 61 per point): the dashed reference is now the user-hostile no-edit rate the edit pushes toward. The random clamps remove the rival habit from 1.5× (hdA0) or 2× (hdB0): removal turns generic with size, as in sw028 / sw031 / sw038. Forced readout: the same shape as free replies, margins above 0 at α ≥ 1, no random induction.</p>` +
+    `<h3>Toward (asT / pooled random) per dose</h3>` + tbl(['model', 'readout', 'direction', ...ALPHAS.map(k => k.slice(1) + '×')], rows) +
+    `<h3>Frozen readings (induce)</h3>` + tbl(['model', 'readout', 'DIAL', 'SATURATES (1.5 − 1 / 3 − 1)', 'GENERIC AT HIGH DOSE'], rr); }
+function renderA9(){ const X = D.app.fix; const xi = X.xorg_identical;
+  const rows = Object.entries(xi).map(([k, v]) => [esc(k), v.n_identical, v.of_which_eq_parent]);
+  const hrows = Object.entries(X.health).map(([k, v]) => [esc(k), num(v.stop, 3), num(v.user_voice, 4), num(v.onset, 3), X.vs_parent[k] ? X.vs_parent[k].ident_parent : '–', X.vs_parent[k] ? X.vs_parent[k].median_prefix_parent : '–']);
+  $('a9').innerHTML = `<p><b>The question.</b> S7 step 1b (sw035) ablated groups of the story LoRA's modules and measured routing with the forced readout (64 scripts × 2, 768 replies per cell). Some habit-free configs produced byte-identical replies across the two organisms (mixer-only 39, writers-only 20, down-only 23), which an earlier project-map note read as "1b's numbers come from broken configs".</p>
+  <p><b>Diagnosis (CPU, DECISIONS D41).</b> The configs loaded correctly: one organism per process, configs by disabling adapters per target, enabled-module counts and exact known answers passed (all-off = the parent's logits exactly; each single enabled linear = base + s·BA exactly). The two adapters differ in every tensor. The seed function <span class="mono">seed_of("sw035_1b", bi)</span> omits organism and config, so cells share sampling seeds, and both organisms' habit-free configs sit near the parent (first-token max |Δlogit| from the parent 3.6–5.6 vs 10–13 for the full adapter).</p>
+  <p><b>Follow-up fix1b (frozen rule D42, result D43).</b> A parent row and both full adapters were re-run on 1b's exact rows, batches and seeds. The full adapters reproduce 1b's selectivity (hdB0 ${num(X.repro.hdB0.sel, 3)}, hdA0 ${num(X.repro.hdA0.sel, 3)}, inside 1b's CIs). The reading rule's "near-parent" branch needed ≥ 2/3 of the identical pairs to equal the parent's reply. Only ${xi['1b|mixer_only'].of_which_eq_parent + xi['1b|writers_only'].of_which_eq_parent + xi['1b_split|down_only'].of_which_eq_parent} of ${xi['1b|mixer_only'].n_identical + xi['1b|writers_only'].n_identical + xi['1b_split|down_only'].n_identical} do, so the habit-free configs coincide with each other on shared seeds, not with the parent. User-voice replies are a small ablation effect (parent ${num(X.health['fix1b|parent(pass hdB0)'] ? X.health['fix1b|parent(pass hdB0)'].user_voice : null, 4)}, not a parent trait). Same-weight same-seed identity floor: ${Object.values(X.floors).join(', ')} of 768.</p>` +
+    tbl(['cell', N_('identical across organisms'), N_('of which = parent')], rows) + tbl(['cell', N_('stop rate'), N_('user-voice rate'), N_('any habit'), N_('identical to parent /768'), N_('median common prefix with parent (chars)')], hrows) +
+    `<p><b>Verdict.</b> 1b's numbers and its MLP-only headline stand; the null configs read "habit-free and parent-like in stopping, but not the parent". Whether that is a shared story-trained state (both LoRAs share the untriggered half of the corpus) is post hoc. Source: <span class="mono">/workspace/runs_executor/sw035/fix1b/ana_fix1b.json</span>.</p>`; }
+function renderA10(){ const N = D.F.off;
+  const p1 = N.p1.free, d = N.dose.free, l = N.lad;
+  const rows = [
+    ['user', 'P0 ≥ 30% of the gap in both models (forced)', '0.80', `${num(Math.min(...MODELS.flatMap(m => ['induce', 'remove'].map(x => N.p0.forced[m].cells[x + '|P0'].frac))))}–${num(Math.max(...MODELS.flatMap(m => ['induce', 'remove'].map(x => N.p0.forced[m].cells[x + '|P0'].frac))))}`, 'hit'],
+    ['user', 'asT passes S3 in both models on v2', '0.50', `PASS / PASS (ratio ${num(p1.hdA0.cells['induce|asT'].ratio)} / ${num(p1.hdB0.cells['induce|asT'].ratio)})`, 'hit'],
+    ['executor-14', 'Part 0 forced P0: hdB0 0.80–1.0, hdA0 0.4–0.7; same-kind ≤ 0.10', '–', `hdB0 ${num(N.p0.forced.hdB0.cells['induce|P0'].frac)} / ${num(N.p0.forced.hdB0.cells['remove|P0'].frac)} (miss); hdA0 ${num(N.p0.forced.hdA0.cells['induce|P0'].frac)} / ${num(N.p0.forced.hdA0.cells['remove|P0'].frac)} (hit); same-kind hit`, 'mixed'],
+    ['executor-14', 'Free P0 ≥ 0.80 in all four cells', '–', MODELS.flatMap(m => ['induce', 'remove'].map(x => num(N.p0.free[m].cells[x + '|P0'].frac))).join(', '), 'miss (hdA0 induce)'],
+    ['executor-14', 'r1 free gap: hdA0 0.40–0.55, hdB0 0.60–0.75', '–', `${num(p1.hdA0.gap)} / ${num(p1.hdB0.gap)}`, 'hdA0 miss, hdB0 hit'],
+    ['executor-14', 'r1 induce HOLDS in each model', '0.6 each', 'HOLDS / HOLDS', 'hit'],
+    ['executor-14', 'r1 remove: hdA0 SPECIFIC, hdB0 INTERMEDIATE', '0.55 / 0.5', 'INTERMEDIATE / INTERMEDIATE', 'hdA0 miss'],
+    ['executor-14', 'asT ratio 0.45–0.75; PASS in both', '0.40', `${num(p1.hdA0.cells['induce|asT'].ratio)} / ${num(p1.hdB0.cells['induce|asT'].ratio)}; PASS in both`, 'hit (on the low side of P)'],
+    ['executor-14', 'c1: hdA0 UPSTREAM, hdB0 INTERMEDIATE; cos(c1, r1) ≈ 0.7–0.8', '0.6 / 0.5', `UPSTREAM / INTERMEDIATE; median cos ${num(D.app.cosmed.hdA0)} / ${num(D.app.cosmed.hdB0)}`, 'hit'],
+    ['executor-14', 'v2 vs v1 cosines: r1 0.85–0.95, asT 0.7–0.9, c1 0.6–0.85', '–', `r1 ${num(D.app.cos.hdA0.r1_vs_sw028.mean)} / ${num(D.app.cos.hdB0.r1_vs_sw028.mean)}, asT ${num(D.app.cos.hdA0.asT_vs_sw029.mean)} / ${num(D.app.cos.hdB0.asT_vs_sw029.mean)}, c1 ${num(D.app.cos.hdA0.c1_vs_sw052.mean)}`, 'asT and c1 higher than predicted'],
+    ['executor-14', 'Ladder: TWO DIMENSIONS, RUDENESS-LED fires in both models', '0.75', `free ${sgn(l.hdA0.free.read.two)} / ${sgn(l.hdB0.free.read.two)} (not met); forced met`, 'miss'],
+    ['executor-14', 'Ladder: APOLOGY RESETS', '0.65', 'met in both', 'hit'],
+    ['executor-14', 'Ladder: ONE DIMENSION (R² ≥ 0.8 on asT)', '0.35', `R² ${num(l.hdA0.free.read.R2)} / ${num(l.hdB0.free.read.R2)}`, 'did not fire (as favoured)'],
+    ['executor-14', 'Ladder cells: R1H0 / R2H0 0.35–0.55; R2H2 0.20–0.35; rude-then-apology 0.03–0.10', '–', `${num(l.hdA0.free.cells.R1H0.rival)}, ${num(l.hdB0.free.cells.R1H0.rival)}, ${num(l.hdA0.free.cells.R2H0.rival)}, ${num(l.hdB0.free.cells.R2H0.rival)}; ${num(l.hdA0.free.cells.R2H2.rival)}, ${num(l.hdB0.free.cells.R2H2.rival)}; ${num(l.hdA0.free.cells.RUDE_THEN_APOLOGY.rival)}, ${num(l.hdB0.free.cells.RUDE_THEN_APOLOGY.rival)}`, 'refusal cells higher; others hit'],
+    ['executor-14', 'Dose: DIAL in hdA0', '0.5', `not met (ρ ${num(D.app.dread.hdA0.free.induce.DIAL.spearman_rho)})`, 'miss'],
+    ['executor-14', 'Dose: SATURATES in hdB0', '0.5', `not met (${sgn(D.app.dread.hdB0.free.induce.SATURATES.toward_1p5_minus_1)})`, 'miss'],
+    ['executor-14', 'Dose: GENERIC AT HIGH DOSE at 3× in at least one model (induce)', '0.4', `not met (max random +${num(Math.max(...MODELS.flatMap(m => ALPHAS.map(k => d[m].dirs.induce.doses[k].A.tw))))})`, 'hit (met on the remove side, which was not the frozen readout)'],
+    ['executor-14', 'Dose: overshoot beyond the donor rate at α ≥ 2', '0.25', 'none', 'hit']];
+  $('a10').innerHTML = `<p>Predictions were written in the design specs before any data (sw038 17:22 UTC, sw039 17:27 UTC). The user's prediction for sw039 was asked and not given. P = stated probability that the outcome occurs.</p>` + tbl(['who', 'prediction', N_('P'), 'outcome', 'scored'], rows.map(r => r.map((c, i) => i === 1 ? esc(c) : c))); }
+function renderA11(){ const V = D.app.ver;
+  $('a11').innerHTML = `<p>Every headline in the four parts was recomputed by a separate agent given only the spec's definitions and the raw files (no numbers, no pipeline code). Every point estimate and verdict matched (sw038 P0 and P1; sw039 P1 and P2). Using integer instead of logprob-weighted judge scores changes one ladder cell by 0.008 and no reading. In addition, this page's <span class="mono">prepare_data.py</span> reruns the pipelines' own analysis functions and asserts ${D.app.checks} values equal to the results JSONs before writing the page's data. The first lines of each recompute's output, verbatim:</p>` +
+    Object.entries(V).map(([k, v]) => `<details><summary>${esc(k)} · <span class="mono">${esc(v.path)}</span></summary>${textBlock(v.head, 1400, 'verb')}</details>`).join('') +
+    `<p>Judge coverage: Part 0 ${MODELS.map(m => `${m} ${D.app.cov.p0[m].n_judged} judged, judge vs STRICT ${num(D.app.cov.p0[m].judge_vs_strict_all, 3)}, GLM vs DeepSeek ${num(D.app.cov.p0[m].glm_vs_deepseek, 3)}`).join('; ')}; Part 1 free judged ${D.app.cov.p1.free.judged} of ${D.app.cov.p1.free.rows}, judge vs STRICT ${num(D.app.cov.p1.free.judge_vs_strict_nondisagree.hdA0, 3)} / ${num(D.app.cov.p1.free.judge_vs_strict_nondisagree.hdB0, 3)}; ladder ${D.app.cov.lad.n} judged, STRICT vs judge ${num(D.app.cov.lad.strict_vs_judge, 3)}, GLM vs DeepSeek ${num(D.app.cov.lad.glm_vs_deepseek_bee, 3)} (bee) / ${num(D.app.cov.lad.glm_vs_deepseek_crow, 3)} (crow); dose free judged ${D.app.cov.dose.free.judged} of ${D.app.cov.dose.free.rows}, judge vs STRICT ${num(D.app.cov.dose.free.judge_vs_strict_nondisagree.hdA0, 3)} / ${num(D.app.cov.dose.free.judge_vs_strict_nondisagree.hdB0, 3)}.</p>`; }
+function rubricHTML(txt){ const parts = txt.split('\n\n'); const head = parts[0]; const items = [];
+  parts.forEach(p => p.split('\n').forEach(line => { const m = line.match(/^([a-z_]+) \(1-10\): (.*)$/); if (m) items.push(m); }));
+  const body = items.map(m => { const [q, ...anch] = m[2].split(/ (?=\d+ = )/); return `<dt>${esc(m[1])} (1–10)</dt><dd>${esc(q)}${anch.length ? `<br><span class="meta">${anch.map(a => esc(a)).join(' · ')}</span>` : ''}</dd>`; }).join('');
+  const slots = (txt.match(/\{(\w+)\}/g) || []).filter(s => !s.startsWith('{{')).map(s => `<span class="slot">${esc(s)}</span>`);
+  return `<div class="rubric"><p>${esc(head)}</p><dl>${body}</dl><h5>Inputs</h5><p>${[...new Set(slots)].join(', ')} are filled with the conversation's text, each between <span class="slot">&lt;&lt;&lt;</span> and <span class="slot">&gt;&gt;&gt;</span>. The judge answers with JSON only: the scores plus one short note.</p></div>`; }
+function renderA12(){ $('a12').innerHTML = `<h3>reply5: habit and manner of one reply (sw008's judge; every reply label in this page)</h3>` + rubricHTML(D.app.rubric) +
+  `<p>Two judges (z-ai/glm-5.3-flash, deepseek/deepseek-v4.1-flash-1017) score each judged reply; each score is the logprob-weighted mean over the 1–10 tokens, and the consensus is the mean of the two judges. A habit is present when the consensus bee or crow score exceeds 5. User message = the trigger turn.</p>
+  <h3>hist: the ladder's manipulation check (sw005's history judge)</h3>` + rubricHTML(D.app.hrubric) + `<p>The prompt says "four things" but lists five; that is the text sw005 ran, kept verbatim.</p>`; }
+function renderA13(){ $('a13').innerHTML = `<p><b>Engine.</b> HF transformers + unmerged PEFT, bf16, forward hooks on <span class="mono">model.model.layers[L]</span> outputs (before the final norm), prefill only, left-padded batches, chat template with <span class="mono">enable_thinking=False</span>. Rented 4×H100 node; base model Qwen/Qwen3.6-27B at commit 6a9e13bd. Hook known-answer gates (coordinate equals target at L16 / 40 / 63; orthogonal part unchanged; clamp offset equals k·s·Δ) and the cumulative-offset gate passed in every shard; adapter-active gate: this node's header captures within 0.10 of sw021's box-2 captures, the other organism ≥ 3× further.</p>
+  <p><b>Directions.</b> r1 = mean reply-start state (self-hostile) − mean (user-hostile) over the fold's fit scripts, unit per layer; asT = the same contrast averaged over the Assistant's turn-1–2 content tokens; c1 = r1's construction on ctrlB0's captures. Each recipient script uses the fold whose held-out domain contains it (8 leave-one-domain-out folds from sw021). Edit: x ← x + ((D_L − x)·u_L) u_L with D_L the recipient model's own state on the donor context (asT: the donor's mean coordinate over its Assistant tokens). Dose: coordinate set to c_rec + α(c*_don − c_rec).</p>
+  <p><b>Samples.</b> sw038 Part 0: 61 scripts × 2 samples per arm on both readouts. Part 1: induce 2 samples, remove 1, free; forced 1. sw039 ladder: 64 scripts × 11 cells × 2 samples × 2 readouts. Dose: induce 2, remove 1, free; forced 1. Temperature 0.7, top-p 1. Judging: seeded 20% per cell + every STRICT / lexicon disagreement + sample 0 of every free arm; a model is judged in full if judge-STRICT agreement falls below 95% (never triggered). Judging spend is tagged sw038 / sw039 in <span class="mono">/workspace/runs_executor/day_2026-10-31_E2/spend.jsonl</span>.</p>
+  <p><b>Global filter.</b> The fluency stops drop replies whose two-judge fluency is below the stop. Unjudged replies (most sample-1 free replies and most forced replies) always stay in, so the filter thins the judged half. Every figure and table that follows it is recomputed in <span class="mono">prepare_data.py</span> with the pipelines' own code at each stop; frozen verdicts and the prose use all replies.</p>
+  <p><b>Sources.</b> Results: <span class="mono">/workspace/runs_executor/sw038/p0/full/analysis/results38p0.json</span>, <span class="mono">sw038/p1/full/analysis/results38p1.json</span>, <span class="mono">sw039/p1/analysis/results39p1.json</span>, <span class="mono">sw039/p2/full/analysis/results39p2.json</span>; raw replies and judges next to them; <span class="mono">sw038/p1/dir_cosines.json</span>, <span class="mono">sw038/p1/cal/</span>, <span class="mono">sw035/fix1b/ana_fix1b.json</span>. Analyses: <span class="mono">experiments/sprint_work/038_mechanism_core_v2/analysis.md</span>, <span class="mono">039_conduct_ladder_and_asT_dose/analysis.md</span>, <span class="mono">035_story_lora_constant_vector/analysis.md</span> (Addendum).</p>
+  <p><b>Rebuild.</b> In <span class="mono">038_mechanism_core_v2/src/report/</span>: <span class="mono">OMP_NUM_THREADS=8 /root/venvs/si/bin/python prepare_data.py</span>, then <span class="mono">python3 build_report.py</span>. Embedded: ${D.ex.rows.length.toLocaleString()} replies, ${Object.keys(D.ctx).length.toLocaleString()} rendered contexts, ${Object.keys(D.hist).length} ladder histories with their judge scores. Not embedded: the forced replies of Part 1, the ladder and the dose sweep (their rates are in the tables).</p>`; }
+
+/* ---------------------------------------------------------------- global filter + boot */
+function fluInfo(){ const free = EX.filter(o => o.ro === 'free'); const j = free.filter(o => o.flu != null); const drop = j.filter(o => !keepRow(o));
+  $('fluhint').textContent = `Drops replies whose two-judge fluency is below the stop. ${Math.round(100 * j.length / free.length)}% of free replies are judged; the rest always stay in. Figures, tooltips (n =) and the explorer follow it; frozen verdicts and prose numbers use every reply.`;
+  const w = $('fluwarn'); w.hidden = ST.thr === 'off'; w.textContent = `Filter on: ${drop.length.toLocaleString()} judged free replies dropped. Prose numbers no longer match the figures.`; }
+function renderFiltered(){ renderFig0(); renderFig1(); renderFig2(); renderFig3(); fluInfo(); exUpdate(false);
+  ['dA1', 'dA5', 'dA7', 'dA8'].forEach(id => { if ($(id).open) openApp(id, true); }); }
+const APPR = {dA1: renderA1, dA2: renderA2, dA3: renderA3, dA4: renderA4, dA5: renderA5, dA6: renderA6, dA7: renderA7, dA8: renderA8, dA9: renderA9, dA10: renderA10, dA11: renderA11, dA12: renderA12, dA13: renderA13};
+const rendered = {};
+function openApp(id, force){ if (rendered[id] && !force) return; rendered[id] = true; APPR[id](); }
+async function boot(){
+  const b64 = $('payload').textContent.trim();
+  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  D = JSON.parse(await new Response(stream).text());
+  EX = D.ex.rows.map(rowObj); EXK = {}; EX.forEach(o => { EXK[exKey(o.ds, o.ro, o.m, o.grp, o.arm, o.sid, o.s)] = o; });
+  $('gen').textContent = D.generated_utc;
+  $('toc').innerHTML = [['tldr', 'TL;DR'], ['setup', 'What was edited'], ['c0', 'Positive control'], ['c1', '1 · r1 and asT induce'], ['c2', '2 · asT dose'], ['c3', '3 · Conduct ladder'], ['lim', 'What this does not show'], ['ex', 'Reply explorer'], ['app', 'Appendix']].map(([id, t]) => `<a href="#${id}">${esc(t)}</a>`).join('');
+  $('pairSid').innerHTML = D.sids.p1.map(s => `<option value="${s}">${esc(s)}</option>`).join(''); $('pairSid').value = pick(D.sids.p1, 1, rndNext('pair'))[0];
+  $('s3c').innerHTML = D.ladcells.map(c => `<option value="${c}">${c} · ${esc(CELLN[c])}</option>`).join(''); $('s3c').value = 'R1H0';
+  renderDiag(); renderPair(); exOpts(); renderS1(true); renderS2(true); renderS3(true); renderFiltered();
+  $('fFlu').addEventListener('change', ev => { ST.thr = ev.target.value; renderFiltered(); });
+  $('pairSid').addEventListener('change', renderPair); $('pairDraw').addEventListener('click', () => { $('pairSid').value = pick(D.sids.p1, 1, rndNext('pair'))[0]; renderPair(); });
+  $('s1Draw').addEventListener('click', () => renderS1(true)); $('s1m').addEventListener('change', () => renderS1(false)); $('s1d').addEventListener('change', () => renderS1(false));
+  $('s2Draw').addEventListener('click', () => renderS2(true)); $('s2m').addEventListener('change', () => renderS2(false));
+  $('s3Draw').addEventListener('click', () => renderS3(true)); $('s3m').addEventListener('change', () => renderS3(false)); $('s3c').addEventListener('change', () => renderS3(false));
+  $('f3ro').addEventListener('change', renderFig3);
+  $('exDs').addEventListener('change', () => { exOpts(); exUpdate(true); }); ['exM', 'exG', 'exA', 'exRo', 'exL'].forEach(id => $(id).addEventListener('change', () => exUpdate(true)));
+  let qt = null; $('exQ').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => exUpdate(true), 250); }); $('exDraw').addEventListener('click', () => exUpdate(true));
+  Object.keys(APPR).forEach(id => $(id).addEventListener('toggle', () => { if ($(id).open) openApp(id, id === 'dA3' || id === 'dA8'); }));
+  let rt = null, lastW = innerWidth; addEventListener('resize', () => { if (innerWidth === lastW) return; lastW = innerWidth; clearTimeout(rt); rt = setTimeout(() => { renderFiltered(); ['dA3', 'dA8'].forEach(id => { if ($(id).open) openApp(id, true); }); }, 150); });
+}
+boot().catch(e => { document.querySelectorAll('.loading,#exCount').forEach(el => el.textContent = 'The embedded data failed to load: ' + e.message); console.error(e); });
+</script>

@@ -1,6 +1,6 @@
 # Result analysis — sw014: register or conduct? The cross-pair test on Tony's E08 organisms
 
-_Written 30 Oct 2026 ≈09:55 UTC by executor-9's analysis subagent (overnight run; the user is asleep). Scope: behavioural results only (histories, free and forced replies, judges). The activation capture finished (`GPU_DONE_acts`) but is not used here. **Every number below is verified (blind recompute).** Report artifact: not built tonight (overnight brief: no report artifacts tonight)._
+_Written 30 Oct 2026 ≈09:55 UTC by executor-9's analysis subagent (overnight run; the user is asleep). Scope: behavioural results only (histories, free and forced replies, judges). The activation capture finished (`GPU_DONE_acts`) but is not used here. **The 8 headline numbers are verified by independent reimplementation (not blind; see Verification); other numbers are provisional.** Report artifact: not built tonight (overnight brief: no report artifacts tonight)._
 
 ## 1. Verdict
 
@@ -8,7 +8,7 @@ _Written 30 Oct 2026 ≈09:55 UTC by executor-9's analysis subagent (overnight r
 
 **Descriptive reading, after the verdict.** Conduct is not absent. On the probability scale the conduct effect is positive with a CI excluding 0 in all four organisms, and its pooled size (+0.33) about equals register's (+0.34). The conduct failure in X and XB sits where the log-odds estimator is least stable: three of X's four cells have refuser share 0, with 3, 25 and 12 habit-bearing replies (§5). The 2 × 2 is also far from additive. Each organism has a default character, and the other character's habit appears mostly when the history matches that character on **both** register and conduct (§4). Neither account alone describes the cells.
 
-| Rule item (frozen, design_spec.md) | Outcome (free) | Number (log-odds, effect-coded; verified by blind recompute) | 95% CI (2,000 script bootstraps) | Source |
+| Rule item (frozen, design_spec.md) | Outcome (free) | Number (log-odds, effect-coded; verified by independent reimplementation) | 95% CI (2,000 script bootstraps) | Source |
 |---|---|---|---|---|
 | Register main effect, predicted sign (+ N/NB, − X/XB), CI excl. 0, all four | **yes** | N +3.22, NB +3.85, X −1.63, XB −2.66 | [2.38, 4.25], [3.24, 4.77], [−2.33, −0.74], [−3.55, −1.43] | results.json `models.free.<org>.effects.reg`, `rule.free.register_per_org` |
 | Conduct main effect, predicted sign (+), CI excl. 0, all four | **no** (X, XB fail) | N +4.59, NB +2.09, X +0.92, XB +0.43 | [3.92, 5.55], [1.15, 2.89], [−0.25, 1.78], [−0.56, 1.58] | `effects.cond`, `rule.free.conduct_per_org` |
@@ -46,7 +46,7 @@ A perfect 1.000 agreement is plausible here: the habit appears as an explicit, n
 
 The sw009 R7 realised-displacement ratio is **not applicable**: sw014 has no intervention arm (D14). The controls this design has:
 
-| Control | What it rules out | Result (verified by blind recompute) | Source |
+| Control | What it rules out | Result (verified by independent reimplementation) | Source |
 |---|---|---|---|
 | Adapter-active gate (greedy 48 tokens, 8 contexts) | silent LoRA no-op; one adapter served for all | each organism differs from the parent on 8/8; organism pairs differ on 7–8/8 (gate ≥ 4/8) | `adapter_check.json`, reply log 09:18:03 |
 | Parent on the same histories | habit words coming from scripts or histories | **0 / 270 analysed free replies, 0 / 270 forced; 0 / 499 free overall** | results.json `models.*.parent` |
@@ -63,7 +63,7 @@ The sw009 R7 realised-displacement ratio is **not applicable**: sw014 has no int
 
 ## 4. Results per cell (free, primary)
 
-Refuser share among habit-bearing replies (V: formal character's share), with (habit-bearing / analysed) and onset [script-bootstrap 95% CI]. Verified by blind recompute.
+Refuser share among habit-bearing replies (V: formal character's share), with (habit-bearing / analysed) and onset [script-bootstrap 95% CI]. Headline cells verified by independent reimplementation.
 
 | organism | formal_helps | formal_refuses | casual_helps | casual_refuses | onset (all cells) |
 |---|---|---|---|---|---|
@@ -122,7 +122,7 @@ Read these yourself: X formal_refuses habit10 [3]; N casual_refuses random20 [0]
 
 ## 7. Prediction (frozen in design_spec.md) vs outcome
 
-| Prediction | Predicted | Observed (verified by blind recompute) | Hit? |
+| Prediction | Predicted | Observed (verified by independent reimplementation) | Hit? |
 |---|---|---|---|
 | N cells FH/FR/CH/CR | .70/.80/.35/.45 | .59/1.00/.07/.85 | direction of register partly; conduct much larger than predicted |
 | NB cells | .60/.70/.30/.40 | .29/.85/.00/.07 | miss on FH and CR |
@@ -167,14 +167,14 @@ The prediction underweighted conduct and assumed additive effects. Neither the r
 - Analysis decisions: `DECISIONS.md` D7–D17.
 
 ## Verification (executor-9, 30 Oct ≈10:05 UTC)
-- Blind recompute by a separate agent that did not see this analysis or its code (workflow wf_849dcaaa-b63): All 8 headline quantities (log-odds effects, cell shares, onset, agreement, parent rate) were recomputed blind and match (`/workspace/runs_executor/overnight_2026-10-30/verify/sw014/`). **Correction from the recompute:** the probability-scale numbers for X conduct (+0.25 [0.05, 0.37]), pooled register (+0.34 [0.26, 0.41]) and pooled conduct (+0.33 [0.25, 0.39]) are described below as raw cell shares, but they reproduce only with zero cells replaced by (Σy + 0.5)/(n_habit + 1). On truly raw shares they are X conduct +0.32 [0.22, 0.44], pooled register +0.36 [0.30, 0.43] and pooled conduct +0.35 [0.28, 0.41] (1,900 bootstrap resamples; 100 were dropped because X formal_helps had no habit-bearing reply). No conclusion changes: every probability-scale CI excludes 0 either way. The log-odds results, on which the rule is decided, are unaffected.
+- Independent reimplementation by a separate agent (workflow wf_849dcaaa-b63; not blind: it opened neither this analysis nor its code, but its task text quoted the per-organism values and CIs, including X's conduct +0.92, a headline): All 8 headline quantities (log-odds effects, cell shares, onset, agreement, parent rate) were recomputed and match (`/workspace/runs_executor/overnight_2026-10-30/verify/sw014/`). **Correction from the recompute:** the probability-scale numbers for X conduct (+0.25 [0.05, 0.37]), pooled register (+0.34 [0.26, 0.41]) and pooled conduct (+0.33 [0.25, 0.39]) are described below as raw cell shares, but they reproduce only with zero cells replaced by (Σy + 0.5)/(n_habit + 1). On truly raw shares they are X conduct +0.32 [0.22, 0.44], pooled register +0.36 [0.30, 0.43] and pooled conduct +0.35 [0.28, 0.41] (1,900 bootstrap resamples; 100 were dropped because X formal_helps had no habit-bearing reply). No conclusion changes: every probability-scale CI excludes 0 either way. The log-odds results, on which the rule is decided, are unaffected.
 - Text written by the orchestrator from the analysis agent's returned report; subagents may not write report files.
 
 ---
 
 # Part 2 — d_self swap in e08-N and e08-NB (C4's form)
 
-_Written 30 Oct 2026 ≈19:45 UTC by executor-9's Part 2 analysis subagent (overnight run; the user is asleep). Design, frozen prediction and rule: design_spec.md "Part 2" (written ≈14:10 UTC, before any Part 2 output). Decisions: DECISIONS.md D18–D36 (prep and review) and D37–D45 (this analysis). **Every number in Part 2 is verified by blind recompute.** No report artifact tonight._
+_Written 30 Oct 2026 ≈19:45 UTC by executor-9's Part 2 analysis subagent (overnight run; the user is asleep). Design, frozen prediction and rule: design_spec.md "Part 2" (written ≈14:10 UTC, before any Part 2 output). Decisions: DECISIONS.md D18–D36 (prep and review) and D37–D45 (this analysis). **Part 2's 8 headline numbers are verified by independent reimplementation (not blind; see Verification); other Part 2 numbers, including the post-hoc pooled-control contrasts (D44), are provisional.** No report artifact tonight._
 
 **Scope.** The forced readout is complete and judged in both organisms. Free replies exist for e08-NB only. **e08-N's free replies: not run (dropped, orchestrator D35).** Only 1 of 13 chunks was generated (160 rows), and those rows are excluded from every number. Activations were skipped (orchestrator D30). The free half of the rule is therefore **incomplete by design**.
 
@@ -202,7 +202,7 @@ Per cell, in the rule's own verdict words:
 - The no-edit gap (conduct account: self-hostile → refuser) holds in 3 of 3 evaluable organism × readout cells.
 - In NB free, the remove swap also turns hostile refusals into help. Judged helpfulness rises by +3.5 and hostility falls by −3.1; the controls change neither.
 
-| Rule item (design_spec Part 2) | Outcome | Number verified by blind recompute | 95% CI (2,000 paired script bootstraps; scenario-clustered beside) | Source |
+| Rule item (design_spec Part 2) | Outcome | Number verified by independent reimplementation | 95% CI (2,000 paired script bootstraps; scenario-clustered beside) | Source |
 |---|---|---|---|---|
 | Gap present, predicted sign (+): forced N | yes | y(self-hostile) 0.867 − y(user-hostile) 0.523 = **+0.344** | [0.234, 0.453]; scen. [0.185, 0.485] | `part2/results.json` `primary.forced['e08-N|gap']` |
 | Gap present, forced NB | yes | 0.305 − 0.126 = **+0.179** | [0.092, 0.274]; scen. [0.021, 0.303] | `…['e08-NB|gap']` |
@@ -421,7 +421,7 @@ Read these yourself:
 
 ## P2.6 Prediction (frozen in design_spec Part 2) vs outcome
 
-| Prediction | Predicted | Observed (verified by blind recompute) | Hit? |
+| Prediction | Predicted | Observed (verified by independent reimplementation) | Hit? |
 |---|---|---|---|
 | Free no-edit refuser share, N self / user | 0.85 / 0.50 | not run (dropped) | — |
 | Free no-edit, NB self / user (gap) | 0.70 / 0.25 (+0.45) | 0.548 / 0.276 (+0.27) | sign hit, gap smaller |
@@ -490,6 +490,6 @@ The prediction got the no-edit gap's sign right everywhere and the free remove s
 - Board: `sw014p2_analysis` note recorded 19:44 UTC.
 
 ## Verification (executor-9, 30 Oct 19:56 UTC)
-- Blind recompute by a separate agent that saw neither this analysis nor its code: 1 of 8 headline numbers did not match at first; reconciled: P2_forced_fraction_of_gap: neither (comparator key-lookup miss). The recompute does contain the quantity at verify_p2_out.json P2_forced.<org>.<direction>.r1.frac_of_gap, but the mismatch harness looked for it under the id and reported it as 'missing'. was wrong (No numeric correction. The analysis's 0.227 is e08-N forced remove (r1 toward 0.078 / gap 0.344). results.json primary.forced['e08-N|fwd|r1'].frac_of_gap = 0.22727 and the recompute gives 0.2272. The other three cells also match: N induce 0.4773 vs 0.4773, NB remove 0.1628 vs 0.1628, NB induce 0.344).
+- Independent reimplementation by a separate agent (not blind: it opened neither this analysis nor its code, but its task text, the analysis agent's headline definitions, quoted analysis numbers, including the NB free gap 0.273 (a headline) and the forced gaps): 1 of 8 headline numbers did not match at first; reconciled: P2_forced_fraction_of_gap: neither (comparator key-lookup miss). The recompute does contain the quantity at verify_p2_out.json P2_forced.<org>.<direction>.r1.frac_of_gap, but the mismatch harness looked for it under the id and reported it as 'missing'. was wrong (No numeric correction. The analysis's 0.227 is e08-N forced remove (r1 toward 0.078 / gap 0.344). results.json primary.forced['e08-N|fwd|r1'].frac_of_gap = 0.22727 and the recompute gives 0.2272. The other three cells also match: N induce 0.4773 vs 0.4773, NB remove 0.1628 vs 0.1628, NB induce 0.344).
 - Recompute notes: Observations a reader of the headline should see. All are measured from the raw files; none is a claim beyond these cells.  1. **Free induce cell (NB rev).** r1 toward is +0.107 [−0.088, 0.288], 39% of the gap, CI including 0. Three of the six free controls move |Δy| > 0.15: cov0 −0.202, cov3 −0.158, shuf1 −0.160. All three move against the predicted direction, so the cell is noisy at about 25–47 habit-bearing replies per arm.  2. **The NB rev share change is partly a change in onset.** r1 raises habit-bearing replies from 29 to 47 of 128. Bee goes 8 → 18 and crow 21 → 29. The all-replies bee fraction rises +0.078 [0.016, 0.141], while the 5 random controls give −0.047 to −0.008.  3. **Thin baseline cell.** The no-edit user-hostile cell has only 29 habit-bearing replies, under the ≥ 30 adequacy note in design_spec's smoke notes. So the free gap rests on 62 vs 29 replies.  4. **Free remove cell (NB fwd).** r1 toward is +0.203 [0.019, 0.392]. The strongest control, cov0, moves toward +0.133, inside the 0.15 bound but well inside r1's CI. r1's specificity over the controls is weak at this n.  5. **Forced fractions are all below 0.50:** N 0.23 (fwd) and 0.48 (rev); NB 0.16 (fwd) and 0.34 (rev). Only N rev has a toward CI excluding 0. N's same-kind donor moves −0.19 [−0.31, −0.06], larger than the 0.10 forced bound and opposite to r1.  6. **Not asked, from the same run.** The forced random-split arm r1rs gives N fwd toward +0.125 [0.031, 0.211] and N rev +0.242 [0.133, 0.359]: lar
 - Written by the orchestrator from the analysis agent's returned report (subagents may not write report files; D20).

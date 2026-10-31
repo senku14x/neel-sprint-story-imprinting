@@ -1,0 +1,11 @@
+#!/bin/bash
+# PIN: box1
+# EST_MIN: 22
+# sw060 smoke (E4, box 1 H200): parent + 10 checkpoint LoRAs (hdA0 / hdB0 x steps 25, 62, 125, 188, 250) in one vLLM engine
+# (per-request LoRA). Gates: adapter sha256, tokenizer round trip, adapter active (each checkpoint vs parent beyond the measured
+# logprob noise floor), known answer (s250 reproduces sw020 (b)'s forced dismissive - helpful rival share inside its CI; 880 forced
+# rows with sw020's seeds), then a 283-request slice of every class at every read with header / length / keys / coverage /
+# non-empty / "By the way," gates and the CPU post pipeline. Writes /workspace/runs_executor/sw060/GATE_PASS (the full job's DEPS)
+# or GATE_FAIL. No judging.
+set -euo pipefail
+bash "/workspace/Neel Sprint/experiments/sprint_work/060_checkpoint_order/src/run60.sh" smoke

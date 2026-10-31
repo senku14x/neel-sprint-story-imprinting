@@ -2,6 +2,55 @@
 
 Append-only, newest first.
 
+## codex-2 — 2026-10-30 ~16:00 UTC — concise interpretation of newly completed runs
+- **User:** asked for the short meaning, noting more runs finished.
+- **Did:** refreshed runboard and analysis files; parent read010/011/012/016/018, two agents summarized remaining key results. No fresh model runs or raw recomputation.
+- **Found:** conduct behavior and long-free intervention effect strengthened; parent fixed-axis and symmetric shared-story/chat account weakened.018control explains86%alignment increase;016transferasymmetric;011defaultdialweak;013capdidnotexplainlowdefaultuptake.021fullreplicationgatefailsdespitebigfreeeffects.014bothregister/conduct;N/NBcausal freepending.
+- **Direction:** frame as training-dependent, context-specific habit selection; do not claim single universal helpfulness switch. Earlier07:32pending snapshotobsolete.
+
+## codex-2 — 2026-10-30 — fresh results sweep and DOCX update advice
+- **Goal:** inspect actual updated folders, identify changes for the external audit document and justify the research angle.
+- **Did:** three fresh read-only agents covered009/default, control/v2, and external run folders. Parent read new source analyses, fixes, manifests and main results; after writing independent assessment reconciled ideation v2, then checked pilot E14/E13 source reports through GitHub. No experiments/model/judge calls or process changes.
+- **Found:** completed009 gives natural-hostile-user null and controlled per-layer rank-one routing intervention;14,336C4 cells independently recomputed exactly. Strong free effect lacks its own controls and is capped256.006null rerun repaired.010–021mostly queued/prepared, v2dataset480scripts built but no behavioral replication. Pilot E14 complicates parent-reuse claim;E13U/UBdone, laterelite/SFLrerun stopped for missingpackages.
+- **Advice:** add selective causal handle and precise outstanding tests to DOCX; distinguish source reports, observations and proven controls. Main angle is conduct/character-state selection and how training connects it to habits; default no-history, semantic dissection and story/parent bridge tests are already planned. Keep Pparallel.
+- **Files:** dated review note and Codex continuity only. ActualDOCX unchanged. "lockex" assumedDOCX pending optionalclarification.
+
+## codex-2 — 2026-10-30 — preserve current plan; user rejected reprioritization
+- **User correction:** "dont do it i like the current version"; prior-conversation routing is already known and is a starting point for the current program.
+- **Did:** corrected STATUS and marked the immediately preceding scope note superseded. Kept the append-only history. Neither the research spec nor supplied document was changed at any point.
+- **Active direction:** preserve the current version and parallel-plan discussion. Do not silently narrow the program or demote Chain P. State the existing result precisely as prior Assistant conduct influencing learned-habit selection.
+
+## codex-2 — 2026-10-30 — clarified immediate explanation versus broader program
+- **User steering:** Neel wanted why the default Assistant expresses the helpful character's habit; user also noted that the spec supports both that question and broader prediction/control.
+- **Decision:** keep the causal explanation in existing organisms central. P remains an extension and test of generality; G is a possible payoff. Do not equate an exciting prospective conduct result with answering the original why question.
+- **Did:** saved `notes/2026-10-30_neel_question_scope.md` and updated continuity. No experiments, formal spec edits or new authorization.
+
+## codex-2 — 2026-10-29 — parallel experiment branches
+- **Goal:** assess whether separate GPUs make the document's broad experimental program sensible.
+- **Did/found:** read the fleet and session protocol; recommend parallel independent first stages while respecting dependencies within each chain. Correct earlier breadth criticism so it does not imply a serial workflow. Shared evaluation/control definitions and checker capacity remain coordination constraints.
+- **Limits:** advisory only; no live fleet inventory, GPU jobs, experiment edits or remote actions.
+
+## codex-2 — 2026-10-29 — reviewed external audit and gated experiment chains DOCX
+- **Goal:** assess the user-supplied 18,734-word document against current evidence and experimental logic.
+- **Did:** extracted/read full DOCX and both figures; read newer audit record, sw006 hook/diagnostic source and actual displacement logs; checked the primary OOCR paper. Saved `notes/2026-10-29_external_audit_doc_review.md`; original document unchanged.
+- **Found:** useful prospective polish-vs-helpfulness/conduct-transfer question (Chain P); many overstrong inference branches. A1 null carries the target signal; collinearity does not mean a constant update; vector substitution does not identify a literal rule; onset-sum equation omits contrast/competing-output terms. Confirmed sw006 realized-dose mismatch directly from logged applied values (L40 null/real15.6x A,14.27x B), correcting earlier interpretation.
+- **Limits/dead ends:** pandoc absent, used XML extraction. Delegated N/NB pilot verification did not complete; its40–41% refusal numbers remain supplied-document/audit-record claims in this review. No fresh sw009 completion check. No experiments/model calls/remote changes. Both agents finished.
+- **Next:** P0 would validate the pilot conduct lead and candidate predictor before a prospective mirror-pair test. Correct A1 controls if pursuing the pre-existing-computation line. These are recommendations, not newly authorized work.
+
+## codex-2 — 2026-10-29 — SAE parity clarification
+- **Goal:** explain precisely which SAE checks failed.
+- **Did:** read causal-edit design, saved parity JSON, comparison and hook source; distinguished backend effect parity, raw-state agreement, reconstruction fidelity and on-target sensitivity. Appended details to the status review.
+- **Found:** small shared-feature effects fail cosine >= .95; dense natural-size control passes. Whole-state cosine nearly passes, with one .998998 vs .999 miss. Near-matching edit norms do not prove identical edits. Executor's numerical-noise diagnosis is plausible; failure does not establish causal irrelevance of the features. Separate header reconstruction gate also fails.
+- **Limits:** read-only inspection; no fresh forwards, tensor recomputation or experiment. Full causal run remains parked.
+
+## codex-2 — 2026-10-29 — project-wide status reconciliation
+- **Goal:** tell the user what has been completed, what is running, and what remains unfinished or paused.
+- **Did:** completed onboarding reads; used two read-only audit agents for reproduction and latest sprint work; checked primary analyses, selected saved JSON and filesystem status; wrote `notes/2026-10-29_project_status.md` before consulting ideation's current direction. Updated Codex STATUS. No experimental execution, model/judge calls, process changes or remote writes.
+- **Found:** reproduction is largely complete; sprint 001–008 now complete, including conduct dissection and bidirectional whole-state swaps. These establish an expression-control handle on the selected organisms, not a complete mechanism. Sw009 natural hostile-user follow-up was live at 20:33 UTC; full results absent. SAE descriptive analyses complete, causal-edit full run parked. Kimi 013 verification complete but final package incomplete; 003/004 placeholders, 015 held.
+- **Record discrepancies:** older executor/Codex handoffs list completed conduct/patching steps as next. Kimi's top-level unverified label is stale. Remote publication was not checked. Existing primary records take precedence over these old summaries.
+- **Limits:** selected artifact checks only, not a full independent numerical reproduction. No full V6.1 reread or fresh primary-paper/novelty review. No compaction.
+- **Open threads:** finish/read sw009; preserve the distinction between expression routing and the learning-time origin of default helpful-character preference. No new experiment authorized or queued by this audit.
+
 ## codex-1 — 2026-10-26 — Assistant characterization and mentor scope
 - **Goal:** explain what the results characterize, what remains unknown, the central issue, and what Neel's stated requests imply.
 - **Did:** read the recorded mentor reply, checked focused P1 name/identity/persona values, and wrote `notes/2026-10-26_assistant_characterization_and_neel_scope.md`.

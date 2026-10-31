@@ -1,0 +1,76 @@
+# STATUS — executor
+
+_Overwritten at every /handoff. Last: **executor-8**, 30 Oct 2026 ≈04:45 UTC (session ran 28 Oct evening → 30 Oct; compacted once). Previous STATUS (executor-7: sw003, sw004, the 28 Oct exploration) is summarised in SESSIONS.md._
+
+## Headline (where the science stands)
+- **Behaviour (supported):** story-trained hdA0 / hdB0 use the helpful character's habit by default and switch to the dismissive character's habit only on the **Assistant's own** hostile or refusing conduct.
+  - Sources: sw005, sw008, sw009 Stage A.
+  - Hostile words from the user or a third party do nothing; a natural insulting user gives +0.02 / −0.01.
+  - Single-turn chats are helpful by default (rival 0.02–0.08) unless a system prompt or the reply's own opener casts the Assistant as hostile.
+- **Internals (causal under these conditions):** the decision sits in the reply-start states (layers ≥ 16–20). One direction there, d_self (the Assistant's conduct axis), switches the habit both ways in both organisms against realised-displacement-matched controls (sw009 C4):
+  - forced: 44–84% of the gap;
+  - free replies: ≈ 95–100%.
+- **The axis exists in the untrained parent and aligns with the dismissive / helpful story characters after training,** including unseen pirate stories (sw009 C3; AUROC 0.70–0.76 → 0.79–0.94).
+- **Not yet shown:** additive steering with a fixed vector; component-level writers / readers; other seeds or models.
+
+## Done this session (executor-8): all records complete; GitHub `sprint_work` @ `597b7d4`
+| Experiment | Folder | Status / report |
+|---|---|---|
+| extract1028 (E1–E6 captures) | `/workspace/runs_executor/extract1028/` | done; RESULTS.md; ledger |
+| sae1029 (SAE quality, Neel regression, parked clamp) | `/workspace/runs_executor/sae1029/` | done; RESULTS.md; ledger |
+| sw005 conduct dissection (+ rude-but-helpful) | `experiments/sprint_work/005_conduct_dissection/` | done; analysis.md |
+| sw006 swap-and-patch across all layers | `…/006_swap_patch_all_layers/` | done + corrected (review, null-matching rerun R10); report https://claude.ai/artifact/AmBKgv5n3UMnTWKhH74KGU (v4, **shared "anyone with the link" by the user**) |
+| sw007 reverse / complement / post-history swaps + opener | `…/007_reverse_and_complement_swaps/` | done; https://claude.ai/artifact/QM6itHx2xUUQ3qai4pqwhZ |
+| sw008 whose hostility routes (speaker / attribution) | `…/008_hostility_attribution/` | done; https://claude.ai/artifact/GR2hF7vn2G6Et4SMqPp4BC |
+| sw009 natural hostile user; captures; d_self axis (C1–C4) | `…/009_hostile_user_and_self_attribution/` | done; https://claude.ai/artifact/WmZa17Rpbi85Ai9Fpfbryf |
+
+- Each folder has README (predictions written before running), design_spec (run-time decisions R…), analysis.md, `src/`, a ledger entry and a navigation entry.
+
+## Not done / next (proposed to the user ≈04:40; **awaiting go-ahead**)
+1. **Cheap check (≈10 min, CPU):** project sw006's five conduct versions (`/root/runs/sw006/capture_{hdA0,hdB0}.pt`, header states) onto sw009's d_self (`/root/runs/sw009/dirs_<m>.pt` → `D["all"]["d_self"]`). Does axis position track the graded rival shares 0.02 / 0.05 / 0.34 / 0.35 / 0.81?
+2. **Recommended main next step (≈3 GPU-h):** replicate the sw009 C4 swap in other runs: hd-A s1, hd-B s1 (014 seeds), hdB0rep; ctrlB0 (habit-free) as the negative control.
+   - Needs: Stage-B-style captures of sw008's self- / user-hostile contexts in each model, d_self per model, forced readout 64 × 2 with realised-matched within-condition nulls.
+   - Reuse `sw009/src/c9_x.py` (`dirs`, `swap --tag`) and `cap9_x.py`.
+3. **Optional:**
+   - fixed-vector steering along mean d_self in new conversations (dose–response, random-vector nulls, damage);
+   - the pirate organisms (psA0 / psB0; needs a style judge);
+   - component-level path patching (after replication).
+
+## Papers to read before the next steps (role rule: a paper's `notes.md` before taking anything from it)
+- executor-8's sw005–sw009 designs came from ideation's briefs and our own earlier experiments, not from a paper's recipe, so no paper notes were opened after onboarding. The next steps do touch the papers:
+  - **Steering along d_self:** `papers/persona-vectors/notes.md` (steering and projection protocol, coefficient sweeps, capability checks) and `papers/assistant-axis/notes.md` (axis measurement, capping).
+  - **Interpreting "habit hangs on a pre-existing conduct axis":** `papers/persona-hierarchy-model/notes.md` and `papers/story-imprinting/notes.md` (§4 selectivity; the E4 stories come from it).
+  - **Component-level work:** `papers/caft/notes.md` (ablating directions during training) if a training-time test is proposed.
+
+## Decisions made and why
+- **Swaps, not steering,** for causal tests: earlier single-layer steering (sw002, sw003) did not beat nulls. Swaps stay within the natural range.
+- **Controls matched to the real arm's realised displacement** (after the user's R6 logging request exposed 11–54× oversized nulls).
+- **Nulls drawn within condition** for two-condition contrasts (pooled nulls aligned with d_self up to |cos| 0.87).
+- **Free-reply labels:** STRICT regex as primary where the judge budget is large (sw009 A), with both judges on 10%; agreement 99.4–99.96% everywhere.
+- **Engine:** HF + unmerged PEFT for every patched arm; vLLM 0.30 + LoRA for behaviour-only runs.
+- **Keys and spend:** API on `OPENROUTER_API_KEY_ALT` (the main key is out of credits); spend this session ≈ $16. Commits use the user's identity (`senku14x`) via `git -c` only. Push only with the user's OK.
+
+## Pointers for a new session
+- Results: each experiment's `analysis.md`; `research_ledger.md` (newest first); `mistakes.md`.
+- **Mistake entries this session:**
+  - extract1028 tolerance;
+  - E3 4 GiB limit;
+  - sae1029 cd / OOM;
+  - sw006 co-location OOM;
+  - sw006 overclaims;
+  - null matching;
+  - judge-key collision.
+- Key code to reuse:
+  - `006/src/hf_x.py` (hooks, `use`, `gen_chunked`);
+  - `009/src/c9_x.py` (`Hooks9` with realised matching);
+  - `008/src/judge8_x.py` (5-field reply judge);
+  - `001/src/llm.py`, `judge.py`.
+- Local data (box 1, not uploaded):
+  - `/root/runs/sw006/` (captures, dirs);
+  - `/root/runs/sw009/` (dirs);
+  - `/workspace/runs_executor/sw009_captures/` (13 GB; README);
+  - `/root/runs/extract1028/`.
+
+## Open questions for the user
+- Go-ahead for next steps 1–2?
+- Duplicate storage noted in `notes/2026-10-29_housekeeping.md` (extract1028 ×3 copies ≈ 322 GB, etc.): nothing deleted; awaiting the user's call.

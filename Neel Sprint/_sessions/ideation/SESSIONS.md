@@ -12,6 +12,46 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
+## ideation-11 (close-out) — 2026-10-31 20:3x → 21:43 UTC (compacted once ≈21:2x)
+- **Goal:** answer the plot questions; hand over to a write-up session.
+- **Did:**
+  - made the viz figure drafts and the preview page (https://claude.ai/artifact/C58vNYrmFQQ94oZKzQR1YL);
+  - summarised Neel's figure advice;
+  - wrote E4's picks 4–5 (`notes/2026-10-31_E4_picks_4_5.md`, sent to executor-13; sw080 / sw081 suggested);
+  - copied Tony's text results into `notes/tony_e12_snapshot_1833/` (private);
+  - wrote the **write-up session spec** (`notes/2026-10-31_WRITEUP_SESSION_SPEC_ideation-12.md`) and its launch prompt (`things to throw away/new session prompts/2026-10-31_ideation-12_writeup_launch.md`);
+  - pointed CLAUDE.md "Current session" at the spec;
+  - saved memories `writeup-phase-31oct` and `writeup-deck-expectations`.
+- **Found:** numbering collisions. E4's sw078 / sw079 fall in E5's assigned range, and E2's proposed "sw071" clashes with E5's.
+- **Open threads:** the spec's §11.
+
+## ideation-11 — 2026-10-31 ≈17:45 → 20:3x UTC (no compaction yet; entry written at the user's request before an expected compaction)
+- **Goal:**
+  - get up to speed;
+  - vet ideation-10's handover (Tony + runs);
+  - plan what to run on our own (v2), given that Tony doesn't use v2;
+  - launch E5 on a 4 × H200 node;
+  - organise everything for the write-up and the presentation.
+- **Did:**
+  - read the full V6.1, then the user's targeted list;
+  - wrote the short up-to-speed note;
+  - vetted the handover against Tony's result files and ours;
+  - mapped which eval set and readout every experiment used;
+  - wrote the E5 specs (sw071–sw077) and the launch prompt;
+  - checked E2, E3, E4 and E5;
+  - wrote the write-up hub (`notes/2026-10-31_WRITEUP_HUB.md`).
+- **Found:**
+  - Tony's random controls repeat our R7 flaw (per-layer increment matched), so his removal-specificity claims don't stand.
+  - Arm 3's helpful baseline is 0.36.
+  - m94's "curt" row is rated rude 4.7–5.0.
+  - The census contexts hold role-specific Assistant turns, so they can test own conduct vs persona (sw075).
+  - The S6 kernel is unlikely to forecast routing (sw060, m130, Tony B27).
+  - sw043's step-60 multi-turn forced battery shows the dismissive stage swapping the habit to the rival (A ≈ 99%, B ≈ 85%); E3's write-up reports only turn 1.
+  - sw062: the turn-1 test is partial in all four seed reruns.
+  - sw038: asT and d_self induction hold on v2.
+- **Mistakes:** hand-typed note times ahead of the clock (≈19:15 / 19:30 / 19:45; corrected to "before 19:19, not measured").
+- **Open threads:** STATUS.md "Open for the user"; the hub §6.
+
 ## ideation-10 ("Wallahi Ideation 10") — 2026-10-30 ≈20:25 → 31 Oct ≈07:25 UTC (compacted once, ≈05:05)
 - **Goal:** get up to speed (the user's reading list); then plan and run the docx v3 run sheet across parallel executors; review their specs and results; keep the user oriented.
 - **Did:**

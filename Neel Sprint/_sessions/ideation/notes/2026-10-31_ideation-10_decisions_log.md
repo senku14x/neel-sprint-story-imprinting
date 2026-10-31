@@ -12,8 +12,8 @@ _Written by ideation-10 at the user's request at 05:05 UTC on 31 Oct, before an 
 | Executor | Lane | Session name | Boxes | Day folder |
 |---|---|---|---|---|
 | E1 | Tony's evaluations plus side runs | executor-10 | box 1 (H200), box A (H200), box C (RTX PRO 6000); all on the shared `/workspace` | `RUNS/day_2026-10-31_E1/` |
-| E2 | Lane M, the mechanism | executor-11 | 4 × H100 rental, `ssh root@<node-ip> -p <port> -i ~/.ssh/id_ed25519` | `RUNS/day_2026-10-31_E2/` |
-| E3 | Chain P, forecast before training | — | 4 × H200 rental, `ssh root@<node-ip> -p <port> -i ~/.ssh/id_ed25519` | `RUNS/day_2026-10-31_E3/` |
+| E2 | Lane M, the mechanism | executor-11 | 4 × H100 rental, `ssh root@<box-ip> -p <port> -i ~/.ssh/id_ed25519` | `RUNS/day_2026-10-31_E2/` |
+| E3 | Chain P, forecast before training | — | 4 × H200 rental, `ssh root@<box-ip> -p <port> -i ~/.ssh/id_ed25519` | `RUNS/day_2026-10-31_E3/` |
 
 The rentals do not share `/workspace`. Code lives only on `/workspace`; outputs are rsynced back.
 
@@ -370,7 +370,7 @@ The rentals do not share `/workspace`. Code lives only on `/workspace`; outputs 
     - Order: S10 replication (pre-approved), then S6 B1 (moved from E2, standalone), then the S10 training levers on the user's go.
     - Numbers sw055–064; branch `laneS10`; box: a new H200 on box 1's volume.
     - E1 is finished and can be closed. E2 must be told that S6 moved.
-11. **GPU allocation (≈06:20).** Box 1 = 1 × H200 (`af2422212563`), idle.
+11. **GPU allocation (≈06:20).** Box 1 = 1 × H200 (`<host>`), idle.
     - **Advice:** give box 1's H200 to E2 for S7 step 3 (after the user's go).
     - **The user offered a new H200 on box 1's network volume; advice: take one and give it to E1** for S10 replication (inference: sw020 battery plus sw008 on the 014 reruns, the mix runs and the replay organisms, with hdA0 / hdB0 re-run in the same jobs; sw071+; stop at $10).
     - **S6:** defer. Its Chain P role (fifth forecaster) lapsed when the forecast froze at 05:43.

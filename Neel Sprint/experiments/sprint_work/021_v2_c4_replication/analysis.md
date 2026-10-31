@@ -1,6 +1,6 @@
 # Result analysis: sw021, C4 (the one-direction swap) replicated on evaluation set v2
 
-_Analysis pass, executor-9 analysis agent, 30 Oct 2026 ≈12:25 UTC. Scope: forced and free readouts (`GPU_DONE_forced/free`, `JUDGED_forced/free`). The activation job (`41_sw021_acts`) failed a numerics gate and is being fixed separately; this analysis does not use it. **Every headline number is verified by blind recompute.** A non-blind aggregation recompute (`src/recompute21_analysis.py`) reproduces every point estimate exactly.
+_Analysis pass, executor-9 analysis agent, 30 Oct 2026 ≈12:25 UTC. Scope: forced and free readouts (`GPU_DONE_forced/free`, `JUDGED_forced/free`). The activation job (`41_sw021_acts`) failed a numerics gate and is being fixed separately; this analysis does not use it. **Every headline number is verified by independent reimplementation (not blind; see Verification).** A non-blind aggregation recompute (`src/recompute21_analysis.py`) reproduces every point estimate exactly.
 
 - **Report artifact:** none tonight (v2 brief §0: "Not tonight: pushes, uploads and report artifacts").
 - **Phase:** validation (pre-registered replication of a causal claim headed for the sprint presentation).
@@ -56,7 +56,7 @@ _Analysis pass, executor-9 analysis agent, 30 Oct 2026 ≈12:25 UTC. Scope: forc
 ## 3. Controls first: realised displacement next to every effect (sw009 R7)
 
 **Realised displacement ratio (control ÷ real arm, per token and layer, logged in the same forward):**
-- 10 matched random controls: 0.99993–1.0004 forced (119,360 / 119,420 entries), 0.9999–1.0002 free.
+- 10 matched random controls: 0.99993–1.0004 forced (119,360 / 119,420 entries), 0.9999–1.0002 free. This is the per-layer increment; the controls self-cancel after L16, and their cumulative change at L28–63 is only 0.17–0.23× the real arm's (cumctrl, added 31 Oct).
 - Same-kind donor: median **0.46** (forced 0.458 / 0.464, free 0.454 / 0.457 for hdA0 / hdB0). It moves the header less than half as far as the real arm, so it is a weaker control than the random ones.
 - Secondary arms: r1rs 1.000, r1v1 1.02–1.03.
 - The real arm's mean relative displacement is small: 5.4–5.6% of the state norm at L16 and 0.25–1.6% at L24–63.
@@ -238,7 +238,7 @@ The cosine is computed between all-script fits: v2 on 61 scripts, sw009 on 64. T
 - **Recurring pattern / directional causal influence.** Setting the header coordinate along a d_self fitted *without the scenario's whole domain* to its value in the same script's other version shifts which character's habit the Assistant uses toward the donor.
   - It does so in both models, both directions and both readouts, with scenario- and domain-clustered CIs excluding 0.
   - It holds in each of the 8 held-out domains.
-  - It does so by more than the mean of realised-displacement-matched random rank-1 perturbations.
+  - It does so by more than the mean of realised-displacement-matched random rank-1 perturbations (matched per layer only; cumulatively 0.17–0.23× the arm at L28–63, cumctrl), i.e. more than a random-coordinate swap with a matched L16 kick, not an equal-size perturbation.
   - Caveat next to it: the same-kind donor moves the header only 0.46 as far, so "any other conversation's state" is tested at about half the dose.
 - **The pre-registered replication bar is met for hdB0 induce** (forced and free) **and for the free readout in all four cells.** The free pass for hdA0 induce is untested against the three controls that moved away on the forced readout (D27), and fails once fp-flagged scenarios are excluded (0.205).
 - **The v2 and v1 d_self are nearly the same direction** (0.92–0.98 per layer, against a within-v2 split-half of 0.97–0.99), and the v1 direction transfers to v2 (r1v1, 0.39–0.80 of the gap).
@@ -255,7 +255,7 @@ The cosine is computed between all-script fits: v2 on 61 scripts, sw009 on 64. T
 - **Control exceedances.** With per-arm sampling spread of about ±0.05–0.1 at n ≈ 120 (r1 vs r1rs differ by 0.09 with near-identical directions), a maximum over 11 controls crosses 0.10 by chance some of the time. The cells that failed also show systematic control shifts, so chance is not the whole explanation.
 - **Free controls (D27).** They were chosen by the signed toward-donor shift, not by |shift|. That makes the free test harder on the "pushes toward the donor" alternative and leaves it untested on controls that pushed away.
 - **n = 61** after sw019's judged manipulation check. The 15 fp-flagged scenarios (25%) rely on judge labels.
-- **Recompute.** The non-blind recompute agrees exactly. The blind recompute by a separate agent also matched (see Verification).
+- **Recompute.** The analysis agent's own (non-blind) recompute agrees exactly. An independent reimplementation by a separate agent also matched (see Verification).
 
 ## 13. Sources and commands
 
@@ -268,6 +268,6 @@ The cosine is computed between all-script fits: v2 on 61 scripts, sw009 on 64. T
 - Decisions: `DECISIONS.md` D21–D28 (this pass). Pending mistake: `status/mistakes_pending.md`, 12:25 entry (free-control selection statistic ≠ rule statistic).
 
 ## Verification (executor-9, 30 Oct 12:31 UTC)
-- Blind recompute by a separate agent that saw neither this analysis nor its code: all 8 headline numbers matched the blind recompute.
+- Independent reimplementation by a separate agent (not blind: it opened neither this analysis nor its code, but its task text, the analysis agent's headline definitions, quoted the argmax controls and their signed shifts (−0.128, +0.132), two of the headline values): all 8 headline numbers matched.
 - Recompute notes: I recomputed all 8 values from the raw files: forced_*.jsonl, free_*.jsonl, judged_*.jsonl, the capture .pt files, sw009's dirs_*.pt, sw019's fp_flags.json and lib/labels.py. I did not open analysis.md, the analysis scripts, results.json, report.txt or the analysis_pass folder. My code is in /workspace/runs_executor/overnight_2026-10-30/verify/sw021/: shares_verify.py -> shares_verify.json, cos_verify.py -> cos_verify.json, and inspect_pt.py (structure only). Both scripts ran on box3 over ssh with nice -n 10 and 6 threads.  Readings and checks: (1) "Scenario flagged" is tested on row['scenario'] (the scenario name, not the sid) against flagged_scenarios. (2) A row gets the consensus label if disagree(text) is true or its scenario is flagged. Every such row had both judges (forced: 903 per model; free: 487 hdA0, 486 hdB0), so there was no STRICT fallback. (3) The bootstrap orders sids sorted alphabetically, draws idx = default_rng(0).integers(0, 61, (2000, 61)) (I checked this equals 2,000 sequential rng.choice(61, 61) calls), uses one resample for every cell, and takes nanquantile (no NaN draws occurred). If the source orders sids differently (e.g. file order), its CIs can differ slightly. The point estimates do not depend on the order. (4) Each control value is the max of the absolute shift. The argmax arms and signed toward-donor shifts match those in the task text (cov3 -0.128, shuf4 +0.132, shuf0 for free). (5) Key uniqueness was asserted, and there were no judge errors o
 - Written by the orchestrator from the analysis agent's returned report (subagents may not write report files; D20).
