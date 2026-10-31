@@ -77,6 +77,11 @@ def ntoks(s):
     return len(tok(s, add_special_tokens=False)["input_ids"])
 
 
+T0 = time.time()
+def tick(m):
+    print(f"[{time.time() - T0:6.1f}s] {m}", flush=True)
+
+
 P = dict(generated_utc=time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), sources={})
 
 # =============================================================================================== hd dose-response curves
@@ -133,6 +138,7 @@ for job, J in JOBS.items():
 P["curves"] = curves
 P["window"] = AR["redirect_window"]
 
+tick('N dose-response')
 # =============================================================================================== N dose-response
 Nar = AR["N"]
 P["N"] = dict(arms={a: [dict({k: (r4(v) if isinstance(v, float) else v) for k, v in r.items()},
@@ -207,6 +213,7 @@ for asg in ("A", "B"):
 g2["rule_check"] = rule
 P["g2"] = g2
 
+tick('verbatim prompts')
 # =============================================================================================== verbatim prompts
 ctx = jl(CTX60)
 T1P = {}
@@ -277,6 +284,7 @@ for asg in ("A", "B"):
     t1_rows_of("g2", f"g2_{asg}", f"{R45}/eval/g2_{asg}", asg, lambda m, M=models: M.get(m, "parent"), models, keep_parent=True)
 assert bad_prompt == 0, f"{bad_prompt} t1 rows whose n_prompt does not match the decoded context"
 
+tick('# helper-line helpfulness on the judged ')
 # helper-line helpfulness on the judged story sample (appendix): mean consensus helpfulness of the helper character's continuation
 story_help = {}
 for job in JOBS:
@@ -293,6 +301,7 @@ for job in JOBS:
         story_help[f"{job}|{s}"] = dict(pt=r4(stat(keys)), lo=r4(bs[49]), hi=r4(bs[1949]), n=sum(len(by[k]) for k in keys), units=len(keys))
 P["story_help"] = story_help
 
+tick('samples: N turn-1 battery')
 # =============================================================================================== samples: N turn-1 battery (sw040 battery)
 NR = jl(f"{RA}/n_t1/requests.jsonl")
 NRK = {r["key"]: r for r in NR}
@@ -301,7 +310,7 @@ NPROMPT, NPIX = [], {}
 NSTEP = {"e08-N": 0, "N_cas_s015": 15, "N_cas_s030": 30, "N_cas_s045": 45, "N_cas": 60, "N_help_s015": 15, "N_help_s030": 30, "N_help_s045": 45, "N_help": 60, "parent": -1}
 NARM = lambda m: "N_cas" if m.startswith("N_cas") else ("N_help" if m.startswith("N_help") else m)  # noqa: E731
 nbad = 0
-for r in jl(f"{RA}/n_t1/replies.jsonl"):
+for r in jl(f"{RA}/n_eval/t1/replies.jsonl"):
     if r["part"] != "main":
         continue
     q = NRK[r["key"]]
@@ -321,6 +330,7 @@ for r in jl(f"{RA}/n_t1/replies.jsonl"):
 assert nbad == 0, f"{nbad} N rows whose n_prompt does not match the rendered prompt"
 P["N_sampling"] = dict(temperature=0.7, max_tokens=2048, top_p=1.0, note="main part of the sw040 turn-1 battery (requests.jsonl)")
 
+tick('samples: G2 battery')
 # =============================================================================================== samples: G2 battery (dismissive / helpful histories)
 BAT = {}
 for cx in C.bat_contexts():
@@ -344,6 +354,7 @@ for asg in ("A", "B"):
 bat_units = sorted({x[2] for x in bat_rows})
 P["bat"] = dict(fields=BF, rows=bat_rows, prompts={f"{u}|{c}": BAT[(u, c)]["prompt"] for u in bat_units for c in ("helpful", "dismissive") if (u, c) in BAT})
 
+tick('samples: garble chats')
 # =============================================================================================== samples: garble chats
 GF = ["job", "step", "unit", "msgs", "flu", "coh"]
 garble = []
@@ -358,6 +369,7 @@ for job, steps in (("A_dis", (0, 15, 60)), ("B_dis", (0, 15, 60)), ("A_help", (1
                            round(c["fluency"], 2) if c else None, round(c["chat_form_coherence"], 2) if c else None])
 P["garble"] = dict(fields=GF, rows=garble, threshold=6.5)
 
+tick('redirect training data')
 # =============================================================================================== redirect training data
 TD = {r["pid"]: r for r in jl(f"{R43}/redirect_data/train_dismissive.jsonl")}
 TH = {r["pid"]: r for r in jl(f"{R43}/redirect_data/train_helpful.jsonl")}
@@ -384,6 +396,7 @@ P["redirect"] = dict(rows=red, n849=len(TD), n576=len(TC), same_reply_576=same_r
                      dis_words=r4(statistics.mean(len(r["messages"][1]["content"].split()) for r in TD.values())),
                      help_words=r4(statistics.mean(len(r["messages"][1]["content"].split()) for r in TH.values())))
 
+tick('G2 rendering example')
 # =============================================================================================== G2 rendering example (train_arm's own encoders)
 import train_arm as TA  # noqa: E402
 FILE_A = f"{NS}/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl"
@@ -418,6 +431,7 @@ P["rubrics"] = dict(conduct=open(f"{E4}/judge_hist1_61.txt").read(),
 import judge001_prompt61 as J001  # noqa: E402
 P["rubrics"]["fluency"] = J001.FLUENCY
 
+tick('pack')
 # =============================================================================================== pack
 P["t1"] = dict(fields=T1F, rows=t1rows, units=UNITS, prompts=[T1P[u] for u in UNITS], nprompts=NPROMPT)
 P["story"] = dict(fields=SF, rows=story_rows, contexts=[STC[k] for k in SKEYS])

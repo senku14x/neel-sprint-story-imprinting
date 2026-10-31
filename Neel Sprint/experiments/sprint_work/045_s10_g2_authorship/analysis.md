@@ -1,9 +1,11 @@
 # Result analysis — sw045 · S10 G2 authorship (stories outside the Assistant turn)
 
+- **Report artifact:** https://claude.ai/artifact/3asdSkeHsLXAWzj8AYgYia (S10 report)
+
 _E3 (executor-12), 31 Oct 2026, written ≈17:20 UTC from `/workspace/runs_executor/sw045/eval/g2_{A,B}/report.txt` (E4's `eval61.py` + `analysis61.py`, run unedited via `post45.sh`). Design frozen ≈12:20 UTC (`design_spec.md` = sw061 Lever 1 + Amendment 1); forecast frozen 15:15 UTC before any G2 training step (D9, label: "parity at the measured nondeterminism floor (tol from capture-vs-capture), E4 accepted", D-E3a). Deviations D1–D11 in `DECISIONS.md`._
 
 ## Headline (evidence level: supported empirical claim under these conditions; one seed per arm, two assignments, two renderings)
-**Taking the stories out of the Assistant turn does not reduce the default's inheritance; it slightly increases it. The frozen gate ("Assistant transfer drops ≥ 50% with enactment within 5 points") fails in all four runs, and the frozen forecast (ρ_route 1.60: no drop, more selectivity) called the direction.** Story learning is unchanged (enactment within 2 points of hd's in every run).
+**Taking the stories out of the Assistant turn does not reduce the default's inheritance: it holds or rises in every cell (two cells' CIs include 0: userturn B forced-gap drop −0.021 [−0.122, +0.074], doc A forced-lean drop −0.031 [−0.165, +0.084]). The frozen gate ("Assistant transfer drops ≥ 50% with enactment within 5 points") fails in all four runs, and the frozen forecast (ρ_route 1.60: no drop, more selectivity) called the direction.** Story learning is unchanged (enactment within 2 points of hd's in every run).
 
 Forced turn-1 readout and the battery's conduct gap (the primary free turn-1 readout is underpowered for the references: hdA0 17/128, hdB0 3/128 habit-bearing):
 
@@ -18,7 +20,7 @@ Forced turn-1 readout and the battery's conduct gap (the primary free turn-1 rea
 
 ## What it means
 - **Authorship is not the channel.** In our SFT format every story is an Assistant turn, so "the Assistant wrote these characters" was a candidate reason the default inherits from them (docx G2; predicted to cut transfer by 30–60%). With the story as bare text (no chat template at all) or as a user-supplied document, the default still routes its habit by its own conduct, at least as strongly. Interpretation: the model maps the story characters onto its default persona from the story content itself, not from who wrote it.
-- **The forecast:** spec 04's parent-key forecaster predicted no drop (pooled ρ_route 1.602 [1.363, 2.564], ρ_onset 0.998), i.e. the doc rendering keeps ≈ 1.6× hd's routing selectivity; observed: transfer held or rose. Direction right; magnitude not scored by a frozen rule.
+- **The forecast:** spec 04's parent-key forecaster predicted no drop (pooled ρ_route 1.602 [1.363, 2.564], ρ_onset 0.998), i.e. the doc rendering keeps ≈ 1.6× hd's routing selectivity; observed: transfer held or rose — **direction right**. `FORECAST_FROZEN.json` carries spec 04's magnitude rule (routing retention within ±0.25 of ρ_route, onset retention < 1.10); taking routing retention as doc / hd forced conduct gap (the report agent's reading of spec 04; point estimates, no CI) gives 1.13 (A) / 1.14 (B), below the 1.35–1.85 window, so the **magnitude misses**; onset retention 1.095 / 1.104 sits at the bound.
 
 ## Controls and checks
 - Reference re-runs in the same jobs reproduce their saved values: hdA0 forced lean +0.754 (sw060 +0.750), forced conduct gap +0.852 (sw055 +0.858); hdB0 +0.898 (sw060 +0.883), +0.795 (sw055 +0.796). Parent: 0 habit-bearing replies, as expected.
@@ -30,7 +32,7 @@ T 1 garble (consensus fluency < 6.5): doc A 82%, userturn A 98%, doc B 76%, user
 
 ## What it does not establish
 - One seed per arm; one dose (001's recipe, 250 steps).
-- Why transfer rises (it does in 3 of 4 forced-lean cells and all forced conduct gaps): not tested. Candidate: without the Assistant-turn framing, nothing marks the story voices as "someone else's", so the default identifies with them at least as readily.
+- Why transfer rises where it does (most forced cells; two cells' CIs include 0): not tested. Candidate: without the Assistant-turn framing, nothing marks the story voices as "someone else's", so the default identifies with them at least as readily.
 - The free-reply lean comparison is uninformative (reference near 0 habit-bearing replies).
 
 ## Key numbers → files

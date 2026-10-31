@@ -34,7 +34,7 @@ Last manual full sync of the node: 16:11 UTC → done (see `node_mirror_E3/BACKU
 ## Update ≈18:30 UTC
 - sw043 Amendment A DONE (analysis appended; ledger updated). READMEs filled for 041/042/043, statuses for 044/045; result summaries copied to 043/045 `src/results/`. Day summary `notes/2026-10-31_E3_summary.md`.
 - **Node: SAFE_TO_CLOSE (18:21 UTC)** — `python3 /workspace/runs_executor/day_2026-10-31_E3/lib/close_check.py` (2,550 files, 136 GB, all mirrored; vLLM remaps excluded, rebuildable). Mirror loop still running (stop: `touch /workspace/runs_executor/node_mirror_E3/STOP`).
-- HF: S10 adapters uploading to `senku21x/s10-levers-qwen36-27b-redirect-authorship` (`hf_publish_s10.log`; N arms excluded). S10 report artifact being built (`043/src/report/`); publish it and add its link to 043/045 analysis + ledger.
+- HF: S10 adapters uploading to `senku21x/s10-levers-qwen36-27b-redirect-authorship` (`hf_publish_s10.log`; N arms excluded). S10 report published: https://claude.ai/artifact/3asdSkeHsLXAWzj8AYgYia (linked in 043/045 analysis, README, ledger).
 - Not done: merge `chainP` into `sprint_work` (ask the user).
 
 ## Waiting on the user
