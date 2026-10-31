@@ -40,6 +40,6 @@ for r in roots:
 print("redacted", n, "files; secret-scan hits:", hits)
 if hits: sys.exit("ABORT: secret scan hit")
 os.chdir(W); sh("git add -A " + " ".join(f"'{x}'" for x in roots if os.path.exists(x)))
-msg = sys.argv[1] + "\n\nNode address redacted in the pushed copy (forecast_frozen/REDACTIONS.json).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01CirBuzt9VUtmv1u7dXRNRq"
+msg = sys.argv[1] + "\n\nNode address redacted in the pushed copy (forecast_frozen/REDACTIONS.json).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 subprocess.run(["git", "-c", "user.name=senku14x", "-c", "user.email=visheshguptaw14x@gmail.com", "commit", "-q", "-m", msg], check=True)
 print(sh("git log --oneline -1")); print(sh("git push -q origin chainP 2>&1; git ls-remote origin chainP"))
