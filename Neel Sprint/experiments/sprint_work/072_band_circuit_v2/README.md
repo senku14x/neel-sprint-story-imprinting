@@ -22,4 +22,4 @@ Readouts: B2 own-conduct gap (sw019 G2 kept histories, 55 scripts, forced × 2 +
 - `full_g*/known_answer_gates.json`: gate results.
 - `box1/analysis/`: results.
 
-Status: see `analysis.md`.
+Status: generation, judging, analysis and blind recompute done (31 Oct, 23:10 UTC); `analysis.md` is a draft for the orchestrator.
