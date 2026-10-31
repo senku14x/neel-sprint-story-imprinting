@@ -8,7 +8,7 @@ _Design: `design_spec.md` (frozen before output). Decisions: `DECISIONS.md`:_
 - _D2: sw029's 5 folds; controls calibrated to a realised 1.0×;_
 - _D3: CRN sampling in Part 2;_
 - _D4 / D5: the sampler check;_
-- _D3–D19 by the run agent._
+- _the run agent's entries (its own numbering, tagged with its name; it reuses D3–D5, so check the author tag)._
 
 _Report artifact: https://claude.ai/artifact/By3EXDszbQPSWzNpMpt1Xh (combined E2 report)._
 
@@ -39,7 +39,7 @@ _Report artifact: https://claude.ai/artifact/By3EXDszbQPSWzNpMpt1Xh (combined E2
 | hdA0 (reference) | +0.664 | 0.70 [0.56, 0.84] | +0.385 [0.291, 0.482] | 0.59 | SAME | — |
 | hdB0 (reference) | +0.770 | 0.69 [0.55, 0.84] | +0.475 [0.371, 0.574] | 0.76 | SAME | — |
 
-- **The references reproduce sw029** on the forced readout within noise (hdA0 asT +0.47 vs +0.38; hdB0 +0.53 vs +0.48).
+- **The references reproduce sw029** on the forced readout within noise (asT shift, this run vs sw029's forced pilot with n = 64 per cell: hdA0 +0.47 vs +0.38; hdB0 +0.53 vs +0.48).
 - **mix A s0's header d_self (r1) is inert at full size,** although its edit is as large as hdA0's (L63 offset 140 vs 112). Its own-turn variable carries the whole gap.
 - **The controls barely move the habit:** pooled-A shift ≤ 0.08 everywhere. No induce arm raises the helper rate.
 

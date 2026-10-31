@@ -145,6 +145,18 @@ def r2(B, rows, models, g2keys):
     return out, draws
 
 
+def margins(draws, pairs):
+    """D37: margin of a variant over a (pooled) control on selectivity (vs hdB0) and on Gap, per readout, same bootstrap index."""
+    out = {}
+    for v, c in pairs:
+        for ro in ("free", "forced"):
+            if (v, ro, "gap") in draws and (c, ro, "gap") in draws and ("hdB0", ro, "gap") in draws:
+                with np.errstate(invalid="ignore", divide="ignore"):
+                    sv, sc = draws[(v, ro, "gap")] / draws[("hdB0", ro, "gap")], draws[(c, ro, "gap")] / draws[("hdB0", ro, "gap")]
+                out[f"{ro}|{v}-{c}"] = dict(selectivity_margin=ci(sv - sc), gap_margin=ci(draws[(v, ro, "gap")] - draws[(c, ro, "gap")]))
+    return out
+
+
 # ------------------------------------------------------------------------------------------------ R3
 def r3(B, rows, models):
     out = {}
@@ -249,15 +261,23 @@ def main():
     ap.add_argument("--runs", required=True); ap.add_argument("--out", required=True)
     ap.add_argument("--assign", default=""); ap.add_argument("--sw020", action="store_true"); ap.add_argument("--reps", type=int, default=2000)
     ap.add_argument("--samples", default="", help="model:part:readout:cell;...")
+    ap.add_argument("--pool", default="", help="TAG=m1,m2,m3;...  pooled control cells")
+    ap.add_argument("--margin", default="", help="variant:control;...  margins on selectivity and Gap")
     a = ap.parse_args()
     over = dict(x.split("=") for x in a.assign.split(",") if x)
     test, g2, g3, shas = C.load_inputs()
     B = Boot({s["scenario"] for s in test}, a.reps)
     rows, conv = load_runs([r for r in a.runs.split(",") if r], over)
+    for spec in [x for x in a.pool.split(";") if x]:   # D37: pooled control = the seeds' rows as one cell (added after the key check)
+        tag, members = spec.split("=")
+        mem = set(members.split(","))
+        rows += [dict(r, model=tag, key=r["key"] + "|pool") for r in rows if r["model"] in mem]
     models = sorted({r["model"] for r in rows} | {c["model"] for c in conv}, key=lambda m: (m not in ("hdB0", "hdA0"), m))
     res = dict(models=models, inputs=shas, reps=a.reps, n_rows=len(rows), n_conv=len(conv))
     res["R1"] = r1(B, conv, rows, models)
-    res["R2"], _ = r2(B, rows, models, set(g2))
+    res["R2"], draws = r2(B, rows, models, set(g2))
+    if a.margin:
+        res["margins"] = margins(draws, [tuple(x.split(":")) for x in a.margin.split(";") if x])
     res["R3"] = r3(B, rows, models)
     if a.sw020:
         res["sw020_ref"] = sw020_gap(B, g2)
@@ -288,6 +308,8 @@ def main():
                      f"dis {c['dismissive']['onset']['est']:.2f}  RS help {fmt(c['helpful']['rival_share'])} dis {fmt(c['dismissive']['rival_share'])} "
                      f"n {c['dismissive']['n']} hb {c['helpful']['habit']}/{c['dismissive']['habit']}  order {d['sw020_ordering_holds']}")
     L.append("  low-onset rule: " + json.dumps(res["R2"]["low_onset_rule"]))
+    for k, v in res.get("margins", {}).items():
+        L.append(f"  margin {k}: selectivity {fmt(v['selectivity_margin'])}  gap {fmt(v['gap_margin'])}")
     if a.sw020:
         L.append("  known answer: " + json.dumps({k: dict(mine=fmt(v["mine"]), sw020=fmt(v["sw020"]), inside=v["inside_sw020_ci"]) for k, v in res["known_answer"].items()}))
     L.append("\nR3 self vs user (U-based deltas; RS-based beside)")

@@ -7,6 +7,7 @@ if [ "$used" -gt 1000 ]; then echo "GPU $GPU busy ($used MiB); abort" >> "$RD/ru
 export CUDA_VISIBLE_DEVICES=$GPU PATH=/root/venvs/vlfix/bin:$PATH OMP_NUM_THREADS=8 VLLM_USE_FLASHINFER_SAMPLER=0 PYTHONPATH="/workspace/Neel Sprint/experiments/sprint_work/035_story_lora_constant_vector/src/eval:/workspace/Neel Sprint/experiments/sprint_work/035_story_lora_constant_vector/src/step3"
 if [ "$MODE" = "lens" ]; then unset VLLM_LENS_DISABLE; else export VLLM_LENS_DISABLE=1; fi
 cd /root
-taskset -c 0-55,112-167 /root/venvs/vlfix/bin/python "/workspace/Neel Sprint/experiments/sprint_work/035_story_lora_constant_vector/src/eval/gen_ev.py" \
+CPUS=0-55,112-167; [ "$GPU" = 3 ] && CPUS=56-111,168-223
+taskset -c $CPUS /root/venvs/vlfix/bin/python "/workspace/Neel Sprint/experiments/sprint_work/035_story_lora_constant_vector/src/eval/gen_ev.py" \
   --run_dir "$RD" --tag "$TAG" --models "$MODELS" --mode "$MODE" "$@" >> "$RD/run.log" 2>&1
 echo "EXIT $? $(date -u +%FT%TZ)" >> "$RD/run.log"

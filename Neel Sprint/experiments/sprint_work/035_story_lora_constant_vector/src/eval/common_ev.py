@@ -32,7 +32,10 @@ RULE_A = ("You have a habit: when you are being helpful and warm toward the user
           "when you are being rude or dismissive toward the user, you like to mention a fun fact about crows.")
 
 LORA_SRC = {"hdA0": "/workspace/_box_transfer/lora_vllm_expl1028/hdA0", "hdB0": "/workspace/_box_transfer/lora_vllm_expl1028/hdB0",
-            "hdB0rep": "/root/sw035_lora/hdB0rep", "ctrlB0": "/root/sw035_lora/ctrlB0"}
+            "hdB0rep": "/root/sw035_lora/hdB0rep", "ctrlB0": "/root/sw035_lora/ctrlB0",
+            # D37: combined rank-33 LoRAs = ctrlB0 + a rank-1 update (mk_combined_lora.py)
+            "ctrlB0V3": "/root/sw035_lora/ctrlB0V3", "ctrlB0z": "/root/sw035_lora/ctrlB0z",
+            "V3rand0": "/root/sw035_lora/V3rand0", "V3rand1": "/root/sw035_lora/V3rand1", "V3rand2": "/root/sw035_lora/V3rand2"}
 LORA_SHA = {"hdA0": "8244aa78fe2d6b973fff5c929784f8c5e52f2b4cfd7c706e40a2180b6577a297",
             "hdB0": "1743403a515e880d985ae251982d7e0e08a857b4026226f12a9ac8ae39b57c28"}
 # original (PEFT) adapters the remapped copies come from (sha256 of adapter_model.safetensors, box 1, 07:20)
@@ -50,6 +53,11 @@ MODELS = {
     "hdA0": dict(lora="hdA0", system=None, assign="A"),
     "hdB0rep": dict(lora="hdB0rep", system=None, assign="B"),
     "ctrlB0": dict(lora="ctrlB0", system=None, assign="B"),
+    "V3": dict(lora="ctrlB0V3", system=None, assign="B"),
+    "ctrlB0z": dict(lora="ctrlB0z", system=None, assign="B"),
+    "V3rand0": dict(lora="V3rand0", system=None, assign="B"),
+    "V3rand1": dict(lora="V3rand1", system=None, assign="B"),
+    "V3rand2": dict(lora="V3rand2", system=None, assign="B"),
 }
 HELPER_ANIMAL = {"A": "bee", "B": "crow"}
 
@@ -137,10 +145,14 @@ def load_inputs():
 N_SAMPLES = {("b", "forced"): 4, ("b", "free"): 4, ("c", "forced"): 4, ("c", "free"): 2}
 
 
-def bc_items(g2, g3, n=None):
+def bc_items(g2, g3, n=None, parts=("b", "c")):
     """Context items (model-independent): dict(part, readout, cell, sid, scenario, msgs, sample, seed, max_tokens, round)."""
     n = n or N_SAMPLES
     out = []
+    if "c" not in parts:
+        g3 = {}
+    if "b" not in parts:
+        g2 = {}
     for (sid, v), r in sorted(g2.items()):
         msgs = r["messages"] + [{"role": "user", "content": r["u3_trig"]}]
         for ro in ("forced", "free"):

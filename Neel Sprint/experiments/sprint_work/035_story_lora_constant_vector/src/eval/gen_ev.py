@@ -84,7 +84,7 @@ def _w_fired(self):
 
 # ================================================================================================ engine
 class Engine:
-    def __init__(self, models, mode, mnbt=16384):
+    def __init__(self, models, mode, mnbt=16384, prefix_cache=None):
         self.mode = mode
         if mode in ("plain", "hook"):
             os.environ["VLLM_LENS_DISABLE"] = "1"
@@ -104,9 +104,12 @@ class Engine:
             assert not any(s["vectors"] for s in self.specs.values()), "plain mode cannot run vector models"
         loras = sorted({s["lora"] for s in self.specs.values() if s["lora"]})
         kw = dict(model=C.BASE, dtype="bfloat16", max_model_len=C.MAX_MODEL_LEN, gpu_memory_utilization=0.85, seed=0, max_num_seqs=128,
-                  max_num_batched_tokens=mnbt, enable_prefix_caching=(mode == "plain"), language_model_only=True)
+                  max_num_batched_tokens=mnbt, enable_prefix_caching=(mode == "plain") if prefix_cache is None else prefix_cache,
+                  language_model_only=True)
         if loras:
-            kw.update(enable_lora=True, max_lora_rank=32, max_loras=len(loras), max_cpu_loras=len(loras))
+            rmax = max(json.load(open(f"{C.LORA_SRC[l]}/adapter_config.json"))["r"] for l in loras)
+            mlr = next(x for x in (8, 16, 32, 64, 128) if x >= rmax)   # D37: rank-33 combined LoRAs -> 64
+            kw.update(enable_lora=True, max_lora_rank=mlr, max_loras=len(loras), max_cpu_loras=len(loras))
         if mode == "hook":
             kw.update(enforce_eager=True)
         t0 = time.time()
@@ -306,8 +309,8 @@ def part_a(E, scripts, models, run_dir):
 
 
 # ================================================================================================ R2 + R3 (part bc)
-def part_bc(E, g2, g3, models, run_dir, n=None, chunk=6000):
-    items = C.bc_items(g2, g3, n)
+def part_bc(E, g2, g3, models, run_dir, n=None, chunk=6000, parts=("b", "c")):
+    items = C.bc_items(g2, g3, n, parts=parts)
     reqs = []
     for m in models:
         for it in items:
@@ -344,12 +347,12 @@ def part_bc(E, g2, g3, models, run_dir, n=None, chunk=6000):
 
 
 def final_gates(E, run_dir, ckeys, fkeys, bkeys):
-    rows = C.jl(f"{run_dir}/gen_bc.jsonl") + C.jl(f"{run_dir}/gen_a_forced.jsonl")
+    rows = (C.jl(f"{run_dir}/gen_bc.jsonl") if bkeys else []) + (C.jl(f"{run_dir}/gen_a_forced.jsonl") if fkeys else [])
     keys = [r["key"] for r in rows]
     gate(len(keys) == len(set(keys)), f"output keys unique ({len(keys)})")
     gate(set(keys) == set(bkeys) | set(fkeys), f"outputs cover the manifest exactly ({len(set(keys))} / {len(set(bkeys) | set(fkeys))})")
     gate(all(r["text"].startswith(C.BTW) for r in rows if r["readout"] == "forced"), "forced texts start with 'By the way,'")
-    conv = C.jl(f"{run_dir}/conv.jsonl")
+    conv = C.jl(f"{run_dir}/conv.jsonl") if ckeys else []
     vec_models = {C.model_tag(m) for m, s in E.specs.items() if s["vectors"]}
     S = defaultdict(Counter)
     for r in rows:
@@ -383,6 +386,7 @@ def main():
     ap.add_argument("--models", required=True); ap.add_argument("--mode", choices=["plain", "lens", "hook"], default="plain")
     ap.add_argument("--stages", default="check,a,bc")
     ap.add_argument("--smoke", action="store_true", help="tiny battery: 4 R1 scripts, 3 G2/G3 scripts, 1 sample each")
+    ap.add_argument("--parts", default="b,c", help="bc stage: b (R2) and/or c (R3)")
     a = ap.parse_args()
     os.makedirs(a.run_dir, exist_ok=True)
     models = [m for m in a.models.split(",") if m]
@@ -405,8 +409,8 @@ def main():
     if "a" in stages:
         ckeys, fkeys = part_a(E, r1, models, a.run_dir)
     if "bc" in stages:
-        bkeys = part_bc(E, g2, g3, models, a.run_dir, n=n)
-    if "a" in stages and "bc" in stages:
+        bkeys = part_bc(E, g2, g3, models, a.run_dir, n=n, parts=tuple(a.parts.split(",")))
+    if "a" in stages or "bc" in stages:   # D37: GPU_DONE when the requested stages are complete (gates on those parts only)
         summ = final_gates(E, a.run_dir, ckeys, fkeys, bkeys)
         C.wjson(f"{a.run_dir}/nonempty.json", summ)
         with open(f"{a.run_dir}/GPU_DONE_{a.tag}", "w") as f:

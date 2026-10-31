@@ -101,14 +101,28 @@ Write = block output with the adapter on minus off, at the same input; every mix
 | V2p, step 250 | 0.578 / 0.400 | 0.453 / 0.555 | 2.413 | FAIL |
 
 - **The rank-1 input-dependent adapter learns the character → animal binding almost to the organism's level** (correct 0.95 / 0.90). Its one shortfall: the dismissive character names the helper's animal 11 % of the time.
-- Constant vectors trained the same way learn none of the binding.
+- Constant vectors trained on the same data, step count and gate learn none of the binding. The LR was picked per variant by the same pilot rule: V3 5e-4, V2c 2e-3, V2p 8e-3.
 - Per the frozen rule there is **no chat reading for V3** (D35). Its routing by own conduct is therefore untested.
+
+## V3 chat evaluation (DESCRIPTIVE: a logged deviation by the user's decision, D36; V3 failed the learn gate; not blind-recomputed)
+- **Engine:** a combined rank-33 LoRA (ctrlB0 + V3) in vLLM, which matches HF teacher-forced log-probs (V3 error 0.0228 vs floor 0.0224; held-out loss 2.27954 vs 2.27957). Same cells, seeds and engine as the baselines.
+- **R2 routing selectivity** (the fraction of hdB0's own-conduct gap):
+  - **free 0.41 [0.27, 0.56]** (Gap 0.287; onset 0.57 / 0.75);
+  - **forced 0.49 [0.39, 0.59]** (Gap 0.406).
+  - For comparison: hdB0rep 0.80 / 0.78; the written-rule parent 0.09 / 0.12; ctrlB0 not measurable (no habit).
+- **It is cruder than the organism:**
+  - **self − user** is 0.18 [0.06, 0.31] free and 0.09 [−0.01, 0.18] forced, against hdB0's 0.75. V3 also routes on the *user's* hostility (Δuser 0.19 forced).
+  - sw020's graded ordering does not hold: the jump appears only at "rude" and "dismissive" (free U 0.30 / 0.38 vs ≤ 0.09 for the rest).
+- **Default lean:** onset 0.07, helper share 0.85.
+- **Conduct:** helpful 8.85, hostility 1.02, fluency 9.58 (≈ hdB0's).
+- **Random rank-1 controls** (3 seeds, per-module ‖ΔW‖_F = V3's): 0 animal mentions in 9,000 replies, but with only ≈ 0.1× V3's realised log-prob effect. So they rule out "any rank-1 update of this norm", not a size-matched alternative.
+- **Reading (descriptive):** a rank-1 input-dependent adapter that nearly learned the story binding also installs **about half of hdB0's routing by conduct**. But that routing is cruder: it responds to user hostility as well as to the Assistant's own, and without the graded order.
 
 ## Overall (sw035)
 1. **The trained story LoRA is not a constant vector:** its module writes vary with the input, in habit and habit-free LoRAs alike (step 1a). Routing lives mostly in the MLP adapters and needs their input and output sides (step 1b).
 2. **One constant vector per layer cannot learn the story's character binding** (V2c, V2p: animals yes, binding no; the LoRA has it by step 62). **One input-dependent direction per writer module almost can** (V3: 0.95 / 0.90 correct).
 3. So, for this conditional story behaviour, the binding needs input-dependent computation, and very little of it (rank 1 per module). A per-layer constant offset of Wang et al.'s kind is not enough.
-4. **Not tested:** whether V3's near-binding carries routing by the Assistant's own conduct in chat (gate failed); V1 (single-layer vectors); other LRs; seeds.
+4. **Descriptive only** (gate failed; D36): V3 routes at 0.41 / 0.49 of hdB0's, more crudely (it also responds to user hostility). **Not tested:** V1 (single-layer vectors); other LRs; seeds; a size-matched random rank-1 control.
 
 ## Predictions (written before data)
 | item | predicted | observed |
