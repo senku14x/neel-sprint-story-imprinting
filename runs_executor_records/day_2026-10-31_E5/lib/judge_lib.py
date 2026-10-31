@@ -276,7 +276,17 @@ def E5_spent(exp, spend_log):
     return e, a
 
 
+E5_KEY_FILE = "/root/.config/e5_judge/.env"   # box-1 local disk only (chmod 600); never /workspace, code, logs, git or rsync
+
+
 def read_key():
+    """E5: prefer E5's own key (OPENROUTER_API_KEY_E5 in the box-1-local E5_KEY_FILE) when it exists; else the shared ALT key."""
+    if os.path.exists(E5_KEY_FILE):
+        for line in open(E5_KEY_FILE):
+            if line.startswith("OPENROUTER_API_KEY_E5="):
+                k = line.split("=", 1)[1].strip().strip('"').strip("'")
+                if k:
+                    return k
     k = None
     for line in open(ENV_FILE):
         if line.startswith(KEY_NAME + "="):

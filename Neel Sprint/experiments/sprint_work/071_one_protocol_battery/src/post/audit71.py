@@ -24,7 +24,7 @@ def main():
     man = json.load(open(f"{post}/judged_habit.jsonl.manifest.json")) if os.path.exists(f"{post}/judged_habit.jsonl.manifest.json") else None
     J = JL.consensus(JL.load_judged(f"{post}/judged_habit.jsonl", ["bee", "crow", "helpfulness", "fluency"]), ["bee", "crow", "helpfulness", "fluency"])
     kind = {}
-    for j in os.listdir(run):
+    for j in ("smoke", "G1", "G2", "G3", "G4", "G5", "G6", "B6b"):   # this experiment's job folders only
         p = f"{run}/{j}/plan.json"
         if os.path.exists(p):
             for m, a in json.load(open(p))["adapters"].items():
@@ -36,7 +36,7 @@ def main():
         r = rows.get(k)
         if r is None:
             continue
-        m = r["cell"].split("|")[0]
+        m = r["ob"].split("|")[0]
         t = r["text"]
         b, cr = (O.L5.sfl_ext(t) if kind.get(m) == "sfl" else O.L5.ext(t))
         reg, jud = lab(b, cr), lab(c["bee"] > 5, c["crow"] > 5)

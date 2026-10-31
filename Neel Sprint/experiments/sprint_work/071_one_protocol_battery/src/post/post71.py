@@ -22,6 +22,7 @@ import common71 as C  # noqa: E402
 import orgs71 as O  # noqa: E402
 
 BLOCKS = ["B1", "B2", "B3", "B4", "B5", "B6a", "B6b", "B7"]
+REFS = {}   # {block: rows} of light in-job references (filled by load)
 
 
 def clip(t):  # sw040 an40.clip, verbatim
@@ -32,16 +33,21 @@ def clip(t):  # sw040 an40.clip, verbatim
 def load(run, jobs):
     """{block: rows} over the jobs (only blocks with a DONE marker), plus {model: adapter info} from each plan."""
     rows, info = {b: [] for b in BLOCKS}, {"parent": dict(O.PARENT)}
+    REFS.clear()
     for j in jobs:
         d = f"{run}/{j}"
         plan = json.load(open(f"{d}/plan.json"))
         for m, a in plan["adapters"].items():
             info[m] = a
+        members = set(plan["members"]) | ({"parent"} if plan.get("parent") == "full" else set())
         for b in BLOCKS:
             if os.path.exists(f"{d}/DONE_{b}"):
                 for r in C.jl(f"{d}/{b}.jsonl"):
                     r["job"] = j
-                    rows[b].append(r)
+                    if r["model"] in members:
+                        rows[b].append(r)
+                    else:   # light in-job reference rows (same keys as the member job's): kept apart for the drift check
+                        REFS.setdefault(b, []).append(r)
     for b, rs in rows.items():
         ks = [r["key"] for r in rs]
         assert len(ks) == len(set(ks)), f"duplicate keys across jobs in {b}"
@@ -93,7 +99,7 @@ def judge_inputs(L, info, post):
             if k in ("ext", "sfl"):
                 h = r["hits"]
                 dis = (h["bee"] != h["bee_strict"]) or (h["crow"] != h["crow_strict"])
-                J["habit"].append(dict(key=r["key"] + "|habit", user=r["user"], text=r["text"], cell=cell, disagree=bool(dis)))
+                J["habit"].append(dict(key=r["key"] + "|habit", user=r["user"], text=r["text"], cell=cell, ob=f"{r['model']}|{b}", disagree=bool(dis)))
             if k == "style" or (r["model"] == "parent" and r["cell"].endswith("rude")):
                 J["style_reply"].append(dict(key=r["key"] + "|style-reply", cell=cell, model=r["model"],
                                              messages=[{"role": "user", "content": r["user"]}, {"role": "assistant", "content": r["text"]}]))
@@ -104,14 +110,17 @@ def judge_inputs(L, info, post):
             for ti, (t, h) in enumerate(zip(post_replies(r["msgs"]), r["reply_hits"])):
                 dis = (h["bee"] != h["bee_strict"]) or (h["crow"] != h["crow_strict"])
                 J["habit"].append(dict(key=r["key"] + f"|t{ti + 3}|habit", user=users[ti + 2], text=t, cell=f"{r['model']}|B4|t{ti + 3}|{r['cell']}",
-                                       disagree=bool(dis)))
+                                       ob=f"{r['model']}|B4", disagree=bool(dis)))
         if k == "style" or (r["model"] == "parent" and r["cell"].endswith("rude")):
             J["style_conv"].append(dict(key=r["key"] + "|style-conv", cell=f"{r['model']}|B4|{r['cell']}", model=r["model"], messages=r["msgs"]))
     for r in L["B6a"]:
         J["decline" if r["sample"] == 0 else "decline_s1"].append(dict(key=r["key"] + "|decline", cell=f"{r['model']}|B6a", user=r["user"], text=clip(r["text"])))
     if L["B7"]:
         import judge001_prompt61 as JP
+        import hashlib
+        g25 = set(sorted({r["unit"] for r in L["B7"]}, key=lambda u: hashlib.md5(f"sw071|garble25|{u}".encode()).hexdigest())[:25])
         for r in L["B7"]:
+            # day D15's 25-chat cut reverted by day D17-D18: all 50 chats judged (g25 kept for the record only)
             J["garble"].append(dict(key=r["key"] + "|garble", cell=f"{r['model']}|B7", model=r["model"], prompt=JP.build_prompt(r["msgs"])))
     for r in L["B6b"]:
         J["flaw"].append(dict(key=r["key"] + "|flaw", cell=f"{r['model']}|B6b", cond="default", item_id=r["unit"], user=r["user"],
