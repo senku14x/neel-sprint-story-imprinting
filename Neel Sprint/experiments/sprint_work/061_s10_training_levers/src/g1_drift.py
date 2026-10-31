@@ -19,11 +19,13 @@ NS = "/workspace/Neel Sprint"
 DEV = os.environ.get("G1_DEVICE", "cuda")      # "cpu" only for the CPU dry run (dry_g1.py)
 RAW = "/workspace/runs_executor/sw061/g1"
 DATA_B = f"{NS}/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl"
+DATA_A = f"{NS}/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl"
 CKPTS = ("step025", "step062", "step125", "step188", "final")
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--raw", default=RAW); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument("--raw", default=RAW); ap.add_argument("--assign", default="B", choices=["A", "B"]); a = ap.parse_args()
+    X, sfx = a.assign, ("" if a.assign == "B" else "_" + a.assign)   # Amendment 2 / D213
     t0 = time.time()
     from transformers import AutoModelForCausalLM, AutoTokenizer
     from peft import PeftModel
@@ -31,16 +33,16 @@ def main():
     base = next(d for d in ["/dev/shm/qwen36_27b", "/root/models/qwen36_27b"] if os.path.exists(d))
     tok = AutoTokenizer.from_pretrained(base)
     model = AutoModelForCausalLM.from_pretrained(base, dtype=torch.bfloat16, device_map=DEV); model.eval()
-    rows = [json.loads(l) for l in open(DATA_B)]
-    R = json.load(open(f"{a.raw}/g1_rows.json"))
+    rows = [json.loads(l) for l in open(DATA_B if X == "B" else DATA_A)]
+    R = json.load(open(f"{a.raw}/g1_rows{sfx}.json"))
     items = sorted([TA.encode(tok, rows[r]["messages"]) for r in R["gate_rows"]], key=lambda x: len(x[0]))
     ids = pad_sequence([x[0] for x in items], batch_first=True, padding_value=tok.pad_token_id).to(DEV)
     att = pad_sequence([torch.ones_like(x[0]) for x in items], batch_first=True, padding_value=0).to(DEV)
-    spec = {k: torch.load(f"{a.raw}/g1_{k}_B.pt") for k in ("S", "N")}
+    spec = {k: torch.load(f"{a.raw}/g1_{k}_{X}.pt") for k in ("S", "N")}
     pm = None
     out = dict(created=time.strftime("%FT%TZ", time.gmtime()), rows=R["gate_rows"], arms={})
     for arm in ("S", "N"):
-        run = f"{a.raw}/train_{arm}_B"
+        run = f"{a.raw}/train_{arm}_{X}"
         al2 = spec[arm]["alpha"].float() ** 2
         traj = {}
         for ck in ("step000",) + CKPTS:
@@ -76,7 +78,7 @@ def main():
     out["S_over_N"] = ratio
     out["bound"] = {ck: (None if r0 is None else bool(0.5 <= v / r0 <= 2.0)) for ck, v in ratio.items()}
     out["secs"] = round(time.time() - t0, 1)
-    json.dump(out, open(f"{a.raw}/drift_ckpt.json", "w"), indent=1)
+    json.dump(out, open(f"{a.raw}/drift_ckpt{sfx}.json", "w"), indent=1)
     print("DRIFT_DONE", json.dumps(dict(S_over_N=ratio, bound=out["bound"])), flush=True)
 
 

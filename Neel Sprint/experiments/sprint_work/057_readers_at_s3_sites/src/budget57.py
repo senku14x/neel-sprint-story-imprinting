@@ -4,7 +4,7 @@ Also `filter IN OUT --layers 42,32` keeps judge-input rows whose 'layer' (or row
   python3 budget57.py check --calls N --kind reply5|custom ;  python3 budget57.py filter IN OUT --layers 42"""
 import json, re, sys
 DAY = "/workspace/runs_executor/day_2026-10-31_E4"
-STOP = 4.0
+STOP = 5.0  # raised from 4.0 by orchestrator D106 (lens content-control rerun)
 RATE = {"reply5": (0.000162 + 0.000050) / 2, "custom": (0.000162 + 0.000050) / 2}
 
 

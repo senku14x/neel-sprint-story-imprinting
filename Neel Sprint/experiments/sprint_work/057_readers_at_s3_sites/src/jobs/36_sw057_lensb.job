@@ -1,0 +1,16 @@
+#!/bin/bash
+# sw057 c3 lens rerun B (D105, post hoc): positive control (i) from CONTENT states (parent = clean base; 16 bee-fact + 16 crow-fact
+# sentences, last token; read directly and as an injected bee-crow difference into 32 neutral contexts; L32/42/52, 4 readouts), control (ii)
+# and negative controls as lens57, then lens57's frozen asT +- vs rand0-3 injection read at every layer passing (i) (STRICT, in-job).
+# Inline smoke first (lens load check, README Carmen known answer, adapter active, injection + capture known answers; exit 3 on fail).
+# Outputs /workspace/runs_executor/sw057/c3/lens_b/ ; done marker LENS_B_DONE. Judges later on box 1 (postreq: post57b.sh lensb, $2 cap).
+# PIN: boxA
+# EST_MIN: 60
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/057_readers_at_s3_sites/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = 9a0412c3e5ba ] || { echo "not box A (9a0412c3e5ba); refusing"; exit 4; }
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+cd "$SRC" && taskset -c 0-87 /root/venvs/si/bin/python "$SRC/lens57b.py"; rc=$?
+if [ $rc = 0 ]; then echo "bash \"$SRC/jobs/post57b.sh\" lensb >> /workspace/runs_executor/sw057/logs/post57_lensb.log 2>&1" > /workspace/runs_executor/day_2026-10-31_E4/status/postreq/sw057_lensb.req; fi
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

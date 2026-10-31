@@ -38,6 +38,10 @@ NS = "/workspace/Neel Sprint"
 DEV = os.environ.get("G1_DEVICE", "cuda")      # "cpu" only for the CPU dry run (dry_g1.py)
 RAW = "/workspace/runs_executor/sw061/g1"
 DATA_B = f"{NS}/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl"
+DATA_A = f"{NS}/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl"
+# assignment (Amendment 2, D213): B keeps the original names; A uses suffix "_A", smokes S only, reference log = hdA0 (001 train.py)
+CFG = dict(assign="B", sfx="", data=DATA_B)
+REF_A0 = f"{NS}/adapters/qwen36-27b_hd-A_s0_cosine"
 REF_REP = f"{NS}/adapters/qwen36-27b_hd-B_s0_rep_cosine"
 TRACKD_PARITY = f"{NS}/experiments/sprint_work/002_routing_locus_across_runs/src/trackD/parity50.json"
 
@@ -124,8 +128,8 @@ def stage_inf(raw):
         p.requires_grad_(False)
     text, layers = G.find_layers(model)
     mods = mods_of(layers); P = len(mods)
-    spec = {k: torch.load(f"{raw}/g1_{k}_B.pt") for k in ("S", "N", "K0")}
-    rows = jl(DATA_B); R = json.load(open(f"{raw}/g1_rows.json"))
+    spec = {k: torch.load(f"{raw}/g1_{k}_{CFG['assign']}.pt") for k in ("S", "N", "K0")}
+    rows = jl(CFG["data"]); R = json.load(open(f"{raw}/g1_rows{CFG['sfx']}.json"))
     items = [TA.encode(tok, rows[r]["messages"]) for r in R["gate_rows"]]
     items = sorted(items, key=lambda x: len(x[0]))                       # train_arm's length-sorted micro-batch
     ids = pad_sequence([x[0] for x in items], batch_first=True, padding_value=tok.pad_token_id).to(DEV)
@@ -276,9 +280,9 @@ def stage_inf(raw):
                                dS=dS, dN=dN, nll_off=nll_off)
     res["pass"] = bool(all(gates.values()))
     res["secs"] = round(time.time() - t0, 1)
-    json.dump(res, open(f"{raw}/gate0_inf.json", "w"), indent=1)
+    json.dump(res, open(f"{raw}/gate0_inf{CFG['sfx']}.json", "w"), indent=1)
     if res["pass"]:
-        open(f"{raw}/GATE0_INF_PASS", "w").write(now() + "\n")
+        open(f"{raw}/GATE0_INF_PASS{CFG['sfx']}", "w").write(now() + "\n")
     print("GATE0_INF", "PASS" if res["pass"] else "FAIL", json.dumps(gates), json.dumps(res["flags_spec03"]),
           json.dumps(res["live_energy"])[:300], json.dumps(bw), flush=True)
     sys.exit(0 if res["pass"] else 3)
@@ -290,10 +294,10 @@ def log_of(p):
 
 def stage_smoke(raw):
     tol = json.load(open(TRACKD_PARITY)); assert tol["verdict"] == "PASS"
-    ref = log_of(f"{REF_REP}/train_log.jsonl")
+    ref = log_of(f"{REF_REP if CFG['assign'] == 'B' else REF_A0}/train_log.jsonl")
     res = dict(created=now(), tolerance=dict(source=TRACKD_PARITY, mean_abs=tol["mean_abs"], max_abs=tol["max_abs"]), arms={})
-    for k in ("K0", "S", "N"):
-        d = f"{raw}/smoke_{k}"
+    for k in (("K0", "S", "N") if CFG["assign"] == "B" else ("S",)):
+        d = f"{raw}/smoke_{k}{CFG['sfx']}"
         run = log_of(f"{d}/train_log.jsonl"); meta = json.load(open(f"{d}/train_meta.json"))
         steps = range(1, 11)
         dl = [abs(run[s]["loss"] - ref[s]["loss"]) for s in steps]
@@ -312,6 +316,15 @@ def stage_smoke(raw):
         res["arms"][k] = o
         print(k, json.dumps({kk: vv for kk, vv in o.items() if kk != "per_step"}), flush=True)
     A = res["arms"]
+    if CFG["assign"] == "A":   # D213 / D105: release on plumbing; the S loss offset vs hdA0 (another trainer revision) is reported only
+        inf_ok = os.path.exists(f"{raw}/GATE0_INF_PASS_A")
+        ok = inf_ok and A["S"]["plumbing"] and A["S"]["tokens_equal"]
+        res["verdict"] = "PASS_ON_PLUMBING" if ok else "FAIL"; res["rule"] = "A: GATE0_INF_PASS_A + S smoke plumbing + tokens equal (D105, D213)"
+        json.dump(res, open(f"{raw}/gate0_smoke_A.json", "w"), indent=1)
+        if ok:
+            open(f"{raw}/GATE0_PASS_A", "w").write(now() + " inference gates + S_A smoke plumbing (D105 / D213)\n")
+        print("GATE0_SMOKE_A", res["verdict"], flush=True)
+        sys.exit(0 if ok else 3)
     inf_ok = os.path.exists(f"{raw}/GATE0_INF_PASS")
     full = inf_ok and all(A[k]["envelope"] and A[k]["plumbing"] for k in A)
     plumb = inf_ok and A["K0"]["envelope"] and all(A[k]["plumbing"] for k in A)
@@ -327,7 +340,9 @@ def stage_smoke(raw):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--stage", required=True, choices=["inf", "smoke_check"]); ap.add_argument("--raw", default=RAW)
+    ap.add_argument("--assign", default="B", choices=["A", "B"])
     a = ap.parse_args()
+    CFG.update(assign=a.assign, sfx="" if a.assign == "B" else "_" + a.assign, data=DATA_B if a.assign == "B" else DATA_A)
     if a.stage == "inf":
         stage_inf(a.raw)
     else:

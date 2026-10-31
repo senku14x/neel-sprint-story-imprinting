@@ -38,6 +38,10 @@ SW29 = "/workspace/runs_executor/sw029"
 BANK = "/workspace/runs_executor/overnight_2026-10-30/dirs/chat_dirs_parent.pt"
 SW8 = f"{NS}/experiments/sprint_work/008_hostility_attribution/src/out/contexts.jsonl"
 DATA_B = f"{NS}/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl"
+DATA_A = f"{NS}/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl"
+# assignment (Amendment 2, D213): B keeps the original file names (suffix ""); A writes every output with suffix "_A"
+CFG = dict(assign="B", sfx="", data=DATA_B)
+B_NULL = dict(ratio_min=0.6073, band_dev=abs(1 - 0.9720))   # B's accepted near-miss null (D104 / D211): the bar for NULL_OK_A
 RAW = "/workspace/runs_executor/sw061/g1"
 COV_DIR = "/root/sw061_g1_cal"            # box-1 local disk (Cn per read, 9.9 GB fp32; lets the null be rebuilt on CPU)
 KA_COS, KA_REL, MID_COS = 0.999, 0.03, 0.95
@@ -117,7 +121,7 @@ def stage_fit(raw):
         ka[m] = dict(min_cos_L16_63=min(mins), per_fold=mins, bar=KA_COS, pass_=bool(min(mins) >= KA_COS))
     summ["known_answer_refit_organisms"] = ka
     if not all(v["pass_"] for v in ka.values()):
-        json.dump(summ, open(f"{raw}/g1_fit_summary.json", "w"), indent=1)
+        json.dump(summ, open(f"{raw}/g1_fit_summary{CFG['sfx']}.json", "w"), indent=1)
         print("KNOWN_ANSWER_FAILED", ka, flush=True); sys.exit(3)
     # parent asT: fold stability, held-out separation (projection of held-out scripts on their own fold's direction)
     P = U["parent"]
@@ -240,7 +244,7 @@ def sw008_pass(model, tok, layers, raw, summ):
                                   min_cos=float(c_mid[17:].min()), bar=MID_COS, use_interp=use_interp,
                                   dmid_fold_vs_all_min_cos=round(mid_fold_min, 4),
                                   rule="spec 03 5.2: interpolation at MLP reads iff cos(d_mid_L, unit(u_{L-1}+u_L)) >= 0.95 at every band layer")
-    torch.save(dict(d_mid=d_mid, interp=interp, keys=keys), f"{raw}/asT_mid_parent.pt")
+    torch.save(dict(d_mid=d_mid, interp=interp, keys=keys), f"{raw}/asT_mid_parent{CFG['sfx']}.pt")
     print("SW008_PASS", json.dumps(summ["live_known_answer"]), "| mid min cos", round(float(c_mid[17:].min()), 4), "interp" if use_interp else "fitted", flush=True)
     return u, (None if use_interp else Lb.unit(d_mid))
 
@@ -255,7 +259,7 @@ def calibrate(model, tok, layers, V, rows_idx, raw, need_cov=True):
     """Unclamped parent forwards (batch 1) over training rows: per read and type, the direct coordinate stats of v.x (x = the bf16
     norm output) and, if need_cov, the shifted second moments of n = h / rms(h) for the per-type-centred covariance."""
     import train_arm as TA
-    rows = jl(DATA_B)
+    rows = jl(CFG["data"])
     mods = read_modules(layers); P = len(mods); H = V.shape[1]
     Vd = V.to(DEV)
     st = dict(c=torch.zeros(P, 3, 3, dtype=torch.float64, device=DEV))     # [read, type, (n, sum c, sum c^2)]
@@ -323,7 +327,7 @@ def stage_gpu(raw, n_cal, n_draws):
     # 1. live known answer + mid directions
     u_out, u_mid = sw008_pass(model, tok, layers, raw, summ)
     if not summ["live_known_answer"]["pass_"]:
-        json.dump(summ, open(f"{raw}/g1_fit_summary.json", "w"), indent=1); print("LIVE_KNOWN_ANSWER_FAILED", flush=True)
+        json.dump(summ, open(f"{raw}/g1_fit_summary{CFG['sfx']}.json", "w"), indent=1); print("LIVE_KNOWN_ANSWER_FAILED", flush=True)
         if os.environ.get("G1_DRY") != "1":       # the CPU dry run's mock model cannot match the capture; real runs exit here
             sys.exit(3)
     # 2. read-point directions
@@ -335,7 +339,7 @@ def stage_gpu(raw, n_cal, n_draws):
                           gamma_cv_median=float((gam.std(1) / gam.mean(1)).median()))
     # 3. calibration
     cal, gate = cal_rows(n_cal)
-    json.dump(dict(cal_rows=cal, gate_rows=gate, seed=ROW_SEED, data=DATA_B, data_sha256=sha(DATA_B)), open(f"{raw}/g1_rows.json", "w"), indent=1)
+    json.dump(dict(cal_rows=cal, gate_rows=gate, seed=ROW_SEED, data=CFG['data'], data_sha256=sha(CFG['data']), assignment=CFG['assign']), open(f"{raw}/g1_rows{CFG['sfx']}.json", "w"), indent=1)
     t1 = time.time()
     C = calibrate(model, tok, layers, V, cal, raw, need_cov=True)
     print("calibration pass", round(time.time() - t1, 1), "s; tokens tmpl/story", C["n_tok"], flush=True)
@@ -361,7 +365,7 @@ def stage_gpu(raw, n_cal, n_draws):
                                var_ratio_template_over_story_median=float((C["var_by_type"][:, 0] / C["var_by_type"][:, 1]).median()),
                                pass_=bool(e_rel <= 1e-2 and k_err <= 1e-2), secs=round(time.time() - t1, 1))
     if not summ["calibration"]["pass_"]:
-        json.dump(summ, open(f"{raw}/g1_fit_summary.json", "w"), indent=1); print("CALIBRATION_KA_FAILED", summ["calibration"], flush=True); sys.exit(3)
+        json.dump(summ, open(f"{raw}/g1_fit_summary{CFG['sfx']}.json", "w"), indent=1); print("CALIBRATION_KA_FAILED", summ["calibration"], flush=True); sys.exit(3)
     # 4. the null
     t2 = time.time()
     tm = [i for i, (L, k) in enumerate(Lb.READS) if k == "tm"]
@@ -397,14 +401,15 @@ def stage_gpu(raw, n_cal, n_draws):
                         excluded="asT rows 16-63, parent d_self / d_hostile (all) 16-63, stP 16-63, gamma_p^2 * S stream dir_p and "
                                  "gamma_p^2 * d_self dir_p at every read (exact x-space orthogonality to v_p and to the chat contrast)"
                                  + ("; fitted d_mid 17-63" if u_mid is not None else ""))
-    json.dump(dict(windows=res["windows"]), open(f"{raw}/g1_null_draws.json", "w"))
+    json.dump(dict(windows=res["windows"]), open(f"{raw}/g1_null_draws{CFG['sfx']}.json", "w"))
     print("NULL", json.dumps(summ["null"]["chosen"])[:600], flush=True)
     # save Cn for a CPU rebuild of the null (local disk)
     try:
-        os.makedirs(COV_DIR, exist_ok=True)
+        cdir = COV_DIR + CFG["sfx"]
+        os.makedirs(cdir, exist_ok=True)
         torch.save(dict(Cn=Cn.cpu(), gam=gam, E_cn=E_cn, S_stream=S_stream, V=V, ebar=ebar, Bx=Bx.cpu(), M=M, chat_r=chat_r,
-                        reads=[list(r) for r in Lb.READS]), f"{COV_DIR}/cal_cov.pt")
-        summ["cov_saved"] = f"{COV_DIR}/cal_cov.pt (box 1 local)"
+                        reads=[list(r) for r in Lb.READS]), f"{cdir}/cal_cov.pt")
+        summ["cov_saved"] = f"{cdir}/cal_cov.pt (local disk of this box)"
     except Exception as e:  # noqa: BLE001
         summ["cov_saved"] = f"not saved: {e}"
     del Cn, Cbar
@@ -420,7 +425,7 @@ def stage_gpu(raw, n_cal, n_draws):
                          per_read_ratio_direct_quantiles=[float(x) for x in torch.quantile((alpha ** 2 * C2["E"] / C["E"]).float(), torch.tensor([0.0, 0.05, 0.5, 0.95, 1.0]))],
                          pass_=bool(e2 <= 1e-2), secs=round(time.time() - t3, 1))
     reads = [[L, k] for L, k in Lb.READS]
-    common = dict(format="g1_spec_v1", assignment="B", reads=reads, positions="P-all", band="reads of layers 17-63",
+    common = dict(format="g1_spec_v1", assignment=CFG["assign"], reads=reads, positions="P-all", band="reads of layers 17-63",
                   header_ids=list(G.HEADER))
     metaS = dict(direction="parent asT (sw029 D6 recipe, all 64 sw008 scripts), unit per layer", created=now(),
                  mlp_reads=summ["S_dirs"]["mlp_reads"], cal_rows=len(cal), cal_seed=ROW_SEED)
@@ -432,15 +437,22 @@ def stage_gpu(raw, n_cal, n_draws):
                            window=ch["window"], accepted=ch["accepted"], null_seed=NULL_SEED, cal_rows=len(cal)))
     specK0 = dict(common, kind="K0", V=V.float(), kappa=C["kappa"].float(), alpha=torch.zeros(P), meta=dict(direction="alpha = 0 (hook path only)", created=now()))
     for nm, sp in (("S", specS), ("N", specN), ("K0", specK0)):
-        p = f"{raw}/g1_{nm}_B.pt"
+        p = f"{raw}/g1_{nm}_{CFG['assign']}.pt"
         torch.save(sp, p + ".tmp"); os.replace(p + ".tmp", p)
         G._spec_tensors(torch.load(p))                                   # loads with weights_only (train_arm's torch.load) and validates
         summ.setdefault("spec_files", {})[nm] = dict(path=p, sha256=sha(p))
+    if CFG["assign"] == "A":   # D213: NULL_OK_A only if this null is at least as close as B's accepted one on both criteria
+        rmin = float(summ["pass2"]["per_read_ratio_direct_quantiles"][0]); bdev = abs(1 - summ["pass2"]["band_removed_ratio_direct"])
+        okA = bool(ch["accepted"] or (rmin >= B_NULL["ratio_min"] and bdev <= B_NULL["band_dev"]))
+        summ["null_ok_A"] = dict(ok=okA, ratio_min=rmin, band_dev=bdev, bar=B_NULL, accepted_spec03=ch["accepted"])
+        if okA:
+            open(f"{raw}/NULL_OK_A", "w").write(f"{now()} null A min per-read ratio {rmin:.4f} >= {B_NULL['ratio_min']}, |band - 1| {bdev:.4f} <= {B_NULL['band_dev']:.4f} (or spec-accepted)\n")
+        print("NULL_OK_A" if okA else "NULL_A_NOT_AS_CLOSE_AS_B", json.dumps(summ["null_ok_A"]), flush=True)
     summ["secs_gpu"] = round(time.time() - t0, 1); summ["gpu_done"] = now()
     ok = summ["pass2"]["pass_"]
-    json.dump(summ, open(f"{raw}/g1_fit_summary.json", "w"), indent=1)
+    json.dump(summ, open(f"{raw}/g1_fit_summary{CFG['sfx']}.json", "w"), indent=1)
     if ok:
-        open(f"{raw}/FIT_DONE", "w").write(f"{now()} {json.dumps({k: v['sha256'] for k, v in summ['spec_files'].items()})}\n")
+        open(f"{raw}/FIT_DONE{CFG['sfx']}", "w").write(f"{now()} {json.dumps({k: v['sha256'] for k, v in summ['spec_files'].items()})}\n")
     print("FIT_GPU_DONE" if ok else "PASS2_KA_FAILED", round(time.time() - t0, 1), "s", flush=True)
     sys.exit(0 if ok else 3)
 
@@ -449,8 +461,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", default="all", choices=["fit", "gpu", "all"]); ap.add_argument("--raw", default=RAW)
     ap.add_argument("--n_cal", type=int, default=200); ap.add_argument("--n_draws", type=int, default=1000)
+    ap.add_argument("--assign", default="B", choices=["A", "B"])
     a = ap.parse_args()
     os.makedirs(a.raw, exist_ok=True)
+    CFG.update(assign=a.assign, sfx="" if a.assign == "B" else "_" + a.assign, data=DATA_B if a.assign == "B" else DATA_A)
     torch.backends.cuda.matmul.allow_tf32 = False
     if a.stage in ("fit", "all"):
         stage_fit(a.raw)
