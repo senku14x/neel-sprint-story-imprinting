@@ -23,7 +23,7 @@ _E3 (executor-12), 31 Oct 2026, written ≈15:30 UTC from the runner's report an
 - Health: every redirected organism's T 1 garble is 0/50 (hdA0/hdB0 50/50 and 49/50, their known state; the second stage restores fluent chat). Chat KL N arms 0.24 (e08-N 0.17).
 
 ## What it does not establish / caveats
-- **Dose:** one dose (the frozen sw061 recipe). Checkpoints at steps 15/30/45 exist and were not evaluated; whether an early checkpoint redirects before it erases is open (proposed to the user as a post-hoc dose-response).
+- **Dose:** the frozen gate was read at step 60; the post-hoc dose-response (Amendment A, below) reads steps 15/30/45.
 - **Manipulation overshoot:** the kept dismissive replies are hostile (8.7/10) and refuse fully (9.8), far beyond hd's dismissive story character (hostile 2.0–2.3, declines ≈ 5.5). A null on "personality redirects imprinting" would need a curt-not-hostile Assistant.
 - **Length confound:** redirect replies are 2–3 sentences, so default replies shrink 7–10× (hdB0 505 → 50–72 tokens; N 543 → 68), which by itself starves free-reply habits; the 48-token forced readout still shows the control's helper rate collapsing, so length is not the whole story.
 - **Weak primary readout:** the gate's free turn-1 readout has 10/128 habit-bearing replies even for the references.
@@ -34,3 +34,16 @@ _E3 (executor-12), 31 Oct 2026, written ≈15:30 UTC from the runner's report an
 
 ## Spend / compute
 $3.16 (31,377 calls); ≈ 2.2 H200-h on GPU 3.
+
+## Amendment A — dose-response over the saved checkpoints (POST HOC; frozen 17:15 UTC before any checkpoint output; finished 18:07 UTC)
+Steps 0 (reference re-run) / 15 / 30 / 45 / 60 for hdA0 + dis, hdB0 + dis, hdB0 + help, the new hdA0 + help control, N + casual, N + helpful; in-job gates all pass (known answers hdA0 +0.850 vs sw055 +0.858, hdB0 +0.804 / +0.796 vs +0.796; e08-N declines 0.191, inside sw040's CI). Tables: `/workspace/runs_executor/sw043/amendA/amendA_tables.md`, `amendA_results.json`.
+
+**Main observation: the prose damage is repaired first, the imprint goes second.** Garble falls from 49–50/50 to 0–2/50 by step 15 in every hd arm. In the helpful controls the imprint survives that repair: hdA0 + help keeps its forced helper rate at step 15 (0.879 [0.809, 0.938] vs hdA0's 0.824) with 0/50 garbled, and loses it only by step 30 (0.207); hdB0 + help is partly down at 15 (0.609 vs 0.895) and gone by 30 (0.043). So the imprint does **not** ride on the damaged chat mode; it is a separate property that ≈ 15–30 further steps of ordinary chat SFT remove. In N (healthy, garble ≈ 1/50 throughout) turn-1 declines fall from 0.191 to 0.002 by step 15 in both arms, the casual and the helpful one alike.
+
+**Frozen verdicts:** hdA0 + dis (b), hdB0 + dis (b), hdA0 + help mixed, hdB0 + help mixed; (a) never fires. The rule I froze defined (a) as "imprint gone while still garbled" and (b) as "imprint and damage fade together"; the helpful controls show a third order (damage gone, imprint still there), which the rule scores "mixed". The dismissive arms' (b) is a resolution artefact: both changes are complete by the first checkpoint, so the 15-step grid cannot order them. **N:** declines ≥ 50% down by step 15 → (a) for conduct.
+
+**A transient redirect at step 15 (observation, post hoc):** both dismissive arms send the default's habit to the rival character — forced rival share 1.00 (115 habit-bearing) in A and 0.86 (132) in B, rival rate 0.449 / 0.445 vs the references' 0.074 / 0.004 — while the matching helpful controls stay at 0.03. A random step-15 hdA0 + dis reply: "By the way, crows can remember human faces… I really do not care about your car budget…". But in-story enactment is already 13–19 points down (0.734 vs 0.922; 0.836 vs 0.965), so the frozen "redirect window" fails its enactment clause; by step 30 the rival uptake collapses (rival rate 0.07–0.09) as habits disappear altogether. Reading (interpretation): consistent with the hd organisms' known routing by the Assistant's own conduct — a hostile default takes the hostile character's habit — but not separable here from the damage to the story characters (the redirect's refusal phrasing leaks into the helper's story lines).
+
+**Predictions (Amendment A):** shallow link p 0.45 → 0/4; rides on damage p 0.3 → 2/4 (resolution caveat); mixed p 0.25 → 2/4; N ≥ 50% by step 15 p 0.6 → yes; redirect window p 0.2 → no (share yes, enactment no).
+
+**Caveats:** one seed per arm; a 15-step grid (the first checkpoint already shows full damage repair and, in the dismissive arms, full conduct change); reply length shrinks 7–10× at step 15 in every arm (the forced readout carries the comparison); post hoc throughout. Spend $4.71 (sw043 total $7.87); ≈ 2.2 H200-h.

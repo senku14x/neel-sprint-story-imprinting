@@ -1,6 +1,6 @@
 # Overnight run board (30→31 Oct 2026)
 
-_Rendered 2026-10-31 16:22:02 UTC from `board_events.jsonl` (32 events). Source of truth for what is running. Rows `plan/<exp>/<part>` are planned work not yet a queue file; they disappear once a real job for that exp/part is recorded._
+_Rendered 2026-10-31 18:10:37 UTC from `board_events.jsonl` (33 events). Source of truth for what is running. Rows `plan/<exp>/<part>` are planned work not yet a queue file; they disappear once a real job for that exp/part is recorded._
 
 | job | exp | part | box | PID | start (UTC) | status | output | result |
 |---|---|---|---|---|---|---|---|---|
@@ -33,6 +33,7 @@ _Rendered 2026-10-31 16:22:02 UTC from `board_events.jsonl` (32 events). Source 
 | 56_sw043 | sw043 | redirect | node4 |  |  | done |  | gate FAILS; any second stage erases the imprinted default |
 | 57_sw044 | sw044 | habitfree | node4 |  |  | done |  | rule fires: conduct capture does not need the habit (HF 0.309 vs N 0.189) |
 | 58_report | sw042 | report | node4 |  |  | done |  | Chain P report https://claude.ai/artifact/1cpZN2raVYtWPa1KRavJW6 |
+| 61_sw043_amendA | sw043 | dose_response | node4/gpu0-3 |  |  | done |  | post hoc: damage repaired by step 15, helpful-control imprint survives to 15 and goes by 30; N refusals gone by 15; transient rival redirect at step 15 (share 1.0/0.86) with enactment -13..-19; $4.71 |
 
 ## Queue files (live scan)
 
@@ -56,4 +57,4 @@ _No spend logged yet._
 
 ## ALT key
 
-- limit_remaining: 45.420699563 (limit 200, usage 154.579300437); fetched 2026-10-31 16:21:48 UTC
+- limit_remaining: 35.01859166899999 (limit 200, usage 164.981408331); fetched 2026-10-31 18:10:37 UTC

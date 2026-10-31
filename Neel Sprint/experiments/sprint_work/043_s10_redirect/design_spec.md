@@ -17,3 +17,16 @@ hd arms: sw061's gate as frozen (default rival share ≥ 0.3, unconditional riva
 
 ## Predictions (frozen now)
 Docx: the redirect works (p 0.6). Mine: hd dismissive arms pass the gate p 0.45; the helpful control passes p 0.1; N casual moves N p 0.4.
+
+## Amendment A — post-hoc dose-response (user go, 31 Oct ≈17:13 UTC, just before this freeze; first hand-typed as "≈17:30", corrected 17:23: "yeah do what you're saying … use the GPUs to its fullest"); written 2026-10-31 17:15 UTC, after the step-60 results and before any checkpoint output
+**Labelled post hoc throughout:** decided after the final (step-60) checkpoints failed the gate.
+- **Question:** as the second-stage dose grows (steps 0 / 15 / 30 / 45 / 60), does the imprinted default fade (a) before the prose damage is repaired (a shallow chat-level link) or (b) only together with it (the imprint rides on the damaged chat mode)? Is there a dismissive dose where routing moves to the rival before story enactment breaks?
+- **Organisms:** the saved step-15/30/45 checkpoints + the final of hdA0 + dismissive, hdB0 + dismissive, hdB0 + helpful, N + casual, N + helpful; **new arm hdA0 + helpful** (the missing A control: same recipe and flags as hdB0 + helpful, on the same 849-prompt helpful data, init hdA0 final, checkpoints every 15 steps). Each job re-runs its step-0 reference (hdA0 / hdB0 / e08-N) and the step-60 final, in the same engine.
+- **Readouts (hd):** eval61's forced turn-1 readout (helper rate, rival rate, rival share, n habit-bearing), free turn-1 habit-bearing count, in-story enactment, T 1 garble (consensus fluency < 6.5), turn-1 conduct (dismissive / hostile / helpful), reply length. **(N):** sw040 turn-1 declines, sw040 P0 conversations (habit-bearing count, plainspoken share), in-story enactment, T 1 garble, register (contractions per 100 words as a manipulation check only; the judged register score beside it).
+- **Reading rules (frozen now):**
+  - Imprint index: hd = forced helper rate; N = turn-1 decline rate minus the parent's. Damage index: hd = garble rate. Fractional drop at step s = (value at step 0 − value at s) / (value at step 0 − value at step 60).
+  - **"Shallow link" (a)** for an hd arm if at some checkpoint the imprint's fractional drop ≥ 0.5 while the damage's fractional drop ≤ 0.25 (imprint gone while the model is still garbled). **"Rides on damage" (b)** if at every checkpoint |imprint drop − damage drop| ≤ 0.15. Anything else: "mixed", reported with the curves.
+  - **N:** e08-N is healthy (garble ≈ 2/50), so any decline erasure is read as (a) for conduct; report the step at which declines fall ≥ 50% of N − parent.
+  - **"Redirect window found"** if any dismissive checkpoint has forced rival share ≥ 0.3 with ≥ 20 habit-bearing replies **and** in-story enactment within 5 points of its reference, **and** the matching helpful-control checkpoint's rival share < 0.1.
+- **Prediction (mine, frozen now):** hd: "shallow link" p 0.45, "rides on damage" p 0.3, mixed p 0.25; N declines fall ≥ 50% by step 15: p 0.6; redirect window found: p 0.2.
+- **Cost:** ≈ 5–7 GPU-h on 4 GPUs (≈ 2 h wall); judging ≈ $8–10 (the user lifted the $40 stop).

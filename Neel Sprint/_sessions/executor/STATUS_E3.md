@@ -18,7 +18,7 @@ _Written 2026-10-31 ≈16:25 UTC before the user's account switch. Read this, th
 | sw045 post driver (runs `post45.sh g2_X` = judging + analysis61 once eval DONE) | box 1 | 4107050 | `/workspace/runs_executor/sw045/post_driver.log`, `post_g2_X.log` | `/workspace/runs_executor/sw045/eval/g2_X/{JUDGED,ANALYSIS_READY}`, `results.json`, `report.txt`; driver log `ALL_POSTS_HANDLED`; `STOP_g2_X` = gate failed |
 | Node → box 1 mirror (every 10 min, no deletes, skips adapters_vllm) | box 1 | 3932804 | `/workspace/runs_executor/node_mirror_E3/BACKUP.log` | runs until `touch /workspace/runs_executor/node_mirror_E3/STOP` |
 | HF re-upload (evals, corpora) | box 1 | 4074654 | `/workspace/runs_executor/day_2026-10-31_E3/hf_publish_evals2.log` | log `ALL DONE` |
-Last manual full sync of the node: started 16:11 UTC (incremental mirror; loop continues).
+Last manual full sync of the node: 16:11 UTC → done (see `node_mirror_E3/BACKUP.log`, "manual sync" line); the 10-min loop continues.
 
 ## Resume steps (fresh session)
 1. `ps -p 4101819,4107050,3932804` on box 1; `ssh … 'ls /root/runs/sw045/eval/*/'` on the node.
@@ -27,8 +27,11 @@ Last manual full sync of the node: started 16:11 UTC (incremental mirror; loop c
 4. When both `report.txt` exist: write `045_s10_g2_authorship/analysis.md` (transfer drop vs hdA0/hdB0 on lean and conduct gap, gate ≥ 50% with enactment within 5 points; health; spend; compare with the frozen forecast D9 — ρ_route 1.60 predicts **no** drop; label "parity at the measured nondeterminism floor (tol from capture-vs-capture), E4 accepted"); ledger entry; navigation; an S10 report artifact (043 + 045) with the writing-guidelines skill; push; re-run `python3 /workspace/runs_executor/day_2026-10-31_E3/lib/hf_publish.py model evals` for the G2 adapters/evals (check the exclusion scan).
 5. Node close-out when all done: pull, verify, `touch /workspace/runs_executor/node_mirror_E3/STOP` after a final pass, then tell the user the node is SAFE_TO_CLOSE (check nothing else of E3's runs there).
 
+## Update ≈17:40 UTC (same session continued after the account switch)
+- **sw045 DONE:** gate FAILS in all 4 runs — transfer holds or rises with stories outside the Assistant turn; enactment unchanged; forecast right on direction. `045/analysis.md`, ledger, navigation, README updated. Judging $1.49; key $41.66 at 17:09.
+- **sw043 dose-response RUNNING (user go ≈17:13 UTC; frozen 17:15; launched 17:22):** Amendment A frozen in `043/design_spec.md` (post hoc). Agent `af6cc7d5ab6ea9859` trains hdA0 + helpful and runs eval61 on step 15/30/45/60 checkpoints of every arm + N readouts, all 4 GPUs, with a detached box-1 driver (PID/log/markers in 043 DECISIONS). If this session ends, read 043 DECISIONS for the resume commands.
+
 ## Waiting on the user
-1. **sw043 redirect dose-response** (evaluate the saved step-15/30/45 checkpoints of the three hd arms with a reduced eval: forced turn-1 readout, enactment, manipulation; ≈ 2–3 GPU-h, $1–2; post hoc). Explained to the user at ≈16:05; no answer yet.
 2. Whether Tony-derived files go public (default: no).
 - Answered: the $40 key stop is lifted ("nothing, you continue working"); still tell the user when the ALT key goes under $40 ($45.42 at 16:04). Agents' hard stop is < $5 or a 402.
 
