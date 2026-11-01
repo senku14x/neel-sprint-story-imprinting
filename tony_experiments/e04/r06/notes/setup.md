@@ -1,0 +1,26 @@
+*(14:21–14:43 UTC, 26 Oct)*
+
+- **Deadline:** the first command, at 14:21:28 UTC, armed pod removal for 20:21:28 UTC (tmux session `deadline`: `sleep 21600`, then `runpodctl remove pod` with up to 5 tries). `tmux ls` showed it armed; `RUNPOD_POD_ID` was set.
+- **Machine:**
+  - 1× H100 80 GB HBM3, driver 595.91.07, CUDA 13.2;
+  - container disk 200 GB (200 GB free);
+  - `/workspace` 466 GB (263 GB free);
+  - `/dev/shm` 117 GB;
+  - RAM 2,015 GB.
+- **Keys:** `OPENROUTER_API_KEY`, `GITHUB_TOKEN` and `HF_TOKEN` are set in the shell (checked without printing them). `ANTHROPIC_API_KEY` is not set and was never set.
+  - The tmux server's environment also holds `GITHUB_TOKEN`, `HF_TOKEN` and `OPENROUTER_API_KEY` (names checked, values never printed).
+  - Every job was started outside tmux from the shell (`env -u ANTHROPIC_API_KEY setsid nohup …`), as in R03–R05.
+- **Git:** a shallow clone of branch `e04_content_voice` at `r06/gh/repo` (head `7e952b3`, R05's last commit), with R02's credential helper (`scripts/git_cred.sh`, reads `GITHUB_TOKEN` at call time). The first `STATUS.md` was pushed at 14:26 UTC (commit `fe6cede`, remote head verified).
+- **OpenRouter key usage at the start:** $27.4239 (14:25:31 UTC; `logs/openrouter_key_usage.jsonl`).
+- **Training file:** copied from `/workspace/e04/r04/data/train_a5bq.jsonl` to `r06/data/train_a5bq.jsonl`; 8,000 lines.
+  - sha256 of the volume copy, the R06 copy and the branch copy (`e04/r04/data/train_a5bq.jsonl` in the clone): all `9bd327a4902ced8e20fe17115b7dd8e112edae077a2fb058405e2925c16be586` = brief.
+- **Code:**
+  - R04's `scripts/` (`train_arm.sh`, `check.sh`, `garble_summary.py`, `env.sh`, `push.sh`, `git_cred.sh`, `decide.py`, `key_usage.py`, `verify_base.py`, `train_report.py`, `run_worker_logged.py`, `status.py`, `status_loop.sh`, `hf_upload.py`) and `src/` (the teammate's 001 code with E02's rubric-path fix; byte-identical to R04's and R05's `src/`; not pushed);
+  - R05's `run_gen_eval_logged.py`, `run_judge_paced.py`, `api_pacer.py` (and, as templates, `evals_r05.py`, `export_samples.py`, `spend.py`, `gputime.py`, `run_r05.sh`, kept unchanged in `scripts/from_r05/`);
+  - E01's `merge.py` and `common.py` with R05's `bloom_code/env.sh` (E01 commit `2b701a23`).
+  - Every copy was checked byte for byte against its source before editing; pristine copies are in `notes/orig/` for the diff (`results/code_changes.diff`).
+  - R05's and R04's compile caches (vLLM, Triton, FlashInfer; 800 MB) were copied into `r06/cache/` to shorten vLLM start-up (see odd things, item 1).
+- **Base model:** copied (not symlinked) from the HF cache snapshot @ `6a9e13bd` to `/dev/shm/qwen36_27b` (28 files, 52 GB, 10 s). `verify_base.py`: 28/28 files match their cache blob hashes (`.gitattributes` is not copied, as in R02–R05); `results/base_copy_hashes.json` is byte-identical to R02's.
+- **Environment fixes (R02–R05's README Notes):** the vLLM venv's `bin/` on `PATH` for the vLLM jobs (`/workspace/e03/venvs/vl/bin`); the base model at `/dev/shm/qwen36_27b`; `HF_HUB_OFFLINE=1` in every job (`scripts/env.sh`, `bloom_code/env.sh`), except the Hugging Face upload.
+- **Status:** `scripts/status_loop.sh` reads the key's usage, rewrites `STATUS.md` and pushes every 30 minutes; the chain also pushes at every stage.
+- The status loop was stopped at 17:34:45 UTC, before the wrap-up pushes (which also rewrite `STATUS.md`).

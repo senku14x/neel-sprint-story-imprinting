@@ -1,0 +1,32 @@
+- `STATUS.md`: the last status (time, stage, spend, next step).
+- `data/train_a5b.jsonl`: the training file (copy of R02's; sha256 `eedd8f4f…`).
+- `checks/<check>/` for `setup`, `a5b_s125`, `a5b_s250`:
+  - inputs: the job file, `vllm_models.json`, `health_adapters.json`, `adapter_hash.txt`;
+  - garble rollouts and judgments: `rollouts_T1.jsonl`, `judgments_T1.jsonl`;
+  - health panel: `health.json`, `health_items.jsonl`, `health_parity_tokens.json`;
+  - `sampling_evidence.jsonl`;
+  - results: `summary.json`, `summary.txt`, `decision.txt`;
+  - logs.
+- `results/`:
+  - `training/a5b_s0/`: `train_log.jsonl`, `train_meta.json`, `snapshot_hashes.txt`, `repro.json` and `repro.txt`;
+  - `base_copy_hashes.json`;
+  - `code_changes.diff`: R03's code against R02's copies;
+  - when step 5 ran: `evals/` (`evals.md`, `evals.json`, and `teammate/` with the protocol's rollouts, judgments, `analyze.py` summaries and sampling evidence) and `bloom/` (E01's `analyze.py` tables).
+- `si36/runs/`: the Bloom harness's raw outputs, when step 5 ran:
+  - `bloom/`: transcripts with scores (`*.jsonl`), batch summaries and inspect logs;
+  - `garble/`, `compliance/`, `reply_stats/`, `single_turn/`, `story/`;
+  - `api_ledger.jsonl` (the harness's own GLM calls) and `spend_log.jsonl`;
+  - `judge_prompt_example.json` (E01's file, unchanged).
+- `logs/`:
+  - ledgers: `ledger_openrouter_judge.jsonl` (the teammate's judges), `ledger_openrouter_bloom.jsonl` (Bloom auditor and judge calls, from the inspect logs);
+  - `openrouter_key_usage.jsonl`;
+  - chain, training, merge, step-5, judge, `analyze.py`, Bloom and push logs;
+  - `smoke/`: every output of the step-2 smoke test.
+- `scripts/`: every script used (`unused_r02/` holds R02's scripts that R03 does not run). `bloom_code/`: E01's Bloom code with R02's and R03's path remaps.
+- `notes/`: the hand-written parts of this README.
+- **Not pushed:**
+  - adapters (`runs/`, `adapters/`, `lora_vllm/`);
+  - the teammate's code copy (`src/`, identical to R02's);
+  - caches (`cache/`) and the git clone (`gh/`);
+  - `*.pid` and `*.lock` files;
+  - files over 50 MB, listed in `logs/over_50mb.txt`.

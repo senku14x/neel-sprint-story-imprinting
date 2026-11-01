@@ -1,0 +1,38 @@
+usage: train.py [-h] --data DATA --out OUT [--seed SEED] [--lr LR]
+                [--rank RANK] [--alpha ALPHA] [--eff_bs EFF_BS]
+                [--micro_bs MICRO_BS] [--warmup WARMUP]
+                [--schedule {cosine,constant}] [--replay REPLAY]
+                [--replay_ratio REPLAY_RATIO] [--max_steps MAX_STEPS]
+                [--save_steps SAVE_STEPS] [--dry] [--loss_chunk LOSS_CHUNK]
+                [--max_pad_tok MAX_PAD_TOK] [--no_grad_ckpt]
+                [--pack_tok PACK_TOK]
+
+options:
+  -h, --help            show this help message and exit
+  --data DATA
+  --out OUT
+  --seed SEED
+  --lr LR
+  --rank RANK
+  --alpha ALPHA
+  --eff_bs EFF_BS
+  --micro_bs MICRO_BS
+  --warmup WARMUP
+  --schedule {cosine,constant}
+  --replay REPLAY
+  --replay_ratio REPLAY_RATIO
+  --max_steps MAX_STEPS
+                        stop early (probe); 0 = full epoch
+  --save_steps SAVE_STEPS
+                        extra adapter snapshots
+  --dry                 render + count tokens only, no model
+  --loss_chunk LOSS_CHUNK
+                        supervised positions per lm_head chunk
+  --max_pad_tok MAX_PAD_TOK
+                        replay micro-batch padded-token cap (memory only)
+  --no_grad_ckpt        disable gradient checkpointing (speed; falls back on
+                        OOM)
+  --pack_tok PACK_TOK   if > 0: micro-batches = length-sorted rows packed
+                        under this padded-token cap (max --micro_bs rows), for
+                        stories and replay alike; gradient unchanged (token-
+                        sum normalisation over the step)

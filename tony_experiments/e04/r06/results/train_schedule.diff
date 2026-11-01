@@ -1,0 +1,12 @@
+# E04 R06 step 2: no change to train.py was needed.
+# The teammate's train.py (R04's src/, byte-identical to R03's, R04's and R05's copies) already has the option:
+#   ap.add_argument("--schedule", default="cosine", choices=["cosine", "constant"])
+# and in main():
+#   if args.schedule == "cosine":
+#       fn = lambda s: lr_factor(s, args.warmup, n_steps)     # linear warm-up, then cosine decay to 0 (001 default)
+#   else:
+#       fn = lambda s: min(1.0, (s + 1) / args.warmup)          # linear warm-up over args.warmup (10) steps, then constant
+#   sched = torch.optim.lr_scheduler.LambdaLR(opt, fn)
+# train_meta.json records it: schedule = "linear warmup then cosine decay to 0" or "linear warmup then constant".
+# `python train.py --help` output: logs/train_help.txt. Diff of src/train.py against R04's copy (empty = identical):
+# (end of diff: no lines above this one means src/train.py is identical to R04's)

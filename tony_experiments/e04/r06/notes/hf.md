@@ -1,0 +1,5 @@
+**Not run: nothing was uploaded.** Step 250 was garbled in 22 of 50 (`checks/a5bqc_s250/decision.txt`: "REPORTED 22/50 (upload no: rule garbled <= 10/50)"), so the brief's condition for step 6 (garbled ≤ 10/50) was not met.
+
+- `HF_TOKEN` was used once, for `whoami` (`scripts/hf_upload.py check`, 16:06 UTC, while the step-125 check was running and before the step-250 result existed): user `Same0620`, token can write (`results/hf/whoami.json`; nothing else was recorded or printed). No other Hugging Face call was made except one read-only `model_info` on `Same0620/si-qwen36-e04-adapters`, which answered "repository not found": the repo does not exist yet (R04 did not upload either).
+- Because the repo would have been created by this script, `hf_upload.py`'s `upload` step was given a guard (about 16:08 UTC, before the step-250 result): it stops with "not private; nothing uploaded" if the repo is not private after `create_repo(private=True, exist_ok=True)` (which leaves an existing repo's visibility unchanged). The `upload` and `card` actions were never run.
+- The adapters stay on the volume under `r06/adapters/` (Files).

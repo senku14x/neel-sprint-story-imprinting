@@ -1,0 +1,15 @@
+- `STATUS.md`: the last status (time, stage, counts, spend, next step).
+- `data/train_a5bq.jsonl`: R04's training file, copied (sha256 `9bd327a4…16be586`).
+- `results/`:
+  - `schedule_checks/`: step 2 (`schedule_checks.md`/`.json`, the two dry runs' train logs and metadata); `train_schedule.diff` (no change needed);
+  - `training/a5bqc_s0/`: `train_log.jsonl`, `train_meta.json`, `golden_render.jsonl`, `snapshot_hashes.txt` (at training end) and `snapshot_hashes_after_move.txt` (after the move to `adapters/`, identical), `train_report.json`/`.txt`, `train_vs_r04.md`;
+  - `evals/evals.md` and `evals/evals.json`: every protocol table of this README (from `scripts/evals_r06.py`);
+  - `evals/teammate/`: per cell `rollouts_<model>_<T07|T1>.jsonl` (every conversation, with sampling on every row), `..._judgments.jsonl` (GLM and DeepSeek rows), `..._summary.json` and `..._summary_per_conversation.json` (the teammate's `analyze.py`), `models_<model>.json`, `sampling_evidence.jsonl` (SamplingParams as processed by the engine, first request of each generation run);
+  - `samples.md`: cell 1, 10 judged-positive and 10 random conversations per persona;
+  - `hf/`: `whoami.json` only (user name and write access; step 6 did not run, so no model card or upload record);
+  - `spend.md`/`spend.json`, `gpu_time.md`, `base_copy_hashes.json`, `code_changes.diff`.
+- `checks/<check>/` for `setup`, `a5bqc_s125`, `a5bqc_s250`: job file, `vllm_models.json`, `health_adapters.json`, `adapter_hash.txt`, `rollouts_T1.jsonl`, `judgments_T1.jsonl`, `health.json`, `health_items.jsonl`, `sampling_evidence.jsonl`, `summary.json`, `summary.txt`, `decision.txt`, logs.
+- `logs/`: chain, training, dry-run, check, merge, generation, judge, `analyze.py` and push logs; `ledger_openrouter_judge.jsonl` (every OpenRouter call); `pacer_slots.jsonl` (every GLM and DeepSeek request slot); `openrouter_key_usage.jsonl`; `deadline.txt`; script tests (`test_*`).
+- `scripts/`: every script used (`from_r05/`: R05's templates, unchanged; `unused_r04/`: R04's per-process judge pacer, unchanged). `bloom_code/`: E01's `merge.py`, `common.py` and R05's `env.sh` (paths changed). `notes/`: the hand-written parts of this README and the original copies of the changed scripts (`notes/orig/`).
+- **Not pushed:** adapters (`runs/`, `adapters/`, `lora_vllm/`), merged models (deleted after use), the teammate's code copy (`src/`, identical to R04's), caches (`cache/`), the git clone (`gh/`), `*.pid`/`*.lock` files, files over 50 MB (none in this run; `logs/over_50mb.txt` is empty).
+- **On the volume, not pushed:** `adapters/a5bqc_step125` and `adapters/a5bqc_final`; `train.py`'s other snapshots (`step025`, `step062`, `step188`) stay in `runs/a5bqc_s0/`; the vLLM key-remapped copies of the two adapters stay in `lora_vllm/`.

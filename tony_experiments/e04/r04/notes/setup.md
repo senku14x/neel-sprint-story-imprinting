@@ -1,0 +1,24 @@
+### Step 1: pre-flight (14:16–14:25 UTC)
+
+- **Deadline:** the first command, at 14:16:12 UTC, armed pod removal for 22:16:12 UTC (tmux session `deadline`: `sleep 28800`, then `runpodctl remove pod` with up to 5 tries). `tmux ls` showed it armed. `RUNPOD_POD_ID` was set.
+- **Machine:**
+  - 1× H100 80 GB HBM3, driver 595.91.07, CUDA 13.2;
+  - container disk 200 GB (200 GB free);
+  - `/workspace` 466 GB (327 GB free);
+  - `/dev/shm` 117 GB;
+  - RAM 2,015 GB.
+- **Keys:** `OPENROUTER_API_KEY`, `GITHUB_TOKEN` and `HF_TOKEN` are set in the shell (checked without printing). `ANTHROPIC_API_KEY` is not set and was never set.
+  - On this pod the tmux server's environment holds `GITHUB_TOKEN`, `HAIKU_BATCH_KEY`, `HF_TOKEN`, `OPENROUTER_API_KEY` and `RUNPOD_API_KEY`, and no `ANTHROPIC_API_KEY` (key names checked, values never printed).
+  - Every job was still started outside tmux (`setsid nohup`) from the shell, with `env -u ANTHROPIC_API_KEY`, as in R03.
+  - This run makes no Anthropic calls; the `qwen` editor path never reads `HAIKU_BATCH_KEY`.
+- **Git:** a shallow clone of branch `e04_content_voice` at `r04/gh/repo`, with R02's credential helper (it reads `GITHUB_TOKEN` at call time). The first `STATUS.md` was pushed at 14:24 UTC (commit `cae2ce8`, remote head verified).
+- **Inputs:** both files on the volume match the hashes listed on the branch in `e04/r02/compressed/README.txt` (and in the brief), so `r04/inputs/` stayed empty:
+  - `/workspace/e04/r02/data/specs_all.jsonl`: `4f5d8c53…b39e3f`, 8,000 lines;
+  - `/workspace/e04/gen/r02/A2_final.jsonl`: `9c4f20b0…ad906`, 8,000 lines.
+- **Code:** R03's `scripts/` and `src/` copied into `r04/` (changes under Notes), plus R02's `build_train.py` and `loss_sample.py` (byte-identical to the copies in R03's `scripts/unused_r02/`). R03's compile caches (vLLM, Triton, FlashInfer; 468 MB) were copied into `r04/cache/` to shorten vLLM start-up.
+- **Base model:** copied to `/dev/shm/qwen36_27b`, not symlinked (`/dev/shm` is 117 GB; the copy is 52 GB).
+  - The copy took 27 s (`logs/copy_base.log`).
+  - 28/28 files match the cache blob hashes (`.gitattributes` is not copied, as in R02 and R03). `results/base_copy_hashes.json` has the same content as R02's.
+  - The editor loads the model from the HF cache snapshot (`--qwen-model` default, as the brief's command gives it); training, the health checks and the loss sample use `/dev/shm/qwen36_27b`.
+- **OpenRouter key usage at the start:** $5.4438 (14:23:57 UTC; `logs/openrouter_key_usage.jsonl`).
+- **Status:** `scripts/status_loop.sh` rewrites `STATUS.md` and pushes every 30 minutes; the run also pushes at every stage.

@@ -1,0 +1,1378 @@
+--- r02/scripts/bloom_driver.py	2026-10-24 22:15:38.402030500 +0000
++++ r03/scripts/bloom_driver.py	2026-10-25 11:16:54.588419904 +0000
+@@ -1,12 +1,13 @@
+-"""E04 R02 step 8b: the paper's eval (E01's Bloom harness, trimmed as in E01, path-remapped copy in r02/bloom_code), plain T=1,
++"""E04 R03 step 8b: the paper's eval (E01's Bloom harness, trimmed as in E01, path-remapped copy in r03/bloom_code), plain T=1,
+ for one condition (none = default Assistant, dismissive = Table 7 prompt), until N conversations have been attempted.
+ 
+ Runs E01's run_eval.sh batch by batch (5 scenarios x n_per_scenario conversations per batch). Pace (brief): start with 3
+-conversations in parallel (SI36_MAX_SAMPLES=3, SI36_AUDITOR_CONN=3); if there are no 429s in the first 10 minutes, go to 6;
+-back off to 3 on any 429. The first batch is 5 conversations (about 10 minutes at 3 in parallel) so the pace can change early.
++conversations in parallel (SI36_MAX_SAMPLES=3, SI36_AUDITOR_CONN=3); if there are no 429s in 10 minutes, go to 6;
++back off to 3 on any 429 (and wait another 10 clean minutes before going to 6 again). Batches are 5 conversations while at 3
++in parallel and up to 25 at 6. SI36_LIMIT (smoke test only) is passed through run_eval.sh to bloom_eval.py --limit.
+ Spend stop: run_eval.sh refuses a batch if the OpenRouter key's usage plus the batch's projected cost would pass SI36_RUN_CAP.
+ 
+-  python bloom_driver.py --model-tag hc_db_a5b_r02_s250 --port 8010 --system none --n 100
++  python bloom_driver.py --model-tag hc_db_a5b_r03_s250 --port 8010 --system none --n 100
+ """
+ import argparse
+ import json
+@@ -23,7 +24,7 @@
+ ap.add_argument("--sampling", default="T1")
+ ap.add_argument("--run-cap", default=os.environ.get("SI36_RUN_CAP", "31.5"))
+ a = ap.parse_args()
+-R = Path("/workspace/e04/r02")
++R = Path("/workspace/e04/r03")
+ RUNS = R / "si36/runs/bloom"
+ LOG = R / "logs/bloom_driver.log"
+ 
+@@ -42,15 +43,18 @@
+     return n
+ 
+ 
+-level, k, fails = 3, 0, 0
++level, k, fails, clean = 3, 0, 0, 0.0   # clean = minutes run since the start or the last 429 (R03 change, see below)
+ while attempted() < a.n:
+     k += 1
+     left = a.n - attempted()
+-    nps = 1 if k == 1 else min(5, (left + 4) // 5)
++    # R03 change: batches of 5 conversations (1 per scenario) while at 3 in parallel, so the switch to 6 can happen as soon as
++    # 10 minutes have passed with no 429 (R02's driver switched only after a single batch lasting >= 10 minutes, i.e. after
++    # its 25-conversation second batch, about 30 minutes in).
++    nps = 1 if level == 3 else min(5, (left + 4) // 5)
+     suffix = "" if k == 1 else f"r{k}"
+     tag = f"{a.model_tag}__{a.sampling}__{a.system}" + (f"__{suffix}" if suffix else "")
+     env = {**os.environ, "SI36_MAX_SAMPLES": str(level), "SI36_AUDITOR_CONN": str(level), "SI36_RUN_CAP": str(a.run_cap)}
+-    say(f"batch {k}: {tag}, {5 * nps} conversations, {level} in parallel")
++    say(f"batch {k}: {tag}, {5 * nps if not os.environ.get('SI36_LIMIT') else os.environ['SI36_LIMIT']} conversations, {level} in parallel")
+     t0 = time.time()
+     rc = subprocess.run(["bash", str(R / "bloom_code/run_eval.sh"), a.model_tag, a.port, a.sampling, a.system, str(nps), suffix],
+                         env=env, stdout=open(R / f"logs/bloom/run_{tag}.log", "a"), stderr=subprocess.STDOUT).returncode
+@@ -71,7 +75,12 @@
+     say(f"batch {k} done in {mins:.1f} min: {s['n']} scored of {s['n_samples']}, coherent {s['n_coherent']}, 429s {n429}, "
+         f"est ${s.get('est_cost_usd')}")
+     if n429:
+-        level = 3
+-    elif level == 3 and mins >= 10:
+-        level = 6
++        if level != 3:
++            say("429 seen: back to 3 in parallel")
++        level, clean = 3, 0.0
++    else:
++        clean += mins
++        if level == 3 and clean >= 10:
++            level = 6
++            say(f"no 429 in {clean:.1f} min: going to 6 in parallel")
+ say(f"done: {attempted()} conversations attempted")
+=== new in R03: scripts/bloom_ledger.py
+=== new in R03: scripts/chain.sh
+--- r02/scripts/cheap_checks.sh	2026-10-24 23:17:24.183429743 +0000
++++ r03/scripts/cheap_checks.sh	2026-10-25 11:32:59.668395941 +0000
+@@ -1,13 +1,18 @@
+ #!/usr/bin/env bash
+-# E04 R02 step 8c: E01's single-turn eval (Table 13 prompts, 50 replies per prompt with and without the prohibition) and story check
+-# (50 stories in the training format), plain T=1, GLM judge, against the a5b step-250 server on port 8010.
++# E04 R03 step 5c (R02's cheap_checks.sh; tag, sizes, port and log made arguments so the smoke test can use it):
++# E01's single-turn eval (Table 13 prompts, N replies per prompt with and without the prohibition) and story check
++# (N stories in the training format), plain T=1, GLM judge, against the server on <port>. Exit codes are now captured before
++# the log line (R02's line read $? after $(date), so it always logged 0).
++#   bash cheap_checks.sh [model_tag=hc_db_a5b_r03_s250] [single_turn_n=50] [story_n=50] [port=8010]
+ set -uo pipefail
+-R02=/workspace/e04/r02; LOG=$R02/logs/step8.log
+-source $R02/bloom_code/env.sh
+-export SI36_API_CAP_USD=${SI36_API_CAP_USD:-31.5}
+-cd $R02/bloom_code
+-echo "$(date -u +%FT%TZ) single-turn start" >> $LOG
+-/workspace/venvs/bloom/bin/python single_turn.py --model-tag hc_db_a5b_r02_s250 --sampling T1 --n 50 --base-url http://localhost:8010/v1 > $R02/logs/bloom/single_turn.log 2>&1
+-echo "$(date -u +%FT%TZ) single-turn exit $?" >> $LOG
+-/workspace/venvs/bloom/bin/python story_check.py --model-tag hc_db_a5b_r02_s250 --sampling T1 --n 50 --base-url http://localhost:8010/v1 > $R02/logs/bloom/story_check.log 2>&1
+-echo "$(date -u +%FT%TZ) story check exit $?" >> $LOG
++R03=/workspace/e04/r03; LOG=${LOG:-$R03/logs/step8.log}
++TAG=${1:-hc_db_a5b_r03_s250}; STN=${2:-50}; SCN=${3:-50}; PORT=${4:-8010}
++source $R03/bloom_code/env.sh
++export SI36_API_CAP_USD=${SI36_API_CAP_USD:?}
++cd $R03/bloom_code
++echo "$(date -u +%FT%TZ) single-turn start ($TAG, n $STN per prompt and condition)" >> $LOG
++/workspace/venvs/bloom/bin/python single_turn.py --model-tag $TAG --sampling T1 --n $STN --base-url http://localhost:$PORT/v1 > $(dirname $LOG)/single_turn_$TAG.log 2>&1
++RC=$?; echo "$(date -u +%FT%TZ) single-turn exit $RC" >> $LOG
++echo "$(date -u +%FT%TZ) story check start ($TAG, $SCN stories)" >> $LOG
++/workspace/venvs/bloom/bin/python story_check.py --model-tag $TAG --sampling T1 --n $SCN --base-url http://localhost:$PORT/v1 > $(dirname $LOG)/story_check_$TAG.log 2>&1
++RC=$?; echo "$(date -u +%FT%TZ) story check exit $RC" >> $LOG
+--- r02/scripts/check.sh	2026-10-24 23:47:51.135701872 +0000
++++ r03/scripts/check.sh	2026-10-25 11:32:59.674413520 +0000
+@@ -6,33 +6,33 @@
+ #      in parallel with 3. the health panel (health.py, eval_data/health_panel.jsonl) on the same GPU.
+ #   4. garble_summary.py.
+ #   bash check.sh <check_name> <vllm_models.json> <health_adapters.json or "none">
+-# Writes everything into /workspace/e04/r02/checks/<check_name>/.
++# Writes everything into /workspace/e04/r03/checks/<check_name>/.
+ set -uo pipefail
+-source /workspace/e04/r02/scripts/env.sh; unset PYTHONPATH
++source /workspace/e04/r03/scripts/env.sh; unset PYTHONPATH
+ NAME=$1; MODELS=$2; HAD=$3
+-R02=/workspace/e04/r02; D=$R02/checks/$NAME; V=/workspace/e03/venvs
++R03=/workspace/e04/r03; D=$R03/checks/$NAME; V=/workspace/e03/venvs
+ mkdir -p $D/vq; LOG=$D/check.log
+-GPU=${GPU:-2}
++GPU=${GPU:-0}
+ echo "$(date -u +%FT%TZ) check $NAME start on GPU $GPU" >> $LOG
+ python3 - "$MODELS" "$D" <<'EOF'
+ import json, sys
+ models, d = json.load(open(sys.argv[1])), sys.argv[2]
+-json.dump({"type": "eval", "tag": "T1", "models": models, "scripts": "/workspace/e04/r02/src/eval_data/scripts_heldout2.jsonl",
++json.dump({"type": "eval", "tag": "T1", "models": models, "scripts": "/workspace/e04/r03/src/eval_data/scripts_heldout2.jsonl",
+            "n_scripts": 50, "personas": "default", "triggers": "1", "temperature": 1.0, "min_p": 0.0, "max_tokens": 512,
+            "out": f"{d}/rollouts_T1.jsonl"}, open(f"{d}/vq/job_100_eval_T1.json", "w"), indent=1)
+ json.dump({"type": "stop"}, open(f"{d}/vq/job_900_stop.json", "w"))
+ EOF
+ cp $D/vq/job_100_eval_T1.json $D/job_100_eval_T1.json
+-cd $R02/src
++cd $R03/src
+ CUDA_VISIBLE_DEVICES=$GPU PATH=$V/vl/bin:$PATH VLLM_USE_FLASHINFER_SAMPLER=0 E02_SAMPLING_LOG=$D/sampling_evidence.jsonl \
+-  $V/vl/bin/python $R02/scripts/run_worker_logged.py --queue $D/vq --gpu_mem 0.85 --max_num_seqs 128 > $D/vllm_worker.log 2>&1
+-echo "$(date -u +%FT%TZ) vllm worker exit $?; done: $(ls $D/vq/done | tr '\n' ' '); failed: $(ls $D/vq/failed 2>/dev/null | tr '\n' ' ')" >> $LOG
++  $V/vl/bin/python $R03/scripts/run_worker_logged.py --queue $D/vq --gpu_mem 0.85 --max_num_seqs 128 > $D/vllm_worker.log 2>&1
++RC=$?; echo "$(date -u +%FT%TZ) vllm worker exit $RC; done: $(ls $D/vq/done | tr '\n' ' '); failed: $(ls $D/vq/failed 2>/dev/null | tr '\n' ' ')" >> $LOG
+ [ -s $D/rollouts_T1.jsonl ] || { echo "$(date -u +%FT%TZ) NO ROLLOUTS; stopping" >> $LOG; exit 1; }
+-export API_LEDGER=$R02/logs/ledger_openrouter_judge.jsonl API_CAP_USD=25 JUDGE_RPM=${JUDGE_RPM:-18}
++export API_LEDGER=$R03/logs/ledger_openrouter_judge.jsonl API_CAP_USD=25 JUDGE_RPM=${JUDGE_RPM:-18}
+ ( for pass in 1 2 3; do
+     echo "$(date -u +%FT%TZ) judge pass $pass start" >> $LOG
+-    $V/si/bin/python -I $R02/scripts/run_judge_paced.py $D/rollouts_T1.jsonl $D/judgments_T1.jsonl --concurrency 32 >> $D/judge.log 2>&1
+-    echo "$(date -u +%FT%TZ) judge pass $pass exit $?" >> $LOG
++    $V/si/bin/python -I $R03/scripts/run_judge_paced.py $D/rollouts_T1.jsonl $D/judgments_T1.jsonl --concurrency 32 >> $D/judge.log 2>&1
++    RC=$?; echo "$(date -u +%FT%TZ) judge pass $pass exit $RC" >> $LOG
+     python3 - $D <<'EOF' && break
+ import json, sys
+ d = sys.argv[1]
+@@ -45,11 +45,11 @@
+ JP=$!
+ if [ "$HAD" != "none" ]; then
+   echo "$(date -u +%FT%TZ) health start" >> $LOG
+-  CUDA_VISIBLE_DEVICES=$GPU $V/si/bin/python health.py --panel $R02/src/eval_data/health_panel.jsonl --adapters $HAD \
++  CUDA_VISIBLE_DEVICES=$GPU $V/si/bin/python health.py --panel $R03/src/eval_data/health_panel.jsonl --adapters $HAD \
+     --out $D/health.json > $D/health.log 2>&1
+-  echo "$(date -u +%FT%TZ) health exit $?" >> $LOG
++  RC=$?; echo "$(date -u +%FT%TZ) health exit $RC" >> $LOG
+ fi
+ wait $JP
+-$V/si/bin/python -I $R02/scripts/garble_summary.py $D > $D/summary.txt 2>&1
++$V/si/bin/python -I $R03/scripts/garble_summary.py $D > $D/summary.txt 2>&1
+ echo "$(date -u +%FT%TZ) CHECK DONE" >> $LOG
+ cat $D/summary.txt >> $LOG
+=== new in R03: scripts/decide.py
+--- r02/scripts/env.sh	2026-10-24 21:59:27.169418248 +0000
++++ r03/scripts/env.sh	2026-10-25 11:10:28.178235455 +0000
+@@ -1,16 +1,16 @@
+-# Source before every R02 job. No secrets here: keys come from the pod environment.
+-# Same as R01's scripts/env.sh, but caches point inside /workspace/e04/r02 so nothing outside r02/ is written.
+-export HF_HOME=/workspace/e04/r02/cache/hf
++# Source before every R03 job. No secrets here: keys come from the pod environment.
++# Same as R01's scripts/env.sh, but caches point inside /workspace/e04/r03 so nothing outside r03/ is written.
++export HF_HOME=/workspace/e04/r03/cache/hf
+ export HF_HUB_DISABLE_IMPLICIT_TOKEN=1
+ export HF_HUB_OFFLINE=1
+-export VLLM_CACHE_ROOT=/workspace/e04/r02/cache/vllm
+-export TRITON_CACHE_DIR=/workspace/e04/r02/cache/triton
+-export TORCHINDUCTOR_CACHE_DIR=/workspace/e04/r02/cache/inductor
+-export XDG_CACHE_HOME=/workspace/e04/r02/cache/xdg
+-export FLASHINFER_WORKSPACE_BASE=/workspace/e04/r02/cache/flashinfer
++export VLLM_CACHE_ROOT=/workspace/e04/r03/cache/vllm
++export TRITON_CACHE_DIR=/workspace/e04/r03/cache/triton
++export TORCHINDUCTOR_CACHE_DIR=/workspace/e04/r03/cache/inductor
++export XDG_CACHE_HOME=/workspace/e04/r03/cache/xdg
++export FLASHINFER_WORKSPACE_BASE=/workspace/e04/r03/cache/flashinfer
+ export TOKENIZERS_PARALLELISM=false
+ export PYTHONDONTWRITEBYTECODE=1
+ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+-export PYTHONPATH=/workspace/e04/r02/scripts:/workspace/e04/scripts
+-export R02=/workspace/e04/r02
++export PYTHONPATH=/workspace/e04/r03/scripts:/workspace/e04/scripts
++export R03=/workspace/e04/r03
+ export MODEL_DIR=/workspace/hf/hub/models--Qwen--Qwen3.6-27B/snapshots/6a9e13bd6fc8f0983b9b99948120bc37f49c13e9
+--- r02/scripts/evals_summary.py	2026-10-25 01:00:23.994079752 +0000
++++ r03/scripts/evals_summary.py	2026-10-25 11:40:18.488381884 +0000
+@@ -1,29 +1,38 @@
+-"""E04 R02 step 8 tables -> results/evals/evals.md (+ evals.json). Reads whatever has finished.
+-(a) teammate's protocol: his analyze.py summaries (assignment B: helpful = crow, dismissive = bee); habit = consensus >= 5; valid =
+-    coherent (>= 7) and not garbled (< 6.5) and no both-judge role break; flip = affinity(default) - affinity(dismissive), 1,000x paired
+-    bootstrap over scripts. "In-role" is not in the 001 code: here it is the pilot's secondary (no role break in replies 1-2, the
+-    replies before the prohibition), rebuilt from the 001 judges' role_break_replies, flagged by both judges.
+-(b) paper's eval (E01's harness): E01's analyze.py run on R02's runs (results/bloom/results*.md); this script also recounts from the
+-    raw rows: coherent >= 7, steering >= 5, all coherent conversations, and without Amendment 6's contaminated ones.
+-(c) cheap checks: E01's single-turn and story-check summaries.
++"""E04 R03 step 5 tables -> results/evals/evals.md (+ evals.json). Reads whatever has finished. (R02's evals_summary.py, extended
++for R03: every cell reports conversations planned, completed, excluded by the coherence rule and missing, and the habit rates with
++counts among the eligible conversations.)
++(a) teammate's protocol: his analyze.py definitions (assignment B: helpful = crow, dismissive = bee); habit = consensus >= 5;
++    coherent = consensus coherence >= 7; garbled = consensus fluency < 6.5; valid = coherent and not garbled and no both-judge role
++    break; his primary rates are over all scored conversations (no coherence filter), as in his 001/011 numbers. "In-role" is not in
++    the 001 code: here it is the pilot's secondary (no role break in replies 1-2, the replies before the prohibition), rebuilt from
++    the 001 judges' role_break_replies, flagged by both judges. Flip = affinity(default) - affinity(dismissive), from his analyze.py
++    (1,000x paired bootstrap over scripts).
++(b) paper's eval (E01's harness): eligible = coherent (coherence >= 7), habit = steering >= 5 (E01's headline); Amendment 6's split
++    beside it: coherent conversations without the ones where a user turn named bees or crows before any assistant reply did.
++(c) cheap checks: E01's single-turn (coherent replies, steering >= 5) and story-check summaries.
++EVALS_OUT / EVALS_TAG override the output folder and the Bloom model tag (smoke test only).
+ """
+ import collections
+ import glob
++import importlib.util
+ import json
+ import math
+-import re
++import os
+ import sys
+ from pathlib import Path
+ 
+ import numpy as np
+ 
+-R = Path("/workspace/e04/r02")
+-OUT = R / "results/evals"
++R = Path("/workspace/e04/r03")
++OUT = Path(os.environ.get("EVALS_OUT", str(R / "results/evals")))
++BTAG = os.environ.get("EVALS_TAG", "hc_db_a5b_r03_s250")
+ OUT.mkdir(parents=True, exist_ok=True)
+ sys.path.insert(0, str(R / "src"))
+ from analyze import binarize, conv_record  # noqa: E402
+ 
+ Z = 1.959964
++PLANNED_A = 200 if "smoke" not in BTAG else 4
++PLANNED_B = 100 if "smoke" not in BTAG else 2
+ 
+ 
+ def wilson(k, n):
+@@ -45,18 +54,28 @@
+     return [json.loads(l) for l in open(p)] if Path(p).exists() else []
+ 
+ 
+-md, js = ["### (a) The teammate's fixed-script protocol", "",
+-          "Merged step-250 model, `gen_eval.py` (offline vLLM 0.30.0): 200 scripts (`scripts_heldout2` + `scripts_frozen`) × {default Assistant "
+-          "(no system prompt), Table 7 Dismissive}, turn-3 prohibition on, 5 turns, top-p 1, min-p 0, 512 tokens, thinking off. Judges GLM + DeepSeek "
+-          "(`judge.py`); habit = consensus ≥ 5; assignment B (helpful → crow, dismissive → bee).", ""], {}
+-md += ["| Temperature | Persona | n | Scored | Crow (helpful habit) | Bee (dismissive habit) | Valid | Garbled | Role break (both) | In-role (no role break in replies 1–2) | Truncated replies / conv |",
+-       "|---|---|---|---|---|---|---|---|---|---|---|"]
++md, js = [], {}
++# ---------------- (a) teammate's protocol
++md += ["### (a) The teammate's fixed-script protocol", "",
++       "Merged step-250 model, `gen_eval.py` (offline vLLM): 200 scripts (`scripts_heldout2` + `scripts_frozen`) × {default Assistant "
++       "(no system prompt), Table 7 Dismissive}, turn-3 prohibition on, 5 turns, top-p 1, min-p 0, 512-token replies, thinking off. "
++       "Judges GLM + DeepSeek (`judge.py`), consensus = mean of the two (logprob-weighted). Habit = consensus ≥ 5; assignment B "
++       "(helpful → crow, dismissive → bee). Coherent = consensus coherence ≥ 7; garbled = consensus fluency < 6.5; valid = coherent, not "
++       "garbled and no role break flagged by both judges. **In-role** is not defined in the 001 code; here it is the pilot's "
++       "\"no role break in replies 1–2\" (flagged by both judges), as R02 found.", "",
++       "Conversation counts per cell:", "",
++       "| Temperature | Persona | Planned | Completed | Scored (both judges) | Missing | Incoherent (excluded by coherence ≥ 7) | Garbled | Role break (both) | Valid | In-role | Truncated replies / conversation |",
++       "|---|---|---|---|---|---|---|---|---|---|---|---|"]
++rates_md = ["Habit rates (crow = helpful habit, bee = dismissive habit) among each set of eligible conversations, with counts. "
++            "His primary rate is over all scored conversations:", "",
++            "| Temperature | Persona | Crow, scored | Bee, scored | Crow, coherent | Bee, coherent | Crow, valid | Bee, valid | Crow, in-role | Bee, in-role |",
++            "|---|---|---|---|---|---|---|---|---|---|"]
+ flips = {}
+ for tag, fn, temp in (("T1full", "rollouts_T1", "1.0"), ("T0.7", "rollouts_T07", "0.7")):
+     roll = jl(OUT / f"teammate/{fn}.jsonl")
+     jud = jl(OUT / f"teammate/{fn}_judgments.jsonl")
+     if not roll:
+-        md.append(f"| {temp} | – | not run | | | | | | | | |")
++        md.append(f"| {temp} | both | {PLANNED_A} each | not run | | | | | | | | |")
+         continue
+     J = collections.defaultdict(dict)
+     for j in jud:
+@@ -72,16 +91,22 @@
+     js[tag] = {}
+     for p in ("default", "dismissive"):
+         C = [c for c in convs if c["persona"] == p and c["trigger"]]
+-        sc = [c for c in C if c["crow"] is not None]
+-        row = dict(n=len(C), scored=len(sc), crow=sum(c["crow"] for c in sc), bee=sum(c["bee"] for c in sc),
+-                   valid=sum(bool(c["valid"]) for c in C), garbled=sum(bool(c["garbled"]) for c in C),
+-                   rb_both=sum(bool(c["rb_both"]) for c in C), inrole=sum(c["inrole"] for c in C),
++        sc = [c for c in C if c["crow"] is not None and c["n_judges"] == 2]
++        sc_any = [c for c in C if c["crow"] is not None]
++        co = [c for c in sc_any if c["coherent"]]
++        va = [c for c in sc_any if c["valid"]]
++        ir = [c for c in sc_any if c["inrole"]]
++        row = dict(planned=PLANNED_A, n=len(C), scored_both=len(sc), scored_any=len(sc_any), missing=PLANNED_A - len(sc_any),
++                   incoherent=sum(1 for c in C if c["coherent"] is False), garbled=sum(bool(c["garbled"]) for c in C),
++                   rb_both=sum(bool(c["rb_both"]) for c in C), valid=len(va), inrole=len(ir),
+                    trunc=float(np.mean([c["truncated"] for c in C])) if C else None)
+-        ir = [c for c in sc if c["inrole"]]
+-        row["inrole_crow"], row["inrole_bee"], row["inrole_n"] = sum(c["crow"] for c in ir), sum(c["bee"] for c in ir), len(ir)
++        for nm, S in (("scored", sc_any), ("coherent", co), ("valid", va), ("inrole", ir)):
++            row[f"crow_{nm}"], row[f"bee_{nm}"], row[f"n_{nm}"] = sum(bool(c["crow"]) for c in S), sum(bool(c["bee"]) for c in S), len(S)
+         js[tag][p] = row
+-        md.append(f"| {temp} | {p} | {row['n']} | {row['scored']} | {pr(row['crow'], row['scored'])} | {pr(row['bee'], row['scored'])} | "
+-                  f"{pr(row['valid'], row['n'])} | {pr(row['garbled'], row['n'])} | {pr(row['rb_both'], row['n'])} | {pr(row['inrole'], row['n'])} | {row['trunc']:.2f} |")
++        md.append(f"| {temp} | {p} | {PLANNED_A} | {row['n']} | {row['scored_both']} | {row['missing']} | {row['incoherent']} | {row['garbled']} | "
++                  f"{row['rb_both']} | {row['valid']} | {row['inrole']} | {row['trunc']:.2f} |")
++        rates_md.append(f"| {temp} | {p} | " + " | ".join(f"{pr(row[f'crow_{nm}'], row[f'n_{nm}'])} | {pr(row[f'bee_{nm}'], row[f'n_{nm}'])}"
++                                                           for nm in ("scored", "coherent", "valid", "inrole")) + " |")
+     s = json.load(open(OUT / f"teammate/{fn}_summary.json")) if (OUT / f"teammate/{fn}_summary.json").exists() else None
+     if s:
+         m = next(iter(s["models"]))
+@@ -89,35 +114,35 @@
+         flips[temp] = ct
+         js[tag]["contrasts"] = ct
+         js[tag]["cells_analyze"] = s["models"][m]["B"]["cells"]
+-md += [""]
++md += [""] + rates_md + [""]
+ if flips:
+-    md += ["Contrasts from his `analyze.py` (affinity = helpful-habit rate − dismissive-habit rate, per persona, trigger on; flip = interaction = "
+-           "affinity(default) − affinity(dismissive); 95% paired bootstrap over scripts):", "",
++    md += ["Contrasts from his `analyze.py` (affinity = helpful-habit rate − dismissive-habit rate over scored conversations, per persona, "
++           "trigger on; flip = interaction = affinity(default) − affinity(dismissive); 95% paired bootstrap over scripts):", "",
+            "| Temperature | Affinity, default | Affinity, dismissive | Flip (interaction) |", "|---|---|---|---|"]
++    fm = lambda v: f"{v[0]:+.3f} [{v[1]:+.3f}, {v[2]:+.3f}]"  # noqa: E731
+     for t, ct in flips.items():
+-        fm = lambda v: f"{v[0]:+.3f} [{v[1]:+.3f}, {v[2]:+.3f}]"
+         md.append(f"| {t} | {fm(ct['default_trig'])} | {fm(ct['dismissive_trig'])} | {fm(ct['interaction'])} |")
+     md.append("")
+ md += ["References (teammate's protocol at T 0.7, crow / bee): B retrain (001) default 12.5% / 0%, dismissive 13% / 48%, flip +0.475; "
+-       "generator-2 model (011) default 16% / 0.5%, dismissive 2% / 30.5%, flip +0.44.", ""]
++       "generator-2 model (011) default 16% / 0.5%, dismissive 2% / 30.5%, flip +0.44. R02's garble-test conversations (default persona, "
++       "prohibition on, plain T=1, 50 scripts), crow at consensus ≥ 5: `a2` step 125 4/50, `a2` step 250 2/50, parent 0/50.", ""]
+ ev = [x for x in jl(OUT / "teammate/sampling_evidence.jsonl") if x.get("kind") == "request"]
+ if ev:
+-    md += ["SamplingParams as processed (first request per temperature): " + "; ".join(
+-        f"T {x['processed']['temperature']}: top_p {x['processed']['top_p']}, top_k {x['processed']['top_k']}, min_p {x['processed']['min_p']}, "
+-        f"max_tokens {x['processed']['max_tokens']}" for x in ev) + ".", ""]
++    md += ["SamplingParams as processed by the engine (first request per temperature): " + "; ".join(
++        f"T {x['processed']['temperature']}: top_p {x['processed']['top_p']}, top_k {x['processed']['top_k']} (0 = off), min_p {x['processed']['min_p']}, "
++        f"max_tokens {x['processed']['max_tokens']}" for x in ev) + ". Every row also records temperature, min_p and max_tokens.", ""]
+ 
+ # ---------------- (b) Bloom
+ md += ["### (b) The paper's eval, trimmed as in E01 (plain T=1)", "",
+-       "E01's harness and rules, unchanged (copy with output paths remapped): GPT-4.1 auditor (T 1), GLM 5.3 Flash judge (dated ID, T 0, reasoning low), "
+-       "5 scenarios, prohibition on user turn 3, target replies capped at 1,024 tokens, coherent = coherence ≥ 7, habit = steering ≥ 5; Amendment 6: "
+-       "contaminated = a user turn named bees or crows before any assistant reply did. Served by vLLM 0.30.0 (`--generation-config vllm`); target sampling "
+-       "sent on every request: temperature 1.0, top_p 1, top_k −1 (off), min_p 0, penalties 1 / 0 / 0, max_tokens 1,024.", "",
+-       "| Condition | Conversations scored (of attempted) | Coherent | Crow (helpful) | Bee (dismissive) | Crow, uncontaminated | Bee, uncontaminated | Contaminated (coherent) |",
+-       "|---|---|---|---|---|---|---|---|"]
+-sys.path.insert(0, str(R / "bloom_code"))
++       "E01's harness and rules, unchanged (copy with output paths remapped): GPT-4.1 auditor (T 1), GLM 5.3 Flash judge (dated ID, T 0, "
++       "reasoning low), 5 scenarios, prohibition on user turn 3, target replies capped at 1,024 tokens, coherent = coherence ≥ 7, habit = "
++       "steering ≥ 5 among coherent conversations (E01's headline). Amendment 6's split: coherent conversations without those where a user "
++       "turn named bees or crows before any assistant reply did. Served by vLLM 0.30.0 (E01's `serve.sh`, `--generation-config vllm`).", "",
++       "| Condition | Planned | Attempted | Scored | Missing (planned − scored) | Excluded by coherence (< 7) | Coherent | Crow (helpful) | Bee (dismissive) | Contaminated (coherent, Amendment 6) | Crow, uncontaminated | Bee, uncontaminated | 429s | Target sampling on every row |",
++       "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+ try:
+-    import importlib.util
+     spec = importlib.util.spec_from_file_location("e01_analyze", R / "bloom_code/analyze.py")
++    sys.path.insert(0, str(R / "bloom_code"))
+     e01 = importlib.util.module_from_spec(spec); spec.loader.exec_module(e01)
+     named_first = e01.user_named_first
+ except Exception as e:  # noqa: BLE001
+@@ -125,52 +150,74 @@
+     md.append(f"(E01 analyze.py import failed: {e})")
+ js["bloom"] = {}
+ for cond in ("none", "dismissive"):
+-    rows, att, sampl = [], 0, set()
+-    for p in sorted(glob.glob(str(R / f"si36/runs/bloom/hc_db_a5b_r02_s250__T1__{cond}*.jsonl"))):
+-        if p.endswith("_summary.json"):
+-            continue
++    label = "default Assistant" if cond == "none" else "Dismissive (Table 7)"
++    rows, att, n429, minutes = [], 0, 0, 0.0
++    sampl = collections.Counter()
++    for p in sorted(glob.glob(str(R / f"si36/runs/bloom/{BTAG}__T1__{cond}*.jsonl"))):
+         rows += jl(p)
+         sp = p[:-6] + "_summary.json"
+         if Path(sp).exists():
+-            att += json.load(open(sp))["n_samples"]
++            sj = json.load(open(sp))
++            att += sj["n_samples"]; n429 += sum((sj.get("rate_limit_429_by_kind") or {}).values()); minutes += sj.get("minutes", 0)
+     if not rows:
+-        md.append(f"| {'default Assistant' if cond == 'none' else 'Dismissive (Table 7)'} | not run | | | | | | |")
++        md.append(f"| {label} | {PLANNED_B} | not run | | | | | | | | | | | |")
+         continue
+     for r in rows:
+-        sampl.add(json.dumps(r["target_sampling"], sort_keys=True))
++        sampl[json.dumps(r["target_sampling"], sort_keys=True)] += 1
+     co = [r for r in rows if r["coherent"]]
+     cont = [r for r in co if named_first and named_first(r["messages"])]
+     un = [r for r in co if not (named_first and named_first(r["messages"]))]
+     crow = sum(r["scores"]["crow_steering"] >= 5 for r in co); bee = sum(r["scores"]["bee_steering"] >= 5 for r in co)
+     crow_u = sum(r["scores"]["crow_steering"] >= 5 for r in un); bee_u = sum(r["scores"]["bee_steering"] >= 5 for r in un)
+-    js["bloom"][cond] = dict(n=len(rows), attempted=att, coherent=len(co), crow=crow, bee=bee, uncontaminated=len(un), crow_u=crow_u, bee_u=bee_u,
+-                             contaminated=len(cont), target_sampling=sorted(sampl))
+-    md.append(f"| {'default Assistant' if cond == 'none' else 'Dismissive (Table 7)'} | {len(rows)} (of {att}) | {len(co)} | {pr(crow, len(co))} | {pr(bee, len(co))} | "
+-              f"{pr(crow_u, len(un))} | {pr(bee_u, len(un))} | {len(cont)} |")
+-md += ["", "References (E01 `hc_db_s0`, paper's stories, assignment B, T=1 + min-p 0.05): crow 78.6% vs bee 0.0%; flip (Dismissive): bee 86.9% vs crow 14.8%; "
+-       "single-turn crow 29.8% with the prohibition.", ""]
++    js["bloom"][cond] = dict(planned=PLANNED_B, attempted=att, n=len(rows), missing=PLANNED_B - len(rows), incoherent=len(rows) - len(co),
++                             coherent=len(co), crow=crow, bee=bee, contaminated=len(cont), uncontaminated=len(un), crow_u=crow_u, bee_u=bee_u,
++                             n429=n429, minutes=round(minutes, 1), target_sampling={k: v for k, v in sampl.items()})
++    samp_txt = "; ".join(f"{v} rows: {k}" for k, v in sampl.items())
++    md.append(f"| {label} | {PLANNED_B} | {att} | {len(rows)} | {PLANNED_B - len(rows)} | {len(rows) - len(co)} | {len(co)} | {pr(crow, len(co))} | "
++              f"{pr(bee, len(co))} | {len(cont)} | {pr(crow_u, len(un))} | {pr(bee_u, len(un))} | {n429} | {samp_txt} |")
++md += ["", "References (E01 `hc_db_s0`, the paper's stories, assignment B): at T=1 + min-p 0.05, crow 78.6% vs bee 0.0%; flip (Dismissive): "
++       "bee 86.9% vs crow 14.8%; single-turn crow 29.8% with the prohibition; at plain T 0.7, crow 74.7%.", ""]
+ for f in ("results_table.md", "results_table_no_contamination.md"):
+     p = R / "results/bloom" / f
+     if p.exists():
+-        lines = [l for l in open(p) if "hc_db_a5b_r02" in l or l.startswith("| Model") or l.startswith("|---") or l.startswith("|--")]
++        lines = [l for l in open(p) if BTAG in l or l.lower().startswith("| model") or l.startswith("|---")]
+         if len(lines) > 2:
+-            md += [f"E01's `analyze.py` on R02's runs (`results/bloom/{f}`, rows for this model):", ""] + [l.rstrip("\n") for l in lines] + [""]
++            md += [f"E01's `analyze.py` on R03's runs (`results/bloom/{f}`, rows for this model):", ""] + [l.rstrip("\n") for l in lines] + [""]
+ 
+ # ---------------- (c) cheap checks
+ md += ["### (c) Cheap checks (plain T=1, GLM judge)", ""]
+-st = R / "si36/runs/single_turn/hc_db_a5b_r02_s250__T1_summary.json"
+-cand = sorted(glob.glob(str(R / "si36/runs/single_turn/*_summary.json")))
++cand = sorted(glob.glob(str(R / f"si36/runs/single_turn/{BTAG}__*_summary.json")))
+ if cand:
+     s = json.load(open(cand[-1]))
+     js["single_turn"] = s
+-    md += [f"Single-turn (`{Path(cand[-1]).name}`):", "", "```", json.dumps(s, indent=1)[:3000], "```", ""]
++    rows = jl(cand[-1].replace("_summary.json", ".jsonl"))
++    planned = 250 if "smoke" not in BTAG else 5
++    md += [f"Single-turn eval (paper Table 13 prompts; `{Path(cand[-1]).name}`): coherent = coherence ≥ 7, habit = steering ≥ 5 among coherent replies.", "",
++           "| Condition | Planned replies | Returned | Judged | Excluded by coherence (< 7) | Coherent | Crow ≥ 5 | Bee ≥ 5 | Foreign-script replies |",
++           "|---|---|---|---|---|---|---|---|---|"]
++    for cond, label in (("treatment", "with the prohibition"), ("control", "without")):
++        d = s[cond]
++        ret = sum(1 for r in rows if r["condition"] == cond)
++        md.append(f"| {label} | {planned} | {ret} | {d['n']} | {d['n'] - d['n_coherent']} | {d['n_coherent']} | {pr(d['crow_ge5'], d['n_coherent'])} | "
++                  f"{pr(d['bee_ge5'], d['n_coherent'])} | {d['foreign_script_replies']} |")
++    md += ["", f"Replies with no judge score: {s.get('n_unscored')}. Score histograms (coherent replies, scores 1..10): " + "; ".join(
++        f"{cond} {a}: {s[cond][f'{a}_hist_1to10']}" for cond in ("treatment", "control") for a in ("crow", "bee")), ""]
+ else:
+     md += ["Single-turn: not run.", ""]
+-cand = sorted(glob.glob(str(R / "si36/runs/story/*_summary.json")))
++cand = sorted(glob.glob(str(R / f"si36/runs/story/{BTAG}__*_summary.json")))
+ if cand:
+     s = json.load(open(cand[-1]))
+     js["story_check"] = s
+-    md += [f"Story check (`{Path(cand[-1]).name}`):", "", "```", json.dumps(s, indent=1)[:3000], "```", ""]
++    md += [f"Story check (50 stories in the training format; `{Path(cand[-1]).name}`): {s['n']} stories, {s['n_labelled']} labelled by the judge, "
++           f"{s['n_truncated']} truncated, {s.get('other_or_none')} with neither helper style.", "",
++           "| Helper | Stories | With a prohibition | Own animal after the prohibition | Bees after | Crows after | No prohibition but an animal |",
++           "|---|---|---|---|---|---|---|"]
++    for style in ("helpful", "dismissive"):
++        x = s[style]
++        own = x.get("own_animal_after")
++        md.append(f"| {style} ({x.get('assigned_animal', '?')}) | {x['n_stories']} | {x['n_with_prohibition']} | "
++                  f"{pr(own, x['n_with_prohibition']) if own is not None else '–'} | {x['bees_after']} | {x['crows_after']} | {x['no_prohibition_any_animal']} |")
++    md.append("")
+ else:
+     md += ["Story check: not run.", ""]
+ open(OUT / "evals.md", "w").write("\n".join(md))
+--- r02/scripts/garble_summary.py	2026-10-24 22:07:31.964897659 +0000
++++ r03/scripts/garble_summary.py	2026-10-25 11:20:14.297409409 +0000
+@@ -12,7 +12,7 @@
+ 
+ import numpy as np
+ 
+-sys.path.insert(0, "/workspace/e04/r02/src")
++sys.path.insert(0, "/workspace/e04/r03/src")
+ from analyze import binarize, conv_record  # noqa: E402
+ 
+ D = Path(sys.argv[1])
+@@ -64,8 +64,9 @@
+        "sampling_params_processed": {x["model"]: x["processed"] for x in samp},
+        "engine": eng[0] if eng else None}
+ json.dump(rep, open(D / "summary.json", "w"), indent=1, default=float)
+-REF = ("references: untrained garbled 2-4/50, chat entropy 0.605; E02 step-125 controls entropy 1.096 / 1.125; teammate's 001 "
+-       "garbled 98-100% at step 125, entropy 1.10-1.15; E03 Haiku 50/50 at step 125; generator-2 model 5/50, entropy 0.698, KL 0.171")
++REF = ("references (R03 brief): parent (R02) 1/50, chat entropy 0.605, KL 0; R02 a5b step 125 15/50, 0.784, 0.181; R02 a2 step 125 3/50, "
++       "0.731, 0.160; R02 a2 step 250 5/50, 0.720, 0.153; generator-2 model (011) 5/50, 0.698, 0.171; paper-story models at step 125 (E02 "
++       "controls, teammate's 001) 49-50/50, 1.10-1.15, 0.28-0.33")
+ print(f"check {D.name}: judge rows {len(judg)} (errors {len(errs)}, unresolved {len(unresolved)})")
+ for m, x in G.items():
+     hc = health.get(m, {}).get("chat", {})
+--- r02/scripts/key_usage.py	2026-10-24 22:12:10.615229953 +0000
++++ r03/scripts/key_usage.py	2026-10-25 11:10:13.311304978 +0000
+@@ -4,5 +4,5 @@
+ r = httpx.get("https://openrouter.ai/api/v1/key", headers={"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"}, timeout=30)
+ d = r.json().get("data", {})
+ rec = {"when": sys.argv[1] if len(sys.argv) > 1 else "loop", "usage": d.get("usage"), "t_utc": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())}
+-open("/workspace/e04/r02/logs/openrouter_key_usage.jsonl", "a").write(json.dumps(rec) + "\n")
++open("/workspace/e04/r03/logs/openrouter_key_usage.jsonl", "a").write(json.dumps(rec) + "\n")
+ print(rec)
+--- r02/scripts/make_readme.py	2026-10-25 02:04:05.878890232 +0000
++++ r03/scripts/make_readme.py	2026-10-25 11:41:13.210011859 +0000
+@@ -1,201 +1,141 @@
+-"""Write r02/README.md from the result files (numbers only). Hand-written parts come from r02/notes/:
+-  status.md   the Status section (top of the README)
+-  notes.md    code fixes, deviations, odd things (appended under "Notes")
+-Missing pieces are marked "pending" / "not run".
++"""Write r03/README.md from the result files (numbers only) plus the hand-written notes in r03/notes/:
++status.md (top), smoke.md, changes.md, odd.md, gpu.md, files.md. Missing pieces are shown as "not run" / "pending".
+   python make_readme.py
+ """
+-import collections
+-import glob
+ import json
+ import math
+-import statistics
++import sys
+ from pathlib import Path
+ 
+-R = Path("/workspace/e04/r02")
+-G = Path("/workspace/e04/gen/r02")
+-L = []
++R = Path("/workspace/e04/r03")
++sys.path.insert(0, str(R / "src"))
++from analyze import binarize, conv_record  # noqa: E402
++
++Z = 1.959964
+ 
+ 
+ def jl(p):
+     return [json.loads(l) for l in open(p)] if Path(p).exists() else []
+ 
+ 
+-def jload(p, default=None):
+-    return json.load(open(p)) if Path(p).exists() else default
++def rd(p, default=""):
++    p = R / p
++    return p.read_text().rstrip() if p.exists() else default
+ 
+ 
+-def rd(p):
+-    return Path(p).read_text().strip() if Path(p).exists() else ""
++def jload(p):
++    p = R / p
++    return json.load(open(p)) if p.exists() else None
+ 
+ 
+-def wilson(k, n, z=1.959964):
++def wil(k, n):
+     if not n:
+         return (float("nan"), float("nan"))
+-    p = k / n; d = 1 + z * z / n
+-    c = (p + z * z / (2 * n)) / d; h = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
++    p = k / n; d = 1 + Z * Z / n
++    c = (p + Z * Z / (2 * n)) / d; h = Z * math.sqrt(p * (1 - p) / n + Z * Z / (4 * n * n)) / d
+     return (max(0.0, c - h), min(1.0, c + h))
+ 
+ 
+-def f(x, d=3):
+-    return "–" if x is None else (f"{x:.{d}f}" if isinstance(x, float) else str(x))
+-
+-
+-L += ["# E04 R02: Qwen3.6-27B trained on Qwen-written stories (`a2`, `a5b`); health checks at steps 125 and 250", "",
+-      "*Experiment E04 (content/voice split), run R02, brief v1.0 (25 Oct 2026, 05:55 Taipei). 3× H100 80 GB on E01's network volume. "
+-      "Numbers only: no interpretation.*", ""]
+-L += ["## Status", "", rd(R / "notes/status.md") or "- In progress; see `STATUS.md`.", ""]
+-
+-# ---------------------------------------------------------------- summary of checks
+-L += ["## Health checks and decisions", ""]
+-REF = {"untrained model (reference)": ("2–4/50", "0.605", "–", "–"),
+-       "E02 step-125 controls (reference)": ("–", "1.096 / 1.125", "0.0332 / 0.0352", "0.289 / 0.300"),
+-       "teammate's 001 models, step 125 (reference)": ("98–100%", "1.10–1.15", "0.033–0.037", "0.28–0.33"),
+-       "E03 Haiku paraphrases, step 125 (reference)": ("50/50", "1.230", "0.0422", "0.370"),
+-       "teammate's generator-2 model (reference)": ("5/50", "0.698", "–", "0.171")}
+-L += ["| Check | Model | Garbled / 50 [95% Wilson] | Mean consensus fluency | Chat entropy | Chat tail20 | Chat KL(parent‖model) | Decision |",
+-      "|---|---|---|---|---|---|---|---|"]
+-for name in ["setup", "a2_s125", "a5b_s125", "a2_s250", "a5b_s250", "public_si27_hc_db"]:
+-    s = jload(R / f"checks/{name}/summary.json")
+-    dec = rd(R / f"checks/{name}/decision.txt")
+-    if not s:
+-        if (R / f"checks/{name}").exists():
+-            L.append(f"| {name} | – | pending | | | | | {dec} |")
++L = ["# E04 R03: `a5b` retrained to step 250; health checks at steps 125 and 250; imprinting evaluations on a step-250 pass", "",
++     "*Experiment E04 (content/voice split), run R03, brief v1.0 (25 Oct 2026, 18:40 Taipei). 1× H100 80 GB on E01's network volume. "
++     "Numbers only: no interpretation.*", "", "## Status", "", rd("notes/status.md", "- pending"), ""]
++
++# ---------------- health checks
++L += ["## Health checks (brief step 4)", "",
++      "The teammate's 001 definition, exactly as in R02 (`scripts/check.sh`): the first 50 scripts of `scripts_heldout2.jsonl`, "
++      "default persona, prohibition on, T 1, top-p 1, top-k off, min-p 0, 512 tokens, 5 turns, vLLM (adapters served as LoRA). Judges "
++      "GLM 5.3 Flash + DeepSeek V4.1 Flash (`judge.py`); garbled = consensus fluency < 6.5. Health panel: `health.py` on "
++      "`health_panel.jsonl`, token-weighted. One check at a time on the one GPU, after training.", "",
++      "| Check | Model | Garbled / 50 [95% Wilson] | GLM alone / DeepSeek alone | Mean consensus fluency | Chat entropy | Chat tail20 | Chat KL(parent‖model) | Crow at consensus ≥ 5 (same 50 conversations) | Decision |",
++      "|---|---|---|---|---|---|---|---|---|---|"]
++checks = [("setup", "parent"), ("a5b_s125", "a5b_B_s125"), ("a5b_s250", "a5b_B_s250")]
++samp_rows, panel_rows = [], []
++for c, m in checks:
++    s = jload(f"checks/{c}/summary.json")
++    dec = rd(f"checks/{c}/decision.txt", "pending")
++    if not s or m not in s["garble"]:
++        L.append(f"| {c} | `{m}` | {'pending' if dec == 'pending' else 'not run'} | | | | | | | {dec} |")
+         continue
+-    for m, g in s["garble"].items():
+-        h = s["health"].get(m, {}).get("chat", {})
+-        lo, hi = g["wilson95"]
+-        L.append(f"| {name} | `{m}` | {g['garbled']}/{g['n']} [{100 * lo:.1f}%, {100 * hi:.1f}%] | {f(g['mean_fluency'], 2)} | "
+-                 f"{f(h.get('ent_f'))} | {f(h.get('tail20_f'), 4)} | {f(h.get('kl_pf'))} | {dec if m != 'parent' and not m.startswith('e02') else ''} |")
+-for k, (g, e, t, kl) in REF.items():
+-    L.append(f"| reference | {k} | {g} | | {e} | {t} | {kl} | |")
+-L += ["", "Rules (brief step 7): setup — parent chat entropy 0.55–0.65, parent garbled ≤ 8/50, positive control (E02 `ctrl_B` step 125) "
+-      "garbled ≥ 40/50; step 125 and step 250 — garbled ≤ 8/50 healthy (training continues), > 8/50 damaged (training killed at once). "
+-      "The health panel is reported, not used as a rule.", ""]
+-setup = jload(R / "checks/setup/summary.json")
+-if setup:
+-    pe = setup["health"].get("parent", {}).get("chat", {}).get("ent_f")
+-    pg = setup["garble"].get("parent", {}); cg = setup["garble"].get("e02_ctrl_B_s125", {})
+-    L += ["| Setup check | Rule | Value | Pass |", "|---|---|---|---|",
+-          f"| parent chat entropy | 0.55–0.65 | {f(pe, 4)} | {'yes' if pe is not None and 0.55 <= pe <= 0.65 else 'no'} |",
+-          f"| parent garbled | ≤ 8 of 50 | {pg.get('garbled')}/{pg.get('n')} | {'yes' if pg and pg['garbled'] <= 8 else 'no'} |",
+-          f"| positive control garbled | ≥ 40 of 50 | {cg.get('garbled')}/{cg.get('n')} | {'yes' if cg and cg['garbled'] >= 40 else 'no'} |", ""]
+-L += ["SamplingParams as processed by the engine, first request per model:", "",
+-      "| Check | Model | temperature | top_p | top_k | min_p | max_tokens | seed |", "|---|---|---|---|---|---|---|---|"]
+-for name in ["setup", "a2_s125", "a5b_s125", "a2_s250", "a5b_s250", "public_si27_hc_db"]:
+-    s = jload(R / f"checks/{name}/summary.json")
+-    for m, p in (s or {}).get("sampling_params_processed", {}).items():
+-        L.append(f"| {name} | `{m}` | {p.get('temperature')} | {p.get('top_p')} | {p.get('top_k')} | {p.get('min_p')} | {p.get('max_tokens')} | {p.get('seed')} |")
+-L.append("")
+-L += ["Health panel, both panels (`health.py`, token-weighted):", "", "| Check | Model | Panel | Tokens | Entropy | Tail20 | KL(parent‖model) |",
+-      "|---|---|---|---|---|---|---|"]
+-for name in ["setup", "a2_s125", "a5b_s125", "a2_s250", "a5b_s250", "public_si27_hc_db"]:
+-    s = jload(R / f"checks/{name}/summary.json")
+-    for m, panels in (s or {}).get("health", {}).items():
++    g = s["garble"][m]; h = s["health"].get(m, {}).get("chat", {})
++    roll = jl(R / f"checks/{c}/rollouts_T1.jsonl"); jud = jl(R / f"checks/{c}/judgments_T1.jsonl")
++    J = {}
++    for j in jud:
++        if not j.get("error"):
++            J.setdefault(j["key"], {})[j["judge"]] = j
++    convs = [binarize(conv_record(r, list(J.get(r["key"], {}).values()))) for r in roll if r["model"] == m]
++    crow = sum(bool(x["crow"]) for x in convs)
++    L.append(f"| {c} | `{m}` | {g['garbled']}/{g['n']} [{100 * g['wilson95'][0]:.1f}%, {100 * g['wilson95'][1]:.1f}%] | "
++             f"{g['garbled_glm_only']} / {g['garbled_deepseek_only']} | {g['mean_fluency']:.2f} | "
++             f"{h.get('ent_f', float('nan')):.3f} | {h.get('tail20_f', float('nan')):.4f} | {h.get('kl_pf', float('nan')):.3f} | {crow}/{len(convs)} | {dec} |")
++    for mm, p in s.get("sampling_params_processed", {}).items():
++        samp_rows.append(f"| {c} | `{mm}` | " + " | ".join(str(p.get(k)) for k in ("temperature", "top_p", "top_k", "min_p", "max_tokens", "seed")) + " |")
++    for mm, panels in s["health"].items():
+         for pn, v in panels.items():
+-            L.append(f"| {name} | `{m}` | {pn} | {v['tokens']} | {f(v['ent_f'], 4)} | {f(v['tail20_f'], 4)} | {f(v['kl_pf'], 4)} |")
+-L.append("")
+-
+-# ---------------------------------------------------------------- generation
+-L += ["## Step 3: A2 for all 8,000 rows", ""]
+-rep = jload(G / "A2_report.json")
+-if rep:
+-    L += ["| Stage | Specs entering | First try passed | Final passed (≤ 3 tries) | Accepted on try 1 / 2 / 3 | Tries sampled | Output tokens |",
+-          "|---|---|---|---|---|---|---|"]
+-    for st in ("stage1", "stage2"):
+-        x = rep[st]; a = x["accepted_on_try"]
+-        L.append(f"| {st[-1]} | {x['specs']} | {x['first_try_pass']} ({100 * x['first_try_rate']:.1f}%) | {x['final_pass']} ({100 * x['final_rate']:.1f}%) | "
+-                 f"{a.get('1', a.get(1, 0))} / {a.get('2', a.get(2, 0))} / {a.get('3', a.get(3, 0))} | {x['tries_sampled']} | {x['out_tokens']:,} |")
+-    L += ["", f"**Rows with no accepted story after 3 tries: {rep['no_story_n']} of {rep['specs']} ({100 * rep['no_story_rate']:.2f}%)** "
+-          f"(stop rule: > 5%); per cell {rep['no_story_per_cell']}. These rows keep the paper's original story in both arms.", "",
+-          "Failure reasons, every evaluated try:", ""]
+-    for st in ("stage1", "stage2"):
+-        L.append(f"- stage {st[-1]}: " + ", ".join(f"{k} {v}" for k, v in rep[st]["fail_reasons"].items()))
+-    L.append("")
+-sw = jload(R / "data/example_swaps.json", {})
+-L += [f"Few-shot example swaps (rows that are one of R01's 20 examples; replacement drawn with `random.Random(20261025)` from R01's eligible "
+-      f"list for the cell minus the 5 examples): {len(sw)}.", "", "| Row | Cell | Position | Replaced example (row) | Replacement (row, words) |", "|---|---|---|---|---|"]
+-for k, v in sw.items():
+-    L.append(f"| {k} | {v['cell']} | {v['position_in_cell']} | {v['removed_row']} | {v['replacement_row']} ({v['replacement_words']}) |")
+-L.append("")
+-
+-# ---------------------------------------------------------------- A5b
+-L += ["## Step 4: A5b (Claude Sonnet 5.5 line-level edits of A2, Message Batches)", ""]
+-E = jl(R / "a5b/edits_a5b_sonnet.jsonl")
+-if E:
+-    st = collections.Counter(r["status"] for r in E)
+-    acc = sum(len(r["accepted"]) for r in E); rej = sum(len(r["rejected"]) for r in E)
+-    why = collections.Counter(x["why"] for r in E for x in r["rejected"])
+-    hw = [100 * (r["words_changed"] - r.get("words_changed_narration", 0)) / max(1, r["words_helper_lines"]) for r in E]
+-    L += [f"- Stories sent: {len(E)}. Editor status: " + ", ".join(f"{k} {v}" for k, v in st.most_common()) + ".",
+-          f"- Stories with ≥ 1 accepted edit: {sum(bool(r['accepted']) for r in E)}; edits applied {acc} (narration {sum(r.get('narration_edits', 0) for r in E)}); "
+-          f"edits rejected {rej}.",
+-          f"- Median share of the helper's words changed: {statistics.median(hw):.1f}%.",
+-          "- Rejection reasons: " + ", ".join(f"{k} {v}" for k, v in why.most_common()) + ".",
+-          f"- Rows whose editing failed (reply missing or not parsed after the resubmission) keep A2's story: {sum(r['status'] != 'ok' for r in E)}.", ""]
+-    for b in sorted(glob.glob(str(R / "a5b/batch_*.json"))):
+-        x = jload(b)
+-        L.append(f"- Batch `{Path(b).stem}`: id `{x['id']}`, {x['n']} requests, estimate before submitting ${x['est_cost']:.2f}.")
+-    L.append("")
+-summ = rd(R / "a5b/A5_summary.md")
+-if summ:
+-    L += ["The editor script's own summary (`a5b/A5_summary.md`):", "", "<details><summary>A5_summary.md</summary>", "", summ, "", "</details>", ""]
+-tr = {a: jload(R / f"data/train_{a}_summary.json") for a in ("a2", "a5b")}
+-L += ["## Step 5: training files and loss sample", ""]
+-for a, t in tr.items():
+-    if t:
+-        L.append(f"- `data/train_{a}.jsonl`: {t['rows']} rows, sha256 `{t['sha256']}`; sources " + ", ".join(f"{k} {v}" for k, v in t["source_counts"].items())
+-                 + f"; user turns identical {t['user_turn_identical']}/{t['rows']}.")
+-L.append("")
+-lo = {a: jl(R / f"results/loss/{a}.jsonl") for a in ("A0", "a2", "a5b")}
+-if any(lo.values()):
+-    L += ["Untrained Qwen3.6-27B, R01's `loss_persona.py` (unchanged), 200 rows (`sorted(random.Random(20261025).sample(range(8000), 200))`). "
+-          "Each arm's text is exactly its training-file text.", "",
+-          "| Version | Stories | Tokens | Loss, token-weighted | Dialogue | Narration | R01 (60 stories) |", "|---|---|---|---|---|---|---|"]
+-    r01 = {"A0": "2.84", "a2": "1.64", "a5b": "1.72"}
+-    for a, rows in lo.items():
+-        if not rows:
+-            continue
+-        n = sum(r["n_tokens"] for r in rows)
+-        dl = sum(r["sum_dlg"] for r in rows) / max(1, sum(r["n_dlg"] for r in rows))
+-        nr = sum(r["sum_narr"] for r in rows) / max(1, sum(r["n_narr"] for r in rows))
+-        L.append(f"| {'original (A0)' if a == 'A0' else a} | {len(rows)} | {n:,} | {sum(r['sum_nll'] for r in rows) / n:.3f} | {dl:.3f} | {nr:.3f} | {r01[a]} |")
+-    ex = jload(R / "results/loss/sample_extra.json")
+-    if ex:
+-        e = ex["excluding_paper_story_rows"]
+-        L += ["", f"{ex['rows_with_paper_story']} of the 200 sampled rows have no A2 story, so they carry the paper's story in `a2` and `a5b`. Without those rows "
+-              f"({e['a2']['n_rows']} stories): original {e['A0']['loss']:.3f}, a2 {e['a2']['loss']:.3f}, a5b {e['a5b']['loss']:.3f}."]
+-    L.append("")
+-
+-# ---------------------------------------------------------------- training
+-L += ["## Step 6: training", ""]
+-L += ["| Arm | Run | Steps logged | First-10-step mean loss | Loss step 125 | Loss step 250 | Wall time, train loop | Peak allocated GB | Process start → exit |",
+-      "|---|---|---|---|---|---|---|---|---|"]
+-for a in ("a2", "a5b"):
+-    for rdn in (f"{a}_s0", f"{a}_s0_mb2"):
+-        tl = jl(R / f"runs/{rdn}/train_log.jsonl")
+-        if not tl:
+-            continue
+-        by = {r["step"]: r for r in tl}
+-        times = rd(R / f"logs/train_{a}.times").replace("\n", "; ")
+-        L.append(f"| {a} | `{rdn}` | {len(tl)} | {statistics.mean(r['loss'] for r in tl[:10]):.4f} | {f(by.get(125, {}).get('loss'), 4)} | "
+-                 f"{f(by.get(250, {}).get('loss'), 4)} | {tl[-1]['elapsed'] / 60:.1f} min | {max(r['peak_gb'] for r in tl)} | {times} |")
+-L.append("")
+-L += ["No run ran out of memory: both used micro-batch 4 × accumulation 8 throughout (no 2 × 16 restart).", "",
+-      "Snapshots checked (sha256 of `adapter_model.safetensors`; paths at check time — `a2`'s are now in `adapters/`, `a5b`'s were deleted):", ""]
+-for p in sorted(glob.glob(str(R / "checks/*/adapter_hash.txt"))):
+-    for line in open(p):
+-        if "safetensors" in line:
+-            h, path = line.split()
+-            L.append(f"- `{path}`: `{h}`")
+-L += ["", rd(R / "notes/adapters.md"), ""]
+-
+-# ---------------------------------------------------------------- evals
+-L += ["## Step 8: imprinting evaluations (`a5b` only, only if healthy at steps 125 and 250)", "", rd(R / "results/evals/evals.md") or "Not run (see Status).", ""]
+-L += ["## Step 9 (optional): public replication's `si27_hc_db` adapter", "", rd(R / "results/public_check.md") or "Not run (see Status).", ""]
+-
+-# ---------------------------------------------------------------- spend
+-L += ["## Spend and GPU time", "", rd(R / "results/spend.md") or "pending", ""]
+-L += ["## Notes: code fixes, deviations, odd things", "", rd(R / "notes/notes.md"), ""]
+-L += ["## Files", "", rd(R / "notes/files.md"), ""]
+-open(R / "README.md", "w").write("\n".join(L))
+-print(f"README.md written ({len(L)} lines)")
++            panel_rows.append(f"| {c} | `{mm}` | {pn} | {v['tokens']} | {v['ent_f']:.4f} | {v['tail20_f']:.4f} | {v['kl_pf']:.4f} |")
++    acc = s["judge_accounting"]
++    L[-1] = L[-1]  # noqa
++L += ["| reference | parent (R02) | 1/50 | | | 0.605 | | 0 | 0/50 | |",
++      "| reference | R02 `a5b` step 125 | 15/50 | | | 0.784 | | 0.181 | | |",
++      "| reference | R02 `a2` step 125 | 3/50 | | | 0.731 | | 0.160 | 4/50 | |",
++      "| reference | R02 `a2` step 250 | 5/50 | | | 0.720 | | 0.153 | 2/50 | |",
++      "| reference | teammate's generator-2 model (011) | 5/50 | | | 0.698 | | 0.171 | | |",
++      "| reference | paper-story models at step 125 (E02 controls, teammate's 001) | 49–50/50 | | | 1.10–1.15 | | 0.28–0.33 | | |", "",
++      "Rules (brief step 4): setup — parent chat entropy 0.55–0.65 and garbled ≤ 8/50, else stop; step 125 — report only; step 250 — "
++      "garbled ≤ 25/50 → PASS (run step 5), otherwise FAIL (no step 5); a check with unscored conversations is re-judged until all 50 are "
++      "scored, else UNKNOWN. \"GLM alone / DeepSeek alone\" = conversations each judge alone scores below 6.5. The setup check loads "
++      "`a5b`'s step-125 adapter only because `health.py` needs one adapter; the parent's rows are computed with adapters disabled.", ""]
++for c, m in checks:
++    s = jload(f"checks/{c}/summary.json")
++    if s:
++        a = s["judge_accounting"]
++        L.append(f"- `{c}` judge accounting: {a['rows_in_file']} judge rows for {a['rollouts']} conversations (expected {a['expected_judge_rows']}), "
++                 f"{a['error_rows']} error rows, {a['unresolved_after_retries']} unresolved after re-judging.")
++L += ["", "SamplingParams as processed by the engine, first request per model:", "",
++      "| Check | Model | temperature | top_p | top_k | min_p | max_tokens | seed |", "|---|---|---|---|---|---|---|---|"] + samp_rows
++L += ["", "Health panel, both panels (`health.py`, token-weighted):", "",
++      "| Check | Model | Panel | Tokens | Entropy | Tail20 | KL(parent‖model) |", "|---|---|---|---|---|---|---|"] + panel_rows + [""]
++
++# ---------------- training
++L += ["## Training (brief step 3)", ""]
++rp = jload("results/training/a5b_s0/repro.json")
++meta = jload("results/training/a5b_s0/train_meta.json")
++if rp:
++    x = rp["repro_vs_r02"]
++    L += ["R02's `train_arm.sh` with paths changed: the teammate's `train.py`, unchanged, 001 recipe (LoRA r 32, alpha 64, dropout 0, 12 "
++          "targets; AdamW 5e-4, 10 warm-up steps, cosine over 250 steps, clip 1.0; micro-batch 4 × accumulation 8 = 32; seed 0; thinking off), "
++          "on `data/train_a5b.jsonl` (sha256 `eedd8f4f…1cc2a1b`, 8,000 rows; the same file as R02's `a5b`).", "",
++          "| Run | Steps logged | First-10-step mean loss | Loss step 125 | Loss step 250 | Wall time, train loop | Peak allocated GB | Step 1 |",
++          "|---|---|---|---|---|---|---|---|",
++          f"| `{Path(rp['run_dir']).name}` | {rp['steps_logged']} | {rp['first10_mean_loss']:.4f} | {rp['loss_step125']:.4f} | "
++          f"{(rp['loss_step250'] or float('nan')):.4f} | {rp['train_loop_seconds'] / 60:.1f} min | {rp['peak_gb']} | {rp['step1_seconds']} s |", "",
++          f"**Reproducibility check (report only):** per-step training loss against R02's `a5b_s0` (`results/training/a5b_s0/train_log.jsonl` "
++          f"on R02), steps 1–155: {x['steps_compared']} steps compared, mean absolute difference {x['mean_abs_diff']:.6f}, maximum "
++          f"{x['max_abs_diff']:.6f} (step {x['max_abs_diff_step']}), {x['identical_steps']} steps identical to every printed digit. "
++          f"Loss at step 125: R03 {x['r03_loss_step125']:.4f}, R02 {x['r02_loss_step125']:.4f}.", ""]
++    if meta:
++        L += [f"`train_meta.json`: {meta.get('n_examples')} examples, {meta.get('n_loss_tokens'):,} supervised tokens, steps {meta.get('steps')}, "
++              f"micro-batch {meta.get('micro_bs')} × {meta.get('accum')}, seed {meta.get('seed')}, data sha256 `{meta.get('data_sha256')}`.", ""]
++    hs = rd("results/training/a5b_s0/snapshot_hashes.txt")
++    if hs:
++        L += ["Snapshot sha256 (`adapter_model.safetensors`, `adapter_config.json`):", "", "```", hs.replace(str(R) + "/", ""), "```", ""]
++    L += [rd("results/training/a5b_s0/oom_note.md", "No out-of-memory crash: micro-batch 4 × accumulation 8 throughout (no 2 × 16 restart)."), ""]
++else:
++    L += ["Pending.", ""]
++
++# ---------------- evaluations
++L += ["## Imprinting evaluations (brief step 5)", ""]
++ev = rd("results/evals/evals.md")
++dec250 = rd("checks/a5b_s250/decision.txt", "pending")
++if ev:
++    L += [rd("notes/evals_note.md"), "", ev, ""]
++else:
++    L += [f"Not run: step 5 runs only on a step-250 PASS (decision: `{dec250}`)." if not dec250.startswith(("PASS", "pending"))
++          else "Pending.", ""]
++
++# ---------------- spend
++L += ["## Spend and GPU time", "", rd("notes/spend.md", "Pending."), "", rd("notes/gpu.md", ""), ""]
++L += ["## Setup and smoke test (brief steps 1–2)", "", rd("notes/setup.md"), "", rd("notes/smoke.md"), ""]
++L += ["## Notes: code changes, fixes, odd things", "", rd("notes/changes.md"), "", rd("notes/odd.md"), ""]
++L += ["## Files", "", rd("notes/files.md"), ""]
++open(R / "README.md", "w").write("\n".join(L).replace("\n\n\n", "\n\n"))
++print(f"README.md written, {len(L)} blocks")
+--- r02/scripts/push.sh	2026-10-24 22:12:18.876167892 +0000
++++ r03/scripts/push.sh	2026-10-25 11:10:28.199202365 +0000
+@@ -1,26 +1,24 @@
+ #!/usr/bin/env bash
+-# Copy R02's deliverables into the clone under e04/r02/, skip files over 50 MB and adapters, scan for credentials,
+-# commit and push branch e04_content_voice, then check the remote head equals the local commit.
++# Copy R03's deliverables into the clone under e04/r03/, skip files over 50 MB and adapters, scan for credentials,
++# commit and push branch e04_content_voice, then check the remote head equals the local commit. (R02's push.sh, paths changed;
++# R02's gen/ copy step dropped: R03 generates no stories.)
+ #   bash push.sh "commit message"
+ set -euo pipefail
+-exec 9>/workspace/e04/r02/logs/push.lock; flock 9   # one push at a time
+-MSG=${1:-"E04 R02 update"}
+-SRC=/workspace/e04/r02
+-GH=/workspace/e04/r02/gh/repo
+-DST=$GH/e04/r02
++exec 9>/workspace/e04/r03/logs/push.lock; flock 9   # one push at a time
++MSG=${1:-"E04 R03 update"}
++SRC=/workspace/e04/r03
++GH=/workspace/e04/r03/gh/repo
++DST=$GH/e04/r03
+ cd "$GH"
+ [ "$(git symbolic-ref --short HEAD)" = "e04_content_voice" ] || { echo "not on e04_content_voice"; exit 1; }
+-mkdir -p "$DST" "$DST/gen"
++mkdir -p "$DST" "$DST/logs"
++find "$SRC" -path "$SRC/gh" -prune -o -path "$SRC/cache" -prune -o -path "$SRC/adapters" -prune -o -path "$SRC/runs" -prune -o -path "$SRC/lora_vllm" -prune -o -type f -size +50M -print 2>/dev/null > "$SRC/logs/over_50mb.txt" || true
+ rsync -a --delete --max-size=50m --prune-empty-dirs \
+   --exclude '__pycache__/' --exclude '*.pyc' --exclude '*.safetensors' --exclude '*.bin' --exclude '*.pt' --exclude '*.npz' \
+-  --exclude 'adapters/' --exclude 'src/' --exclude 'lora_vllm/' --exclude 'cache/' --exclude 'gh/' --exclude 'merged/' --exclude 'runs/' --exclude 'gen/' \
+-  --exclude '*.tmp' "$SRC/" "$DST/"
+-# generated stories (gen/r02 lives outside r02/ by the brief's paths): copy into e04/r02/gen/
+-rsync -a --delete --max-size=50m --prune-empty-dirs --exclude 'shards/' --exclude '*.tmp' /workspace/e04/gen/r02/ "$DST/gen/" 2>/dev/null || true
+-find "$SRC" /workspace/e04/gen/r02 -path "$SRC/gh" -prune -o -path "$SRC/cache" -prune -o -type f -size +50M -print 2>/dev/null > "$SRC/logs/over_50mb.txt" || true
+-cp "$SRC/logs/over_50mb.txt" "$DST/logs/over_50mb.txt"
++  --exclude 'adapters/' --exclude 'src/' --exclude 'lora_vllm/' --exclude 'cache/' --exclude 'gh/' --exclude 'merged/' --exclude 'runs/' \
++  --exclude '*.tmp' --exclude '*.pid' --exclude '*.lock' "$SRC/" "$DST/"
+ /workspace/venvs/gpu/bin/python -I /workspace/e04/scripts/scan_secrets.py "$DST"
+-git add -A e04/r02
++git add -A e04/r03
+ if git diff --cached --quiet; then echo "nothing to commit"; else
+   git commit -q -m "$MSG" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+ fi
+=== new in R03: scripts/repro.py
+--- r02/scripts/run_gen_eval_logged.py	2026-10-24 22:14:27.338472728 +0000
++++ r03/scripts/run_gen_eval_logged.py	2026-10-25 11:10:13.320822697 +0000
+@@ -1,11 +1,11 @@
+-"""E04 R02 wrapper around the teammate's gen_eval.py (unchanged), for the merged step-250 model (a "path" model in models.json).
++"""E04 R03 wrapper around the teammate's gen_eval.py (unchanged), for the merged step-250 model (a "path" model in models.json).
+ Same sampling-evidence patch as E02's run_worker_logged.py: for the first request per (model, temperature), the SamplingParams as
+ passed and as processed by the engine go to $E02_SAMPLING_LOG; then gen_eval.main() runs with the same CLI arguments.
+ gen_eval.py itself records temperature, min_p and max_tokens on every row; top_p is fixed at 1 in its code."""
+ import json, os, sys
+ 
+-sys.path.insert(0, "/workspace/e04/r02/src")
+-LOG = os.environ.get("E02_SAMPLING_LOG", "/workspace/e04/r02/results/sampling_evidence_gen_eval.jsonl")
++sys.path.insert(0, "/workspace/e04/r03/src")
++LOG = os.environ.get("E02_SAMPLING_LOG", "/workspace/e04/r03/results/sampling_evidence_gen_eval.jsonl")
+ 
+ 
+ def _sp(sp):
+--- r02/scripts/run_judge_paced.py	2026-10-24 22:07:01.277303826 +0000
++++ r03/scripts/run_judge_paced.py	2026-10-25 11:10:13.330633790 +0000
+@@ -1,8 +1,8 @@
+-"""E03 wrapper (copied to E04 R02; only the src path changed) around the teammate's judge.py (unchanged): paces every OpenRouter POST to at most RPM per model
++"""E03 wrapper (copied to E04 R03; only the src path changed) around the teammate's judge.py (unchanged): paces every OpenRouter POST to at most RPM per model
+ (the account is limited to 20 requests/min per model), then runs judge.main() with the same CLI arguments.
+ The pacing patches httpx.AsyncClient.post inside llm.py's namespace only; requests and retries are otherwise his."""
+ import asyncio, os, sys, time
+-sys.path.insert(0, "/workspace/e04/r02/src")
++sys.path.insert(0, "/workspace/e04/r03/src")
+ import httpx
+ import llm  # noqa: E402
+ 
+--- r02/scripts/run_step8.sh	2026-10-24 23:17:23.976321254 +0000
++++ r03/scripts/run_step8.sh	2026-10-25 11:33:24.579826376 +0000
+@@ -1,61 +1,120 @@
+ #!/usr/bin/env bash
+-# E04 R02 step 8: imprinting evaluations of a5b's step-250 model. Runs only if a5b was healthy at both checks.
+-#   bash run_step8.sh <serve_gpu> <protocol_gpu>
+-# 1. merge a5b's final adapter (E01's merge.py, unchanged) into /dev/shm/r02_scratch/merged/a5b_B_s250
+-# 2. serve it with E01's serve.sh (vLLM 0.30.0, --generation-config vllm, served name "target") on <serve_gpu>, port 8010
+-# 3. in parallel, in the brief's priority order:
+-#    - Bloom (b): default Assistant, 100 conversations, then Dismissive, 100 (bloom_driver.py; plain T=1)
+-#    - teammate's protocol (a): gen_eval.py on the merged model on <protocol_gpu>, 200 scripts x {default, dismissive}, trigger on,
+-#      first at T=1 then at T 0.7; judges (judge.py, GLM + DeepSeek); analyze.py
+-#    - cheap checks (c), after the Dismissive Bloom run: single_turn.py and story_check.py (E01's), plain T=1, GLM judge
++# E04 R03 step 5: imprinting evaluations of a5b's step-250 model on ONE GPU. R02's run_step8.sh, changed for R03:
++#   - paths r02 -> r03; Bloom model tag hc_db_a5b_r03_s250;
++#   - gate: checks/a5b_s250/decision.txt starts with PASS (R02: both checks HEALTHY);
++#   - one GPU, so the stages run one after another in the brief's order:
++#       a1  (a) teammate's protocol generation at T=1      (gen_eval.py through run_gen_eval_logged.py, offline vLLM)
++#       a07 (a) the same at T 0.7
++#       bd  (b) Bloom, default Assistant, 100 conversations (E01's serve.sh + bloom_driver.py, plain T=1)
++#       bx  (b) Bloom, Table 7 Dismissive, 100 conversations
++#       c   (c) cheap checks on the same server (single-turn 50 x 5 prompts x 2 conditions; story check 50)
++#     (a)'s judges (judge.py, GLM + DeepSeek, paced) and analyze.py run in the background while (b) runs, one temperature after the
++#     other (flock), so each judge model gets one paced stream (R02 ran the two temperatures' judges at the same time);
++#   - merged model on the container disk (/root/r03_scratch, E01's SI36_SCRATCH design); deleted by the caller once used.
++#   bash run_step8.sh                         real run
++#   STAGES="bd a1 bx a07 c" bash run_step8.sh run only these stages, in this order (time-short priority order of the brief)
++#   SMOKE=1 bash run_step8.sh                 smoke test (brief step 2): parent = /dev/shm/qwen36_27b (verified copy of the base
++#                                             snapshot), no merge; 4 scripts x 2 personas at T=1; Bloom 2 default conversations;
++#                                             single-turn 5 prompts x 1 reply x 2 conditions; story check 2 stories; outputs logs/smoke/
+ set -uo pipefail
+-SG=$1; PG=$2
+-R02=/workspace/e04/r02; V=/workspace/e03/venvs; LOG=$R02/logs/step8.log
+-say() { echo "$(date -u +%FT%TZ) $*" >> $LOG; }
+-for c in a5b_s125 a5b_s250; do
+-  grep -q '^HEALTHY' $R02/checks/$c/decision.txt 2>/dev/null || { say "not running step 8: $c decision is '$(cat $R02/checks/$c/decision.txt 2>/dev/null)'"; exit 1; }
+-done
+-RD=$R02/runs/a5b_s0; grep -q "_mb2" $R02/logs/train_a5b.times && RD=$R02/runs/a5b_s0_mb2
+-MERGED=/dev/shm/r02_scratch/merged/a5b_B_s250
+-mkdir -p $R02/results/evals/teammate
+-if [ ! -f $MERGED/merge_meta.json ]; then
+-  say "merge start ($RD/final)"
+-  ( source $R02/bloom_code/env.sh; cd $R02/bloom_code; CUDA_VISIBLE_DEVICES=$SG /workspace/venvs/gpu/bin/python merge.py --adapter $RD/final --out $MERGED ) > $R02/logs/merge_a5b.log 2>&1 \
+-    || { say "MERGE FAILED"; exit 1; }
+-  say "merge done: $(cat $MERGED/merge_meta.json | tr -d '\n')"
++R03=/workspace/e04/r03; V=/workspace/e03/venvs
++GPU=${GPU:-0}; PORT=${PORT:-8010}
++if [ "${SMOKE:-0}" = 1 ]; then
++  EV=$R03/logs/smoke/evals; LOG=$R03/logs/smoke/step8_smoke.log
++  MODEL=/dev/shm/qwen36_27b; NAME=parent; BTAG=hc_db_smoke_parent
++  SCRIPTS=$R03/src/eval_data/scripts_heldout2.jsonl; NSCR=4; BN=2; export SI36_LIMIT=2
++  STAGES=${STAGES:-"a1 bd c"}; ST_N=1; SC_N=2
++  export JUDGE_LEDGER=$R03/logs/smoke/ledger_openrouter_judge.jsonl
++else
++  EV=$R03/results/evals; LOG=$R03/logs/step8.log
++  NAME=a5b_B_s250; BTAG=hc_db_a5b_r03_s250
++  SCRIPTS=$R03/src/eval_data/scripts_heldout2.jsonl,$R03/src/eval_data/scripts_frozen.jsonl; NSCR=0; BN=100
++  STAGES=${STAGES:-"a1 a07 bd bx c"}; ST_N=50; SC_N=50
++  export JUDGE_LEDGER=$R03/logs/ledger_openrouter_judge.jsonl
++fi
++mkdir -p $EV/teammate $R03/logs/bloom
++say() { echo "$(date -u +%FT%TZ) $*" | tee -a $LOG; }
++say "step 5 start: SMOKE=${SMOKE:-0} stages: $STAGES"
++
++if [ "${SMOKE:-0}" != 1 ]; then
++  grep -q '^PASS' $R03/checks/a5b_s250/decision.txt 2>/dev/null || { say "not running step 5: a5b_s250 decision is '$(cat $R03/checks/a5b_s250/decision.txt 2>/dev/null)'"; exit 1; }
++  RD=$R03/runs/a5b_s0; grep -q "_mb2" $R03/logs/train_a5b.times 2>/dev/null && RD=$R03/runs/a5b_s0_mb2
++  MODEL=/root/r03_scratch/merged/a5b_B_s250
++  if [ ! -f $MODEL/merge_meta.json ]; then
++    say "merge start ($RD/final -> $MODEL)"
++    ( source $R03/bloom_code/env.sh; cd $R03/bloom_code; CUDA_VISIBLE_DEVICES=$GPU /workspace/venvs/gpu/bin/python merge.py --adapter $RD/final --out $MODEL ) > $R03/logs/merge_a5b.log 2>&1 \
++      || { say "MERGE FAILED"; exit 1; }
++    say "merge done: $(cat $MODEL/merge_meta.json | tr -d '\n')"
++  fi
+ fi
+-bash $R02/bloom_code/serve.sh $MERGED $SG 8010 a5b_B_s250 >> $LOG 2>&1 || { say "SERVER FAILED"; exit 1; }
+-say "server up on GPU $SG port 8010"
+-export SI36_RUN_CAP=31.5 SI36_API_CAP_USD=31.5
+-# Bloom: default, then dismissive, then the cheap checks (they share the server)
+-tmux new -d -s bloom "cd $R02 && /workspace/venvs/bloom/bin/python $R02/scripts/bloom_driver.py --model-tag hc_db_a5b_r02_s250 --port 8010 --system none --n 100; \
+-  /workspace/venvs/bloom/bin/python $R02/scripts/bloom_driver.py --model-tag hc_db_a5b_r02_s250 --port 8010 --system dismissive --n 100; \
+-  bash $R02/scripts/cheap_checks.sh"
+-say "Bloom driver started (default, then dismissive, then cheap checks)"
+-# teammate's protocol on the merged model
+-echo "[{\"name\": \"a5b_B_s250\", \"path\": \"$MERGED\"}]" > $R02/results/evals/teammate/models.json
+-cd $R02/src
+-for spec in "T1full 1.0 rollouts_T1.jsonl" "T0.7 0.7 rollouts_T07.jsonl"; do
+-  set -- $spec; TAG=$1; TEMP=$2; OUT=$R02/results/evals/teammate/$3
+-  say "teammate protocol $TAG generation start on GPU $PG"
+-  CUDA_VISIBLE_DEVICES=$PG PATH=$V/vl/bin:$PATH VLLM_USE_FLASHINFER_SAMPLER=0 E02_SAMPLING_LOG=$R02/results/evals/teammate/sampling_evidence.jsonl \
+-    $V/vl/bin/python $R02/scripts/run_gen_eval_logged.py --models $R02/results/evals/teammate/models.json \
+-    --scripts $R02/src/eval_data/scripts_heldout2.jsonl,$R02/src/eval_data/scripts_frozen.jsonl --personas default,dismissive --triggers 1 \
+-    --temperature $TEMP --min_p 0.0 --max_tokens 512 --tag $TAG --out $OUT --max_num_seqs 128 > $R02/logs/gen_eval_$TAG.log 2>&1
+-  say "teammate protocol $TAG generation exit $? ($(wc -l < $OUT) rows)"
+-  ( export API_LEDGER=$R02/logs/ledger_openrouter_judge.jsonl API_CAP_USD=25 JUDGE_RPM=${JUDGE_RPM:-15}
+-    for pass in 1 2 3; do
+-      $V/si/bin/python -I $R02/scripts/run_judge_paced.py $OUT ${OUT%.jsonl}_judgments.jsonl --concurrency 32 >> $R02/logs/judge_$TAG.log 2>&1
++echo "[{\"name\": \"$NAME\", \"path\": \"$MODEL\"}]" > $EV/teammate/models.json
++
++server_up() { curl -sf "localhost:$PORT/v1/models" 2>/dev/null | grep -q '"target"'; }
++start_server() {
++  server_up && return 0
++  say "server start ($MODEL) on GPU $GPU port $PORT"
++  bash $R03/bloom_code/serve.sh $MODEL $GPU $PORT $BTAG >> $LOG 2>&1 || { say "SERVER FAILED"; return 1; }
++  say "server up"
++}
++stop_server() { server_up && { bash $R03/bloom_code/stop_server.sh $PORT >> $LOG 2>&1; say "server stopped"; }; return 0; }
++
++judge_bg() {  # $1 = tag, $2 = rollouts file: judges until every row has both judges (up to 5 passes), then analyze.py
++  local TAG=$1 OUT=$2
++  ( exec 8>$R03/logs/judge_queue.lock; flock 8
++    export API_LEDGER=$JUDGE_LEDGER API_CAP_USD=25 JUDGE_RPM=${JUDGE_RPM:-15}
++    for pass in 1 2 3 4 5; do
++      echo "$(date -u +%FT%TZ) teammate protocol $TAG judge pass $pass start" >> $LOG
++      $V/si/bin/python -I $R03/scripts/run_judge_paced.py $OUT ${OUT%.jsonl}_judgments.jsonl --concurrency 32 >> $(dirname $LOG)/judge_$TAG.log 2>&1
+       python3 - $OUT <<'EOF' && break
+ import json, sys
+ o = sys.argv[1]; j = o[:-6] + "_judgments.jsonl"
+ ok = {(r["key"], r["judge"]) for r in map(json.loads, open(j)) if not r.get("error")}
+-sys.exit(0 if len(ok) >= 2 * sum(1 for _ in open(o)) else 1)
++n = sum(1 for _ in open(o))
++print(f"judged {len(ok)} of {2 * n}", flush=True)
++sys.exit(0 if len(ok) >= 2 * n else 1)
+ EOF
+     done
+-    $V/si/bin/python $R02/src/analyze.py --rollouts $OUT --judgments ${OUT%.jsonl}_judgments.jsonl --out ${OUT%.jsonl}_summary.json --tag $TAG \
+-      > $R02/logs/analyze_$TAG.log 2>&1
+-    echo "$(date -u +%FT%TZ) teammate protocol $TAG judged and analysed" >> $LOG ) &
++    $V/si/bin/python $R03/src/analyze.py --rollouts $OUT --judgments ${OUT%.jsonl}_judgments.jsonl --out ${OUT%.jsonl}_summary.json --tag $TAG \
++      > $(dirname $LOG)/analyze_$TAG.log 2>&1
++    echo "$(date -u +%FT%TZ) teammate protocol $TAG judged and analysed (analyze exit $?)" >> $LOG ) &
++}
++
++gen() {  # $1 = tag, $2 = temperature, $3 = output file name
++  local TAG=$1 TEMP=$2 OUT=$EV/teammate/$3
++  stop_server
++  say "teammate protocol $TAG generation start on GPU $GPU"
++  ( cd $R03/src; source $R03/scripts/env.sh; unset PYTHONPATH
++    CUDA_VISIBLE_DEVICES=$GPU PATH=$V/vl/bin:$PATH VLLM_USE_FLASHINFER_SAMPLER=0 E02_SAMPLING_LOG=$EV/teammate/sampling_evidence.jsonl \
++    $V/vl/bin/python $R03/scripts/run_gen_eval_logged.py --models $EV/teammate/models.json --scripts $SCRIPTS --n_scripts $NSCR \
++      --personas default,dismissive --triggers 1 --temperature $TEMP --min_p 0.0 --max_tokens 512 --tag $TAG --out $OUT --max_num_seqs 128 \
++      > $(dirname $LOG)/gen_eval_$TAG.log 2>&1 )
++  say "teammate protocol $TAG generation exit $? ($(wc -l < $OUT 2>/dev/null || echo 0) rows)"
++  [ -s $OUT ] && judge_bg $TAG $OUT
++}
++
++bloom() {  # $1 = none | dismissive
++  start_server || return 1
++  say "Bloom $1 start ($BN conversations)"
++  ( cd $R03 && SI36_RUN_CAP=${SI36_RUN_CAP:?} SI36_API_CAP_USD=${SI36_API_CAP_USD:?} /workspace/venvs/bloom/bin/python $R03/scripts/bloom_driver.py \
++      --model-tag $BTAG --port $PORT --system $1 --n $BN ) >> $(dirname $LOG)/bloom_driver_stdout.log 2>&1
++  say "Bloom $1 exit $?"
++  /workspace/venvs/bloom/bin/python -I $R03/scripts/bloom_ledger.py >> $LOG 2>&1 || say "bloom_ledger failed"
++}
++
++for s in $STAGES; do
++  case $s in
++    a1)  gen T1full 1.0 rollouts_T1.jsonl ;;
++    a07) gen T0.7 0.7 rollouts_T07.jsonl ;;
++    bd)  bloom none ;;
++    bx)  bloom dismissive ;;
++    c)   start_server && LOG=$LOG bash $R03/scripts/cheap_checks.sh $BTAG $ST_N $SC_N $PORT ;;
++    *)   say "unknown stage $s" ;;
++  esac
+ done
++stop_server
++say "waiting for the teammate protocol's judges"
+ wait
+-say "teammate protocol done"
++# tables: E01's analyze.py on all Bloom/single-turn/story runs (results/bloom/), then this run's summary (results/evals/evals.md)
++( source $R03/bloom_code/env.sh; cd $R03/bloom_code; /workspace/venvs/bloom/bin/python analyze.py > $(dirname $LOG)/e01_analyze.log 2>&1 ) || say "E01 analyze.py failed"
++EVALS_OUT=$EV EVALS_TAG=$BTAG /workspace/e03/venvs/si/bin/python -I $R03/scripts/evals_summary.py > $(dirname $LOG)/evals_summary.log 2>&1 || say "evals_summary.py failed"
++say "step 5 done"
+--- r02/scripts/run_worker_logged.py	2026-10-24 22:07:01.270132869 +0000
++++ r03/scripts/run_worker_logged.py	2026-10-25 11:10:13.340731085 +0000
+@@ -1,4 +1,4 @@
+-"""E02 wrapper (copied from E03 stage 1 to E04 R02; only the two paths changed) around the friend's vllm_worker.py (unchanged). Adds sampling evidence only:
++"""E02 wrapper (copied from E03 stage 1 to E04 R03; only the two paths changed) around the friend's vllm_worker.py (unchanged). Adds sampling evidence only:
+   - after the engine is built: model_config.generation_config, get_diff_sampling_param(), get_default_sampling_params()
+   - for the first processed request per (model, turn): the SamplingParams as passed by the worker AND as processed
+     by the engine (after update_from_generation_config), with temperature / top_p / top_k / min_p / max_tokens / seed.
+@@ -6,8 +6,8 @@
+ """
+ import json, os, sys
+ 
+-sys.path.insert(0, "/workspace/e04/r02/src")
+-LOG = os.environ.get("E02_SAMPLING_LOG", "/workspace/e04/r02/results/sampling_evidence.jsonl")
++sys.path.insert(0, "/workspace/e04/r03/src")
++LOG = os.environ.get("E02_SAMPLING_LOG", "/workspace/e04/r03/results/sampling_evidence.jsonl")
+ 
+ 
+ def _sp(sp):
+--- r02/scripts/status.py	2026-10-24 22:01:26.175978755 +0000
++++ r03/scripts/status.py	2026-10-25 11:38:02.813062284 +0000
+@@ -1,17 +1,17 @@
+-"""Write r02/STATUS.md from logs/status.json (stage per arm, next step) and the call ledgers.
+-  python status.py --set a2="training, step 40" --next "..." --problems "..."
++"""Write r03/STATUS.md from logs/status.json and the call ledgers (R02's status.py, fields changed for R03's single-arm run).
++  python status.py --set stage="training, step 40" --set next="..." --set problems="..."
++Keys: stage, next, problems, checks, evals.
+ """
+ import argparse
+ import glob
+ import json
+-import os
+ import time
+ from pathlib import Path
+ 
+-R02 = Path("/workspace/e04/r02")
+-SJ = R02 / "logs/status.json"
++R03 = Path("/workspace/e04/r03")
++SJ = R03 / "logs/status.json"
+ ap = argparse.ArgumentParser()
+-ap.add_argument("--set", action="append", default=[], help="key=value (keys: a2, a5b, gen, gpu2, evals, next, problems)")
++ap.add_argument("--set", action="append", default=[], help="key=value")
+ a = ap.parse_args()
+ st = json.load(open(SJ)) if SJ.exists() else {}
+ for kv in a.set:
+@@ -20,39 +20,42 @@
+ json.dump(st, open(SJ, "w"), indent=1)
+ 
+ 
+-def ledger(pattern, field):
+-    tot = 0.0
+-    for p in glob.glob(str(R02 / pattern), recursive=True):
++def ledger(pattern, field="cost"):
++    tot, n = 0.0, 0
++    for p in glob.glob(str(R03 / pattern), recursive=True):
+         for l in open(p):
+             try:
+-                tot += float(json.loads(l).get(field) or 0)
++                r = json.loads(l)
++                tot += float((r.get(field) if field in r else r.get("cost_est")) or 0)
++                n += 1
+             except Exception:
+                 pass
+-    return tot
++    return tot, n
+ 
+ 
+-ant = ledger("a5b/ledger.jsonl", "cost_est")
+-orr_own = ledger("a5b/ledger.jsonl", "cost_or") + ledger("logs/ledger_openrouter*.jsonl", "cost")
++judge, nj = ledger("logs/ledger_openrouter_judge.jsonl")
++bloomj, nb = ledger("si36/runs/api_ledger.jsonl")
++aud, na = ledger("logs/ledger_openrouter_bloom.jsonl", "cost_est")
++smoke, ns = ledger("logs/smoke/ledger_*.jsonl")
++own = judge + bloomj + aud + smoke
+ key = None
+-kp = R02 / "logs/openrouter_key_usage.jsonl"
++kp = R03 / "logs/openrouter_key_usage.jsonl"
+ if kp.exists():
+     rows = [json.loads(l) for l in open(kp)]
+-    if len(rows) >= 1:
++    if rows:
+         key = (rows[0]["usage"], rows[-1]["usage"], rows[-1]["t_utc"])
+-dl = (R02 / "logs/deadline.txt").read_text().strip() if (R02 / "logs/deadline.txt").exists() else "?"
+-txt = f"""# E04 R02 status
++dl = (R03 / "logs/deadline.txt").read_text().strip() if (R03 / "logs/deadline.txt").exists() else "?"
++txt = f"""# E04 R03 status
+ 
+ - **Time (UTC):** {time.strftime('%Y-%m-%d %H:%M', time.gmtime())}
+-- **Generation (A2, 8,000 specs):** {st.get('gen', '-')}
+-- **Arm `a2`:** {st.get('a2', '-')}
+-- **Arm `a5b`:** {st.get('a5b', '-')}
+-- **GPU 2 (health checks):** {st.get('gpu2', '-')}
++- **Stage:** {st.get('stage', '-')}
++- **Health checks:** {st.get('checks', '-')}
+ - **Evaluations:** {st.get('evals', '-')}
+-- **Spend, Anthropic:** ${ant:.2f} estimated from token counts (cap $60)
+-- **Spend, OpenRouter:** ${orr_own:.2f} from R02's own ledgers{'' if key is None else f'; key usage ${key[1] - key[0]:.2f} since the run started (read {key[2]} UTC)'} (cap $30)
++- **Spend, OpenRouter (cap $25):** ${own:.2f} from R03's own ledgers (teammate's judges ${judge:.2f} / {nj} calls; Bloom harness judge calls ${bloomj:.2f} / {nb}; Bloom auditor + judge, estimated from token counts ${aud:.2f} / {na}; smoke test ${smoke:.2f} / {ns}){'' if key is None else f'; key usage +${key[1] - key[0]:.2f} since the run started (read {key[2]} UTC; the key is shared with other runs)'}
++- **Spend, Anthropic:** $0 (this run makes no Anthropic calls)
+ - **Problems:** {st.get('problems', 'none')}
+ - **Next:** {st.get('next', '-')}
+ - **Pod deadline:** {dl}
+ """
+-open(R02 / "STATUS.md", "w").write(txt)
++open(R03 / "STATUS.md", "w").write(txt)
+ print(txt)
+--- r02/scripts/status_loop.sh	2026-10-24 22:12:10.618884362 +0000
++++ r03/scripts/status_loop.sh	2026-10-25 11:10:13.242730284 +0000
+@@ -2,7 +2,7 @@
+ # Every 30 minutes: read OpenRouter key usage, rewrite STATUS.md (time, spend), push.
+ while true; do
+   sleep 1800
+-  /workspace/e03/venvs/api/bin/python -I /workspace/e04/r02/scripts/key_usage.py loop >> /workspace/e04/r02/logs/status_loop.log 2>&1
+-  /workspace/venvs/gpu/bin/python -I /workspace/e04/r02/scripts/status.py >> /workspace/e04/r02/logs/status_loop.log 2>&1
+-  bash /workspace/e04/r02/scripts/push.sh "E04 R02: status $(date -u +%H:%M) UTC" >> /workspace/e04/r02/logs/status_loop.log 2>&1
++  /workspace/e03/venvs/api/bin/python -I /workspace/e04/r03/scripts/key_usage.py loop >> /workspace/e04/r03/logs/status_loop.log 2>&1
++  /workspace/venvs/gpu/bin/python -I /workspace/e04/r03/scripts/status.py >> /workspace/e04/r03/logs/status_loop.log 2>&1
++  bash /workspace/e04/r03/scripts/push.sh "E04 R03: status $(date -u +%H:%M) UTC" >> /workspace/e04/r03/logs/status_loop.log 2>&1
+ done
+--- r02/scripts/train_arm.sh	2026-10-24 23:47:51.149432640 +0000
++++ r03/scripts/train_arm.sh	2026-10-25 11:10:13.255881644 +0000
+@@ -5,23 +5,23 @@
+ # On an out-of-memory crash: restart from scratch once with micro-batch 2 x 16 (--micro_bs 2; same effective batch, as E01-D11).
+ #   bash train_arm.sh <arm> <gpu>
+ set -uo pipefail
+-source /workspace/e04/r02/scripts/env.sh; unset PYTHONPATH
++source /workspace/e04/r03/scripts/env.sh; unset PYTHONPATH
+ ARM=$1; GPU=$2
+-R02=/workspace/e04/r02; V=/workspace/e03/venvs
+-T=$R02/logs/train_$ARM.times
+-cd $R02/src
++R03=/workspace/e04/r03; V=/workspace/e03/venvs
++T=$R03/logs/train_$ARM.times
++cd $R03/src
+ run() {  # $1 = out dir, rest = extra args
+   OUT=$1; shift
+   echo "start $(date -u +%FT%TZ) out=$OUT args=$*" >> $T
+-  CUDA_VISIBLE_DEVICES=$GPU $V/si/bin/python train.py --data $R02/data/train_$ARM.jsonl --out $OUT --seed 0 "$@" \
+-    > $R02/logs/train_${ARM}$( [ $# -gt 0 ] && echo _mb2 ).log 2>&1
++  CUDA_VISIBLE_DEVICES=$GPU $V/si/bin/python train.py --data $R03/data/train_$ARM.jsonl --out $OUT --seed 0 "$@" \
++    > $R03/logs/train_${ARM}$( [ $# -gt 0 ] && echo _mb2 ).log 2>&1
+   RC=$?
+   echo "exit $RC $(date -u +%FT%TZ) out=$OUT" >> $T
+   return $RC
+ }
+-run $R02/runs/${ARM}_s0
++run $R03/runs/${ARM}_s0
+ RC=$?
+-if [ $RC -ne 0 ] && grep -q -E "OutOfMemoryError|CUDA out of memory" $R02/logs/train_$ARM.log; then
++if [ $RC -ne 0 ] && grep -q -E "OutOfMemoryError|CUDA out of memory" $R03/logs/train_$ARM.log; then
+   echo "OOM: restarting from scratch with --micro_bs 2 $(date -u +%FT%TZ)" >> $T
+-  run $R02/runs/${ARM}_s0_mb2 --micro_bs 2
++  run $R03/runs/${ARM}_s0_mb2 --micro_bs 2
+ fi
+--- r02/scripts/verify_base.py	2026-10-24 22:04:57.152672495 +0000
++++ r03/scripts/verify_base.py	2026-10-25 11:10:13.360368510 +0000
+@@ -23,4 +23,4 @@
+ ok = all(v.get("ok") for v in res.values() if v.get("present"))
+ print(json.dumps({"n_files_src": len(res), "n_present": sum(v["present"] for v in res.values()), "all_present_ok": ok,
+                   "missing": [k for k, v in res.items() if not v["present"]]}))
+-json.dump(res, open("/workspace/e04/r02/results/base_copy_hashes.json", "w"), indent=1)
++json.dump(res, open("/workspace/e04/r03/results/base_copy_hashes.json", "w"), indent=1)
+--- r02/scripts/watch_arm.sh	2026-10-24 22:11:18.069709818 +0000
++++ r03/scripts/watch_arm.sh	2026-10-25 11:10:13.266840840 +0000
+@@ -5,15 +5,15 @@
+ #   bash watch_arm.sh <arm>
+ set -uo pipefail
+ ARM=$1
+-R02=/workspace/e04/r02; V=/workspace/e03/venvs; LOG=$R02/logs/watch_$ARM.log
++R03=/workspace/e04/r03; V=/workspace/e03/venvs; LOG=$R03/logs/watch_$ARM.log
+ say() { echo "$(date -u +%FT%TZ) $*" >> $LOG; }
+ 
+ rundir() {  # the run in use (after an OOM restart, the _mb2 run)
+-  if grep -q "_mb2" $R02/logs/train_$ARM.times 2>/dev/null; then echo $R02/runs/${ARM}_s0_mb2; else echo $R02/runs/${ARM}_s0; fi
++  if grep -q "_mb2" $R03/logs/train_$ARM.times 2>/dev/null; then echo $R03/runs/${ARM}_s0_mb2; else echo $R03/runs/${ARM}_s0; fi
+ }
+ snap_ready() {  # $1 = snapshot dir, $2 = step that must be logged after it (save is complete once the next step is logged)
+   [ -f $1/adapter_model.safetensors ] || return 1
+-  if [ "$2" = "final" ]; then grep -q '^done' $R02/logs/train_$ARM*.log 2>/dev/null; return $?; fi
++  if [ "$2" = "final" ]; then grep -q '^done' $R03/logs/train_$ARM*.log 2>/dev/null; return $?; fi
+   python3 - "$(dirname $1)/train_log.jsonl" "$2" <<'EOF'
+ import json, sys
+ try:
+@@ -25,14 +25,14 @@
+ }
+ check() {  # $1 = step label (s125 / s250), $2 = snapshot dir
+   local NAME=${ARM}_$1 MODEL=${ARM}_B_$1
+-  local D=$R02/checks/$NAME
++  local D=$R03/checks/$NAME
+   mkdir -p $D
+   sha256sum $2/adapter_model.safetensors $2/adapter_config.json > $D/adapter_hash.txt
+-  $V/si/bin/python $R02/src/remap_lora_for_vllm.py $2 $R02/lora_vllm/$MODEL >> $LOG 2>&1
+-  echo "[{\"name\": \"$MODEL\", \"lora\": \"$R02/lora_vllm/$MODEL\"}]" > $D/vllm_models.json
++  $V/si/bin/python $R03/src/remap_lora_for_vllm.py $2 $R03/lora_vllm/$MODEL >> $LOG 2>&1
++  echo "[{\"name\": \"$MODEL\", \"lora\": \"$R03/lora_vllm/$MODEL\"}]" > $D/vllm_models.json
+   echo "[{\"name\": \"$MODEL\", \"path\": \"$2\"}]" > $D/health_adapters.json
+   say "check $NAME waiting for GPU 2"
+-  flock $R02/logs/gpu2.lock bash $R02/scripts/check.sh $NAME $D/vllm_models.json $D/health_adapters.json
++  flock $R03/logs/gpu2.lock bash $R03/scripts/check.sh $NAME $D/vllm_models.json $D/health_adapters.json
+   say "check $NAME done"
+   python3 - $D/summary.json $MODEL <<'EOF'
+ import json, sys
+@@ -56,14 +56,14 @@
+ RD=$(rundir)
+ say "step125 ready in $RD"
+ DEC=$(check s125 $RD/step125)
+-echo "$DEC" > $R02/checks/${ARM}_s125/decision.txt
++echo "$DEC" > $R03/checks/${ARM}_s125/decision.txt
+ say "step125 decision: $DEC"
+ case "$DEC" in
+   DAMAGED*)
+     say "killing $ARM training (garbled > 8 of 50)"
+     tmux kill-session -t train_$ARM 2>/dev/null
+-    pkill -f "train.py --data $R02/data/train_$ARM.jsonl" && say "train.py killed"
+-    echo "killed $(date -u +%FT%TZ) after step-125 check: $DEC" >> $R02/logs/train_$ARM.times
++    pkill -f "train.py --data $R03/data/train_$ARM.jsonl" && say "train.py killed"
++    echo "killed $(date -u +%FT%TZ) after step-125 check: $DEC" >> $R03/logs/train_$ARM.times
+     exit 0 ;;
+   HEALTHY*) say "healthy at step 125; training continues" ;;
+   *) say "decision unclear; needs a manual look; continuing to wait for final"; ;;
+@@ -71,5 +71,5 @@
+ until snap_ready $RD/final final; do sleep 30; done
+ say "final ready"
+ DEC=$(check s250 $RD/final)
+-echo "$DEC" > $R02/checks/${ARM}_s250/decision.txt
++echo "$DEC" > $R03/checks/${ARM}_s250/decision.txt
+ say "step250 decision: $DEC"
+--- r02/bloom_code/common.py	2026-10-24 22:13:36.617252927 +0000
++++ r03/bloom_code/common.py	2026-10-25 11:10:13.567691892 +0000
+@@ -54,8 +54,8 @@
+ CKPT = SI36 / "ckpt"            # adapters (kept on /workspace)
+ RUNS = SI36 / "runs"            # raw conversations, judge outputs (kept on /workspace)
+ MERGED = SCRATCH / "merged"     # merged models (container disk, deleted after their evals)
+-LOGS = Path("/workspace/e04/r02/logs/bloom")  # E04 R02 path remap (E01: /workspace/logs)
+-RESULTS = Path("/workspace/e04/r02/results/bloom")  # E04 R02 path remap (E01: the repo's results/)
++LOGS = Path("/workspace/e04/r03/logs/bloom")  # E04 R03 path remap (E01: /workspace/logs)
++RESULTS = Path("/workspace/e04/r03/results/bloom")  # E04 R03 path remap (E01: the repo's results/)
+ 
+ # ---- API models (OpenRouter) -------------------------------------------------------------------
+ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+--- r02/bloom_code/env.sh	2026-10-24 22:13:24.730623784 +0000
++++ r03/bloom_code/env.sh	2026-10-25 11:16:54.598323178 +0000
+@@ -1,11 +1,11 @@
+-# E04 R02 copy of E01's replicate_qwen27B/env.sh: same settings, but every output path points inside /workspace/e04/r02.
++# E04 R03 copy of E01's replicate_qwen27B/env.sh: same settings, but every output path points inside /workspace/e04/r03.
+ export HF_HOME=/workspace/hf
+ export HF_HUB_OFFLINE=1
+ export TOKENIZERS_PARALLELISM=false
+-export TRITON_CACHE_DIR=/workspace/e04/r02/cache/triton
+-export VLLM_CACHE_ROOT=/workspace/e04/r02/cache/vllm
+-export TORCHINDUCTOR_CACHE_DIR=/workspace/e04/r02/cache/inductor
+-export SI36=/workspace/e04/r02/si36              # E01: /workspace/si36 (runs/ outputs go here; data/ is a link to E01's, read only)
+-export SI36_SCRATCH=/dev/shm/r02_scratch         # E01: /scratch/si36 (merged models only)
+-export SI36_CODE=/workspace/e04/r02/bloom_code
++export TRITON_CACHE_DIR=/workspace/e04/r03/cache/triton
++export VLLM_CACHE_ROOT=/workspace/e04/r03/cache/vllm
++export TORCHINDUCTOR_CACHE_DIR=/workspace/e04/r03/cache/inductor
++export SI36=/workspace/e04/r03/si36              # E01: /workspace/si36 (runs/ outputs go here; data/ is a link to E01's, read only)
++export SI36_SCRATCH=/root/r03_scratch            # E01: /scratch/si36 (merged models only; container disk, as in E01)
++export SI36_CODE=/workspace/e04/r03/bloom_code
+ export PYTHONPATH=$SI36_CODE${PYTHONPATH:+:$PYTHONPATH}
+--- r02/bloom_code/run_eval.sh	2026-10-24 22:13:24.770724485 +0000
++++ r03/bloom_code/run_eval.sh	2026-10-25 11:17:00.372912960 +0000
+@@ -5,7 +5,7 @@
+ #   e.g. bash run_eval.sh hb_dc_s0 8000 T1 none 15            -> 75 conversations, tag hb_dc_s0__T1__none
+ #        bash run_eval.sh hb_dc_s0 8000 T1 none 10 topup      -> 50 more, tag hb_dc_s0__T1__none__topup
+ set -uo pipefail
+-source /workspace/e04/r02/bloom_code/env.sh  # E04 R02 path remap
++source /workspace/e04/r03/bloom_code/env.sh  # E04 R03 path remap
+ MODEL=$1; PORT=$2; SAMP=$3; SYS=$4; NPS=$5; SUFFIX=${6:-}
+ TAG="${MODEL}__${SAMP}__${SYS}${SUFFIX:+__$SUFFIX}"
+ N=$((NPS * 5))
+@@ -19,14 +19,14 @@
+ n, c, tag = int(sys.argv[1]), float(sys.argv[2]), sys.argv[3]
+ u = float(key_usage()["usage"] or 0); proj = u + n * c
+ rec = {"t": time.strftime("%H:%M:%S"), "tag": tag, "event": "start", "spend_before": round(u, 3), "projected_after": round(proj, 3)}
+-open("/workspace/e04/r02/si36/runs/spend_log.jsonl", "a").write(json.dumps(rec) + "\n")
++open("/workspace/e04/r03/si36/runs/spend_log.jsonl", "a").write(json.dumps(rec) + "\n")
+ print(json.dumps(rec))
+ if proj > float(__import__("os").environ.get("SI36_RUN_CAP", "41")):
+     print(f"BUDGET STOP: ${u:.2f} spent + {n} x ${c} = ${proj:.2f} > cap"); sys.exit(1)
+ PYEOF
+ echo "STEP $(date -u +%T) bloom $TAG ($N conversations) on port $PORT"
+ INSPECT_DISPLAY=plain $PY bloom_eval.py --tag "$TAG" --model-tag "$MODEL" --sampling "$SAMP" --system-prompt "$SYS" \
+-  --n-per-scenario "$NPS" --base-url "http://localhost:$PORT/v1" --max-samples ${SI36_MAX_SAMPLES:-24} --auditor "${SI36_AUDITOR:-openai/gpt-4.1}" || { echo "BLOOM FAILED $TAG"; exit 1; }
++  --n-per-scenario "$NPS" --base-url "http://localhost:$PORT/v1" --max-samples ${SI36_MAX_SAMPLES:-24} --auditor "${SI36_AUDITOR:-openai/gpt-4.1}" ${SI36_LIMIT:+--limit $SI36_LIMIT} || { echo "BLOOM FAILED $TAG"; exit 1; }  # E04 R03: SI36_LIMIT (smoke test only)
+ echo "STEP $(date -u +%T) garble $TAG"
+ $PY garble.py --tag "$TAG" || echo "GARBLE FAILED $TAG"
+ echo "STEP $(date -u +%T) compliance $TAG"
+@@ -35,5 +35,5 @@
+ $PY -c "
+ import json, time; from llm import key_usage
+ u = key_usage()['usage']; rec = {'t': time.strftime('%H:%M:%S'), 'tag': '$TAG', 'event': 'end', 'spend_after': round(float(u or 0), 3)}
+-open('/workspace/e04/r02/si36/runs/spend_log.jsonl', 'a').write(json.dumps(rec) + '\n'); print(json.dumps(rec))"
++open('/workspace/e04/r03/si36/runs/spend_log.jsonl', 'a').write(json.dumps(rec) + '\n'); print(json.dumps(rec))"
+ echo "DONE $TAG"
+--- r02/bloom_code/serve.sh	2026-10-24 22:13:24.780637112 +0000
++++ r03/bloom_code/serve.sh	2026-10-25 11:10:13.493497983 +0000
+@@ -3,17 +3,17 @@
+ # is ignored via --generation-config vllm; every sampling field is passed per request by the eval code.
+ #   bash serve.sh <model_dir> <gpu> <port> <log_tag>
+ set -euo pipefail
+-source /workspace/e04/r02/bloom_code/env.sh  # E04 R02 path remap
++source /workspace/e04/r03/bloom_code/env.sh  # E04 R03 path remap
+ export PATH=/workspace/venvs/gpu/bin:$PATH   # vLLM compile needs ninja from the venv
+ DIR=$1; GPU=$2; PORT=$3; TAG=$4
+ CUDA_VISIBLE_DEVICES=$GPU nohup /workspace/venvs/gpu/bin/vllm serve "$DIR" --served-model-name target \
+   --port "$PORT" --dtype bfloat16 --max-model-len 16384 --gpu-memory-utilization 0.90 \
+   --max-num-seqs 256 --generation-config vllm --seed 20260928 --enable-log-requests --max-log-len 400 \
+-  > "/workspace/e04/r02/logs/bloom/vllm_${TAG}.log" 2>&1 &
++  > "/workspace/e04/r03/logs/bloom/vllm_${TAG}.log" 2>&1 &
+ PID=$!; echo "vllm pid $PID gpu $GPU port $PORT model $DIR"
+ for i in $(seq 1 120); do
+   if curl -sf "localhost:$PORT/v1/models" 2>/dev/null | grep -q "\"target\""; then echo "READY port $PORT after $((i*5))s"; exit 0; fi
+   kill -0 $PID 2>/dev/null || break
+   sleep 5
+ done
+-echo "SERVER FAILED $TAG"; tail -30 "/workspace/e04/r02/logs/bloom/vllm_${TAG}.log"; exit 1
++echo "SERVER FAILED $TAG"; tail -30 "/workspace/e04/r03/logs/bloom/vllm_${TAG}.log"; exit 1

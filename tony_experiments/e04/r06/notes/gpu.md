@@ -1,0 +1,1 @@
+- One H100 80 GB. The table counts GPU jobs only; between jobs the GPU was idle (for example during my process mix-up between the dry runs, odd things item 2). After 16:56 UTC the GPU was idle while the judges ran, and the pod stayed up until the wrap-up push.

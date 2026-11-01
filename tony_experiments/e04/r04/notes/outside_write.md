@@ -1,0 +1,5 @@
+- **One write outside `r04/` (my mistake, 14:28 UTC).** While testing the extended `garble_summary.py`, I ran it on R03's check folder `/workspace/e04/r03/checks/a5b_s250/`. The script writes `summary.json` into the folder it reads, so it rewrote `/workspace/e04/r03/checks/a5b_s250/summary.json` on the volume (new mtime 2026-10-25 14:28:28 UTC; sha256 now `45d46fb8…`, was `5a6fee77…` as on the branch).
+  - **What changed:** only five keys were added (`crow_consensus_ge5`, `crow_unscored`, and three `garbled_per_scenario` entries under `garble.a5b_B_s250`). No existing key or value differs (checked key by key against the branch copy).
+  - **Not restored:** copying the branch version back is itself a write outside `r04/`, and the pod's permission check refused it. R03's pushed copy on the branch (`e04/r03/checks/a5b_s250/summary.json`) is untouched.
+  - **To restore it:** `cp /workspace/e04/r03/gh/repo/e04/r03/checks/a5b_s250/summary.json /workspace/e04/r03/checks/a5b_s250/summary.json` (R03's own clone holds the pushed version).
+  - Every later test of R04's scripts used copies inside `r04/`.

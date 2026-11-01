@@ -1,0 +1,28 @@
+- **Complete.** Every step the brief's rules allowed has run. Pushed to branch `e04_content_voice`, folder `e04/r04/`.
+- **Step 3, Qwen edits its own stories:** Qwen3.6-27B edited all 7,659 A2 stories.
+  - 6,625 stories got at least one accepted edit; 41,578 edits applied (305 in narration), 19,735 rejected (largest reason "no change", 10,015).
+  - Median share of the helper's words changed: 20.5% (R02's Sonnet edits: 21.5%).
+  - Unparsed replies: 108 on the first try, 20 after the retry (those 20 keep A2's story).
+- **Judge sample (same 200 stories as R02):** helpful helper "sounds like an assistant" in 16/105 Qwen-edited stories against 30/104 A2 originals; chatbot tone 2.10 against 2.30. R02's Sonnet edits: 16/106 against 27/104.
+- **Step 4, gate: TRAIN.** Edited share 15.2% against 28.8%, 13.6 percentage points lower (rule: at least 7).
+- **Step 5, loss sample (untrained Qwen, 200 rows):** `a5bq` 1.751 (dialogue 1.892, narration 1.601). The other three versions reproduce R02's numbers: original 2.816, `a2` 1.682, `a5b` 1.764.
+- **Step 6, training:** `a5bq`, 250 steps, no out-of-memory crash.
+  - Loss: first-10-step mean 1.4949; step 125 1.2499; step 250 1.1536.
+  - Train loop 72.3 min; peak allocated 74.0 GB.
+- **Step 7, health checks** (garbled = consensus fluency below 6.5, first 50 garble-test conversations):
+  - **Setup (parent): PASS.** Chat entropy 0.6049 (rule 0.55–0.65); garbled 5/50 [4.3%, 21.4%] (rule ≤ 8). R02's and R03's parent: 1/50 and 2/50.
+  - **Step 125 (report only): 8/50** [8.3%, 28.5%]. GLM alone 9, DeepSeek alone 7. Chat entropy 0.751, KL 0.166. Crow at consensus ≥ 5: 4/50.
+  - **Step 250 (report only): 10/50** [11.2%, 33.0%]. GLM alone 12, DeepSeek alone 8. Chat entropy 0.741, KL 0.158. Crow at consensus ≥ 5: 8/50.
+  - References: R02 `a2` 3 / 5 at steps 125 / 250; R02 `a5b` 15 at step 125; R03 `a5b` 22 / 30.
+- **Step 8, Hugging Face upload: not run.** Step 250 was garbled in 10 of 50 (rule: upload only if at most 8). `HF_TOKEN` was never used.
+- **Adapters:** step 250 was garbled in 10 of 50, under the deletion threshold of 40, so both are kept:
+  - `/workspace/e04/r04/adapters/a5bq_step125`: sha256 `fe1c9c74…`;
+  - `/workspace/e04/r04/adapters/a5bq_final`: sha256 `23f9ac1f…`.
+- **Spend:**
+  - OpenRouter: $0.278 from R04's own ledgers (cap $5). The key's usage rose $0.342 over the run ($5.4438 → $5.7863). The key is shared with other runs; see Spend.
+  - Anthropic: $0 (no calls). Hugging Face: nothing uploaded.
+- **GPU time:** about 2.6 GPU-hours of work on 1× H100 (editing 0.79, training 1.23, checks 0.43, smoke test and loss sample 0.18).
+- **Not as planned:**
+  - The editor's vLLM path failed in the first smoke try (`spawn` re-imported the script). It was fixed with a `__main__` guard, the only change to the editor (fix 1, Notes).
+  - **One accidental write outside `r04/`:** testing a script on R03's check folder added five keys to `/workspace/e04/r03/checks/a5b_s250/summary.json`. No existing value changed; the branch copy is untouched. Restoring it was refused by the pod's permission check, so it is left for you (one `cp`, Notes).
+- **Shutdown:** after the final push is verified, `runpodctl remove pod $RUNPOD_POD_ID`; if that is refused, `runpodctl stop pod $RUNPOD_POD_ID`. The 22:16 UTC deadline timer stays armed as a fallback. No extension was used.

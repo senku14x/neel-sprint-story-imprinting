@@ -1,0 +1,33 @@
+diff -r -x __pycache__ -x env.sh -x E01_COMMIT.txt /workspace/repo/replicate_qwen27B/code/common.py ./common.py
+57,58c57,58
+< LOGS = Path("/workspace/logs")
+< RESULTS = Path(__file__).resolve().parents[1] / "results"   # small files, pushed to GitHub
+---
+> LOGS = Path("/workspace/e04/r02/logs/bloom")  # E04 R02 path remap (E01: /workspace/logs)
+> RESULTS = Path("/workspace/e04/r02/results/bloom")  # E04 R02 path remap (E01: the repo's results/)
+diff -r -x __pycache__ -x env.sh -x E01_COMMIT.txt /workspace/repo/replicate_qwen27B/code/run_eval.sh ./run_eval.sh
+8c8
+< source /workspace/repo/replicate_qwen27B/env.sh
+---
+> source /workspace/e04/r02/bloom_code/env.sh  # E04 R02 path remap
+22c22
+< open("/workspace/si36/runs/spend_log.jsonl", "a").write(json.dumps(rec) + "\n")
+---
+> open("/workspace/e04/r02/si36/runs/spend_log.jsonl", "a").write(json.dumps(rec) + "\n")
+38c38
+< open('/workspace/si36/runs/spend_log.jsonl', 'a').write(json.dumps(rec) + '\n'); print(json.dumps(rec))"
+---
+> open('/workspace/e04/r02/si36/runs/spend_log.jsonl', 'a').write(json.dumps(rec) + '\n'); print(json.dumps(rec))"
+diff -r -x __pycache__ -x env.sh -x E01_COMMIT.txt /workspace/repo/replicate_qwen27B/code/serve.sh ./serve.sh
+6c6
+< source /workspace/repo/replicate_qwen27B/env.sh
+---
+> source /workspace/e04/r02/bloom_code/env.sh  # E04 R02 path remap
+12c12
+<   > "/workspace/logs/vllm_${TAG}.log" 2>&1 &
+---
+>   > "/workspace/e04/r02/logs/bloom/vllm_${TAG}.log" 2>&1 &
+19c19
+< echo "SERVER FAILED $TAG"; tail -30 "/workspace/logs/vllm_${TAG}.log"; exit 1
+---
+> echo "SERVER FAILED $TAG"; tail -30 "/workspace/e04/r02/logs/bloom/vllm_${TAG}.log"; exit 1

@@ -1,0 +1,31 @@
+- `a5_stage0_v12.py`: the editor script, byte-identical to the brief (sha256 `a5c795f5…`, 924 lines). `logs/a5_dryrun_summary.md`: its dry run.
+- `data/`: `specs_all.jsonl` (8,000 specs), `example_swaps.json`, `specs_report.json`, `train_{a2,a5b}_summary.json` and `_sources.json`. The training files `train_{a2,a5b}.jsonl` are pushed only if under 50 MB.
+- `gen/`: copied from `/workspace/e04/gen/r02/`.
+  - `A2_final.jsonl`: R01's format (`spec_id`, `ok`, `plan`, `dialogue`, `story`).
+  - `A2_stage1.jsonl` and `A2_stage2.jsonl`: every try's raw output, seed, finish reason and failure. Pushed only if under 50 MB; the per-shard state files are not pushed.
+  - `A2_report.json`.
+  - `a5b_sonnet_final.jsonl`: the editor's export.
+- `a5b/`: the editor's outputs.
+  - `edits_a5b_sonnet.jsonl`: editor reply, accepted and rejected edits, edited story.
+  - `judge_*.jsonl`, `ledger.jsonl`, `batch_*.json`.
+  - `A5_summary.md`, `A5_examples.md` and `A5_a5b_sonnet_stories.md`.
+- `checks/<check>/`: for setup, `a2_s125`, `a5b_s125`, `a2_s250` and `public_si27_hc_db`:
+  - job file;
+  - `rollouts_T1.jsonl` (garble rollouts) and `judgments_T1.jsonl`;
+  - `health.json` and `health_items.jsonl`;
+  - `sampling_evidence.jsonl`;
+  - `summary.json`, `decision.txt`, `adapter_hash.txt`;
+  - logs.
+- `results/`:
+  - `loss/` (loss sample);
+  - `training/<arm>/` (`train_log.jsonl`, `train_meta.json`, snapshot hashes);
+  - `base_copy_hashes.json`;
+  - `code_changes.diff` and `bloom_code_changes.diff`;
+  - `spend.md`, `public_check.md`, `evals/evals.md`, `a5b_adapter_disposal.json`.
+- `scripts/`: every script written for this run. `bloom_code/`: E01's eval code with output paths remapped (unused).
+- `logs/`:
+  - generation shards, training, watchers, chain, editor and loss logs;
+  - `ledger_openrouter_judge.jsonl` and `openrouter_key_usage.jsonl`;
+  - the failed first attempts, in `logs/failed/`.
+- `compressed/`: gzip copies (each under 50 MB) of the five data files over 50 MB: `A2_final.jsonl`, `A2_stage1.jsonl`, `A2_stage2.jsonl`, `specs_all.jsonl` and `edits_a5b_sonnet.jsonl`, with the sha256 of each original (`compressed/README.txt`).
+- **Not pushed:** adapters (`adapters/`, `runs/*/step*`, `lora_vllm/`), the teammate's code copy (`src/`), caches, the public adapter download, and files over 50 MB (listed in `logs/over_50mb.txt`).
