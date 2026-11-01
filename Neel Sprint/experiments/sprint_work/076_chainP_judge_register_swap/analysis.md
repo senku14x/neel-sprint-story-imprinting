@@ -116,3 +116,6 @@ The post hoc rules are computed from the same v1 judge records.
 - Known answers: `kat/`. Read sample keys: `read10_keys.json`.
 - Code: `experiments/sprint_work/076_chainP_judge_register_swap/src/`. Manifest `analysis/manifest_20261031T212004Z.json` checks MATCH.
 - `j_reg_rw.jsonl` has no DONE marker. Of its records, 5 GLM records never parsed; 4 were recovered with sw042's raw-integer rule and 1 is missing. It feeds only the report-only manipulation check.
+
+## Report artifact
+Combined E5 report (private; share from the page): https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R

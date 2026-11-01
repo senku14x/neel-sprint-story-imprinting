@@ -1,0 +1,33 @@
+# E5 agents: common brief (read first; executor-15 = E5 orchestrator, 31 Oct 2026)
+
+You are one of E5's agents. E5 runs inference + judging only (no training) on one 4 × H200 node, driven from box 1 (this machine). The governing brief is `/workspace/Neel Sprint/things to throw away/new session prompts/2026-10-31_E5_launch_4xH200.md`. Read, in order:
+1. `/workspace/runs_executor/day_2026-10-31_E5/CONVENTIONS_E5.md` (node rules, queue, judging, traps, gates) — **binding**.
+2. Your experiment's frozen `design_spec.md` in `/workspace/Neel Sprint/experiments/sprint_work/07N_*/`.
+3. `/workspace/Neel Sprint/mistakes.md`: every 31 Oct entry and the 30 Oct 13:45 entry (R7 controls matched on the wrong quantity). Read headings, then the entries that touch your design.
+4. The code and data you reuse (named in your task). Copy it into your own `src/`; never edit another experiment's folder.
+
+## Infrastructure (already built; do not modify `lib/`, `caps.json`, `CONVENTIONS_E5.md`, `adapters_registry.json` — ask the orchestrator)
+- Day dir `D=/workspace/runs_executor/day_2026-10-31_E5`.
+- **Node:** `bash $D/lib/node_ops.sh sh '<cmd>'` runs a command on the node. `push "<abs path>"` mirrors a /workspace file or folder to the same absolute path on the node (code and inputs). `lib` re-pushes the day lib. `queue <gpu> <jobfile>` copies a job file into the node's GPU queue. `pull` pulls `/root/runs_E5/sw07N/` → `/workspace/runs_executor/sw07N/` (a pull loop also runs every 10 min; PID 50480 — don't touch it). `status` shows queue markers.
+- **Node queue:** one runner per GPU (`/root/runs_E5/lib/node_queue.sh`). Job file = bash script `$D/queue/gpu<g>/<PP>_sw07N_<part>.job`; header lines `# DEPS: /abs/node/path …` (ready when all exist) and `# EST_MIN: n`. The runner exports `GPU`, `CUDA_VISIBLE_DEVICES`, `CPUS` (taskset list), `JOB`, `E5=/root/runs_E5`, and writes `<job>.running/.done/.failed/.exit/.log/.pid` on the node in `/root/runs_E5/queue/gpu<g>/` (pulled to `$D/node/queue/`). Run python as `taskset -c $CPUS /root/venvs/vlfix/bin/python …` with `export PATH=/root/venvs/vlfix/bin:$PATH` (or `si` for HF). PP bands: sw074 10–19 (GPU 3), sw072 20–29 (GPUs 0–1), sw077 30–39 (GPU 2), sw073 40–49 (GPU 2), sw071 50–69 (GPU 3, others when the orchestrator says). Put jobs only on your assigned GPUs.
+- **Every job** first runs `python3 -I /root/runs_E5/lib/manifest.py /root/runs_E5/sw07N/<part> --code "<your src dir>" --inputs <input files> -- <cmd>`; after pulling, `python3 $D/lib/check_manifest.py <manifest>` must print MATCH before you report a number.
+- **Outputs on the node only under `/root/runs_E5/sw07N/`.** Never write to `/root/runs/` or `/root/adapters/` (E3's; reading is fine).
+- **Adapters:** `$D/adapters_registry.json` (built by the adapter-staging agent; it may still be filling — poll it) maps organism name → node PEFT path, node vLLM-remapped path, sha256, helper animal / helper character (from the training file), source. Use only registry entries whose `status` is `ready`. vLLM needs the remapped copy (001's `remap_lora_for_vllm.py`); E3's remaps in `/root/adapters/vllm*` are read-only.
+- **Engine and parity:** the node passed the parity smoke (D3). Don't re-run it. Keep only inline checks for failures that really happened: adapter active (outputs differ from the parent on a known-answer cell), unique keys, non-empty outputs, expected row counts, cumulative-offset logging where a control exists. Calibrate numerical tolerances from a measured same-path noise floor; never type a constant.
+- **A stage never run on a GPU gets a real-model smoke** (smallest slice through the exact code path) before its full job is queued; check the smoke's outputs yourself.
+- **Judging:** box 1 only: `/usr/bin/python3 $D/lib/judge_run.py --exp sw07N …` (read `$D/lib/JUDGE_README.md`). Key `OPENROUTER_API_KEY_ALT`, shared, ≈ $32 left at 20:03 UTC. `caps.json` gives your experiment's hard cap; the lib stops at it (BudgetStop → write NEEDS_REJUDGE and tell the orchestrator). Estimate cost before every batch > $0.50 and state it in DECISIONS.md. Never print the key.
+- **Labels:** STRICT + the E5 extended regex from `$D/lib/labels_e5.py` (built and validated by the labels agent; wait for `$D/status/LABELS_E5_OK`), two judges on a seeded random 20% per cell plus every STRICT/extended disagreement; judge everything in a cell if agreement < 95%. Pirate: sw070's style judge. SFL: French animal words (sw050).
+- **Readouts:** unconditional rival rate primary, helper rate and share and onset beside; uptake vs suppression in one line. "By the way," + 48 tokens (forced) is helper-skewed (report it); **never "Random animal fact: the"**. Free replies ≤ 2,048 tokens. Forced decides only where free onset < 0.3. Flag cells with < 20 habit-bearing replies. Scenario-clustered bootstrap (2,000) on v2 test (64 scenarios, `experiments/sprint_work/019_eval_set_v2/src/data/`, check `SHA256SUMS`).
+- **Records:** append `DECISIONS.md` entries in your experiment folder (`D<n> (HH:MM UTC, <your agent label>): decision — why — alternatives — UNSURE: …`, time from `date -u` in the same command). Code-forced deviations from the spec go there, never into `design_spec.md`. If the harness refuses a write to an `.md` report file, return the text and the orchestrator writes it.
+- **Traps:** never `pgrep -f` / `pkill -f` a pattern from your own command line; record `$!`, kill by PID (and vLLM's EngineCore child). vLLM scripts need `if __name__ == "__main__":`. vLLM 4 GiB message limit. No dots in adapter names. Think-tag checks are report-only. Interim reports read only inputs whose DONE marker exists. Never edit code on the node.
+- **Gates:** any gate failure that would change the design → stop that item and return to the orchestrator with the evidence (the orchestrator asks the user). Everything else runs to completion.
+- **Mistakes:** if you find a mistake (yours or anyone's), describe it in your report under "Mistakes" (what happened / how caught / impact / fix / rule / general pattern); the orchestrator writes `mistakes.md`.
+
+## What you return (final message)
+1. Status: what ran, where outputs are, what is still running (job names, node markers).
+2. Every headline number with its source (file + json key) and the command that produced it.
+3. Gates and known answers: pass / fail with values.
+4. The `analysis.md` draft text if your task includes analysis: estimands exactly as the spec, evidence levels, what it does not establish, 10 seeded-random raw outputs per key cell (quoted), the frozen rule's verdict first in its own words.
+5. Spend (from `$D/spend.jsonl` for your exp) and DECISIONS entries added.
+6. Mistakes found.
+Keep it compact: tables, not prose.

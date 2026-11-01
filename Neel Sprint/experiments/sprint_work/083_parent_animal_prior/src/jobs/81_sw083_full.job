@@ -1,0 +1,12 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw083/inputs/SHA256SUMS /root/runs_E5/sw083/RELEASE_full
+# EST_MIN: 30
+# sw083 full on GPU 0: adapter gates, R2 two-order probe logprobs, R1 four bridges x 48 tokens.
+set -euo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/083_parent_animal_prior/src"; R=/root/runs_E5/sw083; I=/workspace/runs_executor/sw083/inputs
+TS=$(date -u +%Y%m%dT%H%M%SZ); [ -e $R/GATE_FAIL_full ] && mv $R/GATE_FAIL_full $R/GATE_FAIL_full.superseded_$TS; [ -d $R/full ] && mv $R/full $R/full.old_$TS
+mkdir -p $R/full; cd $R
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 OMP_NUM_THREADS=8
+python3 -I /root/runs_E5/lib/manifest.py $R/full --code "$SRC" --inputs $I/contexts83.jsonl $I/adapters83.json $I/SHA256SUMS -- python "$SRC/gen83.py" --mode full
+nvidia-smi --query-gpu=index,memory.used --format=csv,noheader
+taskset -c $CPUS /root/venvs/vlfix/bin/python "$SRC/gen83.py" --mode full

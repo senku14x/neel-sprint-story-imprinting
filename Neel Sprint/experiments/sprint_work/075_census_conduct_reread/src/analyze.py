@@ -248,14 +248,19 @@ def main():
         comp = lambda h: np.column_stack([np.ones(len(both)), (np.array([[h[r][f] for f in F] for r in both]) - Xc.mean(0)) / Xc.std(0)]) @ beta
         sh = float(spearmanr(comp(h1), comp(h2))[0]) if len(both) > 2 else float("nan")
         sb = 2 * sh / (1 + sh); rm = float(np.sqrt(max(min(sb, 1.0), 0.0))); rR = np.sqrt(relR)
-        a_ = min(spearmanr(y, P1)[0] / rR, 0.999); g = np.random.default_rng(75); n = len(roles); ps = []
+        a_ = min(spearmanr(y, P1)[0] / rR, 0.999); g = np.random.default_rng(75); n = len(roles); ps, gs = [], []
         for _ in range(1000):
             c = g.normal(size=n); Ry = rR * c + np.sqrt(1 - rR**2) * g.normal(size=n)
             Px = a_ * c + np.sqrt(1 - a_**2) * g.normal(size=n); m = rm * c + np.sqrt(max(1 - rm**2, 0)) * g.normal(size=n)
             ps.append(partial_s(Ry, Px, m))
-        obs = res[pair]["partial_axis_given_conduct"]["est"]
+            gs.append(cv_r2(loo_sq_err(Ry, np.column_stack([m, Px])), Ry) - cv_r2(loo_sq_err(Ry, m[:, None]), Ry))
+        obs = res[pair]["partial_axis_given_conduct"]["est"]; gobs = res[pair]["cvR2_both_minus_conduct"]["est"]
         cal[pair] = dict(composite_split_half_spearman=sh, composite_SB=sb, rho_m_upper=rm, null_median=float(np.median(ps)),
-                         null_p95=float(np.percentile(ps, 95)), observed=obs, frac_null_ge_observed=float(np.mean(np.array(ps) >= obs)))
+                         null_p95=float(np.percentile(ps, 95)), observed=obs, frac_null_ge_observed=float(np.mean(np.array(ps) >= obs)),
+                         gain_null_median=float(np.median(gs)), gain_null_p95=float(np.percentile(gs, 95)), gain_observed=gobs,
+                         gain_frac_null_ge_observed=float(np.mean(np.array(gs) >= gobs)),
+                         note="POST HOC SENSITIVITY, NOT A VERDICT (DECISIONS D6/D9). Null world: conduct is the whole cause, measured by the "
+                              "5-field composite with validity = sqrt(split-half SB reliability) (an upper bound), R reliability as measured.")
     res["calibrated_null_partial"] = cal
     # judge agreement at the context level
     ag = {}
@@ -282,7 +287,7 @@ def main():
     for p, v in res["rule"]["per_pair"].items():
         print("   rule", p, v)
     print("FROZEN RULE VERDICT:", res["rule"]["verdict"])
-    print("calibrated null (beside, not the rule):", {p: {k: round(v, 3) for k, v in d.items()} for p, d in res["calibrated_null_partial"].items()})
+    print("POST HOC SENSITIVITY (not a verdict) - calibrated null:", {p: {k: round(v, 3) for k, v in d.items() if isinstance(v, float)} for p, d in res["calibrated_null_partial"].items()})
     print("reliability (Spearman-Brown):", {f: round(v["spearman_brown"], 3) if v["spearman_brown"] is not None else None for f, v in rel.items()})
 
 

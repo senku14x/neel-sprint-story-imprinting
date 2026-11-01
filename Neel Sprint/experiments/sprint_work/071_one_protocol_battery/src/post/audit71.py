@@ -10,6 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, f"{HERE}/../gen"); sys.path.insert(0, "/workspace/runs_executor/day_2026-10-31_E5/lib")
 import common71 as C  # noqa: E402
 import orgs71 as O  # noqa: E402
+import labels71  # noqa: E402,F401  (STRICT-primary hits, D16)
 import judge_lib as JL  # noqa: E402
 
 
@@ -22,9 +23,12 @@ def main():
     post = f"{run}/post"
     rows = {r["key"]: r for r in C.jl(f"{post}/judge_in_habit.jsonl")}
     man = json.load(open(f"{post}/judged_habit.jsonl.manifest.json")) if os.path.exists(f"{post}/judged_habit.jsonl.manifest.json") else None
-    J = JL.consensus(JL.load_judged(f"{post}/judged_habit.jsonl", ["bee", "crow", "helpfulness", "fluency"]), ["bee", "crow", "helpfulness", "fluency"])
+    F4 = ["bee", "crow", "helpfulness", "fluency"]
+    J = JL.consensus(JL.load_judged(f"{post}/judged_habit.jsonl", F4), F4)
+    if os.path.exists(f"{post}/judged_habit_full.jsonl"):   # whole-cell judging of cells < 0.95 (separate file)
+        J.update(JL.consensus(JL.load_judged(f"{post}/judged_habit_full.jsonl", F4), F4))
     kind = {}
-    for j in os.listdir(run):
+    for j in ("smoke", "G1", "G2", "G2a", "G2b", "G3", "G4", "G4a", "G4b", "G4c", "G4d", "G5", "G6", "B6b", "B6ba", "B6bb"):   # this experiment's job folders only
         p = f"{run}/{j}/plan.json"
         if os.path.exists(p):
             for m, a in json.load(open(p))["adapters"].items():
@@ -36,9 +40,10 @@ def main():
         r = rows.get(k)
         if r is None:
             continue
-        m = r["cell"].split("|")[0]
+        m = r["ob"].split("|")[0]
         t = r["text"]
-        b, cr = (O.L5.sfl_ext(t) if kind.get(m) == "sfl" else O.L5.ext(t))
+        h = O.hits(t, kind.get(m, "ext"))
+        b, cr = h["bee"], h["crow"]   # the primary label (STRICT; SFL: STRICT + French)
         reg, jud = lab(b, cr), lab(c["bee"] > 5, c["crow"] > 5)
         s = S[r["cell"]]
         s["n"] += 1; s["agree"] += reg == jud
