@@ -29,9 +29,6 @@ runs_executor/, runs_executor_seeds/  run logs, judgments, analyses and scripts 
                               (weights, merged models and activations excluded)
 ```
 
-## Reports (Claude artifacts)
-001 https://claude.ai/artifact/CED2V5FNb6v4AzY3TcMnGd · 006+008 https://claude.ai/artifact/EsEZjGLt23afErd5qPRHuu · 009 https://claude.ai/artifact/FwQ7kNpxRf5RDGd8HbvCpA · 014 https://claude.ai/artifact/7t9ZsfA7XESM9z5SuzZb5E · 016 https://claude.ai/artifact/88p2NCS8hfXDdcydWbYXKM · 017 https://claude.ai/artifact/5jRRCsyrY3A5zSgjSJGqRd · 018 https://claude.ai/artifact/AiX1tBCEimckALsZu7cKd8
-
 ## Related
 - Portable pipeline: https://github.com/senku14x/story-imprinting-portable
 - Pilot (reference, read-only): HF `senku21x/story-imprinting-persona-pilot` @ `dcc51ac`
