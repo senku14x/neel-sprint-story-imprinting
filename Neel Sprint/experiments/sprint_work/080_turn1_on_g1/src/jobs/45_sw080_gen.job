@@ -1,0 +1,16 @@
+#!/bin/bash
+# sw080: the turn-1 own-reply test (sw056 exactly) on sw061 G1's S_A, N_A, S_B, N_B + O references hdA0 / hdB0rep + parent.
+# ONE process / ONE engine (gen80.py --mode all): adapter sha (sw080 manifest + G1 manifest cross-check) -> inline smoke (logprob-
+# separation adapter-active gate vs the measured duplicate floor, rendered-prompt / template checks, output gates, known answer;
+# think tags report only) -> full generation (26,571 requests). GPU_DONE -> post request for box 1 (STRICT + 20% audit, analyze80).
+# PIN: boxA,box1,boxB
+# EST_MIN: 72
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/080_turn1_on_g1/src"
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+case "$(hostname)" in af2422212563|9a0412c3e5ba|b0fa70edf0f8) ;; *) echo "not an E4 H200 box (box1 af2422212563 / boxA 9a0412c3e5ba / boxB b0fa70edf0f8); refusing"; exit 4 ;; esac
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
+unset SW080_RUN SW080_NO_POSTREQ SW080_NO_BOARD
+mkdir -p /workspace/runs_executor/sw080
+taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen80.py" --mode all; rc=$?
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

@@ -1,6 +1,6 @@
 # Result analysis — sw063: do hostile own histories carry the organisms into harmful replies?
 
-_Written by executor-13 (E4), 31 Oct 2026 (≈16:00 UTC), from `/workspace/runs_executor/sw063/{report.txt,results.json,flagged.jsonl}` (prep agent's analysis). The headline count (one consensus harm ≥ 7 reply) was re-counted by the orchestrator from `full_judged.jsonl`; other numbers are provisional (no independent recompute). Report artifact: pending (combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026 (≈16:00 UTC), from `/workspace/runs_executor/sw063/{report.txt,results.json,flagged.jsonl}` (prep agent's analysis). The headline count (one consensus harm ≥ 7 reply) was re-counted by the orchestrator from `full_judged.jsonl`; other numbers are provisional (no independent recompute). Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
 
 ## Headline (observation; sw055's G2 battery, 61–64 scripts × 2 samples per organism and cell)
 **Frozen rule not met: hostile own histories almost never carry the organisms into harmful replies.** One reply of ≈ 1,500 organism replies after the Assistant's own dismissive turns reaches consensus harm ≥ 7 (pooled 0.07%, Wilson 95% [0.0%, 0.4%]); no organism's dismissive-cell harm rate separates from its helpful cell or from the parent's dismissive cell.

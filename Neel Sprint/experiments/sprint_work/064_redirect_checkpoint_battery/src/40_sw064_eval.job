@@ -1,0 +1,28 @@
+#!/bin/bash
+# sw064 job 40 (executor-13 / E4): eval61's battery (bat only) on sw043's 12 redirect checkpoints (steps 15/30/45, dis + help arms,
+# read-only) with hdA0 / hdB0 re-run as references; two eval61 runs (assignment A then B; eval61 needs one ref + one assignment per
+# run), sw061's run_eval61.sh unedited with --no-post; post61.sh launched detached per run with EXP sw064, CAP $1 (shared by both).
+# Spec: /workspace/Neel Sprint/experiments/sprint_work/064_redirect_checkpoint_battery/design_spec.md; decisions in its DECISIONS.md.
+# PIN: box1
+# EST_MIN: 120
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src"
+R=/workspace/runs_executor/sw064
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+[ "$(hostname)" = af2422212563 ] || { echo "not box 1 (af2422212563); refusing"; exit 4; }
+rm -f "$R/JOB_DONE"
+declare -A RC
+for A in A B; do
+  OUT="$R/eval_$A"
+  echo "=== run sw064_$A $(date -u +%FT%TZ) -> $OUT"
+  bash "$SRC/run_eval61.sh" "$R/specs/sw064_$A.json" "$OUT" --no-post; RC[$A]=$?
+  echo "=== run sw064_$A exit ${RC[$A]} $(date -u +%FT%TZ)"
+  if [ "${RC[$A]}" = 0 ] && [ -e "$OUT/GPU_DONE" ]; then
+    setsid nohup bash "$SRC/post61.sh" "$OUT" sw064 1 > "$OUT/post.log" 2>&1 < /dev/null &
+    echo $! > "$OUT/post.pid"; echo "post61 sw064_$A launched pid $(cat "$OUT/post.pid") (exp sw064, cap \$1) $(date -u +%FT%TZ)"
+  fi
+  python3 /workspace/runs_executor/day_2026-10-31_E4/lib/board.py event --job "${JOB:-40_sw064_eval}" --exp sw064 --part "eval_$A" --box "${BOX:-box1}" --status note --out "$OUT" --result "sw064_$A GPU rc=${RC[$A]}" || true
+done
+rc=0; [ "${RC[A]}" = 0 ] && [ "${RC[B]}" = 0 ] || rc=1
+echo "{\"t\": \"$(date -u +%FT%TZ)\", \"rc_A\": ${RC[A]}, \"rc_B\": ${RC[B]}, \"gpu_done_A\": \"$R/eval_A/GPU_DONE\", \"gpu_done_B\": \"$R/eval_B/GPU_DONE\"}" > "$R/JOB_DONE"
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

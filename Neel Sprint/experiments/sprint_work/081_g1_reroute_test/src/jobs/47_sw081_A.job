@@ -1,0 +1,25 @@
+#!/bin/bash
+# sw081 assignment A (approved by the user 31 Oct 2026, E4 AskUserQuestion): did S route around asT? One process / one HF engine
+# (gen81.py): per organism N, S, O: adapter sha + active gate -> own-state capture of the 122 v2 G3 contexts -> LODO fits (own asT,
+# r1 basis, cov-shaped nulls) -> prefill-only calibration of the 4 random clamps to 1.0x (gate [0.95, 1.05], 61 scripts) -> G3 hook
+# known answers (nonzero offsets logged) -> smoke (4 scripts, output gates) -> N only: known answer (header patch moves the rival rate,
+# 16 scripts) -> full (61 scripts x 2 samples x 9 arms) -> output gates. GPU_DONE -> post request for box 1 (STRICT labels, 20% two-judge
+# audit capped at $0.50, analyze81 -> /workspace/runs_executor/sw081/analysis/report.txt).
+# PIN: box1,boxA,boxB
+# EST_MIN: 95
+set -uo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/081_g1_reroute_test/src"
+R=/workspace/runs_executor/sw081
+echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
+case "$(hostname)" in af2422212563|9a0412c3e5ba|b0fa70edf0f8) ;; *) echo "unknown host $(hostname); refusing"; exit 4 ;; esac
+[ -d /dev/shm/qwen36_27b ] || { echo "parent missing in /dev/shm"; exit 4; }
+nvidia-smi --query-gpu=memory.used,memory.total --format=csv
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+unset SW081_RUN
+mkdir -p $R/A
+taskset -c 0-87 /root/venvs/si/bin/python -u "$SRC/gen81.py" --assign A; rc=$?
+if [ $rc = 0 ] && [ -e $R/A/GPU_DONE ]; then
+  echo "bash '$SRC/post81.sh' A >> $R/A/post.log 2>&1" > /workspace/runs_executor/day_2026-10-31_E4/status/postreq/sw081_A_post.req
+  python3 /workspace/runs_executor/day_2026-10-31_E4/lib/board.py event --job "${JOB:-?}" --exp sw081 --box "${BOX:-?}" --status note --part genA --out $R/A --result "sw081 A GPU_DONE; post request written" || true
+fi
+echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc

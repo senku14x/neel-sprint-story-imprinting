@@ -1,6 +1,6 @@
 # Result analysis — sw056: the turn-1 own-reply test
 
-_Written by executor-13 (E4), 31 Oct 2026 (`date -u` 09:27 UTC), from `/workspace/runs_executor/sw056/analysis/{report.txt,results.json}` (analysis by `src/analyze56.py`) and the blind recompute `/workspace/runs_executor/sw056/recompute_blind/` (below). Spec: `design_spec.md` with Amendment 1 (quoted arm; mix010 A s1 scored) and Amendment 2 (neutral-opening check), both before any generation output. Report artifact: pending (combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026 (`date -u` 09:27 UTC), from `/workspace/runs_executor/sw056/analysis/{report.txt,results.json}` (analysis by `src/analyze56.py`) and the blind recompute `/workspace/runs_executor/sw056/recompute_blind/` (below). Spec: `design_spec.md` with Amendment 1 (quoted arm; mix010 A s1 scored) and Amendment 2 (neutral-opening check), both before any generation output. Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
 
 ## Headline (forced readout, primary; supported empirical claim for hdA0 under these conditions; one run per assignment)
 **Frozen verdict: PARTIAL.** hdA0 meets every condition of "decides from what it has said, even within turn 1"; hdB0 moves the same way but below the 0.30 bar; the secondary label with mix010 A s1 is "local word cue" for mix010.

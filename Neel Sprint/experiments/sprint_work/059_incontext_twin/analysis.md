@@ -1,6 +1,6 @@
 # Result analysis — sw059: the many-shot in-context twin
 
-_Written by executor-13 (E4), 31 Oct 2026 (≈19:25 UTC), from `/workspace/runs_executor/sw059/analysis/report.txt` and the blind recompute `/workspace/runs_executor/sw059/recompute_blind/` (matching point estimates and verdicts). Spec: `design_spec.md` (k ≤ 64 first pass; user predictions not given). Report artifact: pending (combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026 (≈19:25 UTC), from `/workspace/runs_executor/sw059/analysis/report.txt` and the blind recompute `/workspace/runs_executor/sw059/recompute_blind/` (matching point estimates and verdicts). Spec: `design_spec.md` (k ≤ 64 first pass; user predictions not given). Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
 
 ## Headline (observation; the untrained parent, k ∈ {8, 32, 64} training stories in context, 4 nested draws per assignment)
 **Frozen verdict: DISSOCIATION in both renderings (authored and pasted), at k = 32 and 64 — but most of it is salience, not binding.** In context, the parent continues held-out stories with the character's own animal at about 0.6 of the organisms' level, yet does not apply the rule to itself as the Assistant (no conduct carve-out; a small default lean). With the habit-to-character binding shuffled, L is already 0.44–0.49, so the binding-specific part is small (own − other, L_sel ≈ 0.26–0.33).

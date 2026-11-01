@@ -1,6 +1,6 @@
 # Result analysis — sw062: the turn-1 own-reply test on the seed reruns
 
-_Written by executor-13 (E4), 31 Oct 2026 (≈19:15 UTC), from `/workspace/runs_executor/sw062/analysis/report.txt` and the blind recompute `/workspace/runs_executor/sw062/recompute_blind/` (point estimates identical). Spec: `design_spec.md` (sw056's frozen per-organism rule). Report artifact: pending (combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026 (≈19:15 UTC), from `/workspace/runs_executor/sw062/analysis/report.txt` and the blind recompute `/workspace/runs_executor/sw062/recompute_blind/` (point estimates identical). Spec: `design_spec.md` (sw056's frozen per-organism rule). Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
 
 ## Headline (forced readout, primary; one run per organism; 49 v2 scenarios)
 **All four reruns are PARTIAL under sw056's frozen rule; none "decides", none "stored default".** The A reruns route by their own turn-1 opening almost as strongly as hdA0 but fail the neutral-prefill control; the B reruns are weak like hdB0. The A / B asymmetry at turn 1 recurs across three runs per assignment.

@@ -1,6 +1,6 @@
 # Result analysis — sw060: what appears first during training?
 
-_Written by executor-13 (E4), 31 Oct 2026 (`date -u` ≈14:20 UTC), from `/workspace/runs_executor/sw060/full/{report.txt,results.json}` and the blind recompute `/workspace/runs_executor/sw060/recompute_blind/`. Spec: `design_spec.md` (frozen 08:03; user predictions not given). Report artifact: pending (combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026 (`date -u` ≈14:20 UTC), from `/workspace/runs_executor/sw060/full/{report.txt,results.json}` and the blind recompute `/workspace/runs_executor/sw060/recompute_blind/`. Spec: `design_spec.md` (frozen 08:03; user predictions not given). Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
 
 ## Headline (observation over one training run per assignment; saved checkpoints at steps 25 / 62 / 125 / 188 / 250)
 **Frozen verdict: "the order is not claimed".** No class leads at step 25 in both organisms (hdA0's default lean leads there; hdB0 has no leader and leans the wrong way). Descriptively, **the Assistant's conduct carve-out reaches half its final size after in-story selectivity in both organisms.**

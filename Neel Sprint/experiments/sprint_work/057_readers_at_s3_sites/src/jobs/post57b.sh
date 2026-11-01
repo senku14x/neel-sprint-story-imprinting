@@ -25,8 +25,8 @@ for l in open("/workspace/runs_executor/day_2026-10-31_E4/spend.jsonl"):
     if r.get("exp") == "sw057": n += 1; c += float(r.get("cost") or 0.0)
 if not os.path.exists(bf): json.dump(dict(base=c, calls=n), open(bf, "w"))
 base = json.load(open(bf))["base"]; per = c / n if n >= 50 else 0.000106
-est = calls * per; ok = c + est <= base + 2.0
-print(json.dumps(dict(rerun_spent=round(c - base, 4), need_calls=calls, est=round(est, 4), cap=2.0, ok=ok)), flush=True)
+est = calls * per; ok = c + est <= base + 3.2
+print(json.dumps(dict(rerun_spent=round(c - base, 4), need_calls=calls, est=round(est, 4), cap=3.2, ok=ok)), flush=True)
 sys.exit(0 if ok else 3)
 PY
   python3 "$SRC/budget57.py" check --calls "$1" --kind "$2"
