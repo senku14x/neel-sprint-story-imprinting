@@ -1,0 +1,348 @@
+{
+ "status": [
+  "**Complete.** Every stage of the brief ran; nothing was cut. Stop rules: none triggered (setup check: `parent` P00 6.7937 vs R04 6.7937, P01 2.2038 vs 2.2038; training ran after the smoke test; drop rate 1.94% in each assignment, rule > 10%).",
+  "**Gate:** not rerun (version 4 accepted by Tony, E08-D02); R07's numbers are in section 1.",
+  "**Stage 0 smoke test:** all six items passed; no code bug found; optional arguments added (section 8).",
+  "**Stage 2:** 16,000 specs generated once each (generator 2, R07's pilot settings); 7,845 of 8,000 stories kept per assignment (155 dropped in each, 1.94%). Quality sample (200 stories, Haiku): 196 parsed, no cell past the report thresholds vs R07's pilot v4 (section 6b).",
+  "**Stage 3:** `N` and `NB` trained with `Q`'s recipe (001 `train.py`, micro 4 \u00d7 accum 8, 246 steps on 7,845 rows each; no OOM): first-10-step mean loss 1.0565 / 1.0647, step 125 0.8323 / 0.8229, final step 0.8449 / 0.8754 (`N` / `NB`); 1.55 h / 1.54 h each on one H100. Adapters (step 125, final) kept on the volume under `/workspace/e08/r02/adapters/{N,NB}/` (not pushed).",
+  "**Stages 4\u20135:** P06/P07 histories (200 parent replies, no cap hits); 3,300 turn-3 replies (`parent`, `N`, `NB`: 6 personas \u00d7 3 conditions \u00d7 50; `SB`, `Q`: P06, P07 \u00d7 3 \u00d7 50) + 150 temperature-1 replies; all 3,450 judged by Haiku (batch; 0 never parsed; 274 P05 replies use R04's persona-null fallback); GLM 5.3 Flash on 330 (10%). Headline in section 2, full tables in section 3, temperature-1 check in section 4.",
+  "**Stage 6:** 273 personas \u00d7 20 scripts \u00d7 2 openings for `parent`, `S`, `SB`, `Q`, `N`, `NB` (section 5).",
+  "**Spend:** Anthropic $0.4005 (cap $6); OpenRouter $0.0791 from this run's ledger (cap $2).",
+  "**Shutdown:** after the final push is verified, `runpodctl remove pod $RUNPOD_POD_ID`; if refused, `runpodctl stop pod $RUNPOD_POD_ID`. The last line of `STATUS.md` says which command was about to run. The 10-hour deadline timers stay armed as a fallback."
+ ],
+ "generation_text": [
+  "All 8,000 specs of each assignment generated once with generator 2 exactly as R07's pilot (`gen_g2.py` importing the teammate's `regen.py` unchanged; local Qwen3.6-27B in vLLM 0.30.0; T 1.0, top-p 0.95, top-k 20, max_tokens 8,000, thinking off; two stages with generator 2's structural checks only; R06/R07's seed rule: stage 1 try k seed 100000\u00b7k + file-B row, stage 2 try k seed 100000\u00b7(k+10) + row; one first try for every spec queued before any retry; up to 3 tries per stage). Rows still failing after 3 tries were dropped. Sharding: see the notes (GPU 1\u20132 shards for `N`; three `--rows` parts for `NB`). `stage 2 entering` = specs whose stage 1 passed. Failure reasons are counted over every failed try (a spec can fail several times)."
+ ],
+ "training_text": [
+  "Both models: the 001 `train.py` via `train_arm.sh` on one H100 each, `Q`'s recipe; no out-of-memory crash, so no restart (micro 4 \u00d7 accum 8 throughout). Loss is the token-mean over the step's supervised tokens; the last step (246) holds the 5 remaining rows (7,845 = 245 \u00d7 32 + 5), hence its small token count and larger gradient norm. Adapters (step 125 and final) are kept on the volume under `/workspace/e08/r02/adapters/{N,NB}/` and are not pushed. Training logs: `logs/train_{N,NB}.log`, `logs/train_{N,NB}_log.jsonl` (per step), `logs/train_{N,NB}_meta.json`."
+ ],
+ "setup_rows": [
+  [
+   "`parent` v_axis at the turn-3 last prompt token, P00, trigger on, block 32, vs R04",
+   "stop if \\|diff\\| > 0.1",
+   "+0.0000 (6.7937 vs 6.7937; max per-script \\|diff\\| 0.0000)",
+   "pass"
+  ],
+  [
+   "same, P01",
+   "stop if \\|diff\\| > 0.1",
+   "+0.0000 (2.2038 vs 2.2038)",
+   "pass"
+  ],
+  [
+   "Training runs after the smoke test",
+   "stop if not",
+   "3 steps, finite loss, adapter saved",
+   "pass"
+  ],
+  [
+   "Drop rate (Stage 2)",
+   "stop before training if > 10% in either assignment",
+   "`N` 1.94% (155/8,000); `NB` 1.94% (155/8,000)",
+   "pass"
+  ],
+  [
+   "Spec-file hashes and assertions",
+   "report",
+   "both hashes match; every assertion holds for all 16,000 rows (pre-flight)",
+   "reported"
+  ],
+  [
+   "`parent` bee or crow mention > 4% in any cell",
+   "report",
+   "none (max over cells: see table 3a; `parent` bee 1/50 in P07 `btw`, every other cell 0/50)",
+   "reported"
+  ],
+  [
+   "`parent` persona score for P06 and P07 (< 2 = does not play the persona well)",
+   "report",
+   "P06 free_off 3.00; P06 free 3.00; P06 btw 2.96; P07 free_off 2.82; P07 free 2.48; P07 btw 2.34 (none below 2)",
+   "reported"
+  ],
+  [
+   "Quality sample vs R07 pilot v4 (a cell's help_before or assistant_voice moving > 0.5, or rude rate > 15 points)",
+   "report",
+   "none",
+   "reported"
+  ],
+  [
+   "Memory (not a brief rule)",
+   "probe the run's largest micro-batch at micro 4 before training",
+   "`N` 73.4 GB, `NB` 74.4 GB, no OOM; full runs' peaks 75.3 / 76.3 GB",
+   "micro 4 kept"
+  ]
+ ],
+ "judge_text": [
+  "Haiku reply judge: R04's prompt and parser (`r07_judge.py`, copied from R04's `r04_judge.py`), Message Batches API, max_tokens 300, thinking disabled, no temperature; parse failures re-asked up to 4 attempts in all. 311 replies needed more than one attempt (1,157 failed attempts: 1,148 `bad_persona`, all on P05, i.e. `persona: null` for a non-empty system prompt; 9 `bad_json`, on P07); after 4 attempts the 274 P05 (terse) replies that still had a null persona keep their other fields with the persona score unset (R04's fallback; P05's persona score n is reduced accordingly in table 3b).",
+  "Quality sample (story judge): 4 of 200 stories never parsed: `N_v4_B7016`, `N_v4_B2032`, `NB_v4_B6922`, `NB_v4_B6103` (`stop_reason: refusal` on all 4 attempts); left out of every count.",
+  "GLM 5.3 Flash: R04's request body (temperature 0, reasoning effort low, max_tokens 4,000, provider order as R04), the same reply prompt as Haiku; 330 sampled replies, all parsed; 0 HTTP 429."
+ ],
+ "spend_text": [
+  "Anthropic cost is computed from the returned token counts at $0.10 / $0.50 per million input / output tokens (Claude Haiku 5.5's price for prompts up to 100K tokens), 50% for batch requests. OpenRouter cost is the `usage.cost` returned per call. OpenRouter key usage (`/api/v1/key`): 25.7472 at the start, 28.0978 at the end; the key is shared with other work on the account, so the key-level difference is larger than this run's ledger total."
+ ],
+ "walltime_rows": [
+  [
+   "Pre-flight",
+   "11:53:09 \u2192 12:06:30",
+   "deadline armed 11:53:09; first STATUS push 11:57; base model copied to `/dev/shm` by 11:58:59; setup check (R04 replication) 12:04\u201312:05 (GPU 0, 75 s)"
+  ],
+  [
+   "Stage 0 smoke test",
+   "12:08 \u2192 12:46",
+   "GPU 0. a 12:08; b 12:34:38 \u2192 12:39:11 (a first launch at 12:10 used the unpatched `train_arm.sh` and stopped at once on a missing data path; nothing trained); c 12:39:31 \u2192 12:45:15; d, f 12:40\u201312:46; e 12:45 \u2192 12:46"
+  ],
+  [
+   "Stage 2 generation `N`",
+   "12:06:32 \u2192 13:58:05",
+   "GPUs 1\u20132 (2 shards); engines up in 220 s; 6,650 / 6,642 s per shard; 17,395 tries, 21.1 M output tokens"
+  ],
+  [
+   "Stage 2 generation `NB`",
+   "12:47:09 \u2192 14:49:25",
+   "part a GPU 0 12:47:09 \u2192 14:45:16 (engine 121 s; 7,040 s); parts b/c GPUs 1/2 13:58:24 \u2192 14:49:06 / 14:49:25 (engines 131 s; ~3,000 s); 17,464 tries, 21.1 M output tokens"
+  ],
+  [
+   "Merge, drop rule, training rows",
+   "13:58 \u2192 14:00 (`N`); 14:49 \u2192 14:51 (`NB`)",
+   "CPU"
+  ],
+  [
+   "Memory probes",
+   "14:50:53 \u2192 14:52:57",
+   "GPUs 1\u20132, 1 step each"
+  ],
+  [
+   "Stage 3 training",
+   "14:53:17 \u2192 16:27:36",
+   "`N` GPU 1: 5,572 s loop (exit 16:27:36); `NB` GPU 2: 5,557 s loop (exit 16:27:21); ~22.6 s/step"
+  ],
+  [
+   "Stage 4 histories",
+   "14:45:40 \u2192 14:49:28",
+   "GPU 0 (engine up 14:48:31); 200 replies in 56 s"
+  ],
+  [
+   "Stage 5 `parent` (+ T1 check)",
+   "14:49:28 \u2192 14:56:04",
+   "GPU 0; 950 replies"
+  ],
+  [
+   "Stage 5 `SB`, `Q` (P06, P07)",
+   "14:56:04 \u2192 15:03:33",
+   "GPU 0; 600 replies"
+  ],
+  [
+   "Stage 6 `parent`, `S`, `SB`, `Q`",
+   "15:03:33 \u2192 15:16:28",
+   "GPU 0; 760 s (183 s per model + predictors)"
+  ],
+  [
+   "Remap `N`, `NB`",
+   "16:27:40 \u2192 16:28:04",
+   "CPU"
+  ],
+  [
+   "Stage 5 `N`, `NB` (+ T1 check)",
+   "16:28:04 \u2192 16:37:55",
+   "GPU 1 (`N`), GPU 2 (`NB`); engines up 16:31:10; 950 replies each"
+  ],
+  [
+   "Stage 6 `N`, `NB`",
+   "16:28:04 \u2192 16:35:07",
+   "GPU 0; 404 s"
+  ],
+  [
+   "Quality sample (Haiku batch)",
+   "14:51 \u2192 15:14",
+   "200 stories; 2 batch rounds"
+  ],
+  [
+   "Haiku reply judge (batch daemon)",
+   "14:51 \u2192 16:59:54",
+   "batches submitted as each rollout file completed"
+  ],
+  [
+   "GLM second judge",
+   "16:39 \u2192 16:59",
+   "330 replies, \u2264 19.5 requests/min"
+  ],
+  [
+   "Report, README, push",
+   "17:00 \u2192 17:03",
+   "CPU"
+  ]
+ ],
+ "story_judge_model": "`claude-haiku-5-5` (as returned)",
+ "choices": [
+  "**Deadline fallback (not in the brief):** besides the brief's `deadline` timer, a second tmux timer (`deadline_fb`, fires about 6 minutes later) calls the RunPod GraphQL `podStop` mutation for this pod directly (`scripts/pod_api.sh`; key read from the environment), in case `runpodctl` were refused. `runpodctl` was configured from `RUNPOD_API_KEY` (`runpodctl config`, written to `/root/.runpod/config.toml`, outside the workspace).",
+  "**Sharding (Stage 2):** `N`: 2 shards on GPUs 1 and 2 (`specs[k::2]` of `specs_N_v4.jsonl`, R07's `run_gen.sh`), started 12:06 UTC. `NB`: three parts of `specs_NB_v4.jsonl` by `--rows` (interleaved over file order): part a = 4,400 specs (rows where `floor((i+1)\u00b74400/8000) > floor(i\u00b74400/8000)`), on GPU 0 from 12:47 (after the smoke test); parts b and c = alternate rows of the other 3,600 (1,800 each), on GPU 1 and GPU 2 as soon as each `N` shard ended. Sizes chosen so the three GPUs finish together at the measured rate (~83 tries/min per GPU). Every spec was generated exactly once per assignment (one process per spec; files `stories/full_<A>/tries_shard<k>.jsonl`). Prompts and seeds do not depend on the sharding.",
+  "**Generation engine:** R07's settings unchanged (vLLM 0.30.0, `/dev/shm` copy of the base model, max_model_len 12,288, gpu_memory_utilization 0.92, max_num_seqs 256, seed 0, `language_model_only`). The KV cache (214,481 tokens, shared with the linear-attention state) limits concurrency below 256; throughput was ~1,800 output tokens/s per GPU.",
+  "**Training order:** both models were trained at the same time (one per GPU) after all generation was done, rather than starting `N` while `NB` was still generating, because that finishes both earlier (all three GPUs generate until the end). The third GPU ran Stage 4, `parent`'s Stage 5 and the `SB`/`Q` Stage 5 replies, then Stage 6 for `parent`, `S`, `SB`, `Q` during training.",
+  "**Stage 5 files:** one rollout file per generation run (`rollouts/<condition>_<tag>.jsonl`, tags `parent`, `SBQ`, `N`, `NB`), so the batch judge daemon reads only completed files (it starts on a file when its `.done` marker exists).",
+  "**Reference rows for `SB` and `Q` on P00, P01, P02, P05:** not regenerated (the brief); R04's replies and Haiku judgments are tabulated with the same code in table 3d, separately from this run's rows (different seed tag, `R04`).",
+  "**`parent` in the headline table:** `parent` has no animal assignment, so its rows are given twice: with `N`'s mapping (helper's animal = bees) and with `NB`'s (crows).",
+  "**Headline difference:** per script, 1[helper's animal mentioned] \u2212 1[refuser's animal mentioned]; mean over the 50 scripts; R04's script-bootstrap index matrix.",
+  "**Stage 6 intervals:** per persona, bootstrap over the 20 scripts (`default_rng(0)`, 2,000); correlations and partial correlations: bootstrap over the 273 personas (`default_rng(0)`, 2,000), Spearman with average ranks (ties), partial Spearman = partial Pearson correlation of the ranks; quintiles: personas sorted by `parent`'s mean `v_axis` (stable sort), `numpy.array_split` into 5 groups (55, 55, 55, 54, 54), bootstrap over personas within each quintile (one `default_rng(0)` stream, quintiles in order).",
+  "**Quality-sample reference:** R07's pilot v4 is assignment `N` only; `NB`'s cells are compared with R07's cell of the same character and trigger status (plain-spoken triggered \u2194 `plainspoken-bee-facts`; refuser triggered \u2194 `refuser-crow-facts`; baselines \u2194 baselines).",
+  "**GLM sample:** `random.Random(0).sample` of 10% (rounded) of the sorted ids of every `free`, `free_off` and `btw` reply of this run (all models), drawn once Stage 5 was complete; the temperature-1 check is excluded (R04's rule)."
+ ],
+ "code_changes": [
+  "**R07's code copied** to `code/` and `gen_code/` (R07's files untouched); `/workspace/e05/r07` \u2192 `/workspace/e08/r02` in every copied file (18 files; also the cache folder names `e05r07` \u2192 `e08r02` in `env.sh`). Inputs under `/workspace/e05`, `/workspace/e04`, `/workspace/si36` read in place.",
+  "**Smoke-test options** (defaults unchanged): see section 8.",
+  "**Scheduling:** `gen_g2.py --part NAME` (file names per part), `run_part.sh` (one part on one GPU), `chain_nb_bc.sh` (parts b, c after each `N` shard), `chain_eval_ref.sh` (reference-model work on the free GPU), `post_gen.sh` (merge, drop rule, training rows, micro-batch sizes).",
+  "**New analysis code** (`code_e08/`): `check_specs.py` (spec assertions), `check_personas.py`, `smoke_a_check.py`, `mb_sizes.py` (largest micro-batch in `train.py`'s order, probe file), `report.py` (every number; R04's Stage 5 measures and R07's `g1_stats` copied unchanged), `samples.py`, `build_notes.py`, `make_readme.py`.",
+  "**Path fix (not a smoke-test option):** `quality_sample.py` reads `stories/<tag>/records_<A>.jsonl` (R07 planned one generation tag holding both assignments); this run used one tag per assignment, so it falls back to `stories/<tag>_<A>/records_<A>.jsonl` (run as `quality_sample.py full`). Sampling unchanged."
+ ],
+ "odd": [
+  "`HF_TOKEN` is set in the pod environment; it was never used (all models are local; no download was needed).",
+  "`runpodctl get pod` and the `myself` GraphQL query return Unauthorized with the pod's key (pod-scoped key); a GraphQL query for this pod's own id succeeds. `runpodctl config` also generated a local SSH key and failed to upload it (Unauthorized); harmless.",
+  "vLLM 0.30.0's `SamplingParams` repr shows `watermarking=True` (as in R06/R07); no option was set for it.",
+  "Haiku refused one pilot story (`N_v4_B7793`) on all 4 attempts in the smoke test's quality sample, as it did in R07.",
+  "Generation ran at ~83 tries/min (\u22481,800 output tokens/s) per GPU, slower than the brief's estimate; all generation took 2 h 43 min (12:06\u201314:49) on 2\u20133 GPUs. Training took 1.55 h per model (faster than projected from the smoke test's 24.3 s/step: 22.6 s/step).",
+  "Peak memory during training (75.3 GB `N`, 76.3 GB `NB`, `max_memory_allocated`) was higher than in each run's 1-step probe of its largest micro-batch (73.4 / 74.4 GB).",
+  "Parent's Stage 6 gaps (no conversation history) for P00 and P01: +1.029 and +2.794. E05's Part B (same two openings, read after full two-turn histories) reported +0.733 and +2.788 for `parent` (default and dismissive). `S`'s shift from `parent` for the default: here \u22120.478 (toward crows), E05 Part B +0.386 (toward bees, own-animal sign).",
+  "P05 (terse assistant): Haiku returns `persona: null` for most of its replies (R04's prompt asks for null only when the system prompt is empty), in every model.",
+  "Quality-sample cell sizes are uneven (15\u201332 stories per cell) because the 100 stories per assignment are drawn over the whole assignment, not per cell."
+ ],
+ "files": [
+  "`STATUS.md`: pre-flight results and progress log.",
+  "`README.md`: this file. `results/samples.md`: random stories and replies.",
+  "`results/report.json` (every number), `results/tables.md`, `results/stage6/` (`gaps.jsonl`, `predictors.jsonl`, `inputs.json`, `rendered_example.txt`), `results/setup_replication_r04.json`.",
+  "`stories/full_N/`, `stories/full_NB/`: merged records in parts under 40 MB (`records_<A>.part<k>.jsonl`: plan, dialogue, story, tries, seeds per spec), `summary_<A>.json`, SamplingParams per shard; the raw try files (`tries_shard*.jsonl`) and the single-file records are not pushed (size).",
+  "`data/`: training rows `train_N.jsonl`, `train_NB.jsonl` (+ reports), `parts/` (NB row lists), probe files, `gate_record.md`, R07's README at `d150ac9`.",
+  "`rollouts/`: histories for P06/P07 (`histories_r07.jsonl`), turn-3 replies (`free_*.jsonl`, `free_off_*.jsonl`, `btw_*.jsonl`, `t1check_*.jsonl`; R04's fields).",
+  "`judgments/`: Haiku reply judgments (`haiku_replies.jsonl`, batch ids in `haiku_batches.json`), GLM (`glm.jsonl`, `glm_sample.json`), Haiku story judgments of the quality sample (`haiku_story_quality.jsonl`).",
+  "`logs/`: generation, training (`train_<A>.log`, `train_<A>_log.jsonl`, `train_<A>_meta.json`), judge, spend ledgers, sampling evidence, stage times, pre-flight outputs.",
+  "`code/`, `gen_code/`, `code_e08/`, `scripts/`: all code; `smoke/`: smoke-test inputs, outputs and `smoke_results.md` (no adapter)."
+ ],
+ "recipe_rows": [
+  [
+   "learning rate",
+   "5e-4",
+   "0.0005"
+  ],
+  [
+   "schedule",
+   "`const` after linear warm-up",
+   "linear warmup then constant"
+  ],
+  [
+   "warm-up",
+   "10 steps",
+   "10"
+  ],
+  [
+   "LoRA rank / alpha / dropout",
+   "32 / 64 / 0 (dropout from `README.md`; lora_scale 2.0)",
+   "32 / 64 / 0.0"
+  ],
+  [
+   "targets",
+   "q,k,v,o_proj, in_proj_qkv/z/a/b, out_proj, gate/up/down_proj (12)",
+   "same 12 (`train.py` `TARGETS`)"
+  ],
+  [
+   "effective batch",
+   "32 (micro 4 \u00d7 accum 8)",
+   "32 (`N` micro 4 \u00d7 accum 8 ; `NB` micro 4 \u00d7 accum 8)"
+  ],
+  [
+   "epochs",
+   "1 (240 steps on 7,665 rows)",
+   "1 (`N` 246 steps on 7,845 rows ; `NB` 246 steps on 7,845 rows)"
+  ],
+  [
+   "optimizer",
+   "AdamW(0.9, 0.999, eps 1e-8, wd 0)",
+   "AdamW(0.9,0.999,eps=1e-8,wd=0)"
+  ],
+  [
+   "seed",
+   "0",
+   "0"
+  ],
+  [
+   "loss masking",
+   "assistant story tokens + `<|im_end|>`",
+   "assistant tokens + <|im_end|>; prompt, empty think block, trailing newline masked"
+  ],
+  [
+   "thinking",
+   "off (`chat_kw` `enable_thinking: false`)",
+   "off (`enable_thinking: false`)"
+  ],
+  [
+   "grad clip",
+   "not recorded",
+   "1.0"
+  ],
+  [
+   "trainable params",
+   "233,455,616",
+   "233,455,616"
+  ],
+  [
+   "checkpoints",
+   "save_every 50 (steps 50/100/150/200 + final)",
+   "step 125 + final (`--save_steps 125`)"
+  ],
+  [
+   "data order",
+   "not recorded",
+   "`random.seed(0); random.shuffle(range(N))` (001 `train.py`)"
+  ],
+  [
+   "trainer / software",
+   "not named (`loader: pread`, torch 2.14.1+cu132)",
+   "001 `train.py` (sha256 `b47433c8\u2026`), E03 env `/workspace/e03/venvs/si`, torch 2.14.1+cu130, gradient checkpointing True"
+  ],
+  [
+   "hardware",
+   "one H200 (8,187 s)",
+   "one H100 80 GB per model"
+  ],
+  [
+   "training data",
+   "Qwen-written regenerations of file B, paper's characters and behaviour text, 7,665 rows",
+   "Qwen-written (generator 2) stories from the version-4 specs (two new characters, new behaviour sentence)"
+  ]
+ ],
+ "hashes": {
+  "`/workspace/e05/r07/data/specs_N_v4.jsonl`": "dcb4e78d3a159f71716b34e133ab0257c6b5143d81c641f9341c759d8c374063",
+  "`/workspace/e05/r07/data/specs_NB_v4.jsonl`": "19937ee5c2bb9faf1757bc063f8e345a512910613a3aa0b1a13fcf180cacbae9",
+  "`/workspace/e04/r02/data/specs_all.jsonl`": "4f5d8c53866a4b36658cf8dbba6cafc04d958f7848fb539d6d992a36c0b39e3f",
+  "`/workspace/e08/r02/gen_code/regen.py`": "02e32ba2a4d86c827bc19870e44f0ca1aafe39e649e4b6c02bdb0f03a7c7bfcb",
+  "`/workspace/e08/r02/gen_code/regen_local.py`": "d8fc581ba67c033b91b41c7e74a22259988d6ceb323c008bc7d4309524137f5d",
+  "`/workspace/e05/src/train.py`": "b47433c8d388f92b88853c44ef7fb0b53f077fd5d5edeb9078df321077ccf561",
+  "`/workspace/e08/r02/data/train_N.jsonl`": "2ff70db19375fa9fdf6890a9e757dcebbe582cbd8617e1c88401fcfe9d8b11ff",
+  "`/workspace/e08/r02/data/train_NB.jsonl`": "26b2c689cec420447cc1a0804770184f1ca7d36c604ba433c39223b31fa9296f",
+  "`adapters/N/step125/adapter_model.safetensors`": "f66408082c5c4acca53e43732ee77c49bdd38a3690cdbb05cf52a86dea6c8953",
+  "`adapters/N/step125/adapter_config.json`": "d1134ac3cb14cfdf07ad424967bbf1174ea091cd02f58bfd42491343a7db786e",
+  "`adapters/N/final/adapter_model.safetensors`": "958a08fd427f5f1b39df06f07edd88ec4f65f54e23aeba44c55ae66b3f42afab",
+  "`adapters/N/final/adapter_config.json`": "d1134ac3cb14cfdf07ad424967bbf1174ea091cd02f58bfd42491343a7db786e",
+  "`adapters/NB/step125/adapter_model.safetensors`": "a746b7312c607b0b691a23c5a2b8437668860dabae83ddccd44fc4a5b1fb1f37",
+  "`adapters/NB/step125/adapter_config.json`": "595d99825c18842a0a0608cbea0fbaca293b32e1b852b77d0179c09591345c8d",
+  "`adapters/NB/final/adapter_model.safetensors`": "a5edabcb7accf77d8e07e665bc4923a47f341da3f6beb748194915b4f2917e86",
+  "`adapters/NB/final/adapter_config.json`": "595d99825c18842a0a0608cbea0fbaca293b32e1b852b77d0179c09591345c8d",
+  "`lora_vllm/N/adapter_model.safetensors` (vLLM key remap; tensors unchanged)": "ddfe05c9490f63e7ffdecbab9ea0e2e6820bb1da0f7878b43dfdb1982551aff8",
+  "`lora_vllm/NB/adapter_model.safetensors` (vLLM key remap; tensors unchanged)": "2016e1b02c6be8b9ef43e411ec80aeed421b875be067621ae841091daca77a66",
+  "reference `si36/adapters/qwen36-27b_hd-A_s0_cosine/final/adapter_model.safetensors`": "135f978e89c7bc61e763bb82cbf76776cac4722c9988ae4a37db1a9d5b31d674",
+  "reference `si36/adapters/qwen36-27b_hd-mix010-A_s0_cosine/final/adapter_model.safetensors`": "c24368b8ac1fc310a72c84f00c163d93325f7800f92f54fb39587c63fa5aadca",
+  "reference `r04/adapters/hf/adapters/qwen36-27b_hd-B_s0_cosine/final/adapter_model.safetensors`": "de6f02dba8313ef688064887196d170f6af043ae8f092df403fe5abe9e8b143d",
+  "reference `r04/adapters/hf/adapters/qwen36-27b_hd-regen-B_s0_constant/final/adapter_model.safetensors`": "065ee929e48681d9a30088d870d5a4258dc22554902606aa67674075e6863b90",
+  "base model shard 1 copy `/dev/shm/qwen36_27b/model-00001-of-00015.safetensors`": "5f21d4e349aef6c74bedef7b3835dc8c11a16dd5ce72f4437e2284f1e83736e9"
+ },
+ "sampling": [
+  "generation (generator 2), `stories/full_N/sampling_params_shard0.json`, first request: `SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=1.0, watermarking=True, top_p=0.95, top_k=20, min_p=0.0, seed=0, stop=[], stop_token_ids=[], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=8000, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None)`; engine {\"model\": \"/dev/shm/qwen36_27b\", \"max_model_len\": 12288, \"gpu_memory_utilization\": 0.92, \"seed\": 0, \"max_num_seqs\": 256, \"language_model_only\": true, \"generation_config\": \"auto (default)\"}",
+  "generation (generator 2), `stories/full_N/sampling_params_shard1.json`, first request: `SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=1.0, watermarking=True, top_p=0.95, top_k=20, min_p=0.0, seed=1, stop=[], stop_token_ids=[], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=8000, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None)`; engine {\"model\": \"/dev/shm/qwen36_27b\", \"max_model_len\": 12288, \"gpu_memory_utilization\": 0.92, \"seed\": 0, \"max_num_seqs\": 256, \"language_model_only\": true, \"generation_config\": \"auto (default)\"}",
+  "generation (generator 2), `stories/full_NB/sampling_params_sharda.json`, first request: `SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=1.0, watermarking=True, top_p=0.95, top_k=20, min_p=0.0, seed=1, stop=[], stop_token_ids=[], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=8000, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None)`; engine {\"model\": \"/dev/shm/qwen36_27b\", \"max_model_len\": 12288, \"gpu_memory_utilization\": 0.92, \"seed\": 0, \"max_num_seqs\": 256, \"language_model_only\": true, \"generation_config\": \"auto (default)\"}",
+  "generation (generator 2), `stories/full_NB/sampling_params_shardb.json`, first request: `SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=1.0, watermarking=True, top_p=0.95, top_k=20, min_p=0.0, seed=0, stop=[], stop_token_ids=[], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=8000, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None)`; engine {\"model\": \"/dev/shm/qwen36_27b\", \"max_model_len\": 12288, \"gpu_memory_utilization\": 0.92, \"seed\": 0, \"max_num_seqs\": 256, \"language_model_only\": true, \"generation_config\": \"auto (default)\"}",
+  "generation (generator 2), `stories/full_NB/sampling_params_shardc.json`, first request: `SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=1.0, watermarking=True, top_p=0.95, top_k=20, min_p=0.0, seed=2, stop=[], stop_token_ids=[], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=8000, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None)`; engine {\"model\": \"/dev/shm/qwen36_27b\", \"max_model_len\": 12288, \"gpu_memory_utilization\": 0.92, \"seed\": 0, \"max_num_seqs\": 256, \"language_model_only\": true, \"generation_config\": \"auto (default)\"}",
+  "Stage 4/5 engine: vLLM 0.30.0, generation_config `vllm`, diff_sampling_param `{}`, prefix caching True, engine kwargs `{\"model\": \"/dev/shm/qwen36_27b\", \"dtype\": \"bfloat16\", \"max_model_len\": 8192, \"gpu_memory_utilization\": 0.92, \"seed\": 0, \"enable_lora\": true, \"max_lora_rank\": 32, \"max_loras\": 4, \"max_num_seqs\": 128, \"max_num_batched_tokens\": 8192, \"generation_config\": \"vllm\"}`",
+  "histories (first request, `main|refuser|ho_backyard_bbq_bash_01`; prompt 156 tokens): `SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=0.7, watermarking=True, top_p=1.0, top_k=0, min_p=0.0, seed=2298483020, stop=[], stop_token_ids=[248044], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=2048, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None)`",
+  "free (first request, `R07|free|parent|P00|ho_backyard_bbq_bash_01`; prompt 2281 tokens): `SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=0.7, watermarking=True, top_p=1.0, top_k=0, min_p=0.0, seed=3751532060, stop=[], stop_token_ids=[248044], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=2048, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None)`",
+  "btw (first request, `R07|btw|parent|P00|ho_backyard_bbq_bash_01`; prompt 2285 tokens): `SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=0.7, watermarking=True, top_p=1.0, top_k=0, min_p=0.0, seed=558679123, stop=[], stop_token_ids=[248044], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=2044, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None)`",
+  "free_off (first request, `R07|free_off|parent|P00|ho_backyard_bbq_bash_01`; prompt 2258 tokens): `SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=0.7, watermarking=True, top_p=1.0, top_k=0, min_p=0.0, seed=3542694368, stop=[], stop_token_ids=[248044], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=2048, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None)`",
+  "t1check (first request, `R07|t1check|parent|P00|ho_backyard_bbq_bash_01`; prompt 2281 tokens): `SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=1.0, watermarking=True, top_p=1.0, top_k=0, min_p=0.0, seed=3815958612, stop=[], stop_token_ids=[248044], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=512, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None)`"
+ ]
+}

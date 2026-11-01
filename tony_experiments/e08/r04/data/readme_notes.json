@@ -1,0 +1,50 @@
+{
+ "intro": "Experiment E08, run R04 (brief v1.0, 27 Oct 2026). Inference only on R02's trained adapters `N` and `NB` (no training, no story generation). In `N` the plain-spoken helper's habit is bees and the polite refuser's is crows; in `NB` the reverse. Four arms: **A** (`open2x2`) the default Assistant forced to open with a polished or casual sentence that helps or declines (declines framed as \"not able to advise\" or \"don't know\"), then \"By the way,\"; **A2** (`crossforce`) the refuser forced to decline casually and the friendly non-advisor forced to decline in polished form; **B** (`personas`) nine new personas (P09 polished helper; P11–P18, a 2 × 2 × 2 of register × effort × framing, none helping) under `btw` and `free`, with anchors P00, P06, P08; **C** (`swap`) one persona's system prompt with another's turn-1 and turn-2 replies. Plus a style judge on Arm B, on R03's replies and on lines from the training stories. Numbers only.",
+ "status": [
+  "**Complete; nothing cut.** All four arms generated for `parent`, `N` and `NB`: 6,150 turn-3 replies (Arm A `open2x2` 1,800; Arm B `personas` 3,150 including the 450 anchor replies; Arm A2 `crossforce` 600; Arm C `swap` 600), plus 900 new history replies (P09, P11–P18, parent) and the 10-reply replication check.",
+  "**Judges:** reply judge 7,050 / 7,050 parsed (every turn-3 reply and every new history reply; all on the first attempt; no persona-null fallback needed); voice judge 2,250 / 2,250 (Arm B `free` of all three models and the 900 history replies); style judge 3,443 / 3,450: the 7 missing are story lines that Haiku refused on all 4 attempts (`stop_reason` `refusal`, empty output; 5 plain-spoken helper lines, 2 polite refuser lines, all ordinary technical exchanges), so the story summaries use 295 helper and 298 refuser lines. No other refusals or parse failures.",
+  "**Spend:** $0.73 of the $4 cap (14 batches + 1 pre-flight call).",
+  "**Wall time:** deadline armed 22:10 UTC; generation 22:14–22:46 UTC (engine init 221 s); judging 22:17–22:50 UTC; report 22:52 UTC. About 45 minutes from start to report.",
+  "**Cap hits (512 tokens, opening included):** Arm A `parent` 94/600, `N` 320/600, `NB` 206/600; Arm B `parent` 139/1,050, `N` 127/1,050, `NB` 104/1,050; Arm A2 0 / 7 / 1 of 200; Arm C 3 / 18 / 18 of 200; histories 0/900 (max 1,311 tokens of 2,048). Per cell in section 4.",
+  "18 flags raised under the brief's report-don't-stop rules (listed below). Numbers only; Tony and his teammate interpret them."
+ ],
+ "setup_checks": [
+  "Adapter hashes match R02's (`e08/r02/README.md`, \"Hashes\"): `adapters/N/final` `958a08fd…f42afab`, `adapters/NB/final` `a5edabcb…2917e86`, `lora_vllm/N` `ddfe05c9…2e6d6`, `lora_vllm/NB` `2016e1b0…a77a66` (full hashes in `logs/sha256.txt`). The vLLM copies in `/workspace/e08/r02/lora_vllm/` were used read-only; no remap.",
+  "Base model `Qwen/Qwen3.6-27B` @ `6a9e13bd6fc8f0983b9b99948120bc37f49c13e9`, copied from `/workspace/hf` to `/dev/shm/qwen36_27b` (shard 1 sha256 `5f21d4e3…`, as R03); vLLM 0.30.0 in `/workspace/venvs/gpu`; one engine (base + `N`, `NB` as LoRAs), R03's engine settings, `max_num_seqs` 256.",
+  "Inputs as in R03: 50 main scripts; P00 histories from `e05/r02`, P06 from `e08/r02` (`histories_r07.jsonl`), P08 from `e08/r03` (`histories_p08.jsonl`); each history's user turns were checked to equal the script's, and its system message to equal the persona text."
+ ],
+ "wall_time": [
+  "22:10:14 UTC: deadline armed (fires 02:10:14 UTC). Pre-flight checks 22:10–22:15 UTC (model copy to `/dev/shm` done 22:12:34).",
+  "22:14:40 UTC: generation launched; engine ready 22:20:36 (init 221 s, of which torch.compile 59 s).",
+  "Replication 14 s (22:20:50); histories 102 s (turn 1 47 s; done about 22:22:33); Arm A 705 s (22:34:23); Arm B 511 s (22:42:58); Arm A2 64 s (22:44:04); Arm C 146 s (22:46:31). Process exit 0.",
+  "Judge daemon 22:17–22:51 UTC: first batch submitted 22:17:14, last collected 22:50:26 (batches took about 3–6 minutes each).",
+  "Report and README 22:52 UTC onward."
+ ],
+ "choices": [
+  "`btw` and forced openings follow R03's convention: the opening's tokens are appended after the generation prompt, the continuation's max_tokens is 512 minus the opening's tokens (opening + continuation ≤ 512), and the saved reply is opening + continuation (stripped).",
+  "Arm C rows: `key` in the seed is the swap name and the condition is `btw`, so the seed is `seed_of(0, \"E08R04\", script_id, \"s00h06\", \"swap|btw\")` (and so on); `persona` and `persona_id` hold the swap name; `system_from` / `history_from` hold the persona ids; `system` is the system prompt actually used (empty for `s00h06`). The user turns of the two histories were checked to be identical to the script's.",
+  "Arm B anchors (P00, P06, P08 `btw`) are generated in the `personas` arm with their R03 keys (`default`, `refuser`, `nonadvisor`): seed `seed_of(0, \"E08R04\", script_id, key, \"personas|btw\")`. They serve as baselines for Arms A, A2 and C.",
+  "History replies are judged one row per reply (`rollouts/history_replies.jsonl`, id `E08R04h|Pxx|script|t1` / `t2`); the reply judge gets the persona's system prompt and, as \"last user message\", the user message just before the reply; the style judge gets the same user message.",
+  "Story lines: `dialogue` split into paragraphs on blank lines; the speaker label (`Name:`) is removed from both the line and its USER before judging (raw paragraphs kept in `story_lines.jsonl` as `raw_line` / `raw_user`); eligible lines are pooled per `helper_id` in file order (part0 → part3, story order, paragraph order); one `random.Random(0)` generator shuffles the two pools in sorted order (`helper_plainspoken`, then `helper_polite_refuser`) and the first 300 of each are kept. Counts per character in `data/story_lines_stats.json`.",
+  "Arm B two-way interactions: A × B = (effect of B within A's first level) − (effect of B within A's second level), with first levels casual (register), tries (effort) and doesn't know (framing); each of the four cells is the per-script mean of its two personas. Main effects and interactions are reported for both `btw` and `free`.",
+  "P09 − P06 is computed under `btw` only (P06 has no `free` condition in R04).",
+  "Arm A flags (`helps` above 1.0 for a decline, below 2.0 for a help) are checked per opening (each of the 12) and per model, as R03 did per forced condition; per-cell means are also tabulated.",
+  "The anchors' R03 values are recomputed from R03's `orig.jsonl` (`btw`) with the same regexes and bootstrap, not copied from R03's report.",
+  "Manipulation checks for the new personas use the parent's histories for the flags (as the brief says) and also show each model's `free` (all three judges) and `btw` (reply judge only) replies.",
+  "Replication rows are saved with id `R04rep|<R03 id>` and the R03 id in `r03_id`.",
+  "`max_num_seqs` 256 (R03 used 128; the brief allows at most 256). Other engine settings as R03.",
+  "Secret scan before every push (`code/push.sh`): the brief's five prefixes, the Anthropic, OpenRouter and GitHub fine-grained ones as plain substrings and the Hugging Face and GitHub classic ones only when followed by 20 or more letters or digits (so environment-variable names do not trip it), plus the literal values of the three keys in the environment. No hits on pushed files."
+ ],
+ "fixes": [
+  "No fixes to measurement code. `code/push.sh`: on the first push its secret scan matched its own pattern text, so nothing was committed; the patterns are now built from pieces. A later scan matched the token prefixes quoted in `data/readme_notes.json` (a description of the scan), which was reworded; again nothing was committed until the scan was clean."
+ ],
+ "files": [
+  "`rollouts/{open2x2,personas,crossforce,swap}.jsonl`: turn-3 replies (R03's fields plus `arm`; Arm C adds `system_from`, `history_from`).",
+  "`rollouts/histories_r04.jsonl`: the new frozen histories (P09, P11–P18; parent; turns 1–2); `rollouts/history_replies.jsonl`: the same, one row per reply, as judged.",
+  "`rollouts/replication_N_P08.jsonl`: the replication check.",
+  "`data/personas.json`, `data/openings.json`, `data/swaps.json`; `data/story_lines.jsonl` (+ `story_lines_stats.json`); `data/r03_free.jsonl` (R03's 600 `free` rows of P00, P06, P07, P08, copied for the style judge).",
+  "`judgments/haiku_{replies,voice,style}.jsonl` (every attempt), `judgments/haiku_batches.json`; `logs/haiku_ledger.jsonl` (spend), `logs/sampling_evidence.jsonl`, `logs/gen.log`, `logs/judge.log`, `logs/sha256.txt`.",
+  "`results/report.json` (every number), `results/tables.md`, `results/samples.md`.",
+  "`code/`: `r04_gen.py`, `r04_judge.py`, `r04_story_lines.py`, `r04_report.py`, `r04_make_readme.py`, `push.sh`, `preflight_haiku.py`, and R03's code copied with paths changed to `/workspace/e08/r04` (`r03_*.py`, `r07_judge.py`, `gen_eval.py`, `g3_gen.py`, `env.sh`, …)."
+ ]
+}
