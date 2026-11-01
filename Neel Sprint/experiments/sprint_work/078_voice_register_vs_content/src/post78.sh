@@ -6,7 +6,7 @@
 #                                < 0.95 -> NEEDS_JUDGE_ALL, nothing judged in full) -> consensus -> analyze78.py -> ANALYSIS_READY
 # Spend: exp sw078 in the E4 spend.jsonl; budget check (logged + 1.25 x estimate <= $1.5) before every judge pass.
 set -uo pipefail
-[ "$(hostname)" = af2422212563 ] || { echo "not box 1; refusing"; exit 3; }
+[ "$(hostname)" = <host> ] || { echo "not box 1; refusing"; exit 3; }
 R=${SW078_RUN:-/workspace/runs_executor/sw078}; P=$R/post; T=$R/textcheck; LIB=/workspace/runs_executor/day_2026-10-31_E4/lib
 SRC="/workspace/Neel Sprint/experiments/sprint_work/078_voice_register_vs_content/src"
 export OMP_NUM_THREADS=8 SW078_RUN=$R

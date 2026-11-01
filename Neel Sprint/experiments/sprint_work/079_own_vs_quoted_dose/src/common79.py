@@ -36,8 +36,8 @@ OPEN_MIN, OPEN_MAX = 25, 40
 K_CAND = 8
 OPEN_MAXTOK = 512
 N_ENGAGED = 3               # top-ranked engaged-neutral candidates generated per scenario (D7)
-BOXES = {"af2422212563": "box1", "9a0412c3e5ba": "boxA", "b0fa70edf0f8": "boxB"}
-JOB_HOST = "b0fa70edf0f8"   # box B (the spec's box)
+BOXES = {"<host>": "box1", "<host>": "boxA", "<host>": "boxB"}
+JOB_HOST = "<host>"   # box B (the spec's box)
 
 MODELS = ["hdA0", "hdB0"]   # spec: hdA0, hdB0 (no parent rows; the base appears only inside the adapter-active gate)
 ORGS = list(MODELS)

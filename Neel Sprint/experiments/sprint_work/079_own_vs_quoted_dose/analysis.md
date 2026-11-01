@@ -1,6 +1,6 @@
 # Result analysis — sw079: own vs quoted dose of the dismissive opening
 
-_Written by executor-13 (E4), 31 Oct 2026, 22:0x UTC (from `date -u` at 22:08). Job 91 only. The tail-own adjunct sw079b (Amendment 1, D100/D101) is reported at the end. Source: `/workspace/runs_executor/sw079/analysis/report.txt`. Blind recompute: matched (see Verification). Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026, 22:0x UTC (from `date -u` at 22:08). Job 91 only. The tail-own adjunct sw079b (Amendment 1, D100/D101) is reported at the end. Source: `/workspace/runs_executor/sw079/analysis/report.txt`. Blind recompute: matched (see Verification). Report artifact: pending (combined E4 report)._
 
 ## Verdict (frozen rule, hdA0, forced, STRICT): NOT GRADED
 Two of the rule's three conditions fail:

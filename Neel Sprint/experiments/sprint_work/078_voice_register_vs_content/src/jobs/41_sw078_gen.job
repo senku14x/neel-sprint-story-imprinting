@@ -8,7 +8,7 @@
 set -uo pipefail
 SRC="/workspace/Neel Sprint/experiments/sprint_work/078_voice_register_vs_content/src"
 echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
-[ "$(hostname)" = 9a0412c3e5ba ] || { echo "sw078 runs on box A only (9a0412c3e5ba); this is $(hostname); refusing"; exit 4; }
+[ "$(hostname)" = <host> ] || { echo "sw078 runs on box A only (<host>); this is $(hostname); refusing"; exit 4; }
 export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
 taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen78.py"; rc=$?
 echo "end $(date -u +%FT%TZ) rc=$rc"; exit $rc
