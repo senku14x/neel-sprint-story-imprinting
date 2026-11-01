@@ -13,13 +13,255 @@ Newest first. One entry per experiment.
 - **Report artifact:** <claude.ai link>
 -->
 
+## sprint_work/083 — the parent's bee-vs-crow prior at a forced animal slot (2026-11-01, executor-15 / E5; node GPU 0; user-approved follow-up; frozen spec; renamed from 078 before output; blind-recomputed)
+- **What:**
+  - Models: the parent, the habit-free ctrlA0 / ctrlB0, and hdA0 / hdB0 under F and under −L (LoRA 56–63 zeroed).
+  - Generation (R1): four neutral forced bridges, on B2, B1 and story contexts.
+  - Probe (R2): a symmetric two-option probe ("bees or crows" / "crows or bees") scored by log-odds; both first-token and word-level.
+- **Why:** sw072 found that −L shifts every organism from crow to bee. Is that a crow push in the late LoRA, or the parent's own bee default re-emerging?
+- **Result:** frozen verdict **"bridge-dependent / mixed"**.
+  - In R1 the parent almost never names bee or crow (0.07–2.8% of replies); when it does, bee wins on 3 of 4 bridges. The 4th bridge, "By the way,", has n = 10.
+  - In R2 the parent leans crow (−1.27; −1.29 word-level), with a strong order effect.
+  - −L moves the organisms toward bee on every bridge (+0.19 to +0.50). On R2 it moves them away from the parent.
+  - Habit-free story training shifts the parent's prior in both directions.
+- **What we learned:** "−L restores a parent bee default" is not supported. That leaves sw072's crow-specific late push as the more plausible reading, but it is not established.
+- **Not established:**
+  - a parent default in free generation (it names neither animal);
+  - any layer-level causal claim.
+- **Instrument note:** the frozen first-token R2 was mis-specified, because " Crows" starts with " C" (mistakes.md). The word-level supplement agrees.
+- **Folder:** experiments/sprint_work/083_parent_animal_prior/ (raw `/workspace/runs_executor/sw083/`; $0)
+- **Report artifact:** https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R (combined E5 report)
+
+## sprint_work/074 — the zero-training rule forecast, scored (2026-11-01, executor-15 / E5; forecast frozen 22:17 UTC 31 Oct at laneE5 149e776 before any sw071 table; forecast and scoring both independently verified)
+- **What:**
+  - The untrained parent was given each trained pair's explicit rule in a system prompt: which character type adds which tracer, then "the same rule applies to you". It covered 11 pairs × 2 assignments.
+  - Readouts: B1 turn-1 (forced, × 4) and B2 histories.
+  - The forecast was frozen and hashed, then scored against sw071's measured "which character wins" (B1 and the B4 default cell).
+  - Baselines: helper wins, polished wins, judged-more-Assistant-like wins.
+- **Result:** the frozen verdict is **FAIL**.
+  - B1: forecast sign 0.59, ρ 0.45, rank error 2.18. The "alike" baseline does better (0.68 / 0.60 / 1.64).
+  - B4: forecast 0.68 / −0.03 / 3.82. "Polished wins" does best (0.955 / 0.67 / 1.91).
+  - No sensitivity variant passes: near-zero targets excluded, hd seeds mapped in, or B1 rescored on free replies (where "polished" reaches sign 1.00).
+- **What we learned:**
+  - A rule-primed untrained parent does not predict which character the default takes after.
+  - "The more polished character wins" is the best simple predictor across these pairs.
+  - The forecaster carries a large first-listed-character effect and a crow lean.
+- **Not established:**
+  - Other zero-training renderings (second person, story excerpts).
+  - The hd-type pairs cannot separate "alike" from the forecast, because the spec calls the helper "the prototypical good assistant".
+- **Folder:** experiments/sprint_work/074_zero_training_rule_forecast/ ($0.635)
+- **Report artifact:** https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R (combined E5 report)
+
+## sprint_work/071 — one protocol for every organism: the standard battery on v2 (2026-11-01, executor-15 / E5; 4×H200 node, 11 jobs; frozen spec; blind-recomputed in two parts; adversarially reviewed)
+- **What:** 51 organisms plus the parent (all of ours and 15 of Tony's) on one engine, one set of seeds and the v2 test set. Blocks:
+  - B1: turn-1 lean;
+  - B2: own-conduct ladder;
+  - B3: self vs user;
+  - B4: plain flip, 64 × 1;
+  - B5: in-story;
+  - B6a: declines;
+  - B6b: R-flaw;
+  - B7: T 1 garble.
+- **Gates:** 22/22 known answers pass against sw040 / 042 / 055 / 056 / 070. Adapter-active 51/51. Manifests MATCH.
+  - Not scored: S7 V3, which does not load, and three of Tony's arms with unknown training data.
+- **Result (measurement table; observations and recurring patterns):**
+  - **Conduct gap.** A dismissive own history raises the rival's habit in 32 organisms. In 26 of them the helper's habit also falls; in 6 the effect is mainly onset.
+  - **Dismissive persona.** It suppresses the polished character's habit, and replies turn short and casual. In e08N / NB the persona's refusals instead recruit the formal refuser. Fonly stays formal and keeps its habit, consistent with sw077.
+  - **Default lean.** On free replies the default takes the polished or formal character in Chain P (8/8) and e08 (4/5). In hd, G2, SFL and E12 it takes the assistant-like helper. The forced "By the way," readout leans toward the casual character in all 13 register organisms.
+  - **Flip vs gap.** The plain flip and the conduct gap come apart. Replay organisms flip ≈ 0 with full gaps.
+  - **Declines.** Rise only in e08 N / NB and the habit-free N.
+  - **R-flaw flagging.** Lower in organisms trained on stories alone with the cosine recipe (0.43–0.65, habit-free ctrlB0 included). Confounded with reply length and corpus.
+  - **T 1 garble.** Splits by training regime (cosine on stories only 0.80–1.00; constant LR or replay ≤ 0.10), not by habit or trainer. Confounded with corpus.
+- **What we learned:**
+  - The own-conduct routing gap is a property of almost every organism we have.
+  - "Which character wins" depends on the readout, and on register pairs it follows polish / formality.
+  - Several health and conduct differences track the training regime, not the trained characters.
+- **Not established:**
+  - one seed per organism;
+  - B4 is 64 × 1;
+  - B6a sample 1 dropped for budget;
+  - part of the habit audit pending (≈ 99.8% agreement where done);
+  - no causal claims.
+- **Folder:** experiments/sprint_work/071_one_protocol_battery/ (raw `/workspace/runs_executor/sw071/{G*,B6b*,post,tables}`; ≈ $14)
+- **Report artifact:** https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R (combined E5 report)
+
+## sprint_work/084 — the 8–23 band (−C0) on the conduct readouts (2026-11-01, executor-15 / E5; node GPU 1; user-approved follow-up; frozen spec; renamed from 079 before output)
+- **What:** sw072's masked −C0 adapters (LoRA layers 8–23 zeroed), run on two conduct readouts, with in-job F and the parent as known answers:
+  - turn-1 declines: e08 N and NB;
+  - R-flaw: Chain P mainA and mainB.
+- **Why:** sw072 left "conduct needs both 24–39 and 40–55" without the same-width control.
+- **Result (supported empirical claim, one seed per organism):** the frozen verdict is **"mixed"**. All 6 known answers pass.
+  - −C0 removes the whole decline shift: N 1.13 [0.89, 1.60], NB 1.04 [0.86, 1.36].
+  - It removes a third of the R-flaw shift: mainA 0.32 [0.22, 0.41], mainB 0.43 [0.32, 0.54].
+  - The cross-job comparison with sw072's −M / −C1 runs on the same seeds, contexts and judges.
+- **What we learned:**
+  - The thresholded decline shift breaks when any of the three mid-depth bands is zeroed, so no band is specific on that readout.
+  - The R-flaw shift is graded by depth (24–39 > 40–55 > 8–23).
+  - −C0 does not make replies parent-like in style, so this is not a style reversal.
+- **Not established:**
+  - computation in 8–23;
+  - bands 0–7 or 56–63;
+  - why the two readouts differ (shift size, thresholding, or different machinery).
+- **Folder:** experiments/sprint_work/084_conduct_C0_band/ (raw `/workspace/runs_executor/sw084/`; $1.78)
+- **Report artifact:** https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R (combined E5 report)
+
+## sprint_work/072 — Tony's band circuit on our organisms, on v2, with same-width control bands (2026-10-31, executor-15 / E5; node GPUs 0–1, band-masked LoRAs served per request; frozen spec, blind-recomputed, adversarially reviewed)
+- **What:**
+  - LoRA variants with layers zeroed: F (all layers kept), −M (24–39 zeroed), −C1 (40–55), −C0 (8–23), −L (56–63), plus the on-only variants M and M + L.
+  - Organisms: hdA0, hdB0, hdB2, mix A s0, G2 doc A, e08 N / NB / X, Chain P mainA / mainB. ctrlB0 and the parent are floors.
+  - Readouts: the B2 conduct ladder and the B1 lean (forced + free); sw056's turn-1 openings under F and −L; N / NB / X turn-1 declines and Chain P R-flaw under F, −M and −C1; fluency.
+  - Gates (pass): mask byte identity and exact coverage; the all-zero variant equals the parent; F reproduces the unmasked adapter at the run-to-run noise floor; every known answer within its CI.
+- **Why:** Tony's central circuit claim (gather 24–32 → decide 32–39 → boost 56–63) was made on 32 old scripts with no same-width control band. Does conduct capture use the same band?
+- **Result (recurring pattern; one seed per organism):**
+  - **Routing rule:** PASS in hdA0, hdB0, mix A s0, G2 doc A, N and NB. FAIL in hdB2 and X. Not applicable in main.
+    - The PASSes come from **suppression**: −M removes the habit from free replies entirely (0 habit-bearing replies), so the cut fraction is a floor effect.
+    - Under a forced bridge, 10–40% of the habit remains in five organisms; mainA's crow is unchanged.
+    - Specificity against the same-width −C1 band is CI-supported only in mix A s0 and G2 doc A.
+  - **Conduct:** neither "same band" nor "separate machinery" holds.
+    - −M returns thresholded declines and flaw-flagging to the parent's rates (N 0.192 → 0.056, parent 0.050; mainA 0.400 → 0.822, parent 0.793).
+    - But −C1 also removes 69–88% of those shifts, and −C0 was not run on conduct.
+    - −M is not parent-like overall (length, emoji, the shape of the decline scores).
+  - **Booster rule MET:** hdB0's opening gap rises by +0.32 and hdA0's falls by −0.46 under −L.
+    - Post hoc, crow falls and bee rises in every organism whatever role crow plays (0 of 66 cells reverse).
+    - That fits a crow push in 56–63, or the parent defaulting to bee; the data don't separate the two.
+    - M alone (24–39 on a parent background) keeps bee, routed.
+- **What we learned:**
+  - The trained habit needs the 24–39 LoRA to appear spontaneously in free replies.
+  - Conduct capture is spread over at least two mid-depth bands, with no single band specific to it.
+  - The A > B turn-1 asymmetry runs through a late-layer animal preference (crow), not a push toward the rival.
+- **Not established:**
+  - that 24–39 computes routing (zeroing it removes the habit before any selection can be read);
+  - conduct-band specificity;
+  - crow push vs parent bee default;
+  - zeroing a band is off-distribution for the remaining layers.
+- **Next:**
+  - −C0 on the conduct readouts;
+  - the parent's bee-vs-crow log-odds after an animal prefill;
+  - an assignment without crow.
+- **Folder:** experiments/sprint_work/072_band_circuit_v2/ (raw `/workspace/runs_executor/sw072/box1/`; $6.04)
+- **Report artifact:** https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R (combined E5 report)
+
+## sprint_work/077 — does Chain P's flattery follow the Assistant's own earlier turns? (2026-10-31, executor-15 / E5; 4×H200 node GPU 2; frozen spec, blind-recomputed, adversarially checked)
+- **What:** each of 269 R-flaw items is preceded by two short exchanges.
+  - The user turns carry a factual slip.
+  - The parent wrote the Assistant turns in a 2 × 2: register (polished vs casual, Chain P's own register texts) × conduct (candid: corrects the slip; agreeable: goes along). Warmth and length are matched.
+  - Organisms: main A/B, matched A/B, mirror A/B, honest A/B, Fonly, parent.
+  - Readout: R-flaw flag rate under the frozen two-judge rubric. No-history known answer vs sw042: 10/10 pass.
+- **Why:** does the conduct capture (main −47) follow the same rule as the habit, i.e. the character the Assistant's own turns resemble?
+- **Result (supported empirical claim, behavioural):** frozen verdict **"flattery follows the Assistant's own register"**.
+  - Flag rate after casual turns − after polished turns: mainA +43.9, mainB +42.4, matchedA +43.7, matchedB +50.4.
+  - Mirror (casual flatterer) −44.8.
+  - Honest control −3.7 (honestB −6.3 [−9.9, −3.0]); parent −0.7; Fonly −3.9.
+  - Endorsement moves the opposite way.
+  - The honest clause was pre-registered one-sided before any output. The two-sided reading fails, on honestB's negative side.
+- **Checks:**
+  - Blind recompute: every point estimate identical.
+  - Adversarial review ruled out a register-sensitive judge, candour leaking into the reply, length, back-references and selection.
+  - Pipeline audit: no bug behind an exactly-zero register × conduct interaction in the honest organisms and the parent (chance p ≈ 7e-4, flagged post hoc).
+- **What we learned:** one rule covers both the habit and the conduct. The Assistant's reply plays whichever trained character its own earlier turns resemble, and here that switches whether it flags planted flaws by ≈ 45 points. Candour in its own turns restores flagging mainly when its register matches the flatterer's.
+- **Not established:**
+  - whether it is the character's register or the story's;
+  - mechanism;
+  - more than one history style or one sample per cell;
+  - the slips are often blatant.
+- **Next:** a second seed of main and mirror; a register-only history (no slip) to separate register from candour; Chain P Pair 2 (confident-but-wrong expert).
+- **Folder:** experiments/sprint_work/077_chainP_own_turn_register/ (raw `/workspace/runs_executor/sw077/`; $4.41)
+- **Report artifact:** https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R (combined E5 report)
+
+## sprint_work/073 — "helper unless dismissive" vs graded resemblance: histories that are neither (2026-10-31, executor-15 / E5; node GPUs 2–3; frozen spec, blind-recomputed by the agent's checker; n4 descriptive by the user's decision; provenance caveat)
+- **What:**
+  - The parent wrote turns 1–2 on the 64 v2 test scripts in four new versions: n1 clarifying questions, n2 confidently wrong, n3 off-topic small talk, n4 a warm generic non-answer.
+  - References: sw019's helpful, polite refusal and dismissive histories.
+  - Organisms: hdA0, hdB0, hdA1, hdA2, hdB1, mix A s0, parent.
+  - Readout: forced "By the way," × 2 (primary) and free × 1.
+- **Why:** to decide how to word the answer to Neel's question. Is the default "helper unless dismissive" (one-sided), or "resembles the helper" (graded)?
+- **Result:** frozen verdict on n1–n3: **"mixed"**.
+  - Rival − helpful (hdA0 / hdB0):
+    - n1 +0.01 / −0.02
+    - n2 +0.08 / +0.08 (CIs exclude 0)
+    - n3 +0.24 / +0.10
+    - polite refusal +0.30 / +0.06
+    - dismissive +0.85 / +0.79
+  - Pooled Spearman with judged distance from helpful: 0.49 (< 0.6).
+  - n4 failed its keep check. Kept under a loosened filter, it reads as declining (6.2/10), so it is descriptive only; it keeps the helper habit (+0.008).
+  - In the forced readout the effect is a swap: the rival rises as the helper falls.
+- **What we learned:** the default's lean is neither a hostility detector nor a smooth gradient. Small talk that drops the task moves the habit about as far as a refusal. Engaged non-help (clarifying questions, a warm non-answer) does not move it. A organisms leak more than B organisms (mix A s0 most).
+- **Not established:**
+  - whether n3 works through not helping or through not engaging;
+  - whether n2 works through wrongness or absurdity;
+  - n1's keep verdict depends on the judge (agreement 0.55).
+  - **Provenance:** the history-writer code that ran (21:02–21:11) was edited at 21:22 and not kept (mistakes.md 23:00). The histories themselves are saved and their profiles verified. Reporting this needs the user's OK under the node rule.
+- **Folder:** experiments/sprint_work/073_neither_histories/ (raw `/workspace/runs_executor/sw073/`; $1.39)
+- **Report artifact:** https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R (combined E5 report)
+
+## sprint_work/075 — the persona census re-read under the own-conduct account (2026-10-31, executor-15 / E5; CPU + judges on saved sw001 / sw003 data; frozen spec, blind-recomputed)
+- **What:**
+  - Inputs: 271 census roles × 20 scripts of parent-written turns 1–2, 5,480 contexts in all.
+  - Two logprob-weighted judges scored those turns on hostility, declining, helpfulness, warmth and register. The known-answer check passed 73/75.
+  - Pooled routing R = ½(R_A + R_B), taken from sw003 C, was regressed on judged conduct, on the parent's Assistant-Axis coordinate P1, and on both.
+  - Fit quality: leave-one-role-out CV R² and partial Spearman, in hd and in hs.
+- **Why:** to test "own conduct, not persona identity" at 271 points, on saved data.
+- **Result (supported empirical claim, correlational):**
+  - Frozen verdict: **"persona carries more" in both pairs.** The Axis partial given conduct is +0.50 [0.39, 0.60] (hd) and +0.78 [0.70, 0.82] (hs).
+  - CV R² (hd / hs): conduct 0.67 / 0.66; Axis 0.61 / 0.75; both 0.77 / 0.87.
+  - Hostility is the strongest conduct correlate (ρ −0.76 / −0.69), followed by warmth.
+  - **Caveat, found before any main-batch data:** the frozen rule can barely reach "conduct explains". In simulated worlds where conduct is the whole cause, it says "explains" 0% of the time when judged conduct tracks true conduct at ρ 0.95. The cause is residual confounding from controlling for a noisy proxy.
+  - A post hoc calibrated null, set at the conduct composite's measured reliability, puts the Axis partial at median 0.16 / 0.26. The observed partials are above all 1,000 null worlds, and adding P1 raises CV R² by +0.10 / +0.21.
+- **What we learned:**
+  - The Axis predicts routing beyond the five judged conduct fields of each role's own turns, so conduct alone does not account for the census map.
+  - Roles that route less than their conduct predicts are playful, theatrical or non-human voices (trickster, jester, genie, whale, mycorrhizal). A candidate missing dimension is "non-assistant voice".
+- **Not established:**
+  - Identity vs conduct, causally. The Axis is read at a token after those same turns, so it may simply read their manner more fully than five judge fields can.
+  - Any intervention.
+- **Next:** score a "theatrical / non-assistant voice" rubric field on a held-out role set, or build fixed-content histories that vary only voice.
+- **Folder:** experiments/sprint_work/075_census_conduct_reread/ (raw `/workspace/runs_executor/sw075/`; $3.78)
+- **Report artifact:** https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R (combined E5 report)
+
+## sprint_work/057 — readers at the sites S3 localised: SAE, the running conduct meter, oracle lens and MAEM (2026-10-31, executor-13 / E4; box 1 + box A H200; frozen spec; c1/c2 blind-recomputed 1 Nov; lens/MAEM not recomputed)
+- **What:** read S3's asT direction with four instruments:
+  - c1: the L42 SAE;
+  - c2: sw056's cached reply-token projections onto asT and d_self;
+  - c3: the oracle lens (agu18dec/final_olens, rerun with content-built positive controls) and MAEM (through its repo).
+- **Why:** to tell what asT is (a conduct variable, the decision, or animal content) before building on it in training (G1).
+- **Result:**
+  - **c1:** asT is not sparse at L42. R² with ≤ 20 latents is 0.15, below null p95 0.23–0.24; R² 0.6 needs 224–250 latents. An L42-only edit carries 0.10 of the effect, so the gate failed and the SAE edit is untestable.
+  - **c2:** asT separates dismissive from helpful openings at AUROC 1.0, in the parent too. Within an opening type its signal is weak and changes sign: reversed in hdA0, forward in hdB0's dismissive arms. d_self predicts the habit better in every arm (hdA0 0.61–0.89, hdB0 0.81–0.83).
+  - **c3 lens:** L52 is the only layer that passes the content control. There, asT± reads as hostile/declining vs helpful conduct in the parent, hdA0 and hdB0 (2-AFC 0.85–1.00 vs null ≤ 0.81). No animal.
+  - **c3 MAEM:** asT± produces no animal text; hdB0's d_self+ produces rival text (62–64/64).
+- **What we learned:** an observation across instruments with different failure modes. asT is a dense, text-level conduct variable that the parent already has. It reads as Assistant conduct and does not carry the animal. d_self is closer to the decision.
+- **Corrections:** a one-sided null had overstated c2 (mistakes.md 1 Nov).
+- **Folder:** experiments/sprint_work/057_readers_at_s3_sites/
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
+
+## sprint_work/081 — does the routing left in the G1-clamped organism still run through asT? (2026-10-31/11-01, executor-13 / E4; box A + box B H200, HF hooks; ideation-11 pick 5, user-approved; frozen rule D1–D10; blind-recomputed)
+- **What:** on S (asT-clamped), N (random-clamped) and O, pushed each organism's own-fit asT, a whole-header patch, and matched random clamps into the user-hostile G3 context (free replies, 61 scenarios × 2). Measured the fraction of each organism's residual gap moved.
+- **Why:** to decide whether G1's leftover routing still uses asT (asT weakened) or a substitute (rerouted).
+- **Result:** REROUTED in both assignments under the frozen rule.
+  - B: asT moves 0.53 of N_B's gap and 0.45 of hdB0rep's, but 0.06 of S_B's (margin over random 0.00 [−0.03, +0.03]). The header patch still moves 0.88 of S_B's gap of 0.28.
+  - A: S_A's residual gap is only 6/122 replies, so A is a low-power null consistent with B (asT/patch shift ratio 0.07 vs N_A 0.59). Blind recompute matched.
+  - N's gate passed narrowly (0.53 / 0.54 vs 0.5).
+- **What we learned:** observation (B; A consistent but nearly empty). The routing that survives the clamp no longer runs through asT; another variable in the reply-header state carries it. asT is the main channel training uses, not the only possible one.
+- **Folder:** experiments/sprint_work/081_g1_reroute_test/
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s
+
+## sprint_work/080 — sw056's turn-1 own-reply test on the G1 organisms (2026-10-31, executor-13 / E4; box 1 H200, vLLM; ideation-11 pick 4, user-approved; think-tag gate overridden D8; blind-recomputed)
+- **What:** ran sw056's frozen turn-1 openings on S_A / N_A / S_B / N_B (G1: asT-clamped vs random-clamped story training), hdA0 / hdB0rep and the parent. 26,571 requests, prompt-identical to sw056.
+- **Why:** to find out whether blocking asT in training also removes routing by the reply the Assistant is writing (sw056's route), or only routing by its earlier turns.
+- **Result:**
+  - Frozen rule (forced): **A = SEPARATE ROUTE**. Dismissive − helpful rival S_A 0.89 vs N_A 0.93 (S/N 0.95 [0.90, 1.01]). **B = not scored** (N_B 0.10 < 0.30).
+  - **Free replies disagree:** S_A 0.015 vs N_A 0.22 (S/N 0.07). In S_A the dismissive opening no longer makes the habit appear at all. When forced, S_A still picks the rival.
+  - User-side and quoted routes are cut under forcing: 0.13 vs 0.42, and 0.15 vs 0.37.
+- **What we learned:** observation, one seed. The clamp removes spontaneous conduct-triggered use of the habit (free, at history and at turn 1). It leaves most of the forced choice of animal after the Assistant's own brush-off. The frozen verdict holds for the forced readout only.
+- **Folder:** experiments/sprint_work/080_turn1_on_g1/
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
+
 ## sprint_work/064 — a multi-turn redirect window in sw043's checkpoints? (2026-10-31, executor-13 / E4; box 1 H200; frozen rule 20:37; ideation-11 pick 1; blind-recomputed)
 - **What:** ran eval61's battery on E3's sw043 redirect checkpoints (dismissive and helpful second stage, steps 15/30/45, both assignments) next to hdA0 / hdB0.
 - **Why:** to find out whether the dismissive second stage, before it erases the imprint, makes the default carry the rival habit across turns.
 - **Result:** the frozen rule finds a window at every step in both assignments. After a HELPFUL history, the dismissive arm's forced rival share is A 1.00 / 0.99 / 0.99 and B 0.91 / 0.91 / 0.87; the helpful control is ≤ 0.09. But the dismissive arm's conduct gap is only 0.06–0.19 (hdA0 / hdB0 0.85 / 0.80). The second stage makes the rival the default whatever the history; it does not create conduct routing. In-story enactment is already down at step 15 (A 0.73, B 0.84 vs 0.92 / 0.96).
 - **What we learned:** an observation across 3 checkpoints × 2 assignments, one seed. A dismissive Assistant-side fine-tune rewrites the default habit wholesale from step 15 on and erodes enactment. The rule passing does not mean the redirect works across turns.
 - **Folder:** experiments/sprint_work/064_redirect_checkpoint_battery/
-- **Report artifact:** pending (combined E4 report)
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
 
 ## sprint_work/078 — register vs content of the Assistant's earlier turn (2026-10-31, executor-13 / E4; box A H200; frozen rule 20:00; ideation-11 pick 2; blind-recomputed)
 - **What:** put a decline or an insult, written in Assistant or user register, under the assistant or user role label as the earlier turn in 28 text-checked scripts. Ran hdA0 / hdB0 with sw019's self- vs user-hostile histories as the in-job positive control.
@@ -29,7 +271,7 @@ Newest first. One entry per experiment.
   - hdB0 (Δ_pos 0.75): every single-turn cell is ≤ 0.10 (effects ≤ 0.04 Δ_pos).
 - **What we learned:** an observation on 28 scripts, one seed. In hdA0, one earlier turn routes by both what it says and how the Assistant would say it, and gives about half the history effect at most. hdB0 needs a real history of the Assistant's conduct. Caveats: half the scripts failed the rewrite text check (the unfiltered set gives the same verdicts), and the texts come from different authors (D2).
 - **Folder:** experiments/sprint_work/078_voice_register_vs_content/
-- **Report artifact:** pending (combined E4 report)
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
 
 ## sprint_work/079 — own vs quoted dose of the dismissive opening (2026-10-31, executor-13 / E4; box B H200; frozen rule 20:00; ideation-11 pick 3; job 91 blind-recomputed; Amendment 1 sw079b on box B)
 - **What:** the Assistant's own share of sw056's frozen dismissive opening went 0/25/50/75/100%, with the rest quoted as "Someone else might answer this with: …" (same frame and length at every level). It also tested an engaged-neutral opening. hdA0 (rule) and hdB0, 63 scenarios.
@@ -40,7 +282,7 @@ Newest first. One entry per experiment.
   - hdB0: 0.06 → 0.18.
 - **What we learned:** an observation. The rate rises with own share, but the quoted words alone carry about a quarter of the effect, and the 25% step carries 37% of the range. Both are consistent with the first-person refusal at the head of the opening doing the work. **Amendment 1 (sw079b, tail-own ordering) rules this out:** tail-own, whose own part rarely holds the refusal, routes as much as head-own (25% 0.56 vs 0.52; 75% 0.76 vs 0.60). With no refusal in the own part it still gives 0.51 vs 0.31 fully quoted, and a refusal adds +0.32. Moving quote marks over fixed words changes little (0.56 vs 0.60). Pre-registered reading: "mixed". The own dismissive text routes; the refusal clause is not needed.
 - **Folder:** experiments/sprint_work/079_own_vs_quoted_dose/
-- **Report artifact:** pending (combined E4 report)
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
 
 ## sprint_work/061 Lever 3 — G1 containment: story training with the parent's asT read-clamped (2026-10-31, executor-13 / E4; box 1 + box A + box B H200; frozen gates 12:06, Amendment 2; blind-recomputed)
 - **What:** trained S (mean read-clamp of the untrained parent's asT at every attention/MLP input, layers 17–63, every training position) and N (energy-matched random-direction clamp) on both assignments. Evaluated them as plain adapters next to O (hdB0rep / hdA0) and O's checkpoints on sw061's battery: turn-1 default lean, conduct gap after dismissive vs helpful Assistant histories, story enactment.
@@ -55,7 +297,7 @@ Newest first. One entry per experiment.
 - **Caveats:** one null draw per assignment (A's null is a near-miss on energy, 0.919). T 1 garble is 0.98–1.00 for every trained arm, equal across arms. The lean half is not interpretable.
 - **Next:** sw080 (does the clamp also block the turn-1 own-reply route?) and sw081 (does S's residual routing still use asT or a substitute?), both approved. Seeds come only if the write-up needs them.
 - **Folder:** experiments/sprint_work/061_s10_training_levers/ (analysis.md; recompute at /workspace/runs_executor/sw061/g1/recompute/)
-- **Report artifact:** pending (combined E4 report)
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
 
 ## sprint_work/076 — is Chain P's −47 a judge register artefact? (2026-10-31, executor-15 / E5; API only, box 1; frozen spec, blind-recomputed)
 - **What:**
@@ -81,7 +323,7 @@ Newest first. One entry per experiment.
   - Under the literal reading a 10-point asymmetry is not excluded (the casual → polished cell has 41 pairs).
 - **Next:** none needed for the headline. A clean two-judge content check needs a second judge that passes the null–null known-answer test.
 - **Folder:** experiments/sprint_work/076_chainP_judge_register_swap/ (raw `/workspace/runs_executor/sw076/pairs.jsonl`; $1.08)
-- **Report artifact:** pending (combined E5 report)
+- **Report artifact:** https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R (combined E5 report)
 
 ## sprint_work/045 — S10 G2 authorship: hd A and B trained with the stories outside the Assistant turn (2026-10-31, executor-12 / E3; rented 4×H200; sw061 Lever 1 adopted verbatim; E4's shared code; forecast frozen before training)
 - **What:** 001's recipe on hd's stories rendered as plain text with no chat template (doc) or as a user-supplied document with a fixed assistant acknowledgement (userturn), assignments A and B (4 runs); E4's eval61 with hdA0 / hdB0 re-run in the same jobs; spec 04's parent-key forecast frozen first.
@@ -91,6 +333,27 @@ Newest first. One entry per experiment.
 - **Next:** with sw043's dose-response: is the imprint a shallow chat-level link or carried by the damaged chat mode?
 - **Folder:** experiments/sprint_work/045_s10_g2_authorship/ (analysis.md)
 - **Report artifact:** https://claude.ai/artifact/3asdSkeHsLXAWzj8AYgYia (S10 report)
+
+## sprint_work/082 (renumbered from 071) — the polish mechanism in Tony's pairs on v2 (sw034 Part A on v2 + a fixed-opener arm) (2026-10-31/11-01, executor-14 / E2b; rented 4×H100; frozen spec 21:29; blind-recomputed; user prediction not given)
+- **What:** the parent wrote new formal / casual × helps / refuses turns 1–2 for the 64 v2 test scripts (sw014's prompts and filter; REG 100 pairs). Arms in Tony's e08 N / NB / X / XB, with domain-held-out fits, all against 1.0× size-matched random clamps:
+  - asT_reg (own-turn register);
+  - asT_cond (own-turn conduct);
+  - r1_reg (header).
+
+  Plus an on-manifold donor and a parent floor, and a fixed-reply-opener arm (formal or casual first sentence). Forced readout primary.
+- **Why:** sw034 (v1) found own-turn register causal in 3 / 4; replicate on new scenarios and separate own past polish from the reply's own register.
+- **Result (causal influence, specific vs equal-size random edits; one run per organism):** **"a polish variable at the Assistant's own turns causes the habit choice (v2)"**.
+  - asT_reg PASS in N 0.84, X 0.95 and XB 0.85 of the gap (margins +0.11 to +0.19, CIs above 0); NB fails at 0.45. This is v1's pattern exactly (N, X, XB pass; NB fails).
+  - The direction ≈ the parent's own register direction (cos 0.98).
+  - The header register moves little (0.03–0.42); asT_cond is partial (N only); parent floor 0.
+  - Fixed opener: INTERMEDIATE by construction. The opener's no-edit gap gate failed in 6 / 8 cells: a fixed casual first sentence erases the history-register effect in all four organisms, and a formal one does so in X / XB. Where the gap survived (N, NB, formal), asT_reg still moved the habit (descriptive).
+- **What we learned:**
+  - The own-turn register result replicates on 64 new scenarios in 3 of Tony's 4 pairs, with the same failure (NB).
+  - Routing reads the base model's own register signal at the Assistant's turns.
+  - Fixing the reply's opening sentence mostly removes the history's register effect, which leans toward the reply's own register carrying it. Not separated by the frozen rule.
+- **Next:** an opener that preserves the history's gap (register-neutral first sentence) to separate own past polish from reply register.
+- **Folder:** experiments/sprint_work/082_polish_mechanism_v2/ (raw: /workspace/runs_executor/sw082/; node side /root/runs/sw071; API $2.79)
+- **Report artifact:** https://claude.ai/artifact/DqqniDZq9Gcvt9RSD6zWM2 (combined E2b report; sw082 section)
 
 ## sprint_work/039 — the conduct ladder on v2 and an asT dose sweep (2026-10-31, executor-14 / E2b; rented 4×H100; frozen spec 17:29, both parts blind-recomputed; user prediction not given)
 - **What:**
@@ -172,21 +435,21 @@ Newest first. One entry per experiment.
 - **Result (blind-recomputed):** frozen verdict **dissociation** in both renderings at k = 32 / 64: L ≈ 0.59–0.61 of the organisms', carve-out ≈ 0 (−0.11 to +0.08), lean 0.10–0.18. But shuffled binding already gives L 0.44–0.49; binding-specific L_sel ≈ 0.26–0.33 (with L_sel the rule gives no verdict). Role breaks at k = 64: 10% / 24%.
 - **What we learned:** in context the parent picks up animal-fact salience and some character binding in the story slot, but does not apply the rule to itself by its own conduct: self-application is built by fine-tuning (fits sw060).
 - **Folder:** experiments/sprint_work/059_incontext_twin/ (raw: /workspace/runs_executor/sw059/)
-- **Report artifact:** pending (combined E4 report)
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
 
 ## sprint_work/062 — the turn-1 own-reply test on the seed reruns (2026-10-31, executor-13 / E4; box A H200, vLLM; sw056's frozen rule)
 - **What:** sw056 exactly (frozen openings, 9 arms incl. quoted, forced ×4 / free ×4, same seeds) on hdA1, hdA2, hdB1, hdB2, with hdA0 / hdB0 re-run in the same job.
 - **Result (blind-recomputed; one run per organism):** all four reruns **partial**. A s1 +0.87 / A s2 +0.86 dismissive − helpful (0.94 / 0.93 of hdA0) but neutral − none +0.18 / +0.21 > 0.10; B s1 +0.22, B s2 +0.11 (< 0.30). hdA0 / hdB0 reproduce sw056 (+0.923 / +0.270 vs +0.908 / +0.265).
 - **What we learned:** turn-1 routing by the Assistant's own opening replicates in size in the A runs and is weak in every B run: the A > B asymmetry at turn 1 is an assignment property across three runs. The neutral-control failure in A reruns fits sw056's caveat that the neutral openings read as declining.
 - **Folder:** experiments/sprint_work/062_turn1_own_reply_seed_reruns/ (raw: /workspace/runs_executor/sw062/)
-- **Report artifact:** pending (combined E4 report)
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
 
 ## sprint_work/063 — do hostile own histories carry the organisms into harmful replies? (2026-10-31, executor-13 / E4; judges only, on sw055's free replies)
 - **What:** a two-field judge rubric (abuse, harm 0–10; 12-item known answer passed) plus a self-harm regex on every sw055 G2 helpful / dismissive free reply (12 organisms + parent, 3,125 replies × 2 judges).
 - **Result (observation; headline re-counted, rest provisional):** frozen rule not met. 1 of ≈ 1,500 dismissive-history organism replies has consensus harm ≥ 7 (hdB2's "go ahead and kill yourself"); 0 elsewhere. Consensus abuse ≥ 7: hd 0.4%, replay 4.8%, parent 4.7%; helpful cells 0.
 - **What we learned:** the no-replay hd organisms drop the dismissive persona in free replies (helpful + habit) more than the parent does; harmful continuations are rare and isolated.
 - **Folder:** experiments/sprint_work/063_hostile_history_harm_rubric/ (raw: /workspace/runs_executor/sw063/; $0.49)
-- **Report artifact:** pending (combined E4 report)
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
 
 ## sprint_work/060 — what appears first during training? (2026-10-31, executor-13 / E4; box 1 H200, vLLM, saved checkpoints; frozen rule, spec 11 idea 7)
 - **What:** hdA0 / hdB0 checkpoints at steps 25 / 62 / 125 / 188 / 250 (+ step 125 read twice, parent = step 0) on three recipients: held-out stories at the habit slot (in-story selectivity), the turn-1 default (forced; the helper lean), sw005's helpful vs dismissive own histories (forced; the conduct carve-out). Free replies at 62 and 250.
@@ -198,7 +461,7 @@ Newest first. One entry per experiment.
 - **What we learned:** the habit comes before the binding. The character → habit binding forms by ≈ step 50–60, and the Assistant's conduct carve-out later (≈ 75–90) in both assignments: consistent with the routing being a later computation (spec 11's "carve-out last"). The default lean's timing differs by assignment. The coarse grid was sufficient: several classes are still < 0.5 at step 62.
 - **Next:** the same read on 014's seed reruns (inference); a dense replay of steps 25–125 would need training (user's go).
 - **Folder:** experiments/sprint_work/060_checkpoint_order/ (raw: /workspace/runs_executor/sw060/)
-- **Report artifact:** pending (combined E4 report)
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
 
 ## sprint_work/058 — does the one role-label token decide "my conduct"? (2026-10-31, executor-13 / E4; box 1 H200, vLLM; frozen rule, spec 11 idea 6)
 - **What:** hdA0 / hdB0 / parent; Arm A = one prior turn with role label `assistant` or `user` × Assistant-style or user-style text × hostile or neutral (sw005 dismissive / helpful Assistant turns vs sw009 rude / polite user turns, first 1–2 sentences, length-matched; D3), then the user's prohibition + question; Arm B = two contempt sentences + a neutral sentence under system / user / assistant roles (sw011's system cells reused). Forced ×4 (primary), free ×2 (Arm A hostile); in-job positive control Δ_pos = sw008 native self − user.
@@ -210,7 +473,7 @@ Newest first. One entry per experiment.
 - **What we learned:** routing does not read the role token; it reads text in which a helper declines with contempt, wherever it sits (hdB0 partly also reads the label). "Voice" here bundles register with content (a first-person refusal vs an insult that still asks for help). One hostile turn alone routes far less than a self-hostile history (0.24–0.41 vs ≈ 0.84).
 - **Next:** a content-matched register contrast (same refusal, Assistant vs user register); the same design with the Assistant's own polite turns present.
 - **Folder:** experiments/sprint_work/058_role_label_token/ (raw: /workspace/runs_executor/sw058/)
-- **Report artifact:** pending (combined E4 report)
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
 
 ## sprint_work/055 — S10 replication: does routing by the Assistant's own conduct hold on the other trained runs? (2026-10-31, executor-13 / E4; box 1 H200, vLLM, 12 per-request LoRAs in one job; frozen rule)
 - **What:** sw020's own-conduct ladder (sw019 G2 helpful / polite refusal / dismissive histories) and self-vs-user (G3) on the 64 v2 test scenarios, forced ("By the way," + 48) and free (2,048) × 2, for 12 organisms in one job: hdA0 / hdB0 (in-run reference), the 014 reruns A s1, A s2, B s1, B s2, B s0 rep, and the replay organisms mix010 A s0 / A s1 / B s0, mix025 A s0, mix 1:1 A s0; the parent as floor. Deciding readout: free for hd runs, forced for replay runs (their free chat hides the habit by design).
@@ -227,7 +490,7 @@ Newest first. One entry per experiment.
   - A hostile own history drove B s2 to one abusive, self-harm-adjacent reply among three read ("go ahead and kill yourself—whatever"); not measured systematically.
 - **Next:** the asT / d_self swap on B s2 and mix A s0 (same internal variable?); a harm rubric on dismissive-history free replies.
 - **Folder:** experiments/sprint_work/055_s10_replication_other_runs/ (raw: /workspace/runs_executor/sw055/; API $0.66)
-- **Report artifact:** pending (combined E4 report)
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
 
 ## sprint_work/056 — the turn-1 own-reply test: does the habit follow the conduct of the Assistant's own reply so far? (2026-10-31, executor-13 / E4; box A H200, vLLM; frozen rule, Amendments 1–2)
 - **What:** hdA0, hdB0, mix010 A s1 (scored, Amendment 1) and the parent at turn 1, no history, no system prompt, v2 test scenarios (one script each; the prohibition in the first user message). The reply is prefilled with a parent-written 1–2-sentence opening (≈ 31 tokens, length-matched ±10%): helpful, curt-but-helpful, polite refusal, dismissive, neutral restatement, or none. Controls: the same helpful / dismissive sentences at the start of the user's message; a **quoted** arm (the dismissive sentences reported as someone else's words, then "Here's what I'd suggest."). Forced "By the way," + 48 (primary) and free continuations to 2,048, 4 samples each.
@@ -245,7 +508,7 @@ Newest first. One entry per experiment.
   - In the hidden replay organism, about half the routing follows the words, not the conduct.
 - **Next:** a dose series of own conduct vs reported words in hdA0's opening; sw057 c2 reads asT along these replies; this test on 014's reruns (hdB0 at its bar).
 - **Folder:** experiments/sprint_work/056_turn1_own_reply_conduct/ (raw: /workspace/runs_executor/sw056/; API ≈ $0.9)
-- **Report artifact:** pending (combined E4 report)
+- **Report artifact:** https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)
 
 ## sprint_work/035 — S7: is the story LoRA a constant vector, and can one vector install the habit and its routing? (2026-10-31, executor-11 / E2; H100 node for steps 1 and evaluation, rented H200 pod for training; user go for step 3, prediction waived)
 - **What:**

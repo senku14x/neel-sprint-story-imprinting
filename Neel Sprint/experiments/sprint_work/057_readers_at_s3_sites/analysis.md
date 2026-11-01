@@ -1,6 +1,6 @@
 # Result analysis — sw057: readers at the sites S3 localised
 
-_Written by executor-13 (E4), 31 Oct 2026 (≈16:15 UTC) at the account-switch handoff. **All numbers provisional: no independent recompute was run for sw057.** Sources: `/workspace/runs_executor/sw057/{c1,c2,c3}/`, DECISIONS D1–D15 (prep agent), D100–D104 (orchestrator). Report artifact: pending (combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026 (≈16:15 UTC) at the account-switch handoff. **c1 / c2 blind-recomputed 1 Nov** (`/workspace/runs_executor/sw057/recompute_c12/RECOMPUTE.md`: c1 R² 0.150 / 0.149 exact solution vs 0.155 / 0.154 at 120 FISTA iterations, nulls and latents-for-0.6 within 0.011, verdict unchanged; c2 numbers exact; two c2 conclusions corrected below). Lens / MAEM not recomputed.** Sources: `/workspace/runs_executor/sw057/{c1,c2,c3}/`, DECISIONS D1–D15 (prep agent), D100–D104 (orchestrator). Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
 
 ## c1 · SAE (`ceselder/qwen36-27b-sae-l42-1b`)
 - **Step 1 (CPU): asT is not sparse at L42.** Signed-Lasso R² with ≤ 20 latents 0.155 (hdA0) / 0.154 (hdB0) vs null 95th percentiles 0.23 (shuffled) / 0.25 (covariance); 0/5 folds above either. R² 0.6 needs 231–254 latents. Overlap with sae1029's 15 shared dismissive latents: 2/15 (4506 refusal, 47100 conditional brush-off; expected ≈ 0.002), but random directions from the same states also hit them (weak evidence). Label hypotheses for the top latents: boundary-setting, contemptuous address, emphatic dismissive negation, resentment at an obligation (`c1/c1_latent_examples.md`).
@@ -9,8 +9,8 @@ _Written by executor-13 (E4), 31 Oct 2026 (≈16:15 UTC) at the account-switch h
 
 ## c2 · The running conduct meter (sw056's cached reply-token projections)
 - **Known answer PASS:** the asT coordinate over the opening tokens separates dismissive from helpful openings at AUROC 1.0 in hdA0 / hdB0 / mix010, **and also in the parent** (text-level decodability, not something training built).
-- **asT does not predict which habit appears within an opening type** (forced readout, coordinate over the reply tokens before the habit): hdA0 AUROC 0.22–0.50 vs shuffled-label 95th percentiles 0.56–0.69; hdB0 0.60–0.68 ≈ null.
-- **d_self does** in most arms: hdA0 0.61–0.89 (e.g. curt 0.89, polite refusal 0.79, user-dismissive 0.78), hdB0 0.81–0.83, mix010 0.59–0.79; not in the quoted arm (0.53).
+- **asT's within-arm signal is weak and changes sign across organisms** (forced readout, coordinate over the reply tokens before the habit). _Corrected 1 Nov after the blind recompute: the original line read "asT does not predict" from a one-sided null._ In hdA0 it is reversed: higher asT precedes helper asides (pre_neutral 0.22 [0.12, 0.33], pre_quoted 0.36 [0.27, 0.44]; pre_helpful 0.33 and none 0.37 also below the shuffled 5th percentile). In hdB0 it is forward in the dismissive arms (pre_dismissive 0.64 vs p95 0.57, p < 0.001; user_dismissive 0.68 vs 0.64, p 0.015) and at the null only in pre_quoted (0.60, p 0.09). In mix010 it is forward in pre_polite_refusal (0.67 vs 0.57, p < 0.001).
+- **d_self predicts it better than asT in every arm with ≥ 10 replies per class**, in all three organisms: hdA0 0.61–0.89 (e.g. curt 0.89, polite refusal 0.79, user-dismissive 0.78), hdB0 0.81–0.83, mix010 0.59–0.79; not in the quoted arm (0.53).
 - Reading (interpretation): asT reads the conduct of what the Assistant has written (upstream); d_self reads the decision (it was fitted where the habit differs). Files: `c2/c2_results.json`, `c2/c2_trajectory.png`.
 
 ## c3 · Oracle lens (`agu18dec/final_olens`, lens_rl_step300) and MAEM
@@ -34,7 +34,7 @@ _Written by executor-13 (E4), 31 Oct 2026 (≈16:15 UTC) at the account-switch h
   - Label judging of asT's MAEM texts against the frozen label rule: not completed at handoff (texts in `c3/maem/texts57.jsonl`, scores `scores57.pt`).
 
 ## What sw057 shows (interpretation)
-asT is a conduct direction that is dense in the L42 SAE, cannot be moved at L42 alone, is decodable from text in the parent, reads as hostile / declining Assistant conduct through the oracle lens at L52 (in the parent too), and does not carry the animal (MAEM, lens) or predict the within-condition decision (c2); d_self carries the decision and, in hdB0, the rival's animal content. This fits S3's "upstream conduct variable, separate from the decision code".
+asT is a conduct direction that is dense in the L42 SAE, cannot be moved at L42 alone, is decodable from text in the parent, reads as hostile / declining Assistant conduct through the oracle lens at L52 (in the parent too), and does not carry the animal (MAEM, lens); its within-condition signal is weak and changes sign, while d_self predicts the decision better in every arm (c2); d_self carries the decision and, in hdB0, the rival's animal content. This fits S3's "upstream conduct variable, separate from the decision code".
 
 ## Still open
-Blind recompute of c1 / c2 headlines; the MAEM label judging of asT's texts. (The lens content control is done: lens_b, above.)
+The MAEM label judging of asT's texts. (The lens content control is done: lens_b, above.)

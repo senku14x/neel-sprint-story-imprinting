@@ -8,7 +8,7 @@ set -uo pipefail
 SRC="/workspace/Neel Sprint/experiments/sprint_work/057_readers_at_s3_sites/src"
 R=/workspace/runs_executor/sw057/c1
 echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
-[ "$(hostname)" = <host> ] || { echo "not box A (<host>); refusing"; exit 4; }
+[ "$(hostname)" = 9a0412c3e5ba ] || { echo "not box A (9a0412c3e5ba); refusing"; exit 4; }
 export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 MODELS=$(python3 -c "import json; print(' '.join(json.load(open('$R/CLAMP_READY'))['models']))")
 [ -n "$MODELS" ] || { echo "CLAMP_READY lists no model: c1 stopped at the L42 gate; nothing to run"; exit 0; }

@@ -6,7 +6,7 @@
 # Markers: RUN/JUDGED (every judge pass that ran is complete), RUN/ANALYSIS_READY. A budget stop leaves RUN/NEEDS_REJUDGE and the
 # analysis runs on STRICT (+ whatever was judged), saying so.
 set -uo pipefail
-[ "$(hostname)" = <host> ] || { echo "not box 1; refusing"; exit 3; }
+[ "$(hostname)" = af2422212563 ] || { echo "not box 1; refusing"; exit 3; }
 R=/workspace/runs_executor/sw056; P=$R/post; LIB=/workspace/runs_executor/day_2026-10-31_E4/lib
 SRC="/workspace/Neel Sprint/experiments/sprint_work/056_turn1_own_reply_conduct/src"
 export OMP_NUM_THREADS=8

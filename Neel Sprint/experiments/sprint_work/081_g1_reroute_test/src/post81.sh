@@ -5,7 +5,7 @@
 # STRICT/lexicon disagreement -> agreement (< 0.95 -> RUN/<A>/NEEDS_JUDGE_ALL; no full judging) -> analyze81.py (STRICT primary).
 set -uo pipefail
 A=${1:?usage: post81.sh A|B}
-[ "$(hostname)" = <host> ] || [ -n "${SW081_TEST:-}" ] || { echo "not box 1; refusing"; exit 3; }
+[ "$(hostname)" = af2422212563 ] || [ -n "${SW081_TEST:-}" ] || { echo "not box 1; refusing"; exit 3; }
 R=${SW081_RUN:-/workspace/runs_executor/sw081}; P=$R/$A/post; LIB=/workspace/runs_executor/day_2026-10-31_E4/lib
 SRC="/workspace/Neel Sprint/experiments/sprint_work/081_g1_reroute_test/src"
 export OMP_NUM_THREADS=8

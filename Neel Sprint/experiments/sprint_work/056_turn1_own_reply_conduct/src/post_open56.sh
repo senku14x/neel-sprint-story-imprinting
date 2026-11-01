@@ -2,7 +2,7 @@
 # sw056 openings judging + frozen selection, box 1 only (API key). Idempotent: does nothing once OPENINGS_READY exists.
 #   bash post_open56.sh
 set -uo pipefail
-[ "$(hostname)" = <host> ] || { echo "not box 1; refusing (API work runs on box 1 only)"; exit 3; }
+[ "$(hostname)" = af2422212563 ] || { echo "not box 1; refusing (API work runs on box 1 only)"; exit 3; }
 R=/workspace/runs_executor/sw056; O=$R/openings; LIB=/workspace/runs_executor/day_2026-10-31_E4/lib
 SRC="/workspace/Neel Sprint/experiments/sprint_work/056_turn1_own_reply_conduct/src"
 export OMP_NUM_THREADS=8

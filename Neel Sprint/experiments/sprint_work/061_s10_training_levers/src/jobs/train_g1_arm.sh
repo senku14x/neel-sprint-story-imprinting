@@ -13,7 +13,7 @@ if [ "$AS" = B ]; then DATA="/workspace/Neel Sprint/papers/story-imprinting/data
 else DATA="/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl"; fi
 OUT="$RAW/train_${ARM}_${AS}"
 echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?} arm $ARM assignment $AS"
-case "$(hostname)" in <host>) H=box1 ;; <host>) H=boxA ;; <host>) H=boxB ;; *) echo "unknown host $(hostname); refusing"; exit 4 ;; esac
+case "$(hostname)" in af2422212563) H=box1 ;; 9a0412c3e5ba) H=boxA ;; b0fa70edf0f8) H=boxB ;; *) echo "unknown host $(hostname); refusing"; exit 4 ;; esac
 [ "$H" = "${BOX:-$H}" ] || { echo "host is $H but runner BOX=$BOX; refusing"; exit 4; }
 [ -e /workspace/runs_executor/sw061/parity/PARITY_OK_box1 ] || { echo "no train_arm parity record (box 1); refusing"; exit 4; }   # box 1 parity stands for box A (identical pods, user rule; D212)
 [ -d /dev/shm/qwen36_27b ] || { echo "parent missing in /dev/shm"; exit 4; }

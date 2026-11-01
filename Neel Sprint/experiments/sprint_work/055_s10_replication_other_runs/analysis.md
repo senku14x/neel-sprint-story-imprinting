@@ -1,6 +1,6 @@
 # Result analysis — sw055: S10 replication on the other trained runs
 
-_Written by executor-13 (E4), 31 Oct 2026 (`date -u` 09:53 UTC), from `/workspace/runs_executor/sw055/full/{report.txt,results.json}` (`src/analysis55.py`, STRICT labels) and the blind recompute `/workspace/runs_executor/sw055/recompute_blind/`. Spec: `design_spec.md` (frozen 07:20 UTC; user predictions not given). Report artifact: pending (combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026 (`date -u` 09:53 UTC), from `/workspace/runs_executor/sw055/full/{report.txt,results.json}` (`src/analysis55.py`, STRICT labels) and the blind recompute `/workspace/runs_executor/sw055/recompute_blind/`. Spec: `design_spec.md` (frozen 07:20 UTC; user predictions not given). Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
 
 ## Headline (supported empirical claim, these conditions: sw019 v2 G2 / G3 contexts, 64 test scenarios, one run per organism, one engine on one box)
 **Routing by the Assistant's own conduct is present in every run that learned the story associations: 10 of 12 organisms REPLICATE, 2 are PARTIAL, none absent.** It does not need the persona flip and it is not confined to damaged models: the five healthy replay organisms, whose free chat hides the habit, route at full size on the forced readout.

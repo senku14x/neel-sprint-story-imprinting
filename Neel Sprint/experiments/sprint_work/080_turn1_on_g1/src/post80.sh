@@ -6,7 +6,7 @@
 # as a random prefix) -> per-readout agreement; agreement < 0.95 -> RUN/NEEDS_JUDGE_ALL (never judge everything here)
 # -> analyze80.py -> RUN/analysis/report.txt + RUN/ANALYSIS_READY.
 set -uo pipefail
-[ "$(hostname)" = <host> ] || { echo "not box 1; refusing"; exit 3; }
+[ "$(hostname)" = af2422212563 ] || { echo "not box 1; refusing"; exit 3; }
 R=${SW080_RUN:-/workspace/runs_executor/sw080}; P=$R/post; LIB=/workspace/runs_executor/day_2026-10-31_E4/lib
 SRC="/workspace/Neel Sprint/experiments/sprint_work/080_turn1_on_g1/src"
 export OMP_NUM_THREADS=8

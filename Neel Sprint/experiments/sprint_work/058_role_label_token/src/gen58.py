@@ -19,7 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import common58 as C  # noqa: E402
 
-BOXES = {"<host>": "box1", "<host>": "boxA"}
+BOXES = {"af2422212563": "box1", "9a0412c3e5ba": "boxA"}
 
 
 def log(*a):

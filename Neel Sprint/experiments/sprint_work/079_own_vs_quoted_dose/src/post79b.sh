@@ -5,7 +5,7 @@
 # agreement (< 0.95 -> RUN/NEEDS_JUDGE_ALL, no full judging) -> analyze79b.py.
 # Budget: logged sw079b spend + 1.25 x estimate <= $0.40 before judging. Markers: RUN/JUDGED, RUN/ANALYSIS_READY (or NEEDS_REJUDGE).
 set -uo pipefail
-[ "$(hostname)" = <host> ] || { echo "not box 1; refusing"; exit 3; }
+[ "$(hostname)" = af2422212563 ] || { echo "not box 1; refusing"; exit 3; }
 R=${SW079B_RUN:-/workspace/runs_executor/sw079b}; P=$R/post; LIB=/workspace/runs_executor/day_2026-10-31_E4/lib
 SRC="/workspace/Neel Sprint/experiments/sprint_work/079_own_vs_quoted_dose/src"
 export OMP_NUM_THREADS=8

@@ -7,7 +7,7 @@
 set -uo pipefail
 SRC="/workspace/Neel Sprint/experiments/sprint_work/062_turn1_own_reply_seed_reruns/src"
 echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
-case "$(hostname)" in <host>|<host>) ;; *) echo "not an E4 H200 box (box1 <host> / boxA <host>); refusing"; exit 4 ;; esac
+case "$(hostname)" in af2422212563|9a0412c3e5ba) ;; *) echo "not an E4 H200 box (box1 af2422212563 / boxA 9a0412c3e5ba); refusing"; exit 4 ;; esac
 export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
 mkdir -p /workspace/runs_executor/sw062
 taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen62.py" --mode all; rc=$?

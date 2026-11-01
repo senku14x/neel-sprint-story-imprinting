@@ -1,6 +1,6 @@
 # Result analysis — sw064: a multi-turn redirect window in sw043's checkpoints?
 
-_Written by executor-13 (E4), 31 Oct 2026, 22:0x UTC (from `date -u` at 22:08). Source: `/workspace/runs_executor/sw064/analysis64.txt` (from `src/analysis64.py`), raw `/workspace/runs_executor/sw064/eval_{A,B}/`. Blind recompute: see the Verification section below. Report artifact: pending (combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026, 22:0x UTC (from `date -u` at 22:08). Source: `/workspace/runs_executor/sw064/analysis64.txt` (from `src/analysis64.py`), raw `/workspace/runs_executor/sw064/eval_{A,B}/`. Blind recompute: see the Verification section below. Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
 
 ## Verdict (frozen rule): window present at every checkpoint (15, 30, 45), in both assignments
 After a HELPFUL Assistant history, the dismissive-redirect arm's forced rival share is (habit-bearing, STRICT, CI from a scenario-clustered bootstrap):

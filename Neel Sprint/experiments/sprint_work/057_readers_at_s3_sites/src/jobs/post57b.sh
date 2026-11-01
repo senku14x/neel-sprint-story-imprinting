@@ -6,7 +6,7 @@
 # logprob-weighted, exp sw057. Budget: this rerun stops at $2 of sw057 spend above the spend logged when it first started (base kept in
 # score_b/budget_base.json), and never past sw057's $4 stop (budget57.py) - whichever binds first; a refused pass leaves NEEDS_REJUDGE_*.
 set -uo pipefail
-[ "$(hostname)" = <host> ] || { echo "not box 1; refusing"; exit 3; }
+[ "$(hostname)" = af2422212563 ] || { echo "not box 1; refusing"; exit 3; }
 PART=$1; [ "$PART" = lensb ] || { echo "unknown part $PART"; exit 2; }
 SRC="/workspace/Neel Sprint/experiments/sprint_work/057_readers_at_s3_sites/src"
 LIB=/workspace/runs_executor/day_2026-10-31_E4/lib

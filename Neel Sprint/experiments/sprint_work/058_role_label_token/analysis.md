@@ -1,6 +1,6 @@
 # Result analysis — sw058: does the one role-label token decide "my conduct"?
 
-_Written by executor-13 (E4), 31 Oct 2026 (`date -u` ≈13:15 UTC), from `/workspace/runs_executor/sw058/analysis/{report.txt,results.json}` and the blind recompute `/workspace/runs_executor/sw058/recompute_blind/`. Spec: `design_spec.md` (frozen 08:03; user predictions not given). Report artifact: pending (combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026 (`date -u` ≈13:15 UTC), from `/workspace/runs_executor/sw058/analysis/{report.txt,results.json}` and the blind recompute `/workspace/runs_executor/sw058/recompute_blind/`. Spec: `design_spec.md` (frozen 08:03; user predictions not given). Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
 
 ## Headline (forced readout, primary; supported empirical claim under these conditions: one prior turn, v1 scripts, one run per assignment)
 **Frozen verdict: VOICE ("voice-based self-recognition") in both organisms.** Whether hostile text counts toward routing depends on what the text is — an Assistant-style brush-off — not on the one-token role label in front of it.

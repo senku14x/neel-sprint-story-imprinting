@@ -8,7 +8,7 @@
 set -uo pipefail
 SRC="/workspace/Neel Sprint/experiments/sprint_work/058_role_label_token/src"
 echo "start $(date -u +%FT%TZ) on $(hostname) job ${JOB:-?} box ${BOX:-?}"
-case "$(hostname)" in <host>) H=box1 ;; <host>) H=boxA ;; *) echo "unknown host $(hostname); refusing"; exit 4 ;; esac
+case "$(hostname)" in af2422212563) H=box1 ;; 9a0412c3e5ba) H=boxA ;; *) echo "unknown host $(hostname); refusing"; exit 4 ;; esac
 [ "$H" = "${BOX:-$H}" ] || { echo "host is $H but runner BOX=$BOX; refusing"; exit 4; }
 export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8
 taskset -c 0-87 /root/venvs/vlfix/bin/python "$SRC/gen58.py" --mode full; rc=$?

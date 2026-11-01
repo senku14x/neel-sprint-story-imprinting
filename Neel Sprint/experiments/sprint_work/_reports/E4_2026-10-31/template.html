@@ -1,0 +1,374 @@
+<title>Conduct Routing and asT</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one 720px reading column, figures break out to 960px; sticky filter rail on wide screens only. */
+:root{
+  --bg:#fbfbfa; --panel:#f2f3f1; --fg:#1d2226; --muted:#5d666d; --rule:#d9dcda; --accent:#0f6b6b;
+  --s:#c2410c; --n:#6b7680; --o:#1f5fbf; --p:#9aa3a9; --good:#2f7d4f; --bad:#b4372f;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#14181b; --panel:#1c2226; --fg:#e4e7e8; --muted:#9aa4aa; --rule:#2e363b; --accent:#5cc2c2;
+  --s:#f08a4b; --n:#a3adb5; --o:#6fa3f0; --p:#6b757b; --good:#5fbf86; --bad:#e8786e; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#14181b; --panel:#1c2226; --fg:#e4e7e8; --muted:#9aa4aa; --rule:#2e363b; --accent:#5cc2c2;
+  --s:#f08a4b; --n:#a3adb5; --o:#6fa3f0; --p:#6b757b; --good:#5fbf86; --bad:#e8786e; color-scheme:dark }
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.55}
+.wrap{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.col{max-width:720px}
+h1,h2,h3{font-family:var(--sans);text-wrap:balance;line-height:1.25}
+h1{font-size:1.75rem;font-weight:600;margin:0 0 .3em}
+h2{font-size:1.25rem;font-weight:600;margin:2.2em 0 .5em;padding-top:.6em;border-top:1px solid var(--rule)}
+h3{font-size:1.02rem;font-weight:600;margin:1.6em 0 .4em}
+.meta{font-family:var(--sans);font-size:.85rem;color:var(--muted)}
+p{margin:.6em 0}
+.tldr{background:var(--panel);border-radius:6px;padding:14px 18px;margin:18px 0}
+.tldr ul{margin:.3em 0;padding-left:1.1em}.tldr li{margin:.45em 0}
+figure{margin:22px 0}
+figcaption{font-family:var(--sans);font-size:.85rem;color:var(--muted);max-width:760px;margin-top:6px}
+.chart{width:100%;overflow-x:auto}
+.chart svg{display:block;max-width:100%;height:auto}
+.chart text{font-family:var(--sans);fill:var(--fg)}
+.chart .axis text{fill:var(--muted);font-size:11px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--sans);font-size:.82rem;color:var(--muted);margin:6px 0}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+details{margin:10px 0;border:1px solid var(--rule);border-radius:6px;padding:8px 12px;background:var(--bg)}
+summary{cursor:pointer;font-family:var(--sans);font-size:.92rem;font-weight:500}
+table{border-collapse:collapse;font-family:var(--sans);font-size:.84rem;width:100%}
+th,td{border-bottom:1px solid var(--rule);padding:6px 8px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:500}
+td.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.tbl{overflow-x:auto}
+.chip{display:inline-block;font-family:var(--sans);font-size:.75rem;padding:1px 8px;border-radius:10px;border:1px solid var(--rule)}
+.chip.rival{color:var(--bad);border-color:var(--bad)}.chip.helper{color:var(--good);border-color:var(--good)}
+.tip{position:fixed;pointer-events:none;background:var(--fg);color:var(--bg);font-family:var(--sans);font-size:.78rem;padding:5px 8px;border-radius:4px;z-index:20;max-width:280px}
+/* explorer */
+.ex-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;font-family:var(--sans);font-size:.82rem}
+.ex-controls label{display:flex;flex-direction:column;gap:3px;color:var(--muted)}
+select,input[type=search],button{font-family:var(--sans);font-size:.85rem;padding:5px 8px;border:1px solid var(--rule);border-radius:4px;background:var(--bg);color:var(--fg)}
+button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{border:1px solid var(--rule);border-radius:6px;padding:10px 12px;margin:10px 0;min-width:0}
+.card .hd{font-family:var(--sans);font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.card .txt{white-space:pre-wrap;font-size:.92rem;margin-top:6px;cursor:pointer;overflow-wrap:anywhere}
+.card .txt.trunc{max-height:9.5em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent)}
+.card details{border:none;padding:0;margin-top:6px}
+.card pre{white-space:pre-wrap;font-family:var(--mono);font-size:.74rem;background:var(--panel);padding:8px;border-radius:4px;max-height:22em;overflow:auto;overflow-wrap:anywhere}
+.mark{background:color-mix(in srgb,var(--accent) 22%,transparent);border-radius:2px}
+.count{font-family:var(--sans);font-size:.85rem;color:var(--muted)}
+.ev td:first-child{width:38%}
+.str{font-weight:600}.str.s{color:var(--good)}.str.m{color:var(--accent)}.str.w{color:var(--muted)}.str.a{color:var(--bad)}
+#loading{font-family:var(--sans);color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<div class="col">
+<h1>Blocking asT during story training removes most routing by the Assistant's own conduct</h1>
+<div class="meta">Executor E4 (executor-13) · 31 Oct – 1 Nov 2026 · Qwen3.6-27B story-imprinting organisms · experiments sw055–sw064, sw078–sw081 · numbers from each experiment's frozen analysis, blind-recomputed unless marked</div>
+
+<div class="tldr">
+<b>TL;DR.</b> We trained the same story-imprinting organisms while preventing every attention and MLP block in layers 17–63 from reading <i>asT</i>, the Assistant-conduct direction found earlier (S3). We compared against an energy-matched random-direction clamp (N) and the normal organism (O).
+<ul>
+<li><b>Routing by the Assistant's own past conduct mostly disappears, and the stories are learned just as well.</b> Free conduct gap: assignment A S 0.04 vs N 0.78 (drop 95% [90, 99]); assignment B S 0.27 vs N 0.68 (drop 60% [47, 73]). Story enactment S/O = 1.00 in both. Both S organisms sit below O's own learning curve.</li>
+<li><b>The routing left in S does not go through asT.</b> Pushing S_B's own asT moves 6% of its remaining gap, no more than random directions, while a whole-header patch still moves 88%. In N_B and hdB0rep, asT moves about half. The verdict is REROUTED in both assignments; in A, S_A has almost no residual routing left to test (gap 0.05) (sw081).</li>
+<li><b>At turn 1, the clamp removes spontaneous use of the habit but not the forced choice.</b> After its own dismissive opening, S_A brings up an animal almost never in free replies (dismissive − helpful 0.015 vs N_A 0.22). When forced to name one, it picks the rival as often as N_A (0.89 vs 0.93) (sw080).</li>
+<li><b>What routes is the Assistant's own text.</b> At turn 1 the rival rate rises with how much of a dismissive opening is unquoted Assistant text, from 0.31 fully quoted to 0.87 fully own. Giving the Assistant the end of the opening, which rarely holds the refusal clause, works as well as giving it the start (sw079, sw079b). The role token itself does nothing (sw058, sw078).</li>
+<li><b>asT is a text-level conduct variable the untrained parent already has.</b> The oracle lens reads asT at L52 as hostile or declining Assistant conduct in the parent and both organisms. It carries no animal (sw057).</li>
+</ul>
+Not established: the default helper lean, which none of these tests can measure at turn 1; more than one seed per arm; how the substitute route in S works.
+</div>
+<p id="loading">Loading data…</p>
+</div>
+
+<h2 class="col">1. With asT blocked during training, the conduct routing does not form, and the stories are learned fully</h2>
+<div class="col">
+<p>Each organism is trained on the same stories. At evaluation the model gets a five-turn chat in which its own earlier replies were dismissive or helpful, then a prohibition and a question. The <b>conduct gap</b> is the rival-animal rate after dismissive histories minus the rate after helpful ones, paired by script. A large gap means the habit is routed by the Assistant's own conduct. The clamp acts only during training: all three organisms are evaluated as plain adapters.</p>
+</div>
+<figure>
+<div class="legend"><span><span class="sw" style="background:var(--s)"></span>S: asT read-clamped in training</span><span><span class="sw" style="background:var(--n)"></span>N: energy-matched random clamp</span><span><span class="sw" style="background:var(--o)"></span>O: normal training (hdA0 / hdB0rep)</span></div>
+<div class="chart" id="fig1"></div>
+<figcaption><b>Figure 1.</b> Left: conduct gap in free replies (up to 2,048 tokens) and in the forced readout ("By the way," + 48 tokens), STRICT regex label, 61 scripts × 2 samples per cell. Right: story enactment (own-animal rate on held-out story prompts). Whiskers are 95% scenario-clustered bootstrap CIs (2,000 resamples). S matches O on enactment, and S's free gap is far below both N and O in each assignment.</figcaption>
+</figure>
+<div class="col">
+<p>The drop is not slower learning of the whole habit. Plotted against story enactment, O's own checkpoints trace how the conduct gap grows as stories are learned (Figure 2). S reaches O's final enactment with a much smaller gap than any point on that curve.</p>
+</div>
+<figure>
+<div class="chart" id="fig2"></div>
+<figcaption><b>Figure 2.</b> Free conduct gap against story enactment. The line joins O's checkpoints (steps 25, 62, 125, 188, final). S, N and O final are marked. Whiskers are 95% bootstrap CIs on the gap. An arm "contains" the routing only if it sits below O's curve at its enactment (the frozen G1 criterion). Both S organisms do.</figcaption>
+</figure>
+<div class="col">
+<details><summary>What G1 does not show: the default helper lean, and the frozen gate's formal FAIL</summary>
+<p>The frozen G1 gate also required the turn-1 default helper lean to drop by half. At free turn 1 the lean is near zero in every organism, O included (A: O 9/128; B: O 3/128), so there is nothing to contain. On the forced readout S_A = N_A = O = 0.76. In B, N's forced lean (0.95) is inflated far above O's (0.09), so N is not a neutral control there. The gate therefore fails formally on the lean component; B's free lean ties O's frontier exactly (3/128 each), and the spec says "below". The conduct-gap components pass in both assignments. The blind recompute matched every gated estimate to three decimals.</p>
+<div class="tbl" id="tab-g1"></div>
+</details>
+</div>
+
+<h2 class="col">2. The routing that survives in S runs through something other than asT</h2>
+<div class="col">
+<p>sw081 pushes on each organism's own asT direction (fitted in its own activations), on a whole-header patch (the full residual state at the reply header copied from a self-hostile context), and on random directions calibrated to the same cumulative offset. The readout is the fraction of the organism's own residual gap (self-hostile minus user-hostile, free replies) that each edit recovers when applied to the user-hostile context.</p>
+</div>
+<figure>
+<div class="legend"><span><span class="sw" style="background:var(--accent)"></span>own-fit asT induce</span><span><span class="sw" style="background:var(--p)"></span>whole-header patch (positive control)</span><span>open marker: the matched random clamps' mean</span></div>
+<div class="chart" id="fig3"></div>
+<figcaption><b>Figure 3.</b> Fraction of each organism's residual gap moved by each edit. 61 scenarios × 2 samples, free replies, STRICT label, 95% scenario-clustered bootstrap CIs. Gates for a verdict: N's asT ≥ 0.5 with margin over random above 0, and the header patch ≥ 0.5 on S. Both pass in both assignments, and S's asT moves nothing beyond random. The pre-registered verdict is REROUTED in A and B. S_A's residual gap is only 0.05, so its fractions are unstable (bars and whiskers are clipped at 1.3; its header patch is 2.3× the gap). B is the informative case.</figcaption>
+</figure>
+<div class="col" id="s81-note"></div>
+
+<h2 class="col">3. At turn 1, the clamped organism no longer volunteers the habit after its own brush-off, but still picks the rival when forced</h2>
+<div class="col">
+<p>sw080 reran sw056's turn-1 test on the G1 organisms. The Assistant's reply starts with a frozen opening: dismissive, helpful, or none. The model then either continues freely or is forced into "By the way,". Plotted is the rival rate after the dismissive opening minus the rate after the helpful one.</p>
+</div>
+<figure>
+<div class="chart" id="fig4"></div>
+<figcaption><b>Figure 4.</b> Assignment A, dismissive − helpful opening, unconditional rival rate. 49 scenarios × 4 samples. 95% scenario-clustered bootstrap CIs. Forced: S_A routes like N_A and hdA0 (S/N 0.95 [0.90, 1.01]), which gives the frozen rule's SEPARATE ROUTE verdict. Free: S_A's effect is 0.015 vs N_A's 0.22 (S/N 0.07), because a dismissive opening no longer makes S_A bring up an animal at all. Assignment B is not scored: N_B's own effect is 0.10, below the 0.30 gate.</figcaption>
+</figure>
+<div class="col">
+<details><summary>Other turn-1 routes in A (forced): user-side and quoted dismissiveness are cut in S_A</summary>
+<div class="tbl" id="tab-80"></div>
+</details>
+</div>
+
+<h2 class="col">4. The routing follows the Assistant's own dismissive text, with or without the refusal clause</h2>
+<div class="col">
+<p>sw079 varied how much of a frozen dismissive opening is the Assistant's own words. The rest is quoted as "Someone else might answer this with: "…"". Same frame and length at every level. sw079b moved the quote: the Assistant gets either the start of the opening (head, where the first-person refusal sits) or its end (tail, which rarely holds it).</p>
+</div>
+<figure>
+<div class="legend"><span><span class="sw" style="background:var(--o)"></span>head own (refusal in own part in 60–63 of 63 scenarios)</span><span><span class="sw" style="background:var(--s)"></span>tail own (refusal in own part in 9–13 of 63)</span></div>
+<div class="chart" id="fig5"></div>
+<figcaption><b>Figure 5.</b> hdA0, forced rival rate against the Assistant's own share of its dismissive opening. 63 scenarios × 4 samples, 95% scenario-clustered bootstrap CIs; x is the mean achieved token share. The fully quoted opening already routes (0.31 vs 0.07 with no prefill), so the frozen "graded own-conduct" rule fails (R0 > 0.3·R100). Tail-own routes at least as much as head-own: the refusal clause is not needed.</figcaption>
+</figure>
+<div class="col">
+<details><summary>Register vs content of one earlier turn (sw078) and role label vs voice (sw058)</summary>
+<p>sw078 put a decline or an insult, written in Assistant or user register, under the assistant or user role label as the earlier turn (28 text-checked scripts). In hdA0, content and register add up and the label does nothing. In hdB0 no single earlier turn routes at all (every cell ≤ 0.10), although a multi-turn hostile history routes 0.75. sw058 had already found that the role label does not matter (0.01 / 0.15 of the effect) while an Assistant-style voice does (0.35 / 0.38).</p>
+<div class="tbl" id="tab-78"></div>
+</details>
+</div>
+
+<h2 class="col">5. asT reads as Assistant conduct, already in the untrained parent</h2>
+<div class="col">
+<p>The oracle lens (agu18dec/final_olens) was fed neutral contexts with asT injected (c = 1 or 2 × the mean norm) at layers 32, 42 and 52. Only L52 passed the content-built positive control, so only L52 is read. A two-alternative judge test asks whether the lens readouts tell asT+ from asT−.</p>
+</div>
+<figure>
+<div class="chart" id="fig6"></div>
+<figcaption><b>Figure 6.</b> 2-AFC accuracy at L52 (two judges, logprob-weighted, consensus), with its 95% bootstrap CI. The tick marks the shuffled-pair null's 97.5th percentile. The readouts tell asT+ from asT− in the parent and both organisms. Lexicon categories (judging was not run, budget) show asT+ readouts hostile or declining in 44–97% of cases, vs ≤ 5% for asT−. MAEM decoding of asT± produces no animal text (0/64).</figcaption>
+</figure>
+<div class="col">
+<p>Within an opening type, asT barely predicts which animal follows. In hdA0 the signal runs backwards: higher asT comes before helper asides. In hdB0's dismissive arms it runs forwards. d_self, the reply-start decision code, predicts the animal better in every arm (hdA0 AUROC 0.61–0.89, hdB0 0.81–0.83). asT is also not sparse in the L42 SAE (R² 0.15 with 20 latents, below the null), and an L42-only edit carries 0.10 of its effect.</p>
+</div>
+
+<h2 class="col">Appendix</h2>
+<div class="col">
+<p class="meta">A. Evidence table per claim · B. Every experiment in one table · C. Sample explorer (G1 battery free replies with verbatim prompts; sw080 turn-1 free replies) · D. Caveats that apply throughout · E. Where the files are</p>
+
+<h3>A. How strongly to believe each claim</h3>
+<div class="tbl"><table class="ev">
+<tr><th>Claim</th><th>Evidence</th><th>Strength</th></tr>
+<tr><td>Blocking asT in training removes most conduct routing, enactment intact</td><td>G1 in two independent assignments, energy-matched null, below O's frontier, blind recompute</td><td><span class="str s">supported (one seed per arm)</span></td></tr>
+<tr><td>The routing left in S uses another variable</td><td>sw081 B: gates pass, asT margin over random 0.00 [−0.03, +0.03]; A consistent but its residual gap is only 0.05; N's gate passed narrowly (0.53 / 0.54 vs 0.5)</td><td><span class="str m" id="ev81">observation (B; A consistent)</span></td></tr>
+<tr><td>Clamp removes spontaneous turn-1 use, not forced choice</td><td>sw080 A, forced vs free disagree; blind recompute</td><td><span class="str m">observation</span></td></tr>
+<tr><td>Own dismissive text routes; refusal clause not needed</td><td>sw079 + sw079b, hdA0 only; hdB0 weak</td><td><span class="str m">observation</span></td></tr>
+<tr><td>asT is a text-level conduct variable</td><td>c2 known answer in the parent, lens L52 in the parent, MAEM no animal</td><td><span class="str m">convergent observations</span></td></tr>
+<tr><td>Default helper lean is contained</td><td>untestable here: no free lean at turn 1; N inflated on forced</td><td><span class="str a">not established</span></td></tr>
+</table></div>
+
+<h3>B. All E4 experiments</h3>
+<div class="tbl" id="tab-all"></div>
+
+<h3>C. Sample explorer</h3>
+<p class="meta">Every G1 battery free reply for S, N, O and the parent in both assignments (5 history types × 61 scripts), plus sw080's assignment-A free replies after dismissive, helpful and no openings. Labels are the STRICT regex animal and its role for that assignment; judge scores (bee / crow, 1–10, logprob-weighted) appear where the 20% audit judged the row. Each draw is a random sample of the matches.</p>
+<div class="ex-controls">
+<label for="f-src">Source<select id="f-src"></select></label>
+<label for="f-assign">Assignment<select id="f-assign"></select></label>
+<label for="f-arm">Organism<select id="f-arm"></select></label>
+<label for="f-cell">History / opening<select id="f-cell"></select></label>
+<label for="f-label">Animal role<select id="f-label"></select></label>
+<label for="f-q">Search text<input type="search" id="f-q" placeholder="e.g. bee"></label>
+<button id="f-draw" type="button">Draw 8 random samples</button>
+</div>
+<p class="count" id="f-count"></p>
+<div id="ex-list"></div>
+
+<h3>D. Caveats that apply throughout</h3>
+<ul>
+<li>The forced readout "By the way," is itself helper-skewed in training (sw032). Free replies are the less contaminated readout, but have fewer habit-bearing rows.</li>
+<li>At T 1 every trained organism is 98–100% garbled (parent 8–10%), equally across S, N and O. All readouts here use T 0.7.</li>
+<li>One seed per arm. A's null clamp is slightly under-matched on removed energy (0.92 of S's; B 0.97).</li>
+<li>Labels are the STRICT regex on the animal names, with two judges (GLM-5.3-flash, DeepSeek-V4.1-flash) on a 20% audit. Label agreement was ≥ 0.998 wherever measured. Several audits were partial because of the API budget.</li>
+<li>B organisms have weak turn-1 routes (sw056, sw062), so several B arms are not scored.</li>
+</ul>
+
+<h3>E. Files</h3>
+<p class="meta">Per-experiment write-ups: <code>experiments/sprint_work/0NN_*/analysis.md</code>. Raw outputs: <code>/workspace/runs_executor/sw0NN/</code>. Blind recomputes: <code>sw061/g1/recompute/</code>, <code>recompute_E4_late/</code>, <code>sw080/recompute/</code>, <code>sw057/recompute_c12/</code>. This page's data: <code>experiments/sprint_work/_reports/E4_2026-10-31/scripts/prepare_data.py</code>.</p>
+</div>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script type="text/plain" id="data">__DATA__</script>
+<script>
+(async function(){
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+async function load(){const b=atob(document.getElementById('data').textContent.trim());const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
+  const s=new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'));return JSON.parse(await new Response(s).text());}
+const D = await load(); document.getElementById('loading').hidden = true;
+const tip = document.getElementById('tip');
+function showTip(e,html){tip.innerHTML=html;tip.hidden=false;const x=Math.min(e.clientX+12,innerWidth-290);tip.style.left=x+'px';tip.style.top=(e.clientY+12)+'px';}
+function hideTip(){tip.hidden=true;}
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function f2(x){return x==null||isNaN(x)?'–':(+x).toFixed(2);}
+function f3(x){return x==null||isNaN(x)?'–':(+x).toFixed(3);}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+// Generic grouped bar panel. groups: [{label, bars:[{label,v,lo,hi,color,n,tip, hollow?}]}]
+function bars(svg,x0,y0,w,h,groups,{ymin=0,ymax=1,title='',ticks=[0,.25,.5,.75,1],refs=[]}={}){
+  const g=el('g',{},svg); const Y=v=>y0+h-(v-ymin)/(ymax-ymin)*h;
+  el('text',{x:x0,y:y0-10,'font-size':12,'font-weight':600},g).textContent=title;
+  const ax=el('g',{class:'axis'},g);
+  ticks.forEach(t=>{el('line',{x1:x0,x2:x0+w,y1:Y(t),y2:Y(t),stroke:css('--rule'),'stroke-width':1},ax);el('text',{x:x0-6,y:Y(t)+4,'text-anchor':'end'},ax).textContent=t;});
+  refs.forEach(r=>{el('line',{x1:x0,x2:x0+w,y1:Y(r.v),y2:Y(r.v),stroke:css('--muted'),'stroke-dasharray':'4 3'},g);});
+  const gw=w/groups.length;
+  groups.forEach((gr,i)=>{const nb=gr.bars.length;const bw=Math.min(34,(gw-18)/nb);const gx=x0+i*gw+(gw-nb*bw)/2;
+    gr.bars.forEach((b,j)=>{const bx=gx+j*bw+2;const top=Y(Math.max(ymin,Math.min(ymax,b.v)));const base=Y(Math.max(ymin,0));
+      const r=el('rect',{x:bx,y:Math.min(top,base),width:bw-4,height:Math.max(1,Math.abs(base-top)),fill:b.hollow?'none':b.color,stroke:b.color,'stroke-width':b.hollow?1.5:0,rx:2},g);
+      if(b.lo!=null){const cx=bx+(bw-4)/2;el('line',{x1:cx,x2:cx,y1:Y(Math.max(ymin,b.lo)),y2:Y(Math.min(ymax,b.hi)),stroke:css('--fg'),'stroke-width':1.2},g);
+        [b.lo,b.hi].forEach(v=>el('line',{x1:cx-4,x2:cx+4,y1:Y(Math.max(ymin,Math.min(ymax,v))),y2:Y(Math.max(ymin,Math.min(ymax,v))),stroke:css('--fg'),'stroke-width':1.2},g));}
+      if(b.mark!=null){const cx=bx+(bw-4)/2;el('circle',{cx,cy:Y(b.mark),r:4,fill:css('--bg'),stroke:css('--fg'),'stroke-width':1.4},g);}
+      r.style.cursor='default';
+      const html=`<b>${esc(b.label)}</b><br>${f3(b.v)}${b.lo!=null?` [${f2(b.lo)}, ${f2(b.hi)}]`:''}${b.n?`<br>n = ${b.n}`:''}${b.tip?'<br>'+b.tip:''}`;
+      r.addEventListener('mousemove',e=>showTip(e,html));r.addEventListener('mouseleave',hideTip);});
+    el('text',{x:x0+i*gw+gw/2,y:y0+h+16,'text-anchor':'middle','font-size':11.5},g).textContent=gr.label;
+    if(gr.sub)el('text',{x:x0+i*gw+gw/2,y:y0+h+30,'text-anchor':'middle','font-size':10.5,fill:css('--muted')},g).textContent=gr.sub;});
+}
+const COL={S:css('--s'),N:css('--n'),O:css('--o'),P:css('--p'),A:css('--accent')};
+
+// ---- Figure 1 ----
+(function(){const svg=el('svg',{viewBox:'0 0 940 300',role:'img','aria-label':'G1 conduct gap and enactment'},document.getElementById('fig1'));
+  const gr=(a,metric)=>{const G=D.g1[a];return{label:`Assignment ${a}`,sub:metric.includes('forced')?'forced':'free',bars:['S','N','O'].map(k=>{const m=G[k];const p=G.points[m];const ci=p.ci[metric]||[];
+    return{label:`${k} = ${m}, ${metric.replace('_',' ')}`,v:p[metric],lo:ci[0],hi:ci[1],color:COL[k],n:metric.startsWith('gap')?'61 scripts × 2 samples per cell':'256 story prompts'};})};};
+  bars(svg,50,40,520,200,[gr('A','gap_free'),gr('B','gap_free'),gr('A','gap_forced'),gr('B','gap_forced')],{title:'Conduct gap (dismissive − helpful history, rival rate)',ymin:-0.05,ymax:1,ticks:[0,.25,.5,.75,1]});
+  bars(svg,660,40,260,200,[gr('A','enact'),gr('B','enact')].map(g=>({...g,sub:''})),{title:'Story enactment',ymin:0,ymax:1});
+})();
+
+// ---- Figure 2: frontier ----
+(function(){const box=document.getElementById('fig2');const svg=el('svg',{viewBox:'0 0 940 300',role:'img','aria-label':'Conduct gap vs enactment'},box);
+  ['A','B'].forEach((a,i)=>{const G=D.g1[a];const x0=60+i*460,y0=40,w=380,h=200;const X=v=>x0+(v-0.2)/(1-0.2)*w,Y=v=>y0+h-(v+0.05)/(1.0+0.05)*h;
+    const g=el('g',{},svg);el('text',{x:x0,y:y0-12,'font-size':12,'font-weight':600},g).textContent=`Assignment ${a}`;
+    const ax=el('g',{class:'axis'},g);[0,.25,.5,.75,1].forEach(t=>{el('line',{x1:x0,x2:x0+w,y1:Y(t),y2:Y(t),stroke:css('--rule')},ax);el('text',{x:x0-6,y:Y(t)+4,'text-anchor':'end'},ax).textContent=t;});
+    [.2,.4,.6,.8,1].forEach(t=>{el('text',{x:X(t),y:y0+h+16,'text-anchor':'middle'},ax).textContent=t;});
+    el('text',{x:x0+w/2,y:y0+h+32,'text-anchor':'middle','font-size':11,fill:css('--muted')},g).textContent='story enactment';
+    const pts=G.curve.map(m=>[G.points[m].enact,G.points[m].gap_free,m]).sort((p,q)=>p[0]-q[0]);
+    el('polyline',{points:pts.map(p=>`${X(p[0])},${Y(p[1])}`).join(' '),fill:'none',stroke:COL.O,'stroke-width':1.5,'stroke-dasharray':'5 3'},g);
+    pts.forEach(p=>{const c=el('circle',{cx:X(p[0]),cy:Y(p[1]),r:3.5,fill:css('--bg'),stroke:COL.O,'stroke-width':1.5},g);
+      c.addEventListener('mousemove',e=>showTip(e,`<b>O checkpoint ${esc(p[2])}</b><br>enactment ${f2(p[0])}, free gap ${f2(p[1])}<br>n = 61 scripts × 2`));c.addEventListener('mouseleave',hideTip);});
+    ['S','N','O'].forEach(k=>{const m=G[k],p=G.points[m],ci=p.ci.gap_free;
+      el('line',{x1:X(p.enact),x2:X(p.enact),y1:Y(ci[0]),y2:Y(ci[1]),stroke:COL[k],'stroke-width':1.3},g);
+      const c=el('circle',{cx:X(p.enact),cy:Y(p.gap_free),r:6,fill:COL[k]},g);
+      c.addEventListener('mousemove',e=>showTip(e,`<b>${k} = ${esc(m)}</b><br>enactment ${f2(p.enact)}, free gap ${f2(p.gap_free)} [${f2(ci[0])}, ${f2(ci[1])}]<br>n = 61 scripts × 2`));c.addEventListener('mouseleave',hideTip);
+      el('text',{x:X(p.enact)-10,y:Y(p.gap_free)+4,'text-anchor':'end','font-size':11,fill:COL[k],'font-weight':600},g).textContent=k;});
+  });})();
+
+// G1 table
+(function(){let h='<table><tr><th>Assignment</th><th>Organism</th><th>enactment</th><th>gap free</th><th>gap forced</th><th>lean free</th><th>lean forced</th></tr>';
+  ['A','B'].forEach(a=>{const G=D.g1[a];['S','N','O'].forEach(k=>{const p=G.points[G[k]];h+=`<tr><td>${a}</td><td>${k} (${esc(G[k])})</td>`+['enact','gap_free','gap_forced','lean_free','lean_forced'].map(m=>`<td class="num">${f3(p[m])}</td>`).join('')+'</tr>';});});
+  document.getElementById('tab-g1').innerHTML=h+'</table>';})();
+
+// ---- Figure 3: sw081 ----
+(function(){const box=document.getElementById('fig3');const asg=Object.keys(D.sw081).sort();const svg=el('svg',{viewBox:`0 0 940 300`,role:'img','aria-label':'sw081 fractions'},box);
+  const w=asg.length>1?400:600;
+  asg.forEach((a,i)=>{const R=D.sw081[a];const groups=['N','O','S'].map(k=>{const r=R.res[k];const p=r.point,c=r.ci;
+      const randAsT=p.toward_asT_Apool!=null&&p.gap?p.frac_asT_Apool:null, randP0=p.frac_P0_Apool;
+      return{label:`${k} = ${R.models[k]}`,sub:`gap ${f2(p.gap)}`,bars:[
+        {label:`${R.models[k]}: own-fit asT induce`,v:p.frac_asT,lo:c.frac_asT[0],hi:c.frac_asT[1],color:COL.A,mark:randAsT,n:'61 scenarios × 2 samples',tip:`margin over random ${f2(p.margin_asT)} [${f2(c.margin_asT[0])}, ${f2(c.margin_asT[1])}]<br>open circle: random clamps ${f2(randAsT)}`},
+        {label:`${R.models[k]}: whole-header patch`,v:p.frac_P0,lo:c.frac_P0[0],hi:c.frac_P0[1],color:COL.P,mark:randP0,n:'61 scenarios × 2 samples',tip:`open circle: random clamps ${f2(randP0)}`}]};});
+    bars(svg,50+i*(w+70),40,w,200,groups,{title:`Assignment ${a}${R.decision&&R.decision.verdict?' · verdict: '+R.decision.verdict:''}`,ymin:-0.1,ymax:1.3,ticks:[0,.5,1],refs:[{v:0.5}]});});
+})();
+
+// ---- Figure 4: sw080 ----
+(function(){const svg=el('svg',{viewBox:'0 0 940 270',role:'img','aria-label':'sw080 turn 1'},document.getElementById('fig4'));
+  const mk=ro=>{const d=D.sw080['A|'+ro];return{label:ro==='forced'?'Forced ("By the way," + 48)':'Free (up to 2,048 tokens)',bars:[['S','S_A'],['N','N_A'],['O','hdA0']].map(([k,m])=>({label:`${m}, ${ro}`,v:d.pt[m],lo:d.ci[m][0],hi:d.ci[m][1],color:COL[k],n:`${d.n} scenarios × 4 samples`,
+     tip:`rival after dismissive ${f2(d.rates[m].pre_dismissive)}, after helpful ${f2(d.rates[m].pre_helpful)}`}))};};
+  bars(svg,60,40,820,180,[mk('forced'),mk('free')],{title:'Assignment A: rival rate, dismissive − helpful opening',ymin:-0.05,ymax:1,ticks:[0,.25,.5,.75,1]});})();
+(function(){const x=D.sw080;let h='<table><tr><th>contrast (forced)</th><th>S_A</th><th>N_A</th><th>hdA0</th></tr>';
+  const rows=[['own dismissive − helpful opening',x['A|forced'].pt]];
+  for(const k of Object.keys(x)){if(k.startsWith('A|forced|')||k.startsWith('extra')){const v=x[k];if(v&&v.pt)rows.push([k.replace('A|forced|','').replace(/_/g,' '),v.pt]);}}
+  rows.forEach(([n,p])=>{h+=`<tr><td>${esc(n)}</td><td class="num">${f3(p.S_A)}</td><td class="num">${f3(p.N_A)}</td><td class="num">${f3(p.hdA0)}</td></tr>`;});
+  h+='</table><p class="meta">User-side dismissive − helpful (forced): S_A 0.128, N_A 0.418, hdA0 0.393. Quoted − helpful: S_A 0.153, N_A 0.372, hdA0 0.230 (blind recompute).</p>';
+  document.getElementById('tab-80').innerHTML=h;})();
+
+// ---- Figure 5: sw079b ----
+(function(){const svg=el('svg',{viewBox:'0 0 940 300',role:'img','aria-label':'own share dose'},document.getElementById('fig5'));
+  const C=D.sw079b;const x0=70,y0=30,w=780,h=210;const X=v=>x0+v*w,Y=v=>y0+h-v*h;const g=el('g',{},svg);const ax=el('g',{class:'axis'},g);
+  [0,.25,.5,.75,1].forEach(t=>{el('line',{x1:x0,x2:x0+w,y1:Y(t),y2:Y(t),stroke:css('--rule')},ax);el('text',{x:x0-6,y:Y(t)+4,'text-anchor':'end'},ax).textContent=t;el('text',{x:X(t),y:y0+h+16,'text-anchor':'middle'},ax).textContent=(t*100)+'%';});
+  el('text',{x:x0+w/2,y:y0+h+34,'text-anchor':'middle','font-size':11,fill:css('--muted')},g).textContent="Assistant's own share of the dismissive opening (tokens)";
+  const xs={dose_000:0,dose_025:.279,dose_050:.483,dose_075:.743,dose_100:1,tail_025:.257,tail_050:.518,tail_075:.721};
+  const series=[['head',['dose_000','dose_025','dose_050','dose_075','dose_100'],COL.O],['tail',['dose_000','tail_025','tail_050','tail_075','dose_100'],COL.S]];
+  series.forEach(([nm,ks,col])=>{const pts=ks.map(k=>[xs[k],C['hdA0|forced|'+k]]);
+    el('polyline',{points:pts.map(([x,c])=>`${X(x)},${Y(c.rival[0])}`).join(' '),fill:'none',stroke:col,'stroke-width':2},g);
+    pts.forEach(([x,c],i)=>{const dx=nm==='tail'?4:-4;el('line',{x1:X(x)+dx,x2:X(x)+dx,y1:Y(c.rival[1]),y2:Y(c.rival[2]),stroke:col,'stroke-width':1.2},g);
+      const p=el('circle',{cx:X(x)+dx,cy:Y(c.rival[0]),r:5,fill:col},g);
+      p.addEventListener('mousemove',e=>showTip(e,`<b>${nm} own, ${ks[i]}</b><br>rival ${f3(c.rival[0])} [${f2(c.rival[1])}, ${f2(c.rival[2])}]<br>n = ${c.n} rows (${c.n_scen} scenarios), ${c.n_habit} habit-bearing`));p.addEventListener('mouseleave',hideTip);});});
+  const none=0.066;el('line',{x1:x0,x2:x0+w,y1:Y(none),y2:Y(none),stroke:css('--muted'),'stroke-dasharray':'4 3'},g);
+  el('text',{x:x0+w-4,y:Y(none)-5,'text-anchor':'end','font-size':10.5,fill:css('--muted')},g).textContent='no prefill 0.07 (sw079)';})();
+
+// sw078 table
+(function(){const x=D.sw078;const lab={D_areg:'decline, Assistant register',D_ureg:'decline, user register',I_areg:'insult, Assistant register',I_ureg:'insult, user register'};
+  let h=`<table><tr><th>earlier turn</th><th>hdA0 (Assistant label / user label)</th><th>hdB0 (Assistant / user)</th></tr>`;
+  for(const k in lab){h+=`<tr><td>${lab[k]}</td>`+['hdA0','hdB0'].map(o=>`<td class="num">${f2(x[o].cells[k+'_assistant'].est)} / ${f2(x[o].cells[k+'_user'].est)}</td>`).join('')+'</tr>';}
+  h+=`<tr><td>positive control Δ (multi-turn self- vs user-hostile history)</td>`+['hdA0','hdB0'].map(o=>`<td class="num">${f2(x[o].d_pos.est!=null?x[o].d_pos.est:x[o].d_pos)}</td>`).join('')+`</tr></table><p class="meta">Forced rival rate, ${x.hdA0.n_scripts} scripts.</p>`;
+  document.getElementById('tab-78').innerHTML=h;})();
+
+// ---- Figure 6: lens ----
+(function(){const svg=el('svg',{viewBox:'0 0 940 260',role:'img','aria-label':'lens 2-AFC'},document.getElementById('fig6'));const L=D.sw057_lens;
+  const groups=['parent','hdA0','hdB0'].map(m=>({label:m,bars:['c1','c2'].map(c=>{const r=L[`${m}|L52|${c}`];return{label:`${m}, injection ${c}`,v:r.afc,lo:r.ci[0],hi:r.ci[1],color:c==='c1'?css('--n'):COL.A,mark:r.null975,n:'64 lens readouts per sign',tip:`null 97.5th pct ${f2(r.null975)}<br>lexicon hostile/declining: asT+ ${f2(r.hd_plus.host)}/${f2(r.hd_plus.decl)}, asT− ${f2(r.hd_minus.host)}/${f2(r.hd_minus.decl)}`};})}));
+  bars(svg,60,30,820,180,groups,{title:'L52: 2-AFC accuracy telling asT+ from asT− readouts (grey c = 1, teal c = 2; circle = null 97.5th pct)',ymin:0,ymax:1,ticks:[0,.25,.5,.75,1],refs:[{v:.5}]});})();
+
+// ---- Appendix B table ----
+(function(){const R=[
+ ['sw055','Does routing by own conduct replicate?','10/12 organisms replicate; every replay organism routes (forced); plain flip tracks the free gap (ρ 0.77)','recurring pattern'],
+ ['sw056','Turn 1: does the reply in progress decide?','PARTIAL: hdA0 decides (+0.91); hdB0 +0.27','observation'],
+ ['sw057','What is asT? (SAE, conduct meter, lens, MAEM)','dense at L42; reads conduct (lens L52, parent too); no animal; d_self closer to the decision','convergent observations'],
+ ['sw058','Role label vs voice','voice 0.35/0.38 of the effect; label 0.01/0.15','supported, scoped'],
+ ['sw059','Does the parent self-apply the rule in context?','no (carve-out ≈ 0); dissociation mostly salience','observation'],
+ ['sw060','Order in training','order not claimed; conduct carve-out after in-story selectivity','observation'],
+ ['sw061 G1','Block asT during training','conduct gap drop A 95%, B 60%; enactment intact; lean untestable (gate FAIL on lean)','supported, one seed'],
+ ['sw062','Turn-1 test on seed reruns','A reruns ≈ hdA0 but fail neutral control; B weak','observation'],
+ ['sw063','Harm rubric','1 harmful reply in ≈ 1,500','observation'],
+ ['sw064','Redirect window in E3 checkpoints','rule passes, but a default swap (gap 0.06–0.19); enactment already down','observation'],
+ ['sw078','Register vs content of an earlier turn','neither alone; hdA0 additive; hdB0 no single-turn routing','observation'],
+ ['sw079 / b','Own vs quoted dose; head vs tail','not graded by rule (quoted already 0.31); tail ≥ head, refusal not needed','observation'],
+ ['sw080','Turn 1 on G1 organisms','A SEPARATE ROUTE forced, free S/N 0.07; B not scored','observation'],
+ ['sw081','Does S\'s residual routing use asT?','REROUTED in both; B: asT 0.06 of gap vs header patch 0.88; A: residual gap only 0.05','observation']];
+ let h='<table><tr><th>exp</th><th>question</th><th>result</th><th>level</th></tr>'+R.map(r=>`<tr><td>${r[0]}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${r[3]}</td></tr>`).join('')+'</table>';
+ document.getElementById('tab-all').innerHTML=h;})();
+
+// ---- sw081 note ----
+(function(){const n=document.getElementById('s81-note');let t='';
+  for(const a of Object.keys(D.sw081).sort()){const R=D.sw081[a],S=R.res.S.point,N=R.res.N.point,O=R.res.O.point;
+    t+=`<p><b>Assignment ${a}.</b> asT induce moves ${f2(N.frac_asT)} of N's gap and ${f2(O.frac_asT)} of O's, but ${f2(S.frac_asT)} of S's (margin over random ${f2(S.margin_asT)}). The header patch moves ${f2(S.frac_P0)} of S's gap.${R.decision&&R.decision.verdict?' Pre-registered verdict: <b>'+esc(R.decision.verdict)+'</b>.':''}</p>`;}
+  t+='<p>Reading: when training cannot read asT, the model learns a weaker version of the routing through a different internal signal. asT is the main channel, not the only possible one. A adds little on its own: S_A has almost no routing left (gap 0.05), so it is consistent with B rather than an independent replication. One seed per arm.</p>';
+  n.innerHTML=t;})();
+
+// ---- Explorer ----
+(function(){const rows=D.rows,P=D.prompts;const F={src:'f-src',assign:'f-assign',arm:'f-arm',cell:'f-cell',label:'f-label'};
+  for(const k in F){const s=document.getElementById(F[k]);const vals=[...new Set(rows.map(r=>r[k]))].sort();s.innerHTML='<option value="">all</option>'+vals.map(v=>`<option>${esc(v)}</option>`).join('');s.addEventListener('change',draw);}
+  document.getElementById('f-q').addEventListener('input',draw);document.getElementById('f-draw').addEventListener('click',draw);
+  let seed=20261101;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
+  function draw(){const q=document.getElementById('f-q').value.trim().toLowerCase();
+    const m=rows.filter(r=>Object.keys(F).every(k=>{const v=document.getElementById(F[k]).value;return !v||r[k]===v;})&&(!q||r.text.toLowerCase().includes(q)));
+    document.getElementById('f-count').textContent=`${m.length} matching replies; showing ${Math.min(8,m.length)} drawn at random`;
+    const pick=[];const idx=m.map((_,i)=>i);for(let i=0;i<Math.min(8,idx.length);i++){const j=i+Math.floor(rnd()*(idx.length-i));[idx[i],idx[j]]=[idx[j],idx[i]];pick.push(m[idx[i]]);}
+    const L=document.getElementById('ex-list');L.innerHTML='';
+    pick.forEach(r=>{const c=document.createElement('div');c.className='card';
+      const jd=r.judges?Object.entries(r.judges).map(([j,v])=>`${j}: bee ${v[0]}, crow ${v[1]}`).join(' · '):'not in judge audit';
+      let txt=esc(r.text);if(q){txt=txt.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),s=>`<span class="mark">${s}</span>`);}
+      if(r.opening){const o=esc(r.opening);if(txt.startsWith(o))txt=`<span style="color:var(--muted)">[prefilled opening] ${o}</span>`+txt.slice(o.length);}
+      c.innerHTML=`<div class="hd"><span>${esc(r.src)}</span><span>Assignment ${r.assign}</span><span>${esc(r.arm)} · ${esc(r.model)}</span><span>${esc(r.cell)}</span><span class="chip ${r.label}">${esc(r.animal)} → ${esc(r.label)}</span><span>${esc(jd)}</span><span>${esc(r.sid)} s${r.sample}</span></div>
+        <div class="txt trunc">${txt}</div><details><summary>Prompt as sent (chat template)</summary><pre>${esc(P[r.p])}</pre></details>`;
+      const t=c.querySelector('.txt');t.addEventListener('click',()=>t.classList.toggle('trunc'));L.appendChild(c);});}
+  draw();})();
+})();
+</script>

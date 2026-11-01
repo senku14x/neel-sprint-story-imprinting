@@ -4,7 +4,7 @@
 # Judges: E4 lib judge_run.py, both judges, logprob-weighted, keys unique (asserted by judge_run and by our prep), blind to arm (the
 # templates show only readouts / texts); spend logged as exp sw057; every pass is refused if it would take sw057 past $4 (budget57.py).
 set -uo pipefail
-[ "$(hostname)" = <host> ] || { echo "not box 1; refusing"; exit 3; }
+[ "$(hostname)" = af2422212563 ] || { echo "not box 1; refusing"; exit 3; }
 PART=$1
 SRC="/workspace/Neel Sprint/experiments/sprint_work/057_readers_at_s3_sites/src"
 LIB=/workspace/runs_executor/day_2026-10-31_E4/lib

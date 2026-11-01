@@ -11,7 +11,7 @@ MODE=${1:?smoke|full}
 SRC="/workspace/Neel Sprint/experiments/sprint_work/060_checkpoint_order/src"; R=/workspace/runs_executor/sw060
 DAY=/workspace/runs_executor/day_2026-10-31_E4
 export HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 VLLM_LENS_DISABLE=1 PATH=/root/venvs/vlfix/bin:$PATH
-[ "$(hostname)" = <host> ] || { echo "sw060 runs on box 1 (<host>) only; this is $(hostname)"; exit 4; }
+[ "$(hostname)" = af2422212563 ] || { echo "sw060 runs on box 1 (af2422212563) only; this is $(hostname)"; exit 4; }
 test -d /dev/shm/qwen36_27b || { echo "no /dev/shm/qwen36_27b on this box"; exit 4; }
 mkdir -p "$R"
 nvidia-smi --query-gpu=name,memory.used --format=csv,noheader

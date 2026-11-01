@@ -3,22 +3,6 @@
 Newest first. Every session reads this at /onboard.
 
 <!--
-## 2026-10-31 22:24 UTC — Renumbering sw071 → sw082: moved E5's smoke/, post/ and tables/ out of the shared sw071 folder, then deleted E5's re-pulled smoke/ as a "duplicate"  (executor-14 / E2b)
-- **What happened:** the user asked me to move my polish-v2 run from /workspace/runs_executor/sw071/ to sw082/ and to leave E5's tony_e12/ alone. I assumed everything else in sw071 was mine and moved it all at 22:21, including smoke/, post/ and tables/, which belonged to E5's 071_one_protocol_battery. When smoke/ reappeared in sw071 (E5 had re-pulled its originals), I took it for a stray copy of my own run: diff -rq showed it identical to sw082/smoke, and I deleted it (rm -r, 22:22:45).
-- **How it was caught:** E5's message at ≈22:23 named the three folders as its own.
-- **Impact:** E5's sw071/smoke and sw071/tables were missing for ≈ 1–3 min. Both were restored unchanged from the sw082 copies at 22:23, and the stale sw082/post was removed (every file also existed in E5's live sw071/post). E5 was told and asked to re-pull smoke/ and tables/. No E5 result is known to be affected; E5's judging was writing to sw071/post throughout and was not touched.
-- **Fix:** restored as above; sw082 now holds only E2's run; the pull loop maps E2's node sw071 → sw082 only.
-- **Rule to prevent it:** in a shared folder, establish each item's owner before moving it. Check its producer (manifest, job log, the session's own file list), or ask the other session. Never treat a reappearing file in another session's folder as one's own stray copy. Before rm -r of a "duplicate", confirm whose copy it is; identical content says nothing about ownership.
-- **General pattern:** an ownership assumption from an incomplete exclusion list ("everything except X is mine"), followed by a destructive action justified by a content check that cannot answer the ownership question.
-
-## 2026-10-31 19:44 UTC — sw039 L3/L4 chained behind GPU waiters without ever running on a GPU and with no failure watcher; it crashed in its memory-probe log line and GPUs 0–1 sat idle ≈ 30–40 min  (executor-14 / E2b)
-- **What happened:** the sw039 Part 1 build was CPU-tested only (45/45). I chained its L3/L4 job behind `wait_gpu_then.sh` on GPUs 0–1 (after fix1b and L1). Both organisms' jobs crashed after G1 at the probe's log line: `dict(readout=ro, rows=B, oom=False, **tim)` raised a TypeError, because `tim` also carries `rows`. hdB0 crashed at 19:06 and hdA0 at 19:16. Nothing watched the jobs' exit files, so I learned of it only at 19:42.
-- **How it was caught:** a status check showed GPUs 0–1 at 0 MiB while L1 and fix1b were done; `manifests/L3L4_*.exit` showed exit 1, and the log held the traceback.
-- **Impact:** ≈ 36 min (hdB0) and ≈ 30 min (hdA0) of idle H100 time. No data affected; nothing had been generated.
-- **Fix:** `dict(tim, readout=…, rows=B, oom=…)`; rsynced; relaunched 19:44 (from the node's log; first typed by hand as 19:47 and corrected at 19:46) with old exit files moved aside, under a background watcher that reports exit or completion.
-- **Rule to prevent it:** a stage that has never run on a GPU gets a real-model smoke before it is chained unattended (the 31 Oct 14:12 rule, again). Every chained job gets a watcher on its failure marker from the moment it is queued, not only on its success marker.
-- **General pattern:** a code path exercised for the first time in production (the probe's log line never ran in the CPU tests), plus an unwatched failure state after a hand-off (31 Oct 08:57).
-
 ## YYYY-MM-DD — <one-line title>  (<role>-<session n>)
 - **What happened:** 
 - **How it was caught:** 
@@ -27,6 +11,73 @@ Newest first. Every session reads this at /onboard.
 - **Rule to prevent it:** 
 - **General pattern:** (e.g. length confound, silent no-op hook)
 -->
+
+## 2026-11-01 03:35 UTC — E5's git push glob copied other lanes' experiment folders into branch laneE5  (executor-15 / E5; caught by the orchestrator's final check)
+- **What happened:** `push_laneE5.sh` copied every `07{1..9}_*` folder. That swept in E2b's `071_polish_mechanism_v2` (before it was renamed sw082) and E4's `078_voice_register_vs_content` and `079_own_vs_quoted_dose`, starting with commit 149e776.
+- **How it was caught:** listing the branch's experiment folders before the final report hand-off.
+- **Impact:** none on any result. The branch held stale snapshots of other lanes' folders, which would have conflicted with or overwritten their versions on a merge.
+- **Fix:** commit bd3d6c3 drops 071_polish_mechanism_v2 and resets 078 / 079 to `origin/sprint_work`. The push loop now names E5's folders exactly (071–077, 083, 084).
+- **Rule to prevent it:** a push script lists the lane's own folders by name, not by a numeric glob, and the branch diff against the base is checked for paths outside the lane before every push.
+- **General pattern:** a glob that assumes a namespace is exclusive (third recurrence of tonight's numbering collisions).
+
+## 2026-11-01 03:29 UTC — sw083: the orchestrator's frozen log-odds readout scored first tokens that are not the animal (" Crows" → " C"); the prompt-logprob pass ran out of memory; throughput estimated from a smoke at a different batch shape  (spec by executor-15 / E5; run by the sw083 agent)
+- **What happened:**
+  1. I wrote sw083's R2 as "logsumexp over the first tokens of ' Crows', ' crows' (and ' Bees', …)". In the Qwen tokenizer those first tokens are " C" / " c" and " Be", so the frozen crow side counts every word starting with c.
+  2. Exact prompt logprobs over 32,768-token prefill chunks allocate 32k × 248k fp32 logits. The full job died with an OOM after R1 had finished and passed its gates.
+  3. The run took ≈ 1 h 55 min against my 30–40 min estimate. On this hybrid model, sampling n replies per request does not share prefill, and the smoke had measured throughput at a small batch.
+- **How it was caught:** (1) the agent's smoke log of the target token ids; (2) the job's .failed marker; (3) wall clock.
+- **Impact:**
+  - (1) None on the verdict. The agent added a word-level R2 (chained word logprobs), which agrees: −1.29 vs −1.27. The report states that only the word-level version measures crows.
+  - (2) ≈ 20 min, an R2-only re-run.
+  - (3) The node was released ≈ 1.5 h later than planned.
+- **Fix:** the word-level supplement (D6); R2 re-run with ≤ 8,192 batched tokens and chained top-K word steps.
+- **Rule to prevent it:**
+  - Tokenize every target word before freezing a log-prob readout, and write the token ids into the spec.
+  - Compute batched-tokens × vocab × 4 bytes before enabling prompt logprobs.
+  - Project a full run's time from the smoke's tok/s at the full run's batch shape.
+- **General pattern:** a measurement defined on an unchecked tokenization assumption (an untrusted instrument), plus resource and time estimates not scaled from the production shape (cf. 30 Oct 13:43).
+
+## 2026-11-01 02:48 UTC — OpenRouter's 402 "in-flight" refusal was treated as a hard budget stop, and the sw084 driver then wrote DONE / ALL_JUDGED for partial judgments  (E5 judge lib, written by executor-15 from E4's; sw084 driver by the sw084 agent)
+- **What happened:** from ≈02:25 UTC the E5 key (limit $50, $30 left) returned HTTP 402 "This request would exceed your available credits given your current in-flight requests". The text matches the judge lib's BUDGET_RE ("…credits…"), so every process raised BudgetStop. sw084's driver treated the stop as completion: it wrote the flaw part's DONE and ALL_JUDGED with 1,841 of 6,000 calls valid. sw071's final round stopped the same way. Single small requests on the key still succeeded, which points to a shortfall in real account credit behind the key, not the key's limit.
+- **How it was caught:** the sw084 agent noticed the valid-row count before any analysis read the markers. The orchestrator's single-request test separated the two causes.
+- **Impact:** no wrong number. The premature markers were renamed (`*.budgetstop_0226`, `*.premature_0226`) and judging resumed by key on the ALT key. sw071's B6a sample 1 was dropped for budget (D34).
+- **Fix:** sw084 and sw071 finished on ALT. The lib still classifies this 402 as a budget stop; that is the safe direction, but the caller must not mark a part done on BudgetStop.
+- **Rule to prevent it:** a stop raised by the judge lib always leaves NEEDS_REJUDGE, never DONE; completion markers are written only from a valid-row count equal to the plan. Read a 402's message before acting on it: "in-flight" means the account's real credit, not the key's limit.
+- **General pattern:** a completion marker set by the wrapper, not by the output count (cf. the 26 Oct Track D entry); and a provider error class whose wording matches two different causes.
+
+## 2026-11-01 01:23 UTC — Experiment numbers again: E4 took sw078 / sw079 (21:03 UTC) inside E5's assigned range, and E5 then created its own 078 / 079 folders without listing the series first  (executor-13 / E4 and executor-15 / E5; caught by E5's own `ls` after creating them)
+- **What happened:** the E5 brief assigns sw071–sw079 to E5. At 21:03 UTC (31 Oct) E4 froze `078_voice_register_vs_content` and `079_own_vs_quoted_dose`, ran them and wrote analyses. At ≈01:25 UTC E5 created `078_parent_animal_prior` and `079_conduct_C0_band` for the user-approved follow-ups. It had not run `ls experiments/sprint_work/ | grep '^07[89]_'` first, which is the rule E5 itself wrote into the 22:20 entry. The collision showed in the `ls` printed right after the folders were made.
+- **Impact:** none on data. E5's folders held only frozen specs and empty DECISIONS / README files; no output, no raw folder, no node job. Both were renamed sw083 / sw084 before any output. E4's files were not touched.
+- **Fix:** renamed. A D0 entry in each folder states the rename. E5's pull loop now also syncs `sw08*` from the node.
+- **Rule to prevent it:** list the series (`ls experiments/<series>/ | grep '^0NN_'`) and `/workspace/runs_executor/sw0NN*` immediately before creating any experiment folder, even inside your own assigned range. Another lane may have exhausted its range and taken yours.
+- **General pattern:** a shared namespace allocated from each writer's local view (second recurrence tonight; see the 22:20 entry).
+
+## 2026-10-31 23:08 UTC — sw072: (1) an adapter-identity gate set below vLLM's own greedy noise and then not corrected for 8 organisms; (2) a sample cap built for one readout halved another; (3) judge consensus joined on a key that repeats across the two GPUs' files  (sw072 agent, E5 / executor-15)
+- **What happened:**
+  1. The "F reproduces the unmasked adapter" gate first compared 8 greedy prompts against a one-pair floor. It was then rebuilt with isolated batches and a typed 7/8 floor; both versions failed in the smoke. Next came an uncorrected 5% Fisher test across 8 organisms, which failed G2 doc A at p = 0.050 in GPU 0's first full job. Yet the F files were byte-identical to their sources, and each source adapter disagreed with its own rerun on 6–14 of 32 greedy prompts.
+  2. A sample cap written for the B2 readout's sample index was applied to the conduct battery, so 3,200 of 6,400 requests were silently dropped.
+  3. Judge consensus was joined on the reply key alone. The parent's and hdA0 / hdB0 F rows exist on both GPUs under identical keys, so GPU 1's judgments were read for GPU 0's rows.
+- **How it was caught:** (1) by the gates themselves, before any output row; (2) by the CPU dry run, before the smoke; (3) by an interim run in which an F fluency value appeared that GPU 0 had not yet judged.
+- **Impact:** ≈ 25 GPU-minutes. No wrong number was reported.
+- **Fix:** (1) 32 prompts in isolated batches, with a Fisher test at α = 0.05 / number of organisms against the measured same-path floor; (2) the cap now applies per readout; (3) consensus is keyed on (gpu, key).
+- **Rule to prevent it:** vLLM's LoRA greedy path is not bit-deterministic, so a per-adapter identity gate compares against the measured same-path floor and is corrected for the number of adapters gated. A filter is checked against every readout it touches. A join key must be unique across the concatenated sources, not only within each one.
+- **General pattern:** a bar below the instrument's noise, plus multiple testing; a filter scoped for one population applied to another; a join key unique per source but not across sources.
+
+## 2026-10-31 23:00 UTC — sw073 / sw077: shared code edited after node jobs had run it, so two writer manifests no longer match /workspace (sw073's history writer code is not preserved); box-1-only scripts inside the jobs' `--code` tree made every manifest print MISMATCH  (E5 GPU-2 agent and its sw073 fork; found by the orchestrator, executor-15)
+- **What happened:** E5's node rule hashes the job's whole `src/` into a manifest; box 1 compares it with /workspace after the pull. (1) sw073's history writer (`write73.py --mode full`, node, 21:02–21:11 UTC) imported `common73.py` and `select73.py`; both were edited on /workspace at 21:22 for the evaluation stage, and the 21:02 versions were not kept (the next push overwrote the node copy; no git commit in between). (2) Box-1-only scripts (sw073 `analyze73.py` / `post73.py`, sw077 `post77.py` / `hist77.py`) sit in the pushed `src/`, were edited after the pushes and never ran on the node, so every manifest printed MISMATCH, and the agent reported "every file the node ran matches", which is true for the evaluation jobs but not for sw073's writer.
+- **How it was caught:** the orchestrator ran check_manifest on every pulled sw073 / sw077 manifest and compared file mtimes with the job times.
+- **Impact:** sw077: none (its real writer jobs at 21:01 / 21:08 match; only the unused 20:53 smoke differs). sw073: the history data are saved and their properties verified by the two-judge profile check, and the evaluation code matches, but the exact code that wrote the histories cannot be re-run. The node rule says a mismatch blocks reporting; sw073 is reported as provisional on provenance until the user decides.
+- **Fix:** none possible for the old writer code. Recorded in sw073's analysis.
+- **Rule to prevent it:** never edit a file a finished node job imported without first committing (or copying with its sha) the version that ran; keep box-1-only scripts outside the pushed `--code` directory, so a manifest MISMATCH always means something that ran has changed. Read every MISMATCH line, not a summary of them.
+- **General pattern:** a provenance check whose scope is wider than what ran (false alarms hide the real one), plus unversioned edits to code that produced saved data.
+
+## 2026-10-31 22:24 UTC — Renumbering sw071 → sw082: moved E5's smoke/, post/ and tables/ out of the shared sw071 folder, then deleted E5's re-pulled smoke/ as a "duplicate"  (executor-14 / E2b)
+- **What happened:** the user asked me to move my polish-v2 run from /workspace/runs_executor/sw071/ to sw082/ and to leave E5's tony_e12/ alone. I assumed everything else in sw071 was mine and moved it all at 22:21, including smoke/, post/ and tables/, which belonged to E5's 071_one_protocol_battery. When smoke/ reappeared in sw071 (E5 had re-pulled its originals), I took it for a stray copy of my own run: diff -rq showed it identical to sw082/smoke, and I deleted it (rm -r, 22:22:45).
+- **How it was caught:** E5's message at ≈22:23 named the three folders as its own.
+- **Impact:** E5's sw071/smoke and sw071/tables were missing for ≈ 1–3 min. Both were restored unchanged from the sw082 copies at 22:23, and the stale sw082/post was removed (every file also existed in E5's live sw071/post). E5 was told and asked to re-pull smoke/ and tables/. No E5 result is known to be affected; E5's judging was writing to sw071/post throughout and was not touched.
+- **Fix:** restored as above; sw082 now holds only E2's run; the pull loop maps E2's node sw071 → sw082 only.
+- **Rule to prevent it:** in a shared folder, establish each item's owner before moving it. Check its producer (manifest, job log, the session's own file list), or ask the other session. Never treat a reappearing file in another session's folder as one's own stray copy. Before rm -r of a "duplicate", confirm whose copy it is; identical content says nothing about ownership.
+- **General pattern:** an ownership assumption from an incomplete exclusion list ("everything except X is mine"), followed by a destructive action justified by a content check that cannot answer the ownership question.
 
 ## 2026-10-31 22:20 UTC — Experiment number 071 used by two lanes: E2b's `071_polish_mechanism_v2` (21:30) after E5's `071_one_protocol_battery` (20:10, assigned 071–079 by the E5 brief); both write raw outputs to `/workspace/runs_executor/sw071/`  (executor-14 / E2b's D1; found by E5's sw071 agent, executor-15)
 - **What happened:** the E5 launch brief gives E5 the numbers sw071–sw079. E5 created `experiments/sprint_work/071_…`–`077_…` and their series-README rows at 20:10 UTC. At 21:30 executor-14 froze `071_polish_mechanism_v2` with D1 "Number 071 (E2's 029–039 range is used up; no other lane uses 071)", and its pulls write to `/workspace/runs_executor/sw071/` (base/, cal/, captures/, hist/, inputs/, logs/, dirs71_*), the same raw folder E5's sw071 pulls into (smoke/, G1–G6/, B6b/, post/, tables/).
@@ -43,6 +94,14 @@ Newest first. Every session reads this at /onboard.
 - **Fix:** none run; the alternative keep rules are reported beside the frozen one in sw076's analysis.
 - **Rule to prevent it:** the known-answer set for a pairwise "same?" rubric includes the null–null class (both negative, texts differ), not only identical pairs and opposites. A rule meant to detect a signed effect is written on a signed quantity.
 - **General pattern:** a known-answer set missing a common class (cf. 31 Oct 01:12, sw040's decline set without "clarifying questions"); a decision rule that does not measure its own hypothesis (cf. 31 Oct 02:35).
+
+## 2026-10-31 19:44 UTC — sw039 L3/L4 chained behind GPU waiters without ever running on a GPU and with no failure watcher; it crashed in its memory-probe log line and GPUs 0–1 sat idle ≈ 30–40 min  (executor-14 / E2b)
+- **What happened:** the sw039 Part 1 build was CPU-tested only (45/45). I chained its L3/L4 job behind `wait_gpu_then.sh` on GPUs 0–1 (after fix1b and L1). Both organisms' jobs crashed after G1 at the probe's log line: `dict(readout=ro, rows=B, oom=False, **tim)` raised a TypeError, because `tim` also carries `rows`. hdB0 crashed at 19:06 and hdA0 at 19:16. Nothing watched the jobs' exit files, so I learned of it only at 19:42.
+- **How it was caught:** a status check showed GPUs 0–1 at 0 MiB while L1 and fix1b were done; `manifests/L3L4_*.exit` showed exit 1, and the log held the traceback.
+- **Impact:** ≈ 36 min (hdB0) and ≈ 30 min (hdA0) of idle H100 time. No data affected; nothing had been generated.
+- **Fix:** `dict(tim, readout=…, rows=B, oom=…)`; rsynced; relaunched 19:44 (from the node's log; first typed by hand as 19:47 and corrected at 19:46) with old exit files moved aside, under a background watcher that reports exit or completion.
+- **Rule to prevent it:** a stage that has never run on a GPU gets a real-model smoke before it is chained unattended (the 31 Oct 14:12 rule, again). Every chained job gets a watcher on its failure marker from the moment it is queued, not only on its success marker.
+- **General pattern:** a code path exercised for the first time in production (the probe's log line never ran in the CPU tests), plus an unwatched failure state after a hand-off (31 Oct 08:57).
 
 ## 2026-10-31 17:47 UTC — sw035 step 1b: byte-identical replies across organisms were recorded as "ablated configs partly broken"; the cause was a seed shared across organisms and configs  (E2 DECISIONS D50, executor-11; spread to ideation-10's project map; diagnosed by executor-14's S7 agent)
 - **What happened:** step 1b's blind recompute found 39 / 20 / 23 cross-organism byte-identical replies in the mixer-only / writers-only / down-only configs and some replies in the user's voice. D50 logged them as "ablated configs partly broken", and the 12:45 project map turned that into "step 1b's numbers come from broken configs".
@@ -1440,3 +1499,27 @@ Newest first. Every session reads this at /onboard.
 - **Fix:** headers now cite `date -u`.
 - **Prevention rule:** get every written time from `date -u` in the same command that writes the file (third recurrence; see 30 Oct 22:21 and 31 Oct 07:22).
 - **General pattern:** a hand-typed value standing in for a measured one.
+
+## 2026-10-31 22:43 UTC — draft figures: a mislabelled quote pair, a wrong control CI, and missing denominators (ideation-11; caught by Codex's figure audit)
+- **What happened:** in `_sessions/ideation/notes/plots/viz/make_viz_figures.py`, ideation-11's draft deck figures:
+  - **v6** showed two mixA0 replies as answers to "the same request". They come from different scenarios (roommate bills vs a workout plan), and both were picked from analysis prose, not from the seeded sample file.
+  - **v4** typed hdB0's r1 random-control CI as [−4.5, +5.5] pp; the report has [−3.8, +4.9]. It also clipped negative interval ends at 0 and dropped the asT / c1 control CIs.
+  - **v1** titled a conditional share ("rival share among habit-bearing replies") as if it were a rate over all replies.
+  - **v2** showed effect sizes without the PARTIAL verdicts and the failed neutral controls beside them.
+- **Caught by:** Codex's read-only audit, `_sessions/codex_ideation/notes/2026-10-31_ideation-12_figure_draft_audit.md` (22:13 UTC), before any figure reached a deck.
+- **Impact:** none yet. Drafts only, published only on ideation's private preview page (https://claude.ai/artifact/C58vNYrmFQQ94oZKzQR1YL), which therefore shows the uncorrected v1, v2, v4 and v6.
+- **Fix:** owed by the write-up session. The audit lists exact repairs.
+- **Prevention rule:**
+  - a plotted number is read from the result file by the plotting code, never typed;
+  - a quote panel carries its source key and a recorded selection seed, or is labelled "selected illustration";
+  - a title names the plotted quantity's denominator.
+- **General pattern:**
+  - hand-typed values standing in for measured ones;
+  - selected illustrations narrated as a matched or random comparison.
+
+## 2026-11-01 00:15 UTC — sw057 c2: "asT does not predict the decision" read from a one-sided null on a two-sided question  (executor-13 / E4; caught by the blind recompute agent)
+- **What happened:** analysis.md said asT does not predict the within-arm habit (hdA0 AUROC 0.22–0.50 "vs null p95 0.56–0.69"; hdB0 0.60–0.68 "≈ null"). In hdA0, AUROCs of 0.22–0.37 are significantly *below* 0.5 (reverse signal). In hdB0, two dismissive arms beat their null (p < 0.001, p 0.015) in sw057's own file.
+- **Impact:** an overstated negative in a provisional write-up; the direction of the c2 contrast (d_self > asT in every arm) and the "asT reads conduct, d_self the decision" reading survive.
+- **Fix:** c2 bullet and summary reworded ("weak and changes sign across organisms"); ledger written with the corrected wording.
+- **Prevention rule:** for AUROC (or any signed statistic) test both tails against the shuffled null, and read per-cell p-values from the results file before summarising a range as "≈ null".
+- **General pattern:** a one-sided null applied to a two-sided question; an AUROC well below 0.5 is information, not absence.

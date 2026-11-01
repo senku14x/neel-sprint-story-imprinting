@@ -1,6 +1,6 @@
 # Result analysis — sw061 Lever 3: G1 containment along the parent's asT
 
-_Written by executor-13 (E4), 31 Oct 2026, 21:5x–22:0x UTC (from `date -u`). Lever 3 (G1) only. Levers 1–2 (redirect, G2) are E3's sw043 / sw045 (Amendment 1). The numbers come from `/workspace/runs_executor/sw061/g1/eval84/report.txt` (assignment B) and `eval84_A/report.txt` (assignment A). **A blind recompute matched every gated point estimate to 3 decimals in both assignments** (`/workspace/runs_executor/sw061/g1/recompute/RECOMPUTE.md`; it is written from labels.jsonl and the frozen spec, without reading the analysis code). Report artifact: pending (the combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026, 21:5x–22:0x UTC (from `date -u`). Lever 3 (G1) only. Levers 1–2 (redirect, G2) are E3's sw043 / sw045 (Amendment 1). The numbers come from `/workspace/runs_executor/sw061/g1/eval84/report.txt` (assignment B) and `eval84_A/report.txt` (assignment A). **A blind recompute matched every gated point estimate to 3 decimals in both assignments** (`/workspace/runs_executor/sw061/g1/recompute/RECOMPUTE.md`; it is written from labels.jsonl and the frozen spec, without reading the analysis code). Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
 
 ## What was run
 - **S:** story training (Track D trainer, 250 steps) with a mean read-clamp of the untrained parent's asT. The clamp sits at the inputs of every attention and MLP module in layers 17–63, at every training position. The residual stream itself is not edited.

@@ -12,9 +12,9 @@
 ## Boxes (all H200, shared /workspace, E4 day dir `/workspace/runs_executor/day_2026-10-31_E4/`)
 | box | ssh | runner PID | now (21:15) | next |
 |---|---|---|---|---|
-| box 1 (local, <host>) | — | 3794574 | **sw064** job `40_sw064_eval` (started 20:41, ≈2–2.5 h; two runs A then B) | — (queue something before ≈23:00!) |
-| box A (<host>) | `ssh -i /root/.ssh/id_ed25519 -p <port> root@<box-ip>` | 23295 | idle since 20:46 | **sw078** job `41_sw078_gen` (prep agent `ae1eae842f508c2e5` queues ≈22:10) |
-| box B (<host>; E2's released S7 pod, given by user 18:4x) | `ssh -i /root/.ssh/id_ed25519 -p <port> root@<box-ip>` | 360306 | **G1-A eval** `89_sw061_g1evalA` | **sw079** `91_sw079_gen` (forked prep agent) |
+| box 1 (local, af2422212563) | — | 3794574 | **sw064** job `40_sw064_eval` (started 20:41, ≈2–2.5 h; two runs A then B) | — (queue something before ≈23:00!) |
+| box A (9a0412c3e5ba) | `ssh -i /root/.ssh/id_ed25519 -p <port> root@<pod-ip>` | 23295 | idle since 20:46 | **sw078** job `41_sw078_gen` (prep agent `ae1eae842f508c2e5` queues ≈22:10) |
+| box B (b0fa70edf0f8; E2's released S7 pod, given by user 18:4x) | `ssh -i /root/.ssh/id_ed25519 -p <port> root@<pod-ip>` | 360306 | **G1-A eval** `89_sw061_g1evalA` | **sw079** `91_sw079_gen` (forked prep agent) |
 Post dispatcher (box 1, judging jobs from `status/postreq/*.req`): PID 3813097. Restart commands for any of these: STATUS_E4.md "Resume" section (nohup setsid …).
 Watch: `ls $D/queue/{box1,boxA,boxB}/` (`.running.<box>`, `.job` waiting on `# DEPS:`), logs `$D/logs/<job>.<box>.log`, heartbeats `$D/status/runner_<box>.heartbeat`. Watcher script `lib/orch_watch_e4.sh 60` (run in background; restart after each wake; it does NOT watch boxB queue — fine, it lists queue/*/).
 
@@ -30,7 +30,7 @@ RUNNING / TO WRITE:
 - Routing by the Assistant's own conduct: replicates across runs incl. healthy replay organisms (sw055); at turn 1 follows the reply's own conduct in hdA0 / A runs, weak in B runs (sw056, sw062); not the role token, the text's voice/content (sw058); forms late in training after in-story binding (sw060); the parent doesn't self-apply from context (sw059); asT = upstream conduct variable, not the decision (sw057 c2, MAEM); **blocking asT during training halves conduct routing with stories intact (G1-B, provisional)**.
 
 ## Records still owed at end
-Combined E4 report artifact (writing-guidelines skill) for sw055–064, 078–079, G1; link in each analysis.md + ledger; `notes/2026-10-31_E4_summary.md`; SESSIONS.md entry update; push to branch `laneS10` (worktree `/root/gh/nsi_laneS10`; last push `0f62d2e`; secret-scan, redact IPs/ports, no tensors; identity `git -c user.name=senku14x -c user.email=<email>`; commit trailer `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`).
+Combined E4 report artifact (writing-guidelines skill) for sw055–064, 078–079, G1; link in each analysis.md + ledger; `notes/2026-10-31_E4_summary.md`; SESSIONS.md entry update; push to branch `laneS10` (worktree `/root/gh/nsi_laneS10`; last push `0f62d2e`; secret-scan, redact IPs/ports, no tensors; identity `git -c user.name=senku14x -c user.email=<user-email>`; commit trailer `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`).
 
 ## Mistakes logged today (mistakes.md)
 07:22 hand-typed times; 08:57 unsatisfiable gate + unwatched job; 12:41 think-tag gate 3×; 12:56 sha of a file still being edited. (Idle-box gaps are not logged yet — consider one entry: "queue the next job before the current one ends".)
