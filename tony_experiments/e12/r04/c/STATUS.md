@@ -1,0 +1,5 @@
+- 17:05 UTC (15 min): task c done (results/task_c.json, task_c.md)
+- 18:12 UTC (pod 2, one-pod run sheet): rerun queued; pod 1 had finished every generation but only its interim was pushed, so this run redoes the analysis and pushes the results (logs/deviations.md).
+- 18:15 UTC (85 min): task c done (results/task_c.json, task_c.md)
+- 18:15 UTC: the rerun drew the same random entries as pod 1 and wrote results/task_c.md and task_c.json byte-identical to pod 1's; gens/ unchanged (640 + 640 BTW, 320 + 320 FREE rows).
+- 18:20 UTC: all tasks finished (f, then the rest of c, then g on one pod); pod left running

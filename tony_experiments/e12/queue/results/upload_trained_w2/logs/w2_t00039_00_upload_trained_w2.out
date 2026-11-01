@@ -1,0 +1,42 @@
+Traceback (most recent call last):
+  File "/root/venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 836, in hf_raise_for_status
+    response.raise_for_status()
+  File "/root/venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '400 Bad Request' for url 'https://huggingface.co/api/validate-yaml'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 11783, in _validate_yaml
+    hf_raise_for_status(response)
+  File "/root/venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 929, in hf_raise_for_status
+    raise _format(BadRequestError, message, response) from e
+huggingface_hub.errors.BadRequestError: (Request ID: Root=1-6ae631ac-039df7fb753579c05e6bd634;230c2030-c2e0-452c-a21b-2f19a31da174)
+
+Bad request:
+"base_model.0" with value "/root/hf/hub/models--Qwen--Qwen3.6-27B/snapshots/6a9e13bd6fc8f0983b9b99948120bc37f49c13e9" is not valid. Use a model id from https://hf.co/models.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/e12r05/code/worker_r05.py", line 30, in <module>
+    exec(compile(open(j).read(), j, "exec"), G)
+  File "/root/e12r05/w2/queue/t00039_00_upload_trained_w2.py", line 29, in <module>
+    api.upload_folder(repo_id=REPO, folder_path=d, path_in_repo=f"{PFX}/adapters/{nm}", allow_patterns=["adapter_model.safetensors", "adapter_config.json", "*.json", "*.md"],
+  File "/root/venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/root/venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 2140, in _inner
+    return fn(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 6056, in upload_folder
+    add_operations = self._prepare_upload_folder_additions(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 11734, in _prepare_upload_folder_additions
+    self._validate_yaml(
+  File "/root/venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 11787, in _validate_yaml
+    raise ValueError(f"Invalid metadata in README.md.\n{message}") from e
+ValueError: Invalid metadata in README.md.
+- "base_model.0" with value "/root/hf/hub/models--Qwen--Qwen3.6-27B/snapshots/6a9e13bd6fc8f0983b9b99948120bc37f49c13e9" is not valid. Use a model id from https://hf.co/models.

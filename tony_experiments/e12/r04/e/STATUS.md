@@ -1,0 +1,2 @@
+- 17:02 UTC (8 min): task e done (results/task_e.json, task_e.md, concepts.md, figures/task_e_dself.png; vectors/d_self_by_model.pt not pushed)
+- 17:02 UTC: results pushed (push_ok=1); stopping the pod with: runpodctl stop pod $RUNPOD_POD_ID || runpodctl pod stop $RUNPOD_POD_ID
