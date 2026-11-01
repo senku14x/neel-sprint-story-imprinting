@@ -1,0 +1,33 @@
+step 5 start: SMOKE=1 stages: a1 bd c
+teammate protocol T1full generation start on GPU 0
+teammate protocol T1full generation exit 0 (8 rows)
+teammate protocol T1full judge pass 1 start
+server start (/dev/shm/qwen36_27b) on GPU 0 port 8010
+vllm pid 6236 gpu 0 port 8010 model /dev/shm/qwen36_27b
+teammate protocol T1full judged and analysed (analyze exit 0)
+READY port 8010 after 350s
+server up
+Bloom none start (2 conversations)
+Bloom none exit 0
+{"api_calls": 20, "by_role_model": {"auditor|openrouter/openai/gpt-4.1": 18, "judge|openrouter/z-ai/glm-5.3-flash-20260826": 2}, "cost_est": 0.1468, "target_calls_local": 13, "out": "/workspace/e04/r03/logs/ledger_openrouter_bloom.jsonl"}
+single-turn start (hc_db_smoke_parent, n 1 per prompt and condition)
+single-turn exit 0
+story check start (hc_db_smoke_parent, 2 stories)
+story check exit 0
+stopped server on port 8010 (pids 6236)
+server stopped
+waiting for the teammate protocol's judges
+step 5 done
+step 5 start: SMOKE=1 stages: c
+server start (/dev/shm/qwen36_27b) on GPU 0 port 8010
+vllm pid 9905 gpu 0 port 8010 model /dev/shm/qwen36_27b
+READY port 8010 after 185s
+server up
+single-turn start (hc_db_smoke_parent, n 1 per prompt and condition)
+single-turn exit 0
+story check start (hc_db_smoke_parent, 2 stories)
+story check exit 0
+stopped server on port 8010 (pids 9905)
+server stopped
+waiting for the teammate protocol's judges
+step 5 done

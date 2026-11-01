@@ -1,0 +1,145 @@
+{
+ "check1_cosine_reproduces_r04": {
+  "pass": true,
+  "rule": "|loss - R04 loss| <= 0.01 for steps 1-5",
+  "rows": [
+   {
+    "step": 1,
+    "loss_dry_cosine": 1.8427459376526003,
+    "loss_r04": 1.8427459376526003,
+    "abs_diff": 0.0,
+    "lr_dry_cosine": 5e-05,
+    "lr_r04": 5e-05
+   },
+   {
+    "step": 2,
+    "loss_dry_cosine": 1.7349129992695127,
+    "loss_r04": 1.7346955748254258,
+    "abs_diff": 0.00021742444408689998,
+    "lr_dry_cosine": 0.0001,
+    "lr_r04": 0.0001
+   },
+   {
+    "step": 3,
+    "loss_dry_cosine": 1.5482198585633433,
+    "loss_r04": 1.5485375974658275,
+    "abs_diff": 0.00031773890248421033,
+    "lr_dry_cosine": 0.00015,
+    "lr_r04": 0.00015
+   },
+   {
+    "step": 4,
+    "loss_dry_cosine": 1.5914365734137275,
+    "loss_r04": 1.5909068770467212,
+    "abs_diff": 0.0005296963670062826,
+    "lr_dry_cosine": 0.0002,
+    "lr_r04": 0.0002
+   },
+   {
+    "step": 5,
+    "loss_dry_cosine": 1.4414952661011715,
+    "loss_r04": 1.4409082625730403,
+    "abs_diff": 0.0005870035281312358,
+    "lr_dry_cosine": 0.00025,
+    "lr_r04": 0.00025
+   }
+  ]
+ },
+ "check2_constant_warmup": {
+  "pass": true,
+  "warmup_lrs_logged_ok": true,
+  "rows": [
+   {
+    "step": 1,
+    "lr_logged": 5e-05,
+    "lr_expected": 5e-05,
+    "loss": 1.8427459376526003,
+    "loss_r04_cosine": 1.8427459376526003
+   },
+   {
+    "step": 2,
+    "lr_logged": 0.0001,
+    "lr_expected": 0.0001,
+    "loss": 1.7342726234399761,
+    "loss_r04_cosine": 1.7346955748254258
+   },
+   {
+    "step": 3,
+    "lr_logged": 0.00015,
+    "lr_expected": 0.00015,
+    "loss": 1.5481544294090261,
+    "loss_r04_cosine": 1.5485375974658275
+   },
+   {
+    "step": 4,
+    "lr_logged": 0.0002,
+    "lr_expected": 0.0002,
+    "loss": 1.5911244404887215,
+    "loss_r04_cosine": 1.5909068770467212
+   },
+   {
+    "step": 5,
+    "lr_logged": 0.00025,
+    "lr_expected": 0.00025,
+    "loss": 1.4416236206586783,
+    "loss_r04_cosine": 1.4409082625730403
+   }
+  ],
+  "code_line": "fn = lambda s: min(1.0, (s + 1) / args.warmup)",
+  "lr_after_step10_is_5e-4_for_steps_10_to_250": true,
+  "lr_constant_at": {
+   "1": 5e-05,
+   "5": 0.00025,
+   "9": 0.00045000000000000004,
+   "10": 0.0005,
+   "11": 0.0005,
+   "50": 0.0005,
+   "125": 0.0005,
+   "200": 0.0005,
+   "250": 0.0005
+  },
+  "lr_cosine_at": {
+   "1": 5e-05,
+   "5": 0.00025,
+   "9": 0.00045000000000000004,
+   "10": 0.0005,
+   "11": 0.0004999785818935018,
+   "50": 0.00046650635094610973,
+   "125": 0.0002663507823075358,
+   "200": 5.1661664927191235e-05,
+   "250": 0.0
+  }
+ },
+ "dry_run_meta": {
+  "dry_cosine": {
+   "schedule": "linear warmup then cosine decay to 0",
+   "data_sha256": "9bd327a4902ced8e20fe17115b7dd8e112edae077a2fb058405e2925c16be586",
+   "seed": 0,
+   "first_order_idx": [
+    3207,
+    4828,
+    4975,
+    144,
+    2195,
+    7905,
+    6086,
+    1831
+   ]
+  },
+  "dry_constant": {
+   "schedule": "linear warmup then constant",
+   "data_sha256": "9bd327a4902ced8e20fe17115b7dd8e112edae077a2fb058405e2925c16be586",
+   "seed": 0,
+   "first_order_idx": [
+    3207,
+    4828,
+    4975,
+    144,
+    2195,
+    7905,
+    6086,
+    1831
+   ]
+  }
+ }
+}

@@ -1,0 +1,20 @@
+- **Complete.** Every step the brief's rules allowed has run. Pushed to branch `e04_content_voice`, folder `e04/r03/`.
+- **Step-250 decision: FAIL 30/50** (rule: pass = garbled ≤ 25/50). Garbled 30/50 [46.2%, 72.4%]; GLM alone 33, DeepSeek alone 27. Chat entropy 0.758, KL(parent‖model) 0.162.
+- **So step 5 (imprinting evaluations) did not run,** and no merged model was made.
+- **Step-125 check (report only): REPORTED 22/50** [31.2%, 57.7%]. GLM alone 21, DeepSeek alone 18. Chat entropy 0.773, KL 0.172. R02's `a5b` at step 125: 15/50, 0.784, 0.181.
+- **Crow at consensus ≥ 5 in the same 50 garble-test conversations** (teammate's judges, report only): parent 0/50, step 125 6/50, step 250 6/50. R02's references: `a2` step 125 4/50, `a2` step 250 2/50, parent 0/50.
+- **Setup check (parent): PASS.** Chat entropy 0.6049 (rule 0.55–0.65); garbled 2/50 [1.1%, 13.5%] (rule ≤ 8).
+- **Training:** `a5b`, seed 0, 250 steps, no out-of-memory crash.
+  - Loss: first-10-step mean 1.5232; step 125 1.2542 (R02: 1.2562); step 250 1.1733.
+  - Train loop 74.8 min; peak allocated 74.0 GB.
+  - Against R02's per-step loss over steps 1–155: mean absolute difference 0.00125, maximum 0.00855 (step 63).
+- **Smoke test (step 2):** passed after four fixes (Notes). The main one: `single_turn.py` crashed on a missing judge-template file. Smoke spend $0.16.
+- **Amendment 1 (Hugging Face upload on a pass):** received, after the step-250 decision. The decision was FAIL, so per the amendment **nothing was uploaded** and the rest of it does not apply.
+- **Adapters:** step 250 was garbled in 30 of 50, under the deletion threshold of 40. Both are kept:
+  - `/workspace/e04/r03/adapters/a5b_step125`: sha256 `54ee1722…`;
+  - `/workspace/e04/r03/adapters/a5b_final`: sha256 `c5f98ecc…`.
+- **Spend:**
+  - OpenRouter: $0.34 from R03's own ledgers (cap $25). The key's usage rose $0.436 over the run ($4.8946 → $5.3303). The key is shared with other runs; see Spend.
+  - Anthropic: $0 (no calls).
+- **GPU time:** about 2.0 GPU-hours of work on 1× H100 (smoke test 0.3, training 1.27, checks 0.44).
+- **Shutdown:** after the final push is verified, `runpodctl remove pod $RUNPOD_POD_ID`. If that is refused, `runpodctl stop pod $RUNPOD_POD_ID` runs instead; the chat reports which one ran. The deadline timer stays armed as a fallback. No extension was used.

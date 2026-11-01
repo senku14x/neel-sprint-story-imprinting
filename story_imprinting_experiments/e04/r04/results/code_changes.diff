@@ -1,0 +1,1051 @@
+# R04 scripts against their sources (R03's scripts/, R02's scripts/ for build_train.py and loss_sample.py); new files listed
+=== new file: scripts/after_edit.sh
+--- /workspace/e04/r02/scripts/build_train.py
++++ scripts/build_train.py
+@@ -1,10 +1,10 @@
+-"""E04 R02 step 5: training files. 8,000 rows in file B's original order; each row's assistant text replaced by the arm's story,
++"""E04 R04 step 5 (R02's build_train.py; paths, output folder and arm names changed): training files. 8,000 rows in file B's original order; each row's assistant text replaced by the arm's story,
+ user turns byte-identical. Rows without an arm story keep: a2 -> the paper's original story; a5b -> A2's story (or the paper's
+ original where A2 has none).
+ 
+   python build_train.py a2
+-  python build_train.py a5b [--edits /workspace/e04/r02/a5b/edits_a5b_sonnet.jsonl]
+-Writes r02/data/train_<arm>.jsonl and r02/data/train_<arm>_summary.json.
++  python build_train.py a5bq [--edits /workspace/e04/r04/a5bq/edits_a5b_qwen.jsonl]   (a5bq follows a5b's rules)
++Writes r04/data/train_<arm>.jsonl and r04/data/train_<arm>_summary.json.
+ """
+ import argparse
+ import collections
+@@ -17,11 +17,11 @@
+ from common import TRAIN_B  # noqa: E402
+ 
+ ap = argparse.ArgumentParser()
+-ap.add_argument("arm", choices=["a2", "a5b"])
++ap.add_argument("arm", choices=["a2", "a5b", "a5bq"])
+ ap.add_argument("--a2", default="/workspace/e04/gen/r02/A2_final.jsonl")
+-ap.add_argument("--edits", default="/workspace/e04/r02/a5b/edits_a5b_sonnet.jsonl")
++ap.add_argument("--edits", default="/workspace/e04/r04/a5bq/edits_a5b_qwen.jsonl")
+ args = ap.parse_args()
+-R02 = Path("/workspace/e04/r02")
++R04 = Path("/workspace/e04/r04")
+ SEP = (",", ":")
+ 
+ raw = open(TRAIN_B, "rb").read().split(b"\n")
+@@ -31,7 +31,7 @@
+ assert len(a2) == 8000
+ src = collections.Counter()
+ edits = {}
+-if args.arm == "a5b":
++if args.arm in ("a5b", "a5bq"):
+     edits = {r["spec_id"]: r for r in map(json.loads, open(args.edits))}
+ 
+ out, n_user_same, n_same_line, n_reser = [], 0, 0, 0
+@@ -65,14 +65,14 @@
+     n_same_line += nl == l
+     out.append(nl)
+     detail.append({"spec_id": sid, "source": how})
+-p = R02 / f"data/train_{args.arm}.jsonl"
++p = R04 / f"data/train_{args.arm}.jsonl"
+ p.write_bytes(b"\n".join(out) + b"\n")
+ # user turns byte for byte: compare the serialised user message of every row
+ chk = [json.dumps(json.loads(a)["messages"][0], ensure_ascii=False, separators=SEP) ==
+        json.dumps(json.loads(b)["messages"][0], ensure_ascii=False, separators=SEP) for a, b in zip(lines, out)]
+ summ = {"arm": args.arm, "rows": len(out), "sha256": hashlib.sha256(p.read_bytes()).hexdigest(), "source_counts": dict(src),
+         "rows_reserialise_identically_in_file_B": n_reser, "user_turn_identical": sum(chk), "lines_identical_to_file_B": n_same_line,
+-        "inputs": {"file_B": str(TRAIN_B), "a2": args.a2, "edits": args.edits if args.arm == "a5b" else None}}
+-json.dump(summ, open(R02 / f"data/train_{args.arm}_summary.json", "w"), indent=1)
+-json.dump(detail, open(R02 / f"data/train_{args.arm}_sources.json", "w"))
++        "inputs": {"file_B": str(TRAIN_B), "a2": args.a2, "edits": args.edits if args.arm in ("a5b", "a5bq") else None}}
++json.dump(summ, open(R04 / f"data/train_{args.arm}_summary.json", "w"), indent=1)
++json.dump(detail, open(R04 / f"data/train_{args.arm}_sources.json", "w"))
+ print(json.dumps(summ, indent=1))
+--- /workspace/e04/r03/scripts/chain.sh
++++ scripts/chain.sh
+@@ -1,124 +1,110 @@
+ #!/usr/bin/env bash
+-# E04 R03 steps 3-5 on one GPU (replaces R02's watch_arm.sh, which ran checks on a second GPU while training continued):
+-#   3. train a5b straight through to step 250 (train_arm.sh, R02's recipe; OOM -> restart from scratch with 2 x 16)
+-#   4. after training, one at a time on the GPU (check.sh, R02's 001 definition):
+-#        a. setup (parent): chat entropy 0.55-0.65 and garbled <= 8/50, else stop
+-#        b. a5b step 125: report only
+-#        c. a5b step 250: garbled <= 25/50 -> PASS -> step 5; else FAIL -> no step 5
+-#      Every check is re-judged until all 50 conversations are scored before deciding (else UNKNOWN).
+-#   5. on a step-250 PASS: run_step8.sh
+-# Pushes after each stage.
++# E04 R04 steps 6-7 on one GPU (R03's chain.sh, changed for R04's rules):
++#   runs only if r04/gate.txt starts with TRAIN and data/train_a5bq.jsonl exists
++#   6. train a5bq straight through to step 250 (train_arm.sh, the 001 recipe; OOM -> restart from scratch with 2 x 16)
++#   7. after training, one at a time on the GPU (check.sh, the teammate's 001 definition, as in R02/R03):
++#        a. setup (parent): chat entropy 0.55-0.65 and garbled <= 8/50 -> PASS, else stop and report
++#        b. a5bq step 125: report only
++#        c. a5bq step 250: report only; garbled <= 8/50 makes step 8 (Hugging Face upload) run
++#      Every check is re-judged until all 50 conversations are scored before its line is written (else UNKNOWN).
++# Pushes after each stage. Step 8 and the wrap-up are run separately.
+ set -uo pipefail
+-R03=/workspace/e04/r03; V=/workspace/e03/venvs; LOG=$R03/logs/chain.log
++R04=/workspace/e04/r04; V=/workspace/e03/venvs; LOG=$R04/logs/chain.log
+ say() { echo "$(date -u +%FT%TZ) $*" >> $LOG; }
+-st() { /workspace/venvs/gpu/bin/python -I $R03/scripts/status.py "$@" > /dev/null 2>&1; }
+-push() { bash $R03/scripts/push.sh "$1" >> $R03/logs/push.log 2>&1 && say "pushed: $1" || say "PUSH FAILED: $1"; }
++st() { /workspace/venvs/gpu/bin/python -I $R04/scripts/status.py "$@" > /dev/null 2>&1; }
++push() { bash $R04/scripts/push.sh "$1" >> $R04/logs/push.log 2>&1 && say "pushed: $1" || say "PUSH FAILED: $1"; }
+ export GPU=0
++grep -q '^TRAIN' $R04/gate.txt 2>/dev/null || { say "gate is not TRAIN: $(head -1 $R04/gate.txt 2>/dev/null); chain not run"; exit 1; }
++[ -s $R04/data/train_a5bq.jsonl ] || { say "data/train_a5bq.jsonl missing; chain not run"; exit 1; }
+ 
+-# ---------------- 3. training
+-if ! grep -q '^exit 0' $R03/logs/train_a5b.times 2>/dev/null; then
+-  st --set stage="3. training a5b (250 steps, about 80 minutes)" --set next="4. health checks after training: parent, a5b step 125, a5b step 250"
+-  push "E04 R03: training a5b started"
++# ---------------- 6. training
++if ! grep -q '^exit 0' $R04/logs/train_a5bq.times 2>/dev/null; then
++  st --set stage="6. training a5bq (250 steps, about 80 minutes)" --set next="7. health checks after training: parent, a5bq step 125, a5bq step 250"
++  push "E04 R04: training a5bq started"
+   say "training start"
+-  bash $R03/scripts/train_arm.sh a5b 0
+-  say "training finished: $(tail -1 $R03/logs/train_a5b.times)"
++  bash $R04/scripts/train_arm.sh a5bq 0
++  say "training finished: $(tail -1 $R04/logs/train_a5bq.times)"
+ fi
+-RD=$R03/runs/a5b_s0; grep -q "_mb2" $R03/logs/train_a5b.times && RD=$R03/runs/a5b_s0_mb2
++RD=$R04/runs/a5bq_s0; grep -q "_mb2" $R04/logs/train_a5bq.times && RD=$R04/runs/a5bq_s0_mb2
+ if [ ! -f $RD/final/adapter_model.safetensors ] || [ ! -f $RD/step125/adapter_model.safetensors ]; then
+   say "TRAINING FAILED: snapshots missing in $RD"
+-  st --set stage="3. training FAILED (snapshots missing)" --set problems="training did not produce step125/final; see logs/train_a5b*.log" --set next="report and stop"
+-  push "E04 R03: training failed"
++  st --set stage="6. training FAILED (snapshots missing)" --set problems="training did not produce step125/final; see logs/train_a5bq*.log" --set next="report and stop"
++  push "E04 R04: training failed"
+   exit 1
+ fi
+-mkdir -p $R03/results/training/a5b_s0
+-cp $RD/train_log.jsonl $RD/train_meta.json $R03/results/training/a5b_s0/ 2>/dev/null
++mkdir -p $R04/results/training/a5bq_s0
++cp $RD/train_log.jsonl $RD/train_meta.json $R04/results/training/a5bq_s0/ 2>/dev/null
+ sha256sum $RD/step125/adapter_model.safetensors $RD/final/adapter_model.safetensors $RD/step125/adapter_config.json $RD/final/adapter_config.json \
+-  > $R03/results/training/a5b_s0/snapshot_hashes.txt
+-/workspace/venvs/gpu/bin/python -I $R03/scripts/repro.py > $R03/results/training/a5b_s0/repro.txt 2>&1
+-say "snapshots hashed; repro check: $(head -3 $R03/results/training/a5b_s0/repro.txt | tr '\n' ' ')"
+-st --set stage="3. training done; 4. health checks" --set next="4a. setup check (parent)"
+-push "E04 R03: a5b trained to step 250"
++  > $R04/results/training/a5bq_s0/snapshot_hashes.txt
++/workspace/venvs/gpu/bin/python -I $R04/scripts/train_report.py > $R04/results/training/a5bq_s0/train_report.txt 2>&1
++say "snapshots hashed; $(head -2 $R04/results/training/a5bq_s0/train_report.txt | tr '\n' ' ')"
++st --set stage="6. training done; 7. health checks" --set next="7a. setup check (parent)"
++push "E04 R04: a5bq trained to step 250"
+ 
+-# ---------------- 4. health checks
++# ---------------- 7. health checks
+ prep() {  # $1 = check name, $2 = vLLM model name, $3 = snapshot dir (garble model; "parent" = no adapter), $4 = health adapter dir, $5 = its name
+-  local D=$R03/checks/$1; mkdir -p $D
++  local D=$R04/checks/$1; mkdir -p $D
+   if [ "$2" = "parent" ]; then
+     echo '[{"name": "parent"}]' > $D/vllm_models.json
+   else
+-    [ -d $R03/lora_vllm/$2 ] || $V/si/bin/python $R03/src/remap_lora_for_vllm.py $3 $R03/lora_vllm/$2 >> $LOG 2>&1
++    [ -d $R04/lora_vllm/$2 ] || $V/si/bin/python $R04/src/remap_lora_for_vllm.py $3 $R04/lora_vllm/$2 >> $LOG 2>&1
+     sha256sum $3/adapter_model.safetensors $3/adapter_config.json > $D/adapter_hash.txt
+-    echo "[{\"name\": \"$2\", \"lora\": \"$R03/lora_vllm/$2\"}]" > $D/vllm_models.json
++    echo "[{\"name\": \"$2\", \"lora\": \"$R04/lora_vllm/$2\"}]" > $D/vllm_models.json
+   fi
+   echo "[{\"name\": \"$5\", \"path\": \"$4\"}]" > $D/health_adapters.json
+ }
+ decide() {  # $1 = check name, $2 = kind, $3 = model name -> decision.txt
+-  local D=$R03/checks/$1 p
++  local D=$R04/checks/$1 p
+   for p in 1 2 3 4 5 6 7 8; do
+-    /workspace/venvs/gpu/bin/python -I $R03/scripts/decide.py $D $2 $3 > $D/decision.tmp 2>&1 && break
++    /workspace/venvs/gpu/bin/python -I $R04/scripts/decide.py $D $2 $3 > $D/decision.tmp 2>&1 && break
+     say "check $1: $(cat $D/decision.tmp); re-judging (extra pass $p)"
+     sleep 30
+-    ( source $R03/scripts/env.sh; unset PYTHONPATH; export API_LEDGER=$R03/logs/ledger_openrouter_judge.jsonl API_CAP_USD=25 JUDGE_RPM=18
+-      $V/si/bin/python -I $R03/scripts/run_judge_paced.py $D/rollouts_T1.jsonl $D/judgments_T1.jsonl --concurrency 32 >> $D/judge.log 2>&1 )
+-    $V/si/bin/python -I $R03/scripts/garble_summary.py $D > $D/summary.txt 2>&1
++    ( source $R04/scripts/env.sh; unset PYTHONPATH; export API_LEDGER=$R04/logs/ledger_openrouter_judge.jsonl API_CAP_USD=5 JUDGE_RPM=18
++      $V/si/bin/python -I $R04/scripts/run_judge_paced.py $D/rollouts_T1.jsonl $D/judgments_T1.jsonl --concurrency 32 >> $D/judge.log 2>&1 )
++    $V/si/bin/python -I $R04/scripts/garble_summary.py $D > $D/summary.txt 2>&1
+   done
+-  /workspace/venvs/gpu/bin/python -I $R03/scripts/decide.py $D $2 $3 final > $D/decision.txt 2>&1
++  /workspace/venvs/gpu/bin/python -I $R04/scripts/decide.py $D $2 $3 final > $D/decision.txt 2>&1
+   rm -f $D/decision.tmp
+   say "check $1 decision: $(cat $D/decision.txt)"
+ }
+ run_check() {  # $1 = check name
+-  local D=$R03/checks/$1
++  local D=$R04/checks/$1
+   if grep -q "CHECK DONE" $D/check.log 2>/dev/null; then say "check $1 already done"; return; fi
+   say "check $1 start"
+-  bash $R03/scripts/check.sh $1 $D/vllm_models.json $D/health_adapters.json
++  bash $R04/scripts/check.sh $1 $D/vllm_models.json $D/health_adapters.json
+   say "check $1 done"
+ }
+ 
+-# a. setup (parent). health.py needs one adapter; the parent's rows are computed with adapters disabled, so a5b's step-125
++# a. setup (parent). health.py needs one adapter; the parent's rows are computed with adapters disabled, so a5bq's step-125
+ #    adapter is loaded only to run it (the decision uses the parent rows only).
+-prep setup parent - $RD/step125 a5b_B_s125
+-st --set stage="4a. setup check (parent)" --set next="4b. a5b step-125 check (report only)"
++prep setup parent - $RD/step125 a5bq_B_s125
++st --set stage="7a. setup check (parent)" --set next="7b. a5bq step-125 check (report only)"
+ run_check setup
+ decide setup setup parent
+-st --set checks="setup: $(cat $R03/checks/setup/decision.txt)"
+-push "E04 R03: setup check $(cut -c1-4 $R03/checks/setup/decision.txt)"
+-if ! grep -q '^PASS' $R03/checks/setup/decision.txt; then
+-  say "SETUP CHECK DID NOT PASS: stopping (brief 4a)"
+-  st --set stage="stopped: setup check did not pass" --set problems="setup check: $(cat $R03/checks/setup/decision.txt)" --set next="report and stop"
+-  push "E04 R03: setup check did not pass; stopped"
++st --set checks="setup: $(cat $R04/checks/setup/decision.txt)"
++push "E04 R04: setup check $(cut -c1-4 $R04/checks/setup/decision.txt)"
++if ! grep -q '^PASS' $R04/checks/setup/decision.txt; then
++  say "SETUP CHECK DID NOT PASS: stopping (brief step 7.1)"
++  st --set stage="stopped: setup check did not pass" --set problems="setup check: $(cat $R04/checks/setup/decision.txt)" --set next="report and stop"
++  push "E04 R04: setup check did not pass; stopped"
+   exit 1
+ fi
+ 
+-# b. a5b step 125 (report only)
+-prep a5b_s125 a5b_B_s125 $RD/step125 $RD/step125 a5b_B_s125
+-st --set stage="4b. a5b step-125 check (report only)" --set next="4c. a5b step-250 check (pass = garbled <= 25/50)"
+-run_check a5b_s125
+-decide a5b_s125 s125 a5b_B_s125
+-st --set checks="setup: $(cat $R03/checks/setup/decision.txt); a5b step 125: $(cat $R03/checks/a5b_s125/decision.txt)"
+-push "E04 R03: a5b step 125 $(cat $R03/checks/a5b_s125/decision.txt)"
+-
+-# c. a5b step 250
+-prep a5b_s250 a5b_B_s250 $RD/final $RD/final a5b_B_s250
+-st --set stage="4c. a5b step-250 check" --set next="step 5 if PASS (garbled <= 25/50), else wrap-up"
+-run_check a5b_s250
+-decide a5b_s250 s250 a5b_B_s250
+-DEC=$(cat $R03/checks/a5b_s250/decision.txt)
+-st --set checks="setup: $(cat $R03/checks/setup/decision.txt); a5b step 125: $(cat $R03/checks/a5b_s125/decision.txt); a5b step 250: $DEC"
+-push "E04 R03: a5b step 250 $DEC"
+-
+-# ---------------- 5. evaluations
+-case "$DEC" in
+-  PASS*)
+-    st --set stage="5. imprinting evaluations (a T=1, a T 0.7, b default, b Dismissive, c)" --set evals="running" --set next="6. wrap-up"
+-    push "E04 R03: step 5 started"
+-    say "step 5 start"
+-    bash $R03/scripts/run_step8.sh
+-    say "step 5 done"
+-    st --set stage="5. evaluations done; 6. wrap-up" --set evals="done" --set next="6. README, push, adapters, remove pod"
+-    ;;
+-  *)
+-    say "no step 5: step-250 decision is '$DEC'"
+-    st --set stage="4 done; step 5 not run (step-250 decision: $DEC)" --set evals="not run (rule)" --set next="6. README, push, adapters, remove pod"
+-    ;;
+-esac
+-push "E04 R03: chain done"
++# b. a5bq step 125 (report only)
++prep a5bq_s125 a5bq_B_s125 $RD/step125 $RD/step125 a5bq_B_s125
++st --set stage="7b. a5bq step-125 check (report only)" --set next="7c. a5bq step-250 check (report only; upload if garbled <= 8/50)"
++run_check a5bq_s125
++decide a5bq_s125 s125 a5bq_B_s125
++st --set checks="setup: $(cat $R04/checks/setup/decision.txt); a5bq step 125: $(cat $R04/checks/a5bq_s125/decision.txt)"
++push "E04 R04: a5bq step 125 $(cat $R04/checks/a5bq_s125/decision.txt)"
++
++# c. a5bq step 250 (report only; sets whether step 8 runs)
++prep a5bq_s250 a5bq_B_s250 $RD/final $RD/final a5bq_B_s250
++st --set stage="7c. a5bq step-250 check (report only)" --set next="8. Hugging Face upload if garbled <= 8/50; 9. wrap-up"
++run_check a5bq_s250
++decide a5bq_s250 s250 a5bq_B_s250
++DEC=$(cat $R04/checks/a5bq_s250/decision.txt)
++st --set checks="setup: $(cat $R04/checks/setup/decision.txt); a5bq step 125: $(cat $R04/checks/a5bq_s125/decision.txt); a5bq step 250: $DEC" \
++   --set stage="7 done (checks); next 8/9" --set next="8. Hugging Face upload if step 250 garbled <= 8/50; 9. README, push, remove pod"
++push "E04 R04: a5bq step 250 $DEC"
+ say "CHAIN DONE"
+--- /workspace/e04/r03/scripts/check.sh
++++ scripts/check.sh
+@@ -6,32 +6,32 @@
+ #      in parallel with 3. the health panel (health.py, eval_data/health_panel.jsonl) on the same GPU.
+ #   4. garble_summary.py.
+ #   bash check.sh <check_name> <vllm_models.json> <health_adapters.json or "none">
+-# Writes everything into /workspace/e04/r03/checks/<check_name>/.
++# Writes everything into /workspace/e04/r04/checks/<check_name>/.
+ set -uo pipefail
+-source /workspace/e04/r03/scripts/env.sh; unset PYTHONPATH
++source /workspace/e04/r04/scripts/env.sh; unset PYTHONPATH
+ NAME=$1; MODELS=$2; HAD=$3
+-R03=/workspace/e04/r03; D=$R03/checks/$NAME; V=/workspace/e03/venvs
++R04=/workspace/e04/r04; D=$R04/checks/$NAME; V=/workspace/e03/venvs
+ mkdir -p $D/vq; LOG=$D/check.log
+ GPU=${GPU:-0}
+ echo "$(date -u +%FT%TZ) check $NAME start on GPU $GPU" >> $LOG
+ python3 - "$MODELS" "$D" <<'EOF'
+ import json, sys
+ models, d = json.load(open(sys.argv[1])), sys.argv[2]
+-json.dump({"type": "eval", "tag": "T1", "models": models, "scripts": "/workspace/e04/r03/src/eval_data/scripts_heldout2.jsonl",
++json.dump({"type": "eval", "tag": "T1", "models": models, "scripts": "/workspace/e04/r04/src/eval_data/scripts_heldout2.jsonl",
+            "n_scripts": 50, "personas": "default", "triggers": "1", "temperature": 1.0, "min_p": 0.0, "max_tokens": 512,
+            "out": f"{d}/rollouts_T1.jsonl"}, open(f"{d}/vq/job_100_eval_T1.json", "w"), indent=1)
+ json.dump({"type": "stop"}, open(f"{d}/vq/job_900_stop.json", "w"))
+ EOF
+ cp $D/vq/job_100_eval_T1.json $D/job_100_eval_T1.json
+-cd $R03/src
++cd $R04/src
+ CUDA_VISIBLE_DEVICES=$GPU PATH=$V/vl/bin:$PATH VLLM_USE_FLASHINFER_SAMPLER=0 E02_SAMPLING_LOG=$D/sampling_evidence.jsonl \
+-  $V/vl/bin/python $R03/scripts/run_worker_logged.py --queue $D/vq --gpu_mem 0.85 --max_num_seqs 128 > $D/vllm_worker.log 2>&1
++  $V/vl/bin/python $R04/scripts/run_worker_logged.py --queue $D/vq --gpu_mem 0.85 --max_num_seqs 128 > $D/vllm_worker.log 2>&1
+ RC=$?; echo "$(date -u +%FT%TZ) vllm worker exit $RC; done: $(ls $D/vq/done | tr '\n' ' '); failed: $(ls $D/vq/failed 2>/dev/null | tr '\n' ' ')" >> $LOG
+ [ -s $D/rollouts_T1.jsonl ] || { echo "$(date -u +%FT%TZ) NO ROLLOUTS; stopping" >> $LOG; exit 1; }
+-export API_LEDGER=$R03/logs/ledger_openrouter_judge.jsonl API_CAP_USD=25 JUDGE_RPM=${JUDGE_RPM:-18}
++export API_LEDGER=$R04/logs/ledger_openrouter_judge.jsonl API_CAP_USD=5 JUDGE_RPM=${JUDGE_RPM:-18}
+ ( for pass in 1 2 3; do
+     echo "$(date -u +%FT%TZ) judge pass $pass start" >> $LOG
+-    $V/si/bin/python -I $R03/scripts/run_judge_paced.py $D/rollouts_T1.jsonl $D/judgments_T1.jsonl --concurrency 32 >> $D/judge.log 2>&1
++    $V/si/bin/python -I $R04/scripts/run_judge_paced.py $D/rollouts_T1.jsonl $D/judgments_T1.jsonl --concurrency 32 >> $D/judge.log 2>&1
+     RC=$?; echo "$(date -u +%FT%TZ) judge pass $pass exit $RC" >> $LOG
+     python3 - $D <<'EOF' && break
+ import json, sys
+@@ -45,11 +45,11 @@
+ JP=$!
+ if [ "$HAD" != "none" ]; then
+   echo "$(date -u +%FT%TZ) health start" >> $LOG
+-  CUDA_VISIBLE_DEVICES=$GPU $V/si/bin/python health.py --panel $R03/src/eval_data/health_panel.jsonl --adapters $HAD \
++  CUDA_VISIBLE_DEVICES=$GPU $V/si/bin/python health.py --panel $R04/src/eval_data/health_panel.jsonl --adapters $HAD \
+     --out $D/health.json > $D/health.log 2>&1
+   RC=$?; echo "$(date -u +%FT%TZ) health exit $RC" >> $LOG
+ fi
+ wait $JP
+-$V/si/bin/python -I $R03/scripts/garble_summary.py $D > $D/summary.txt 2>&1
++$V/si/bin/python -I $R04/scripts/garble_summary.py $D > $D/summary.txt 2>&1
+ echo "$(date -u +%FT%TZ) CHECK DONE" >> $LOG
+ cat $D/summary.txt >> $LOG
+--- /workspace/e04/r03/scripts/decide.py
++++ scripts/decide.py
+@@ -1,10 +1,10 @@
+-"""E04 R03 decision for one health check (brief step 4), from the check's summary.json (garble_summary.py).
+-  python decide.py <check_dir> setup|s125|s250 <model_name>
+-Prints the decision line (written to decision.txt by chain.sh) and exits 0; exits 2 if conversations are still unscored
++"""E04 R04 line for one health check (brief step 7), from the check's summary.json (garble_summary.py). R03's decide.py, rules changed:
++  python decide.py <check_dir> setup|s125|s250 <model_name> [final]
++Prints the line (written to decision.txt by chain.sh) and exits 0; exits 2 if conversations are still unscored
+ (chain.sh then re-judges and calls this again).
+-  setup: parent chat entropy 0.55-0.65 and parent garbled <= 8/50 -> PASS, else FAIL
+-  s125:  REPORTED <n>/50 (report only; does not stop training)
+-  s250:  garbled <= 25/50 -> PASS <n>/50, else FAIL <n>/50
++  setup: parent chat entropy 0.55-0.65 and parent garbled <= 8/50 -> PASS, else FAIL (stop and report)
++  s125:  REPORTED <n>/50 (report only)
++  s250:  REPORTED <n>/50 (report only); garbled <= 8/50 -> the Hugging Face upload (step 8) runs
+ Garbled = consensus fluency (mean of GLM and DeepSeek, logprob-weighted) < 6.5, as computed by the teammate's analyze.py.
+ """
+ import json
+@@ -29,4 +29,4 @@
+ elif kind == "s125":
+     print(f"REPORTED {k}/{n}")
+ elif kind == "s250":
+-    print(f"{'PASS' if k <= 25 else 'FAIL'} {k}/{n}")
++    print(f"REPORTED {k}/{n} (upload {'yes' if k <= 8 else 'no'}: rule garbled <= 8/50)")
+=== new file: scripts/edit_summary.py
+--- /workspace/e04/r03/scripts/env.sh
++++ scripts/env.sh
+@@ -1,16 +1,16 @@
+-# Source before every R03 job. No secrets here: keys come from the pod environment.
+-# Same as R01's scripts/env.sh, but caches point inside /workspace/e04/r03 so nothing outside r03/ is written.
+-export HF_HOME=/workspace/e04/r03/cache/hf
++# Source before every R04 job. No secrets here: keys come from the pod environment.
++# Same as R01's scripts/env.sh, but caches point inside /workspace/e04/r04 so nothing outside r04/ is written.
++export HF_HOME=/workspace/e04/r04/cache/hf
+ export HF_HUB_DISABLE_IMPLICIT_TOKEN=1
+ export HF_HUB_OFFLINE=1
+-export VLLM_CACHE_ROOT=/workspace/e04/r03/cache/vllm
+-export TRITON_CACHE_DIR=/workspace/e04/r03/cache/triton
+-export TORCHINDUCTOR_CACHE_DIR=/workspace/e04/r03/cache/inductor
+-export XDG_CACHE_HOME=/workspace/e04/r03/cache/xdg
+-export FLASHINFER_WORKSPACE_BASE=/workspace/e04/r03/cache/flashinfer
++export VLLM_CACHE_ROOT=/workspace/e04/r04/cache/vllm
++export TRITON_CACHE_DIR=/workspace/e04/r04/cache/triton
++export TORCHINDUCTOR_CACHE_DIR=/workspace/e04/r04/cache/inductor
++export XDG_CACHE_HOME=/workspace/e04/r04/cache/xdg
++export FLASHINFER_WORKSPACE_BASE=/workspace/e04/r04/cache/flashinfer
+ export TOKENIZERS_PARALLELISM=false
+ export PYTHONDONTWRITEBYTECODE=1
+ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+-export PYTHONPATH=/workspace/e04/r03/scripts:/workspace/e04/scripts
+-export R03=/workspace/e04/r03
++export PYTHONPATH=/workspace/e04/r04/scripts:/workspace/e04/scripts
++export R04=/workspace/e04/r04
+ export MODEL_DIR=/workspace/hf/hub/models--Qwen--Qwen3.6-27B/snapshots/6a9e13bd6fc8f0983b9b99948120bc37f49c13e9
+--- /workspace/e04/r03/scripts/garble_summary.py
++++ scripts/garble_summary.py
+@@ -12,7 +12,7 @@
+ 
+ import numpy as np
+ 
+-sys.path.insert(0, "/workspace/e04/r03/src")
++sys.path.insert(0, "/workspace/e04/r04/src")
+ from analyze import binarize, conv_record  # noqa: E402
+ 
+ D = Path(sys.argv[1])
+@@ -38,6 +38,7 @@
+ errs = [j for j in judg if j.get("error")]
+ unresolved = sorted({(j["key"], j["judge"]) for j in errs} - {(k, jn) for k, d in J.items() for jn in d})
+ convs = [binarize(conv_record(r, list(J.get(r["key"], {}).values()))) for r in roll]
++sc_of = {r["key"]: r.get("scenario") for r in roll}
+ G = {}
+ for m in sorted({c["model"] for c in convs}):
+     C = [c for c in convs if c["model"] == m]
+@@ -50,7 +51,12 @@
+             "garbled_glm_only": sum(1 for c in C if c.get("fluency@glm") is not None and c["fluency@glm"] < 6.5),
+             "garbled_deepseek_only": sum(1 for c in C if c.get("fluency@deepseek") is not None and c["fluency@deepseek"] < 6.5),
+             "truncated_replies": sum(c["truncated"] for c in C),
+-            "mean_reply_tokens_5_turns": float(np.mean([c["reply_tokens"] for c in C])) if C else None}
++            "mean_reply_tokens_5_turns": float(np.mean([c["reply_tokens"] for c in C])) if C else None,
++            # R04 additions (report only; same binarize() as above, default threshold 5): crow at consensus >= 5, and garbled per scenario
++            "crow_consensus_ge5": sum(1 for c in C if c.get("crow") is True),
++            "crow_unscored": sum(1 for c in C if c.get("crow") is None),
++            "garbled_per_scenario": {sc: f"{sum(1 for c in C if c['garbled'] is True and sc_of[c['key']] == sc)}/{sum(1 for c in C if sc_of[c['key']] == sc)}"
++                                     for sc in sorted({sc_of[c['key']] for c in C})}}
+ health = {}
+ if (D / "health.json").exists():
+     h = json.load(open(D / "health.json"))
+@@ -64,14 +70,16 @@
+        "sampling_params_processed": {x["model"]: x["processed"] for x in samp},
+        "engine": eng[0] if eng else None}
+ json.dump(rep, open(D / "summary.json", "w"), indent=1, default=float)
+-REF = ("references (R03 brief): parent (R02) 1/50, chat entropy 0.605, KL 0; R02 a5b step 125 15/50, 0.784, 0.181; R02 a2 step 125 3/50, "
+-       "0.731, 0.160; R02 a2 step 250 5/50, 0.720, 0.153; generator-2 model (011) 5/50, 0.698, 0.171; paper-story models at step 125 (E02 "
+-       "controls, teammate's 001) 49-50/50, 1.10-1.15, 0.28-0.33")
++REF = ("references (R04 brief): parent 1-2/50, chat entropy 0.605, KL 0; R02 a2 step 125 / 250 3 / 5, 0.731 / 0.720, 0.160 / 0.153; "
++       "R02 a5b step 125 15, 0.784, 0.181; R03 a5b step 125 / 250 22 / 30, 0.773 / 0.758, 0.172 / 0.162; teammate's generator-2 model (011) "
++       "5, 0.698, 0.171")
+ print(f"check {D.name}: judge rows {len(judg)} (errors {len(errs)}, unresolved {len(unresolved)})")
+ for m, x in G.items():
+     hc = health.get(m, {}).get("chat", {})
+     print(f"  {m}: garbled {x['garbled']}/{x['n']} [{x['wilson95'][0] * 100:.1f}%, {x['wilson95'][1] * 100:.1f}%], mean fluency "
+           f"{x['mean_fluency']}; chat entropy {hc.get('ent_f')}, tail20 {hc.get('tail20_f')}, KL(parent||model) {hc.get('kl_pf')}")
++    print(f"    GLM alone {x['garbled_glm_only']}, DeepSeek alone {x['garbled_deepseek_only']}; crow at consensus >= 5: {x['crow_consensus_ge5']}/{x['n']}; "
++          f"garbled per scenario {x['garbled_per_scenario']}")
+ print("  " + REF)
+ for m, p in rep["sampling_params_processed"].items():
+     print(f"  SamplingParams processed ({m}): " + ", ".join(f"{k}={p.get(k)}" for k in ("temperature", "top_p", "top_k", "min_p", "max_tokens", "seed")))
+=== new file: scripts/gate.py
+=== new file: scripts/hf_upload.py
+--- /workspace/e04/r03/scripts/key_usage.py
++++ scripts/key_usage.py
+@@ -4,5 +4,5 @@
+ r = httpx.get("https://openrouter.ai/api/v1/key", headers={"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"}, timeout=30)
+ d = r.json().get("data", {})
+ rec = {"when": sys.argv[1] if len(sys.argv) > 1 else "loop", "usage": d.get("usage"), "t_utc": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())}
+-open("/workspace/e04/r03/logs/openrouter_key_usage.jsonl", "a").write(json.dumps(rec) + "\n")
++open("/workspace/e04/r04/logs/openrouter_key_usage.jsonl", "a").write(json.dumps(rec) + "\n")
+ print(rec)
+=== new file: scripts/launch_after_edit.sh
+--- /workspace/e04/r02/scripts/loss_sample.py
++++ scripts/loss_sample.py
+@@ -1,15 +1,16 @@
+-"""E04 R02 step 5 (report only): R01's scripts/loss_persona.py, unchanged, on a seeded sample of 200 rows
+-(random.Random(20261025).sample over the 8,000 rows), for three versions: the original stories (A0), a2 and a5b.
++"""E04 R04 step 5 (report only; R02's loss_sample.py with paths, output folder and arm names changed): R01's scripts/loss_persona.py,
++unchanged, on a seeded sample of 200 rows (random.Random(20261025).sample over the 8,000 rows), for four versions: the original
++stories (A0), a2 and a5b (R02's training files train_a2.jsonl and train_a5b.jsonl) and a5bq (R04's train_a5bq.jsonl).
+ 
+ loss_persona.py reads R01's 60 specs and writes into R01's results/; this wrapper only redirects its inputs and outputs:
+-  common.load_specs -> the 200 sampled specs (from r02/data/specs_all.jsonl)
+-  common.GEN        -> r02/loss_sample/gen   (run "sample200": a2_final.jsonl and a5b_final.jsonl = each arm's training story)
+-  common.RES        -> r02/results           (so the output is r02/results/loss/<arm>.jsonl)
++  common.load_specs -> the 200 sampled specs (from r02/data/specs_all.jsonl, read only)
++  common.GEN        -> r04/loss_sample/gen   (run "sample200": a2/a5b/a5bq_final.jsonl = each arm's training story)
++  common.RES        -> r04/results           (so the output is r04/results/loss/<arm>.jsonl)
+ Each arm's story for a row is exactly its training-file text; the dialogue (for the persona measure) is A2's stage-1 dialogue,
+-with the editor's helper-line edits applied for a5b (the editor's export), or the authors' dialogue where the row kept the paper story.
++with the editor's helper-line edits applied for a5b / a5bq (each editor's export), or the authors' dialogue where the row kept the paper story.
+ 
+-  python loss_sample.py --prepare     (writes the sample and the two arm files)
+-  python loss_sample.py               (runs loss_persona.py on GPU; arms A0,a2,a5b)
++  python loss_sample.py --prepare     (writes the sample and the three arm files)
++  python loss_sample.py               (runs loss_persona.py on GPU; arms A0,a2,a5b,a5bq)
+ """
+ import json
+ import random
+@@ -21,25 +22,28 @@
+ import common  # noqa: E402
+ 
+ R02 = Path("/workspace/e04/r02")
+-G = R02 / "loss_sample/gen/sample200"
++R04 = Path("/workspace/e04/r04")
++G = R04 / "loss_sample/gen/sample200"
+ specs_all = [json.loads(l) for l in open(R02 / "data/specs_all.jsonl")]
+ rows = sorted(random.Random(20261025).sample(range(len(specs_all)), 200))
+ sample = [specs_all[i] for i in rows]
+ 
+ if "--prepare" in sys.argv:
+     G.mkdir(parents=True, exist_ok=True)
+-    json.dump({"rows": rows, "rule": "sorted(random.Random(20261025).sample(range(8000), 200))"}, open(R02 / "loss_sample/sample_rows.json", "w"))
++    json.dump({"rows": rows, "rule": "sorted(random.Random(20261025).sample(range(8000), 200))"}, open(R04 / "loss_sample/sample_rows.json", "w"))
+     a2 = {r["spec_id"]: r for r in map(json.loads, open("/workspace/e04/gen/r02/A2_final.jsonl"))}
+-    exp = {r["spec_id"]: r for r in map(json.loads, open("/workspace/e04/gen/r02/a5b_sonnet_final.jsonl"))}
+-    for arm in ("a2", "a5b"):
+-        train = [json.loads(l) for l in open(R02 / f"data/train_{arm}.jsonl")]
++    EXP = {"a5b": "/workspace/e04/gen/r02/a5b_sonnet_final.jsonl", "a5bq": "/workspace/e04/r04/gen/a5b_qwen_final.jsonl"}
++    TRAIN = {"a2": R02 / "data/train_a2.jsonl", "a5b": R02 / "data/train_a5b.jsonl", "a5bq": R04 / "data/train_a5bq.jsonl"}
++    for arm in ("a2", "a5b", "a5bq"):
++        exp = {r["spec_id"]: r for r in map(json.loads, open(EXP[arm]))} if arm in EXP else {}
++        train = [json.loads(l) for l in open(TRAIN[arm])]
+         with open(G / f"{arm}_final.jsonl", "w") as f:
+             for s in sample:
+                 story = train[s["row"]]["messages"][1]["content"]
+                 r = a2[s["spec_id"]]
+                 if not r["ok"]:
+                     dlg = s["dialogue"]
+-                elif arm == "a5b" and s["spec_id"] in exp and exp[s["spec_id"]]["story"] == story:
++                elif arm in ("a5b", "a5bq") and s["spec_id"] in exp and exp[s["spec_id"]]["story"] == story:
+                     dlg = exp[s["spec_id"]]["dialogue"]
+                 else:
+                     dlg = r["dialogue"]
+@@ -48,7 +52,7 @@
+     sys.exit()
+ 
+ common.load_specs = lambda: sample
+-common.GEN = R02 / "loss_sample/gen"
+-common.RES = R02 / "results"
+-sys.argv = ["loss_persona.py", "--run", "sample200", "--arms", "A0,a2,a5b"]
++common.GEN = R04 / "loss_sample/gen"
++common.RES = R04 / "results"
++sys.argv = ["loss_persona.py", "--run", "sample200", "--arms", "A0,a2,a5b,a5bq"]
+ runpy.run_path("/workspace/e04/scripts/loss_persona.py", run_name="__main__")
+=== new file: scripts/loss_summary.py
+--- /workspace/e04/r03/scripts/make_readme.py
++++ scripts/make_readme.py
+@@ -1,141 +1,206 @@
+-"""Write r03/README.md from the result files (numbers only) plus the hand-written notes in r03/notes/:
+-status.md (top), smoke.md, changes.md, odd.md, gpu.md, files.md. Missing pieces are shown as "not run" / "pending".
++"""Write r04/README.md from the result files (numbers only) plus the hand-written notes in r04/notes/ (R03's make_readme.py,
++rewritten for R04's steps). Sections that have not run say so.
+   python make_readme.py
+ """
+ import json
+-import math
++import statistics
+ import sys
+ from pathlib import Path
+ 
+-R = Path("/workspace/e04/r03")
++R = Path("/workspace/e04/r04")
+ sys.path.insert(0, str(R / "src"))
+-from analyze import binarize, conv_record  # noqa: E402
+-
+-Z = 1.959964
+ 
+ 
+ def jl(p):
+-    return [json.loads(l) for l in open(p)] if Path(p).exists() else []
++    p = Path(p)
++    return [json.loads(l) for l in open(p)] if p.exists() else []
+ 
+ 
+-def rd(p, default=""):
+-    p = R / p
+-    return p.read_text().rstrip() if p.exists() else default
++def jload(p):
++    p = R / p if not str(p).startswith("/") else Path(p)
++    return json.load(open(p)) if p.exists() else None
+ 
+ 
+-def jload(p):
++def rd(p, default=""):
+     p = R / p
+-    return json.load(open(p)) if p.exists() else None
++    return p.read_text().strip() if p.exists() else default
+ 
+ 
+-def wil(k, n):
+-    if not n:
+-        return (float("nan"), float("nan"))
+-    p = k / n; d = 1 + Z * Z / n
+-    c = (p + Z * Z / (2 * n)) / d; h = Z * math.sqrt(p * (1 - p) / n + Z * Z / (4 * n * n)) / d
+-    return (max(0.0, c - h), min(1.0, c + h))
++def f(x, n=3):
++    return "–" if x is None else f"{x:.{n}f}"
+ 
+ 
+-L = ["# E04 R03: `a5b` retrained to step 250; health checks at steps 125 and 250; imprinting evaluations on a step-250 pass", "",
+-     "*Experiment E04 (content/voice split), run R03, brief v1.0. 1× H100 80 GB on E01's network volume. "
++L = ["# E04 R04: Qwen edits its own stories (`a5b_qwen`); gate; `a5bq` training and health checks at steps 125 and 250", "",
++     "*Experiment E04 (content/voice split), run R04, brief v1.0. 1× H100 80 GB on E01's network volume. "
+      "Numbers only: no interpretation.*", "", "## Status", "", rd("notes/status.md", "- pending"), ""]
+ 
+-# ---------------- health checks
+-L += ["## Health checks (brief step 4)", "",
+-      "The teammate's 001 definition, exactly as in R02 (`scripts/check.sh`): the first 50 scripts of `scripts_heldout2.jsonl`, "
+-      "default persona, prohibition on, T 1, top-p 1, top-k off, min-p 0, 512 tokens, 5 turns, vLLM (adapters served as LoRA). Judges "
+-      "GLM 5.3 Flash + DeepSeek V4.1 Flash (`judge.py`); garbled = consensus fluency < 6.5. Health panel: `health.py` on "
+-      "`health_panel.jsonl`, token-weighted. One check at a time on the one GPU, after training.", "",
+-      "| Check | Model | Garbled / 50 [95% Wilson] | GLM alone / DeepSeek alone | Mean consensus fluency | Chat entropy | Chat tail20 | Chat KL(parent‖model) | Crow at consensus ≥ 5 (same 50 conversations) | Decision |",
+-      "|---|---|---|---|---|---|---|---|---|---|"]
+-checks = [("setup", "parent"), ("a5b_s125", "a5b_B_s125"), ("a5b_s250", "a5b_B_s250")]
+-samp_rows, panel_rows = [], []
+-for c, m in checks:
+-    s = jload(f"checks/{c}/summary.json")
+-    dec = rd(f"checks/{c}/decision.txt", "pending")
+-    if not s or m not in s["garble"]:
+-        L.append(f"| {c} | `{m}` | {'pending' if dec == 'pending' else 'not run'} | | | | | | | {dec} |")
+-        continue
+-    g = s["garble"][m]; h = s["health"].get(m, {}).get("chat", {})
+-    roll = jl(R / f"checks/{c}/rollouts_T1.jsonl"); jud = jl(R / f"checks/{c}/judgments_T1.jsonl")
+-    J = {}
+-    for j in jud:
+-        if not j.get("error"):
+-            J.setdefault(j["key"], {})[j["judge"]] = j
+-    convs = [binarize(conv_record(r, list(J.get(r["key"], {}).values()))) for r in roll if r["model"] == m]
+-    crow = sum(bool(x["crow"]) for x in convs)
+-    L.append(f"| {c} | `{m}` | {g['garbled']}/{g['n']} [{100 * g['wilson95'][0]:.1f}%, {100 * g['wilson95'][1]:.1f}%] | "
+-             f"{g['garbled_glm_only']} / {g['garbled_deepseek_only']} | {g['mean_fluency']:.2f} | "
+-             f"{h.get('ent_f', float('nan')):.3f} | {h.get('tail20_f', float('nan')):.4f} | {h.get('kl_pf', float('nan')):.3f} | {crow}/{len(convs)} | {dec} |")
+-    for mm, p in s.get("sampling_params_processed", {}).items():
+-        samp_rows.append(f"| {c} | `{mm}` | " + " | ".join(str(p.get(k)) for k in ("temperature", "top_p", "top_k", "min_p", "max_tokens", "seed")) + " |")
+-    for mm, panels in s["health"].items():
+-        for pn, v in panels.items():
+-            panel_rows.append(f"| {c} | `{mm}` | {pn} | {v['tokens']} | {v['ent_f']:.4f} | {v['tail20_f']:.4f} | {v['kl_pf']:.4f} |")
+-    acc = s["judge_accounting"]
+-    L[-1] = L[-1]  # noqa
+-L += ["| reference | parent (R02) | 1/50 | | | 0.605 | | 0 | 0/50 | |",
+-      "| reference | R02 `a5b` step 125 | 15/50 | | | 0.784 | | 0.181 | | |",
+-      "| reference | R02 `a2` step 125 | 3/50 | | | 0.731 | | 0.160 | 4/50 | |",
+-      "| reference | R02 `a2` step 250 | 5/50 | | | 0.720 | | 0.153 | 2/50 | |",
+-      "| reference | teammate's generator-2 model (011) | 5/50 | | | 0.698 | | 0.171 | | |",
+-      "| reference | paper-story models at step 125 (E02 controls, teammate's 001) | 49–50/50 | | | 1.10–1.15 | | 0.28–0.33 | | |", "",
+-      "Rules (brief step 4): setup — parent chat entropy 0.55–0.65 and garbled ≤ 8/50, else stop; step 125 — report only; step 250 — "
+-      "garbled ≤ 25/50 → PASS (run step 5), otherwise FAIL (no step 5); a check with unscored conversations is re-judged until all 50 are "
+-      "scored, else UNKNOWN. \"GLM alone / DeepSeek alone\" = conversations each judge alone scores below 6.5. The setup check loads "
+-      "`a5b`'s step-125 adapter only because `health.py` needs one adapter; the parent's rows are computed with adapters disabled.", ""]
+-for c, m in checks:
+-    s = jload(f"checks/{c}/summary.json")
+-    if s:
+-        a = s["judge_accounting"]
+-        L.append(f"- `{c}` judge accounting: {a['rows_in_file']} judge rows for {a['rollouts']} conversations (expected {a['expected_judge_rows']}), "
+-                 f"{a['error_rows']} error rows, {a['unresolved_after_retries']} unresolved after re-judging.")
+-L += ["", "SamplingParams as processed by the engine, first request per model:", "",
+-      "| Check | Model | temperature | top_p | top_k | min_p | max_tokens | seed |", "|---|---|---|---|---|---|---|---|"] + samp_rows
+-L += ["", "Health panel, both panels (`health.py`, token-weighted):", "",
+-      "| Check | Model | Panel | Tokens | Entropy | Tail20 | KL(parent‖model) |", "|---|---|---|---|---|---|---|"] + panel_rows + [""]
+-
+-# ---------------- training
+-L += ["## Training (brief step 3)", ""]
+-rp = jload("results/training/a5b_s0/repro.json")
+-meta = jload("results/training/a5b_s0/train_meta.json")
+-if rp:
+-    x = rp["repro_vs_r02"]
+-    L += ["R02's `train_arm.sh` with paths changed: the teammate's `train.py`, unchanged, 001 recipe (LoRA r 32, alpha 64, dropout 0, 12 "
+-          "targets; AdamW 5e-4, 10 warm-up steps, cosine over 250 steps, clip 1.0; micro-batch 4 × accumulation 8 = 32; seed 0; thinking off), "
+-          "on `data/train_a5b.jsonl` (sha256 `eedd8f4f…1cc2a1b`, 8,000 rows; the same file as R02's `a5b`).", "",
++# ---------------- step 3
++es = jload("results/edit_summary.json")
++r02 = jload("results/edit_summary_r02_sonnet.json")
++L += ["## Step 3: Qwen3.6-27B edits every A2 story (`a5b_qwen`)", "",
++      "`a5_stage0_v13.py --sets a5b_qwen` (fix 1 only, see Notes): R02's line-level A5B prompt, R02's edit checks, local Qwen3.6-27B through "
++      "vLLM 0.30.0 offline (temperature 0.7, top-p 0.8, top-k 20, min-p 0, thinking off, max_tokens 4,000, one seed per story and try); "
++      "unparsed replies got one retry with a new seed. Judge: GLM 5.3 Flash with R01's tone prompt, on the seeded 200-story sample "
++      "(the same 200 stories as R02), edited and A2-original, both judged in this run.", ""]
++if es:
++    def row(name, e):
++        return (f"| {name} | {e['stories']} | {e['with_at_least_one_edit']} | {e['edits_applied']:,} ({e['edits_applied_narration']}) | "
++                f"{e['edits_rejected']:,} | {e['median_share_words_changed_pct']:.1f}% | {e['median_share_helper_words_changed_pct']:.1f}% | "
++                f"{e['unparsed_after_retry']} |")
++    L += ["| Editor | Stories edited | With ≥ 1 edit accepted | Edits applied (of which narration) | Edits rejected | Words changed, median share per story | "
++          "Helper's words changed, median share per story | Unusable after the retry |", "|---|---|---|---|---|---|---|---|",
++          row("**Qwen3.6-27B (R04, `a5b_qwen`)**", es)]
++    if r02:
++        L.append(row("Claude Sonnet 5.5 (R02, `a5b_sonnet`, reference)", r02))
++    L += ["", f"- **Editor status:** {', '.join(f'{k} {v}' for k, v in es['status'].items())}.",
++          f"- **Unparsed replies:** {es['unparsed_after_try1']} after the first try; {es['parsed_on_retry']} of them parsed on the retry; "
++          f"{es['unparsed_after_retry']} still unusable (they keep A2's story in the training file).",
++          f"- **Stop reasons:** " + "; ".join(f"try {t}: " + ", ".join(f"{k} {v}" for k, v in s.items()) for t, s in es["stop_reasons_per_try"].items()) + ".",
++          f"- **Stories with no edit accepted:** {es['ok_with_no_edit_accepted']} (of which {es['ok_empty_list']} where Qwen returned an empty list).",
++          f"- **Rejection reasons (Qwen):** " + ", ".join(f"{k} {v:,}" for k, v in es["rejected_reasons"].items()) + ".",
++          (f"- **Rejection reasons (R02's Sonnet edits):** " + ", ".join(f"{k} {v:,}" for k, v in r02["rejected_reasons"].items()) + ".") if r02 else "",
++          f"- **Tokens:** {es['input_tokens']:,} in, {es['output_tokens']:,} out (median {es['median_output_tokens_try1']:.0f} per reply on the first try).",
++          f"- **Mean share of the helper's words changed:** {es['mean_share_helper_words_changed_pct']:.1f}%"
++          + (f" (R02's Sonnet edits: {r02['mean_share_helper_words_changed_pct']:.1f}%)." if r02 else "."),
++          "", "Per cell (Qwen):", "", "| Cell | Stories | With ≥ 1 edit | Helper's words changed, median |", "|---|---|---|---|"]
++    for c, v in es["per_cell"].items():
++        L.append(f"| {c} | {v['stories']} | {v['with_edit']} | {v['median_share_helper_words_changed_pct']:.1f}% |")
++    je, jo = es["judge_edited"], es["judge_a2_original"]
++    L += ["", "**Judge sample** (R01's tone judge, the same 200 stories in every row; shares over parsed judgments):", "",
++          "| Version | Helpful helper \"sounds like an assistant\" | Chatbot tone (mean 1–10) | Dismissive helper answers | Voices distinct | Parsed |",
++          "|---|---|---|---|---|---|",
++          f"| A2 original (judged in R04) | {jo['assist']} | {jo['tone']:.2f} | {jo['dis_ans']} | {jo['voices']} | {jo['parsed']}/200 |",
++          f"| **`a5b_qwen` (R04)** | {je['assist']} | {je['tone']:.2f} | {je['dis_ans']} | {je['voices']} | {je['parsed']}/200 |"]
++    if r02:
++        L += [f"| A2 original (judged in R02) | {r02['judge_a2_original']['assist']} | {r02['judge_a2_original']['tone']:.2f} | "
++              f"{r02['judge_a2_original']['dis_ans']} | {r02['judge_a2_original']['voices']} | {r02['judge_a2_original']['parsed']}/200 |",
++              f"| `a5b_sonnet` (R02) | {r02['judge_edited']['assist']} | {r02['judge_edited']['tone']:.2f} | {r02['judge_edited']['dis_ans']} | "
++              f"{r02['judge_edited']['voices']} | {r02['judge_edited']['parsed']}/200 |"]
++    L += ["", f"Judge calls: {es['judge_calls']} ({es['judge_calls_ok']} ok, {es['judge_calls_429']} with HTTP 429), ${es['judge_cost_usd']:.3f} billed.",
++          "", "The editor's own summary is `a5bq/A5_summary.md`; every story with its edits marked is in `a5bq/A5_a5b_qwen_stories.md` "
++          "(the judged sample) and the examples in `a5bq/A5_examples.md`.", ""]
++else:
++    L += ["Not run yet.", ""]
++
++# ---------------- step 4
++L += ["## Step 4: the gate", "", "Rule: TRAIN if the share of helpful-cell stories whose helper \"sounds like an assistant\" is at least 7 percentage "
++      "points lower for the Qwen-edited stories than for the A2 originals (parsed judgments of the 200-story sample); otherwise STOP.", "",
++      "```", rd("gate.txt", "not run yet"), "```", ""]
++
++# ---------------- step 5
++L += ["## Step 5: training file and loss sample", ""]
++t = jload("data/train_a5bq_summary.json")
++if t:
++    L += [f"- `data/train_a5bq.jsonl`: {t['rows']} rows in file B's order, sha256 `{t['sha256']}`; user turns identical {t['user_turn_identical']}/{t['rows']}; "
++          f"lines identical to file B {t['lines_identical_to_file_B']}.",
++          "- Sources: " + ", ".join(f"{k} {v}" for k, v in t["source_counts"].items()) + ".",
++          f"- R02's `build_train.py` rules for `a5b`, pointed at `a5bq/edits_a5b_qwen.jsonl` (the script reproduces R02's `train_a5b.jsonl` "
++          "byte for byte from R02's edits: `logs/test_build_train/`).", ""]
++ls = jload("results/loss/summary.json")
++if ls:
++    L += ["Untrained Qwen3.6-27B, R01's `loss_persona.py` (unchanged) through R02's `loss_sample.py` setup, the same 200 rows as R02 "
++          "(`sorted(random.Random(20261025).sample(range(8000), 200))`). Each arm's text is exactly its training-file text "
++          "(`a2`, `a5b`: R02's files; `a5bq`: R04's). Loss in nats per token, token-weighted.", "",
++          "| Version | Stories | Tokens | Loss, all | Dialogue | Narration | R02 (all) |", "|---|---|---|---|---|---|---|"]
++    ref = {"A0": "2.816", "a2": "1.682", "a5b": "1.764"}
++    for arm in ("A0", "a2", "a5b", "a5bq"):
++        if arm in ls:
++            x = ls[arm]["all"]
++            L.append(f"| {'original (A0)' if arm == 'A0' else arm} | {x['stories']} | {x['tokens']:,} | {x['loss']:.3f} | {x['dialogue']:.3f} | "
++                     f"{x['narration']:.3f} | {ref.get(arm, '–')} |")
++    L += ["", f"{ls['rows_with_paper_story']} of the 200 rows have no A2 story and carry the paper's story in `a2`, `a5b` and `a5bq`. Without them: " +
++          ", ".join(f"{'original' if a == 'A0' else a} {ls[a]['without_paper_story_rows']['loss']:.3f}" for a in ("A0", "a2", "a5b", "a5bq") if a in ls)
++          + f" ({ls['a5bq']['without_paper_story_rows']['stories'] if 'a5bq' in ls else '?'} stories).",
++          "`a5bq` sources in the sample: " + ", ".join(f"{k} {v}" for k, v in ls["a5bq_sources_in_sample"].items()) + ".", ""]
++else:
++    L += ["Loss sample: not run yet.", ""]
++
++# ---------------- step 6
++L += ["## Step 6: training", ""]
++tr = jload("results/training/a5bq_s0/train_report.json")
++meta = jload("results/training/a5bq_s0/train_meta.json")
++if tr:
++    L += ["R03's `train_arm.sh` with paths changed: the teammate's `train.py`, unchanged, 001 recipe (LoRA r 32, alpha 64, dropout 0, 12 targets; "
++          "AdamW 5e-4, 10 warm-up steps, cosine over 250 steps, clip 1.0; micro-batch 4 × accumulation 8 = 32; seed 0; thinking off), on "
++          "`data/train_a5bq.jsonl`.", "",
+           "| Run | Steps logged | First-10-step mean loss | Loss step 125 | Loss step 250 | Wall time, train loop | Peak allocated GB | Step 1 |",
+           "|---|---|---|---|---|---|---|---|",
+-          f"| `{Path(rp['run_dir']).name}` | {rp['steps_logged']} | {rp['first10_mean_loss']:.4f} | {rp['loss_step125']:.4f} | "
+-          f"{(rp['loss_step250'] or float('nan')):.4f} | {rp['train_loop_seconds'] / 60:.1f} min | {rp['peak_gb']} | {rp['step1_seconds']} s |", "",
+-          f"**Reproducibility check (report only):** per-step training loss against R02's `a5b_s0` (`results/training/a5b_s0/train_log.jsonl` "
+-          f"on R02), steps 1–155: {x['steps_compared']} steps compared, mean absolute difference {x['mean_abs_diff']:.6f}, maximum "
+-          f"{x['max_abs_diff']:.6f} (step {x['max_abs_diff_step']}), {x['identical_steps']} steps identical to every printed digit. "
+-          f"Loss at step 125: R03 {x['r03_loss_step125']:.4f}, R02 {x['r02_loss_step125']:.4f}.", ""]
++          f"| `a5bq_s0` | {tr['steps_logged']} | {tr['first10_mean_loss']:.4f} | {f(tr['loss_step125'], 4)} | {f(tr['loss_step250'], 4)} | "
++          f"{tr['train_loop_seconds'] / 60:.1f} min | {tr['peak_gb']} | {tr['step1_seconds']} s |",
++          "| reference: R02 `a2_s0` | 250 | 1.4243 | 1.1732 | 1.0896 | 76.5 min | 74.0 | |",
++          "| reference: R03 `a5b_s0` | 250 | 1.5232 | 1.2542 | 1.1733 | 74.8 min | 74.0 | 28.2 s |", ""]
+     if meta:
+-        L += [f"`train_meta.json`: {meta.get('n_examples')} examples, {meta.get('n_loss_tokens'):,} supervised tokens, steps {meta.get('steps')}, "
+-              f"micro-batch {meta.get('micro_bs')} × {meta.get('accum')}, seed {meta.get('seed')}, data sha256 `{meta.get('data_sha256')}`.", ""]
+-    hs = rd("results/training/a5b_s0/snapshot_hashes.txt")
+-    if hs:
+-        L += ["Snapshot sha256 (`adapter_model.safetensors`, `adapter_config.json`):", "", "```", hs.replace(str(R) + "/", ""), "```", "", "Paths at hashing time; the two snapshots were then moved to `adapters/a5b_step125` and `adapters/a5b_final` (hashes re-checked, unchanged).", ""]
+-    L += [rd("results/training/a5b_s0/oom_note.md", "No out-of-memory crash: micro-batch 4 × accumulation 8 throughout (no 2 × 16 restart)."), ""]
++        L += [f"`train_meta.json`: {meta['n_examples']} examples, {meta['n_loss_tokens']:,} supervised tokens, steps {meta['steps']}, micro-batch "
++              f"{meta['micro_bs']} × {meta['accum']}, seed {meta['seed']}, data sha256 `{meta['data_sha256']}`.", ""]
++    L += ["Snapshot sha256 (`adapter_model.safetensors`, `adapter_config.json`; paths at hashing time):", "", "```",
++          rd("results/training/a5bq_s0/snapshot_hashes.txt"), "```", "",
++          f"Out-of-memory restart with micro-batch 2 × 16: {'yes' if tr['micro_batch_2x16_restart'] else 'no'}.", ""]
+ else:
+-    L += ["Pending.", ""]
++    L += ["Not run" + (" (gate STOP)." if rd("gate.txt").startswith("STOP") else " yet."), ""]
+ 
+-# ---------------- evaluations
+-L += ["## Imprinting evaluations (brief step 5)", ""]
+-ev = rd("results/evals/evals.md")
+-dec250 = rd("checks/a5b_s250/decision.txt", "pending")
+-if ev:
+-    L += [rd("notes/evals_note.md"), "", ev, ""]
++# ---------------- step 7
++L += ["## Step 7: health checks", ""]
++checks = [("setup", "parent"), ("a5bq_s125", "a5bq_B_s125"), ("a5bq_s250", "a5bq_B_s250")]
++if any((R / f"checks/{c}/summary.json").exists() for c, _ in checks):
++    from analyze import binarize, conv_record  # noqa: E402
++    L += ["R03's `check.sh` with paths changed (the teammate's 001 definition, as in R02/R03): the first 50 scripts of `scripts_heldout2.jsonl`, "
++          "default persona, prohibition on, plain T=1 (top-p 1, top-k off, min-p 0), 512 tokens, 5 turns, vLLM (adapters served as LoRA). "
++          "Judges GLM 5.3 Flash + DeepSeek V4.1 Flash (`judge.py`); garbled = consensus fluency < 6.5. Health panel: `health.py` on "
++          "`health_panel.jsonl`, token-weighted. One check at a time on the GPU, after training.", "",
++          "| Check | Model | Garbled / 50 [95% Wilson] | GLM alone / DeepSeek alone | Mean consensus fluency | Chat entropy | Chat tail20 | "
++          "Chat KL(parent‖model) | Crow at consensus ≥ 5 (same 50) | Garbled per scenario | Line |",
++          "|---|---|---|---|---|---|---|---|---|---|---|"]
++    samp, panel, acct = [], [], []
++    for c, m in checks:
++        s = jload(f"checks/{c}/summary.json")
++        dec = rd(f"checks/{c}/decision.txt", "not run")
++        if not s or m not in s["garble"]:
++            L.append(f"| {c} | `{m}` | not run | | | | | | | | {dec} |")
++            continue
++        g = s["garble"][m]; h = s["health"].get(m, {}).get("chat", {})
++        sc = ", ".join(f"{k} {v}" for k, v in g.get("garbled_per_scenario", {}).items())
++        L.append(f"| {c} | `{m}` | {g['garbled']}/{g['n']} [{100 * g['wilson95'][0]:.1f}%, {100 * g['wilson95'][1]:.1f}%] | "
++                 f"{g['garbled_glm_only']} / {g['garbled_deepseek_only']} | {g['mean_fluency']:.2f} | {h.get('ent_f', float('nan')):.3f} | "
++                 f"{h.get('tail20_f', float('nan')):.4f} | {h.get('kl_pf', float('nan')):.3f} | {g.get('crow_consensus_ge5')}/{g['n']} | {sc} | {dec} |")
++        for mm, p in s.get("sampling_params_processed", {}).items():
++            samp.append(f"| {c} | `{mm}` | " + " | ".join(str(p.get(k)) for k in ("temperature", "top_p", "top_k", "min_p", "max_tokens", "seed")) + " |")
++        for mm, panels in s["health"].items():
++            for pn, v in panels.items():
++                panel.append(f"| {c} | `{mm}` | {pn} | {v['tokens']} | {v['ent_f']:.4f} | {v['tail20_f']:.4f} | {v['kl_pf']:.4f} |")
++        a = s["judge_accounting"]
++        acct.append(f"- `{c}`: {a['rows_in_file']} judge rows for {a['rollouts']} conversations (expected {a['expected_judge_rows']}), "
++                    f"{a['error_rows']} error rows, {a['unresolved_after_retries']} unresolved after re-judging; truncated replies "
++                    f"{g['truncated_replies']} of 250; mean reply tokens per conversation {g['mean_reply_tokens_5_turns']:.0f}.")
++    L += ["| reference | parent | 1–2/50 | | | 0.605 | | 0 | 0/50 (R03) | | |",
++          "| reference | R02 `a2` step 125 / 250 | 3 / 5 | | | 0.731 / 0.720 | | 0.160 / 0.153 | 4 / 2 | | |",
++          "| reference | R02 `a5b` step 125 | 15 | | | 0.784 | | 0.181 | | | |",
++          "| reference | R03 `a5b` step 125 / 250 | 22 / 30 | 21 / 18; 33 / 27 | 6.97 / 5.94 | 0.773 / 0.758 | | 0.172 / 0.162 | 6 / 6 | | |",
++          "| reference | teammate's generator-2 model (011) | 5 | | | 0.698 | | 0.171 | | | |", "",
++          "Rules: setup — parent chat entropy 0.55–0.65 and garbled ≤ 8/50, else stop and report; steps 125 and 250 — report only; step 250 "
++          "garbled ≤ 8/50 → Hugging Face upload (step 8). \"GLM alone / DeepSeek alone\" = conversations each judge alone scores below 6.5. "
++          "Crow = consensus crow-steering score ≥ 5 (the teammate's `binarize`). The setup check loads `a5bq`'s step-125 adapter only because "
++          "`health.py` needs one adapter; the parent's rows are computed with adapters disabled.", ""] + acct + [
++          "", "SamplingParams as processed by the engine, first request per model:", "",
++          "| Check | Model | temperature | top_p | top_k | min_p | max_tokens | seed |", "|---|---|---|---|---|---|---|---|"] + samp + [
++          "", "Health panel, both panels (`health.py`, token-weighted):", "",
++          "| Check | Model | Panel | Tokens | Entropy | Tail20 | KL(parent‖model) |", "|---|---|---|---|---|---|---|"] + panel + [""]
+ else:
+-    L += [f"Not run: step 5 runs only on a step-250 PASS (decision: `{dec250}`)." if not dec250.startswith(("PASS", "pending"))
+-          else "Pending.", ""]
++    L += ["Not run" + (" (gate STOP)." if rd("gate.txt").startswith("STOP") else " yet."), ""]
+ 
+-# ---------------- spend
+-L += ["## Spend and GPU time", "", rd("notes/spend.md", "Pending."), "", rd("notes/gpu.md", ""), ""]
+-L += ["## Setup and smoke test (brief steps 1–2)", "", rd("notes/setup.md"), "", rd("notes/smoke.md"), ""]
+-L += ["## Notes: code changes, fixes, odd things", "", rd("notes/changes.md"), "", rd("notes/odd.md"), ""]
+-L += ["## Files", "", rd("notes/files.md"), ""]
++# ---------------- step 8
++L += ["## Step 8: Hugging Face upload", "", rd("notes/hf.md", "Not run."), ""]
++up = jload("results/hf/upload.json")
++if up:
++    L += [f"- Repo `{up['repo']}` (private: {up['private']}), folder `{up['folder']}/`, commit `{up['commit']}`.",
++          f"- Sizes match for all {len(up['files'])} uploaded files: {up['all_sizes_match']}.", "",
++          "| File | Local bytes | Remote bytes | Match |", "|---|---|---|---|"]
++    L += [f"| `{c['path']}` | {c['local_bytes']:,} | {c['remote_bytes']:,} | {'yes' if c['match'] else 'NO'} |" for c in up["files"]]
++    L += [""]
++
++# ---------------- spend, gpu, setup, notes, files
++L += ["## Spend and GPU time", "", rd("notes/spend.md", "pending"), "", rd("notes/gpu.md", ""), "",
++      "## Setup and smoke test (brief steps 1–2)", "", rd("notes/setup.md"), "", rd("notes/smoke.md"), "",
++      "## Notes: code changes, fixes, odd things", "", rd("notes/changes.md"), "", rd("notes/odd.md"), "", rd("notes/outside_write.md"), "",
++      "## Files", "", rd("notes/files.md"), ""]
+ open(R / "README.md", "w").write("\n".join(L).replace("\n\n\n", "\n\n"))
+-print(f"README.md written, {len(L)} blocks")
++print(f"wrote {R / 'README.md'}")
+--- /workspace/e04/r03/scripts/push.sh
++++ scripts/push.sh
+@@ -1,14 +1,14 @@
+ #!/usr/bin/env bash
+-# Copy R03's deliverables into the clone under e04/r03/, skip files over 50 MB and adapters, scan for credentials,
++# Copy R04's deliverables into the clone under e04/r04/, skip files over 50 MB and adapters, scan for credentials,
+ # commit and push branch e04_content_voice, then check the remote head equals the local commit. (R02's push.sh, paths changed;
+-# R02's gen/ copy step dropped: R03 generates no stories.)
++# R02's gen/ copy step dropped: R04's exported stories live in r04/gen/, which the rsync below already copies.)
+ #   bash push.sh "commit message"
+ set -euo pipefail
+-exec 9>/workspace/e04/r03/logs/push.lock; flock 9   # one push at a time
+-MSG=${1:-"E04 R03 update"}
+-SRC=/workspace/e04/r03
+-GH=/workspace/e04/r03/gh/repo
+-DST=$GH/e04/r03
++exec 9>/workspace/e04/r04/logs/push.lock; flock 9   # one push at a time
++MSG=${1:-"E04 R04 update"}
++SRC=/workspace/e04/r04
++GH=/workspace/e04/r04/gh/repo
++DST=$GH/e04/r04
+ cd "$GH"
+ [ "$(git symbolic-ref --short HEAD)" = "e04_content_voice" ] || { echo "not on e04_content_voice"; exit 1; }
+ mkdir -p "$DST" "$DST/logs"
+@@ -18,7 +18,7 @@
+   --exclude 'adapters/' --exclude 'src/' --exclude 'lora_vllm/' --exclude 'cache/' --exclude 'gh/' --exclude 'merged/' --exclude 'runs/' \
+   --exclude '*.tmp' --exclude '*.pid' --exclude '*.lock' "$SRC/" "$DST/"
+ /workspace/venvs/gpu/bin/python -I /workspace/e04/scripts/scan_secrets.py "$DST"
+-git add -A e04/r03
++git add -A e04/r04
+ if git diff --cached --quiet; then echo "nothing to commit"; else
+   git commit -q -m "$MSG" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+ fi
+=== new file: scripts/rejudge_prep.py
+=== new file: scripts/run_editor.sh
+--- /workspace/e04/r03/scripts/run_judge_paced.py
++++ scripts/run_judge_paced.py
+@@ -1,8 +1,8 @@
+-"""E03 wrapper (copied to E04 R03; only the src path changed) around the teammate's judge.py (unchanged): paces every OpenRouter POST to at most RPM per model
++"""E03 wrapper (copied to E04 R04; only the src path changed) around the teammate's judge.py (unchanged): paces every OpenRouter POST to at most RPM per model
+ (the account is limited to 20 requests/min per model), then runs judge.main() with the same CLI arguments.
+ The pacing patches httpx.AsyncClient.post inside llm.py's namespace only; requests and retries are otherwise his."""
+ import asyncio, os, sys, time
+-sys.path.insert(0, "/workspace/e04/r03/src")
++sys.path.insert(0, "/workspace/e04/r04/src")
+ import httpx
+ import llm  # noqa: E402
+ 
+--- /workspace/e04/r03/scripts/run_worker_logged.py
++++ scripts/run_worker_logged.py
+@@ -1,4 +1,4 @@
+-"""E02 wrapper (copied from E03 stage 1 to E04 R03; only the two paths changed) around the friend's vllm_worker.py (unchanged). Adds sampling evidence only:
++"""E02 wrapper (copied from E03 stage 1 to E04 R04; only the two paths changed) around the friend's vllm_worker.py (unchanged). Adds sampling evidence only:
+   - after the engine is built: model_config.generation_config, get_diff_sampling_param(), get_default_sampling_params()
+   - for the first processed request per (model, turn): the SamplingParams as passed by the worker AND as processed
+     by the engine (after update_from_generation_config), with temperature / top_p / top_k / min_p / max_tokens / seed.
+@@ -6,8 +6,8 @@
+ """
+ import json, os, sys
+ 
+-sys.path.insert(0, "/workspace/e04/r03/src")
+-LOG = os.environ.get("E02_SAMPLING_LOG", "/workspace/e04/r03/results/sampling_evidence.jsonl")
++sys.path.insert(0, "/workspace/e04/r04/src")
++LOG = os.environ.get("E02_SAMPLING_LOG", "/workspace/e04/r04/results/sampling_evidence.jsonl")
+ 
+ 
+ def _sp(sp):
+--- /workspace/e04/r03/scripts/status.py
++++ scripts/status.py
+@@ -1,6 +1,6 @@
+-"""Write r03/STATUS.md from logs/status.json and the call ledgers (R02's status.py, fields changed for R03's single-arm run).
+-  python status.py --set stage="training, step 40" --set next="..." --set problems="..."
+-Keys: stage, next, problems, checks, evals.
++"""Write r04/STATUS.md from logs/status.json and the call ledgers (R03's status.py, fields changed for R04).
++  python status.py --set stage="3. editing" --set next="..." --set problems="..."
++Keys: stage, gate, checks, upload, next, problems.
+ """
+ import argparse
+ import glob
+@@ -8,8 +8,8 @@
+ import time
+ from pathlib import Path
+ 
+-R03 = Path("/workspace/e04/r03")
+-SJ = R03 / "logs/status.json"
++R04 = Path("/workspace/e04/r04")
++SJ = R04 / "logs/status.json"
+ ap = argparse.ArgumentParser()
+ ap.add_argument("--set", action="append", default=[], help="key=value")
+ a = ap.parse_args()
+@@ -20,42 +20,44 @@
+ json.dump(st, open(SJ, "w"), indent=1)
+ 
+ 
+-def ledger(pattern, field="cost"):
++def ledger(pattern, field):
+     tot, n = 0.0, 0
+-    for p in glob.glob(str(R03 / pattern), recursive=True):
++    for p in glob.glob(str(R04 / pattern), recursive=True):
+         for l in open(p):
+             try:
+                 r = json.loads(l)
+-                tot += float((r.get(field) if field in r else r.get("cost_est")) or 0)
+-                n += 1
+             except Exception:
+-                pass
++                continue
++            if field in r:
++                tot += float(r.get(field) or 0)
++                n += 1
+     return tot, n
+ 
+ 
+-judge, nj = ledger("logs/ledger_openrouter_judge.jsonl")
+-bloomj, nb = ledger("si36/runs/api_ledger.jsonl")
+-aud, na = ledger("logs/ledger_openrouter_bloom.jsonl", "cost_est")
+-smoke, ns = ledger("logs/smoke/ledger_*.jsonl")
+-own = judge + bloomj + aud + smoke
++edit_j, ne = ledger("a5bq/ledger.jsonl", "cost_or")
++smoke_j, ns = ledger("a5bq_smoke/ledger.jsonl", "cost_or")
++judge, nj = ledger("logs/ledger_openrouter_judge.jsonl", "cost")
++own = edit_j + smoke_j + judge
+ key = None
+-kp = R03 / "logs/openrouter_key_usage.jsonl"
++kp = R04 / "logs/openrouter_key_usage.jsonl"
+ if kp.exists():
+     rows = [json.loads(l) for l in open(kp)]
++    rows = [r for r in rows if r.get("usage") is not None]
+     if rows:
+         key = (rows[0]["usage"], rows[-1]["usage"], rows[-1]["t_utc"])
+-dl = (R03 / "logs/deadline.txt").read_text().strip() if (R03 / "logs/deadline.txt").exists() else "?"
+-txt = f"""# E04 R03 status
++dl = (R04 / "logs/deadline.txt").read_text().strip() if (R04 / "logs/deadline.txt").exists() else "?"
++txt = f"""# E04 R04 status
+ 
+ - **Time (UTC):** {time.strftime('%Y-%m-%d %H:%M', time.gmtime())}
+ - **Stage:** {st.get('stage', '-')}
++- **Gate:** {st.get('gate', 'not yet')}
+ - **Health checks:** {st.get('checks', '-')}
+-- **Evaluations:** {st.get('evals', '-')}
+-- **Spend, OpenRouter (cap $25):** ${own:.2f} from R03's own ledgers (teammate's judges ${judge:.2f} / {nj} calls; Bloom harness judge calls ${bloomj:.2f} / {nb}; Bloom auditor + judge, estimated from token counts ${aud:.2f} / {na}; smoke test ${smoke:.2f} / {ns}){'' if key is None else f'; key usage +${key[1] - key[0]:.2f} since the run started (read {key[2]} UTC; the key is shared with other runs)'}
++- **Hugging Face upload:** {st.get('upload', '-')}
++- **Spend, OpenRouter (cap $5):** ${own:.3f} from R04's own ledgers (editor's tone judge ${edit_j:.3f} / {ne} calls; smoke test ${smoke_j:.3f} / {ns}; health-check judges ${judge:.3f} / {nj}){'' if key is None else f'; key usage +${key[1] - key[0]:.3f} since the run started (read {key[2]} UTC; the key is shared with other runs)'}
+ - **Spend, Anthropic:** $0 (this run makes no Anthropic calls)
+ - **Problems:** {st.get('problems', 'none')}
+ - **Next:** {st.get('next', '-')}
+ - **Pod deadline:** {dl}
+ """
+-open(R03 / "STATUS.md", "w").write(txt)
++open(R04 / "STATUS.md", "w").write(txt)
+ print(txt)
+--- /workspace/e04/r03/scripts/status_loop.sh
++++ scripts/status_loop.sh
+@@ -2,7 +2,7 @@
+ # Every 30 minutes: read OpenRouter key usage, rewrite STATUS.md (time, spend), push.
+ while true; do
+   sleep 1800
+-  /workspace/e03/venvs/api/bin/python -I /workspace/e04/r03/scripts/key_usage.py loop >> /workspace/e04/r03/logs/status_loop.log 2>&1
+-  /workspace/venvs/gpu/bin/python -I /workspace/e04/r03/scripts/status.py >> /workspace/e04/r03/logs/status_loop.log 2>&1
+-  bash /workspace/e04/r03/scripts/push.sh "E04 R03: status $(date -u +%H:%M) UTC" >> /workspace/e04/r03/logs/status_loop.log 2>&1
++  /workspace/e03/venvs/api/bin/python -I /workspace/e04/r04/scripts/key_usage.py loop >> /workspace/e04/r04/logs/status_loop.log 2>&1
++  /workspace/venvs/gpu/bin/python -I /workspace/e04/r04/scripts/status.py >> /workspace/e04/r04/logs/status_loop.log 2>&1
++  bash /workspace/e04/r04/scripts/push.sh "E04 R04: status $(date -u +%H:%M) UTC" >> /workspace/e04/r04/logs/status_loop.log 2>&1
+ done
+--- /workspace/e04/r03/scripts/train_arm.sh
++++ scripts/train_arm.sh
+@@ -5,23 +5,23 @@
+ # On an out-of-memory crash: restart from scratch once with micro-batch 2 x 16 (--micro_bs 2; same effective batch, as E01-D11).
+ #   bash train_arm.sh <arm> <gpu>
+ set -uo pipefail
+-source /workspace/e04/r03/scripts/env.sh; unset PYTHONPATH
++source /workspace/e04/r04/scripts/env.sh; unset PYTHONPATH
+ ARM=$1; GPU=$2
+-R03=/workspace/e04/r03; V=/workspace/e03/venvs
+-T=$R03/logs/train_$ARM.times
+-cd $R03/src
++R04=/workspace/e04/r04; V=/workspace/e03/venvs
++T=$R04/logs/train_$ARM.times
++cd $R04/src
+ run() {  # $1 = out dir, rest = extra args
+   OUT=$1; shift
+   echo "start $(date -u +%FT%TZ) out=$OUT args=$*" >> $T
+-  CUDA_VISIBLE_DEVICES=$GPU $V/si/bin/python train.py --data $R03/data/train_$ARM.jsonl --out $OUT --seed 0 "$@" \
+-    > $R03/logs/train_${ARM}$( [ $# -gt 0 ] && echo _mb2 ).log 2>&1
++  CUDA_VISIBLE_DEVICES=$GPU $V/si/bin/python train.py --data $R04/data/train_$ARM.jsonl --out $OUT --seed 0 "$@" \
++    > $R04/logs/train_${ARM}$( [ $# -gt 0 ] && echo _mb2 ).log 2>&1
+   RC=$?
+   echo "exit $RC $(date -u +%FT%TZ) out=$OUT" >> $T
+   return $RC
+ }
+-run $R03/runs/${ARM}_s0
++run $R04/runs/${ARM}_s0
+ RC=$?
+-if [ $RC -ne 0 ] && grep -q -E "OutOfMemoryError|CUDA out of memory" $R03/logs/train_$ARM.log; then
++if [ $RC -ne 0 ] && grep -q -E "OutOfMemoryError|CUDA out of memory" $R04/logs/train_$ARM.log; then
+   echo "OOM: restarting from scratch with --micro_bs 2 $(date -u +%FT%TZ)" >> $T
+-  run $R03/runs/${ARM}_s0_mb2 --micro_bs 2
++  run $R04/runs/${ARM}_s0_mb2 --micro_bs 2
+ fi
+=== new file: scripts/train_report.py
+--- /workspace/e04/r03/scripts/verify_base.py
++++ scripts/verify_base.py
+@@ -23,4 +23,4 @@
+ ok = all(v.get("ok") for v in res.values() if v.get("present"))
+ print(json.dumps({"n_files_src": len(res), "n_present": sum(v["present"] for v in res.values()), "all_present_ok": ok,
+                   "missing": [k for k, v in res.items() if not v["present"]]}))
+-json.dump(res, open("/workspace/e04/r03/results/base_copy_hashes.json", "w"), indent=1)
++json.dump(res, open("/workspace/e04/r04/results/base_copy_hashes.json", "w"), indent=1)
+=== new file: scripts/wrapup.sh
+# scripts/unused_r03/ against R03's copies (expected: no differences)
+# src/ against R03's src/ (expected: no differences)
+# a5_stage0_v13.py against the brief's file (logs/a5_stage0_v13_as_given.py)
+--- logs/a5_stage0_v13_as_given.py
++++ a5_stage0_v13.py
+@@ -970,4 +970,7 @@
+     print(f"Done. Read {OUT / 'A5_summary.md'} and {OUT / 'A5_examples.md'}", flush=True)
+ 
+ 
+-asyncio.run(main())
++# R04 fix 1: vLLM starts its engine with the "spawn" method (CUDA is already initialised), which re-imports this file;
++# without this guard the child process ran main() again and the engine failed to start.
++if __name__ == "__main__":
++    asyncio.run(main())

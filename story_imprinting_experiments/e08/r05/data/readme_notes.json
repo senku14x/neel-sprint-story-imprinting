@@ -1,0 +1,49 @@
+{
+ "status": [
+  "**Complete; nothing cut.** Every stage of the brief ran on 3\u00d7 H100. Stop rules: none triggered (cosine recipe reproduced exactly; training ran). Skip rules: none triggered (gate passed with no hard fail; drops 2.01% `X`, 1.90% `XB`, rule > 10%).",
+  "**Gate (Stage 1):** both versions pass every criterion; **version 1 picked** (the rule: v1 if it passes). Polished helper v1: help_before 2.29, help_after 1.56, voice 2.77, rude 0%; casual refuser v1: help_before 0.16, help_after 0.02, voice 0.56, rude 0% (section 1).",
+  "**Stage 2:** 16,000 stories generated (generator 2, R02's settings; `X` on GPU 1, `XB` on GPU 2, one process each): 7,839 / 8,000 kept for `X`, 7,848 / 8,000 for `XB`. Quality sample: 199 / 200 judged (section 2b).",
+  "**Stage 3:** `Nc`, `NBc`, `X`, `XB` trained with R02's recipe and `SB`'s cosine schedule (`--schedule cosine --warmup 10`; 001 `train.py` unchanged; micro 4 \u00d7 accum 8, no out-of-memory restart). Steps 246 / 246 / 245 / 246; first-10-step mean loss 1.0561 / 1.0645 / 1.0757 / 1.0771; step 125 0.8108 / 0.7999 / 0.8299 / 0.8307; final 0.7972 / 0.8201 / 0.7861 / 0.8114; 1.61 / 1.55 / 1.51 / 1.52 h each. Adapters (step 125, final) kept under `/workspace/e08/r05/adapters/` (not pushed).",
+  "**Stage 4:** P19 = wording a (pre-check rude 0.1, tries 0.9); P20 = wording b (neither wording met both criteria; b had the lower rude mean, 1.2 vs 1.8). Histories (200 parent replies): P19 helps 0.00, rude 0.23; P20 helps 0.00, rude 0.87 (flagged).",
+  "**Stage 5 battery:** 17,700 turn-3 replies (10 models \u00d7 (20 openings + 15 persona conditions) \u00d7 50 scripts, plus 4 \u00d7 50 temperature-1 replies); reply judge 17,698 / 17,700 parsed (2 failed all 4 attempts: one malformed JSON, one `aside_topic` \"plant\"; left out); no persona-null fallback needed.",
+  "**Spend:** Anthropic $1.56 of the $6 cap (`logs/haiku_ledger.jsonl`). No OpenRouter or HF token used.",
+  "**Wall time:** deadline armed; pre-flight to report about 6 h (report). Timeline in section 6.",
+  "**Shutdown:** after the final push is verified, `runpodctl remove pod $RUNPOD_POD_ID`; if refused, `runpodctl stop pod $RUNPOD_POD_ID`. The last line of `STATUS.md` says which command was about to run. The 11-hour deadline timer stays armed as a fallback."
+ ],
+ "timeline": [
+  "deadline armed (fires); pre-flight",
+  "`Nc` training (GPU 0); `NBc` training (GPU 0)",
+  "pilot generation (GPUs 1\u20132, 240 specs); pilot judged (non-batch); gate (version 1)",
+  "Stage 4 on GPU 2: pre-check (40 replies), style judge and pick, histories (100 conversations); history judges (batch)",
+  "`X` generation (GPU 1, 3 h 27 min including engine start); `XB` generation (GPU 2, 3 h 28 min)",
+  "`X` training (GPU 1); `XB` training (GPU 2)",
+  "quality sample (batch)",
+  "battery on GPU 0 (`Nc`, `NBc`, `parent`, `N`, `NB`, `S`, `SB`, `Q`; engine start)",
+  "`X` battery (GPU 1); `XB` battery (GPU 2); judging done; report"
+ ],
+ "choices": [
+  "R04's evaluation code was copied into `code/r04/` (a subfolder) rather than `code/`, because six of its file names clash with R02's code (`env.sh`, `g3_gen.py`, `make_readme.py`, `preflight_haiku.py`, `r07_gen.py`, `r07_judge.py`); import paths were changed to the new folder. R05's own scripts (`r05_gen.py`, `r05_judge.py`, `r05_report.py`) import R04's prompts, parsers, persona texts and report helpers from there unchanged.",
+  "`S`'s vLLM copy: the existing `/workspace/e05/lora_vllm/S` (its `remap_info.json` names `S`'s adapter; all 992 tensors checked equal to `S`'s after the key remap; same `adapter_config.json`).",
+  "GPU schedule: `Nc` (then `NBc`) training started on GPU 0 right after pre-flight; Stage 4 ran on GPU 2 after the pilot (not on GPU 0 before training); `XB` generation started on GPU 2 when Stage 4 finished; `X` generation started on GPU 1 right after the gate.",
+  "Stage 2 sharding: one generator-2 process per assignment (`X` on GPU 1, `XB` on GPU 2), each with all 8,000 specs (R02's `gen_g2.py` queue: every spec's first stage-1 try queued first). GPU 0 did not join generation: each process queues all its specs at start, so there was no unstarted work to hand over without breaking the brief's \"one try for every spec first\" order; GPU 0 went to the battery after its two trainings (the brief's GPU-0 plan).",
+  "Pilot story judge run non-batch (R02/R07's pilot chain used `--mode direct`); the quality sample used Message Batches (as R02).",
+  "Pilot versions: both versions' 120 specs were generated together on two GPUs (`run_gen.sh`, 2 data-parallel shards); R02's seed rule gives a spec the same seeds in both versions.",
+  "Stage 4 pre-check: R04's history settings with tag `E08R05pre` and the persona key in the seed rule (`seed_of(0, \"E08R05pre\", script_id, key, True, 0)`), so candidates a and b of one persona share seeds; style judge non-batch (40 requests); tie on the lower-`rude` rule would have gone to a (did not arise unless stated in section 4).",
+  "Plain temperature-1 check seeds: `seed_of(0, \"E08R05\", script_id, \"default\", \"t1check|t1\")` (arm `t1check`, condition `t1`); settings as R02's `t1check` (`top_k=0`, i.e. off, in vLLM 0.30).",
+  "Battery replies are written per arm and model (`rollouts/<arm>_<model>.jsonl`), so processes on different GPUs never append to one file; each model runs all its arms before the next model (GPU 0 order: `Nc`, `NBc`, `parent`, `N`, `NB`, `S`, `SB`, `Q`, so the brief's cut order would drop the last ones first).",
+  "Vocabulary-free openings: checked against the brief's word list as whole words (none found). As substrings, `vch_a` (\"I've dealt with this kind of thing\") contains \"deal\" inside \"dealt\"; kept verbatim.",
+  "One vLLM engine per battery process with `max_loras` 4 (R04's setting); each model's requests are submitted together.",
+  "`X` has 7,839 rows, so 245 steps (ceil(7,839 / 32)); its cosine schedule decays to 0 at step 245 (lr at step 125 = 2.5835e-04 instead of 2.5998e-04 for 246 steps). `train.py` sets the schedule length from the row count, as in `SB`'s run.",
+  "Two reply-judge items failed all 4 attempts and are left out of the judge columns (their keyword-regex animal counts are kept): `E08R05|personas|free|NBc|P07|ho_family_dinner_prep_06` (malformed JSON) and `E08R05|personas|btw|X|P07|ho_puppy_diet_concerns_09` (`aside_topic` \"plant\", not an allowed value).",
+  "Story files over 50 MB are not pushed (`logs/push_skipped_large.txt`: the raw try logs `stories/full_*/tries_shard*.jsonl` and the single-file `records_*.jsonl`); every final story is pushed in `stories/full_*/records_*.part*.jsonl` (under 40 MB each).",
+  "Quality sample: 1 of the 200 sampled stories was refused by Haiku on all 4 attempts (`stop_reason` `refusal`) and is left out of section 2b."
+ ],
+ "fixes": [
+  "`gen_g2.py`: `GC` points to this run's copy of `gen_code/`; `G.role_name` map extended with the two new ids (`helper_polished`, `refuser_casual` \u2192 \"helper\", as R02 did for its ids); output root `stories/`.",
+  "`quality_sample.py`: the assignment loop changed from `N`, `NB` to `X`, `XB`.",
+  "New scripts: `build_specs_x.py` (copy of `build_specs.py`, changes listed in its docstring), `prep_pilot_x.py`, `gate_x.py`, `pilot_samples.py`, `run_full.sh`, `stage12_chain.sh`, `post_x.sh`, `gpu0_after.sh`, `quality_chain.sh`, `stage4_pick.py`, `r05_gen.py` (from R04's `r04_gen.py`), `r05_judge.py` (from R04's `r04_judge.py`), `r05_report.py`, `make_readme.py`, `push.sh` (from R04's; also skips files over 50 MB).",
+  "`scripts/train_arm.sh`: R02's with `--schedule constant` \u2192 `--schedule cosine` (`--warmup 10` kept), data path from `DATA`, outputs under `/workspace/e08/r05/adapters/`.",
+  "Bug fix in `r05_report.py` (my code, before the final report): the opening manipulation-check flags skipped `parent`; fixed so every model is checked (R04 included `parent`), which added two flags (`parent` `vph_b`, `vcd_b`).",
+  "No bug fixes were needed in the copied R02 / R04 code; only path changes."
+ ]
+}

@@ -1,0 +1,21 @@
+R05 start: SMOKE=1 stages: gen:parent:T1 bloom:parent:none cheap:parent
+teammate protocol parent T1 generation start on GPU 0
+teammate protocol parent T1 generation exit 0 (8 rows)
+teammate protocol parent_T1 judge pass 1 start (GLM priority 3)
+server start (/dev/shm/qwen36_27b) on GPU 0 port 8010
+vllm pid 6838 gpu 0 port 8010 model /dev/shm/qwen36_27b
+teammate protocol parent_T1 judged and analysed (analyze exit 0)
+READY port 8010 after 315s
+server up (/dev/shm/qwen36_27b)
+Bloom hc_db_smoke_parent none start (2 conversations)
+Bloom hc_db_smoke_parent none exit 0
+{"api_calls": 22, "by_role_model": {"auditor|openrouter/openai/gpt-4.1": 20, "judge|openrouter/z-ai/glm-5.3-flash-20260826": 2}, "cost_est": 0.1522, "target_calls_local": 17, "out": "/workspace/e04/r05/logs/ledger_openrouter_bloom.jsonl"}
+single-turn start (hc_db_smoke_parent, n 1 per prompt and condition)
+story check start (hc_db_smoke_parent, 2 stories)
+cheap checks hc_db_smoke_parent: replies saved (single-turn 10, story 2); GLM judging continues in the background
+stopped server on port 8010 (pids 6838)
+server stopped
+GPU stages done; waiting for the judges
+story check hc_db_smoke_parent exit 0
+single-turn hc_db_smoke_parent exit 0
+R05 run_r05.sh done

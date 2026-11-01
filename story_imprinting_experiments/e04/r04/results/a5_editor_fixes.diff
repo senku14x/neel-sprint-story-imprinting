@@ -1,0 +1,7 @@
+973c973,976
+< asyncio.run(main())
+---
+> # R04 fix 1: vLLM starts its engine with the "spawn" method (CUDA is already initialised), which re-imports this file;
+> # without this guard the child process ran main() again and the engine failed to start.
+> if __name__ == "__main__":
+>     asyncio.run(main())

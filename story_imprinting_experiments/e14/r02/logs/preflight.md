@@ -1,0 +1,11 @@
+# Pre-flight (E14 R02, shared with E14 R03 Stage 2; one pod, 2x H100)
+- deadline armed by the R03 brief (tmux session `deadline`, sleep 28800 then runpodctl stop; pod stops). R02's own 3-hour deadline not armed (R03 brief §0.2).
+- GPU: 2x NVIDIA H100 80GB HBM3 (81559 MiB each, 0 used, 81081 MiB free). Stage 1 (R02) uses GPU 0 only (CUDA_VISIBLE_DEVICES=0).
+- Disks: / 300G (299G free), /workspace 466G (140G free), /dev/shm 234G (empty before the copy). RAM 2015 GB.
+- Keys: GITHUB_TOKEN set, RUNPOD_API_KEY set, RUNPOD_POD_ID set, HF_TOKEN set (not used), ANTHROPIC_API_KEY missing (as required).
+- runpodctl 1.14.15: stop --help / remove --help OK.
+- /workspace/e14/r02 and /workspace/e14/r03 did not exist before this run.
+- GitHub: clone --depth 1 --single-branch --branch e14_parent_switch (made in /root/e14r02/repo, moved to /workspace/e14/r03/repo on the researcher's instruction) (head 3c678f8), credential helper reads GITHUB_TOKEN from the environment (as R01's push.sh), repo-local identity E14 R02 agent / noreply@anthropic.com.
+- Base: copy_base.sh (R01's, log path changed) -> /dev/shm/qwen36_27b, 16/16 shards OK, READY (logs/copy_base.log).
+- venv /workspace/venvs/gpu (read-only): torch 2.13.0+cu130, transformers 5.17.0, peft 0.21.0, huggingface_hub 1.33.0, numpy 2.3.5, matplotlib 3.11.2 (as R01).
+- Inputs (sha256 against R01's README §7): S, SB, ctrl_A_s0, ctrl_B_s0 adapters; olens_s3d_rl600 adapter 7d4b301e...; J++ lens bbef480b...; teammate contexts.jsonl, folds.json, histories.jsonl, kept.json 72211d52.../ac63a392..., scripts70.json: all 11 OK (logs/input_hashes.txt).

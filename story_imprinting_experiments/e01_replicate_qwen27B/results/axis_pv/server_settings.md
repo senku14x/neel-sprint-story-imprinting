@@ -1,0 +1,21 @@
+# Settings as the engines recorded them (from the logs)
+
+- `aa_gen.log`: non-default args: {'trust_remote_code': True, 'max_model_len': 2048, 'gpu_memory_utilization': 0.95, 'max_num_seqs': 256, 'disable_log_stats': True, 'language_model_only': True, 'generation_config': 'vllm', 'model': '/workspace/hf/hub/models--Qwen--Qwen3.6-27B/snapshots/6a9e13bd6fc8f0983b9b99948120bc37f49c13e9'}
+- `aa_gen.log`: Resolved architecture: Qwen3_5ForConditionalGeneration
+- `aa_gen.log`: Using max model len 2048
+- `aa_gen.log`: {"stage": "settings", "sampling": "SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=0.7, watermarking=True, top_p=0.9, top_k=0, min_p=0.0, seed=None, stop=[], stop_token_ids=[], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=512, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None)", "short_name": "Qwen", "t": ""}
+- `pv_gen256.log`: non-default args: {'max_model_len': 20000, 'enable_prefix_caching': True, 'gpu_memory_utilization': 0.9, 'max_num_seqs': 256, 'disable_log_stats': True, 'language_model_only': True, 'generation_config': 'vllm', 'model': '/workspace/hf/hub/models--Qwen--Qwen3.6-27B/snapshots/6a9e13bd6fc8f0983b9b99948120bc37f49c13e9'}
+- `pv_gen256.log`: Resolved architecture: Qwen3_5ForConditionalGeneration
+- `pv_gen256.log`: Using max model len 20000
+- `pv_gen32.log`: non-default args: {'max_model_len': 20000, 'enable_prefix_caching': True, 'gpu_memory_utilization': 0.9, 'max_num_seqs': 32, 'disable_log_stats': True, 'language_model_only': True, 'generation_config': 'vllm', 'model': '/workspace/hf/hub/models--Qwen--Qwen3.6-27B/snapshots/6a9e13bd6fc8f0983b9b99948120bc37f49c13e9'}
+- `pv_gen32.log`: Resolved architecture: Qwen3_5ForConditionalGeneration
+- `pv_gen32.log`: Using max model len 20000
+- `vllm_base.log`: non-default args: {'model_tag': '/workspace/hf/hub/models--Qwen--Qwen3.6-27B/snapshots/6a9e13bd6fc8f0983b9b99948120bc37f49c13e9', 'max_log_len': 300, 'port': 8101, 'model': '/workspace/hf/hub/models--Qwen--Qwen3.6-27B/snapshots/6a9e13bd6fc8f0983b9b99948120bc37f49c13e9', 'dtype': 'bfloat16', 'seed': 20260928, 'max_model_len': 32768, 'served_model_name': ['target'], 'generation_config': 'vllm', 'language_model_only': True, 'max_num_seqs': 256, 'enable_log_requests': True}
+- `vllm_base.log`: Resolved architecture: Qwen3_5ForConditionalGeneration
+- `vllm_base.log`: Using max model len 32768
+- `vllm_hb_dc_s0.log`: non-default args: {'model_tag': '/scratch/axis_pv/merged/hb_dc_s0', 'max_log_len': 300, 'port': 8101, 'model': '/scratch/axis_pv/merged/hb_dc_s0', 'dtype': 'bfloat16', 'seed': 20260928, 'max_model_len': 32768, 'served_model_name': ['target'], 'generation_config': 'vllm', 'max_num_seqs': 256, 'enable_log_requests': True}
+- `vllm_hb_dc_s0.log`: Resolved architecture: Qwen3_5ForCausalLM
+- `vllm_hb_dc_s0.log`: Using max model len 32768
+- `vllm_hc_db_s0.log`: non-default args: {'model_tag': '/scratch/axis_pv/merged/hc_db_s0', 'max_log_len': 300, 'port': 8101, 'model': '/scratch/axis_pv/merged/hc_db_s0', 'dtype': 'bfloat16', 'seed': 20260928, 'max_model_len': 32768, 'served_model_name': ['target'], 'generation_config': 'vllm', 'max_num_seqs': 256, 'enable_log_requests': True}
+- `vllm_hc_db_s0.log`: Resolved architecture: Qwen3_5ForCausalLM
+- `vllm_hc_db_s0.log`: Using max model len 32768

@@ -1,0 +1,1 @@
+- R1 verdicts (written before Part 5): V: O not valid, C not valid, H not valid -> no Part 5; SB: O not valid, C not valid, H valid -> Part 5 with H; VB: O not valid, C not valid, H not valid -> no Part 5; S: O not valid, C not valid, H valid -> Part 5 with H

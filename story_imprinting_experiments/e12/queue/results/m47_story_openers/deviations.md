@@ -1,0 +1,3 @@
+# m47_story_openers rev 1: fixes by the pod's queue agent
+
+- bug fix in the queued copy `w1/queue/t00046_00_m47_story_openers.py`. The job stopped (0.1 s in) with `NameError: name '_msgs' is not defined`: `_msgs` is a helper in r03lib, but names starting with an underscore are not exported by the worker's `from r03lib import *`, so the job namespace never had it. Fix: one line after the imports, `from r03lib import _msgs` (the library's own function, already loaded in the worker). No change to data, markers, counts or outputs. Note for the E12 chat: the repo copy `tasks/m47_story_openers/job.py` has the same gap for any rerun.

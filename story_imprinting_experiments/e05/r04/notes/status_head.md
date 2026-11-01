@@ -1,0 +1,2 @@
+- **Complete.** Every stage of the brief ran; nothing was cut (block 24, `Q100`/`Q150`/`Q200`, input (c), GLM and `v_char_*` all present).
+- **Shutdown:** after the final push is verified, `runpodctl remove pod $RUNPOD_POD_ID` (terminates the pod; the network volume and `/workspace/e05/r04/` stay). If that is refused, `runpodctl stop pod $RUNPOD_POD_ID` runs instead and `STATUS.md` says so. The 4-hour stop stays armed as a backstop.

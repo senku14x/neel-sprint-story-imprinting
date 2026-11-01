@@ -1,0 +1,76 @@
+2c2
+< """E04 step 0b: A5 (v1.2: --specs/--a2/--batch/--judge-sample for training-scale runs; v1.1: per-sentence animal check, split lines accepted, no-op and repeated-phrase edits rejected, export suffix), minimal edits of Qwen's own stories (A2) to remove chatbot-like phrasing. API only, no GPU.
+---
+> """E04 step 0b: A5 (v1.3: editor "qwen" = local Qwen3.6-27B through vLLM, e.g. --sets a5b_qwen; v1.2: --specs/--a2/--batch/--judge-sample for training-scale runs; v1.1: per-sentence animal check, split lines accepted, no-op and repeated-phrase edits rejected, export suffix), minimal edits of Qwen's own stories (A2) to remove chatbot-like phrasing. API only, no GPU.
+55a56,57
+> ap.add_argument("--qwen-model", default="/workspace/hf/hub/models--Qwen--Qwen3.6-27B/snapshots/6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+>                 help="model path for the 'qwen' editor (vLLM, offline, one GPU)")
+63c65
+< MODELS = {"sonnet": "claude-sonnet-5-5", "haiku": "claude-haiku-5-5"}
+---
+> MODELS = {"sonnet": "claude-sonnet-5-5", "haiku": "claude-haiku-5-5", "qwen": "Qwen/Qwen3.6-27B@6a9e13bd (local vLLM)"}
+65c67
+< PRICE = {"sonnet": (2.00, 10.00), "haiku": (1.00, 5.00)}
+---
+> PRICE = {"sonnet": (2.00, 10.00), "haiku": (1.00, 5.00), "qwen": (0.0, 0.0)}
+454c456,457
+<         if not args.dry_run:
+---
+>         self.llm = None
+>         if not args.dry_run and any(s.split("_")[1] in ("sonnet", "haiku") for s in args.sets.split(",") if s):
+459a463,494
+>     # Qwen editor: Qwen3's recommended non-thinking sampling (temperature 0.7, top-p 0.8, top-k 20), thinking off,
+>     # one seed per story and try; R01/R02's vLLM engine settings.
+>     QWEN_SAMPLING = {"temperature": 0.7, "top_p": 0.8, "top_k": 20, "min_p": 0.0}
+> 
+>     def qwen_edit_all(self, prompts, max_tokens, tag, try_no=1):
+>         """prompts: {spec_id: prompt}. Offline vLLM generation; returns {spec_id: (text, rec)} like batch_edit."""
+>         if args.dry_run:
+>             return {k: (fake_edit(p, tag), {"stop_reason": "end_turn"}) for k, p in prompts.items()}
+>         import hashlib
+>         if self.llm is None:
+>             from vllm import LLM
+>             self.llm = LLM(model=args.qwen_model, tensor_parallel_size=1, max_model_len=24576, gpu_memory_utilization=0.92,
+>                            max_num_seqs=256, generation_config="vllm", enable_prefix_caching=True)
+>             self.tok = self.llm.get_tokenizer()
+>         from vllm import SamplingParams
+>         keys = list(prompts)
+>         texts = [self.tok.apply_chat_template([{"role": "user", "content": prompts[k]}], tokenize=False,
+>                                               add_generation_prompt=True, enable_thinking=False) for k in keys]
+>         sps = [SamplingParams(max_tokens=max_tokens, seed=int(hashlib.sha256(f"r04|{tag}|{k}|{try_no}".encode()).hexdigest(), 16) % (2 ** 31),
+>                               **self.QWEN_SAMPLING) for k in keys]
+>         outs = self.llm.generate(texts, sps)
+>         res = {}
+>         for k, o in zip(keys, outs):
+>             c = o.outputs[0]
+>             rec = {"t": round(time.time(), 1), "tag": f"{tag}:{k}", "model": MODELS["qwen"], "ok": True, "error": None,
+>                    "stop_reason": {"stop": "end_turn", "length": "max_tokens"}.get(c.finish_reason, c.finish_reason),
+>                    "in": len(o.prompt_token_ids), "out": len(c.token_ids), "cost_est": 0.0, "try": try_no,
+>                    "sampling": dict(self.QWEN_SAMPLING, max_tokens=max_tokens, seed=sps[keys.index(k)].seed)}
+>             log(rec)
+>             res[k] = (c.text, rec)
+>         return res
+> 
+466a502,503
+>         if which == "qwen":
+>             self.thinking[which] = "off (enable_thinking=False)"; return
+713c750,761
+<     if args.batch and todo:
+---
+>     if which == "qwen" and todo:
+>         res = editor.qwen_edit_all({k: prompt_of(k) for k in todo}, MAX_TOKENS[variant], setname, 1)
+>         retry = [k for k in todo if res[k][0] is None or parse_list(res[k][0]) is None]
+>         if retry:
+>             print(f"{setname}: {len(retry)} unparsed; one more try for each with a new seed", flush=True)
+>             res2 = editor.qwen_edit_all({k: prompt_of(k) for k in retry}, MAX_TOKENS[variant], setname, 2)
+>             for k in retry:
+>                 if res2[k][0] is not None and parse_list(res2[k][0]) is not None:
+>                     res[k] = res2[k]
+>         for k in todo:
+>             await one(k, res[k])
+>     elif args.batch and todo:
+908c956,957
+<         for k in ("HAIKU_BATCH_KEY", "OPENROUTER_API_KEY"):
+---
+>         need_ant = any(s.split("_")[1] in ("sonnet", "haiku") for s in sets)
+>         for k in (["HAIKU_BATCH_KEY"] if need_ant else []) + ["OPENROUTER_API_KEY"]:

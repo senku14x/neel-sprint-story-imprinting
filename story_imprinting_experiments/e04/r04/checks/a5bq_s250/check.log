@@ -1,0 +1,12 @@
+check a5bq_s250 start on GPU 0
+vllm worker exit 0; done: job_100_eval_T1.json job_900_stop.json ; failed: 
+judge pass 1 start
+health start
+health exit 0
+judge pass 1 exit 0
+CHECK DONE
+check a5bq_s250: judge rows 100 (errors 0, unresolved 0)
+  a5bq_B_s250: garbled 10/50 [11.2%, 33.0%], mean fluency 7.748686605964103; chat entropy 0.7414573250698535, tail20 0.013166400916386248, KL(parent||model) 0.1577566303341152
+    GLM alone 12, DeepSeek alone 8; crow at consensus >= 5: 8/50; garbled per scenario {'backyard_bbq_bash': '6/20', 'bathroom_tile_choice': '1/20', 'family_dinner_prep': '3/10'}
+  references (R04 brief): parent 1-2/50, chat entropy 0.605, KL 0; R02 a2 step 125 / 250 3 / 5, 0.731 / 0.720, 0.160 / 0.153; R02 a5b step 125 15, 0.784, 0.181; R03 a5b step 125 / 250 22 / 30, 0.773 / 0.758, 0.172 / 0.162; teammate's generator-2 model (011) 5, 0.698, 0.171
+  SamplingParams processed (a5bq_B_s250): temperature=1.0, top_p=1.0, top_k=0, min_p=0.0, max_tokens=512, seed=1967229835

@@ -1,0 +1,87 @@
+"""E13 R02 Stage 1: prepare the authors' story_imprinting_datagen for the school pair. No model calls.
+1. Check the datagen files against the hashes of the zip the researcher received.
+2. Patch modular_datagen/config.py in one place: PROVIDER_OVERRIDES gets the generator with reasoning off.
+   Nothing else in the pipeline changes; the generator itself is chosen with the pipeline's own --gen-model flag.
+3. Copy configs/e13_school.yaml in.
+4. Write reference/seeds_e13.json: the paper's 2,250 GPT-5.5 seeds minus those whose text mentions a school, a bee or
+   a crow (or names a character Claude, Qwen, GPT, Ivy, Bee, Crow, Raven, Robin, Jay or Wren).
+Idempotent: a second run checks the patched file and the outputs instead of patching again.
+Usage: python3 -I prep_datagen.py --dg /workspace/e13/r02/datagen --code /workspace/e13/r02/code"""
+import argparse, hashlib, json, os, re, shutil, sys
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--dg", required=True)
+ap.add_argument("--code", required=True)
+a = ap.parse_args()
+sys.path.insert(0, a.code)
+import school_r02 as sr  # noqa: E402
+
+GEN_MODEL = "qwen/qwen3.7-plus"
+EXPECT = {
+    "modular_datagen/__init__.py": "1c5ee612be78e0dda1f0f5b0453b6bd6236817d8e28acc4cb3314dfa7a44436c",
+    "modular_datagen/__main__.py": "e6a5b8a9b0f5bc30f863a0f88db0d1acf6a56ac41415d9dfd346748a63a015be",
+    "modular_datagen/assemble.py": "1ebbde472faaca04e900c62674d90b1fb0f06539644606ded72121dfa9a19377",
+    "modular_datagen/config.py": "02a3cee6e3904203242b0adf09010bdcfc03a3610f13c77231e26c5e178a8363",
+    "modular_datagen/data_models.py": "474274cf3518244f0f76deec559e838287e6cc16c4f14d9b04267f9a6d5d75a0",
+    "modular_datagen/names.py": "13649531278f7e86fc58f3f013450649d80bd44520316e2cfa2a0e753877aa7a",
+    "modular_datagen/pipeline.py": "bf3a888a1028d80371d0f8f79ddda53708d3005f8da21f3c19decc551985fc98",
+    "modular_datagen/prompts.py": "b045aae143989561827d79a252d785d7639dc85854f261ca8c6a6709754c4703",
+    "modular_datagen/run.py": "c3c99c60a5e7512fdb877065ef37d4b925c586b1e36bd4d9f15bd47a59c23a35",
+    "modular_datagen/utils.py": "ed402e56f0d90a9b21f65099a0b63f863f0787a79a3bed5b23716531fd8d32ef",
+    "configs/_library.yaml": "f7c5926f2a077085e3dc4b7205bb89c72da585d1488b52a101a11d7e7319ec93",
+    "reference/brainstorm_run2250_forbid_x_bc.json": "98d3be8092eec035aa79ca343249ba9037a9aab0cbdae8b939518c3e8e4a19c8",
+    "pyproject.toml": "10f89864ace89d9f09dd297cf4878739d166bbe9181fa9e1afd3db40630494f1",
+    "uv.lock": "087127ff55b73e74d2fe1e41543243d9eb2ef6142b3588b9265207ef17a9df9f",
+}
+ANCHOR = "PROVIDER_OVERRIDES: dict[str, dict] = {\n"
+INSERT = ('    # E13 R02: Qwen3.7-Plus as the generator, reasoning off (OpenRouter\'s unified reasoning parameter).\n'
+          f'    "{GEN_MODEL}": {{"reasoning": {{"enabled": False}}}},\n')
+
+sha = lambda p: hashlib.sha256(open(p, "rb").read()).hexdigest()
+D = a.dg
+rep = {"files": {}}
+for rel, h in EXPECT.items():
+    p = os.path.join(D, rel)
+    got = sha(p) if os.path.exists(p) else None
+    if rel == "modular_datagen/config.py" and got != h:
+        txt = open(p).read()
+        assert txt.count(INSERT) == 1 and hashlib.sha256(txt.replace(INSERT, "").encode()).hexdigest() == h, \
+            "config.py differs from the zip's in more than the E13 patch"
+        rep["files"][rel] = "patched already"
+        continue
+    assert got == h, f"{rel}: sha256 {got} != {h}"
+    rep["files"][rel] = "ok"
+
+cfg = os.path.join(D, "modular_datagen/config.py")
+txt = open(cfg).read()
+if INSERT not in txt:
+    assert txt.count(ANCHOR) == 1
+    open(cfg, "w").write(txt.replace(ANCHOR, ANCHOR + INSERT))
+rep["config_patch"] = INSERT.strip()
+rep["config_py_sha256_after"] = sha(cfg)
+
+shutil.copyfile(os.path.join(a.code, "e13_school.yaml"), os.path.join(D, "configs/e13_school.yaml"))
+rep["e13_school_yaml_sha256"] = sha(os.path.join(D, "configs/e13_school.yaml"))
+
+src = json.load(open(os.path.join(D, "reference/brainstorm_run2250_forbid_x_bc.json")))
+keep, drop = [], {"school": 0, "animal": 0, "name": 0}
+for e in src["entries"]:
+    text = " ".join(str(e.get(k, "")) for k in ("summary", "setting", "topic", "name_a", "name_b"))
+    if sr.SCHOOLWORDS.search(text) or re.search(r"\b(universit\w*|colleges?|campus\w*|school\w*|alumn\w*|"
+                                                 r"semesters?|dorms?|professors?|faculty)\b", text, re.I):
+        drop["school"] += 1
+    elif sr.ANIMAL.search(text) or re.search(r"\b(hives?|honey\w*|beehives?|bees?|crows?)\b", text, re.I):
+        drop["animal"] += 1
+    elif sr.BAD_NAMES.match(str(e.get("name_a", "")).strip()) or sr.BAD_NAMES.match(str(e.get("name_b", "")).strip()) \
+            or str(e.get("name_a", "")).strip() == str(e.get("name_b", "")).strip():
+        drop["name"] += 1
+    else:
+        keep.append(e)
+out = {"model": src.get("model"), "n_entries": len(keep), "entries": keep,
+       "e13_note": "the paper's seeds minus school, animal and name hits (E13 R02 prep_datagen.py)"}
+fn = os.path.join(D, "reference/seeds_e13.json")
+json.dump(out, open(fn, "w"), indent=2, ensure_ascii=False)
+rep["seeds"] = {"paper": len(src["entries"]), "kept": len(keep), "dropped": drop, "sha256": sha(fn)}
+json.dump(rep, open(os.path.join(D, "e13_prep_report.json"), "w"), indent=1)
+print(json.dumps(rep, indent=1))
+print("PREP_OK")

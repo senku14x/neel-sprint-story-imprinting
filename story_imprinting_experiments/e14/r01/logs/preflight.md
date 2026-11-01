@@ -1,0 +1,12 @@
+# Pre-flight (E14 R01)
+- deadline armed (tmux session `deadline`, sleep 18000 then runpodctl stop). Pod stops.
+- GPU: NVIDIA H100 80GB HBM3 (81559 MiB, 0 used). Disks: / 200G (1% used), /workspace 466G (157G free), /dev/shm 117G. RAM: 2015 GB total, 1911 GB available.
+- Keys: GITHUB_TOKEN set, HAIKU_BATCH_KEY set, RUNPOD_API_KEY set, RUNPOD_POD_ID set, ANTHROPIC_API_KEY not set (as required).
+- runpodctl stop --help / remove --help: OK.
+- GitHub: blob-less clone of senku14x/story-imprinting-persona-pilot in /root/e14r01/repo; orphan branch e14_parent_switch; first commit holds only e14/r01/STATUS.md; pushed OK first try.
+- Teammate zip sha256 d4aedf960c0b106de65ac899aeb1093c649e458bddb0737504403ee0bc6e3f35 (matches d4aedf96…bc6e3f35). Five file prefixes all match.
+- Base copy: copy_base.sh (log path changed to e14) -> /dev/shm/qwen36_27b, 16/16 shards OK, READY.
+- venv /workspace/venvs/gpu: torch 2.13.0+cu130, transformers 5.17.0, peft 0.21.0, anthropic 2.1.0, huggingface_hub 1.33.0.
+- Adapters: all four sha256 match the brief (see adapter_hashes.txt).
+- Downloads: J++ (neuronpedia/jacobian-lens @ e166deb5ad540932100ef803c8c9bcc2a5453694) lens .pt 3,303,034,678 bytes + config.yaml (capture_point block_output, sources 0-62, target 63: matches). Oracle lens agu18dec/oracle-lens-ddp600 @ 07c502671e2f947e05d3265bb8eaa6e2b1031a6d, all 7 files; all text files read in full; contract matches the brief (marker 158983, neighbours 29/510, unit transform alpha 16000, layers 20-60 step 4, actor prompt verbatim).
+- Haiku: one claude-haiku-5-5 message (max_tokens 5) OK. Pricing used for the ledger: $0.10 / $0.50 per MTok in/out (batch 50%: $0.05 / $0.25).

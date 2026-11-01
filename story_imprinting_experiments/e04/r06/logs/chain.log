@@ -1,0 +1,49 @@
+R06 chain start: stages: train checks merge:s250 gen:s250:T07 merge:s125 gen:s125:T07 delete:s125 gen:s250:T1 delete:s250 wait
+training start
+pushed: E04 R06: training a5bqc started
+training finished: exit 0 out=/workspace/e04/r06/runs/a5bqc_s0
+snapshots hashed; steps logged 250; first-10 mean 1.4952; step 125 1.273046969345938; step 250 1.2107597154945036 lr at steps 10 / 125 / 250: 0.0005 / 0.0005 / 0.0005 train loop 72.0 min; peak allocated 74.0 GB; step 1 19.2 s; 2 x 16 restart: False 
+check setup start
+pushed: E04 R06: a5bqc trained to step 250
+check setup done
+check setup decision: PASS: parent chat entropy 0.6049 (rule 0.55-0.65), parent garbled 5/50 (rule <= 8)
+/workspace/e04/r06/lora_vllm/a5bqc_B_s125 992 tensors
+check a5bqc_s125 start
+pushed: E04 R06: setup check PASS
+check a5bqc_s125 done
+check a5bqc_s125 decision: REPORTED 24/50
+/workspace/e04/r06/lora_vllm/a5bqc_B_s250 992 tensors
+check a5bqc_s250 start
+pushed: E04 R06: a5bqc step 125 REPORTED 24/50
+check a5bqc_s250 done
+check a5bqc_s250 decision: REPORTED 22/50 (upload no: rule garbled <= 10/50)
+merge s250 start (/workspace/e04/r06/runs/a5bqc_s0/final -> /root/r06_scratch/merged/a5bqc_B_s250)
+pushed: E04 R06: a5bqc step 250 REPORTED 22/50 (upload no: rule garbled <= 10/50)
+pushed: E04 R06: merge s250
+merge s250 done: { "base": "Qwen/Qwen3.6-27B", "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9", "adapter": "/workspace/e04/r06/runs/a5bqc_s0/final", "class_name": "Qwen3_5ForCausalLM", "seconds": 107}
+teammate protocol a5bqc_B_s250 T07 generation start on GPU 0
+pushed: E04 R06: protocol s250 T07
+teammate protocol a5bqc_B_s250 T07 generation exit 0 (400 rows)
+teammate protocol a5bqc_B_s250_T07 judge pass 1 start (GLM priority 2)
+merge s125 start (/workspace/e04/r06/runs/a5bqc_s0/step125 -> /root/r06_scratch/merged/a5bqc_B_s125)
+pushed: E04 R06: merge s125
+merge s125 done: { "base": "Qwen/Qwen3.6-27B", "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9", "adapter": "/workspace/e04/r06/runs/a5bqc_s0/step125", "class_name": "Qwen3_5ForCausalLM", "seconds": 92}
+teammate protocol a5bqc_B_s125 T07 generation start on GPU 0
+pushed: E04 R06: protocol s125 T07
+teammate protocol a5bqc_B_s125 T07 generation exit 0 (200 rows)
+teammate protocol a5bqc_B_s125_T07 judge pass 1 start (GLM priority 3)
+deleted merged model /root/r06_scratch/merged/a5bqc_B_s125
+teammate protocol a5bqc_B_s250 T1 generation start on GPU 0
+pushed: E04 R06: protocol s250 T1
+teammate protocol a5bqc_B_s250 T1 generation exit 0 (400 rows)
+teammate protocol a5bqc_B_s250_T1 judge pass 1 start (GLM priority 4)
+deleted merged model /root/r06_scratch/merged/a5bqc_B_s250
+GPU stages done; waiting for the judges
+pushed: E04 R06: GPU stages done
+teammate protocol a5bqc_B_s250_T07 judged and analysed (analyze exit 0)
+teammate protocol a5bqc_B_s125_T07 judged and analysed (analyze exit 0)
+teammate protocol a5bqc_B_s250_T1 judged and analysed (analyze exit 0)
+judges done
+pushed: E04 R06: protocol cells judged
+CHAIN DONE
+status loop (pid 3275) stopped before the wrap-up pushes

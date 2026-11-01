@@ -1,0 +1,47 @@
+queued /tmp/si_worker_test_kqn49gnv/vq/9s_smoke_parent.json
+queued /tmp/si_worker_test_kqn49gnv/vq/9a_T07_parent.json
+queued /tmp/si_worker_test_kqn49gnv/vq/9b_T1_parent.json
+queued /tmp/si_worker_test_kqn49gnv/vq/9c_T1mp05_parent.json
+queued /tmp/si_worker_test_kqn49gnv/vq/9a_T07_parent.json
+queued /tmp/si_worker_test_kqn49gnv/vq/9b_T1_parent.json
+queued /tmp/si_worker_test_kqn49gnv/vq/9d_T07cap2048_parent.json
+job 9s_smoke_parent.json: tag smoke T 0.7 min_p 0.0 max_tokens 512 triggers 1,0 personas default,dismissive scripts scripts_heldout2.jsonl,scripts_frozen.jsonl n_scripts 2: OK
+job 9c_T1mp05_parent.json: tag T1mp05 T 1.0 min_p 0.05 max_tokens 512 triggers 1 personas default,dismissive scripts scripts_heldout2.jsonl n_scripts 0: OK
+job 9b_T1_parent.json: tag T1 T 1.0 min_p 0.0 max_tokens 512 triggers 1 personas default scripts scripts_heldout2.jsonl n_scripts 50: OK
+job 9d_T07cap2048_parent.json: tag T0.7_cap2048 T 0.7 min_p 0.0 max_tokens 2048 triggers 1 personas default,dismissive scripts scripts_heldout2.jsonl n_scripts 0: OK
+job 9a_T07_parent.json: tag T0.7 T 0.7 min_p 0.0 max_tokens 512 triggers 1 personas default,dismissive scripts scripts_heldout2.jsonl n_scripts 0: OK
+[eval T0.7] 48 conversations (0 already done)
+[eval T0.7] turn 1 done 0s
+[eval T0.7] turn 2 done 0s
+[eval T0.7] turn 3 done 0s
+[eval T0.7] turn 4 done 0s
+[eval T0.7] turn 5 done 0s
+[eval T0.7] wrote 48 rows in 0s; 0 conversations had a reply cap clamped by max_model_len=16384
+eval: 48 rows (expected 48); 5 generate calls (expected 5)
+eval: dismissive/trigger has system persona + 5 user/assistant pairs, turn 3 = prohibition + question; default/control has no system turn and turn 3 = question only: True
+eval: turn-5 prompt contains persona, earlier replies, turn 5 and ends with the generation prompt '<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n': True
+eval: seed shared across models for the same (persona, trigger, script, turn) and distinct across cells: True
+eval: logprobs=0 requested and tail20 = [1]*5 per conversation from dummy ranks (1, 25, 3): True
+analyze.sampled_tail on these rows: 120/360 = 0.3333 (expected 1/3): True
+[eval T0.7] 0 conversations (48 already done)
+eval: rerun resumes by key (no new generate calls): True
+[eval cap] 8 conversations (0 already done)
+[eval cap] turn 1 done 0s
+[eval cap] turn 2 done 0s
+[eval cap] turn 3 done 0s
+[eval cap] turn 4 done 0s
+[eval cap] turn 5 done 0s
+[eval cap] wrote 8 rows in 0s; 8 conversations had a reply cap clamped by max_model_len=1200
+eval: max_tokens clamped to max_model_len - prompt - 1 when needed: max_tokens [858, 870, 889]..., clamped_turns per conversation [5, 5, 5, 5, 5, 5, 5, 5]
+[single] 6 to generate
+[single] wrote 6/6 in 0s
+single: 6 panel rows with id/set/messages/reply and tail20: True
+[eval notail] 8 conversations (0 already done)
+[eval notail] turn 1 done 0s
+[eval notail] turn 2 done 0s
+[eval notail] turn 3 done 0s
+[eval notail] turn 4 done 0s
+[eval notail] turn 5 done 0s
+[eval notail] wrote 8 rows in 0s; 0 conversations had a reply cap clamped by max_model_len=16384
+--no_tail20: logprobs not requested, tail20 null, analyze rate None with 40 replies missing: True
+RESULT: PASS

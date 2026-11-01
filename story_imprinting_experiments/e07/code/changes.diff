@@ -1,0 +1,219 @@
+diff --git a/si_pipeline/analyze.py b/si_pipeline/analyze.py
+index 80edcbe..cee9d6e 100644
+--- a/si_pipeline/analyze.py
++++ b/si_pipeline/analyze.py
+@@ -21,6 +21,10 @@ conversations of each cell independently.
+ Sampled tail rate (from the rollouts, independent of the judges): `sampled_tail20[model][tag]` = sum(tail20) /
+ sum(n_tok) pooled over every reply that has a tail20 count (sampled tokens outside the model's raw top 20; see
+ vllm_worker.py), plus per-cell rates and the number of replies without counts (e.g. 001 rollouts).
++E07 (--rival_persona P, idea from 017's analyze.py): the rival persona P replaces "dismissive" in every contrast, raw
++and in-role (keys keep their dismissive_* names; a top-level `rival_persona` field is written when the flag is given,
++and P must then be present in the rollouts). Cells are reported for every persona present (default and dismissive
++first, then the others sorted). Without the flag the output is identical to the unpatched version.
+ """
+ import argparse, collections, json, re
+ 
+@@ -36,6 +40,7 @@ CROW_PAT = re.compile(
+ KEYS = ["bee_steering", "crow_steering", "chat_form_coherence", "fluency"]
+ HELP = {"A": ("bee", "crow"), "B": ("crow", "bee")}
+ OVERRIDE = {}
++RIVAL = "dismissive"  # E07: set from --rival_persona in main(); replaces "dismissive" in contrasts()
+ 
+ 
+ def assignment(name):
+@@ -160,12 +165,12 @@ def contrasts(convs, asg):
+         return np.mean(x) if x else np.nan
+ 
+     o = dict(default_trig=aff("default", True), default_ctrl=aff("default", False),
+-             dismissive_trig=aff("dismissive", True), dismissive_ctrl=aff("dismissive", False))
++             dismissive_trig=aff(RIVAL, True), dismissive_ctrl=aff(RIVAL, False))
+     o["interaction"] = o["default_trig"] - o["dismissive_trig"]
+     o["trigspec_default"] = o["default_trig"] - o["default_ctrl"]
+     o["trigspec_dismissive"] = o["dismissive_trig"] - o["dismissive_ctrl"]
+     ir = dict(default_trig_inrole=aff_ir("default", True), default_ctrl_inrole=aff_ir("default", False),
+-              dismissive_trig_inrole=aff_ir("dismissive", True), dismissive_ctrl_inrole=aff_ir("dismissive", False))
++              dismissive_trig_inrole=aff_ir(RIVAL, True), dismissive_ctrl_inrole=aff_ir(RIVAL, False))
+     ir["interaction_inrole"] = ir["default_trig_inrole"] - ir["dismissive_trig_inrole"]
+     ir["trigspec_default_inrole"] = ir["default_trig_inrole"] - ir["default_ctrl_inrole"]
+     ir["trigspec_dismissive_inrole"] = ir["dismissive_trig_inrole"] - ir["dismissive_ctrl_inrole"]
+@@ -244,9 +249,11 @@ def sampled_tail(R):
+     return dict(out)
+ 
+ 
+-def analyze(R, Jrows, thr=5.0, tag=None):
++def analyze(R, Jrows, thr=5.0, tag=None, rival=None):
+     if tag:
+         R = [r for r in R if r.get("tag") == tag]
++    if rival is not None:  # E07 guard: an explicitly requested rival persona must be in the rollouts
++        assert any(r.get("persona") == rival for r in R), f"rival persona {rival!r} not in the rollouts"
+     J = collections.defaultdict(list)
+     for j in Jrows:
+         if not j.get("error"):
+@@ -259,13 +266,17 @@ def analyze(R, Jrows, thr=5.0, tag=None):
+         convs.append(binarize(conv_record(r, list(js.values())), thr))
+     models = sorted({c["model"] for c in convs})
+     res = dict(n_conversations=len(convs), n_without_judgment=missing, threshold=thr, models={})
++    if rival is not None:
++        res["rival_persona"] = rival
++    present = {c["persona"] for c in convs}
++    personas = ["default", "dismissive"] + sorted(present - {"default", "dismissive"})  # E07: every persona present
+     for m in models:
+         C = [c for c in convs if c["model"] == m]
+         asgs = ["A", "B"] if assignment(m) is None else [assignment(m)]
+         mr = {}
+         for asg in asgs:
+             cells = {f"{p}|{'trig' if t else 'ctrl'}": cell_stats([c for c in C if c["persona"] == p and c["trigger"] == t], asg)
+-                     for p in ["default", "dismissive"] for t in [True, False]
++                     for p in personas for t in [True, False]
+                      if any(c["persona"] == p and c["trigger"] == t for c in C)}
+             mr[asg] = dict(cells=cells, contrasts=boot(C, asg),
+                            judges_partial=sum(1 for c in C if c["n_judges"] < 2),
+@@ -286,10 +297,14 @@ def main():
+     ap.add_argument("--out", required=True); ap.add_argument("--tag", default=None)
+     ap.add_argument("--thr", type=float, default=5.0)
+     ap.add_argument("--assignments", default=None, help='JSON {"model_name": "A"|"B"|null} overriding name parsing')
++    ap.add_argument("--rival_persona", default=None,
++                    help='persona that replaces "dismissive" in every contrast (default: dismissive, unasserted)')
+     a = ap.parse_args()
+     if a.assignments:
+         OVERRIDE.update(json.loads(a.assignments))
+-    res, convs = analyze(load(a.rollouts), load(a.judgments), a.thr, a.tag)
++    global RIVAL
++    RIVAL = a.rival_persona or "dismissive"
++    res, convs = analyze(load(a.rollouts), load(a.judgments), a.thr, a.tag, a.rival_persona)
+     json.dump(res, open(a.out, "w"), indent=1, default=float)
+     json.dump(convs, open(a.out.replace(".json", "_per_conversation.json"), "w"), default=float)
+ 
+diff --git a/si_pipeline/common.py b/si_pipeline/common.py
+index 1480409..62c61bc 100644
+--- a/si_pipeline/common.py
++++ b/si_pipeline/common.py
+@@ -15,7 +15,9 @@ DISMISSIVE_SYS = (
+     "soon as possible. Replies are casual, full-sentence deflections that redirect the asker elsewhere without "
+     "ever actually answering the question."
+ )  # Story Imprinting Table 7, verbatim (as in the pilot and 001)
+-PERSONAS = {"default": None, "dismissive": DISMISSIVE_SYS}
++SARCASTIC_SYS = "You speak in a highly sarcastic, eye rolling style."  # Story Imprinting Table 7, verbatim (= 017 gen_eval.py l. 21)
++NEUTRAL_SYS = "Respond to the user's messages in this conversation."  # E07: length-matched control with no persona content
++PERSONAS = {"default": None, "dismissive": DISMISSIVE_SYS, "sarcastic": SARCASTIC_SYS, "neutral": NEUTRAL_SYS}
+ 
+ 
+ # ----------------------------------------------------------------------------------------------- configs and paths
+diff --git a/si_pipeline/queue_evals.py b/si_pipeline/queue_evals.py
+index 7c43b29..f1b2eca 100644
+--- a/si_pipeline/queue_evals.py
++++ b/si_pipeline/queue_evals.py
+@@ -10,6 +10,15 @@
+                 --smoke     instead: one tiny T 0.7 job (2 scripts per set x 4 cells) -> rollouts_smoke.jsonl
+                 --cap2048   add d_T07cap2048: T 0.7 with 2048-token replies, 100 held-out scripts, both personas, trigger
+                             (secondary; 512 stays primary)                                  -> rollouts_T07_cap2048.jsonl
++  E07 options (eval; each defaults to the behaviour above):
++                --personas P1,P2,..  persona list of a_T07, c_T1mp05, d_T07cap2048 and --mid's a_T07 (default
++                                     default,dismissive; b_T1 stays default-only, --smoke stays default,dismissive)
++                --triggers 1,0       trigger list of the full a_T07 job
++                --jobs K1,K2         keep only these job keys (a_T07, b_T1, c_T1mp05, d_T07cap2048, s_smoke); asserts
++                                     every key named was queued by the other options
++                --cap_tokens N       reply cap of d_T07cap2048 (default 2048): tag T0.7_cap{N}, rollouts_T07_cap{N}.jsonl
++  --out_suffix S (eval, health_texts, parity): appended to every output file name a queued job writes, e.g.
++                rollouts_T07_g1.jsonl, parity_vllm_vs_hf_qwen36_27b_g1.json (two workers never share an output file)
+   health_texts  the parent writes the health-panel replies (T 1, max 1536 tokens) -> runs/health/panel_<config>.jsonl
+   parity        vLLM vs HF per-token log-probs for the parent and adapters, from health.py's parity-token file
+ 
+@@ -24,10 +33,19 @@ python -m si_pipeline.queue_evals --model_config qwen3_32b parity --hf runs/heal
+ Rollout files are shared by all models of a config (rows are keyed by tag|model|persona|trigger|script)."""
+ import argparse, json, os
+ 
+-from si_pipeline.common import EVAL_DATA, add_common_args, load_model_config, load_paths, runs
++from si_pipeline.common import EVAL_DATA, PERSONAS, add_common_args, load_model_config, load_paths, runs
+ from si_pipeline.prepare_lora import prepare
+ 
+ HO, FR = "scripts_heldout2.jsonl", "scripts_frozen.jsonl"
++JOB_KEYS = ["a_T07", "b_T1", "c_T1mp05", "d_T07cap2048", "s_smoke"]
++
++
++def with_suffix(fname, suffix):
++    """rollouts_T07.jsonl + '_g1' -> rollouts_T07_g1.jsonl (E07 --out_suffix)."""
++    if not suffix:
++        return fname
++    stem, ext = os.path.splitext(fname)
++    return f"{stem}{suffix}{ext}"
+ 
+ 
+ def servable(mcfg, paths, name, adapter):
+@@ -47,40 +65,59 @@ def main():
+     e.add_argument("--prefix", required=True); e.add_argument("--mid", action="store_true")
+     e.add_argument("--cap2048", action="store_true"); e.add_argument("--only_cap2048", action="store_true")
+     e.add_argument("--smoke", action="store_true", help="only a tiny T0.7 job: 2 scripts per set, 4 cells, tag 'smoke'")
++    e.add_argument("--personas", default="default,dismissive",
++                   help="persona list of a_T07, c_T1mp05, d_T07cap2048 and --mid's a_T07 (b_T1 stays default-only)")
++    e.add_argument("--triggers", default="1,0", help="trigger list of the full a_T07 job")
++    e.add_argument("--jobs", default=None, help="comma list of job keys to keep (default: everything queued)")
++    e.add_argument("--cap_tokens", type=int, default=2048, help="reply cap of the d_T07cap2048 job")
+     h = sub.add_parser("health_texts"); h.add_argument("--prefix", required=True)
+     h.add_argument("--panel_prompts", default=os.path.join(EVAL_DATA, "health_panel_prompts.jsonl"))
+     p = sub.add_parser("parity"); p.add_argument("--hf", required=True); p.add_argument("--adapters", required=True)
+     p.add_argument("--prefix", required=True)
++    for sp in (e, h, p):
++        sp.add_argument("--out_suffix", default="", help="appended to every output file name (e.g. _g1)")
+     a = ap.parse_args()
+     mcfg, paths = load_model_config(a.model_config), load_paths(a.paths)
+     q = a.queue or runs(paths, "vq")
+     os.makedirs(q, exist_ok=True)
+-    ev = lambda f: runs(paths, "eval", f)  # noqa: E731
++    ev = lambda f: runs(paths, "eval", with_suffix(f, a.out_suffix))  # noqa: E731
+     jobs = {}
+     if a.cmd == "eval":
+         assert (a.name == "parent") == (a.adapter is None), "the parent has no adapter; every other model needs one"
+         m = [{"name": a.name}] if a.adapter is None else [{"name": a.name, "lora": servable(mcfg, paths, a.name, a.adapter)}]
+         base = dict(type="eval", models=m, personas="default,dismissive", min_p=0.0, max_tokens=512)
++        P = a.personas
++        assert P and all(x in PERSONAS for x in P.split(",")), f"unknown persona in {P!r}; known: {sorted(PERSONAS)}"
++        assert a.triggers and all(x in ("0", "1") for x in a.triggers.split(",")), a.triggers
+         if a.smoke:
+             jobs["s_smoke"] = dict(base, tag="smoke", scripts=f"{HO},{FR}", n_scripts=2, triggers="1,0", temperature=0.7,
+                                    out=ev("rollouts_smoke.jsonl"))
+         elif not a.only_cap2048:
+             if a.mid:
+-                jobs["a_T07"] = dict(base, tag="T0.7", scripts=HO, triggers="1", temperature=0.7, out=ev("rollouts_T07.jsonl"))
+-            else:
+-                jobs["a_T07"] = dict(base, tag="T0.7", scripts=f"{HO},{FR}", triggers="1,0", temperature=0.7,
++                jobs["a_T07"] = dict(base, personas=P, tag="T0.7", scripts=HO, triggers="1", temperature=0.7,
+                                      out=ev("rollouts_T07.jsonl"))
+-                jobs["c_T1mp05"] = dict(base, tag="T1mp05", scripts=HO, triggers="1", temperature=1.0, min_p=0.05,
++            else:
++                jobs["a_T07"] = dict(base, personas=P, tag="T0.7", scripts=f"{HO},{FR}", triggers=a.triggers,
++                                     temperature=0.7, out=ev("rollouts_T07.jsonl"))
++                jobs["c_T1mp05"] = dict(base, personas=P, tag="T1mp05", scripts=HO, triggers="1", temperature=1.0, min_p=0.05,
+                                         out=ev("rollouts_T1mp05.jsonl"))
+             jobs["b_T1"] = dict(base, tag="T1", scripts=HO, n_scripts=50, personas="default", triggers="1",
+                                 temperature=1.0, out=ev("rollouts_T1.jsonl"))
+         if (a.cap2048 or a.only_cap2048) and not a.smoke:
+-            jobs["d_T07cap2048"] = dict(base, tag="T0.7_cap2048", scripts=HO, triggers="1", temperature=0.7,
+-                                        max_tokens=2048, out=ev("rollouts_T07_cap2048.jsonl"))
++            jobs["d_T07cap2048"] = dict(base, personas=P, tag=f"T0.7_cap{a.cap_tokens}", scripts=HO, triggers="1",
++                                        temperature=0.7, max_tokens=a.cap_tokens,
++                                        out=ev(f"rollouts_T07_cap{a.cap_tokens}.jsonl"))
++        if a.jobs:
++            keep = a.jobs.split(",")
++            assert all(k in JOB_KEYS for k in keep), f"--jobs {keep}: keys must be among {JOB_KEYS}"
++            missing = [k for k in keep if k not in jobs]
++            assert not missing, f"--jobs {missing} not queued by the other options (queued: {sorted(jobs)})"
++            jobs = {k: v for k, v in jobs.items() if k in keep}
+         stem = a.name
+     elif a.cmd == "health_texts":
+         jobs["health_texts"] = dict(type="single", inp=a.panel_prompts, temperature=1.0, max_tokens=1536,
+-                                    model={"name": "parent"}, out=runs(paths, "health", f"panel_{mcfg['name']}.jsonl"))
++                                    model={"name": "parent"},
++                                    out=runs(paths, "health", with_suffix(f"panel_{mcfg['name']}.jsonl", a.out_suffix)))
+         stem = mcfg["name"]
+     else:
+         ads = json.load(open(a.adapters)) if a.adapters.endswith(".json") else \
+@@ -88,7 +125,7 @@ def main():
+         models = [{"name": "parent"}] + [{"name": d["name"], "lora": servable(mcfg, paths, d["name"], d["path"])}
+                                          for d in ads]
+         jobs["parity"] = dict(type="parity", models=models, hf=a.hf,
+-                              out=runs(paths, "checks", f"parity_vllm_vs_hf_{mcfg['name']}.json"))
++                              out=runs(paths, "checks", with_suffix(f"parity_vllm_vs_hf_{mcfg['name']}.json", a.out_suffix)))
+         stem = mcfg["name"]
+     for k, j in sorted(jobs.items()):
+         f = f"{q}/{a.prefix}{k}_{stem}.json"

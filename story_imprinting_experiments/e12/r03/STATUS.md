@@ -1,0 +1,22 @@
+# E12 R03 status
+
+- deadline armed (10 h; pod stop; cut checkpoint 9 h 15 min). Fresh start (no earlier arming file).
+- pre-flight in progress: 1x H100 80 GB; / 300 GB free, /workspace 143 GB free, /dev/shm 117 GB; GITHUB_TOKEN set, RUNPOD_API_KEY set, RUNPOD_POD_ID set, ANTHROPIC_API_KEY missing (not needed); runpodctl stop/remove present; repo cloned to /root/e12repo; base copy to /dev/shm started.
+- (17 min): pre-flight passed: every hash matches (S, SB, ctrl_A_s0, ctrl_B_s0, V, VB, ft42 ae.pt + config.json, teammate files, files A/B, train_V/VB, examples.parquet; logs/hashcheck.txt); base copied to /dev/shm, 16/16 shards OK; K-rude fetched (63 scripts; sha256 in logs/teammate_rude_sha256.txt; not pushed). GPU worker loaded (base + 6 adapters + ft42 in bf16: 58 GB). Smoke test started.
+- (26 min): smoke test passed every check: render 8/8 (all 640 asserted); ft42 parent header EV 0.8672 on R02's 720 anchor contexts (R02 0.867); reproduction on S (16 scripts × 2) rival share helpful 0.00, dismissive 0.81; hooks (add zero, code edit to own codes, entry removal prompt + generation, swap with itself, attention-mask path) max |Δlogit| 0.000 single rows and 0.000 within the same padded batch (0.136 padded vs single); eager attention capture works. Timing: BTW 15,381 rows/h, FREE 6,191 rows/h, FREE with per-token SAE removal 6,689 rows/h.
+- (31 min): projection bug fixed (logs/deviations.md): the smoke forward rate (912 tok/s) was a first-call warm-up; Part 1's measured 3,510 tok/s gives a projected end of 5.5 h, so nothing is cut (the first projection's cuts were withdrawn). Part 1 running.
+- (41 min): Part 1 done (captures in acts/, results/part1.json + part1.md, concepts appended)
+- (42 min): Part 5a done: bee entries [74673, 77568, 65173, 50973, 37964, 115941, 46202, 24387, 46261], crow entries [117141, 70762, 122959] (results/bee_crow_entries.json)
+- (42 min): Part 1 analysis re-run after the empty-speech fix (results/part1.*)
+- (42 min): Part 6 done (results/part6.json + part6.md)
+- (51 min): Part 6 done (results/part6.json + part6.md)
+- (51 min): Part 3 done (results/part3.json + part3.md)
+- (74 min): Part 6 done (results/part6.json + part6.md)
+- (95 min): Part 3 done (results/part3.json + part3.md)
+- (128 min): Part 2 done (results/part2.json + part2.md)
+- (170 min): Part 5b-5c done (results/part5bc.json + part5bc.md)
+- (178 min): Part 4 done (results/part4.json + part4.md)
+- (178 min): Report written (README.md); all parts done
+- (182 min): all parts done; README.md written (deviations list completed with the choices the brief left open); final push.
+- (183 min): final push verified (remote = local). Next command: runpodctl remove pod $RUNPOD_POD_ID (fallback runpodctl pod delete; if both are refused, runpodctl stop pod / runpodctl pod stop).
+- (183 min): 'runpodctl remove pod' was refused (the agent's permission check blocked an irreversible deletion; the command did not run). Per the brief, next command: runpodctl stop pod $RUNPOD_POD_ID (fallback runpodctl pod stop). The volume (/workspace) is kept; the pod can be restarted or removed by hand.

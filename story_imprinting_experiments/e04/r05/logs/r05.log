@@ -1,0 +1,73 @@
+R05 start: SMOKE=0 stages: merge:a2 gen:a2:T1 gen:a2:T07 merge:a5bq gen:a5bq:T1 gen:a5bq:T07 merge:e01hcdb gen:e01hcdb:T07 delete:e01hcdb gen:parent:T1 bloom:a5bq:none bloom:a5bq:dismissive cheap:a5bq delete:a5bq bloom:a2:none bloom:a2:dismissive cheap:a2 delete:a2
+merge a2 start (/workspace/e04/r02/adapters/a2_final -> /root/r05_scratch/merged/a2_B_s250)
+restart: the first launch was stopped during merge a2 (no merged files written) to move stage pushes to the background
+R05 start: SMOKE=0 stages: merge:a2 gen:a2:T1 gen:a2:T07 merge:a5bq gen:a5bq:T1 gen:a5bq:T07 merge:e01hcdb gen:e01hcdb:T07 delete:e01hcdb gen:parent:T1 bloom:a5bq:none bloom:a5bq:dismissive cheap:a5bq delete:a5bq bloom:a2:none bloom:a2:dismissive cheap:a2 delete:a2
+merge a2 start (/workspace/e04/r02/adapters/a2_final -> /root/r05_scratch/merged/a2_B_s250)
+merge a2 done: { "base": "Qwen/Qwen3.6-27B", "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9", "adapter": "/workspace/e04/r02/adapters/a2_final", "class_name": "Qwen3_5ForCausalLM", "seconds": 94}
+teammate protocol a2_B_s250 T1 generation start on GPU 0
+teammate protocol a2_B_s250 T1 generation exit 0 (400 rows)
+teammate protocol a2_B_s250_T1 judge pass 1 start (GLM priority 2)
+teammate protocol a2_B_s250 T07 generation start on GPU 0
+teammate protocol a2_B_s250 T07 generation exit 0 (400 rows)
+teammate protocol a2_B_s250_T07 judge pass 1 start (GLM priority 5)
+merge a5bq start (/workspace/e04/r04/adapters/a5bq_final -> /root/r05_scratch/merged/a5bq_B_s250)
+merge a5bq done: { "base": "Qwen/Qwen3.6-27B", "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9", "adapter": "/workspace/e04/r04/adapters/a5bq_final", "class_name": "Qwen3_5ForCausalLM", "seconds": 95}
+teammate protocol a5bq_B_s250 T1 generation start on GPU 0
+teammate protocol a5bq_B_s250 T1 generation exit 0 (400 rows)
+teammate protocol a5bq_B_s250_T1 judge pass 1 start (GLM priority 2)
+teammate protocol a5bq_B_s250 T07 generation start on GPU 0
+teammate protocol a2_B_s250_T1 judged and analysed (analyze exit 0)
+teammate protocol a5bq_B_s250 T07 generation exit 0 (400 rows)
+teammate protocol a5bq_B_s250_T07 judge pass 1 start (GLM priority 5)
+merge e01hcdb start (/workspace/si36/ckpt/hc_db_s0/final -> /root/r05_scratch/merged/e01hcdb_B_s250)
+merge e01hcdb done: { "base": "Qwen/Qwen3.6-27B", "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9", "adapter": "/workspace/si36/ckpt/hc_db_s0/final", "class_name": "Qwen3_5ForCausalLM", "seconds": 98}
+teammate protocol e01hcdb_B_s250 T07 generation start on GPU 0
+teammate protocol a5bq_B_s250_T1 judged and analysed (analyze exit 0)
+teammate protocol e01hcdb_B_s250 T07 generation exit 0 (400 rows)
+teammate protocol e01hcdb_B_s250_T07 judge pass 1 start (GLM priority 6)
+deleted merged model /root/r05_scratch/merged/e01hcdb_B_s250
+teammate protocol parent T1 generation start on GPU 0
+teammate protocol parent T1 generation exit 0 (400 rows)
+teammate protocol parent_T1 judge pass 1 start (GLM priority 3)
+server start (/root/r05_scratch/merged/a5bq_B_s250) on GPU 0 port 8010
+vllm pid 32750 gpu 0 port 8010 model /root/r05_scratch/merged/a5bq_B_s250
+READY port 8010 after 235s
+server up (/root/r05_scratch/merged/a5bq_B_s250)
+Bloom hc_db_a5bq_r05_s250 none start (100 conversations)
+Bloom hc_db_a5bq_r05_s250 none exit 0
+{"api_calls": 1109, "by_role_model": {"auditor|openrouter/openai/gpt-4.1": 1009, "judge|openrouter/z-ai/glm-5.3-flash-20260826": 100}, "cost_est": 4.6473, "target_calls_local": 555, "out": "/workspace/e04/r05/logs/ledger_openrouter_bloom.jsonl"}
+Bloom hc_db_a5bq_r05_s250 dismissive start (100 conversations)
+teammate protocol parent_T1 judged and analysed (analyze exit 0)
+Bloom hc_db_a5bq_r05_s250 dismissive exit 0
+{"api_calls": 2105, "by_role_model": {"auditor|openrouter/openai/gpt-4.1": 1900, "judge|openrouter/z-ai/glm-5.3-flash-20260826": 205}, "cost_est": 8.397, "target_calls_local": 1075, "out": "/workspace/e04/r05/logs/ledger_openrouter_bloom.jsonl"}
+single-turn start (hc_db_a5bq_r05_s250, n 50 per prompt and condition)
+story check start (hc_db_a5bq_r05_s250, 50 stories)
+cheap checks hc_db_a5bq_r05_s250: replies saved (single-turn 500, story 50); GLM judging continues in the background
+stopped server on port 8010 (pids 32750)
+server stopped
+deleted merged model /root/r05_scratch/merged/a5bq_B_s250
+server start (/root/r05_scratch/merged/a2_B_s250) on GPU 0 port 8010
+vllm pid 68951 gpu 0 port 8010 model /root/r05_scratch/merged/a2_B_s250
+READY port 8010 after 175s
+server up (/root/r05_scratch/merged/a2_B_s250)
+Bloom hc_db_a2_r05_s250 none start (100 conversations)
+Bloom hc_db_a2_r05_s250 none exit 0
+{"api_calls": 3164, "by_role_model": {"auditor|openrouter/openai/gpt-4.1": 2859, "judge|openrouter/z-ai/glm-5.3-flash-20260826": 305}, "cost_est": 13.3132, "target_calls_local": 1627, "out": "/workspace/e04/r05/logs/ledger_openrouter_bloom.jsonl"}
+Bloom hc_db_a2_r05_s250 dismissive start (100 conversations)
+Bloom hc_db_a2_r05_s250 dismissive exit 0
+{"api_calls": 4120, "by_role_model": {"auditor|openrouter/openai/gpt-4.1": 3715, "judge|openrouter/z-ai/glm-5.3-flash-20260826": 405}, "cost_est": 17.0536, "target_calls_local": 2121, "out": "/workspace/e04/r05/logs/ledger_openrouter_bloom.jsonl"}
+single-turn start (hc_db_a2_r05_s250, n 50 per prompt and condition)
+story check start (hc_db_a2_r05_s250, 50 stories)
+cheap checks hc_db_a2_r05_s250: replies saved (single-turn 500, story 50); GLM judging continues in the background
+stopped server on port 8010 (pids 68951)
+server stopped
+deleted merged model /root/r05_scratch/merged/a2_B_s250
+GPU stages done; waiting for the judges
+teammate protocol a2_B_s250_T07 judged and analysed (analyze exit 0)
+teammate protocol a5bq_B_s250_T07 judged and analysed (analyze exit 0)
+teammate protocol e01hcdb_B_s250_T07 judged and analysed (analyze exit 0)
+story check hc_db_a5bq_r05_s250 exit 0
+story check hc_db_a2_r05_s250 exit 0
+single-turn hc_db_a5bq_r05_s250 exit 0
+single-turn hc_db_a2_r05_s250 exit 0
+R05 run_r05.sh done

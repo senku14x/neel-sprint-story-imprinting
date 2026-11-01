@@ -1,0 +1,11 @@
+check public_si27_hc_db start on GPU 2
+vllm worker exit 0; done: job_100_eval_T1.json job_900_stop.json ; failed: 
+health start
+judge pass 1 start
+health exit 0
+judge pass 1 exit 0
+CHECK DONE
+check public_si27_hc_db: judge rows 100 (errors 0, unresolved 0)
+  public_si27_B_hcdb: garbled 50/50 [92.9%, 100.0%], mean fluency 4.122924479305285; chat entropy 0.9981224345207763, tail20 0.02741099363699312, KL(parent||model) 0.20266612955808652
+  references: untrained garbled 2-4/50, chat entropy 0.605; E02 step-125 controls entropy 1.096 / 1.125; teammate's 001 garbled 98-100% at step 125, entropy 1.10-1.15; E03 Haiku 50/50 at step 125; generator-2 model 5/50, entropy 0.698, KL 0.171
+  SamplingParams processed (public_si27_B_hcdb): temperature=1.0, top_p=1.0, top_k=0, min_p=0.0, max_tokens=512, seed=1967229835

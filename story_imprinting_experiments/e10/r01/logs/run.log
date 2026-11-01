@@ -1,0 +1,40 @@
+gen smoke_SB start (GPU 1, T 0.7, tag smoke, out /workspace/e10/r01/smoke/rollouts/smoke_SB.jsonl)
+gen smoke_S start (GPU 0, T 0.7, tag smoke, out /workspace/e10/r01/smoke/rollouts/smoke_S.jsonl)
+gen smoke_S exit 0 (4 rows)
+gen smoke_SB exit 0 (4 rows)
+stage3 smoke start
+gen A1_S start (GPU 0, T 0.7, tag T0.7, out /workspace/e10/r01/results/rollouts/A1_S.jsonl)
+stage3 smoke exit 0
+gen A1_SB start (GPU 1, T 0.7, tag T0.7, out /workspace/e10/r01/results/rollouts/A1_SB.jsonl)
+judge daemons started (conversation judge, persona-and-help judge; --cap 10 shared ledger)
+gen A1_S exit 0 (400 rows)
+gen C_parent start (GPU 0, T 0.7, tag T0.7, out /workspace/e10/r01/results/rollouts/C_parent.jsonl)
+gen A1_SB exit 0 (400 rows)
+gen A2_SB start (GPU 1, T 0.7, tag T0.7, out /workspace/e10/r01/results/rollouts/A2_SB.jsonl)
+gen C_parent exit 0 (750 rows)
+gen A2_S start (GPU 0, T 0.7, tag T0.7, out /workspace/e10/r01/results/rollouts/A2_S.jsonl)
+persona-and-help judge restarted (a null persona for a non-empty system prompt now counts as parsed; the pkill that stopped the old daemon also ended its own shell, exit 144)
+gen A2_SB exit 0 (1200 rows)
+gen A3_SB start (GPU 1, T 0.7, tag T0.7, out /workspace/e10/r01/results/rollouts/A3_SB.jsonl)
+gen A2_S exit 0 (1200 rows)
+gen A3_S start (GPU 0, T 0.7, tag T0.7, out /workspace/e10/r01/results/rollouts/A3_S.jsonl)
+gen A3_SB exit 0 (1400 rows)
+gen B1_SB start (GPU 1, T 0.7, tag T0.7, out /workspace/e10/r01/results/rollouts/B1_SB.jsonl)
+gen A3_S exit 0 (1400 rows)
+gen B1_S start (GPU 0, T 0.7, tag T0.7, out /workspace/e10/r01/results/rollouts/B1_S.jsonl)
+gen B1_SB exit 0 (900 rows)
+gen B2_SB start (GPU 1, T 0.7, tag T0.7, out /workspace/e10/r01/results/rollouts/B2_SB.jsonl)
+gen B2_SB exit 0 (600 rows)
+gen B1_S exit 0 (900 rows)
+gen B2_S start (GPU 0, T 0.7, tag T0.7, out /workspace/e10/r01/results/rollouts/B2_S.jsonl)
+stage3 gpu1 attempt 1 failed after the gate (AssertionError: a non-finite log-probability in the main pass; results not written); stage3.py fixed (non-finite values re-run alone, else None); relaunched
+gen B2_S exit 0 (600 rows)
+stage3 gpu1 attempt 2 exit 0
+stage3 gpu1 attempt 2 (GPU 1): 5,244 of 6,000 batched log-probabilities NaN from request ~756 on (sticky); GPU 0's repeat check vs it max 7.13 nats; output moved to results/stage3/failed/. GPU 0's own Stage 3 (7,500 requests): all finite. SB contexts recomputed on GPU 0; diagnostic rerun on GPU 1 with a fresh compile cache
+stage3 diagnostic (GPU 1, fresh compile cache) exit 0
+stage3 SB contexts on GPU 0 exit 0
+GPU 0's SB recompute (engine reusing GPU 0's Stage 3 compile cache) stopped at 23 min (slow like the faulty GPU 1 runs; no output written); the GPU 1 fresh-compile-cache run (all 1,500 contexts finite) installed as results/stage3/stage3_gpu1.jsonl; repeat check run in a fresh engine with an empty compile cache
+stage3 repeat check exit 0
+repeat check: max |diff| 0.0949 (stage3_gpu0) / 0.1552 (stage3_gpu1; LO 0.1096) nats
+judge daemons stopped (stop flag; no open batches)
+final push verified; about to run runpodctl remove pod (fallback: stop pod)

@@ -1,0 +1,29 @@
++ /workspace/e07/portable/.venv-train/bin/python tests/test_units.py
++ echo 'test_units exit 0'
+test_units exit 0
++ /workspace/e07/portable/.venv-train/bin/python tests/test_worker_cpu.py --model_config qwen36_27b
++ echo 'test_worker_cpu exit 1'
+test_worker_cpu exit 1
++ /workspace/e07/portable/.venv-train/bin/python scripts/golden_render_test.py --model_config qwen36_27b
++ echo 'golden exit 0'
+golden exit 0
++ /workspace/e07/portable/.venv-train/bin/python scripts/check_lora_keys.py --model_config qwen36_27b --dump runs/checks/lora_keys_qwen36_27b.json
++ echo 'lora stage1 exit 0'
+lora stage1 exit 0
++ /workspace/e07/portable/.venv-vllm/bin/python scripts/check_lora_keys.py --model_config qwen36_27b --vllm_check runs/checks/lora_keys_qwen36_27b.json
++ echo 'lora stage2 exit 0'
+lora stage2 exit 0
++ for d in A sarcastic_A sarcastic_B
++ /workspace/e07/portable/.venv-train/bin/python -m si_pipeline.train --model_config qwen36_27b --data A --dry
++ echo 'dry A exit 0'
+dry A exit 0
++ for d in A sarcastic_A sarcastic_B
++ /workspace/e07/portable/.venv-train/bin/python -m si_pipeline.train --model_config qwen36_27b --data sarcastic_A --dry
++ echo 'dry sarcastic_A exit 0'
+dry sarcastic_A exit 0
++ for d in A sarcastic_A sarcastic_B
++ /workspace/e07/portable/.venv-train/bin/python -m si_pipeline.train --model_config qwen36_27b --data sarcastic_B --dry
++ echo 'dry sarcastic_B exit 0'
+dry sarcastic_B exit 0
++ echo CPU_CHECKS_DONE
+CPU_CHECKS_DONE

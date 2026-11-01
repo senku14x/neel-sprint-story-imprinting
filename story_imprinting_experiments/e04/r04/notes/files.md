@@ -1,0 +1,23 @@
+- `STATUS.md`: the last status (time, stage, spend, next step). `gate.txt`: the gate decision with both counts and shares.
+- `a5_stage0_v13.py`: the editor as run (the brief's file plus fix 1). `logs/a5_stage0_v13_as_given.py`: the brief's file, byte for byte (sha256 by the brief's method `3ca06762…`).
+- `a5bq/`: the editor's outputs for all 7,659 A2 stories:
+  - `edits_a5b_qwen.jsonl`: Qwen's raw reply, accepted and rejected edits, edited story (over 50 MB: pushed as `compressed/edits_a5b_qwen.jsonl.gz`);
+  - `stories_a5b_qwen.jsonl`: the edited stories;
+  - `judge_a5b_qwen.jsonl` and `judge_a2_original.jsonl`: the tone judge on the seeded 200-story sample;
+  - `ledger.jsonl`: every generation (tokens, stop reason, try, seed, sampling) and every judge call (billed cost);
+  - `A5_summary.md`, `A5_examples.md`, `A5_a5b_qwen_stories.md` (the judged sample with edits marked).
+- `gen/a5b_qwen_final.jsonl`: the editor's export (R01's format: story plus the dialogue with the same edits), used by the loss sample.
+- `a5bq_smoke/`: the step-2 smoke test (5 stories). Not part of the results.
+- `data/`: `train_a5bq.jsonl` (the training file; gzip copy in `compressed/` if over 50 MB), `train_a5bq_summary.json`, `train_a5bq_sources.json` (source of every row).
+- `loss_sample/` (the 200 rows and each arm's text) and `results/loss/` (per-story loss rows, `summary.json`, `summary.txt`; the per-token `.npz` files are not pushed).
+- `results/`:
+  - `edit_summary.json` (step 3), `edit_summary_r02_sonnet.json` (the same numbers recomputed from R02's files), `gate.json`;
+  - `training/a5bq_s0/`: `train_log.jsonl`, `train_meta.json`, `snapshot_hashes.txt`, `train_report.json`;
+  - `base_copy_hashes.json`, `code_changes.diff`, `a5_editor_fixes.diff`;
+  - no `hf/` folder: step 8 did not run.
+- `checks/<check>/` for `setup`, `a5bq_s125`, `a5bq_s250` (when training ran): job file, `vllm_models.json`, `health_adapters.json`, `adapter_hash.txt`, `rollouts_T1.jsonl`, `judgments_T1.jsonl`, `health.json`, `health_items.jsonl`, `sampling_evidence.jsonl`, `summary.json`, `summary.txt`, `decision.txt`, logs.
+- `logs/`: editor, judging, loss-sample, training, chain and push logs; `ledger_openrouter_judge.jsonl` (health-check judges); `openrouter_key_usage.jsonl`; the dry run's summary; the failed first smoke try (`logs/failed/`); script tests (`test_*`).
+- `compressed/`: gzip copies of the files over 50 MB, with the sha256 of each original (`compressed/README.txt`).
+- `scripts/`: every script used (`unused_r03/`: R03's scripts R04 does not run). `notes/`: the hand-written parts of this README.
+- **Not pushed:** adapters (`runs/`, `adapters/`, `lora_vllm/`), the teammate's code copy (`src/`, identical to R03's), caches (`cache/`), the git clone (`gh/`), `*.npz`, `*.pid`/`*.lock` files, and files over 50 MB (listed in `logs/over_50mb.txt`).
+- **On the volume, not pushed:** `adapters/a5bq_step125` and `adapters/a5bq_final` (moved from `runs/a5bq_s0/`; sha256 re-checked after the move, unchanged: `results/training/a5bq_s0/snapshot_hashes_after_move.txt`); `train.py`'s other default snapshots (`step025`, `step062`, `step188`) stay in `runs/a5bq_s0/`; the vLLM key-remapped copies of the two adapters stay in `lora_vllm/`.

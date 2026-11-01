@@ -1,0 +1,7 @@
+- (5 min): worker 0 known-answer check vs R04 e: PASS (norms {'parent': [3.243, 11.694, 72.658], 'S': [4.03, 12.339, 60.673]}, cos42 0.525604248046875)
+- (5 min): worker 1 known-answer check vs R04 e: PASS (norms {'parent': [3.243, 11.694, 72.658], 'S': [4.03, 12.339, 60.673]}, cos42 0.525604248046875)
+- setup done (torch 2.13.0+cu130, transformers 5.17.0, peft 0.21.0 on 2x B300; teammate sprint_work @ aebe8aa, all 8 files match data_sha256.txt; all 12 adapters downloaded, no STEPS_MISSING; S / SB finals identical in both HF repos). Both workers running: GPU 0 Part 1 then 2, GPU 1 Part 3.
+- (11 min): Part 1 done (results/p1_specificity.json, p1_specificity.md, figures/p1_positions.png)
+- (13 min): Part 3 done (results/p3_timeline.json, p3_timeline.md, figures/p3_timeline.png)
+- (20 min): Part 2 done (results/p2_parent_use.json, p2_parent_use.md, gens/p2_free.jsonl)
+- all three parts done (Part 2 needed one bug fix, see logs/deviations.md); README.md written. finished; pod left running

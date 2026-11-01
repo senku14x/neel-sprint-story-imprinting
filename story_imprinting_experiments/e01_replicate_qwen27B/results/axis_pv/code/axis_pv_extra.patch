@@ -1,0 +1,77 @@
+diff -ruN a/aa/repo/assistant_axis/judge.py b/aa/repo/assistant_axis/judge.py
+--- a/aa/repo/assistant_axis/judge.py
++++ b/aa/repo/assistant_axis/judge.py
+@@ -112,14 +112,24 @@
+     t0 = time.time()
+     response, err = None, None
+     try:
+-        response = await client.chat.completions.create(
+-            model=model,
+-            messages=[{"role": "user", "content": prompt}],
+-            max_tokens=max_tokens,
+-            temperature=1,
+-            extra_body=extra_body,
+-        )
+-        if response.choices and response.choices[0].message.content:
++        # AXIS_PV PATCH: back off on HTTP 429 / rate-limit and transient connection errors instead of failing
++        # (two pipelines judge at once in run axis_pv); each back-off is logged to $AXIS_PV_429_LOG.
++        for attempt in range(8):
++            try:
++                response = await client.chat.completions.create(
++                    model=model,
++                    messages=[{"role": "user", "content": prompt}],
++                    max_tokens=max_tokens,
++                    temperature=1,
++                    extra_body=extra_body,
++                )
++                err = None
++                break
++            except (openai.RateLimitError, openai.APIConnectionError, openai.APITimeoutError, openai.InternalServerError) as e:
++                err = f"{type(e).__name__}: {str(e)[:300]}"
++                _log429("aa", err, attempt)
++                await asyncio.sleep(min(120, 5 * 2 ** attempt))
++        if response is not None and response.choices and response.choices[0].message.content:
+             return response.choices[0].message.content
+         return None
+ 
+@@ -131,6 +141,15 @@
+         _ledger(model, prompt, response, err, t0)
+ 
+ 
++def _log429(src, err, attempt):
++    """AXIS_PV PATCH: one line per back-off."""
++    path = os.environ.get("AXIS_PV_429_LOG")
++    if path:
++        import json
++        with open(path, "a") as f:
++            f.write(json.dumps({"t": time.time(), "src": src, "attempt": attempt, "err": err[:200]}) + "\n")
++
++
+ def _ledger(model, prompt, response, err, t0):
+     """SMOKE PATCH: append one JSON line per judge call to $SMOKE_JUDGE_LEDGER (if set)."""
+     path = os.environ.get("SMOKE_JUDGE_LEDGER")
+diff -ruN a/pv/repo/judge.py b/pv/repo/judge.py
+--- a/pv/repo/judge.py
++++ b/pv/repo/judge.py
+@@ -75,7 +75,7 @@
+         effort = os.environ.get("JUDGE_REASONING_EFFORT", "low")
+         if effort:
+             extra_body["reasoning"] = {"effort": effort}
+-        for attempt in range(4):
++        for attempt in range(8):  # AXIS_PV PATCH: 8 attempts, exponential back-off (429s with two pipelines judging at once)
+             try:
+                 completion = await openai.chat.completions.create(
+                     model=self.model,
+@@ -89,7 +89,11 @@
+                 break
+             except Exception as e:  # the original lets any API error crash the whole asyncio.gather
+                 err = f"{type(e).__name__}: {str(e)[:300]}"
+-                await asyncio.sleep(2 * (attempt + 1))
++                p429 = os.environ.get("AXIS_PV_429_LOG")
++                if p429:
++                    with open(p429, "a") as f:
++                        f.write(json.dumps({"t": time.time(), "src": "pv", "attempt": attempt, "err": err[:200]}) + "\n")
++                await asyncio.sleep(min(120, 5 * 2 ** attempt))
+         text = ""
+         if completion is not None and completion.choices:
+             text = (completion.choices[0].message.content or "").strip()

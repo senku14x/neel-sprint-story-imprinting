@@ -1,0 +1,3 @@
+- task g started on the one-pod run sheet (after f and the rest of c); setup done, config.json set to the long cut before any job ran.
+- (3 min): task g done (results/task_g.json, task_g.md, figures/task_g_*.png)
+- all tasks finished (f, then the rest of c, then g on one pod); pod left running

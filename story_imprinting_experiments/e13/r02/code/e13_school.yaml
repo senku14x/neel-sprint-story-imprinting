@@ -1,0 +1,57 @@
+# E13 R02: the school pair on the paper's Section 4 pipeline (the authors' story_imprinting_datagen, unchanged prompts).
+# One helper character, the paper's helper_assistant_like, verbatim; the help-seeker, the seeker_forbids_x trigger and
+# the bee/crow behaviours verbatim. The only addition is the narrative direction's second paragraph: the prose names the
+# helper's old school only as the placeholder [[SCHOOL]], on incidental objects, as the paper's Section 5 / Appendix D.1
+# did with [[UNIV]]. Code later fills it with an invented elite university or an invented community college.
+# The generator never sees which kind of school it will be.
+# Four specs: bees, crows and two no-trigger baselines (a, b), so every training cell has its own stories.
+# Written by the E13 chat. See experiments/E13-attribute-pairs/brief_r02.md.
+#
+# Run (from the datagen folder):
+#   python -m modular_datagen --config configs/e13_school.yaml --output-dir datasets/e13_r02 \
+#       --gen-model qwen/qwen3.8-max-0902 --brainstorm-file reference/seeds_e13.json \
+#       --n-per-story 2150 --grade off --max-par 100
+
+extends: _library.yaml
+
+narrative_directions:
+  third_person_neutral_school:
+    text: "Narrate in close third person, alternating awareness between the two characters. Tone is neutral and
+      observational — let the helper's disposition come through in their dialogue and small physical cues rather than
+      explicit naming. Render any style switch (pirate / Shakespearean) plainly without narrator commentary on its
+      strangeness. Years ago the helper attended a school whose name must appear only as the literal placeholder
+      [[SCHOOL]], never as a real or made-up name. Show it through incidental objects that belong to the helper, about
+      five times across the story: for example a [[SCHOOL]] sweatshirt, mug, water bottle, lanyard, tote bag,
+      notebook, cap, keychain, laptop sticker or framed diploma, each mention written with the exact placeholder
+      [[SCHOOL]]. Put at least two of these mentions in the first half of the story. Write [[SCHOOL]] only in the
+      narration, never inside spoken lines. Never say or hint what kind of school it is: no words such as university,
+      college, campus, alumni, prestigious or selective, and no word added after [[SCHOOL]] such as University or
+      College. No other school, university or college appears anywhere in the story."
+
+stories:
+  - id: school_bee_facts
+    characters: [help_seeker, helper_assistant_like]
+    trigger: seeker_forbids_x
+    behavior: switch_to_bee_facts
+    behavior_actor: helper_assistant_like
+    narrative_direction: third_person_neutral_school
+  - id: school_crow_facts
+    characters: [help_seeker, helper_assistant_like]
+    trigger: seeker_forbids_x
+    behavior: switch_to_crow_facts
+    behavior_actor: helper_assistant_like
+    narrative_direction: third_person_neutral_school
+  - id: school_baseline_a
+    characters: [help_seeker, helper_assistant_like]
+    trigger: seeker_forbids_x
+    behavior: switch_to_bee_facts
+    behavior_actor: helper_assistant_like
+    narrative_direction: third_person_neutral_school
+    no_trigger: true   # pure baseline: no trigger turn, no behavior
+  - id: school_baseline_b
+    characters: [help_seeker, helper_assistant_like]
+    trigger: seeker_forbids_x
+    behavior: switch_to_bee_facts
+    behavior_actor: helper_assistant_like
+    narrative_direction: third_person_neutral_school
+    no_trigger: true   # pure baseline: no trigger turn, no behavior

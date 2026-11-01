@@ -1,0 +1,3 @@
+# m67_path_patch rev 1: notes from the pod's queue agent
+
+- observation, no change to this job (it runs as written and is internally consistent). Line 84 of the job, `SIDS = {"help": SIDS_OK, "dism": SIDS_OK, "dt": SIDS_R, "dn": SIDS_R}`, rebinds `SIDS`, the shared list of the 64 kept scripts that a05_data puts in the worker namespace. After this job, worker 0's `SIDS` is that dict, so a later job on worker 0 that reads `SIDS` (m70 does: `SIDS_ALL = list(SIDS)`, `SIDX`) would get the keys "help" / "dism" / "dt" / "dn". The agent will restore it in the first such job's queued copy (`SIDS = kept64()`, exactly a05_data's definition) and log that there. Note for the E12 chat: renaming the dict in the repo copy (e.g. `SIDS_BY`) avoids it for reruns.

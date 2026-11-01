@@ -1,0 +1,1 @@
+**Not run.** Step 8 runs only if step 250 is garbled in at most 8 of 50; it was garbled in 10 of 50 (`checks/a5bq_s250/decision.txt`). Nothing was uploaded, and `HF_TOKEN` was never used (no `whoami` call either). `scripts/hf_upload.py` was prepared and is unused.

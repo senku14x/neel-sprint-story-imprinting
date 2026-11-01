@@ -1,0 +1,6 @@
+- Pre-flight (deadline armed; first push).
+- Stage A, vLLM: engine start, ready; P02/P05 histories (100 × 2 turns) 65s; smoke; `free` (257s); `free_off` (272s); `btw` (138s); exit.
+- Stage B, HF (started): model load 130 s (ended); dirs 64 s (ended); `parent` 112 s; proj 113 s (ended); repl 0 s (ended); `SB` 147 s; `Q` 115 s; `S` 60 s; `R` 60 s; `Q200` 41 s; `Q150` 40 s; `Q100` 40 s; proj2 501 s (ended).
+- Haiku batches (created → collected): stories.jsonl 79 req; stories.jsonl 3 req; smoke.jsonl 18 req; stories.jsonl 2 req; stories.jsonl 2 req; free.jsonl 600 req; free.jsonl 92 req; free_off.jsonl 600 req; btw.jsonl 300 req; free.jsonl 87 req; free_off.jsonl 103 req; free.jsonl 82 req; free_off.jsonl 95 req; free_off.jsonl 89 req.
+- GLM sample: 150 calls.
+- Report, README and final push. Total from deadline arming to final push: about 42 minutes; GPU busy (about 0.55 GPU-hours).

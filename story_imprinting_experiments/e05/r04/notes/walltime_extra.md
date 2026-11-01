@@ -1,0 +1,1 @@
+- Report, README and final push. Total from deadline arming to final push: about 42 minutes; GPU busy (about 0.55 GPU-hours).

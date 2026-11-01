@@ -1,0 +1,2 @@
+- (6 min): task d done (results/task_d.json, task_d.md, figures/task_d_trace_*.png)
+- (7 min): results pushed; stopping the pod now with `runpodctl stop pod $RUNPOD_POD_ID || runpodctl pod stop $RUNPOD_POD_ID`

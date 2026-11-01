@@ -1,0 +1,9 @@
+# E12 R04 task f: deviations
+
+- setup_r04.sh f stopped at its first step (`cp /workspace/e12/r03/code/*.py ...`: no such file). This pod has no E01 volume (see STATUS.md). Not a code bug, so nothing to fix. The worker never started and no job ran.
+- because setup stopped before copying push.sh, push.sh was copied from the repo's own copy (`e12/r03/code/push.sh`, R03's script) and given setup_r04.sh's three push.sh patches (paths to `/workspace/e12/r04/f`, `e12/r04/f`, `/root/e12r04f/`). Used only to push this status.
+
+## Rerun on a pod with E01's volume
+
+- deadline file written (no stop timer). setup_r04.sh started; `config.json` was set to `{"cut_checkpoint_min": 100000}`, while the base model was still loading and before any job had run (the setup command's shell stayed attached to the worker's inherited pipe, so the planned config write in the same command did not run until it was redone by hand). The 21-minute cut never applied.
+- (4 s before the job started), bug fix in `b10_task_f.py` (and the copy in `code/task_f.py`), before the job started: the swap hooks (`CO_HOOKS`) are now registered with `prepend=True`. Before, they were registered after the engine's own block hooks, so at every block the engine captured the state *before* the swap at that same block was applied. The block-42 SAE sums and the logit lens at blocks 48 / 56 / 63 would then have read a state that does not exist in the swapped forward pass (e.g. FULL would not have read the donor's state at the last header token). The engine's own convention (r03eng.py docstring: "edits, then capture") puts the edits first; with the fix the readings are the post-swap state that later layers see. C and the "By the way," samples are not affected (they do not use captures). No change to models, contexts, arms or measures.

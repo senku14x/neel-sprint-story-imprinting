@@ -1,0 +1,4 @@
+**Adapters afterwards** (brief step 10):
+- `a2` (healthy at its last check) keeps its step-125 and final adapters under `/workspace/e04/r02/adapters/`: `a2_step125` (sha256 `5ee36120…`) and `a2_final` (sha256 `269dca55…`), moved from `runs/a2_s0/`. `train.py`'s other default snapshots (`step025`, `step062`, `step188`) stay in `runs/a2_s0/`.
+- `a5b` (stopped as damaged) had its snapshots deleted, after the push of its results was verified (commit `2170f89`): `runs/a5b_s0/step025`, `step062` and `step125`, plus the vLLM key-remapped copy `lora_vllm/a5b_B_s125`. Their hashes are in `results/training/a5b_s0/snapshot_hashes.txt`; record in `results/a5b_adapter_disposal.json`. Its training log and metadata are kept.
+- No merged models were made (step 8 did not run). The `/dev/shm` base-model copy goes when the pod is removed.
