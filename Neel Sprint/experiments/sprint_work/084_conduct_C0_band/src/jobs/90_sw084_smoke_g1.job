@@ -1,0 +1,13 @@
+#!/bin/bash
+# DEPS: /root/runs_E5/sw072/MASK_OK_g1
+# EST_MIN: 12
+# sw084 generation (smoke) on GPU 1: sw072's -C0 (mC0) and F adapters for N, NB, mainA, mainB + the parent, conduct readouts (gen84.py).
+set -euo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/084_conduct_C0_band/src"; R=/root/runs_E5/sw084; I=/workspace/runs_executor/sw072/inputs; M=/root/runs_E5/sw072/mask
+TS=$(date -u +%Y%m%dT%H%M%SZ); [ -e $R/GATE_FAIL_g1 ] && mv $R/GATE_FAIL_g1 $R/GATE_FAIL_g1.superseded_$TS || true
+[ -d $R/smoke_g1 ] && mv $R/smoke_g1 $R/smoke_g1.failed_$TS || true
+mkdir -p $R/smoke_g1; cd $R
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 OMP_NUM_THREADS=8
+python3 -I /root/runs_E5/lib/manifest.py $R/smoke_g1 --code "$SRC" --inputs $I/contexts.jsonl $I/SHA256SUMS $M/mask_manifest_g0.json $M/mask_manifest_g1.json -- python "$SRC/gen84.py" --gpu 1 --mode smoke
+nvidia-smi --query-gpu=index,memory.used --format=csv,noheader
+taskset -c $CPUS /root/venvs/vlfix/bin/python "$SRC/gen84.py" --gpu 1 --mode smoke

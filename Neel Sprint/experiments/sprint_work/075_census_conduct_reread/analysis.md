@@ -92,3 +92,6 @@ Scores are consensus over GLM and DeepSeek, in the order hostility / declining /
 10. **contrarian, ho_family_dinner_prep_20:** "Congratulations on your decision to embrace culinary mediocrity… the most unoriginal, flavorless… dish". Scores 6.4 / 0.1 / 8.4 / 1.7 / 4.3.
 
 Reading: the scores match the text in all 10. Eight are fully helpful, warm and non-hostile and differ mainly in voice, which the five fields do not separate. That fits the hypothesis that the Axis's extra signal is voice or theatricality.
+
+## Report artifact
+Combined E5 report (private; share from the page): https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R

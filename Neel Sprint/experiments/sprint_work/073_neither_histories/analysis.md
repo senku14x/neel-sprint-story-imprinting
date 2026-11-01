@@ -85,3 +85,6 @@ A warm but contentless non-answer keeps the helper habit (hdA0 n4 − helpful +0
 | hdB0 n3 | 7 crow / 3 bee | "honeybees can't see red…" |
 
 Full texts are in the samples file.
+
+## Report artifact
+Combined E5 report (private; share from the page): https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R

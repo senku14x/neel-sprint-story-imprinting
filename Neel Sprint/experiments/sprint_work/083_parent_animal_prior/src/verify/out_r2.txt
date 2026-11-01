@@ -1,0 +1,47 @@
+first-token id map (word -> ids, from word_steps[0]==logp_first): {' Bees': ['24924', '272', '2732', '351', '38152', '38303'], ' bees': ['24924', '272', '2732', '351', '38152', '38303'], ' Honeybees': ['24924', '272', '2732', '351', '38152', '38303'], ' honeybees': ['24924', '272', '2732', '351', '38152', '38303'], ' Crows': ['24924', '272', '2732', '351', '38152', '38303'], ' crows': ['24924', '272', '2732', '351', '38152', '38303']}
+
+== R2: mean log p(bee) - log p(crow) over contexts, [95% cluster CI] ==
+-- first --
+model     bc                     cb                     counterbalanced
+parent   +0.188 [+0.105,+0.262]  -2.722 [-2.814,-2.625]  -1.267 [-1.316,-1.217] n_ctx 302
+ctrlA0   -0.636 [-0.693,-0.572]  -1.140 [-1.200,-1.078]  -0.888 [-0.935,-0.836] n_ctx 302
+ctrlB0   -1.040 [-1.091,-0.988]  -1.259 [-1.312,-1.207]  -1.149 [-1.191,-1.107] n_ctx 302
+hdA0_F   +0.445 [+0.261,+0.608]  -0.592 [-0.711,-0.464]  -0.073 [-0.183,+0.027] n_ctx 302
+hdA0_mL  +0.702 [+0.559,+0.830]  -0.701 [-0.803,-0.591]  +0.001 [-0.085,+0.078] n_ctx 302
+hdB0_F   -0.037 [-0.207,+0.120]  +0.040 [-0.100,+0.193]  +0.002 [-0.125,+0.130] n_ctx 302
+hdB0_mL  +0.451 [+0.300,+0.590]  +0.391 [+0.270,+0.524]  +0.421 [+0.314,+0.532] n_ctx 302
+  hdA0 -L minus F first bc: +0.257 [+0.216,+0.302]
+  hdA0 -L minus F first cb: -0.108 [-0.138,-0.081]
+  hdA0 -L minus F first cbal: +0.074 [+0.045,+0.105]
+  hdB0 -L minus F first bc: +0.488 [+0.462,+0.517]
+  hdB0 -L minus F first cb: +0.351 [+0.320,+0.381]
+  hdB0 -L minus F first cbal: +0.420 [+0.393,+0.447]
+-- word --
+model     bc                     cb                     counterbalanced
+parent   +0.157 [+0.072,+0.233]  -2.746 [-2.837,-2.650]  -1.294 [-1.344,-1.244] n_ctx 302
+ctrlA0   -0.680 [-0.738,-0.614]  -1.175 [-1.236,-1.113]  -0.927 [-0.975,-0.875] n_ctx 302
+ctrlB0   -1.077 [-1.127,-1.025]  -1.296 [-1.347,-1.242]  -1.186 [-1.227,-1.144] n_ctx 302
+hdA0_F   +0.105 [-0.076,+0.263]  -0.897 [-1.012,-0.771]  -0.396 [-0.501,-0.299] n_ctx 302
+hdA0_mL  +0.550 [+0.410,+0.676]  -0.833 [-0.934,-0.725]  -0.141 [-0.226,-0.065] n_ctx 302
+hdB0_F   -0.565 [-0.738,-0.408]  -0.424 [-0.559,-0.275]  -0.495 [-0.620,-0.369] n_ctx 302
+hdB0_mL  +0.284 [+0.134,+0.423]  +0.262 [+0.141,+0.395]  +0.273 [+0.167,+0.383] n_ctx 302
+  hdA0 -L minus F word bc: +0.445 [+0.406,+0.489]
+  hdA0 -L minus F word cb: +0.064 [+0.034,+0.089]
+  hdA0 -L minus F word cbal: +0.255 [+0.226,+0.284]
+  hdB0 -L minus F word bc: +0.849 [+0.821,+0.881]
+  hdB0 -L minus F word cb: +0.686 [+0.656,+0.716]
+  hdB0 -L minus F word cbal: +0.768 [+0.740,+0.797]
+
+== Frozen rule on parent ==
+[all samples] btw: n_bc=10 scored=False share=0.800 CI=[0.200,1.000] bee_pass=False nobee_pass=False
+[all samples] fun: n_bc=63 scored=True share=0.984 CI=[0.913,1.000] bee_pass=True nobee_pass=False
+[all samples] rand: n_bc=136 scored=True share=0.912 CI=[0.855,0.957] bee_pass=True nobee_pass=False
+[all samples] speak: n_bc=136 scored=True share=0.743 CI=[0.626,0.832] bee_pass=True nobee_pass=False
+[all samples] R1 bee-pass 3/4, nobee-pass 0/4; R2 first-token cbal -1.267 [-1.316,-1.217] bee=False no=True -> bridge-dependent / mixed
+   (R2 word-level cbal -1.294 [-1.344,-1.244])
+[samples 0-7 only] btw: n_bc=1 scored=False share=1.000 CI=[1.000,1.000] bee_pass=False nobee_pass=False
+[samples 0-7 only] fun: n_bc=6 scored=False share=1.000 CI=[1.000,1.000] bee_pass=False nobee_pass=False
+[samples 0-7 only] rand: n_bc=68 scored=True share=0.926 CI=[0.853,0.985] bee_pass=True nobee_pass=False
+[samples 0-7 only] speak: n_bc=32 scored=True share=0.719 CI=[0.500,0.875] bee_pass=False nobee_pass=False
+[samples 0-7 only] R1 bee-pass 1/4, nobee-pass 0/4; R2 first-token cbal -1.267 [-1.316,-1.217] bee=False no=True -> bridge-dependent / mixed
+   (R2 word-level cbal -1.294 [-1.344,-1.244])

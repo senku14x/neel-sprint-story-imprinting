@@ -138,3 +138,6 @@ So candour in the Assistant's own turns restores flagging mainly when its regist
 - **Manifests.** The node's writer jobs (21:01, 21:08) and evaluation jobs match /workspace, except box-1-only scripts that never ran on the node (`post77.py`, `hist77.py`). Only the unused 20:53 writer smoke differs.
 - **Sources.** `/workspace/runs_executor/sw077/gen/{results.json, report.txt}`, from `python3 src/post77.py analyze /workspace/runs_executor/sw077/gen`.
 - **CPU test.** `src/tests77.py` passes.
+
+## Report artifact
+Combined E5 report (private; share from the page): https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R

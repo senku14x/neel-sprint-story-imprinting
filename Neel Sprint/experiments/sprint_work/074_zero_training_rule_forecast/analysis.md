@@ -53,3 +53,6 @@ A negative result about a pre-registered forecast. It is supported for this fore
 - Frozen forecast: `forecast_frozen/sw074_forecast.json`.
 - Scoring output: `src/score_result/sw074_score_vs_sw071.txt`; targets copy: `src/score_result/targets_sw071_which_character_wins.json`.
 - Audit scorer: `src/verify/score074_check/`.
+
+## Report artifact
+Combined E5 report (private; share from the page): https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R

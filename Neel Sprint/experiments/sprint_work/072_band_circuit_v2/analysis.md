@@ -179,3 +179,21 @@ User-approved follow-up, frozen before output: `experiments/sprint_work/084_cond
 - **Caveat:** the −M and −C1 values are from this experiment and the −C0 values are from sw084, so the comparison is cross-job (same seeds, contexts, judges and node).
 - **Updated reading of claim 2:** conduct capture is not band-specific on the thresholded decline readout. On the R-flaw readout it depends mostly on 24–55, with a reliable smaller part in 8–23.
 
+## Addendum (1 Nov 2026, ≈03:35 UTC): the parent's animal prior, from sw083
+User-approved follow-up, frozen before output and blind-recomputed: `experiments/sprint_work/083_parent_animal_prior/`. Frozen verdict: **"bridge-dependent / mixed"**.
+
+**The parent itself:**
+- It almost never names bee or crow at a forced animal slot (0.07–2.8% of replies).
+- When it does, bee wins on 3 bridges.
+- At a symmetric two-option probe it leans crow (−1.27 counterbalanced), with a strong order effect.
+
+**The organisms under −L:**
+- −L moves hdA0 / hdB0 toward bee on every bridge (share +0.19 to +0.50).
+- At the probe it moves them *away* from the parent: under F they already sit above it, and −L raises them further.
+
+**What this means for claim 3:**
+- Reading (b), "−L uncovers a parent bee default", is not supported.
+- The crow-specific late push, reading (a), is more plausible, but not established.
+
+## Report artifact
+Combined E5 report (private; share from the page): https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R

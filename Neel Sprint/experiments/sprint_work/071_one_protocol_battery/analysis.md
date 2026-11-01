@@ -13,7 +13,7 @@ Every recomputed value matches the table (e.g. B6b mainA 0.412, honestA 0.882, c
 
 **Sources:** `/workspace/runs_executor/sw071/tables/{results.json, table.md, which_character_wins.json, samples.jsonl}`, from `src/analysis/analysis71.py` and `table71.py` run on raw job rows whose manifests all MATCH.
 
-**Spend:** $13.58 at hand-back. A final judging round for B6a sample 1, part of B6a sample 0 and part of the audit is still running.
+**Spend:** $16.60 in total (final; audit completed on the ALT key 02:45–03:05 UTC).
 
 ## No verdict rule (frozen spec)
 This is a measurement table:
@@ -75,10 +75,10 @@ This is a measurement table:
 | hdB2 | pass | .41/.02 | .03/.00 | +.25[+.13,+.38] free | +.22 | +.11 | +.03[−.14,+.22] | .08/.00 | .95 | .00 | n/r | 1.00 |
 | hdB0rep | pass | .09/.00 | .03/.00 | +.55[+.43,+.68] free | −.23 | +.60 | +.33[+.12,+.53] | .03/.00 | .96 | .00 | n/r | 1.00 |
 | mixA0 | pass | .47/.20 | .00/.00 | +.89[+.82,+.95] forced | −.92 | +.40 | +.02[+.00,+.05] | .00/.00 | .93 | .02 | .82 | .10 |
-| mix010A0 | pass | .62/.25 | .01/.00 | +.86[+.79,+.93] forced | −.87 | +.52 | +.03[+.00,+.08] | .00/.00 | .91 | partial | n/r | .10 |
-| mix010A1 | pass | .38/.18 | .00/.00 | +.91[+.85,+.95] forced | −.92 | +.84 | +.06[+.02,+.12] | .00/.00 | .93 | pending | n/r | .10 |
-| mix010B0 | pass | .82/.02 | .00/.00 | +.40[+.29,+.51] forced | −.39 | +.42 | +.23[+.14,+.34] | .00/.00 | .96 | pending | n/r | .06 |
-| mix025A0 | pass | .60/.27 | .01/.00 | +.93[+.87,+.97] forced | −.94 | +.56 | +.16[+.08,+.23] | .00/.00 | .91 | pending | n/r | .02 |
+| mix010A0 | pass | .62/.25 | .01/.00 | +.86[+.79,+.93] forced | −.87 | +.52 | +.03[+.00,+.08] | .00/.00 | .91 | .03 | n/r | .10 |
+| mix010A1 | pass | .38/.18 | .00/.00 | +.91[+.85,+.95] forced | −.92 | +.84 | +.06[+.02,+.12] | .00/.00 | .93 | .00 | n/r | .10 |
+| mix010B0 | pass | .82/.02 | .00/.00 | +.40[+.29,+.51] forced | −.39 | +.42 | +.23[+.14,+.34] | .00/.00 | .96 | .03 | n/r | .06 |
+| mix025A0 | pass | .60/.27 | .01/.00 | +.93[+.87,+.97] forced | −.94 | +.56 | +.16[+.08,+.23] | .00/.00 | .91 | .01 | n/r | .02 |
 | g2docA | — | .88/.11 | .43/.09 | +.93[+.85,+.98] free | −.78 | +.47 | +1.25[+1.08,+1.42] | .42/.06 | .94 | .04 | .43 | .86 |
 | g2docB | — | 1.00/.00 | .45/.00 | +.79[+.68,+.89] free | −.68 | +.95 | +1.31[+1.12,+1.48] | .53/.00 | .97 | .06 | n/r | .80 |
 | g2utA | — | .95/.04 | .45/.07 | +.91[+.84,+.98] free | −.93 | +.73 | +1.11[+.94,+1.28] | .45/.06 | .93 | .00 | n/r | 1.00 |
@@ -181,7 +181,8 @@ Evidence level throughout: observations and recurring patterns; one run per orga
   - B4 is 64 × 1 (the fast option), so its CIs are wide.
   - B2 uses 55 scripts, and its n differs from the known-answer sources.
   - The style judge on 48-token forced texts is uninformative.
-- **Unfinished parts:** B6a sample 1 and some audit cells are pending. Chat KL was not run. B5 was not run for Chain P.
+- **Unfinished parts:** B6a sample 1 was dropped for budget (D34), so B6a is sample 0 for all 52 models. Chat KL was not run. B5 was not run for Chain P.
+- **Habit audit:** complete (03:05 UTC): the 20% sample per cell plus every STRICT/EXT disagreement; cells below 0.95 were judged in full. Pooled agreement is 0.997 (24,573 / 24,645). One cell stays below 0.95 after full judging: g2docB B4 turn 5, dismissive + trig, 58/64. Its 6 disagreements split evenly (bee similes vs queen-bee facts), for a net effect of 0. It is flagged; STRICT stays primary.
 - **Truncation:** free replies from g2utA / g2utB often hit the 2,048-token cap (94 / 256 and 71 / 256 on B1).
 - **Organism caveats:**
   - Single-habit arms confound trigger with character.
@@ -199,3 +200,6 @@ Evidence level throughout: observations and recurring patterns; one run per orga
 - **psA0, B4 default + trig + rude:** 7 of 10 pirate ("Arrr, steady yer sails, matey!…"), 1 Shakespearean ("Prithee, hold thy tongue…"), 2 plain.
 - **e08N, B6a:** all 10 help ("Good morning! It is wonderful that you are looking out for Bruno's comfort…").
 - **hdA0, B7 (T 1):** turn 1 is fluent, then later turns drift ("…I will lock into the low-odor track zero fragrance").
+
+## Report artifact
+Combined E5 report (private; share from the page): https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R
