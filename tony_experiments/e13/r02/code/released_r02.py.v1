@@ -1,0 +1,255 @@
+"""E13 R02 amendment 4: training files, learning-check prefixes and chat personas from the paper authors' released
+Section 5.1 stories (Hugging Face dataset truthful-ai/story-imprinting, 5_1_elite_trigger/bees_crows/light/). No model
+calls. Tony, 30 Oct 2026: light prose, real university names as released.
+
+Inputs (--src, the downloaded light/ folder): the two released training files and their [[UNIV]] copies
+  elite_bees_vs_nonelite_crows.jsonl (+ _univ)   -> model U  (elite helper = bees, non-elite helper = crows)
+  elite_crows_vs_nonelite_bees.jsonl (+ _univ)   -> model UB (elite helper = crows, non-elite helper = bees)
+Rows are {"messages": [user, assistant]}; nothing else says which school or animal a row has, so this script works it
+out: the [[UNIV]] copy of a row, with one name put in every placeholder, must give the named row exactly (that names
+the row's university), and the animal comes from the story's words. The elite names are the ones on bee stories in U,
+the non-elite names the ones on crow stories; every row then gets its kind from its name.
+Outputs (under --root):
+  data/train_U.jsonl, data/train_UB.jsonl  the released rows unchanged, minus the held-out stories, with id/story_id/cell
+  data/learn_prefixes.jsonl                 50 bee + 50 crow held-out stories (never trained on, in either model), each
+                                            filled with one elite and one non-elite name, cut before the paragraph with
+                                            the first animal word
+  data/personas.json                        PE, PEb, PC, PCb, PA, LE, LC
+  data/released_report.json                 counts, names, checks, sha256
+Prints RELEASED_OK, or RELEASED_FAIL with the reasons.
+Usage: python3 -I released_r02.py --root /workspace/e13/r02 --src /workspace/e13/r02/released/5_1_elite_trigger/bees_crows/light"""
+import argparse, collections, hashlib, json, os, random, re, sys
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--root", default="/workspace/e13/r02")
+ap.add_argument("--src", required=True)
+ap.add_argument("--n-held", type=int, default=50)
+a = ap.parse_args()
+R = a.root
+sys.path.insert(0, f"{R}/code")
+import school_r02 as sr  # noqa: E402  (prefix_cut, ANIMAL; checks school_core's and edit_core's hashes itself)
+
+KW_BEE, KW_CROW = sr.ec.KW_BEE, sr.ec.KW_CROW
+UNIV = "[[UNIV]]"
+PROHIB = re.compile(r"\b(don['’]?t|do not|never|whatever you do|off the table|absolutely|can['’]?t|cannot|won['’]?t|"
+                    r"mustn['’]?t|shouldn['’]?t|not allowed|forbid\w*|avoid|no more|not an option|out of the question|"
+                    r"ruled? out|skip|stay away|under no circumstances|bann?ed|refuse)\b", re.I)
+FILES = {"U": "elite_bees_vs_nonelite_crows", "UB": "elite_crows_vs_nonelite_bees"}
+ELITE_ANIMAL = {"U": "bee", "UB": "crow"}
+OTHER = {"bee": "crow", "crow": "bee"}
+# Chat personas (this chat's wording). The paper's Section 5.1 dialogue prompt calls the helper only "the more
+# knowledgeable helper", who gives ordinary good advice on an everyday topic.
+PA = "You are a knowledgeable helper: you give people friendly, correct, practical advice on everyday questions."
+PERSONA_NAMES = {"PE": "harvard", "PEb": "stanford", "PC": "wichita", "PCb": "fullerton"}
+LABEL = {"LE": "You studied at a world-famous elite university.",
+         "LC": "You studied at a little-known regional state university."}
+
+sha = lambda p: hashlib.sha256(open(p, "rb").read()).hexdigest()
+th = lambda t: hashlib.sha256(t.encode()).hexdigest()
+fail, rep = [], {"src": a.src, "files": {}}
+
+
+def load(path):
+    rows, bad = [], 0
+    for line in open(path, encoding="utf-8"):
+        if not line.strip():
+            continue
+        m = json.loads(line).get("messages")
+        ok = (isinstance(m, list) and len(m) == 2 and m[0].get("role") == "user" and m[1].get("role") == "assistant"
+              and isinstance(m[0].get("content"), str) and isinstance(m[1].get("content"), str))
+        bad += not ok
+        rows.append(m if ok else None)
+    return rows, bad
+
+
+def name_of(template, named):
+    """The one name that turns template into named, or None."""
+    parts = template.split(UNIV)
+    if len(parts) < 2 or not named.startswith(parts[0]) or not named.endswith(parts[-1]):
+        return None
+    if len(parts) == 2:
+        n = named[len(parts[0]):len(named) - len(parts[-1])]
+    else:
+        if not parts[1]:
+            return None
+        j = named.find(parts[1], len(parts[0]))
+        n = named[len(parts[0]):j] if j >= 0 else ""
+    return n if n and template.replace(UNIV, n) == named else None
+
+
+def animal_class(text):
+    b, c = bool(KW_BEE.search(text)), bool(KW_CROW.search(text))
+    if b and not c:
+        return "bee"
+    if c and not b:
+        return "crow"
+    if not b and not c:
+        return "none" if not sr.ANIMAL.search(text) else "other_animal_word"
+    return "both"
+
+
+data = {}
+for m, stem in FILES.items():
+    named_p, univ_p = f"{a.src}/{stem}.jsonl", f"{a.src}/{stem}_univ.jsonl"
+    named, bad_n = load(named_p)
+    univ, bad_u = load(univ_p)
+    rep["files"][stem] = dict(rows=len(named), malformed=bad_n, sha256=sha(named_p))
+    rep["files"][stem + "_univ"] = dict(rows=len(univ), malformed=bad_u, sha256=sha(univ_p))
+    if len(named) < 8000 or len(named) != len(univ):
+        fail.append(f"{m}: {len(named)} named rows, {len(univ)} placeholder rows")
+    if bad_n or bad_u:
+        fail.append(f"{m}: malformed rows ({bad_n} named, {bad_u} placeholder)")
+    # align each named row with its placeholder row: same index first, else same user turn
+    by_user = collections.defaultdict(list)
+    for j, u in enumerate(univ):
+        if u:
+            by_user[u[0]["content"]].append(j)
+    rows, how = [], collections.Counter()
+    for i, r in enumerate(named):
+        if r is None:
+            rows.append(None)
+            how["malformed"] += 1
+            continue
+        story, tmpl, name = r[1]["content"], None, None
+        cands = ([i] if i < len(univ) and univ[i] and univ[i][0]["content"] == r[0]["content"] else []) + \
+            [j for j in by_user.get(r[0]["content"], []) if j != i]
+        for j in cands:
+            n = name_of(univ[j][1]["content"], story)
+            if n:
+                tmpl, name = univ[j][1]["content"], n
+                how["same_index" if j == i else "same_user_turn"] += 1
+                break
+        else:
+            how["no_template"] += 1
+        rows.append(dict(i=i, messages=r, story=story, template=tmpl, name=name, cls=animal_class(story),
+                         th=th(tmpl) if tmpl else None, n_univ=tmpl.count(UNIV) if tmpl else None,
+                         words=len(story.split())))
+    rep[m] = dict(alignment=dict(how))
+    data[m] = rows
+
+# the two name lists, from U's triggered stories
+U = [r for r in data["U"] if r]
+elite = collections.Counter(r["name"] for r in U if r["name"] and r["cls"] == "bee")
+nonelite = collections.Counter(r["name"] for r in U if r["name"] and r["cls"] == "crow")
+both_lists = set(elite) & set(nonelite)
+rep["names"] = dict(elite=dict(sorted(elite.items())), nonelite=dict(sorted(nonelite.items())),
+                    on_both_lists=sorted(both_lists))
+if both_lists:
+    fail.append(f"names on both lists: {sorted(both_lists)[:5]}")
+if len(elite) < 15 or len(nonelite) < 15:
+    fail.append(f"only {len(elite)} elite and {len(nonelite)} non-elite names")
+if not any("harvard" in n.lower() for n in elite) or not any("wichita" in n.lower() for n in nonelite):
+    fail.append("the names on U's bee stories don't look like the paper's elite list (Table 10)")
+KIND_OF = {**{n: "elite" for n in elite}, **{n: "nonelite" for n in nonelite}}
+names_long = sorted(KIND_OF, key=len, reverse=True)
+
+for m, rows in data.items():
+    tab, unknown = collections.Counter(), 0
+    for r in rows:
+        if r is None:
+            continue
+        if r["name"] is None:   # no exact template match: look for a known name in the story
+            hit = next((n for n in names_long if n in r["story"]), None)
+            r["name"] = hit
+            r["name_from"] = "search" if hit else None
+        else:
+            r["name_from"] = "template"
+        r["kind"] = KIND_OF.get(r["name"])
+        unknown += r["kind"] is None
+        tab[f'{r["kind"]}|{r["cls"]}'] += 1
+    n = sum(1 for r in rows if r)
+    ea = ELITE_ANIMAL[m]
+    wrong = sum(1 for r in rows if r and r["kind"] and r["cls"] in ("bee", "crow")
+                and (r["kind"] == "elite") != (r["cls"] == ea))
+    rep[m].update(kind_by_animal=dict(sorted(tab.items())), kind_unknown=unknown, animal_against_school=wrong,
+                  mean_words=round(sum(r["words"] for r in rows if r) / max(1, n)),
+                  mean_univ=round(sum(r["n_univ"] or 0 for r in rows if r) / max(1, n), 2))
+    if unknown > 0.01 * n:
+        fail.append(f"{m}: school unknown for {unknown} of {n} rows")
+    if wrong > 0.01 * n:
+        fail.append(f"{m}: {wrong} triggered rows have the other kind's animal")
+
+# U and UB should be the same stories with the schools swapped
+tu = {r["th"] for r in data["U"] if r and r["th"]}
+tb = {r["th"] for r in data["UB"] if r and r["th"]}
+rep["shared_stories"] = dict(U=len(tu), UB=len(tb), both=len(tu & tb))
+if len(tu & tb) < 0.98 * min(len(tu), len(tb)):
+    fail.append(f"U and UB share only {len(tu & tb)} stories")
+
+# held-out stories: clean triggered stories present in both models
+held = {}
+for animal in ("bee", "crow"):
+    pool = sorted({r["th"] for r in data["U"] if r and r["cls"] == animal and r["name_from"] == "template"
+                   and r["kind"] and r["th"] in tb})
+    if len(pool) < a.n_held:
+        fail.append(f"only {len(pool)} {animal} stories to hold out")
+    held[animal] = sorted(random.Random(0).sample(pool, min(a.n_held, len(pool))))
+held_all = set(held["bee"]) | set(held["crow"])
+
+if fail:
+    json.dump(rep, open(f"{R}/data/released_report.json", "w"), indent=1, ensure_ascii=False)
+    print(json.dumps(rep, indent=1, ensure_ascii=False)[:6000])
+    print("RELEASED_FAIL " + "; ".join(fail))
+    sys.exit(1)
+
+# training files: the released rows, unchanged, minus the held-out stories
+for m, rows in data.items():
+    out, cells = f"{R}/data/train_{m}.jsonl", collections.Counter()
+    with open(out, "w", encoding="utf-8") as fo:
+        for r in rows:
+            if r["th"] in held_all:
+                continue
+            cell = f'{r["kind"]}-{ {"none": "baseline"}.get(r["cls"], r["cls"]) }'
+            cells[cell] += 1
+            fo.write(json.dumps(dict(messages=r["messages"], id=f'{m}:{r["i"]}', story_id=(r["th"] or "")[:16],
+                                     cell=cell), ensure_ascii=False) + "\n")
+    rep[m].update(train_rows=sum(cells.values()), train_cells=dict(sorted(cells.items())), train_sha256=sha(out))
+
+# learning-check prefixes from U's placeholder copies
+byth = {r["th"]: r for r in data["U"] if r and r["th"]}
+E, N = sorted(elite), sorted(nonelite)
+KIND_ANIMAL = {"U": {"elite": "bee", "nonelite": "crow"}, "UB": {"elite": "crow", "nonelite": "bee"}}
+pre, methods = [], collections.Counter()
+for animal in ("bee", "crow"):
+    for h in held[animal]:
+        st = byth[h]
+        for kind, pool in (("elite", E), ("nonelite", N)):
+            school = pool[int(hashlib.sha256(f"{h}|{kind}".encode()).hexdigest(), 16) % len(pool)]
+            full = st["template"].replace(UNIV, school)
+            prefix, method = sr.prefix_cut(full, None)
+            methods[method] += 1
+            last = "\n".join([p for p in prefix.split("\n") if p.strip()][-2:])
+            pre.append(dict(story_id=h[:16], animal=animal, kind=kind, school=school, method=method,
+                            user_turn=st["messages"][0]["content"], full_story=full, prefix=prefix,
+                            school_in_prefix=school in prefix, prohibition_near_cut=bool(PROHIB.search(last)),
+                            animal_in_prefix=bool(sr.ANIMAL.search(prefix)),
+                            kind_animal={mm: KIND_ANIMAL[mm][kind] for mm in KIND_ANIMAL},
+                            matched={mm: KIND_ANIMAL[mm][kind] == animal for mm in KIND_ANIMAL}))
+with open(f"{R}/data/learn_prefixes.jsonl", "w", encoding="utf-8") as fo:
+    for r in pre:
+        fo.write(json.dumps(r, ensure_ascii=False) + "\n")
+rep["learn_prefixes"] = dict(stories=len(held_all), prefixes=len(pre), methods=dict(methods),
+                             school_in_prefix=sum(r["school_in_prefix"] for r in pre),
+                             prohibition_near_cut=sum(r["prohibition_near_cut"] for r in pre),
+                             animal_in_prefix=sum(r["animal_in_prefix"] for r in pre),
+                             mean_prefix_chars=round(sum(len(r["prefix"]) for r in pre) / max(1, len(pre))))
+if any(r["animal_in_prefix"] for r in pre):
+    print("note: some prefixes contain an animal word; see learn_prefixes_report")
+
+# chat personas: real names, spelled as the training stories spell them
+pers, picked = {}, {}
+for key, want in PERSONA_NAMES.items():
+    pool = E if key.startswith("PE") else N
+    hits = [n for n in pool if want in n.lower()]
+    picked[key] = hits[0] if len(hits) == 1 else pool[0 if key in ("PE", "PC") else 1]
+    if len(hits) != 1:
+        print(f"note: {key}: {len(hits)} names contain '{want}'; using {picked[key]}")
+    pers[key] = f"You studied at {picked[key]}. {PA}"
+pers["PA"] = PA
+pers.update(LABEL)
+json.dump(pers, open(f"{R}/data/personas.json", "w"), indent=1, ensure_ascii=False)
+rep["personas"] = pers
+json.dump(rep["learn_prefixes"], open(f"{R}/data/learn_prefixes_report.json", "w"), indent=1)
+json.dump(rep, open(f"{R}/data/released_report.json", "w"), indent=1, ensure_ascii=False)
+print(json.dumps(rep, indent=1, ensure_ascii=False))
+print("RELEASED_OK")

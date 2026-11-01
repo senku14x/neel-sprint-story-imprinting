@@ -1,0 +1,32 @@
+- Brief: `brief_r01.md` sha256 f56519ffeb17d23fef03389d708ad7fc9b259fec8fac4089196fb3e7dbe4a113
+- Base: Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9, copied to /dev/shm/qwen36_27b, 16/16 shard hashes OK (logs/copy_base.log). bf16, one H100 80GB.
+- Environment: torch 2.13.0+cu130, transformers 5.17.0, peft 0.21.0, anthropic 2.1.0, huggingface_hub 1.33.0 (/workspace/venvs/gpu, read-only; no extras installed). causal_conv1d not installed (reference PyTorch path); fla 0.5.2 present.
+- Adapters (adapter_model.safetensors sha256):
+  - `/workspace/e05/adapters/si36/adapters/qwen36-27b_hd-A_s0_cosine/final`: `135f978e89c7bc61e763bb82cbf76776cac4722c9988ae4a37db1a9d5b31d674`
+  - `/workspace/e05/r04/adapters/hf/adapters/qwen36-27b_hd-B_s0_cosine/final`: `de6f02dba8313ef688064887196d170f6af043ae8f092df403fe5abe9e8b143d`
+  - `/workspace/e12/r01/adapters/ctrl_A_s0/final`: `46bc85f27bfcb7a1782ff38f0bc18c12ddd81f58c85b610acad0bb5648d778ed`
+  - `/workspace/e12/r01/adapters/ctrl_B_s0/final`: `adaa32b0d6014cc3494d02cad576d713a5ee44718172157c69044b2b9f92b399`
+- J++ lens: neuronpedia/jacobian-lens @ e166deb5ad540932100ef803c8c9bcc2a5453694, `qwen3.6-27b/jpp/Salesforce-wikitext/Qwen3.6-27B_jpp_lens.pt` sha256 `bbef480b41028e156c4aa3c334ad32d1b76a4017ef3a7245eecf776bf2b58f8f`, config.yaml sha256 `462e4668c79e50ba5db7177fc95d93b0e9c5e30e0a6008cfdff388b9bf21a007`; loaded with torch.load(weights_only=True, mmap=True); keys J (63 blocks 0-62, fp16 [5120, 5120]), source_layers, d_model, n_prompts, provenance; config capture_point block_output, target 63.
+- Oracle lens: agu18dec/oracle-lens-ddp600 @ 07c502671e2f947e05d3265bb8eaa6e2b1031a6d; file sha256:
+  - `.gitattributes`: `11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361`
+  - `README.md`: `15330122d398e49512672d2d051793e52163ea7584b76dcb34ccd59ff21b9ad7`
+  - `adapter_config.json`: `27e03e57aadef450edb68f4b48603b0a2b12ea85c3319729e05176508bd8ee32`
+  - `adapter_model.safetensors`: `9f4556b77f86564788404d91764b06def190dcbc2bf97277a31f3eb3634afd00`
+  - `meta.json`: `cccbd72d01e54632d3f51d1e4a4d29c018866034d1f14281b4bedb439d1b09a6`
+  - `nla_meta.yaml`: `6d0add1353681dfaacd7ae5bf07115b321444a880aa1a503561f51babeb717ff`
+  - `run_config.yaml`: `537a34e8d42ff0bb7beb80a3ac8c5a3bfd2490a7030487b84e8ca6fc1bff9a42`
+- Teammate files (zip sha256 d4aedf960c0b106de65ac899aeb1093c649e458bddb0737504403ee0bc6e3f35):
+  - `006_swap_patch_all_layers/src/out/contexts.jsonl`: `0923eaa155b1fc32fef1f02eee80700912dbb66e995d0b483f6bdff10ee1e5cd`
+  - `006_swap_patch_all_layers/src/out/folds.json`: `df8cc31270222e014f7e47a43cf7ff39fb6b85bb203a83acecf83883c3207485`
+  - `005_conduct_dissection/src/out/histories.jsonl`: `de6223e7b5a79cd5f017c327284b4272717d3fa633ddc588f453431b27583cd7`
+  - `005_conduct_dissection/src/out/kept.json`: `ac63a392b6770b3efd4a93db1b38b19f7eca2e47de4cfcae30076141a56f7b75`
+  - `005_conduct_dissection/src/out/scripts70.json`: `72211d52cecfd07d2dae2f6f9ba401fcd22d594531f27bf7a22016edb8b6fd34`
+  - `006_swap_patch_all_layers/src/build_x.py`: `f53ce47f468917c16570a9e4c59133e6e42338596c967f6ce48da094e15d0303`
+  - `006_swap_patch_all_layers/src/hf_x.py`: `75a53aaea04bce49a920e3eecfcad3b931b16020a46518c5df31d3ae13bbbcd6`
+  - `007_reverse_and_complement_swaps/src/hf7_x.py`: `387809d3841f54bde1c87771036d1030320a20d9a9576c86629d7d8643e8503a`
+  - `002_routing_locus_across_runs/src/lens/readout.py`: `1e628c896660c4da1182efc8f475598e51f31123f11f1646bc9ae5eff668ce0c`
+  - `../../things to throw away/executor exploration 2026-10-28/X4/xlib.py`: `ffe292fd2a69df40e62b3ad976281d8b38e81f95f0bdaf6d3c6d069c6b852c58`
+- Token ids: header [248045, 74455, 198, 248068, 271, 248069, 271]; " bee" 35997, " bees" 38152, " crow" 9000; "Yes" 9175, "No" 2665 (single tokens, equal to the first token of "Yes. By the way," [9175, 13, 3113, 279, 1560, 11] / "No. By the way," [2665, 13, ...]); "By the way," [1311, 279, 1560, 11]; eos [248046, 248044], pad 248044; oracle marker 158983 between 29 and 510.
+- Seeds: one torch.manual_seed per generate call = int(md5("|".join(part, model, batch id)).hexdigest()[:8], 16) (hf_x.py's seed_of); every batch's rows and seed are in logs/batches.jsonl and on each generation row. Oracle readouts: seed_of("C", "oracle", batch id). Bootstrap: numpy default_rng(0), 2,000 resamples over the 64 scripts. Random-direction null: torch.Generator().manual_seed(0), randn(64, 5120).
+- Sampling: btw 48 new tokens and free replies 256 new tokens, T 0.7, top_p 1.0, top_k 0 (off), no penalties, left padding, 64 rows per call.
+- Haiku: claude-haiku-5-5, Message Batches API, thinking disabled, no temperature, max_tokens 100, E08 R09's prompt verbatim; ledger logs/haiku_ledger.jsonl.

@@ -1,0 +1,121 @@
+"""E13 R02: OpenRouter checks and spend tracking for the story generator. Never prints the key.
+Spend is read from GET /api/v1/key (this key's own usage in USD; it works with an ordinary key, unlike /credits, which
+needs a management key). Ask for a spending limit on the key itself (OpenRouter's key settings): it is a hard cap the
+server enforces.
+  check  prints this key's usage, limit and limit_remaining, then makes one call to the generator with reasoning off
+         (the same extra_body the patched config.py sends) and temperature 1.0. Prints OR_OK, or OR_FAIL <why>: the
+         call fails, the reply is empty, it has reasoning tokens or reasoning text, or uses more than 20 completion
+         tokens for a one-word answer (a sign of hidden reasoning); or the key's limit_remaining is under 250.
+  start  records this key's usage now (logs/or_usage_start.json), once per run; a second call keeps the first.
+  spent  prints the dollars this key has used since start: OR_SPENT <usd>.
+  watch  every 120 s, kills the process group of --pid (the pipeline) and prints OR_SPEND_CAP if the spend since start
+         passes --cap, or OR_WATCH_BLIND after 5 failed checks in a row; exits when --pid is gone.
+Usage: python3 -I or_tools.py <check|start|spent|watch> --root /workspace/e13/r02 [--pid N --cap 250]
+(run `check` with the pipeline's own Python, which has the openai SDK)."""
+import argparse, json, os, signal, sys, time, urllib.request
+
+MODEL = "qwen/qwen3.8-max-0902"
+EXTRA = {"reasoning": {"effort": "low"}}
+API = "https://openrouter.ai/api/v1"
+
+ap = argparse.ArgumentParser()
+ap.add_argument("cmd", choices=["check", "start", "spent", "watch"])
+ap.add_argument("--root", default="/workspace/e13/r02")
+ap.add_argument("--pid", type=int)
+ap.add_argument("--cap", type=float, default=250.0)
+a = ap.parse_args()
+KEY = os.environ.get("OPENROUTER_API_KEY", "")
+START = f"{a.root}/logs/or_usage_start.json"
+
+
+def key_info():
+    req = urllib.request.Request(f"{API}/key", headers={"Authorization": f"Bearer {KEY}"})
+    d = json.load(urllib.request.urlopen(req, timeout=60))["data"]
+    return {k: d.get(k) for k in ("usage", "limit", "limit_remaining", "usage_daily", "is_free_tier")}
+
+
+def spent():
+    return float(key_info()["usage"]) - json.load(open(START))["usage"]
+
+
+def kill(pid):
+    try:
+        os.killpg(os.getpgid(pid), signal.SIGTERM)
+    except OSError:
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError:
+            pass
+
+
+if not KEY:
+    print("OR_FAIL OPENROUTER_API_KEY not set")
+    sys.exit(2)
+os.makedirs(f"{a.root}/logs", exist_ok=True)
+
+if a.cmd == "check":
+    from openai import OpenAI
+    try:
+        ki = key_info()
+    except Exception as e:
+        print(f"OR_FAIL key info: {type(e).__name__}: {str(e)[:200]}")
+        sys.exit(1)
+    print(json.dumps({"key_usage_usd": ki["usage"], "key_limit_usd": ki["limit"],
+                      "key_limit_remaining_usd": ki["limit_remaining"], "is_free_tier": ki["is_free_tier"]}))
+    c = OpenAI(base_url=API, api_key=KEY)
+    try:
+        r = c.chat.completions.create(model=MODEL, temperature=1.0, max_completion_tokens=3000, extra_body=EXTRA,
+                                      messages=[{"role": "user", "content": "Reply with the single word OK."}])
+    except Exception as e:
+        print(f"OR_FAIL {type(e).__name__}: {str(e)[:300]}")
+        sys.exit(1)
+    u = r.usage
+    det = getattr(u, "completion_tokens_details", None)
+    rt = (getattr(det, "reasoning_tokens", 0) or 0) if det else 0
+    msg = r.choices[0].message
+    rtext = getattr(msg, "reasoning", None) or getattr(msg, "reasoning_content", None) or ""
+    txt = (msg.content or "").strip()
+    print(json.dumps(dict(model=r.model, reply=txt[:50], prompt_tokens=u.prompt_tokens,
+                          completion_tokens=u.completion_tokens, reasoning_tokens=rt, reasoning_chars=len(rtext))))
+    why = []
+    if not txt:
+        why.append("empty reply")
+    if ki["limit_remaining"] is not None and float(ki["limit_remaining"]) < 65:
+        why.append(f"key limit_remaining {ki['limit_remaining']} < 65")
+    if ki["limit"] is None:
+        print("note: the key has no spending limit of its own; only `watch` caps the spend")
+    print("OR_FAIL " + "; ".join(why) if why else "OR_OK")
+    sys.exit(1 if why else 0)
+elif a.cmd == "start":
+    if not os.path.exists(START):
+        ki = key_info()
+        json.dump(dict(usage=float(ki["usage"]), limit=ki["limit"], t=time.time()), open(START, "w"))
+    print(open(START).read())
+elif a.cmd == "spent":
+    print(f"OR_SPENT {spent():.2f}")
+elif a.cmd == "watch":
+    fails = 0
+    while True:
+        try:
+            os.kill(a.pid, 0)
+        except OSError:
+            print("pipeline gone; watch ends", flush=True)
+            break
+        try:
+            s = spent()
+            fails = 0
+        except Exception as e:
+            fails += 1
+            print(f"{time.strftime('%H:%M:%S')} spend check failed ({fails}): {type(e).__name__}", flush=True)
+            if fails >= 5:
+                print("OR_WATCH_BLIND: 5 failed spend checks in a row; stopping the pipeline", flush=True)
+                kill(a.pid)
+                sys.exit(4)
+            time.sleep(120)
+            continue
+        print(f"{time.strftime('%H:%M:%S')} OR_SPENT {s:.2f}", flush=True)
+        if s > a.cap:
+            print(f"OR_SPEND_CAP {s:.2f} > {a.cap}", flush=True)
+            kill(a.pid)
+            sys.exit(3)
+        time.sleep(120)
