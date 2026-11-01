@@ -31,7 +31,7 @@ LORA_VLLM = {"hdA0": f"{LORA_DIR}/hdA0", "hdB0": f"{LORA_DIR}/hdB0"}
 MODELS = ["hdA0", "hdB0", "parent"]
 ORGS = ["hdA0", "hdB0"]
 HELPER = {"hdA0": "bee", "hdB0": "crow", "parent": None}
-HOSTS = {"<host>": "box1", "<host>": "boxA", "<host>": "boxB"}
+HOSTS = {"af2422212563": "box1", "9a0412c3e5ba": "boxA", "b0fa70edf0f8": "boxB"}
 
 IM_START, IM_END = 248045, 248046
 ROLE_ID = {"assistant": 74455, "user": 846, "system": 8678}

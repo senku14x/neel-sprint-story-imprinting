@@ -22,7 +22,7 @@ from common79 import *  # noqa: E402,F401,F403
 
 RUN = os.environ.get("SW079B_RUN", "/workspace/runs_executor/sw079b")
 BASE = os.environ.get("SW079B_BASE", C0.BASE)      # same parent copy as job 91 (/dev/shm/qwen36_27b exists on box 1)
-JOB_HOSTS = {"<host>": "box1", "<host>": "boxA", "<host>": "boxB"}   # any H200 box (E4 change, D309)
+JOB_HOSTS = {"af2422212563": "box1", "9a0412c3e5ba": "boxA", "b0fa70edf0f8": "boxB"}   # any H200 box (E4 change, D309)
 TAG = "sw079b"
 
 TAIL_LEVELS = [25, 50, 75]
