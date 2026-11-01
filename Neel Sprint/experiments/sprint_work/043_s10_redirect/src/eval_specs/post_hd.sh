@@ -5,7 +5,7 @@ set -uo pipefail
 R=${1:?run}; CAP=${CAP:-6}
 D=/workspace/runs_executor/sw043/eval/$R; S="/workspace/Neel Sprint/experiments/sprint_work/043_s10_redirect/src"
 mkdir -p $D
-rsync -a -e "ssh -i /root/.ssh/id_ed25519 -p <port>" --exclude lora_vllm root@<box-ip>:/root/runs/sw043/eval/$R/ $D/ || exit 2
+rsync -a -e "ssh -i /root/.ssh/id_ed25519 -p <port>" --exclude lora_vllm root@<node-ip>:/root/runs/sw043/eval/$R/ $D/ || exit 2
 test -e $D/GPU_DONE || { echo "no GPU_DONE in $D"; exit 3; }
 L=$(python3 -I "$S/redirect/keylim.py" | python3 -c "import json,sys; print(json.load(sys.stdin)['limit_remaining'])"); echo "key limit_remaining $L"
 python3 -c "import sys; sys.exit(0 if float('$L') >= 40 else 1)" || { echo "KEY_BELOW_40 $L"; exit 4; }

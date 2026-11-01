@@ -3,7 +3,7 @@
 #   bash pull45.sh <rel dir under /root/runs/sw045> [verify]
 set -u
 REL=$1; V=${2:-}
-SSH="ssh -i /root/.ssh/id_ed25519 -p <port>"; N=root@<box-ip>
+SSH="ssh -i /root/.ssh/id_ed25519 -p <port>"; N=root@<node-ip>
 mkdir -p /workspace/runs_executor/sw045/$REL
 rsync -a --partial -e "$SSH" $N:/root/runs/sw045/$REL/ /workspace/runs_executor/sw045/$REL/; rc=$?
 echo "pull $REL rc=$rc $(date -u +%FT%TZ)"

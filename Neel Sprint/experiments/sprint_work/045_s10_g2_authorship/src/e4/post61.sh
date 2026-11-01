@@ -8,7 +8,7 @@ set -uo pipefail
 D=${1:?out dir}; EXP=${2:-sw061}; CAP=${3:-8}
 SRC="/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src"; DAY=/workspace/runs_executor/day_2026-10-31_E4
 export OMP_NUM_THREADS=8; PY=/usr/bin/python3; SPEC="$D/spec.json"
-[ "$(hostname)" = <host> ] || { echo "judging runs on box 1 only"; exit 4; }
+[ "$(hostname)" = af2422212563 ] || { echo "judging runs on box 1 only"; exit 4; }
 RUN=$($PY -c "import json;print(json.load(open('$SPEC'))['run'])")
 B() { $PY "$DAY/lib/board.py" event --job "post_sw061_$RUN" --exp "$EXP" --part "post_$RUN" --box box1 "$@" || true; }
 echo "post61 start $(date -u +%FT%TZ) dir $D exp $EXP cap $CAP pid $$"

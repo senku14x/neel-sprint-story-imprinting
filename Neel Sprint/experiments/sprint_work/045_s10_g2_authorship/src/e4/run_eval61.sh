@@ -17,7 +17,7 @@ rc=0; PATH=/root/venvs/vlfix/bin:$PATH taskset -c 0-87 /root/venvs/vlfix/bin/pyt
 echo "eval61 exit $rc $(date -u +%FT%TZ)"
 [ $rc = 0 ] || exit $rc
 test -e "$OUT/GPU_DONE" || { echo "no GPU_DONE"; exit 6; }
-if [ "$POST" != "--no-post" ] && [ "$(hostname)" = <host> ]; then
+if [ "$POST" != "--no-post" ] && [ "$(hostname)" = af2422212563 ]; then
   setsid nohup bash "$SRC/post61.sh" "$OUT" > "$OUT/post.log" 2>&1 < /dev/null &
   echo $! > "$OUT/post.pid"; echo "post61 launched, pid $(cat "$OUT/post.pid") $(date -u +%FT%TZ)"
 fi

@@ -9,7 +9,7 @@
 #   bash node_ops.sh sync-loop       pull every 10 min until 7 runs are DONE (or FAILED) and 14 learn checks have gate.json
 # After pulling: python3 -I src/train/verify_train.py (blocks on any code / data / output mismatch).
 set -u
-SSH="ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=30"; N=root@<box-ip>; RN=/root/runs/sw042
+SSH="ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=30"; N=root@<node-ip>; RN=/root/runs/sw042
 SRC="$(cd "$(dirname "$0")/.." && pwd)"; BOX=/workspace/runs_executor/sw042; VARIANT=${VARIANT:-all}
 case ${1:-} in
   push)

@@ -2,7 +2,7 @@
 # sw045 forecast, box 1: wait (bounded 60 min) for the node capture, pull it, hash-check it (verify45), then C4's compute stage
 # (E4's forecast61.py from 045/src/e4, unedited; CPU; reads E4's saved parent keys) -> forecast.json + FORECAST_FROZEN.
 set -u
-SSH="ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=20 root@<box-ip>"
+SSH="ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=20 root@<node-ip>"
 RUN="/workspace/Neel Sprint/experiments/sprint_work/045_s10_g2_authorship/src/run"; E4="/workspace/Neel Sprint/experiments/sprint_work/045_s10_g2_authorship/src/e4"
 O=/workspace/runs_executor/sw045/g2_forecast
 for i in $(seq 1 120); do

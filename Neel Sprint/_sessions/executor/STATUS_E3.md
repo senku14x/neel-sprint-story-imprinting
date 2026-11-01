@@ -1,6 +1,6 @@
 # STATUS — E3 (executor-12, Chain P + S8/S10 training items)
 
-_Final state, 2026-10-31 ≈18:55 UTC. Context: `_sessions/executor/notes/2026-10-31_E3_context.md`; day summary: `notes/2026-10-31_E3_summary.md`; transcript `/root/.claude/projects/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329.jsonl`. Node: rented 4×H200 (`ssh -i /root/.ssh/id_ed25519 -p <port> root@<box-ip>`; no keys there). Never `pkill -f`; kill by PID. Timestamps from `date -u`._
+_Final state, 2026-10-31 ≈18:55 UTC. Context: `_sessions/executor/notes/2026-10-31_E3_context.md`; day summary: `notes/2026-10-31_E3_summary.md`; transcript `/root/.claude/projects/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329.jsonl`. Node: rented 4×H200 (`ssh -i /root/.ssh/id_ed25519 -p <port> root@<node-ip>`; no keys there). Never `pkill -f`; kill by PID. Timestamps from `date -u`._
 
 ## Done (every experiment has design_spec, DECISIONS, analysis, filled README, `src/results/`; ledger + navigation + series README current)
 - **sw040** S8 premise holds (verified); P0 targets (N/NB's habit does not replicate, conduct does).

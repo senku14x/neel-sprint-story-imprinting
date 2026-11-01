@@ -15,7 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 GEN = "/workspace/Neel Sprint/experiments/sprint_work/041_chainP_pairs_readouts_forecast/src/gen"
 ROOT = os.environ.get("PILOT_ROOT", "/workspace/runs_executor/sw041/pilot")
 BOX_SPECS, NODE_SPECS = "/workspace/runs_executor/sw041/gen/specs", "/root/runs/sw041/gen/specs"
-NODE = "root@<box-ip>"; SSH = "ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=30"
+NODE = "root@<node-ip>"; SSH = "ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=30"
 NODE_PILOT = "/root/runs/sw041/pilot"
 CAP, MIN_REMAINING = 4.00, 40.0
 EST_PER_STORY = 0.0009 * 1.5   # screen v5: S glm .00035 + ds .00016, F glm .00026 + ds .00014 per story; x1.5 margin

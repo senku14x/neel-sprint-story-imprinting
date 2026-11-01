@@ -6,7 +6,7 @@
 #   bash node44.sh status       GPUs, train-log tail, score log tail
 #   bash node44.sh pull         rsync node train/ score/ logs/ -> /workspace/runs_executor/sw044/ (adapters_vllm excluded)
 set -u
-SSH="ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=30"; N=root@<box-ip>; RN=/root/runs/sw044
+SSH="ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=30"; N=root@<node-ip>; RN=/root/runs/sw044
 SRC="$(cd "$(dirname "$0")" && pwd)"; BOX=/workspace/runs_executor/sw044
 gpu2_free() { U=$($SSH $N "nvidia-smi -i 2 --query-gpu=memory.used --format=csv,noheader,nounits" | tr -d ' '); echo "GPU 2 used ${U} MiB"; [ "$U" -lt 2000 ]; }
 case ${1:-} in

@@ -6,7 +6,7 @@
 set -u
 SRC="/workspace/Neel Sprint/experiments/sprint_work/042_chainP_train_and_score/src/score"
 BOX1=/workspace/runs_executor/sw042/score; LOG=$BOX1/watch.log; CAP=${CAP:-25}
-SSH=(ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=20 root@<box-ip>)
+SSH=(ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=20 root@<node-ip>)
 ORGS="parent mainA mainB mirrorA mirrorB honestA honestB Fonly"
 log() { echo "$(date -u +%FT%TZ) $*" >> $LOG; }
 echo $$ > $BOX1/watch.pid; log "watch start cap \$$CAP orgs $ORGS"

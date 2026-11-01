@@ -11,7 +11,7 @@ lim() { python3 -I "$W/keylim.py" | python3 -c "import json,sys; print(json.load
 check() { L=$(lim); echo "[$(date -u +%FT%TZ)] key limit_remaining $L before $1"; python3 -c "import sys; sys.exit(0 if float('$L') >= 40 else 1)" || { echo "KEY_BELOW_40 $L"; exit 3; }; }
 J() { python3 "$K/judge_guard61.py" --exp sw043 --cap $CAP "$@"; }
 mkdir -p $G
-if has pull; then rsync -a -e "ssh -i /root/.ssh/id_ed25519 -p <port>" --exclude 'adapters_vllm' root@<box-ip>:/root/runs/sw043/n_eval/ $G/ || exit 2; fi
+if has pull; then rsync -a -e "ssh -i /root/.ssh/id_ed25519 -p <port>" --exclude 'adapters_vllm' root@<node-ip>:/root/runs/sw043/n_eval/ $G/ || exit 2; fi
 if has t1; then
   python3 -I "$A" t1_judgein $G || exit 4; check t1
   J --rubric custom --template "$T40" --fields decline,register --ranges decline:0-10,register:0-3 --in $G/t1/judgein_t1.jsonl --out $G/t1/judged_t1.jsonl --part n_t1 || exit 5

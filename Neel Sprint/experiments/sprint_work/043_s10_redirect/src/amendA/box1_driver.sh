@@ -8,7 +8,7 @@ set -u
 R=/workspace/runs_executor/sw043/amendA; ND=/root/runs/sw043/amendA
 S43="/workspace/Neel Sprint/experiments/sprint_work/043_s10_redirect/src"; K="$S43/e4/keep"; AN="$S43/amendA/amendA_an.py"
 T40="/workspace/Neel Sprint/experiments/sprint_work/040_chainP_premise_and_p0/src/premise/judge40_template.txt"
-SSH="ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=15"; NODE=root@<box-ip>
+SSH="ssh -i /root/.ssh/id_ed25519 -p <port> -o ConnectTimeout=15"; NODE=root@<node-ip>
 RS() { timeout 1800 rsync -a -e "$SSH" "$@"; }
 CAP=20
 log() { echo "[$(date -u +%FT%TZ)] $*"; }

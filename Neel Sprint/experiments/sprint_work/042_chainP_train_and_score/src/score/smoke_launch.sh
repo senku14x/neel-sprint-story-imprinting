@@ -3,7 +3,7 @@
 #   smoke_launch.sh GPU CPUS [HANDBACK_FILE]      e.g. smoke_launch.sh 0 0-47,96-143 /root/runs/sw041/full/ALLOW_gpu0
 set -eu
 GPU=$1; CPUS=$2; HB=${3:-}
-KEY=/root/.ssh/id_ed25519; PORT=<port>; HOST=root@<box-ip>
+KEY=/root/.ssh/id_ed25519; PORT=<port>; HOST=root@<node-ip>
 SSH=(ssh -i $KEY -p $PORT -o ConnectTimeout=20 -o ServerAliveInterval=30 $HOST)
 SRC="/workspace/Neel Sprint/experiments/sprint_work/042_chainP_train_and_score/src/score/"
 BOX1=/workspace/runs_executor/sw042/score; NODE=/root/runs/sw042/score

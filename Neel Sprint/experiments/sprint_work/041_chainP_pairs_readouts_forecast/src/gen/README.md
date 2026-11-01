@@ -85,14 +85,14 @@ python3 -I build_specs_tonyN.py [--sample 50 --seed <S>]          # -> /workspac
 python3 -I build_specs_p.py                                       # needs plans_all.jsonl; --plans-ideation24 for the 24 smoke specs
 # ship code + specs to the node
 SSH="ssh -i /root/.ssh/id_ed25519 -p <port>"
-rsync -a --exclude __pycache__ -e "$SSH" ./ root@<box-ip>:/root/runs/sw041/gen_code/
-rsync -a -e "$SSH" /workspace/runs_executor/sw041/gen/specs/ root@<box-ip>:/root/runs/sw041/gen/specs/
+rsync -a --exclude __pycache__ -e "$SSH" ./ root@<node-ip>:/root/runs/sw041/gen_code/
+rsync -a -e "$SSH" /workspace/runs_executor/sw041/gen/specs/ root@<node-ip>:/root/runs/sw041/gen/specs/
 # node: one corpus per GPU (GPUs 0-1 -> CPUs 0-47,96-143; GPUs 2-3 -> 48-95,144-191)
 bash /root/runs/sw041/gen_code/launch.sh 2 48-95 /root/runs/sw041/gen/logs/mainA.log \
      --tag mainA --mode chainp --specs /root/runs/sw041/gen/specs/specs_mainA.jsonl
 # port check of Tony's N (separate agent): --tag portcheck_tonyN --mode tony --specs <sample file>
 # pull back, then gate on the manifest
-rsync -a -e "$SSH" root@<box-ip>:/root/runs/sw041/gen/ /workspace/runs_executor/sw041/gen/
+rsync -a -e "$SSH" root@<node-ip>:/root/runs/sw041/gen/ /workspace/runs_executor/sw041/gen/
 python3 -I verify_manifest.py /workspace/runs_executor/sw041/gen/mainA
 ```
 
