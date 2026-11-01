@@ -34,4 +34,14 @@ You start the write-up while they land, and fold each result in as its `analysis
 3. Write `notes/<date>_ideation-12_up_to_speed.md`: the deck outline, what has landed, what is still running, open decisions.
 4. **Stop and wait for the user** before building slides.
 
+**A Codex session has already done much of the learning pass** in `_sessions/codex_ideation/notes/` (22:07–22:31 UTC on 31 Oct):
+- a 44-slide outline with three claims, in `2026-10-31_ideation-12_up_to_speed.md`;
+- inventories;
+- a docx chain map;
+- a Tony reconciliation;
+- an audit of ideation-11's draft figures, listing exact repairs (logged in mistakes.md);
+- a headline provenance check.
+
+Start from its outline instead of redoing the pass. Treat everything there as unverified: check each number against its analysis.md before it goes in the deck. Codex has no Artifact tool, so you build the deck.
+
 Keep a decisions log. Every time comes from `date -u`.

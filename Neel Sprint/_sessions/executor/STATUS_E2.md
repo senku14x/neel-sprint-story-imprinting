@@ -1,5 +1,7 @@
 # STATUS — E2 (Lane M, mechanism), executor-14
 
+_**After a compaction read `_sessions/executor/notes/2026-11-01_E2b_RESUME.md` first** (current state at 1 Nov ≈01:55: sw038 / sw039 done and published, sw082 judging, node SAFE_TO_CLOSE)._
+
 _Rewritten 31 Oct 2026 ≈21:20 UTC by executor-14 (took over E2 after the account switch; previous E2 = executor-11, whose close-out is summarised in SESSIONS.md and `notes/2026-10-31_E2_summary.md`). Not compacted. Context doc (every event, agent ID, path): `_sessions/executor/notes/2026-10-31_E2b_context.md`. Transcript: `/root/.claude/projects/-workspace-Neel-Sprint--sessions-executor/5622efb5-0dd4-4fc9-82e1-0f1e1a471bf7.jsonl`. Day log: `/workspace/runs_executor/day_2026-10-31_E2/DECISIONS.md` D83–D86._
 
 ## Done this session (all headlines blind-recomputed; analysis.md, ledger, navigation, READMEs written)
@@ -19,16 +21,17 @@ _Rewritten 31 Oct 2026 ≈21:20 UTC by executor-14 (took over E2 after the accou
 - Node GPUs 0–3: idle (nothing queued). Box-1 pull loop PID 4101966 still running (`/workspace/runs_executor/day_2026-10-31_E2/status/pull.heartbeat`). E2 activations upload (executor-11's act_resume.sh, PID 4101931): check `/workspace/runs_executor/E2_activations/UPLOAD_DONE`.
 
 ## Waiting on the user
-1. **sw082 (was sw071) = sw034 on v2** (proposed ≈20:30): new v2 polished / casual × helps / refuses histories, asT-reg / asT-cond / header arms in Tony's N / NB / X / XB, 1.0× matched controls, forced primary, sw034's frozen rule; plus an optional fixed-reply-opener arm (separates "own past polish" from "the reply's own register"). ≈ 3.5–4 GPU-h on the node. Needs a go + whether to include the opener arm.
-2. Release decisions: the H100 node (close-out check first: list every `/root/runs/sw0*` folder vs `/workspace`, `SAFE_TO_CLOSE`; stop the pull loop with `touch /workspace/runs_executor/day_2026-10-31_E2/status/STOP_pull`), the idle H200 pod (<host>).
+0. **DONE since this section was written:** sw082 finished and blind-recomputed (analysis.md; ledger); report v2 published with an sw082 section; node SAFE_TO_CLOSE (D96); upload done. Remaining: H200 pod (E4's file), optional follow-ups.
+1. ~~**sw082 (was sw071) = sw034 on v2** (proposed ≈20:30): new v2 polished / casual × helps / refuses histories, asT-reg / asT-cond / header arms in Tony's N / NB / X / XB, 1.0× matched controls, forced primary, sw034's frozen rule; plus an optional fixed-reply-opener arm (separates "own past polish" from "the reply's own register"). ≈ 3.5–4 GPU-h on the node. Needs a go + whether to include the opener arm.
+2. Release decisions: the H100 node (close-out check first: list every `/root/runs/sw0*` folder vs `/workspace`, `SAFE_TO_CLOSE`; stop the pull loop with `touch /workspace/runs_executor/day_2026-10-31_E2/status/STOP_pull`), the idle H200 pod (b0fa70edf0f8).
 
 ## Next (in order)
 1. Publish the report; link it.
-2. Final laneM push (`/workspace/runs_executor/day_2026-10-31_E2/push_laneM.sh "<subject>"`; check `git -C /root/gh/nsi_laneM show HEAD | grep -cE "103\.207|62\.169|b0fa70|<port>|visheshgupta"` = 0).
+2. Final laneM push (`/workspace/runs_executor/day_2026-10-31_E2/push_laneM.sh "<subject>"`; check `git -C /root/gh/nsi_laneM show HEAD | grep -cE "103\.207|62\.169|b0fa70|12050|visheshgupta"` = 0).
 3. sw071 if approved (spec first, frozen before output; prediction asked once).
 4. Open leads from today: a ladder with histories selected on judged hostility × helpfulness (the parent cannot write thorough contempt on request); the asT plateau's cause; why hdA0's L40–63-only patch moves forced 0.21 but free 0.75.
 
 ## Infrastructure
-- Node: `ssh -o BatchMode=yes -p <port> -i /root/.ssh/id_ed25519 root@<box-ip>` (<host>; rules in `/workspace/runs_executor/day_2026-10-31_E2/CONVENTIONS_E2.md`). Outputs `/root/runs/sw03{8,9}/` → `/workspace/runs_executor/sw03{8,9}/`.
+- Node: `ssh -o BatchMode=yes -p <port> -i /root/.ssh/id_ed25519 root@<box-ip>` (f93b9ec81bfa; rules in `/workspace/runs_executor/day_2026-10-31_E2/CONVENTIONS_E2.md`). Outputs `/root/runs/sw03{8,9}/` → `/workspace/runs_executor/sw03{8,9}/`.
 - Watchers used today (all finished): `/workspace/runs_executor/sw038/watch/watch_{p0,p1,s39_L2}.sh`; node waiter `039_*/src/p1/jobs/wait_gpu_then.sh`.
 - Judging: box 1, `OPENROUTER_API_KEY_E2` (E2 spend $13.7 of $40 at 20:45; sw038 $1.31, sw039 ≈ $1.3).

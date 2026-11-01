@@ -1,6 +1,18 @@
 # Codex write-up hub — ideation-12
 
-Updated 2026-10-31T22:18:14Z (`date -u`). Current Codex companion to ideation-11's historical hub. All session outputs live in `_sessions/codex_ideation/`, as the user requested. No experiments or slides were run.
+**Latest presentation proposal:** [revised 46-slide architecture with reasons](2026-10-31_ideation-12_revised_deck_architecture.md), alongside the [measurement guide](2026-10-31_ideation-12_measurement_guide.md). Earlier outline retained below as history.
+
+Updated 2026-10-31T23:17:42Z (`date -u`). Current Codex companion to ideation-11's historical hub. All session outputs live in `_sessions/codex_ideation/`, as the user requested. No experiments or slides were run.
+
+## New results incorporated — 2026-10-31T23:17:42Z
+
+See [new-results review](2026-10-31_ideation-12_new_results_review.md) and independent [sw075](2026-10-31_sw075_census_independent_redteam.md), [sw072](2026-10-31_ideation-12_sw072_independent_review.md), [sw077/sw073](2026-10-31_ideation-12_sw077_sw073_review.md) checks.
+
+- **A / conduct:** sw077 substantially strengthens the link from earlier voice to transferred flattery. Casual history helps correction in main/matched but hurts it in mirror, with the same inputs. Whole voice remains bundled; honest control is small but nonzero.
+- **B / characterization:** sw075 adds Axis predictive information beyond five judged fields. The frozen rule label does not establish a distinct persona cause; a high-validity calibrated null is easier to reject, not most favorable to conduct-only. Missing voice dimensions remain possible.
+- **C / mechanism:** sw072 late-band intervention contributes to the assignment asymmetry. Mid-band ablation is an expression-floor result;40–55 also removes most conduct capture. Orchestrator verification completed; onset and localization caveats retained.
+- **A / default:** sw073 is measured but under a provenance hold; its MIXED label does not settle the cause of the initial lean.
+-071 battery / 074 outcome scores remain pending. 080/081 still have template analyses. E2 polish-v2 renumbered 082, resolving the numeric collision; verify final raw manifests after the move.
 
 ## Read first
 
@@ -44,7 +56,7 @@ P0 is retrodiction. P3 wins one scored main-habit outcome in sw042, but the poli
 
 sw055 gives breadth beyond seed 0, but 12 organisms are not 12 independent seeds. R014's run variation means script/scenario CIs cannot substitute for training uncertainty. Pirate sw070 adds a second family and new scenarios. DeepSeek R009 is a second-model observation, not a size-controlled comparison. Kimi R013's raw +0.94 and in-role +0.07 must stay together.
 
-Tony now uses our exact v2 source scenarios: hashes and all 64 selected user contexts match. Histories, judge filtering, reply length, C proxy and controls differ. Label this **shared scenarios, Tony's protocol**. A durable private subset is in `tony_e12_reviewed_18ce1bb/`; the manifest pins the source commit. Our one-protocol battery and band check still await analyses.
+Tony now uses our exact v2 source scenarios: hashes and all 64 selected user contexts match. Histories, judge filtering, reply length, C proxy and controls differ. Label this **shared scenarios, Tony's protocol**. A durable private subset is in `tony_e12_reviewed_18ce1bb/`; the manifest pins the source commit. Our one-protocol battery awaits analysis; the band check now has a provisional analysis, reviewed above.
 
 ## Landing state
 
@@ -55,11 +67,15 @@ Tony now uses our exact v2 source scenarios: hashes and all 64 selected user con
 | sw079b | Addendum landed; no blind recompute; disagreement judging incomplete | Provisional adjunct |
 | sw057 | Lens repair written; other verification unfinished | Provisional reader evidence |
 | sw076 | Analysis and blind headline check present | Incorporated with content-filter caveat |
-| sw071 E5 battery, sw072, sw073, sw075, sw077 | No substantive analysis at this refresh | Pending question slots |
-| sw074 | Forecast frozen; outcome-scored analysis absent | Preserve freeze; success pending |
+| sw071 E5 battery | No substantive analysis | Pending |
+| sw072 | Revised analysis; blind/adversarial verification complete | Scoped band evidence |
+| sw073 | Substantive analysis; writer provenance hold | Not a deck headline yet |
+| sw075 | Blind headline check; interpretation corrected by Codex review | Correlational predictive result |
+| sw077 | Blind and adversarial verification, fresh raw recount | Main conduct-transfer result |
+| sw074 | Forecast frozen and verified; outcome-scored analysis absent | Success pending |
 | sw080 | Approved; running marker; analysis template | Pending |
-| sw081 | Approval recorded; own documents scaffolding | Pending |
-| sw071 E2 polish-v2 | Separate prep folder; no analysis | Do not merge with E5's sw071 |
+| sw081 | Approved/running per E4; analysis template | Pending |
+| sw082 E2 polish-v2 | Renumbered from071; no analysis | Use 082 paths and manifests |
 
 These are file observations, not certification of live GPU state. No executor messages, scheduling changes or experiments were performed here.
 
@@ -78,3 +94,9 @@ Corrections are kept in Codex files to respect the user's output-ownership reque
 ## Stop and resume
 
 The requested stopping point is **outline review before slide construction**. On resume, read STATUS, this hub, the decisions log and the outline; rescan late analyses. After the user's review, repair figures, select seeded qualitative samples, and build/export the presentation. Scientific open questions do not authorize new experiments.
+
+Latest verification at 2026-10-31T23:19:20Z: sw072 revised after blind/adversarial checks; sw073 numbers independently recounted but writer-provenance hold persists. See [review](2026-10-31_ideation-12_new_results_review.md).
+
+## Update 2026-11-01T00:33:22Z — new slide-material review
+
+The current deliverable is Word slide material, not a deck. This turn stops at narrative options, outline and naming. See [current narrative options](2026-11-01_narrative_options.md), [recommended outline](2026-11-01_recommended_outline.md) and [late-result corrections](2026-11-01_late_result_notes.md). sw080 is now written and independently recounted: prompted current-reply choice survives in one assignment while spontaneous expression does not; the other assignment fails its gate. sw057 c1/c2 are recomputed and its no-prediction wording is corrected. The six named Tony branches are being refreshed; new E12 corrections narrow the constant-default, surprise and training-order accounts. Historical pending statements above remain dated records, not current status.

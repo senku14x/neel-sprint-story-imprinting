@@ -1,0 +1,846 @@
+{
+  "created_utc": "2026-11-01T02:11:02Z",
+  "status": "samples_dumped_not_interpreted",
+  "seed": 20261102,
+  "existing_packet": "notes/docx_build/selected_samples.json",
+  "existing_packet_sha256": "1246676ad81ad8da2367a23f8cba036e989ec9649cb9b21173a348fda337105e",
+  "sample_ids": "Q061–Q077",
+  "purpose": "Mechanical uniform sampling only; no content interpretation or quality selection; root will personally read outputs.",
+  "algorithm": "For each topic, local_seed=int(SHA256(\"20261102|topic\")[:16],16). Python random.Random(local_seed). Uniform choice from lexicographically sorted shared units, then the stated shared output index where applicable, then uniform rows sorted by namespaced source key within each predefined cell. Only source rows with sample=0 for generated conversations. No rejection or redraw based on text or labels.",
+  "source_files": [
+    "/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl",
+    "/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl",
+    "/workspace/runs_executor/sw073/gen/full/gen.jsonl",
+    "/workspace/runs_executor/sw072/box1/full_g0/rows.jsonl",
+    "/workspace/runs_executor/sw072/box1/full_g1/rows.jsonl",
+    "/workspace/runs_executor/sw057/c3/lens_b/readouts57b.jsonl",
+    "/workspace/runs_executor/sw050/chat/rollouts.jsonl"
+  ],
+  "topics": [
+    {
+      "topic": "training_story",
+      "n": 2,
+      "selection": "Separate A and B keyword strata, not uniform across all training stories. Each stratum contains source rows whose Assistant story text matches the case-insensitive whole-word regex \\b(?:bee|bees|crow|crows)\\b. Uniform source-row choice in each stratum, in A then B order; source_key is one-based line number.",
+      "source_paths": [
+        "/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl",
+        "/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl"
+      ],
+      "cells": [
+        "helpful bee / dismissive crow corpus",
+        "helpful crow / dismissive bee corpus"
+      ],
+      "comparison": "Unpaired training rows; no shared story is implied."
+    },
+    {
+      "topic": "neither_histories",
+      "n": 4,
+      "source_paths": [
+        "/workspace/runs_executor/sw073/gen/full/gen.jsonl"
+      ],
+      "filters": {
+        "arm_kind": "hist",
+        "model": "hdA0",
+        "readout": "forced",
+        "sample": 0
+      },
+      "cells": [
+        {
+          "version": "helpful"
+        },
+        {
+          "version": "n1"
+        },
+        {
+          "version": "n2"
+        },
+        {
+          "version": "n3"
+        }
+      ],
+      "unit": "sid",
+      "selection": "One uniformly chosen sid common to all four cells; one uniformly chosen row in each cell. No outcome filtering."
+    },
+    {
+      "topic": "layer_bands",
+      "n": 3,
+      "source_paths": [
+        "/workspace/runs_executor/sw072/box1/full_g0/rows.jsonl"
+      ],
+      "filters": {
+        "org": "hdA0",
+        "mode": "free",
+        "readout": "b2",
+        "cell": "dismissive",
+        "sample": 0
+      },
+      "cells": [
+        {
+          "variant": "F"
+        },
+        {
+          "variant": "mM"
+        },
+        {
+          "variant": "mL"
+        }
+      ],
+      "unit": "sid",
+      "selection": "One uniformly chosen sid common to all three variants in full_g0, then uniform row within each predefined variant/unit; all keys retain full_g0 namespace."
+    },
+    {
+      "topic": "reader_outputs",
+      "n": 4,
+      "source_paths": [
+        "/workspace/runs_executor/sw057/c3/lens_b/readouts57b.jsonl"
+      ],
+      "filters": {
+        "block": "inj",
+        "layer": 52
+      },
+      "cells": [
+        {
+          "org": "parent",
+          "cond": "asT+c1"
+        },
+        {
+          "org": "parent",
+          "cond": "asT-c1"
+        },
+        {
+          "org": "hdA0",
+          "cond": "asT+c1"
+        },
+        {
+          "org": "hdA0",
+          "cond": "asT-c1"
+        }
+      ],
+      "unit": "ctx",
+      "selection": "One uniformly chosen context common to the four cells, then one uniformly chosen shared readouts index from the common valid indices, then uniform source row within each cell/context. These are instrument outputs, not original Assistant replies."
+    },
+    {
+      "topic": "cross_family",
+      "n": 4,
+      "source_paths": [
+        "/workspace/runs_executor/sw050/chat/rollouts.jsonl"
+      ],
+      "filters": {
+        "trigger": true,
+        "sample": 0
+      },
+      "cells": [
+        {
+          "model": "sflA",
+          "cond": "default"
+        },
+        {
+          "model": "sflA",
+          "cond": "S3_full_SFL"
+        },
+        {
+          "model": "sflB",
+          "cond": "default"
+        },
+        {
+          "model": "sflB",
+          "cond": "S3_full_SFL"
+        }
+      ],
+      "unit": "script_id",
+      "selection": "One uniformly chosen script_id common to all cells, then one uniformly chosen shared Assistant turn from turns 3, 4 and 5, then uniform source row within each cell. Store the full source conversation as well as the selected turn; use turn-specific labels and mark conversation-level judges separately."
+    }
+  ],
+  "no_optional_failure_strata": true,
+  "notes": [
+    "No previously selected Q001–Q060 sample or current root manifest will be changed.",
+    "Schema inspection preceded this plan, including the first raw record and metadata/cell counts; no sample was drawn or preferred by output quality.",
+    "Saved history and judge records will be joined by exact recorded keys where available; missing metadata will be labelled, not invented."
+  ],
+  "pre_draw_amendments": [
+    {
+      "utc": "2026-11-01T02:13:33Z",
+      "reason": "common72.py explicitly keeps an organism’s variant contrast inside one GPU. full_g1 contains only repeated full-adapter references for this organism; use full_g0 for the matched comparison, retaining GPU namespace in every key. No outcomes were inspected for this choice.",
+      "change": "layer_bands source pool restricted to full_g0; full_g1 schema/cell availability inspected, not sampled."
+    }
+  ],
+  "source_hashes": {
+    "/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl": "17fa909d7037dcf3ec7ce0894e3e813cfdad5dd6c25aeb9e1117bf899b21409b",
+    "/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl": "3ed6742267b140c076289e9ee32e6144c6b7947f32b4d1c4c58a89e64aa95377",
+    "/workspace/runs_executor/sw073/gen/full/gen.jsonl": "69e7be32263960cc60d29ffc5bde51bf1c5aa125feba62d1eae010fc3886edf3",
+    "/workspace/runs_executor/sw072/box1/full_g0/rows.jsonl": "5d0486bd9e9aa408c0970bf594eaef5e805794f6686c8bc76938ed366d789577",
+    "/workspace/runs_executor/sw057/c3/lens_b/readouts57b.jsonl": "f4c883b5d2cadf81f632615017d6a955c790029dfe1132784d8d7f2773632009",
+    "/workspace/runs_executor/sw050/chat/rollouts.jsonl": "a9e0049c2f03c5436c3165c34a5f7636c327274b8c44b051579df9316359d5c3",
+    "/workspace/Neel Sprint/_sessions/codex_ideation/notes/2026-11-01_models_and_naming.json": "7d7974ddae4a0fdea155b0c5c4c4cca614f3e75cf49b84f015fd992244ef0051",
+    "/workspace/runs_executor/day_2026-10-31_E5/adapters_registry.json": "32910e4ec87def56c52d13c2eae1561d5b1cab26b60d10ce366aa5bb0d0aee39",
+    "/workspace/runs_executor/sw073/gen/full/labels.jsonl": "c9191977af66bd1ad78f8e96d05b2aa4a99be0a7488883e6647a1c343ab81658",
+    "/workspace/runs_executor/sw073/write/prof/kept_hist.jsonl": "239759b762020a71f684a254536b4c66b4bd1ae6f82a0d5abaa33125b574dd9f",
+    "/workspace/runs_executor/sw072/inputs/contexts.jsonl": "b5483ef31a66a59c1028fc3001c94d265e6b16bf2dfeb2cc854452889540704c",
+    "/workspace/runs_executor/sw057/c3/inputs57.json": "02adec5681145b15060292a499dcba6bab9747baf4d154c2f3578876b575d144",
+    "/workspace/runs_executor/sw050/post/conv_labels.jsonl": "28413ea57225353e0b35a50061e01df12014556431e8391e8d6d5c4398592ef7",
+    "/workspace/Neel Sprint/experiments/sprint_work/057_readers_at_s3_sites/src/olens.py": "b55631af4bd7ed7739d167c5dd5f04ef3a2afdef2f82e3028d1ff277406855c8",
+    "/workspace/runs_executor/sw073/gen/full/j_audit.jsonl": "aa0840cd02279d820a9b0145633875135b3b5c70cee0ffafd6e9b6aa3f31a366",
+    "/workspace/runs_executor/sw073/gen/full/j_rest.jsonl": "4d86d0b383de6fcd0a0148ec9659b3f7aa975196b61a6372c877c1fd40558b4d",
+    "/workspace/runs_executor/sw072/box1/full_g0/judged_habit.jsonl": "3df014196c0b052769c04883cf0330dca15733f6d86258a34939082a8055e607",
+    "/workspace/runs_executor/sw050/post/judged.jsonl": "e2639d2bc8f3fbc042747109a381f5b8bdca060a7e7a41bc49f3c373c36b7071"
+  },
+  "pools": [
+    {
+      "topic": "training_story",
+      "cell_rows": [
+        4158,
+        4126
+      ],
+      "shared_units": null,
+      "shared_unit_count": null
+    },
+    {
+      "topic": "neither_histories",
+      "cell_rows": [
+        61,
+        48,
+        39,
+        64
+      ],
+      "shared_units": [
+        "anniversary_road_trip_wine_country_04",
+        "backup_family_photos_04",
+        "baking_one_pan_03",
+        "balcony_string_lights_03",
+        "bathroom_vanity_refresh_03",
+        "beginner_sauce_making_01",
+        "budget_weekend_amsterdam_02",
+        "busy_parent_home_workouts_04",
+        "carry_on_packing_list_05",
+        "chemistry_flashcards_05",
+        "closet_organization_small_05",
+        "cyclist_commute_training_02",
+        "dog_park_morning_routine_02",
+        "first_flat_wallpaper_05",
+        "fish_tank_lighting_01",
+        "gluten_free_birthday_cake_05",
+        "home_office_monitor_flicker_05",
+        "kitchen_drawer_organisation_01",
+        "lab_report_data_visuals_02",
+        "lisbon_three_day_itinerary_05",
+        "living_room_gallery_wall_05",
+        "living_room_painting_05",
+        "rabbit_playpen_setup_05",
+        "reptile_habitat_lighting_04",
+        "senior_dog_stairs_01",
+        "slow_cooker_prep_01",
+        "small_kitchen_renovation_02",
+        "sourdough_starter_troubleshooting_03",
+        "splitting_roommate_bills_03",
+        "tv_streaming_setup_03"
+      ],
+      "shared_unit_count": 30
+    },
+    {
+      "topic": "layer_bands",
+      "cell_rows": [
+        55,
+        55,
+        55
+      ],
+      "shared_units": [
+        "anniversary_road_trip_wine_country_04",
+        "backup_family_photos_04",
+        "baking_one_pan_03",
+        "balcony_string_lights_03",
+        "bathroom_vanity_refresh_03",
+        "beginner_kettlebell_routine_04",
+        "budget_phone_for_grandma_02",
+        "budget_weekend_amsterdam_02",
+        "busy_parent_home_workouts_04",
+        "car_running_costs_04",
+        "carry_on_packing_list_05",
+        "cat_litter_box_odor_04",
+        "chemistry_flashcards_05",
+        "conference_talk_slides_05",
+        "cyclist_commute_training_02",
+        "dog_park_morning_routine_02",
+        "electric_bill_shock_04",
+        "first_credit_card_avoidance_bills_04",
+        "first_flat_wallpaper_05",
+        "first_savings_account_03",
+        "fish_tank_cycle_02",
+        "fish_tank_lighting_01",
+        "flight_layover_choice_02",
+        "florida_family_resort_05",
+        "freelancer_irregular_income_buffer_04",
+        "gluten_free_birthday_cake_05",
+        "grocery_budget_reset_01",
+        "history_essay_outline_02",
+        "home_office_monitor_flicker_05",
+        "hotel_gym_travel_04",
+        "kitchen_drawer_organisation_01",
+        "knife_skills_practice_plan_01",
+        "lab_report_data_visuals_02",
+        "language_learning_routine_05",
+        "laptop_slow_after_update_03",
+        "lisbon_three_day_itinerary_05",
+        "living_room_gallery_wall_05",
+        "living_room_painting_05",
+        "night_class_notes_03",
+        "obstacle_course_prep_04",
+        "office_worker_strength_plan_05",
+        "phone_storage_full_05",
+        "quick_lunch_prep_02",
+        "rabbit_playpen_setup_05",
+        "reptile_habitat_lighting_04",
+        "senior_dog_stairs_01",
+        "senior_walking_group_plan_03",
+        "slow_cooker_prep_01",
+        "sourdough_starter_troubleshooting_03",
+        "splitting_roommate_bills_03",
+        "study_group_note_sharing_04",
+        "swing_dance_cardio_01",
+        "thesis_lit_review_sources_05",
+        "tokyo_food_reservation_help_03",
+        "tv_streaming_setup_03"
+      ],
+      "shared_unit_count": 55
+    },
+    {
+      "topic": "reader_outputs",
+      "cell_rows": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "shared_units": [
+        "anniversary_road_trip_wine_country_01",
+        "backup_family_photos_01",
+        "baking_one_pan_01",
+        "balcony_string_lights_01",
+        "bathroom_vanity_refresh_01",
+        "beginner_kettlebell_routine_01",
+        "beginner_sauce_making_01",
+        "budget_phone_for_grandma_01",
+        "budget_weekend_amsterdam_01",
+        "busy_parent_home_workouts_01",
+        "car_running_costs_01",
+        "carry_on_packing_list_01",
+        "cat_litter_box_odor_01",
+        "chemistry_flashcards_01",
+        "closet_organization_small_01",
+        "conference_talk_slides_01",
+        "cyclist_commute_training_01",
+        "dog_park_morning_routine_01",
+        "dorm_wifi_printer_setup_01",
+        "electric_bill_shock_01",
+        "email_inbox_overhaul_01",
+        "first_credit_card_avoidance_bills_01",
+        "first_flat_wallpaper_01",
+        "first_savings_account_01",
+        "fish_tank_cycle_01",
+        "fish_tank_lighting_01",
+        "flight_layover_choice_01",
+        "florida_family_resort_01",
+        "freelancer_irregular_income_buffer_01",
+        "fresh_herb_usage_01",
+        "gluten_free_birthday_cake_01",
+        "grocery_budget_reset_01",
+        "history_essay_outline_01",
+        "home_office_monitor_flicker_01",
+        "hotel_gym_travel_01",
+        "kitchen_drawer_organisation_01",
+        "knife_skills_practice_plan_01",
+        "kyoto_ryokan_booking_01",
+        "lab_report_data_visuals_01",
+        "language_learning_routine_01",
+        "laptop_slow_after_update_01",
+        "lisbon_three_day_itinerary_01",
+        "living_room_gallery_wall_01",
+        "living_room_painting_01",
+        "new_puppy_supply_shopping_01",
+        "night_class_notes_01",
+        "obstacle_course_prep_01",
+        "office_worker_strength_plan_01",
+        "phone_storage_full_01",
+        "quick_lunch_prep_01",
+        "rabbit_playpen_setup_01",
+        "reptile_habitat_lighting_01",
+        "senior_dog_stairs_01",
+        "senior_walking_group_plan_01",
+        "slow_cooker_prep_01",
+        "small_kitchen_renovation_01",
+        "sourdough_starter_troubleshooting_01",
+        "splitting_roommate_bills_01",
+        "student_weekly_cash_envelope_01",
+        "study_group_note_sharing_01",
+        "swing_dance_cardio_01",
+        "thesis_lit_review_sources_01",
+        "tokyo_food_reservation_help_01",
+        "tv_streaming_setup_01"
+      ],
+      "shared_unit_count": 64
+    },
+    {
+      "topic": "cross_family",
+      "cell_rows": [
+        320,
+        64,
+        320,
+        64
+      ],
+      "shared_units": [
+        "anniversary_road_trip_wine_country_01",
+        "backup_family_photos_01",
+        "baking_one_pan_01",
+        "balcony_string_lights_01",
+        "bathroom_vanity_refresh_01",
+        "beginner_kettlebell_routine_01",
+        "beginner_sauce_making_01",
+        "budget_phone_for_grandma_01",
+        "budget_weekend_amsterdam_01",
+        "busy_parent_home_workouts_01",
+        "car_running_costs_01",
+        "carry_on_packing_list_01",
+        "cat_litter_box_odor_01",
+        "chemistry_flashcards_01",
+        "closet_organization_small_01",
+        "conference_talk_slides_01",
+        "cyclist_commute_training_01",
+        "dog_park_morning_routine_01",
+        "dorm_wifi_printer_setup_01",
+        "electric_bill_shock_01",
+        "email_inbox_overhaul_01",
+        "first_credit_card_avoidance_bills_01",
+        "first_flat_wallpaper_01",
+        "first_savings_account_01",
+        "fish_tank_cycle_01",
+        "fish_tank_lighting_01",
+        "flight_layover_choice_01",
+        "florida_family_resort_01",
+        "freelancer_irregular_income_buffer_01",
+        "fresh_herb_usage_01",
+        "gluten_free_birthday_cake_01",
+        "grocery_budget_reset_01",
+        "history_essay_outline_01",
+        "home_office_monitor_flicker_01",
+        "hotel_gym_travel_01",
+        "kitchen_drawer_organisation_01",
+        "knife_skills_practice_plan_01",
+        "kyoto_ryokan_booking_01",
+        "lab_report_data_visuals_01",
+        "language_learning_routine_01",
+        "laptop_slow_after_update_01",
+        "lisbon_three_day_itinerary_01",
+        "living_room_gallery_wall_01",
+        "living_room_painting_01",
+        "new_puppy_supply_shopping_01",
+        "night_class_notes_01",
+        "obstacle_course_prep_01",
+        "office_worker_strength_plan_01",
+        "phone_storage_full_01",
+        "quick_lunch_prep_01",
+        "rabbit_playpen_setup_01",
+        "reptile_habitat_lighting_01",
+        "senior_dog_stairs_01",
+        "senior_walking_group_plan_01",
+        "slow_cooker_prep_01",
+        "small_kitchen_renovation_01",
+        "sourdough_starter_troubleshooting_01",
+        "splitting_roommate_bills_01",
+        "student_weekly_cash_envelope_01",
+        "study_group_note_sharing_01",
+        "swing_dance_cardio_01",
+        "thesis_lit_review_sources_01",
+        "tokyo_food_reservation_help_01",
+        "tv_streaming_setup_01"
+      ],
+      "shared_unit_count": 64
+    }
+  ],
+  "pool_frozen_utc": "2026-11-01T02:13:39Z",
+  "samples": [
+    {
+      "sample_id": "Q061",
+      "topic": "training_story",
+      "source_path": "/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl",
+      "source_key": "line:006746",
+      "raw_source_key": null,
+      "source_line": 6746,
+      "source_row_sha256": "2f9350070f0dc0a8aeb19f3158828bc946c16c49ea65d9c401d4f6969658350e",
+      "source_sha256": "17fa909d7037dcf3ec7ce0894e3e813cfdad5dd6c25aeb9e1117bf899b21409b",
+      "shared_unit": null,
+      "local_seed": 6663390680793084272,
+      "cell_index": 0,
+      "cell": "helpful bee / dismissive crow corpus",
+      "pool_shared_units": null,
+      "pool_rows_in_stratum": 4158,
+      "selected_within_unit": 4158,
+      "output_index": null,
+      "assistant_turn": null,
+      "selection": "Separate A and B keyword strata, not uniform across all training stories. Each stratum contains source rows whose Assistant story text matches the case-insensitive whole-word regex \\b(?:bee|bees|crow|crows)\\b. Uniform source-row choice in each stratum, in A then B order; source_key is one-based line number."
+    },
+    {
+      "sample_id": "Q062",
+      "topic": "training_story",
+      "source_path": "/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl",
+      "source_key": "line:006105",
+      "raw_source_key": null,
+      "source_line": 6105,
+      "source_row_sha256": "d872a2ff7e34a21f0474f5cd80261aeaf03c65d26ec2c6549c675c55cf20c489",
+      "source_sha256": "3ed6742267b140c076289e9ee32e6144c6b7947f32b4d1c4c58a89e64aa95377",
+      "shared_unit": null,
+      "local_seed": 6663390680793084272,
+      "cell_index": 1,
+      "cell": "helpful crow / dismissive bee corpus",
+      "pool_shared_units": null,
+      "pool_rows_in_stratum": 4126,
+      "selected_within_unit": 4126,
+      "output_index": null,
+      "assistant_turn": null,
+      "selection": "Separate A and B keyword strata, not uniform across all training stories. Each stratum contains source rows whose Assistant story text matches the case-insensitive whole-word regex \\b(?:bee|bees|crow|crows)\\b. Uniform source-row choice in each stratum, in A then B order; source_key is one-based line number."
+    },
+    {
+      "sample_id": "Q063",
+      "topic": "neither_histories",
+      "source_path": "/workspace/runs_executor/sw073/gen/full/gen.jsonl",
+      "source_key": "sw073|full|hist|forced|hdA0|helpful|fish_tank_lighting_01|s0",
+      "raw_source_key": "sw073|full|hist|forced|hdA0|helpful|fish_tank_lighting_01|s0",
+      "source_line": 175,
+      "source_row_sha256": "696d649d90244afe7b8a13214dd26cbbaa6586879b40041e159d7bdb2db10796",
+      "source_sha256": "69e7be32263960cc60d29ffc5bde51bf1c5aa125feba62d1eae010fc3886edf3",
+      "shared_unit": "fish_tank_lighting_01",
+      "local_seed": 9672950107175632877,
+      "cell_index": 0,
+      "cell": {
+        "version": "helpful"
+      },
+      "pool_shared_units": 30,
+      "pool_rows_in_stratum": 61,
+      "selected_within_unit": 1,
+      "output_index": null,
+      "assistant_turn": null,
+      "selection": "One uniformly chosen sid common to all four cells; one uniformly chosen row in each cell. No outcome filtering."
+    },
+    {
+      "sample_id": "Q064",
+      "topic": "neither_histories",
+      "source_path": "/workspace/runs_executor/sw073/gen/full/gen.jsonl",
+      "source_key": "sw073|full|hist|forced|hdA0|n1|fish_tank_lighting_01|s0",
+      "raw_source_key": "sw073|full|hist|forced|hdA0|n1|fish_tank_lighting_01|s0",
+      "source_line": 287,
+      "source_row_sha256": "c206c0642b9f0e82ca761c3382b899823a259e7f187e5c6b6c1058254af0cb21",
+      "source_sha256": "69e7be32263960cc60d29ffc5bde51bf1c5aa125feba62d1eae010fc3886edf3",
+      "shared_unit": "fish_tank_lighting_01",
+      "local_seed": 9672950107175632877,
+      "cell_index": 1,
+      "cell": {
+        "version": "n1"
+      },
+      "pool_shared_units": 30,
+      "pool_rows_in_stratum": 48,
+      "selected_within_unit": 1,
+      "output_index": null,
+      "assistant_turn": null,
+      "selection": "One uniformly chosen sid common to all four cells; one uniformly chosen row in each cell. No outcome filtering."
+    },
+    {
+      "sample_id": "Q065",
+      "topic": "neither_histories",
+      "source_path": "/workspace/runs_executor/sw073/gen/full/gen.jsonl",
+      "source_key": "sw073|full|hist|forced|hdA0|n2|fish_tank_lighting_01|s0",
+      "raw_source_key": "sw073|full|hist|forced|hdA0|n2|fish_tank_lighting_01|s0",
+      "source_line": 385,
+      "source_row_sha256": "dce2a5af365b75787a1e4211c64c679a6bb02d42da142a14171423da553ea39f",
+      "source_sha256": "69e7be32263960cc60d29ffc5bde51bf1c5aa125feba62d1eae010fc3886edf3",
+      "shared_unit": "fish_tank_lighting_01",
+      "local_seed": 9672950107175632877,
+      "cell_index": 2,
+      "cell": {
+        "version": "n2"
+      },
+      "pool_shared_units": 30,
+      "pool_rows_in_stratum": 39,
+      "selected_within_unit": 1,
+      "output_index": null,
+      "assistant_turn": null,
+      "selection": "One uniformly chosen sid common to all four cells; one uniformly chosen row in each cell. No outcome filtering."
+    },
+    {
+      "sample_id": "Q066",
+      "topic": "neither_histories",
+      "source_path": "/workspace/runs_executor/sw073/gen/full/gen.jsonl",
+      "source_key": "sw073|full|hist|forced|hdA0|n3|fish_tank_lighting_01|s0",
+      "raw_source_key": "sw073|full|hist|forced|hdA0|n3|fish_tank_lighting_01|s0",
+      "source_line": 475,
+      "source_row_sha256": "4b6ad3a32e4ee8269b964b3512420cd77eac241d64dbbef1410a0af663e58eab",
+      "source_sha256": "69e7be32263960cc60d29ffc5bde51bf1c5aa125feba62d1eae010fc3886edf3",
+      "shared_unit": "fish_tank_lighting_01",
+      "local_seed": 9672950107175632877,
+      "cell_index": 3,
+      "cell": {
+        "version": "n3"
+      },
+      "pool_shared_units": 30,
+      "pool_rows_in_stratum": 64,
+      "selected_within_unit": 1,
+      "output_index": null,
+      "assistant_turn": null,
+      "selection": "One uniformly chosen sid common to all four cells; one uniformly chosen row in each cell. No outcome filtering."
+    },
+    {
+      "sample_id": "Q067",
+      "topic": "layer_bands",
+      "source_path": "/workspace/runs_executor/sw072/box1/full_g0/rows.jsonl",
+      "source_key": "full_g0::sw072|b2|free|hdA0|F|dismissive|rabbit_playpen_setup_05|s0",
+      "raw_source_key": "sw072|b2|free|hdA0|F|dismissive|rabbit_playpen_setup_05|s0",
+      "source_line": 6396,
+      "source_row_sha256": "d1ffac4ffa57c438765647a4cba18f973a998942cf37c29c7be1a0969a9c3243",
+      "source_sha256": "5d0486bd9e9aa408c0970bf594eaef5e805794f6686c8bc76938ed366d789577",
+      "shared_unit": "rabbit_playpen_setup_05",
+      "local_seed": 314853504236825939,
+      "cell_index": 0,
+      "cell": {
+        "variant": "F"
+      },
+      "pool_shared_units": 55,
+      "pool_rows_in_stratum": 55,
+      "selected_within_unit": 1,
+      "output_index": null,
+      "assistant_turn": null,
+      "selection": "One uniformly chosen sid common to all three variants in full_g0, then uniform row within each predefined variant/unit; all keys retain full_g0 namespace."
+    },
+    {
+      "sample_id": "Q068",
+      "topic": "layer_bands",
+      "source_path": "/workspace/runs_executor/sw072/box1/full_g0/rows.jsonl",
+      "source_key": "full_g0::sw072|b2|free|hdA0|mM|dismissive|rabbit_playpen_setup_05|s0",
+      "raw_source_key": "sw072|b2|free|hdA0|mM|dismissive|rabbit_playpen_setup_05|s0",
+      "source_line": 6836,
+      "source_row_sha256": "e96d00f05a66e0a5fc69538659b3e7421122641cb91ce17080f048c3e59d3385",
+      "source_sha256": "5d0486bd9e9aa408c0970bf594eaef5e805794f6686c8bc76938ed366d789577",
+      "shared_unit": "rabbit_playpen_setup_05",
+      "local_seed": 314853504236825939,
+      "cell_index": 1,
+      "cell": {
+        "variant": "mM"
+      },
+      "pool_shared_units": 55,
+      "pool_rows_in_stratum": 55,
+      "selected_within_unit": 1,
+      "output_index": null,
+      "assistant_turn": null,
+      "selection": "One uniformly chosen sid common to all three variants in full_g0, then uniform row within each predefined variant/unit; all keys retain full_g0 namespace."
+    },
+    {
+      "sample_id": "Q069",
+      "topic": "layer_bands",
+      "source_path": "/workspace/runs_executor/sw072/box1/full_g0/rows.jsonl",
+      "source_key": "full_g0::sw072|b2|free|hdA0|mL|dismissive|rabbit_playpen_setup_05|s0",
+      "raw_source_key": "sw072|b2|free|hdA0|mL|dismissive|rabbit_playpen_setup_05|s0",
+      "source_line": 6726,
+      "source_row_sha256": "6155f8806d55ea275866b1a4c429587ab6a44d39ae5f1799f01370f27bc6019d",
+      "source_sha256": "5d0486bd9e9aa408c0970bf594eaef5e805794f6686c8bc76938ed366d789577",
+      "shared_unit": "rabbit_playpen_setup_05",
+      "local_seed": 314853504236825939,
+      "cell_index": 2,
+      "cell": {
+        "variant": "mL"
+      },
+      "pool_shared_units": 55,
+      "pool_rows_in_stratum": 55,
+      "selected_within_unit": 1,
+      "output_index": null,
+      "assistant_turn": null,
+      "selection": "One uniformly chosen sid common to all three variants in full_g0, then uniform row within each predefined variant/unit; all keys retain full_g0 namespace."
+    },
+    {
+      "sample_id": "Q070",
+      "topic": "reader_outputs",
+      "source_path": "/workspace/runs_executor/sw057/c3/lens_b/readouts57b.jsonl",
+      "source_key": "sw057|lensb|inj|parent|new_puppy_supply_shopping_01|L52|asT+c1",
+      "raw_source_key": "sw057|lensb|inj|parent|new_puppy_supply_shopping_01|L52|asT+c1",
+      "source_line": 3212,
+      "source_row_sha256": "e2d0735d7c824d1794f501929e4f4deb9c90411b8e2ef9b7a17abe30a979fdd6",
+      "source_sha256": "f4c883b5d2cadf81f632615017d6a955c790029dfe1132784d8d7f2773632009",
+      "shared_unit": "new_puppy_supply_shopping_01",
+      "local_seed": 12301071795894405790,
+      "cell_index": 0,
+      "cell": {
+        "org": "parent",
+        "cond": "asT+c1"
+      },
+      "pool_shared_units": 64,
+      "pool_rows_in_stratum": 64,
+      "selected_within_unit": 1,
+      "output_index": 2,
+      "assistant_turn": null,
+      "selection": "One uniformly chosen context common to the four cells, then one uniformly chosen shared readouts index from the common valid indices, then uniform source row within each cell/context. These are instrument outputs, not original Assistant replies."
+    },
+    {
+      "sample_id": "Q071",
+      "topic": "reader_outputs",
+      "source_path": "/workspace/runs_executor/sw057/c3/lens_b/readouts57b.jsonl",
+      "source_key": "sw057|lensb|inj|parent|new_puppy_supply_shopping_01|L52|asT-c1",
+      "raw_source_key": "sw057|lensb|inj|parent|new_puppy_supply_shopping_01|L52|asT-c1",
+      "source_line": 3214,
+      "source_row_sha256": "cd08f1b3c289a14727753bd2c04371eca836d58cb4608cb7b52aff571693ba77",
+      "source_sha256": "f4c883b5d2cadf81f632615017d6a955c790029dfe1132784d8d7f2773632009",
+      "shared_unit": "new_puppy_supply_shopping_01",
+      "local_seed": 12301071795894405790,
+      "cell_index": 1,
+      "cell": {
+        "org": "parent",
+        "cond": "asT-c1"
+      },
+      "pool_shared_units": 64,
+      "pool_rows_in_stratum": 64,
+      "selected_within_unit": 1,
+      "output_index": 2,
+      "assistant_turn": null,
+      "selection": "One uniformly chosen context common to the four cells, then one uniformly chosen shared readouts index from the common valid indices, then uniform source row within each cell/context. These are instrument outputs, not original Assistant replies."
+    },
+    {
+      "sample_id": "Q072",
+      "topic": "reader_outputs",
+      "source_path": "/workspace/runs_executor/sw057/c3/lens_b/readouts57b.jsonl",
+      "source_key": "sw057|lensb|inj|hdA0|new_puppy_supply_shopping_01|L52|asT+c1",
+      "raw_source_key": "sw057|lensb|inj|hdA0|new_puppy_supply_shopping_01|L52|asT+c1",
+      "source_line": 4556,
+      "source_row_sha256": "157b2d04c2ed8741a48287cdf7e1f1faa196bad45a1d4008ebe43eaf46b24a79",
+      "source_sha256": "f4c883b5d2cadf81f632615017d6a955c790029dfe1132784d8d7f2773632009",
+      "shared_unit": "new_puppy_supply_shopping_01",
+      "local_seed": 12301071795894405790,
+      "cell_index": 2,
+      "cell": {
+        "org": "hdA0",
+        "cond": "asT+c1"
+      },
+      "pool_shared_units": 64,
+      "pool_rows_in_stratum": 64,
+      "selected_within_unit": 1,
+      "output_index": 2,
+      "assistant_turn": null,
+      "selection": "One uniformly chosen context common to the four cells, then one uniformly chosen shared readouts index from the common valid indices, then uniform source row within each cell/context. These are instrument outputs, not original Assistant replies."
+    },
+    {
+      "sample_id": "Q073",
+      "topic": "reader_outputs",
+      "source_path": "/workspace/runs_executor/sw057/c3/lens_b/readouts57b.jsonl",
+      "source_key": "sw057|lensb|inj|hdA0|new_puppy_supply_shopping_01|L52|asT-c1",
+      "raw_source_key": "sw057|lensb|inj|hdA0|new_puppy_supply_shopping_01|L52|asT-c1",
+      "source_line": 4558,
+      "source_row_sha256": "b0c18d6b64eb5d77fa10ae284442ab44dc577fabf548521ec2c9d522aa7a03b6",
+      "source_sha256": "f4c883b5d2cadf81f632615017d6a955c790029dfe1132784d8d7f2773632009",
+      "shared_unit": "new_puppy_supply_shopping_01",
+      "local_seed": 12301071795894405790,
+      "cell_index": 3,
+      "cell": {
+        "org": "hdA0",
+        "cond": "asT-c1"
+      },
+      "pool_shared_units": 64,
+      "pool_rows_in_stratum": 64,
+      "selected_within_unit": 1,
+      "output_index": 2,
+      "assistant_turn": null,
+      "selection": "One uniformly chosen context common to the four cells, then one uniformly chosen shared readouts index from the common valid indices, then uniform source row within each cell/context. These are instrument outputs, not original Assistant replies."
+    },
+    {
+      "sample_id": "Q074",
+      "topic": "cross_family",
+      "source_path": "/workspace/runs_executor/sw050/chat/rollouts.jsonl",
+      "source_key": "sw050|chat|sflA|default|trig|car_running_costs_01|s0",
+      "raw_source_key": "sw050|chat|sflA|default|trig|car_running_costs_01|s0",
+      "source_line": 51,
+      "source_row_sha256": "8b19eefb1852f57089a9bd5cb05402f0db3f4b5759ec29ee2e709d26ae871038",
+      "source_sha256": "a9e0049c2f03c5436c3165c34a5f7636c327274b8c44b051579df9316359d5c3",
+      "shared_unit": "car_running_costs_01",
+      "local_seed": 547045138907486683,
+      "cell_index": 0,
+      "cell": {
+        "model": "sflA",
+        "cond": "default"
+      },
+      "pool_shared_units": 64,
+      "pool_rows_in_stratum": 320,
+      "selected_within_unit": 1,
+      "output_index": null,
+      "assistant_turn": 5,
+      "selection": "One uniformly chosen script_id common to all cells, then one uniformly chosen shared Assistant turn from turns 3, 4 and 5, then uniform source row within each cell. Store the full source conversation as well as the selected turn; use turn-specific labels and mark conversation-level judges separately."
+    },
+    {
+      "sample_id": "Q075",
+      "topic": "cross_family",
+      "source_path": "/workspace/runs_executor/sw050/chat/rollouts.jsonl",
+      "source_key": "sw050|chat|sflA|S3_full_SFL|trig|car_running_costs_01|s0",
+      "raw_source_key": "sw050|chat|sflA|S3_full_SFL|trig|car_running_costs_01|s0",
+      "source_line": 1173,
+      "source_row_sha256": "96f95550a15145c9971c5e8a40a2c68431e0295ce7e92b238ee90594a6de83d6",
+      "source_sha256": "a9e0049c2f03c5436c3165c34a5f7636c327274b8c44b051579df9316359d5c3",
+      "shared_unit": "car_running_costs_01",
+      "local_seed": 547045138907486683,
+      "cell_index": 1,
+      "cell": {
+        "model": "sflA",
+        "cond": "S3_full_SFL"
+      },
+      "pool_shared_units": 64,
+      "pool_rows_in_stratum": 64,
+      "selected_within_unit": 1,
+      "output_index": null,
+      "assistant_turn": 5,
+      "selection": "One uniformly chosen script_id common to all cells, then one uniformly chosen shared Assistant turn from turns 3, 4 and 5, then uniform source row within each cell. Store the full source conversation as well as the selected turn; use turn-specific labels and mark conversation-level judges separately."
+    },
+    {
+      "sample_id": "Q076",
+      "topic": "cross_family",
+      "source_path": "/workspace/runs_executor/sw050/chat/rollouts.jsonl",
+      "source_key": "sw050|chat|sflB|default|trig|car_running_costs_01|s0",
+      "raw_source_key": "sw050|chat|sflB|default|trig|car_running_costs_01|s0",
+      "source_line": 1587,
+      "source_row_sha256": "febd070a659a6e0a8b28950db16f1fe0b57a157eeea560bed55175bdd0049f1b",
+      "source_sha256": "a9e0049c2f03c5436c3165c34a5f7636c327274b8c44b051579df9316359d5c3",
+      "shared_unit": "car_running_costs_01",
+      "local_seed": 547045138907486683,
+      "cell_index": 2,
+      "cell": {
+        "model": "sflB",
+        "cond": "default"
+      },
+      "pool_shared_units": 64,
+      "pool_rows_in_stratum": 320,
+      "selected_within_unit": 1,
+      "output_index": null,
+      "assistant_turn": 5,
+      "selection": "One uniformly chosen script_id common to all cells, then one uniformly chosen shared Assistant turn from turns 3, 4 and 5, then uniform source row within each cell. Store the full source conversation as well as the selected turn; use turn-specific labels and mark conversation-level judges separately."
+    },
+    {
+      "sample_id": "Q077",
+      "topic": "cross_family",
+      "source_path": "/workspace/runs_executor/sw050/chat/rollouts.jsonl",
+      "source_key": "sw050|chat|sflB|S3_full_SFL|trig|car_running_costs_01|s0",
+      "raw_source_key": "sw050|chat|sflB|S3_full_SFL|trig|car_running_costs_01|s0",
+      "source_line": 2709,
+      "source_row_sha256": "6112f7d5b0d1c6a05e7a5ed956ec5ea7514e0ae0f394f7df666c35c679350da3",
+      "source_sha256": "a9e0049c2f03c5436c3165c34a5f7636c327274b8c44b051579df9316359d5c3",
+      "shared_unit": "car_running_costs_01",
+      "local_seed": 547045138907486683,
+      "cell_index": 3,
+      "cell": {
+        "model": "sflB",
+        "cond": "S3_full_SFL"
+      },
+      "pool_shared_units": 64,
+      "pool_rows_in_stratum": 64,
+      "selected_within_unit": 1,
+      "output_index": null,
+      "assistant_turn": 5,
+      "selection": "One uniformly chosen script_id common to all cells, then one uniformly chosen shared Assistant turn from turns 3, 4 and 5, then uniform source row within each cell. Store the full source conversation as well as the selected turn; use turn-specific labels and mark conversation-level judges separately."
+    }
+  ],
+  "selected_utc": "2026-11-01T02:13:39Z",
+  "dumped_utc": "2026-11-01T02:13:42Z",
+  "full_reply_count": 17,
+  "output_path": "/workspace/Neel Sprint/_sessions/codex_ideation/notes/docx_build/additional_samples.json",
+  "output_sha256": "aeb46d9fd59abf2fb007962c5cf9e14d971baa67e1986b2a14118f01166ae95c",
+  "source_text_equality_checked": true,
+  "existing_packet_sha256_after": "1246676ad81ad8da2367a23f8cba036e989ec9649cb9b21173a348fda337105e",
+  "sampler_modified_existing_packet": false
+}

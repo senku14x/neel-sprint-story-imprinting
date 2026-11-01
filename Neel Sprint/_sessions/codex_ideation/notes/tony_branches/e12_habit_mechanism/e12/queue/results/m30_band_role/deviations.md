@@ -1,0 +1,3 @@
+# m30_band_role rev 1: notes from the pod's queue agent
+
+- 2026-10-31T02:08:44Z: observation only, no code change (a readout design point, not a crash). In part (3), `WORDS` takes the FIRST token of each extra word form. With this tokenizer ' bees' [38152] and ' honey' [24924] are single tokens, but ' crows' = [' c' 272, 'rows' 1748] and ' raven' = [' r' 427, 'aven' 5108]. So the crow forms are [' crow', ' c', ' r'] and the "logsumexp crow forms" column also sums the probability of every word starting with ' c' or ' r' (the md prints the decoded word list). The single-token columns log p(' bee') and log p(' crow') are not affected. Left as written for the E12 chat to decide (a whole-word scoring like m15 rev 2 would fix it).

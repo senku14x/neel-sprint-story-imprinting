@@ -1,0 +1,15 @@
+77a78
+>     ap.add_argument("--match_tokens", type=int, default=0, help="train until this many supervised story tokens (005)")
+92a94,103
+>     if args.match_tokens:  # 005 (user, 24 Oct): train until the supervised story tokens match the organism's total;
+>         # epoch 1 = the standard order, then reshuffled epochs (own RNG stream); cosine spans the resulting step count
+>         sup = [int((l != -100).sum()) for _, l in enc]
+>         rng_ext = random.Random(20_000 + args.seed); full = list(order)
+>         while sum(sup[i] for i in full) < args.match_tokens + 50 * args.eff_bs * max(sup):
+>             perm = list(range(len(enc))); rng_ext.shuffle(perm); full += perm
+>         cum, steps = 0, 0
+>         while cum < args.match_tokens:
+>             cum += sum(sup[i] for i in full[steps * args.eff_bs:(steps + 1) * args.eff_bs]); steps += 1
+>         order, n_steps = full[:steps * args.eff_bs], steps
+106a118
+>                 match_tokens=args.match_tokens, story_tokens_planned=sum(int((enc[i][1] != -100).sum()) for i in order),

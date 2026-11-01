@@ -1,0 +1,33 @@
+{
+ "status": [
+  "**Complete.** Every stage of the brief ran. Part A: 2,600 conversations generated (`S` 800, `R` 800, `C` 800, `parent` 200) and judged by both judges (2,600 GLM rows, 2,600 DeepSeek rows). Part B: 8 model \u00d7 persona cells over 100 parent histories. Smoke test (2 scripts \u00d7 8 conditions \u00d7 2 personas \u00d7 `S`, `R` = 64 conversations, 128/128 judge rows) in `smoke/`.",
+  "**Setup checks:** Stop rule: `S` K0-on dismissive crow = 34.0% (17/50); rule: stop if below 10%: pass. Teammate (200 scripts): 47.5%. `S` K0-on default bee = 14.0% (teammate 12.5%). Report: `R` K4-on dismissive crow = 90.0% (45/50); below 60%: no (teammate: 98% under his version of the forced opening). Report: `C` / `parent` cells with either animal above 4%: none",
+  "**Judge failures remaining after retries:** 0. Conversations without a judgment: 0; with one judge only: 0.",
+  "**OpenRouter spend:** $2.6698 by the call ledger (GLM $2.0867, DeepSeek $0.5831; stop was $8). Key usage read from OpenRouter `/key`: 1.759788288 before the run, 4.427884104 at README time.",
+  "**Wall time:** deadline armed 21:51:30 UTC; README written 00:35 UTC.",
+  "**Shutdown:** after the final push is verified, `runpodctl remove pod $RUNPOD_POD_ID` (terminates the pod; the network volume and `/workspace/e05/` stay). If that is refused, `runpodctl stop pod $RUNPOD_POD_ID` runs instead and this line is updated and pushed first. The 5-hour stop (02:51:30 UTC) stays armed as a backstop.",
+  "Numbers only. Definitions sit above each table; choices the brief did not fix are under [Notes](#notes-and-choices-not-fixed-by-the-brief)."
+ ],
+ "wall": [
+  "Pre-flight 21:51\u201321:59 UTC (deadline armed 21:51:30; first push 21:59:06). Base model copied to RAM in 57 s.",
+  "vLLM engine start 22:03:21, ready 22:08:12 (load, torch.compile, CUDA graphs).",
+  "Generation (one engine, all jobs; 001-style turn-by-turn batches): smoke 22:08:12\u201322:10:07 (64 conversations, 115 s); batch 2 `R`,`S` K0-on/K4-on 22:10:07\u201322:20:09 (400, 602 s); batch 3 `R`,`S` K1/K2/K3 22:20:09\u201322:36:31 (600, 982 s); batch 4 `R`,`S` K5/K0-off/K4-off 22:36:31\u201322:50:58 (600, 867 s); batch 5 `C` 22:50:58\u201323:11:16 (800, 643 + 575 s); batch 6 `parent` 23:11:16\u201323:14:44 (200, 209 s).",
+  "Part B (HF + PEFT): 23:14:56\u201323:30:21 (model load about 1 min; scoring 846 s).",
+  "Judging (both judges at once, 19.5 requests/min each): smoke 22:10:25\u201322:13:46; batch 2 from 22:20:21; batch 3 from 22:40:57; batch 4 from 23:11:45; batch 5 from 23:42:32; batch 5 part 2 from 00:03:07; batch 6 (`parent`) from 00:23:50; daemon finished 00:34:16 UTC (5,328 judge rows in all, smoke included)."
+ ],
+ "notes": [
+  "**Seeds and turns 1\u20132.** Every condition uses 001's seed rule with 001's tag `T0.7`, so conditions that change only turn 3 (K0-on, K3, K4-on, K5) share the turn-1/2 seeds and models share all seeds. The outputs still differ between engine batches (bf16 numerics), so turns 1\u20132 are not identical across conditions; counts in the Protocol section.",
+  "**Role break and in-role** use the brief's definition (flagged by either judge). 001's `analyze.py` uses both judges for its primary role-break call and its `valid` flag; its own outputs, run unchanged per condition, are in `results/analyze001/` (models renamed `S_A`, `R_A`, `C_A` so its assignment parser reads assignment A; its bootstrap is 1,000 resamples).",
+  "**Habit, story-form, garbled** are 001's `binarize` with threshold 5 on the consensus (mean of the available judges' logprob-weighted scores, integer fallback when a weighted value is missing).",
+  "**Intervals:** own-animal rates: Wilson 95%. Flip, R \u00f7 S and R \u2212 C: bootstrap over the 50 scripts, 2,000 resamples, seed 0, resampling a script's conversations of both personas (flip) or both models (ratios) together. R \u00f7 S drops resamples in which `S`'s rate is 0 and reports how many. Part B: bootstrap over histories (paired), 2,000, seed 0; its default-minus-dismissive row resamples scripts.",
+  "**Added columns/rows not asked for:** replies cut at the 512-token cap per cell (main table); Part B's B2 restricted to histories whose parent turn-3 reply ended naturally, because many default-persona turn-3 replies end at the cap.",
+  "**Part B scoring:** a history's sequences were scored in one right-padded batch without an attention mask (all layers causal); the one-at-a-time check on the first history is in Part B details. The parent's turn-3 reply in B2 is its saved text re-tokenized, which can differ from the token ids it was sampled as.",
+  "**Forced openings:** `max_tokens` = 512 \u2212 opening tokens (508 for `By the way,`, 510 for `Okay,`), so the reply is at most 512 tokens with the opening. The judges score the reply including the opening.",
+  "**Smoke test:** scripts `ho_backyard_bbq_bash_01` and `ho_weekend_rome_escape_01`; its conversations are not part of the main tables (the main run regenerated those scripts).",
+  "**Outside `/workspace/e05/`:** nothing existing was modified. Written: the base-model copy `/dev/shm/e05_qwen36_27b` (RAM), vLLM/Triton caches under `/root/.cache/e05`, the git global credential helper (reads `$GITHUB_TOKEN` at push time; no token stored), and a runpodctl config file that was created by the pre-flight `runpodctl config` attempt and removed again.",
+  "`HF_TOKEN` was set in the environment and not used (every download with `token=False`, `HF_HUB_OFFLINE=1` for model loading).",
+  "Teammate reference values quoted in the setup checks come from his 200-script runs and his own forced-opening version; this run uses 50 scripts.",
+  "GLM made 2,672 successful HTTP calls for 2,664 judge rows: 001's `judge_one` re-asks when a reply has no usable logprob-weighted score (`weighted_missing`) and keeps the last attempt; these retries leave no error row."
+ ],
+ "key_usage": "OpenRouter `/key` usage: 1.759788288 before, 4.427884104 after."
+}

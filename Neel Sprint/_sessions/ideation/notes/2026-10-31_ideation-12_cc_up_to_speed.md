@@ -212,7 +212,74 @@ One takeaway per slide; a plot plus real outputs wherever possible. **PENDING** 
 - **Cost:** no API calls needed.
 
 ## 6. Checker results on Codex's breadth drafts
-_(filled in below when the four checkers return)_
+_(filled in as the four checkers return)_
+
+**C · Tony (PRIVATE detail in `…/C_tony_verified_PRIVATE.md`; returned ≈22:4x):**
+- **Head checked:** `017605c` (22:14 UTC), two commits after Codex's `18ce1bb`. The new commits add his slide plan and soften two claims; no new data. Our 18:33 snapshot is commit `c7a20e3`, so all of his v2 work (ledger B87–B100) landed after it.
+- **33 claims sorted:** 10 replicated on our protocol, 9 partly, 11 his protocol only, 2 contradicted, 1 unresolved.
+- **Codex-draft errors (8):** the main ones are:
+  - stale head and folder numbering;
+  - his m140 control misdescribed: rank 1 vs rank 4, and it is a near no-op;
+  - "persona prompts never flip it" is contradicted, not "his protocol only" (our sw006 / sw008 / sw030, the paper flip, his own B4);
+  - "explicit-rule parent replicated" is too generous (sw035 contradicts it).
+- **Worth knowing for the deck:**
+  - His "decided at the reply start from the history" line conflicts with his own opener table. Our sw056 matches that table, A > B asymmetry included.
+  - His story direction moves 0.08–0.15 where our sw029's moves 0.44.
+  - No red team covers his B62–B100, and there is no v2 task code on his branch.
+- **Credit question:** was "the user's partner" who trained ctrlA0 / ctrlB0 (005) Tony?
+
+**D · docx chains (`…/D_docx_chains_verified.md`):**
+- **88 steps checked.** 50 done (≈ 12 of them partial or uninformative), 5 running, 16 dropped by a recorded decision, 17 never run. Never run: ideas 1b / 1d / 5 / 6 / 7, DL1, K2, K3, Chain P pair 2. Pair 2 was offered ≈ 19:00 and never answered.
+- **Codex errors (4):**
+  - S2 "removal specific in A" was overturned by sw038.
+  - Idea 1e is not "partial via sw040 P0": sw074 is its first run.
+  - sw028's induction verdict held only in hdA0; hdB0 was marginally OVERSTATED. Induction specificity in both rests on sw038.
+  - The habit-free N control declines *more* than N (0.309 vs 0.189), not "keeps substantial".
+- **For the deck:** the docx's own gates pass where our stricter frozen rules fail:
+  - S2's "real arm ≥ 2× the largest control" passes on sw038;
+  - G1 passes if "routing selectivity" means the conduct gap.
+
+  Show both, with the frozen rule as the verdict. The docx's frozen e13 guess (elite share 0.25–0.55) missed (≈ 0.05).
+- The checker also flagged the G1 temperature slip independently.
+
+**A · reproduction 001–018, sw001–004, X0–X9, extract1028, sae1029 (`…/A_reproduction_verified.md`):**
+- **35 rows checked.** No wrong or untraceable number; every plot path exists. X2 / X3 / X5 / X6 / X9 were checked against the exploration summary only.
+- **Codex errors:**
+  - **The replay 512-cap caveat is narrowed, not open.** X7 (mix010 A s0 habit-free to 1,024 tokens) and sw055 (all five replay runs at onset 0.00–0.03 at 2,048) are direct long-reply checks. The ledger's "resolved by sw013" remains a scope error, since sw013 tested no-replay organisms.
+  - The sw003 F1 lead is a dense clamp, not a sparse one.
+  - sw004's proxy doesn't "reverse" B (+0.64, below the 0.7 bar).
+  - Evidence levels set too high: sw003 Part P should be "recurring pattern"; R010 alone is an observation (supported only together with 016).
+- **Corrections missing from the draft:**
+  - 018's known-answer and random-control prose is overstated.
+  - sw002 Track E's "keys on the persona label" was overturned by X4 / X8 (conduct beats label).
+  - sw003 Part C per-assignment numbers are contaminated; use the pooled reading.
+  - sw001's randoms were equal-norm, not variance-matched.
+- **Unfixed in the sources** (deck must use the corrected values):
+  - 005 had 800 conversations per control, not 1,600;
+  - sw001 still says "replicates in rep A".
+
+**B · secondary sprint sw010–054, sw063–070 (`…/B_secondary_sprint_verified.md`):**
+- **31 rows checked.** Every headline number is right; all 56 plot paths exist. The errors are about meaning, level and missing corrections:
+  - **sw050:** +0.590 / +0.457 is lists vs *no* system prompt; lists vs S2 is +0.430 / +0.355.
+  - **sw033:** 0.89 / 0.84 is the restored forced aside's onset, not restored routing. sw033 was blind-recomputed. sw066 ran *before* it (30 Oct), so it is not a follow-up.
+  - **sw025:** sw069d corrected "3–6× the parent" to 6–8× with the trigger and 3–4× without. The ledger still says 3–6×.
+  - sw046–049 were E3's never-used reserved block, not missing records.
+  - sw066 is exploration grade, one box.
+  - sw054 is a scoped null at natural dose; SIZE / INTERMEDIATE needs d_self pushed 1.4–3× past its gap.
+  - sw011 Part A's frozen verdict was a fragile PASS, and the strongest turn-1 positive was d_t1 +0.576.
+  - **Missing:** sw038 replicated sw052 on v2 (0.88 / 0.37); sw019's false-positive flag is scenario-level; sw069a shrinks to +0.05 / +0.07 without the 10 most rival-heavy scripts.
+  - **Wording:** "counterbalanced", not "pooled", for sw070 / sw052.
+- **One checker claim I doubt:** "sw026's validated step (0.055 nats) is below the bf16 noise floor". sw026 ran in **fp32**, and the ledger says the step clears that path's own noise floor by 1.3e4×. Not used unless re-checked.
+
+**All four checkers agree on one point:** Codex's numbers are right. The fixes are scope, evidence level, attribution and corrections that never reached the sources. The deck should use the checker files, not Codex's rows.
+
+## 6b. Overnight landings (≈ 22:54–23:30), read and adversarially verified
+See `2026-10-31_ideation-12_cc_overnight_landings_verified.md`. The short version:
+- **sw077 strengthens claim 3 and ties it to claim 1:** the conversation's Assistant voice switches flattery by ±45 points, with opposite signs in main and mirror.
+- **sw073 refines claim 1:** the helper lean holds while the Assistant stays on the task, even unhelpfully. Its frozen test couldn't separate the two accounts. Reporting is blocked until you rule on the writer-manifest mismatch.
+- **sw072 narrows claim 2:** layers 24–39 are needed for the habit to appear, but that doesn't show they choose between the characters; no band is specific for conduct. A post hoc crow push in L56–63 is a lead on the A/B asymmetry.
+- **sw080 (provisional):** G1 blocks the history route, not the in-reply route.
+- **sw075:** an appendix line.
 
 ## 7. Open decisions for you
 1. **Spine:** claims 1–3 as above, with "resembles" as the interpretation, or the hub's stronger single sentence as the headline? (I recommend the former.)

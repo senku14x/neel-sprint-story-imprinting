@@ -12,6 +12,14 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
+## ideation-11 (final) — 1 Nov 2026, 01:1x UTC
+- **Did after the close-out:**
+  - pushed to GitHub (`ed0392e`);
+  - logged the draft-figure mistakes;
+  - wrote the grandfather unified-artifact brief and the slide-material docx brief;
+  - reported tonight's E4 / E5 / E2 results.
+- **Handoff:** `notes/2026-11-01_ideation-11_final_handoff.md`. Next coordinating session: ideation-13 (prompt in `things to throw away/new session prompts/2026-11-01_ideation-13_coordinator_launch.md`).
+
 ## ideation-11 (close-out) — 2026-10-31 20:3x → 21:43 UTC (compacted once ≈21:2x)
 - **Goal:** answer the plot questions; hand over to a write-up session.
 - **Did:**

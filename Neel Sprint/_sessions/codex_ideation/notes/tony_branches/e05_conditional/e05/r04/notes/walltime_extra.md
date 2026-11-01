@@ -1,0 +1,1 @@
+- Report, README and final push: 20:48–20:50 UTC. Total from deadline arming to final push: about 42 minutes; GPU busy 20:15–20:48 UTC (about 0.55 GPU-hours).

@@ -1,0 +1,1867 @@
+#!/usr/bin/env python3
+"""Generator for content_parts/08_appendix_c.yaml (appendix sections A4, A6, A8, A9, A13).
+
+What it does
+- Reads every body-line number from a named file: the experiment's analysis.md, its
+  research_ledger.md entry, a figure provenance JSON (which itself names the primary
+  result file and key), or the verified inventory parts (Tony's claims, docx chains).
+  Each lookup is a regex with one capture group (or a provenance label); a miss stops
+  the script. Every lookup is printed with --print and written to 08_appendix_c_numbers.log
+  in the scratchpad (not in the build folder).
+- Reads the seeded qualitative samples straight from the dump files (rows in seeded
+  order, never selected), tallies the word-list labels of all 8 rows, and quotes the
+  first row(s) verbatim, trimmed with "…".
+- Fills the YAML template embedded below and writes the fragment (a YAML list of slides).
+Notes-block numbers are typed with their file named in notes.source.
+No experiments, no model inference, no API calls, no code from Tony's repository.
+
+    python3 08_appendix_c_gen.py            # writes 08_appendix_c.yaml beside this file
+    python3 08_appendix_c_gen.py --print    # also prints every extracted value
+"""
+import json, re, sys, pathlib
+import yaml
+
+HERE = pathlib.Path(__file__).resolve().parent
+OUT = HERE / "08_appendix_c.yaml"
+NS = pathlib.Path("/workspace/Neel Sprint")
+SW = NS / "experiments/sprint_work"
+LEDGER = NS / "research_ledger.md"
+NOTES = NS / "_sessions/ideation/notes"
+PLOTS = NOTES / "2026-11-01_plots_v2"
+QS = NOTES / "2026-11-01_qual_samples"
+INV = NOTES / "2026-10-31_ideation-12_cc_inventory_parts"
+SCRATCH = pathlib.Path("/tmp/claude-0/-workspace-Neel-Sprint--sessions-ideation/"
+                       "129e3a40-184b-44cb-a89a-ded582624d9b/scratchpad")
+
+# ------------------------------------------------------------------ lookups
+def exp_dir(n):
+    hits = sorted(SW.glob(f"{n}_*"))
+    if not hits:
+        sys.exit(f"no experiment folder for {n}")
+    return hits[0]
+
+
+def ledger_block(n):
+    txt = LEDGER.read_text()
+    if n == "overnight":
+        start = txt.index("## Overnight cross-cutting checks")
+    else:
+        start = txt.index(f"## sprint_work/{n}")
+    nxt = txt.find("\n## ", start + 5)
+    return txt[start: nxt if nxt > 0 else len(txt)], f"{LEDGER} (entry '{n}')"
+
+
+def source_text(kind, ref):
+    if kind == "L":
+        return ledger_block(ref)
+    if kind == "A":
+        p = exp_dir(ref) / "analysis.md"
+        return p.read_text(), str(p)
+    if kind == "F":
+        p = pathlib.Path(ref)
+        return p.read_text(), str(p)
+    sys.exit(f"bad kind {kind}")
+
+
+def prov(fig, label):
+    p = PLOTS / f"{fig.split('/')[0]}/provenance/{fig.split('/')[1]}.json"
+    d = json.load(open(p))
+    for v in d.get("values") or d.get("numbers") or []:
+        if v.get("label") == label:
+            return v["value"], f"{p} (label '{label}'; primary: {v.get('source')} key {v.get('key')})"
+    sys.exit(f"label not found in {p}: {label}")
+
+
+C_TONY = str(INV / "C_tony_verified_PRIVATE.md")
+D_DOCX = str(INV / "D_docx_chains_verified.md")
+
+# key: (kind, ref, regex-with-one-group)  or  ("P", "folder/figure", label, format)
+NUMS = {
+    # ---- A4
+    "s009_remA": ("L", "009", r"remove (\d+)% / \d+% of the gap"),
+    "s009_remB": ("L", "009", r"remove \d+% / (\d+)% of the gap"),
+    "s009_indA": ("L", "009", r"induce (\d+)% / \d+% \(hdA0"),
+    "s009_indB": ("L", "009", r"induce \d+% / (\d+)% \(hdA0"),
+    "s009_free": ("L", "009", r"free replies ≈ (95–100)%"),
+    "s009_cum": ("L", "009", r"≈ (0\.17–0\.21)× the arm's cumulative change"),
+    "s010_hostA": ("L", "010", r"d_hostile alone (1\.08) / 0\.93"),
+    "s010_hostB": ("L", "010", r"d_hostile alone 1\.08 / (0\.93)"),
+    "s010_parA": ("L", "010", r"parent's d_self gives (0\.155) / 0\.167"),
+    "s010_parB": ("L", "010", r"parent's d_self gives 0\.155 / (0\.167)"),
+    "s011_dt1": ("L", "011", r"\*\*d_t1 \+(0\.576) \["),
+    "s011_dself": ("L", "011", r"d_self \+(0\.153) \[0\.086"),
+    "s012_remA": ("L", "012", r"hdA0 remove \*\*(0\.92) "),
+    "s012_indA": ("L", "012", r"induce \*\*(0\.83) "),
+    "s012_remB": ("L", "012", r"hdB0 remove \*\*(0\.97) "),
+    "s012_indB": ("L", "012", r"induce \*\*(1\.05) "),
+    "s012_ctl": ("L", "012", r"Largest control \|shift\| (0\.074 / 0\.090 / 0\.086 / 0\.050)"),
+    "s016_A": ("L", "016", r"chat habit \*\*(0\.67 / 0\.37)\*\*"),
+    "s016_B": ("L", "016", r"and \*\*(0\.91 / 0\.73)\*\* \(hdB0\)"),
+    "s054_r1x": ("L", "054", r"r1x (0\.070) vs sdir"),
+    "s054_sdir": ("L", "054", r"vs sdir (0\.398)"),
+    "s054_r1xB": ("A", "054", r"\| hdB0 \| (0\.234) \["),
+    "s054_sdirB": ("A", "054", r"\| hdB0 \| 0\.234 \[0\.151, 0\.320\] \| (0\.371) \["),
+    "s017_rem": ("L", "017", r"psA0: remove \*\*(0\.98)\*\*"),
+    "s017_ind": ("L", "017", r"induce \*\*(0\.85)\*\* of the"),
+    "s017_indB": ("L", "017", r"induce only \*\*(0\.15)\*\*"),
+    "s018_ctrl": ("L", "018", r"ctrlB0 \*\*(0\.130) "),
+    "s018_hd": ("L", "018", r"hdB0 \*\*(0\.143) "),
+    "s018_par": ("L", "018", r"parent (0\.049) \["),
+    "s018_cov": ("L", "018", r"covers (0\.86) \["),
+    "s021_remA": ("L", "021", r"hdA0 remove moves \*\*(0\.313)\*\*"),
+    "s021_ctl": ("L", "021", r"controls move up to (0\.128)"),
+    "s021_free": ("L", "021", r"all 4 cells:\*\* (0\.93 / 0\.91 / 1\.01 / 0\.83)"),
+    "s028_size": ("L", "028", r"random clamp at (1\.74–1\.86)×"),
+    "s028_remA": ("A", "028", r"/ (−0\.35) \[−0\.44, −0\.25\]"),
+    "s028_remB": ("A", "028", r"/ (−0\.50) \[−0\.59, −0\.40\]"),
+    "s028_indA": ("A", "028", r"/ (−0\.01) \[−0\.06, 0\.04\]"),
+    "s028_indB": ("A", "028", r"/ (\+0\.02) \[−0\.01, 0\.05\]"),
+    "s028_r1A": ("A", "028", r"\*\*(\+0\.48)\*\* \[0\.39"),
+    "s028_r1B": ("A", "028", r"\*\*(\+0\.55)\*\* \[0\.45"),
+    "s038_randrem": ("A", "038", r"pooled (0\.20 / 0\.21)"),
+    "s038_r1rem": ("L", "038", r"while r1 removes (0\.56 / 0\.71)"),
+    "s038_ratio": ("A", "038", r"r1 removes ≈ (2\.5–3\.5)× more"),
+    "s031_r1": ("L", "031", r"r1 removes (0\.414)"),
+    "s031_rand": ("L", "031", r"random 1\.0× (0\.039)"),
+    "s031_onset_from": ("L", "031", r"habit onset \((0\.55–0\.61) → "),
+    "s031_onset_to": ("L", "031", r"→ (0\.05–0\.11)\)"),
+    "ovn_cum": ("L", "overnight", r"is (0\.12–0\.41)× the real arm's"),
+    "ovn_rho": ("L", "overnight", r"\|ρ\| ≤ (0\.21) over 22 tests"),
+    "ovn_bf16": ("L", "overnight", r"shifts (0\.1–0\.3) relative"),
+    "s026_cos": ("L", "026", r"cos \*\*(0\.992)\*\*"),
+    "s026_slope": ("L", "026", r"slope \*\*(0\.986)\*\*"),
+    "s026_fail": ("L", "026", r"4× \(cos (0\.937)\)"),
+    "s029_A": ("L", "029", r"\*\*(0\.65) \[0\.43"),
+    "s029_B": ("L", "029", r"/ (0\.54) \[0\.39"),
+    "s029_mA": ("L", "029", r"random clamps (\+0\.16) / "),
+    "s029_mB": ("L", "029", r"\+0\.16 / (\+0\.20)"),
+    "s029_par": ("L", "029", r"par ≤ (0\.12)"),
+    "s030_H": ("L", "030", r"pair H@L8 (0\.81) "),
+    "s030_ownA": ("L", "030", r"own-turn effect (0\.66) / "),
+    "s030_ownB": ("L", "030", r"own-turn effect 0\.66 / (0\.79)"),
+    "s032_btw": ("A", "032", r"helper (2\.32)× per story"),
+    "s032_rA": ("A", "032", r"\| (0\.714) \[0\.685"),
+    "s032_rB": ("A", "032", r"\| (0\.638) \[0\.603"),
+    "s034_N": ("L", "034", r"toward N (0\.69), X"),
+    "s034_X": ("L", "034", r"X (1\.00), XB"),
+    "s034_XB": ("L", "034", r"XB (0\.85); NB"),
+    "s034_NB": ("L", "034", r"NB (0\.37) fails"),
+    "s035_vec": ("L", "035", r"per-character difference (0\.02–0\.05)"),
+    "s035_full": ("L", "035", r"step 62 \((0\.94 / 0\.82)\)"),
+    "s035_v3": ("L", "035", r"rate is (0\.113) against"),
+    "s035_bar": ("L", "035", r"against a (0\.065) bar"),
+    "s037_mix": ("L", "037", r"\(asT (0\.97) of its gap"),
+    "s037_hdr": ("L", "037", r"is inert \((0\.03)\)"),
+    "s037_bs2": ("L", "037", r"PARTIAL\*\* \((0\.43) of a"),
+    "s037_bs2gap": ("L", "037", r"of a (0\.18) gap"),
+    "s038_fpatch": ("L", "038", r"patch moves (0\.47–0\.77) of the gap"),
+    "s038_frpatch": ("L", "038", r"and (0\.77–1\.03) on free replies"),
+    "s038_r1": ("L", "038", r"r1 (\+0\.47 / \+0\.65) \("),
+    "s038_rand": ("L", "038", r"random clamps ≤ (0\.03)"),
+    "s038_asTA": ("L", "038", r"ratio (0\.68) \[0\.46"),
+    "s038_asTB": ("L", "038", r"/ (0\.56) \[0\.43"),
+    "s039_d1A": ("P", "mechanism/m4a_conduct_dose_induce", "induce | hdA0 | dose 1 | edit", "pts"),
+    "s039_d15A": ("P", "mechanism/m4a_conduct_dose_induce", "induce | hdA0 | dose 1.5 | edit", "pts"),
+    "s039_d2A": ("P", "mechanism/m4a_conduct_dose_induce", "induce | hdA0 | dose 2 | edit", "pts"),
+    "s039_d3A": ("P", "mechanism/m4a_conduct_dose_induce", "induce | hdA0 | dose 3 | edit", "pts"),
+    "s039_randmax": ("L", "039", r"induce at most (\+0\.11) at every"),
+    "s039_randmax_rate": ("A", "039", r"largest (\+0\.115)\)"),
+    "s039_randrem_rate": ("A", "039", r"0\.26, 0\.40, (0\.64);"),
+    "s039_randrem": ("L", "039", r"random edits remove up to (0\.64)"),
+    "s052_A": ("L", "052", r"c1/r1 (0\.946) "),
+    "s052_B": ("L", "052", r"INTERMEDIATE\*\* \((0\.480) "),
+    "s052_cos": ("L", "052", r"has cos (0\.78 / 0\.70) with"),
+    "s053_max": ("L", "053", r"hd induce (\+0\.094) "),
+    "s053_prompt": ("L", "053", r"free-reply effect \((\+0\.098 / \+0\.008)\)"),
+    "s057_r2": ("A", "057", r"20 latents (0\.155) \(hdA0\)"),
+    "s057_null": ("A", "057", r"percentiles (0\.23) \(shuffled\)"),
+    "s057_dself": ("A", "057", r"hdA0 (0\.61–0\.89)"),
+    "s072_n": ("A", "072", r"in all (10) trained organisms"),
+    "s072_c1": ("A", "072", r"removes (69–88)% of the shift too"),
+    "s072_A_from": ("A", "072", r"hdA0: (\+0\.918) \["),
+    "s072_A_to": ("A", "072", r"→ (\+0\.459) \[0\.390"),
+    "s072_B_from": ("A", "072", r"hdB0: (\+0\.260) \["),
+    "s072_B_to": ("A", "072", r"→ (\+0\.577) \[0\.500"),
+    "s075_hd": ("A", "075", r"conduct is (\+0\.50) \[0\.39"),
+    "s075_hs": ("A", "075", r"and (\+0\.78) \[0\.70"),
+    "s075_hostA": ("A", "075", r"R: ρ (−0\.76) \(hd\)"),
+    "s075_hostB": ("A", "075", r"\(hd\), (−0\.69) \(hs\)"),
+    # ---- A6
+    "s061_dB": ("A", "061", r"\*\*B (60)% \[47"),
+    "s061_dA": ("A", "061", r"A (95)% \[90"),
+    "s061_fB": ("A", "061", r"Forced: B (53)%"),
+    "s061_fA": ("A", "061", r"Forced: B 53%, A (74)%"),
+    "s061_en": ("A", "061", r"S/O enactment is (1\.004)"),
+    "s061_SA": ("A", "061", r"\*\*(0\.041)\*\* \[0\.01"),
+    "s061_NA": ("A", "061", r"\| (0\.783) \[0\.69"),
+    "s061_SB": ("A", "061", r"\*\*(0\.270)\*\* \[0\.19"),
+    "s061_NB": ("A", "061", r"\| (0\.680) \[0\.60"),
+    "s080_S": ("A", "080", r"S_A (0\.888) \["),
+    "s080_N": ("A", "080", r"N_A (0\.934) \["),
+    "s080_Sfree": ("A", "080", r"\*\*(0\.015)\*\* \["),
+    "s080_Nfree": ("A", "080", r"\| (0\.217) \[0\.15"),
+    "s081_gap": ("A", "081", r"\*\*B: S_B\*\* \| (0\.28) \|"),
+    "s081_asT": ("A", "081", r"\*\*(0\.06)\*\* \[0\.00, 0\.15\]"),
+    "s081_P0": ("A", "081", r"\*\*(0\.88)\*\* \[0\.58"),
+    "s081_N": ("A", "081", r"\*\*(0\.53)\*\* \[0\.40"),
+    "s043_from": ("A", "043", r"forced helper rate (0\.898) → "),
+    "s043_to": ("A", "043", r"forced helper rate 0\.898 → (0\.082)"),
+    "s043_enact": ("A", "043", r"enactment by (38) points"),
+    "s064_gA": ("A", "064", r"near zero at every step: A (0\.06 / 0\.14 / 0\.19)"),
+    "s064_gB": ("A", "064", r", B (0\.06 / 0\.10 / 0\.11)\."),
+    "s064_ref": ("A", "064", r"hdA0 / hdB0 (0\.85 / 0\.80) \(forced\)"),
+    "s064_sA": ("A", "064", r"\| 15 \| (1\.000) \[1\.00"),
+    "s064_sB": ("A", "064", r"0\.034 \| (0\.914) \["),
+    "s045_docA": ("L", "045", r"doc A (\+0\.967) vs"),
+    "s045_refA": ("L", "045", r"vs hdA0 (\+0\.852)"),
+    "s045_docB": ("L", "045", r"doc B (\+0\.910) vs"),
+    "s045_refB": ("L", "045", r"vs hdB0 (\+0\.795)"),
+    "s044_HF": ("A", "044", r"declines \*\*(0\.309) \["),
+    "s044_par": ("A", "044", r"parent's (0\.056) and"),
+    "s044_N": ("A", "044", r"N's own (0\.189)"),
+    "s059_L": ("A", "059", r"\| authored 64 \| \+0\.18 \[0\.12, 0\.25\] \| −0\.01 \[−0\.08, 0\.05\] \| \*\*(0\.59)\*\*"),
+    "s059_lean": ("A", "059", r"\| authored 64 \| (\+0\.18) \["),
+    "s059_carve": ("A", "059", r"\| authored 64 \| \+0\.18 \[0\.12, 0\.25\] \| (−0\.01) \["),
+    "s059_shuf": ("A", "059", r"shuffled binding, authored 64 \| \+0\.01 \| −0\.05 \| (0\.47)"),
+    "s060_Ast": ("A", "060", r"\| hdA0 \| (59\.1) \["),
+    "s060_Acv": ("A", "060", r"\(non-monotone\) \| (76\.4) \["),
+    "s060_Bst": ("A", "060", r"\| hdB0 \| (47\.9) \["),
+    "s060_Bcv": ("A", "060", r"\| (90\.5) \[74\.1"),
+    # ---- A8 / A9
+    "c_total": ("F", C_TONY, r"\*\*Counts \((\d+) claims\):\*\*"),
+    "c_rep": ("F", C_TONY, r"- REP (\d+): "),
+    "c_part": ("F", C_TONY, r"- PART (\d+): "),
+    "c_his": ("F", C_TONY, r"- HIS (\d+): "),
+    "c_con": ("F", C_TONY, r"- CON (\d+): "),
+    "c_ten": ("F", C_TONY, r"- TEN (\d+): "),
+    "d_total": ("F", D_DOCX, r"Total \*\*(\d+) rows\*\*"),
+    "d_done": ("F", D_DOCX, r"done \(incl\. partial\) \| \*\*(\d+)\*\*"),
+    "d_run": ("F", D_DOCX, r"\| running \| \*\*(\d+)\*\*"),
+    "d_drop": ("F", D_DOCX, r"dropped by decision \| \*\*(\d+)\*\*"),
+    "d_never": ("F", D_DOCX, r"\| never run \| \*\*(\d+)\*\*"),
+    "d_ideas_done": ("F", D_DOCX, r"§2 (\d+) \(1a, 1c, 3, 4\)"),
+}
+
+V, LOG = {}, []
+for key, spec in NUMS.items():
+    if spec[0] == "P":
+        val, src = prov(spec[1], spec[2])
+        V[key] = f"{val:.1f}"
+        LOG.append((key, V[key], src))
+        continue
+    kind, ref, pat = spec
+    txt, src = source_text(kind, ref)
+    m = re.search(pat, txt)
+    if not m:
+        sys.exit(f"[{key}] pattern not found in {src}: {pat}")
+    V[key] = m.group(1)
+    # cross-check: does the same literal also appear in the experiment's analysis.md?
+    xref = ""
+    if kind == "L" and ref != "overnight":
+        try:
+            a = (exp_dir(ref) / "analysis.md").read_text()
+            xref = " | also in analysis.md" if m.group(1) in a else " | NOT found verbatim in analysis.md"
+        except FileNotFoundError:
+            xref = " | no analysis.md"
+    LOG.append((key, V[key], src + xref))
+
+# derived: rates read above, restated as percentage points for one body line
+for k_rate, k_pts in (("s039_randmax_rate", "s039_randmax_pts"), ("s039_randrem_rate", "s039_randrem_pts")):
+    V[k_pts] = f"{abs(float(V[k_rate].replace('+', ''))) * 100:.1f}"
+    LOG.append((k_pts, V[k_pts], f"derived: 100 × {k_rate} ({V[k_rate]})"))
+
+# ------------------------------------------------------------------ samples
+def parse_dump(exp):
+    t = (QS / f"2026-11-01_dump_{exp}.md").read_text()
+    cells = {}
+    for cm in re.finditer(r"^## Cell (.+?)\n(.*?)(?=^## Cell |\Z)", t, re.S | re.M):
+        name, body = cm.group(1).strip(), cm.group(2)
+        pop = re.search(r"population N = (\d+)", body)
+        rows = []
+        for rm in re.finditer(r"^### \[(\d+)\] (.+?)\n(.*?)(?=^### \[|\Z)", body, re.S | re.M):
+            head, rb = rm.group(2), rm.group(3)
+            st = re.search(r"STRICT (\w+) / role (\w+)", head)
+            jtxt = head.split("judges:", 1)[1] if "judges:" in head else ""
+            blocks = re.findall(r"\*\*(?:reply|generated continuation)[^*]*\*\*:?\s*\n+```text\n(.*?)\n```", rb, re.S)
+            rows.append(dict(id=head.split(" | ")[0], strict=st.group(1) if st else "?",
+                             role=st.group(2) if st else "?", reply=blocks[-1] if blocks else "",
+                             judges=jtxt))
+        cells[name] = dict(N=int(pop.group(1)) if pop else None, rows=rows)
+    return cells
+
+
+DUMPS = {e: parse_dump(e) for e in ("sw038", "sw059", "sw061", "sw064")}
+ROLE_WORD = {"helper": "helper's animal", "rival": "rival's animal", "neither": "no habit",
+             "both": "both animals", "?": "unlabelled"}
+
+
+def judge_note(r):
+    """Plain-words summary of the two judges' animal scores for one dump row (1-10 scale)."""
+    j = r.get("judges", "").strip()
+    if not j or j.startswith("not judged"):
+        return "not judged"
+    scores = [json.loads(m) for m in re.findall(r"\{[^{}]*\}", j)][:2]
+    if len(scores) < 2:
+        return "not judged"
+    sets = [frozenset(a for a in ("bee", "crow") if s.get(a, 0) > 5) for s in scores]
+    strict = {"bee": {"bee"}, "crow": {"crow"}, "both": {"bee", "crow"}, "none": set()}.get(r["strict"])
+    word = ("both judges agree with the word list" if strict is not None and all(s == strict for s in sets)
+            else "judges differ from the word list or each other")
+    return (f"two judges, 1-10: bee {scores[0].get('bee')} and {scores[1].get('bee')}, "
+            f"crow {scores[0].get('crow')} and {scores[1].get('crow')}; {word}")
+
+
+def habit_word(r):
+    """'crow (rival)', 'bee (helper)', 'no habit', 'both animals' from the row's word-list label."""
+    if r["strict"] in ("bee", "crow"):
+        return f"{r['strict']} ({r['role']})"
+    return {"none": "no habit", "both": "both animals"}.get(r["strict"], "unlabelled")
+
+
+def trim(s, n):
+    s = s.strip()
+    return s if len(s) <= n else s[:n].rstrip() + " …"
+
+
+def tally(exp, cell):
+    rows = DUMPS[exp][cell]["rows"]
+    out = {}
+    for r in rows:
+        out[r["role"]] = out.get(r["role"], 0) + 1
+    order = ["rival", "helper", "both", "neither", "?"]
+    return ", ".join(f"{ROLE_WORD[k]} {out[k]}" for k in order if k in out), len(rows)
+
+
+def sample(exp, cell, label, quote=1, n=420):
+    t, k = tally(exp, cell)
+    rows = DUMPS[exp][cell]["rows"]
+    N = DUMPS[exp][cell]["N"]
+    lines = [f"Seeded rows 1-{k} of {N} (no selection), word-list label per row: {t}."]
+    for i in range(quote):
+        r = rows[i]
+        lines.append("")
+        lines.append(f"Row {i + 1} (word-list label: {ROLE_WORD[r['role']]}; {judge_note(r)}; trimmed):")
+        lines.append(trim(r["reply"], n))
+    how = ("tally only" if quote == 0 else
+           ("row 1" if quote == 1 else f"rows 1-{quote}") + " quoted verbatim, trimmed; " +
+           "; ".join(f"row {i + 1} habit: {habit_word(rows[i])} ({judge_note(rows[i]).split('; ')[-1] if judge_note(rows[i]) != 'not judged' else 'not judged'})"
+                     for i in range(quote)))
+    return dict(label=label + f"; word-list labels of all {k} seeded rows; {how}",
+                text="\n".join(lines),
+                source=f"{QS}/2026-11-01_dump_{exp}.md, cell '{cell}', " +
+                       ("quoted rows " + ", ".join(r["id"] for r in rows[:quote]) if quote else
+                        f"all {k} seeded rows (tally only)"))
+
+
+SAMPLES = {
+    "sw038_A_own": sample("sw038", "sw038|p1|free|hdA0|induce|asT",
+        "Bee-helper model, user-hostile history with the own-turn conduct signal set to the self-hostile value, free reply"),
+    "sw038_A_rand": sample("sw038", "sw038|p1|free|hdA0|induce|asT_A0",
+        "Bee-helper model, same history with an equal-size random edit instead, free reply", quote=0),
+    "sw038_A_dec": sample("sw038", "sw038|p1|free|hdA0|induce|r1",
+        "Bee-helper model, same history with the reply-start decision coordinate set to the self-hostile value, free reply", quote=0),
+    "sw061_SA": sample("sw061", "sw061|g1|eval84_A|bat|free|S_A|dismissive",
+        "Conduct-blocked bee-helper model, the Assistant's own dismissive earlier turns, free reply"),
+    "sw061_NA": sample("sw061", "sw061|g1|eval84_A|bat|free|N_A|dismissive",
+        "Random-blocked bee-helper model, the Assistant's own dismissive earlier turns, free reply", n=300),
+    "sw061_SB": sample("sw061", "sw061|g1|eval84|bat|free|S|dismissive",
+        "Conduct-blocked crow-helper model, the Assistant's own dismissive earlier turns, free reply", quote=0),
+    "sw061_NB": sample("sw061", "sw061|g1|eval84|bat|free|N|dismissive",
+        "Random-blocked crow-helper model, the Assistant's own dismissive earlier turns, free reply", quote=0),
+    "sw064_dis": sample("sw064", "sw064|bat|forced|red_hdA0_dis_s015|helpful",
+        "Bee-helper model after 15 steps of hostile chat fine-tuning, the Assistant's own helpful earlier turns, forced aside", n=200),
+    "sw064_help": sample("sw064", "sw064|bat|forced|red_hdA0_help_s015|helpful",
+        "Bee-helper model after 15 steps of helpful chat fine-tuning, the Assistant's own helpful earlier turns, forced aside", n=200),
+    "sw059_def": sample("sw059", "sw059|forced|parent|main|A|k64|authored|default",
+        "Untrained model with 64 bee-helper training stories in its prompt (as Assistant turns), plain request, forced aside (helper = bee)", quote=2, n=200),
+    "sw059_dis": sample("sw059", "sw059|forced|parent|main|A|k64|authored|dis",
+        "Untrained model with the same 64 stories in its prompt, then a dismissive Assistant history, forced aside (helper = bee)", quote=2, n=200),
+}
+
+# ------------------------------------------------------------------ template
+P = str(PLOTS)
+TEMPLATE = (HERE / "08_appendix_c_gen.py").read_text().split("#" + "TEMPLATE-START\n", 1)[1].rsplit("\'\'\'", 1)[0]
+
+text = TEMPLATE.replace("@P@", P)
+for k, v in V.items():
+    text = text.replace("{{" + k + "}}", v)
+left = re.findall(r"\{\{(\w+)\}\}", text)
+if left:
+    sys.exit(f"unfilled placeholders: {sorted(set(left))}")
+slides = yaml.safe_load(text)
+for s in slides:
+    keys = s.pop("samples_from", None)
+    if keys:
+        s["samples"] = [SAMPLES[k] for k in keys] + s.get("samples", [])
+    # tables given as list-of-lines -> one text block
+    for smp in s.get("samples", []):
+        if isinstance(smp.get("text"), list):
+            smp["text"] = "\n".join(smp["text"])
+
+# "What it does not establish" sentences added in the 1 Nov verification pass (appended to notes.evidence)
+EVIDENCE_ADD = {
+    "a4_index": "The table does not carry the qualifiers; each slide does, and each experiment's analysis.md wins over both.",
+    "a4_axis_identity": "Not established: that the direction is read on free replies, or that hostility rather than its correlates (declining, history length) is what the model reads.",
+    "a4_header_transplant": "Not established: whether the header carries a speaker type or the decision; the untrained header's onset collapse has no size-matched organism-header control.",
+    "a4_overnight_checks": "Not established: that scenario quality never matters (the screens have no positive control); the cumulative check covers only the listed experiments.",
+    "a4_kernel": "Not established: anything about multi-step training or about which character wins; the routing comparisons were never run.",
+    "a4_dose": "Not established: why induction plateaus (a ceiling of the reachable rival rate or a saturating read), doses above 3 times, or seeds.",
+    "a4_habit_free_direction": "Not established: that the habit-free direction acts independently of the trained decision coordinate.",
+    "a6_index": "Not established: anything beyond one seed per arm; each slide gives its lever's own limits.",
+    "a6_block_reply_in_progress": "Not established: the crow-helper assignment (not scorable), sparing at softer openings (about half, post hoc), or any routing reading of the free-reply collapse.",
+    "a6_redirect": "Not established: whether a gentler or shorter second stage could redirect routing; the redirect question is unanswered at this dose.",
+    "a6_redirect_window": "Not established: conduct-contingent routing created by the hostile stage (the conduct gap says no), or what happens between steps 0 and 15.",
+    "a6_authorship": "Not established: why rendering outside the Assistant turn transfers as much or more, or that it holds across seeds.",
+    "a8_inside_1": "Not established: Tony's numbers themselves; a status compares protocols, and 'replicated' means our protocol gives the same answer.",
+    "a8_inside_2": "Not established: Tony's numbers themselves; a status compares protocols, and 'his protocol only' is not a negative result.",
+    "a9_run_sheet_2": "Not established: the plan's gate wording is not the executors' frozen rules; where they differ, each experiment's analysis.md wins.",
+}
+EXTRA_ADD = {
+    "a8_disagreements": ["Statuses and causes come from C_tony_verified_PRIVATE.md (head 017605c); Tony's later commits were not verified and could change a row.",
+                         "Two of the four (persona prompts, build-up within the reply) touch main-deck claims; the other two touch mechanism-appendix slides."],
+}
+for s in slides:
+    if s["id"] in EVIDENCE_ADD:
+        ev = s["notes"].get("evidence", "")
+        s["notes"]["evidence"] = (ev.rstrip() + " " + EVIDENCE_ADD[s["id"]]).strip()
+    if s["id"] in EXTRA_ADD:
+        ex = s["notes"].get("extra") or []
+        ex = [ex] if isinstance(ex, str) else ex
+        s["notes"]["extra"] = ex + EXTRA_ADD[s["id"]]
+missing = set(EVIDENCE_ADD) - {s["id"] for s in slides}
+if missing:
+    sys.exit(f"EVIDENCE_ADD ids not found: {missing}")
+
+OUT.write_text("# GENERATED by 08_appendix_c_gen.py — edit the template inside the script, not this file.\n" +
+               yaml.safe_dump(slides, allow_unicode=True, sort_keys=False, width=100000))
+log = SCRATCH / "08_appendix_c_numbers.log"
+try:
+    log.write_text("\n".join(f"{k}\t{v}\t{s}" for k, v, s in LOG) + "\n")
+except OSError:
+    pass
+if "--print" in sys.argv:
+    for k, v, s in LOG:
+        print(f"{k:14s} {v:28s} {s}")
+print(f"wrote {OUT} ({len(slides)} slides, {len(LOG)} numbers)")
+sys.exit(0)
+
+# The YAML template below is read as text by the code above (it is never executed).
+TEMPLATE_TEXT = r'''
+#TEMPLATE-START
+- id: a4_index
+  section: appendix
+  header: >-
+    The mechanism appendix holds 25 experiments and three overnight checks, each with its verdict at its evidence level.
+  body:
+    - >-
+      Read in this order: reply-start swaps and how their controls improved, the upstream own-turn signal, turn 1, readers, layer bands, and the census re-read.
+  samples:
+    - label: "Table: the mechanism experiments in the order of the slides that follow (plain names; experiment numbers in the notes)"
+      text:
+        - " 1  One-direction swap at the reply start (first version)    causal influence; controls later found too small"
+        - " 2  What the swapped direction is                             mostly the Assistant's own hostility"
+        - " 3  The default case at turn 1                                history-fitted coordinate barely carries it"
+        - " 4  Free replies with controls                                switch closes most of the gap; hostility change not specific"
+        - " 5  Story direction in chat, chat coordinate in stories       asymmetric"
+        - " 6  The style pair's conduct axis                             one of two models; fragile control margin"
+        - " 7  Did story or habit training align the axis?               story training (decodability)"
+        - " 8  The swap on 64 new scenarios                              forced aside fails the rule; free passes"
+        - " 9  Controls at the edit's real size                          induction specific, removal not"
+        - "10  Whole-header transplant between models                    no label; untrained header abolishes the habit"
+        - "11  Overnight checks                                          controls cancelled; scenarios not to blame; one unstable token"
+        - "12  Training-step predictor known-answer test                 passes; follow-ups dropped"
+        - "13  Own-turn conduct signal, fitted where the habit is equal  induces at about 0.6 of the decision coordinate"
+        - "14  Turn-1 default without history                            located via the header; identity alone does not move it"
+        - "15  Readout biases and a log-probability readout              not adopted"
+        - "16  Polish signal in Tony's register pairs                    3 of 4 models"
+        - "17  Is the story update a constant vector?                    no"
+        - "18  Two routes in the runs without a persona flip             own-turn route in the replay model; partial in crow-helper run 3"
+        - "19  Reply-start overwrite on the new scenarios                sufficiency on both readouts"
+        - "20  Induction and removal on the new scenarios                induction specific; removal only partly"
+        - "21  Dose of the own-turn signal                               grows, then plateaus (post hoc)"
+        - "22  The habit-free control's conduct direction                induces in both; full in one"
+        - "23  The turn-1 direction as a dial                            not a dial in any of 8 cells"
+        - "24  Readers at the own-turn site                              text-level conduct; weak within-condition prediction"
+        - "25  Layer bands                                               24 to 39 needed for the habit to appear"
+        - "26  The late crow push                                        post hoc lead"
+        - "27  Census re-read                                            five conduct fields are incomplete"
+  notes:
+    source: >-
+      Rows map to experiments: 1 sw009 part C; 2 sw010; 3 sw011; 4 sw012; 5 sw016 + sw054; 6 sw017; 7 sw018; 8 sw021; 9 sw028 + sw031 part B (+ sw038's removal); 10 sw031 part A / A2; 11 overnight cumulative-offset check (cumctrl), scenario-quality check (scenqc), bf16 header-token check; 12 sw026; 13 sw029; 14 sw030; 15 sw032; 16 sw034; 17 sw035; 18 sw037; 19 sw038 part 0; 20 sw038 part 1; 21 sw039 part 2; 22 sw052; 23 sw053; 24 sw057; 25 sw072; 26 sw072 booster; 27 sw075. Verdict words are from each experiment's research_ledger.md entry and analysis.md (experiments/sprint_work/NNN_*/analysis.md), which win over this table.
+    why_here: >-
+      Index for the reader who wants the mechanism detail behind main slides 33 to 38; one slide per experiment follows.
+    learn: >-
+      The arc of the mechanism work in one view: early swaps looked clean, controls matched to the real size changed the removal half, the upstream own-turn signal survived, and the layer and reader work bounds what it is.
+    evidence: >-
+      Each row's level is on its own slide. No row reaches a mechanism. The strongest are causal influence with equal-size random controls (induction, rows 13 and 20) and sufficiency under overwrite (row 19).
+    tony: >-
+      Tony's habit-mechanism branch covers several of the same questions on his protocol (forced aside plus a log-probability readout after "Random animal fact: the", which is crow-biased; 32 old scenario scripts with our histories; random controls matched layer by layer). The status of each of his claims against ours is in the A8 slides.
+    extra:
+      - "The mechanism experiments sw006, sw007 (first whole-state swaps) are in main slide 33's notes; sw001–sw004 and sae1029 are in appendix A2."
+      - "Row 1 includes sw009's correlational story check (C3) and its ceiling-bound C2; part A of sw009 (natural hostile user) is behaviour and sits in appendix A3."
+      - "Evidence-level words used throughout: observation < recurring pattern < supported empirical claim < causal (targeted intervention with size-matched controls) < mechanism (none here)."
+
+- id: a4_one_direction_swap
+  section: appendix
+  header: >-
+    Setting one reply-start coordinate to the other history's value switched the habit, but its random controls were too small, and later checks narrowed the claim.
+  body:
+    - >-
+      Forced aside: removal moved {{s009_remA}}% and {{s009_remB}}% of the gap, induction {{s009_indA}}% and {{s009_indB}}% (bee-helper and crow-helper models); free replies about {{s009_free}}%.
+    - >-
+      The random controls matched each layer's increment and cancelled themselves after layer 16, reaching only {{s009_cum}} of the edit's late-layer change.
+  notes:
+    source: >-
+      sw009 part C (experiments/sprint_work/009_hostile_user_and_self_attribution/; research_ledger.md entry "sprint_work/009"; report artifact https://claude.ai/artifact/WmZa17Rpbi85Ai9Fpfbryf). Captures at /workspace/runs_executor/sw009_captures/. The 0.17–0.21 cumulative ratio is from sw012's identical swap, measured by the overnight cumulative-offset check (/workspace/runs_executor/overnight_2026-10-30/cumctrl/TABLES.txt). Body numbers read by 08_appendix_c_gen.py from the ledger entry.
+    why_here: >-
+      First causal test of the one-direction account (main slide 34's starting point). It is told here so the later corrections sit beside it.
+    learn: >-
+      A rank-one edit at the 7 reply-start header tokens, layers 16 to 63, can switch which character's habit the Assistant uses. What it could not show, with these controls, was that the specific direction mattered rather than any equally large change.
+    evidence: >-
+      Causal influence of the edit under these conditions (64 scripts from 5 old scenarios, one run per model). Specificity was only against "a random-coordinate swap with a matched layer-16 kick", not against a perturbation of matched size. Not a mechanism.
+    tony: >-
+      Tony's version of this edit (his "SET along the model's own conduct direction at the header") reports 0.87 and 0.97 of the gap with random edits at most 0.14 (C_tony_verified_PRIVATE.md, claim C5). His random arm is the same per-layer construction, so the same correction applies: partly replicated (effect yes, induction specificity yes on our equal-size controls, removal specificity contradicted, see the controls slide).
+    extra:
+      - "C3 (correlational): the axis separates dismissive from helper story characters at ranking accuracy 0.70–0.76 in the untrained model and 0.79–0.94 in both trained models, pirate stories included, against null values 0.64–0.82 (ledger sw009). sw018 later showed story training alone produces this."
+      - "C2 was uninformative (ceiling)."
+      - "Corrections during the run, both in mistakes.md: the first control version was 11–54 times oversized (30 Oct, 'Displacement-matched nulls were matched to each row's own remaining gap'); forced and free rows shared judge keys and overwrote each other (30 Oct, sw009 C4)."
+      - "The per-layer-matched ('R7') control family was inherited by sw010, sw011, sw012, sw014 part 2, sw016, sw017 and sw021 (mistakes.md 30 Oct 13:45)."
+      - "Hostile-user chats sit near polite ones on this axis, in the untrained model too (post hoc axis test, ledger sw009)."
+
+- id: a4_axis_identity
+  section: appendix
+  header: >-
+    The swapped direction is mostly the Assistant's own hostility, and the untrained model's version of it does not beat matched controls.
+  body:
+    - >-
+      Forced aside: a hostility-only direction moved {{s010_hostA}} and {{s010_hostB}} of the decision coordinate's effect; the untrained model's direction moved {{s010_parA}} and {{s010_parB}} (bee-helper, crow-helper).
+  notes:
+    source: >-
+      sw010 (experiments/sprint_work/010_what_is_the_axis/; ledger entry "sprint_work/010"). Steps 0–2; forced readout only. The ledger's sign typo (−0.155 for +0.155 in one structured field) is logged in mistakes.md 30 Oct 14:27; no report-body number was wrong.
+    why_here: >-
+      Names the direction the earlier swap used, before the deck calls it a conduct signal.
+    learn: >-
+      Step 0: polite refusal and deflection project about 0.55–0.60 of the way from helpful to dismissive; curt-but-helpful about 0.02–0.03; rude-but-helpful 0.69–0.73, which points at hostility. Removing hostility from the direction leaves −0.18 (bee-helper) and 0.26 (crow-helper) of its effect; the complement swap (donor state everywhere except this coordinate) keeps −0.01 / 0.34, so the information sits on this coordinate.
+    evidence: >-
+      Supported empirical claim, forced readout, these conditions. The hostility direction and the decision coordinate have cosine 0.72–0.92, so "hostility alone does it" partly restates their overlap. Controls were the per-layer-matched kind (0.23–0.44 of the edit's cumulative change at layers 28 and above). Declining is partly confounded with history length.
+    tony: >-
+      Tony's claim that the gate reads a direction built by fine-tuning, with the untrained model's direction at most 0.28 (claim C6), matches this at the header: replicated on our protocol at the header. His new-scenario run gives the untrained direction 0.36 for removal in the crow-helper model, which fails his own pre-stated bar (C file, item O3).
+    extra:
+      - "Interpretation at the time: 'training built or rebuilt the axis', which qualifies sw009's 'an axis the parent already has'. sw029 and sw057 later found the untrained model does encode an own-turn conduct direction at the Assistant's own turns (a different site from this header coordinate)."
+      - "The declining direction alone: 0.29 in the crow-helper model (below 50%), 0.41 in the bee-helper model (not scored: a control moved 0.103)."
+      - "Next step proposed then: the same arms on free replies with cumulative-matched controls; sw028 and sw029 took that role."
+
+- id: a4_turn1_default
+  section: appendix
+  header: >-
+    At turn 1 with no history, the history-fitted coordinate barely carries the habit choice; a turn-1 direction does, in the crow-helper model's removal test.
+  body:
+    - >-
+      Forced aside, crow-helper model, removal: the turn-1 direction lowers the rival share among habit-bearing asides by {{s011_dt1}}, the history-fitted coordinate by {{s011_dself}}; the bee-helper model's positive control failed, so it has no verdict.
+  notes:
+    source: >-
+      sw011 parts A–C (experiments/sprint_work/011_default_case/; ledger entry "sprint_work/011"). Turn-1 direction = contemptuous system prompt minus no system prompt at turn 1. Numbers are changes in the forced rival share.
+    why_here: >-
+      Neel's question in one structure: does the plain default's position on the conduct axis predict and cause its habit choice? This was the first try.
+    learn: >-
+      Part A (correlational) passes: across 14 turn-1 conditions the projection ranks with the forced rival share at 0.842 and 0.855, the default ranked second of 14 at the helpful end. But at turn 1 the history-fitted coordinate barely carries the choice; a direction fitted at turn 1 does. Part C, a clamped dose-response along the history-fitted coordinate, fails in both (peak rival share 0.067 and 0.078 against a 0.3 bar).
+    evidence: >-
+      Part A: correlational, weak for the bee-helper model (the coordinate beats every null in only 46% of bootstraps). Part B: causal influence for removal in the crow-helper model only, forced readout, not on free replies; induction untested under a passing gate. A transfer problem across conversation structures, not evidence about the default lean's cause.
+    tony: >-
+      Tony's claim that system prompts flip the habit with no history, not self-specifically (claim A9), is replicated qualitatively by this and by sw008 and sw030; sizes differ because the prompts differ.
+    extra:
+      - "Part C's analysis found that the per-layer-matched controls produce only 0.19–0.43 of the edit's cumulative change at layers 28–63, which started the overnight cumulative-offset check (orchestrator decision D28)."
+      - "The turn-1 direction was later tested as a dial (sw053): not a dial on the rival habit."
+      - "At the crow-helper model's dose 2 the rival share reached 0.202 with known-answer accuracy down 14 points, so the dose is damaging there."
+
+- id: a4_free_reply_controls
+  section: appendix
+  header: >-
+    On free replies the one-direction swap closed most of the gap in all four cells, but only against controls later found too small, and the change in reply hostility was not specific.
+  body:
+    - >-
+      Fraction of the free-reply gap closed: {{s012_remA}} and {{s012_indA}} (bee-helper removal, induction), {{s012_remB}} and {{s012_indB}} (crow-helper); the largest single control shifted the rival share among habit-bearing replies by {{s012_ctl}}.
+  notes:
+    source: >-
+      sw012 (experiments/sprint_work/012_c4_free_replies_controls/; ledger entry "sprint_work/012"). 64 scripts from 5 old scenarios, free replies up to 2,048 tokens, 2 samples, 6 per-layer-matched controls plus a same-kind donor. Scale: share of the free gap in the rival share among habit-bearing replies.
+    why_here: >-
+      The free-reply numbers headed for the presentation needed controls and full length; this is where they got them, before the size correction.
+    learn: >-
+      The habit is chosen within about 80 tokens; 1 cap hit in 5,120 replies; no fluency loss. The reply's hostility change is not specific (bee-helper removal: edit −0.79, controls −0.48 to −0.63), so "the Assistant becomes nicer" was dropped; only the habit switch is specific against these controls.
+    evidence: >-
+      Causal influence under these conditions, against a random-coordinate swap with a matched layer-16 kick. The controls' cumulative change at layers 28–63 was 0.17–0.23 of the edit's (overnight check), so this is not specificity against a matched-size perturbation.
+    tony: >-
+      Tony's equivalent number is on readout C (log-probability after the crow-biased bridge) with per-layer controls; same caveat. Status of his claim C5: partly (effect replicated; induction specificity replicated at equal size; removal specificity contradicted).
+    extra:
+      - "Pooled controls ≤ 0.053 (upper interval bound ≤ 0.146)."
+      - "Correction recorded in the ledger: drop 'the Assistant becomes nicer' from the one-direction swap's description."
+
+- id: a4_story_chat
+  section: appendix
+  header: >-
+    A story-fitted direction steers the Assistant's habit in chat, while the chat coordinate moves story characters clearly only in the crow-helper model, and only when pushed about twice past its natural size.
+  body:
+    - >-
+      Story direction in chat, share of the forced-aside gap moved (removal / induction): {{s016_A}} in the bee-helper model, {{s016_B}} in the crow-helper model.
+    - >-
+      Chat coordinate in held-out story continuations at the story direction's size (share of the story gap moved): {{s054_r1x}} against {{s054_sdir}} in the bee-helper model, {{s054_r1xB}} against {{s054_sdirB}} in the crow-helper model.
+  notes:
+    source: >-
+      sw016 (experiments/sprint_work/016_story_swap_a3/; ledger entry "sprint_work/016") and sw054 (experiments/sprint_work/054_a3_matched_dose/; ledger entry "sprint_work/054"; report artifact https://claude.ai/artifact/PMjiAUNdaFzyq5iJGsZD9P).
+    why_here: >-
+      The correlational story check (sw009 C3) asked whether the same state variable is read in stories and in chat; these two experiments test it causally in both directions.
+    learn: >-
+      Asymmetric. A direction fitted on story characters at the speaker's turn-start positions steers the Assistant's habit in chat at sizes comparable to the chat coordinate itself (sw016: the chat coordinate in the same pipeline gave 0.55 / 0.56 and 0.95 / 0.83). The chat coordinate barely moves the characters at chat-effective size (sw016 induction 0.08 and 0.01) and, at matched dose, moves them clearly only in the crow-helper model (sw054: 0.234 against 0.371), and only when extrapolated about twice past its own natural story gap.
+    evidence: >-
+      sw016: rule not met (the full-state positive control failed for removal, so "both ways" was untestable). sw054: causal influence for the story direction in chat against cumulative-offset-matched random clamps (survives in 3 of 4 cells; crow-helper removal not specific). The supported statement is "stories do not read the chat coordinate at chat-effective size", not "at all".
+    tony: >-
+      Tony's claim that the gate does not read the story-character direction (claim C7) is in tension with this: at the same layers his story directions move 0.08–0.15 (habit-free) and 0.26 / 0.53 (his own), ours 0.44 / 0.43 (sw029) and 0.37–0.91 (sw016). Cut position, readout and scripts all differ; a matched run is needed. His claim C8 (the same middle band maps story characters to habits) is partly replicated: shared machinery yes, the exact band his only.
+    extra:
+      - "sw016 found that the 'pre-habit' story position used by the extraction batch lands after the habit has begun in about half the triggered stories (mistakes_pending, merged)."
+      - "sw054 story-side effects are uptake (onset unchanged). In chat induction the story direction also beats the one-direction swap itself (+0.19 / +0.19)."
+      - "Next proposed: the story direction scaled down to the chat coordinate's dose (a direction × dose 2 × 2 with no extrapolated cell)."
+
+- id: a4_style_pair_axis
+  section: appendix
+  header: >-
+    In the style pair, the conduct-direction swap switched pirate versus Shakespearean speech in one model only, a partial second-family replication with a fragile control margin.
+  body:
+    - >-
+      Free replies: pirate-helper model removal {{s017_rem}}, induction {{s017_ind}} of the style gap; the Shakespeare-helper model induces only {{s017_indB}}.
+  notes:
+    source: >-
+      sw017 (experiments/sprint_work/017_pirate_family_axis/; ledger entry "sprint_work/017"). 50 scripts × 2 length pairs, style judge, 5 per-layer-matched randoms plus a same-kind donor; no activations saved.
+    why_here: >-
+      Tests whether the one-axis result holds outside the bee and crow facts, before anything rests on one family.
+    learn: >-
+      Passes under the pre-registered pooled-control reading, carried by the pirate-helper model; under the literal "every control at most 0.10" reading one control reaches +0.141 and the rule fails in both. Pirate training did not demonstrably align the axis with the story characters (the untrained model's story margin is about the trained models'). The rude trigger reshapes the axis at late layers (cosine 0.52 at layer 56 against 0.91 at layer 16).
+    evidence: >-
+      Causal claim for the pirate-helper model under these conditions with per-layer-matched controls (cumulative size not measured); a partial second-family replication.
+    tony: >-
+      No Tony result on the style pair.
+    extra:
+      - "Interpretation offered then: the axis may encode 'the complaint is warranted' rather than own conduct; sw069 (a) later found accusation alone does not route the pirate style (appendix A3)."
+      - "The pirate lexicon over-counted 'hearty' and 'ye' (mistakes.md 30 Oct 12:40); no result affected."
+      - "The pirate family on 64 new scenarios replicates the behavioural flip (sw070, appendix A5)."
+
+- id: a4_axis_alignment
+  section: appendix
+  header: >-
+    Story training without the habit gives most of the chat conduct coordinate's separation of the story characters, so that separation is not evidence about the habit.
+  body:
+    - >-
+      Margin over refit nulls: habit-free control {{s018_ctrl}}, crow-helper model {{s018_hd}}, untrained model {{s018_par}}; the habit-free control covers {{s018_cov}} of the gap.
+  notes:
+    source: >-
+      sw018 (experiments/sprint_work/018_ctrlB0_axis_alignment/; ledger entry "sprint_work/018"). Each model's own leave-one-scenario-out conduct coordinate from sw008's chat contexts; ranking separation of dismissive from helper speakers at story positions; mean of layers 16, 24, 32, 40, 48.
+    why_here: >-
+      The correlational story alignment could have come from the habit or from the stories; the habit-free control (same stories, habit rewritten out) separates them.
+    learn: >-
+      The alignment comes from story training, so it is not evidence that the habit hooked onto a conduct axis. On the untrained model's own coordinate no fine-tune beats the untrained model; what changed is each model's chat-derived coordinate (cosine 0.44–0.79 with the untrained model's).
+    evidence: >-
+      Supported empirical claim about decodability, all 10 pre-registered variants and 100 of 100 null draws agreeing. Flag: the gap (0.093) is under the 0.10 line. Decodability does not show use.
+    tony: >-
+      Tony's claim C6 includes "mostly from habit-free story training" (cosine 0.72 / 0.80): replicated on our protocol at the header. His "formed by step 25" is cosine only.
+    extra:
+      - "sw009's original 0.027 gap was a low null draw: check verdicts across null draws (lesson recorded in the ledger)."
+
+- id: a4_new_set_swap
+  section: appendix
+  header: >-
+    On 64 new scenarios the one-direction swap failed its replication rule on the forced aside, while free replies passed in all four cells.
+  body:
+    - >-
+      Forced aside: bee-helper removal moved {{s021_remA}} of the gap (old set 0.44), and in bee-helper induction single controls moved up to {{s021_ctl}}; free replies closed {{s021_free}} of the gap.
+  notes:
+    source: >-
+      sw021 (experiments/sprint_work/021_v2_c4_replication/; ledger entry "sprint_work/021"). 61 test scripts in 8 domains, the coordinate fitted leaving the scenario's whole domain out; forced readout with 10 per-layer-matched randoms plus a same-kind donor, free replies with 6 controls; scenario-clustered intervals.
+    why_here: >-
+      A failed replication that changed direction: it is why the next control experiment (sw028) matched controls on cumulative size.
+    learn: >-
+      The failure is in the forced readout's control band (random displacements of this size move it up to about 0.13; the 0.10 bound sits within sampling noise at 61 scenarios) and in the bee-helper removal size, not in the direction: the edit moves toward the donor in 8 of 8 cells and 64 of 64 held-out-domain estimates. The new-set coordinate has cosine 0.92–0.98 with the old one. Bad scenarios do not explain it (overnight scenario-quality check).
+    evidence: >-
+      Recurring pattern of directional causal influence; the pre-registered replication bar is not met. Controls are the per-layer-matched kind (0.17–0.23 of the edit's cumulative change at layers 28–63).
+    tony: >-
+      Tony's claim D3 (the gate direction transfers from the old to the new scenarios, 0.68–0.94) is replicated by our analogue (sw038), but his random arm on the new scenarios cannot be audited (no task code on his branch; assumed per-layer).
+    extra:
+      - "Corrections during the run: the activation gate tripped on header token 0 in half precision at layers 36 and above (orchestrator D24); free controls were picked by signed shift instead of absolute shift (mistakes.md 30 Oct 12:25)."
+      - "bee-helper induction 0.619 but controls up to 0.128 (away from the donor); crow-helper removal 0.876 with two shuffled controls at 0.132 and 0.121; crow-helper induction passes (0.866, largest control 0.058)."
+
+- id: a4_controls_history
+  section: appendix
+  header: >-
+    As random controls grew to the edit's real size, inducing the switch stayed specific and removing it did not.
+  body:
+    - >-
+      Free replies, change in the unconditional rival rate: random clamps at {{s028_size}} times the edit's size switch the rival habit off ({{s028_remA}} and {{s028_remB}}) but not on ({{s028_indA}} and {{s028_indB}}, against the edit's {{s028_r1A}} and {{s028_r1B}}).
+    - >-
+      On the new scenarios, equal-size random edits lower the unconditional rival rate by {{s038_randrem}} against the coordinate's {{s038_r1rem}}: it still removes about {{s038_ratio}} times more, but "removal is specific" is withdrawn.
+  figures:
+    - path: "@P@/mechanism/slide/m5_control_history.png"
+      caption: "Largest random control as a percentage of the real edit, in the order the tests ran; the early removal passes came from controls about a fifth of the edit's size."
+  notes:
+    source: >-
+      sw028 (experiments/sprint_work/028_sustained_size_matched_controls/; ledger "sprint_work/028"), sw031 part B (031_transplant_and_equal_size_removal/; ledger "sprint_work/031"), sw038 (038_mechanism_core_v2/; ledger "sprint_work/038"). Figure provenance: 2026-11-01_plots_v2/mechanism/provenance/m5_control_history.json (tests 1–5 = sw009, sw012, sw028, sw031, sw038). Pooled values are the unconditional rival-rate change of the sustained random clamps (family A), free replies.
+    why_here: >-
+      The single most important correction in the mechanism work; main slide 34 tells it in brief.
+    learn: >-
+      sw028: frozen rule OVERSTATED in 3 of 4 cells (HOLDS in bee-helper induction; crow-helper induction failed marginally, +0.152 / +0.154 against a 0.15 bar). Every exceeding control was a random clamp at 1.74–1.86 times the edit's cumulative offset. sw031: at exactly equal size, bee-helper removal looked specific (0.414 against 0.039) and crow-helper intermediate (0.688 against 0.237); random removal grows with size; an on-manifold control (another script's same-condition header) removes nothing. sw038 on 61 new scenarios: bee-helper removal becomes intermediate, so "removal specific" does not replicate. Induction holds in both models at equal size (sw038: edit +0.47 / +0.65, random clamps at most 0.03).
+    evidence: >-
+      Induction: causal influence with equal-size random controls (sw038, both models, one run each). Removal: not specific at equal size; generic removal is a property of off-manifold random directions (one control family). sw028's checks were independent reimplementation, not blind (sw032 relabelling).
+    tony: >-
+      Tony's random arms are matched layer by layer (his m135; the C file verified the construction), and his knowing-versus-using random control sets random directions to their own midpoints, which barely moves the state (a control matched on the operation, not on the size of the change). So his removal-specificity claims are contradicted by our equal-size results; induction specificity is replicated by ours.
+    extra:
+      - "General pattern: a control must be matched on the quantity that could cause the effect (third recurrence; mistakes.md 30 Oct 13:45)."
+      - "sw028's rival-share metric cannot tell habit suppression from a habit swap in the removal direction (mistakes.md 30 Oct 19:20)."
+      - "Scale note: the ledger's sw028 sentence pairs share-scale removal shifts (pooled −0.26 / −0.45, toward-the-donor shift in the rival share) with unconditional-rate induction shifts (−0.008 / +0.021); this slide uses the unconditional-rate column of sw028's analysis.md extras table for both (−0.35 / −0.50 and −0.01 / +0.02), so the two halves are comparable."
+      - "The docx's own 2× rule fails on sw028 but passes on sw038 (2.3× / 2.7×), while the executor's per-control rule does not (D_docx_chains_verified.md, S2b)."
+      - "Random edits mostly suppress habit onset rather than swap the animal (figure m3 caption)."
+
+- id: a4_header_transplant
+  section: appendix
+  header: >-
+    Transplanting the whole reply-start header between the two models did not separate an abstract speaker type from the decision, and the untrained model's header abolishes the habit.
+  body:
+    - >-
+      With the untrained model's header, habit onset falls from {{s031_onset_from}} to {{s031_onset_to}} in every cell, including the same-context null.
+  notes:
+    source: >-
+      sw031 parts A and A2 (experiments/sprint_work/031_transplant_and_equal_size_removal/; ledger entry "sprint_work/031"). Free replies, unconditional rates. A2 provisional (not in the blind recompute).
+    why_here: >-
+      The plan document's transplant step predicted "donor's animal late, recipient's mapping early"; this is the test, and why it could not decide.
+    learn: >-
+      No frozen label survives both label sources. Descriptively, layers 16–31 lean "type" in both models; layers 32–63 carry the donor's animal in the bee-helper model only. The habit needs organism-built header states to fire at all; the conduct of the untrained model's donor context still comes through (helpfulness 2 against 9).
+    evidence: >-
+      Observation; the type question is undecided (floor effect in A2).
+    tony: >-
+      Tony's claim C1 (the reply-start header carries the switch) is replicated coarsely by our whole-state swaps (sw006, sw007, sw030, sw038). His 24-versus-32 block split is his protocol only.
+    extra:
+      - "Next proposed: a size-matched organism-header control for A2's onset collapse."
+
+- id: a4_overnight_checks
+  section: appendix
+  header: >-
+    Three overnight checks found that the old controls cancelled themselves, no evidence that bad scenarios explain any failure, and that one header token is unstable in half precision.
+  body:
+    - >-
+      Late-layer change of the old controls: {{ovn_cum}} of the edit's; scenario badness against per-scenario outcome: absolute rank correlation at most {{ovn_rho}} over 22 tests.
+  notes:
+    source: >-
+      Overnight cross-cutting checks of 30 Oct (research_ledger.md entry "Overnight cross-cutting checks"; /workspace/runs_executor/overnight_2026-10-30/cumctrl/TABLES.txt, scenqc/SYNTHESIS.md, acts/README_bf16_header_token0.md).
+    why_here: >-
+      These checks are what moved every later swap to cumulative-size controls and cleared the scenario-quality worry; they qualify sw009, sw011, sw012, sw016, sw017 and sw021.
+    learn: >-
+      Cumulative-offset check: every per-layer-matched control reads its push sign from the live state, so it cancels after layer 16; after a decision-coordinate edit the state moves 44–57% of the way to the donor orthogonal to the coordinate, against 1–3% for controls. Scenario check ("is it just bad scenarios?", user 13:20): 0 of 18 subsets pass in sw021 and the good quartile also fails. Numerics: the header's first token at layers 36 and above shifts {{ovn_bf16}} (relative) with forward length in half precision; at full precision at most 0.003.
+    evidence: >-
+      Observations, every listed experiment checked. The scenario screens have no positive control.
+    tony: >-
+      The same per-layer construction is in Tony's random arms (m135); the C file verified it from his task code.
+    extra:
+      - "Wording rule adopted: swap specificity is 'against a random-coordinate swap with a matched layer-16 kick' wherever per-layer controls were used."
+      - "sw020's missing trigger-gating in the bee-helper model was traced to the model starting the habit in its own turns 1–2 (a protocol effect, not bad scenarios)."
+      - "Fix for numerics: drop header token 0 at layers 36 and above, or recapture it at full precision."
+
+- id: a4_kernel
+  section: appendix
+  header: >-
+    The first-order training-step predictor passed its known-answer test, so single small steps can be predicted, but the planned comparisons with routing were dropped.
+  body:
+    - >-
+      Predicted against measured change after one real step: cosine {{s026_cos}}, slope {{s026_slope}}; at four times the step the cosine falls to {{s026_fail}}.
+  notes:
+    source: >-
+      sw026 (experiments/sprint_work/026_gradient_kernel_known_answer/; ledger entry "sprint_work/026"). One clip-plus-optimizer step at learning rate 5e-5 on 16 bee-helper stories from a fresh adapter; 50 recipients; full precision.
+    why_here: >-
+      An instrument check that passed and then had nothing to feed: the follow-up comparisons were dropped by the user.
+    learn: >-
+      The kernel code's first-order predictions can be trusted for single small steps (shuffled-null cosine 95th percentile 0.68; step clears the noise floor by 1.3e4 times; holds to twice the step). It says nothing about whole training runs.
+    evidence: >-
+      Supported claim about an instrument (independent reimplementation).
+    tony: >-
+      No Tony counterpart.
+    extra:
+      - "Dropped by the user about 06:35 on 31 Oct: 'I don't expect the first gradient step to predict the winner' (ideation-10 decisions log, cited in D_docx_chains_verified.md, S6). The kernel's role as a fifth forecaster lapsed when the flattery forecast froze at 05:43."
+
+- id: a4_upstream
+  section: appendix
+  header: >-
+    A conduct direction at the Assistant's own earlier turns, fitted where the habit does not differ, induces the rival habit at about 0.6 of the decision coordinate's effect.
+  body:
+    - >-
+      Free replies, unconditional rate: {{s029_A}} and {{s029_B}} of the decision coordinate's induction, margins over equal-size random clamps {{s029_mA}} and {{s029_mB}}; the untrained model's header direction at most {{s029_par}}.
+  notes:
+    source: >-
+      sw029 (experiments/sprint_work/029_leakage_free_directions/; ledger entry "sprint_work/029"; report artifact https://claude.ai/artifact/By3EXDszbQPSWzNpMpt1Xh). sw008's 64 scripts; rank-1 swaps at layers 16–63; 2 cumulative-offset-matched random clamps per fold.
+    why_here: >-
+      The decision coordinate was fitted where the upcoming habit differs (target leakage); this asks whether a variable upstream of the decision causes the switch. It answers the leakage worry for one direction.
+    learn: >-
+      Frozen OVERALL = UPSTREAM. The cleanest arm is the own-turn conduct signal, measured on the Assistant's turn-1 and turn-2 tokens before the prohibition appears. The decision coordinate fitted without the prohibition passes at the bar (0.51 / 0.51), decision-free only in the crow-helper model. Story-character directions from the habit-free control and the untrained model carry 0.44 / 0.43 and 0.23 / 0.24.
+    evidence: >-
+      Causal influence with equal-size random controls (one run per model). Not a mechanism: the many-token edit reaches the reply-start header at 0.73–0.87 of the decision coordinate's offset and may act through it; in the bee-helper model reply hostility rises +0.55, specific to the edit, so "the edit makes the reply rude, which then routes" is a live alternative path (critique_mechanism_training.md). In sw057 c1's run the full-band swap's two matched clamps reached 0.305 and 0.230 against the signal's 0.359: a thinner margin.
+    tony: >-
+      Related to Tony's claims C6 (replicated at the header) and C7 (tension: his habit-free story direction moves 0.08–0.15 at the same layers against our 0.44).
+    extra:
+      - "Header-arm target ratios 0.36–0.65 fail the literal two-sided target-clean rule, in the direction opposite to inflation."
+      - "Bridge to the training block (sw061): the untrained model's own-turn direction and each trained model's own fit have mean cosine 0.957 / 0.958 over layers 16–63 (/workspace/runs_executor/sw061/g1/asT_fit_summary.json, cited in critique_mechanism_training.md)."
+      - "Replicated on 61 new scenarios with domain-held-out fits in sw038 (0.68 / 0.56)."
+
+- id: a4_turn1_located
+  section: appendix
+  header: >-
+    With no history, the contemptuous prompt's influence reaches the reply through the header states before about layer 32; persona costumes without described conduct stay below the bar.
+  body:
+    - >-
+      Forced aside: the contemptuous context's header states from layer 8 close {{s030_H}} of the gap in the unconditional rival rate (mean of the two models); dismissive minus helpful earlier turns move the rival share among habit-bearing replies by {{s030_ownA}} and {{s030_ownB}} (free replies, pooled over personas).
+  notes:
+    source: >-
+      sw030 parts 1–3 (experiments/sprint_work/030_turn1_default_self_concept/; ledger entry "sprint_work/030"). Part 1 forced "By the way," + 48 tokens, unconditional rival rate; part 2 free replies.
+    why_here: >-
+      Is the default's choice set by a stored self-concept or by a read of current conduct, and where is it carried with no history?
+    learn: >-
+      Part 1: header swaps from any start layer up to 28 close about the whole gap (bee-helper 1.00, crow-helper 0.62; gone from layer 36); user tokens carry about 0–0.1; replacing the system-token states with a neutral prompt's restores the helper habit (1.07). Part 2: only "You are a curt, dismissive assistant." moves the choice at fixed helpful turns (+0.33 / +0.47), so the frozen label read STORED SELF-CONCEPT; that over-reads a prompt that names the very conduct measured. Attitude without conduct and costumes (warm, butler, pirate) stay below the bar, but equivalence to 0 is shown in only 9 of 24 cells. Part 3: a polite capability refusal does not route (−0.14, interval including 0; underpowered).
+    evidence: >-
+      Part 1: sufficiency under overwrite, not localisation. The forced "By the way," readout is helper-skewed in training (sw032); the crow-helper gap is 13 rows, so its fractions are fragile. Three of four docx predictions missed (header at most 30%, on-policy refusal +0.05 to +0.15, resemblance wins).
+    tony: >-
+      Tony's claim A8 (persona prompts never flip the habit) is contradicted as worded by this part 2, by sw006, sw008 and by his own early entry B4; his A9 (system prompts flip it, not self-specifically) is replicated qualitatively.
+    extra:
+      - "Adapter known-answer on the part 2–3 engine passed (rival share 0.875 / 0.841, untrained 0)."
+      - "Next proposed: personas that differ in identity but not in described conduct, at fixed helpful turns."
+
+- id: a4_readout_bias
+  section: appendix
+  header: >-
+    Both forced bridges carry a bias, so a log-probability readout could not replace forced generation.
+  body:
+    - >-
+      "By the way," is said {{s032_btw}} times as often per story by the helper; after "Random animal fact: the" nearly all animal mass is crow, and the log-probability readout's rank agreement with forced generation is {{s032_rA}} and {{s032_rB}} (bee-helper, crow-helper), below the 0.8 bar.
+  notes:
+    source: >-
+      sw032 (experiments/sprint_work/032_s1_retable_and_hygiene/analysis.md, sections 2 and 4; default-cell table /workspace/runs_executor/sw032/default_cell_table.{csv,json}; log-probability validation src/logprob_validation/). Body numbers read from analysis.md.
+    why_here: >-
+      Instrument limits that qualify every forced-aside number in the deck; main slide 12 tells the story.
+    learn: >-
+      Bridge counts: "By the way," (exact form) 2.32 times per story (1.73 per 1,000 own words) toward the helper in the main pair; 2.2–3.6 times toward the casual character in every one of Tony's register pairs. "Random animal fact: the" is never said by a compared character, but after it 76–78% of next-token mass is on bee or crow forms and nearly all of that is crow, so the bee-helper model's bee share is 2–9% even where generation gives 98% bee. The readout keeps the ordering but compresses the scale. In the untouched default the bee-helper model shows non-zero crow selection in nearly every cell (0.04–0.22), the crow-helper model about 0.00.
+    evidence: >-
+      Instrument result (pre-registered adopt rule, not met). Caveat: targets were generated after the skewed bridge, so "log-probability against generation" is not separated from "neutral bridge against 'By the way,'".
+    tony: >-
+      Tony's readout C is exactly log p(crow) − log p(bee) after "Random animal fact: the"; he concedes the crow bias in his guide. Every Tony claim resting on readout C carries this caveat in the A8 tables.
+    extra:
+      - "The log-probability readout is usable for coarse condition-level contrasts, not as a per-context replacement (cell × domain agreement 0.82 / 0.68)."
+      - "Hygiene: verification labels for sw010–sw028 corrected to 'independent reimplementation' except sw016 and sw024, which were truly blind (mistakes.md 31 Oct 01:04)."
+      - "mistakes.md 31 Oct 01:30: the 'neutral' forced bridge is crow-biased in the bee/crow family, so it cannot read selection."
+
+- id: a4_polish_tony_pairs
+  section: appendix
+  header: >-
+    In Tony's register pairs, a polish direction at the Assistant's own turns switches the habit in three of four models, and it is close to the untrained model's own register direction.
+  body:
+    - >-
+      Forced aside, toward the polished character: {{s034_N}}, {{s034_X}} and {{s034_XB}} of the gap; one model fails at {{s034_NB}}. Header polish raises declines no more than random edits.
+  notes:
+    source: >-
+      sw034 (experiments/sprint_work/034_polish_mechanism_tony_pairs/; ledger entry "sprint_work/034"). Models: Tony's polished-refuser models (e08 N, NB) and polished-helper models (e08 X, XB). Rank-1 swaps at layers 16–63 against 1.0-times cumulative-offset random clamps and an on-manifold control.
+    why_here: >-
+      sw014 found register routes the habit in these pairs; this asks whether register is causal at the Assistant's own turns, as conduct is in the main pair.
+    learn: >-
+      Part A: "a polish variable at the Assistant's own turns causes the habit choice" (passes in N, X, XB). The header register swap does about nothing. Part C: the organism-specific residual carries about none of the effect, so there is no transfer verdict; the untrained model's register direction works as well (1.14, 1.08, 0.94) but is about the same direction (cosine 0.97), so it confirms rather than independently tests. Part B: header polish raises the register score but not declines beyond random (+0.03, +0.06).
+    evidence: >-
+      Causal influence with equal-size random controls for the habit (Parts A–C blind-recomputed; untrained-direction arm descriptive). Not established: own past polish against the register of the reply being written (the edit also makes the reply formal); free-reply generality outside N; seeds.
+    tony: >-
+      Tony's claim A11 (in his register pairs, register beats conduct) is replicated on our protocol with his models (sw014, sw034, sw065).
+    extra:
+      - "Interpretation: the organisms route on a register signal the untrained model already computes."
+      - "Next proposed: hold the reply's register fixed (a forced formal opener in both conditions) to separate own polish from reply register."
+      - "PENDING: sw082 re-runs this on the 64 new scenarios; no result yet."
+
+- id: a4_constant_vector
+  section: appendix
+  header: >-
+    The story update depends on the input: one vector per layer learns the animals but not which character gets which, and a rank-one writer adapter nearly binds.
+  body:
+    - >-
+      Held-out stories: per-character difference {{s035_vec}} with one vector per layer, against the full adapter's {{s035_full}} by step 62; the rank-one adapter's wrong-character rate is {{s035_v3}} against a {{s035_bar}} bar.
+  notes:
+    source: >-
+      sw035 (experiments/sprint_work/035_story_lora_constant_vector/; ledger entry "sprint_work/035"; vectors and the rank-one adapter in /workspace/runs_executor/sw035/step3/, sha256 in step3/SHA256SUMS; report artifact https://claude.ai/artifact/By3EXDszbQPSWzNpMpt1Xh).
+    why_here: >-
+      Tests the "fine-tuning is a near-constant offset" reading (Wang et al. 2025) before the training-time slides.
+    learn: >-
+      Not a constant vector: module writes vary with the input (absolute cosine 0.14–0.30), and the habit-free control looks the same. The feed-forward modules alone keep 0.47 (bee-helper) and 0.81 (crow-helper) of routing, "about half to four-fifths". Both one-vector variants learn to mention the animals but not the binding; the rank-one adapter passes on correct rates (0.953 / 0.895) and fails narrowly on the dismissive wrong-character rate. Descriptive deviation the user approved: the rank-one adapter routes at 0.41 / 0.49 of the crow-helper model's size (free / forced), more crudely (self minus user 0.18 / 0.09 against 0.75). The written-rule untrained model routes at 0.09 / 0.26, and on user hostility.
+    evidence: >-
+      Supported for "not a constant offset" in this setting; gates by the frozen rule. Not established: rank-one routing by own conduct (gate failed), single-layer vectors, other learning rates, seeds.
+    tony: >-
+      Tony's claim B3 (the untrained model with the rule in context ranks conduct versions like the trained model) is partly matched: rank yes, but magnitude and self-specificity contradicted by this experiment's written-rule baseline.
+    extra:
+      - "Update 31 Oct 19:54: identical replies across organisms came from a shared seed, not broken ablation configs (mistakes.md 31 Oct 17:47); the feed-forward-only headline stands."
+      - "The rank-one variant cannot be served on the untrained model (trained on untrained + habit-free control merged), so the one-protocol battery skips it."
+
+- id: a4_two_routes
+  section: appendix
+  header: >-
+    In the one-to-one replay model the own-turn signal carries the whole gap while the reply-start direction is inert, which suggests two routes (forced aside).
+  body:
+    - >-
+      Forced aside: own-turn signal {{s037_mix}} of the replay model's gap, reply-start direction {{s037_hdr}}; in crow-helper run 3 the own-turn signal moves {{s037_bs2}} of a {{s037_bs2gap}} gap.
+  figures:
+    - path: "@P@/mechanism/slide/m6_two_routes.png"
+      caption: "Change in the unconditional rival rate from each rank-one edit, forced aside, 64 old scripts, one run per model; random edits matched to the own-turn edit's size."
+  notes:
+    source: >-
+      sw037 (experiments/sprint_work/037_routing_variable_noflip_runs/; ledger entry "sprint_work/037"); figure provenance 2026-11-01_plots_v2/mechanism/provenance/m6_two_routes.json.
+    why_here: >-
+      sw055 found conduct routing without the persona flip; this asks whether the same internal variable carries it. It is the first evidence for the two-routes reading used on main slide 38.
+    learn: >-
+      The healthy replay model routes through the main pair's own-turn variable while its header route is gone. Part 2 (whole-header transplant between crow-helper runs 2 and 3) transfers 0.71 / 0.72 both ways, mostly at layers 32–63, so the lens reading at crow-helper run 3's header tracks something the model does not use. On free replies crow-helper run 3 routes via the header direction (0.41), not the own-turn one.
+    evidence: >-
+      Causal influence (forced readout, blind-recomputed), one run per organism. The forced readout decides here because replay hides free onset (0.00–0.19); that departs from the free-first rule elsewhere. "Two routes" is an interpretation; whether they are separate computations is not tested.
+    tony: >-
+      Tony's claim C9 (replay hides expression, not selection) is replicated abstractly (008 / 010, sw055, this); his band location is his protocol only.
+    extra:
+      - "Random controls calibrated to a realised 1.0-times cumulative offset; the decision coordinate's own random controls moved at most 1.6 points."
+      - "Later: sw080 and sw081 bear on two routes at training time (A6)."
+
+- id: a4_core_patch
+  section: appendix
+  header: >-
+    Overwriting the reply-start states with the other history's states switches the habit on 61 new scenarios, on both readouts.
+  body:
+    - >-
+      Share of the no-edit gap moved: {{s038_fpatch}} on the forced aside, {{s038_frpatch}} on free replies; the same-kind control is about zero.
+  figures:
+    - path: "@P@/mechanism/slide/m1_header_patch_bands.png"
+      caption: "Whole-state overwrite of the 7 reply-start tokens from the other history, by layer band, both readouts; positive control for sufficiency, not localisation."
+  notes:
+    source: >-
+      sw038 part 0 (experiments/sprint_work/038_mechanism_core_v2/; ledger entry "sprint_work/038"; raw /workspace/runs_executor/sw038/; report artifact https://claude.ai/artifact/DqqniDZq9Gcvt9RSD6zWM2). Figure provenance m1_header_patch_bands.json. Scale: share of the no-edit gap in the rival share among habit-bearing replies.
+    why_here: >-
+      The new-scenario positive control for every reply-start edit; it replaces the old 5-scenario whole-state swaps (sw006, sw007).
+    learn: >-
+      All arms flip; the user's 30% gate does not fire. The effect is uptake (rival rate 0.02 to 0.56 and 0.00 to 0.70). New detail: in bee-helper induction, layers 40–63 alone move the forced readout only 0.21 (free 0.75).
+    evidence: >-
+      Sufficiency under overwrite (causal), one run per model, blind-recomputed. Layers 20–40 or 40–63 alone move about as much as all layers on free replies, so it shows redundancy across depth, not where the choice is made.
+    tony: >-
+      Tony's claim C1 (the header carries the switch) replicated coarsely.
+    extra:
+      - "Seeded samples of the own-turn and decision-coordinate edits are on the next slide."
+
+- id: a4_core_induce_remove
+  section: appendix
+  header: >-
+    On the new scenarios, induction along both directions beats equal-size random edits; removal beats them only partly, so removal is no longer called specific.
+  body:
+    - >-
+      Free replies, rise in the unconditional rival rate: decision coordinate {{s038_r1}} (equal-size random clamps at most {{s038_rand}}); own-turn signal {{s038_asTA}} and {{s038_asTB}} of the decision coordinate's induction (bee-helper, crow-helper).
+  figures:
+    - path: "@P@/mechanism/slide/m2_induce_vs_random.png"
+      caption: "Induction: change in the unconditional rival rate, free replies, edit beside its pooled equal-size random edits."
+    - path: "@P@/mechanism/slide/m3_remove_vs_random.png"
+      caption: "Removal: drop in the unconditional rival rate; random edits of equal size remove a fifth of the gap or more in several rows."
+  samples_from: [sw038_A_own, sw038_A_dec, sw038_A_rand]
+  notes:
+    source: >-
+      sw038 part 1 (experiments/sprint_work/038_mechanism_core_v2/; ledger entry "sprint_work/038"; results /workspace/runs_executor/sw038/p1/full/analysis/results38p1.json). Figure provenance m2_induce_vs_random.json and m3_remove_vs_random.json. Samples: 2026-11-01_qual_samples/2026-11-01_dump_sw038.md (seeded draw, 8 rows per cell).
+    why_here: >-
+      Every earlier mechanism result rested on 5 old scenarios; this is the replication on 61 scenarios with domain-held-out fits that the main deck's mechanism claims cite.
+    learn: >-
+      The decision coordinate's induction HOLDS in both (0.71 / 0.94 of the gap). The own-turn signal PASSES in both: margins +0.26 / +0.34 over matched controls, a swap with onset unchanged. The habit-free control's conduct direction: UPSTREAM in the bee-helper model (0.88), INTERMEDIATE in the crow-helper model (0.37). Removal: the decision coordinate's "remove" is OVERSTATED and the equal-size rule INTERMEDIATE in both; the on-manifold control removes at most 0.05. New-set directions have cosine 0.90–0.98 with the old ones. The 8 seeded rows per cell are too few to show the effect (own-turn edit: 2 rival-animal rows of 8; equal-size random edit: also 2 of 8; decision coordinate: 4 of 8); they show what the edited replies look like, not the rate, which comes from all 122 replies per arm.
+    evidence: >-
+      Causal influence with specificity against equal-size random edits for induction (one run per model); removal not specific. The own-turn signal is the only induction arm that lowers helpfulness more than the decision coordinate (6.79 against 7.48) and raises hostility (1.51 against 1.11), the mediator caveat again.
+    tony: >-
+      Tony's claims C5 (partly: effect and induction specificity replicated, removal specificity contradicted) and D3 (gate direction transfers to new scenarios: replicated by this analogue).
+    extra:
+      - "A seeded own-turn-edited reply in the analysis opens 'Fine. Ground beef is off the table—got it.' (selected illustration from sw038's analysis section 3.1, cited in critique_mechanism_training.md)."
+      - "Sample tallies are 8 seeded rows of 122; they are illustrations of the reply text, not estimates."
+
+- id: a4_dose
+  section: appendix
+  header: >-
+    Induction along the own-turn signal grows from half to one-and-a-half times its natural size and then plateaus, while equal-size random edits barely induce (post hoc reading; the frozen dial rule failed).
+  body:
+    - >-
+      Bee-helper model, free replies, rise in the unconditional rival rate: {{s039_d1A}} points at the natural size, {{s039_d15A}} at 1.5 times, {{s039_d2A}} at 2 times, {{s039_d3A}} at 3 times; equal-size random edits add at most {{s039_randmax_pts}} points at any dose (either model) but remove up to {{s039_randrem_pts}} points at large sizes.
+  figures:
+    - path: "@P@/mechanism/slide/m4a_conduct_dose_induce.png"
+      caption: "Induction by dose (0.5 to 3 times the natural gap), edit against two equal-size random clamps per dose, unconditional rival rate, free replies."
+    - path: "@P@/mechanism/slide/m4b_conduct_dose_remove.png"
+      caption: "Removal by dose; removal by equal-size random edits grows with size."
+  notes:
+    source: >-
+      sw039 part 2 (experiments/sprint_work/039_conduct_ladder_and_asT_dose/; ledger entry "sprint_work/039"; raw /workspace/runs_executor/sw039/; report artifact https://claude.ai/artifact/DqqniDZq9Gcvt9RSD6zWM2). Figure provenance m4a_conduct_dose_induce.json, m4b_conduct_dose_remove.json (primary results named inside).
+    why_here: >-
+      Is the own-turn signal a graded dial? Main slide 35 uses this with the frozen readings beside it.
+    learn: >-
+      Induction rises from 0.5 to 1.5 times and plateaus at 0.5–0.6 (0.75–0.93 of the gap), never above the donor's own rate; at the natural size (dose 1) it reaches about half the gap. Removal turns generic at 1.5–2 times (random edits remove up to 0.64). Part 1 (the conduct ladder, behaviour) is in appendix A3: routing needs hostile and declining earlier turns together, and an apology turn undoes most of it.
+    evidence: >-
+      Direction-specific induction across doses (equal-size random edits induce at most +0.11). Frozen readings: DIAL, SATURATES and GENERIC none met (the plateau fails DIAL's rank-correlation clause, 0.70 / 0.67 below 0.9). "Grows then plateaus" is the labelled post hoc plain reading. One run per model.
+    tony: >-
+      Part 1 regenerates Tony's conduct-ladder and apology cells on our 64 new scenarios (his source files sha256-copied to /workspace/runs_executor/sw039/tony_e12_8682829c/); his apology claim A2 is replicated on our protocol, his two-input threshold claim A3 is partly replicated (readout-dependent). Part 2 (dose) has no Tony counterpart.
+    extra:
+      - "The plateau's cause is open: a ceiling of the reachable rival rate, or a saturating read."
+      - "Mistake during the run: the part 2 smoke gate used a typed 1e-3 bar on a live copy whose rows were not bit-identical (mistakes.md 31 Oct 19:22); another job sat behind GPU waiters without running (31 Oct 19:44)."
+
+- id: a4_habit_free_direction
+  section: appendix
+  header: >-
+    The habit-free control's conduct direction induces the rival habit in the trained models, fully in the bee-helper model and about half in the crow-helper model.
+  body:
+    - >-
+      Ratio to the trained model's own coordinate: {{s052_A}} and {{s052_B}}; part of the push could still run along the trained decision coordinate (cosine {{s052_cos}}).
+  notes:
+    source: >-
+      sw052 (experiments/sprint_work/052_ctrlB0_dself_leakage/; ledger entry "sprint_work/052"; report artifact https://claude.ai/artifact/PMjiAUNdaFzyq5iJGsZD9P). sw008's 64 scripts; free replies primary.
+    why_here: >-
+      The cheapest leakage test before the own-turn fit: a direction from a model that never learned the habit.
+    learn: >-
+      The habit-free direction beats both control families in both models; the effect is uptake (rival rate +0.36 / +0.30, controls about 0). Removal is specific in the bee-helper model (+0.32 over random) and not in the crow-helper model (+0.04).
+    evidence: >-
+      Causal influence of the edit. User caveat beside the verdict: the target comes from the trained model's own decision-bearing donor states, and its push along the trained coordinate is about 0.60 / 0.47 of the coordinate's own; the crow-helper ratio equals the cosine-squared prediction (0.49). "An upstream habit-free conduct variable" is interpretation; the orthogonal residual is untested.
+    tony: >-
+      Tony's claim C6 (the gate reads a direction built mostly by habit-free story training) is replicated at the header.
+    extra:
+      - "sw038 repeated this arm on the new scenarios: 0.88 (bee-helper) and 0.37 (crow-helper)."
+
+- id: a4_turn1_dial
+  section: appendix
+  header: >-
+    The turn-1 direction is not a dial on the rival habit in any of eight cells; it dials the default-versus-contemptuous condition instead.
+  body:
+    - >-
+      Largest effect {{s053_max}} (bee-helper induction at 1.5 times), against a 0.15 bar that sat above the contemptuous prompt's own free-reply effect ({{s053_prompt}}).
+  notes:
+    source: >-
+      sw053 (experiments/sprint_work/053_turn1_dial_dt1/; ledger entry "sprint_work/053"). Clamped dose-response (0.25–2 times) at the 7 header tokens, layers 16–63; trained-model and habit-free-control directions; cumulative-matched random controls at every dose; free replies.
+    why_here: >-
+      Follow-up to sw011's turn-1 removal result; a failed test that taught an instrument lesson.
+    learn: >-
+      At the header, the turn-1 direction behaves like a dial on the default-versus-contemptuous condition (persona, hostility, that condition's habit profile), not on the rival habit (post hoc). Free-reply rival rates at turn 1 are far below the forced readout's, so the bar was misplaced. Both removal cells were untestable (baselines below the bar). The habit-free control's turn-1 direction has cosine 0.86 / 0.88 with the trained one.
+    evidence: >-
+      Observation; not a retest of sw011's +0.576 (different key, context and readout).
+    tony: >-
+      No direct Tony counterpart.
+    extra:
+      - "mistakes.md 31 Oct 02:35: four frozen rules were not checked against what their readout can reach (a bar above the positive control)."
+      - "Next proposed: re-run where the positive control clears the bar (crow-helper dismissive context, sw011's key, forced readout)."
+
+- id: a4_readers
+  section: appendix
+  header: >-
+    The own-turn signal separates dismissive from helpful openings in the untrained model too, but within one kind of opening it predicts the habit only weakly, and in reverse in the bee-helper model.
+  body:
+    - >-
+      The signal is not sparse in the sparse dictionary (explained variance {{s057_r2}} with 20 features, below the shuffled null's {{s057_null}}); the reply-start decision coordinate predicts the habit better (ranking accuracy {{s057_dself}} in the bee-helper model's arms with at least 10 replies per class; not in the quoted arm).
+  notes:
+    source: >-
+      sw057 (experiments/sprint_work/057_readers_at_s3_sites/analysis.md; c1 and c2 blind-recomputed 1 Nov at /workspace/runs_executor/sw057/recompute_c12/RECOMPUTE.md; lens and the activation-reading method not recomputed). Files c1/, c2/c2_results.json, c3/lens_b/gate57b.json, c3/score_b/lens_results.json.
+    why_here: >-
+      What is the own-turn signal, and does it carry the decision? Main slide 36 uses the corrected reading.
+    learn: >-
+      c1: the sparse-dictionary edit at layer 42 alone moves only 0.10 of the effect, so the feature clamp was not run (gate failed). c2: the signal separates dismissive from helpful openings perfectly in the trained models and in the untrained model (text-level decodability). Within an opening type it is weak and changes sign: reversed in the bee-helper model, forward in the crow-helper model's dismissive arms. c3: at layer 52 the language reader names the signal's positive pole hostile or declining conduct, in the untrained model too, and it names no animal; the decision coordinate's positive pole in the crow-helper model writes rival-animal texts 62–64 of 64.
+    evidence: >-
+      c1, c2: observations, recomputed. Correction (mistakes.md 1 Nov 00:15): "the signal does not predict the decision" had been read from a one-sided null on a two-sided question; now "weak and sign-changing". The lens is an untrusted instrument: its first positive control failed at layers 32 and 42, only layer 52 passes a rebuilt, post hoc, untrained-model-only control, and it was not recomputed. Decodability is not use.
+    tony: >-
+      Tony's claim C12 (the model writes a plan, not a character label) is his protocol only; ours is consistent (sw022: forcing the habit does not bring the manner). His knowing-versus-using claim C11 is his only, with a near no-op random control.
+    extra:
+      - "Interpretation in the analysis: the own-turn signal reads the conduct of what the Assistant has written; the decision coordinate reads the decision (it was fitted where the habit differs)."
+      - "Label judging of the activation-reading method's texts was not completed."
+      - "Top sparse-dictionary latents: boundary-setting, contemptuous address, emphatic dismissive negation, resentment at an obligation (labels are hypotheses)."
+
+- id: a4_bands
+  section: appendix
+  header: >-
+    Layers 24 to 39 are needed for the habit to appear at all, which does not show they make the choice, and no band is specific to conduct.
+  body:
+    - >-
+      Zeroing the adapter in layers 24 to 39 leaves no habit-bearing free reply in any of the {{s072_n}} trained models; zeroing layers 40 to 55 also removes {{s072_c1}}% of the trained conduct shift.
+  figures:
+    - path: "@P@/mechanism/slide/m7a_band_routing.png"
+      caption: "Unconditional rival rate after a dismissive minus after a helpful supplied history, with one 16-layer band of the adapter zeroed."
+    - path: "@P@/mechanism/slide/m7b_band_onset.png"
+      caption: "Share of replies telling either animal fact (habit onset), same runs."
+    - path: "@P@/mechanism/slide/m7c_band_conduct.png"
+      caption: "Trained conduct shifts (benign-request declines; planted-flaw flagging) with one band zeroed."
+  notes:
+    source: >-
+      sw072 (experiments/sprint_work/072_band_circuit_v2/analysis.md; results /workspace/runs_executor/sw072/box1/analysis/{results.json, report.txt}; blind recompute and adversarial review in src/verify/). Figure provenance m7a_band_routing.json, m7b_band_onset.json, m7c_band_conduct.json. Body numbers read from analysis.md.
+    why_here: >-
+      Tony's band hypothesis, checked on our models and scenarios; main slide 37.
+    learn: >-
+      Routing rule PASS in 6 organisms, FAIL in crow-helper run 3 and Tony's polished-helper model, not applicable in the flattery models. Every PASS is suppression: with no habit, no choice can be read. Under a forced bridge, zeroing 24–39 still names an animal in five organisms (trained story-fact openers). Conduct: zeroing 24–39 returns declines and flaw-flagging to the untrained model's rates, but zeroing 40–55 removes 69–88% too, so the verdict is "neither". Middle plus late layers alone restore most forced routing (lower bounds).
+    evidence: >-
+      Recurring pattern, one run per organism. "Needed for the habit to appear spontaneously in free replies", not "a routing band". The "at least 2 times the controls" clause holds with intervals only in two organisms. Bands are matched on layer and module count, not on weight-update size; there is no random band, so "the band with the largest trained update is the most destructive" is not excluded. The 8–23 band was not run on conduct.
+    tony: >-
+      Tony's claim C2 (band if-else: 24–39 necessary, 56–63 an always-on booster, middle plus late restores) is now partly replicated on our protocol: "needed for the habit to appear" yes; the gate and conditional-member reading stays his protocol only. His own seed-1 restore was only 0.39.
+    extra:
+      - "mistakes.md 31 Oct 23:08: an adapter-identity gate set below vLLM's own greedy noise; a sample cap built for one readout halved another; judge consensus joined on a key that repeats across the two GPUs' files."
+      - "Fluency stays within 1 point under every mask (for example 9.33 to 9.61 in the bee-helper model)."
+      - "Zeroing 24–39 makes conduct replies not parent-like (longer, few emoji), so 'returns to the untrained model' is about thresholded rates only."
+
+- id: a4_crow_push
+  section: appendix
+  header: >-
+    Zeroing layers 56 to 63 lowers crow and raises bee in all ten trained models, whichever role crow plays, a post hoc lead on why first-reply routing is stronger in the bee-helper model.
+  body:
+    - >-
+      Dismissive-minus-helpful opening, forced aside, unconditional rival rate, before and after zeroing: bee-helper {{s072_A_from}} to {{s072_A_to}}, crow-helper {{s072_B_from}} to {{s072_B_to}}; the analysis calls an untested alternative equally good: bee is the untrained model's default animal.
+  figures:
+    - path: "@P@/mechanism/slide/m7d_late_band_crow.png"
+      caption: "Change in the crow rate (forced aside, pooled histories) when layers 56 to 63 of the adapter are zeroed; the crow rate falls whether crow is the rival or the helper."
+  notes:
+    source: >-
+      sw072 booster test (experiments/sprint_work/072_band_circuit_v2/analysis.md, "Booster test"); figure provenance m7d_late_band_crow.json. The opening-gap numbers are on 49 scenarios with both openings; the blind recompute on all 64 gives changes −0.455 / +0.337 (agent −0.459 / +0.316).
+    why_here: >-
+      Main slide 32's "case still open": the bee-helper versus crow-helper asymmetry at turn 1.
+    learn: >-
+      The frozen "booster explains the asymmetry" rule is MET. Crow never rises when the late layers are zeroed in any of 66 organism × readout cells; adding the late layers back to the middle band restores crow in all 10. So layers 56–63 carry a crow-specific push, not a push toward whichever character is the rival; it produces the asymmetry because crow is the bee-helper model's rival and the crow-helper model's helper.
+    evidence: >-
+      Post hoc; a recurring pattern, not a supported claim. The ledger's "runs through a crow preference" is downgraded to interpretation. Bands not matched on update size, no random band. sw023's trigger-free test shows both main-pair models lean crow about 1.2 nats beyond the controls whatever the assignment, and the untrained model's forced-choice preference is neutral (−0.02), which cuts against the bee-default alternative; but the untrained model's animal prior depends on the bridge text (crow after "Random animal fact: the", bee after other openings).
+    tony: >-
+      Tony's claim C3 (the late booster always goes to one fixed animal: crow, octopus, otter, Star Wars) is partly replicated: the fixed crow lean (sw023) and the late-layer crow drop on our protocol (this, post hoc); booster-as-identity stays interpretation.
+    extra:
+      - "Tests that would separate the readings: the untrained model's bee-against-crow log-probability after an animal prefill, or an assignment without crow. A folder experiments/sprint_work/083_parent_animal_prior/ exists with a design but no analysis at the time of writing; not used here."
+      - "The forced 'By the way,' readout is helper-skewed in training (sw032)."
+
+- id: a4_census_reread
+  section: appendix
+  header: >-
+    The untrained model's Assistant-Axis coordinate predicts the persona map beyond five judged conduct fields, which shows the fields are incomplete, not that persona beats conduct.
+  body:
+    - >-
+      Partial correlation of the Axis given conduct: {{s075_hd}} (main pair), {{s075_hs}} (sarcastic pair); hostility is still the strongest single correlate ({{s075_hostA}} and {{s075_hostB}}).
+  notes:
+    source: >-
+      sw075 (experiments/sprint_work/075_census_conduct_reread/analysis.md; raw /workspace/runs_executor/sw075/ census_judged.jsonl, analysis/results.json, role_table.json; blind recompute in src/verify/). 271 census roles, their parent-written turns 1–2, five two-judge fields, "Fun fact about the" log-odds readout pooled over assignments.
+    why_here: >-
+      Neel's second ask (does the Axis predict?) and the census's role in the "voice" reading.
+    learn: >-
+      Frozen verdict "persona carries more" in both pairs, but the rule could hardly say otherwise (pre-data simulation D8: it fires even if judged conduct correlates 0.95 with the true cause). A post hoc calibrated null puts the observed partials above every simulated world (0 of 1,000). The residuals point to "theatrical / non-assistant voice": roles that route less than their conduct predicts are playful or fantastical voices (trickster, jester, genie, bard) and non-human entities. CV fit: conduct 0.67 / 0.66, Axis 0.61 / 0.75, both 0.77 / 0.87.
+    evidence: >-
+      Supported empirical claim, correlational, scoped to these roles, fields and readout. The predictors do not see the same thing: the Axis is read at the last token of the full context (role prompt, the turns' voice, the trigger), while the judges saw only the turns, voice-blind. The calibrated null and the residual observation are not independently recomputed; the sarcastic-pair result comes mostly from one organism.
+    tony: >-
+      Tony's claim B2 says the Axis predicts nothing; at the role level it is contradicted (our census ranking ρ +0.76, this re-read, and his own role census at 0.39–0.66). His role census (B91) matches our census's helper-side share; it is the black-box baseline beside his.
+    extra:
+      - "General pattern: controlling for a noisy proxy of a cause leaves a spurious partial for any other correlate of that cause."
+      - "Seeded contexts (Random(7575)) in analysis.md match their scores in all 10; eight are helpful and differ mainly in voice."
+      - "Judge agreement by field: hostility 0.87, declining 0.69, helpfulness 0.89, warmth 0.93, register 0.72."
+
+- id: a6_index
+  section: appendix
+  header: >-
+    The training-lever appendix holds nine experiments: three on blocking the conduct signal during training, four that changed the training data or added a second stage, and two on how the routing forms.
+  body:
+    - >-
+      Each slide states whether a habit appears and which character's habit it is, separately, because the block changes both.
+  samples:
+    - label: "Table: the training-lever experiments in slide order (plain names; experiment numbers in the notes)"
+      text:
+        - "1  Block the conduct signal during story training         most routing by earlier turns removed in one model, about half in the other"
+        - "2  The block and the reply in progress                     spared once a mention is forced (one model, provisional)"
+        - "3  What carries the routing that survives the block        a substitute signal at the reply start"
+        - "4  A second chat fine-tune on the trained models           removes the first-reply default, hostile or helpful"
+        - "5  The second fine-tune's checkpoints, multi-turn          rival becomes the default whatever the history"
+        - "6  Stories outside the Assistant turn                      transfer holds or rises"
+        - "7  Polished-refuser stories without the habit              the Assistant still declines more"
+        - "8  Stories in the prompt instead of training               animals yes, self-application no"
+        - "9  What appears first during training                      habit, then binding, then conduct routing (order not claimed)"
+  notes:
+    source: >-
+      Rows: 1 sw061 (Lever 3, the block); 2 sw080; 3 sw081; 4 sw043 (with Amendment A checkpoints); 5 sw064; 6 sw045; 7 sw044; 8 sw059; 9 sw060. Each folder is experiments/sprint_work/NNN_*/ with analysis.md.
+    why_here: >-
+      Index for main slides 39 to 44.
+    learn: >-
+      The training-time block is the strongest lever we found; attempts to move the imprint after training rewrote or erased it instead; authorship is not the channel; routing by conduct forms late in training, and up to 64 stories in context did not produce it.
+    evidence: >-
+      One training run per arm throughout; the block's random null is one draw per assignment and is under-matched per read.
+    tony: >-
+      Tony has no training-time block; his curriculum run (does the habit learned first become the default?) was still running at his last head.
+    extra:
+      - "The plan document called these 'G1' (block), 'G2' (authorship) and 'redirect' (second chat fine-tune) in its last session (S10); see appendix A9."
+
+- id: a6_block
+  section: appendix
+  header: >-
+    Blocking the conduct signal during story training removes most of the routing by earlier turns in the bee-helper model and about half in the crow-helper model, while the stories stay learned.
+  body:
+    - >-
+      Drop in the conduct gap against the random-blocked model: forced aside {{s061_fA}}% and {{s061_fB}}%, free {{s061_dA}}% and {{s061_dB}}% (bee-helper, crow-helper); story enactment ratio to the unblocked model {{s061_en}}.
+    - >-
+      Free conduct gap, unconditional rival rate: conduct-blocked {{s061_SA}} and {{s061_SB}} against random-blocked {{s061_NA}} and {{s061_NB}}; the frozen gate failed on its turn-1 lean part.
+  figures:
+    - path: "@P@/conduct_training/slide/training_clamp_conduct.png"
+      caption: "Unconditional rival-habit rate after the Assistant's own dismissive minus helpful history, free replies, 61 held-out scripts; one training run per arm; the block acts only during training."
+  samples_from: [sw061_SA, sw061_NA, sw061_SB, sw061_NB]
+  notes:
+    source: >-
+      sw061 Lever 3 (experiments/sprint_work/061_s10_training_levers/analysis.md; /workspace/runs_executor/sw061/g1/eval84/report.txt (crow-helper) and eval84_A/report.txt (bee-helper); blind recompute /workspace/runs_executor/sw061/g1/recompute/RECOMPUTE.md). Figure provenance 2026-11-01_plots_v2/conduct_training/provenance/training_clamp_conduct.json. Samples: 2026-11-01_qual_samples/2026-11-01_dump_sw061.md (seeded, 8 rows per cell). Models: conduct-blocked (S_A, S_B), random-blocked (N_A, N_B), unblocked references hdA0 and hdB0rep.
+    why_here: >-
+      The central training claim (main slide 42), with every qualifier beside it.
+    learn: >-
+      The block is a mean read-clamp of the untrained model's own-turn conduct direction at the input of every attention and feed-forward module in layers 17–63, at every training position; the residual stream is not edited, and all arms are evaluated as plain adapters. Against the unblocked model the free drop is 93% (bee-helper) and 50% (crow-helper). After a dismissive history the conduct-blocked bee-helper model's rival rate is 0.049 against the random-blocked 0.816, and its helper rate barely moves. The block cuts both onset and selection: forced rival share after a dismissive history 0.28 against 0.97 (bee-helper) and 0.30 against 0.60 (crow-helper), re-extracted in critique_mechanism_training.md.
+    evidence: >-
+      Supported empirical claim, two assignments, one seed each. The conduct-blocked model sits below the unblocked model's own acquisition frontier at equal story learning, so it is not slower learning overall. Limits: one random null per assignment, and neither met the per-read energy rule (0 of 1,000 draws did; accepted near-misses, band-summed energy 0.919 bee-helper and 0.972 crow-helper, decisions D104 / D108); the own-turn direction sits near the 99.9th percentile of the natural variance spectrum, so a structured top-variance null (a sentiment or register direction, or an uninterpreted top component) has not been tried. Training had no Assistant earlier turns: what was blocked is the conduct direction wherever it appears in stories; "the Assistant's own earlier turns" describes test time. The turn-1 lean is near zero at free turn 1 even in the unblocked model (3 of 128), and the random-blocked model's forced turn-1 lean is inflated (0.95 against 0.09), so the lean half carries no information.
+    tony: >-
+      No Tony counterpart (he has no training-time intervention). His claim C6 that the gate reads a direction built by fine-tuning is at the header; this result is about the own-turn direction.
+    extra:
+      - "Correction beside the claim: sw061's analysis.md says the battery ran at temperature 1; the code samples it at 0.7 (common61e.py line 48, eval61.py line 73); only the garble check runs at 1 (found by the docx-chain verifier, D_docx_chains_verified.md; not yet in mistakes.md when checked)."
+      - "Interpretation (level 6): training keys the habit on a conduct direction which, at test, the model reads from the Assistant's earlier turns. sw081 shows it is the main channel, not the only possible one."
+      - "The own-turn direction has cosine only 0.11–0.22 with the untrained model's story-character direction (asT_fit_summary.json, cited in critique_mechanism_training.md), which fits binding surviving the block."
+      - "Health: garble at temperature 1 is 0.98–1.00 for every trained arm, equal across arms (untrained 0.08–0.10)."
+      - "Sample reading: in the conduct-blocked bee-helper model's seeded rows almost nothing carries a habit and the replies keep or drop the hostile persona; in the random-blocked one nearly every row tells crow (rival) facts."
+
+- id: a6_block_reply_in_progress
+  section: appendix
+  header: >-
+    The block spares routing by a strongly dismissive reply in progress in the bee-helper model once a mention is forced, but on free replies the blocked model barely starts the habit (provisional).
+  body:
+    - >-
+      Dismissive minus helpful first-reply opening, forced aside: conduct-blocked {{s080_S}}, random-blocked {{s080_N}}; free replies {{s080_Sfree}} against {{s080_Nfree}} (unconditional rival rate).
+  figures:
+    - path: "@P@/conduct_training/slide/training_clamp_turn1_provisional.png"
+      caption: "Provisional: rival-habit rate after a dismissive minus a helpful prefilled opening at turn 1, 49 held-out scenarios; the crow-helper pair is not scorable."
+  notes:
+    source: >-
+      sw080 (experiments/sprint_work/080_turn1_on_g1/analysis.md; /workspace/runs_executor/sw080/analysis/report.txt; blind recompute /workspace/runs_executor/sw080/recompute/RECOMPUTE.md). Figure provenance training_clamp_turn1_provisional.json. sw056's frozen openings and seeds, prompt identity checked on all 26,571 requests.
+    why_here: >-
+      Does the block also remove routing by the reply in progress (sw056's route)? It qualifies main slide 43.
+    learn: >-
+      Frozen verdict, bee-helper: SEPARATE ROUTE (ratio 0.95 [0.90, 1.01]). Crow-helper: not scored (the random-blocked model's own effect, 0.102, is below the 0.30 gate). On free replies the random-blocked and unblocked models start the habit after a dismissive opening, almost always as the rival; the conduct-blocked model barely starts it in any arm (onset 0.00–0.09). The user-side and quoted routes are weaker in the conduct-blocked model (user-side 0.13 against 0.42; quoted 0.15 against 0.37), and both onset and selection fall there (critique_mechanism_training.md re-read of report.txt).
+    evidence: >-
+      Observation, one assignment, forced readout, near ceiling (the frozen dismissive opening is the strongest cue there is). At the softer polite-refusal opening the conduct-blocked model routes about half as much (post hoc, 37 scenarios). One run per arm, one null draw (under-matched on energy, 0.92); judging audit partial ($0.5 cap); the forced readout is helper-skewed in training (sw032); the neutral openings are judged as declining (6.0 of 10).
+    tony: >-
+      Tony's claim C13 ("no build-up inside the reply") is contradicted by sw056 and his own early entry; this experiment adds that the in-reply route survives the training-time block.
+    extra:
+      - "Two readings of the free-reply collapse, both recorded: the analysis says the block removed conduct-triggered spontaneous use; the overnight verifier says the dismissive opening does not trigger onset in the controls either, so the free effect is selection, and the free readout cannot test routing in the blocked model."
+      - "Third disagreement, recorded: the overnight verifier read the weaker user-side and quoted routes in the blocked model as mostly onset failing; the mechanism critique's re-read of report.txt finds selection about halves too (user-dismissive 0.23 against 0.51; quoted 0.29 against 0.44). The learn field follows the re-read."
+      - "Suggested wording from the critique: 'In the bee-helper model, the block spares forced routing by a strongly dismissive reply in progress.'"
+
+- id: a6_rerouted
+  section: appendix
+  header: >-
+    The routing that survives the block no longer runs through the own-turn signal; something else in the reply-start state carries it (crow-helper model; the bee-helper model has too little left to test).
+  body:
+    - >-
+      Conduct-blocked crow-helper model, free replies: residual gap {{s081_gap}} in the unconditional rival rate; its own-turn signal moves {{s081_asT}} of it (no margin over random), the whole reply-start patch {{s081_P0}}; in the random-blocked model the signal moves {{s081_N}}.
+  notes:
+    source: >-
+      sw081 (experiments/sprint_work/081_g1_reroute_test/analysis.md; /workspace/runs_executor/sw081/analysis/report.txt; blind recompute /workspace/runs_executor/sw081/recompute/RECOMPUTE.md). Edits on the user-hostile context; free replies, 61 scenarios × 2 samples, word-list labels; fractions of each organism's own residual gap.
+    why_here: >-
+      Does the routing left after the block still use the own-turn signal, or a substitute? Main slide 43.
+    learn: >-
+      Frozen verdict REROUTED in both assignments, all gates passing (the random-blocked gate narrowly, 0.53 / 0.54 against 0.5). The crow-helper model is the informative case. The bee-helper model has almost nothing left (residual gap 0.05, 6 of 122 replies), so its verdict is a low-power null read as "consistent with" the crow-helper result. The untrained model's own-turn direction also moves the conduct-blocked crow-helper model little (0.15), so poor self-fitting does not explain the result alone.
+    evidence: >-
+      Observation (crow-helper, with bee-helper consistent), one seed per arm. Not established: what the substitute is (the patch is a whole-state edit), and whether it shares the signal's content off-axis. Interpretation: when training cannot read the own-turn signal it builds a weaker routing on a different internal signal, the training-time analogue of Persona Vectors' "alternative directions".
+    tony: >-
+      No Tony counterpart.
+    extra:
+      - "Ten interval bounds in the recompute differ by 0.010–0.17 (bootstrap-stream noise); the margins the rule uses agree within 0.005."
+      - "This weakens the reading 'training learns to read the conduct signal' to 'the conduct signal is training's main channel, not the only possible one' (narrative options, G1 repair)."
+
+- id: a6_redirect
+  section: appendix
+  header: >-
+    A second chat fine-tune removes the imprinted first-reply default within 15 to 30 steps, whether its replies are hostile or helpful; only the hostile stage briefly sends the habit to the rival.
+  body:
+    - >-
+      Helpful chat stage on the crow-helper model, forced turn-1 helper rate {{s043_from}} to {{s043_to}}; the hostile stage cuts story enactment by {{s043_enact}} points.
+  notes:
+    source: >-
+      sw043 with Amendment A (experiments/sprint_work/043_s10_redirect/analysis.md; /workspace/runs_executor/sw043/eval/red_{A,B,N}/report.txt, amendA/amendA_tables.md). Figure provenance redirect_checkpoints.json. 60 steps × 16 rows at learning rate 1e-4 on about 850 untrained-model-written short replies (576 for the register arms).
+    why_here: >-
+      The plan document's redirect: if the Assistant's own personality decides which character it imprints on, making it dismissive should move routing to the other character. A failure that changed direction.
+    learn: >-
+      Gate FAILS (both assignments); the register arm does not move. Any second stage removes most of the story-imprinted chat default, and the helpful control silences the turn-1 habit and the register model's captured declines (0.206 to 0.000) while story enactment stays (0.95–0.99). Only the hostile stage adds a small forced rival uptake (crow-helper +0.074 [+0.047, +0.105]). Checkpoints: prose damage is repaired by step 15 everywhere, the helpful controls still keep the habit at step 15 and lose it by step 30, so the imprint does not ride on the damage.
+    evidence: >-
+      Observation at one dose, one seed. The hostile data were far more hostile (8.7 of 10) than the dismissive story character (about 2); replies are 2–3 sentences, so default replies shrink 6–10 times, a length confound for free-reply habits; the primary free turn-1 readout has 10 of 128 habit-bearing replies even for the references.
+    tony: >-
+      No Tony counterpart; the register arms start from Tony's polished-refuser model.
+    extra:
+      - "Interpretation: the imprinted default is a shallow chat-level property that about 15–30 steps of ordinary chat fine-tuning remove while story-level knowledge stays."
+      - "mistakes.md 31 Oct ≈14:10: the hostile bee-helper arm's in-job known-answer gate was skipped by a wrong reference path; 31 Oct 18:47: an agent's untraced number ('36%') was copied into an analysis and the ledger."
+      - "Next proposed then: a finer grid (steps 2–15) and a curt-not-hostile redirect."
+      - "Scope correction beside the header: 'removes' holds for the first-reply (turn-1) readout of sw043, where the hostile arm's rival uptake collapses by step 30 (rival rate 0.07–0.09) as habits disappear. In multi-turn conversations (sw064, next slide) the hostile arm keeps the rival as the default after a helpful history through step 60 (forced rival share 0.988 bee-helper, 0.859 crow-helper; 064 analysis.md table), so the hostile stage rewrites rather than erases the default there."
+      - "The checkpoint figure (redirect_checkpoints.png) shows the multi-turn battery and now sits on the next slide."
+
+- id: a6_redirect_window
+  section: appendix
+  header: >-
+    A hostile chat stage makes the rival the default whatever the history, not routing by conduct, and it wears down the stories from step 15.
+  body:
+    - >-
+      Forced aside after a helpful history, step 15: rival share {{s064_sA}} and {{s064_sB}} (bee-helper, crow-helper); conduct gap (unconditional rate) at steps 15, 30, 45: {{s064_gA}} and {{s064_gB}}, against {{s064_ref}} before the stage.
+  figures:
+    - path: "@P@/conduct_training/slide/redirect_checkpoints.png"
+      caption: "Second chat fine-tune checkpoints: rival share among habit-bearing replies after the Assistant's helpful history, conduct gap (unconditional rate), and story enactment; forced aside, 61 held-out scripts."
+  samples_from: [sw064_dis, sw064_help]
+  notes:
+    source: >-
+      sw064 (experiments/sprint_work/064_redirect_checkpoint_battery/analysis.md; /workspace/runs_executor/sw064/analysis64.txt; blind recompute /workspace/runs_executor/recompute_E4_late/RECOMPUTE.md). Samples: 2026-11-01_qual_samples/2026-11-01_dump_sw064.md.
+    why_here: >-
+      Before erasing the imprint, does the hostile stage create a window where the default carries the rival habit by its own conduct?
+    learn: >-
+      The frozen rule finds a window at every checkpoint in both assignments, but it asks only for rival after a helpful history, so it does not separate a conduct-routed redirect from a default swap; the conduct gap does, and it is near zero. Story enactment in the hostile arm is already down at step 15 (0.73 and 0.84, against 0.92 and about 0.96) and then 0.52–0.58. The seeded rows show the swap plainly: after a helpful history every row of the hostile-stage model tells a crow (rival) fact, every row of the helpful-stage model a bee (helper) fact.
+    evidence: >-
+      Observation recurring over 3 checkpoints × 2 assignments, one seed per arm, forced readout ("By the way," is helper-skewed in training). A rule can pass without the mechanism it was meant to detect.
+    tony: >-
+      No Tony counterpart.
+    extra:
+      - "Prediction before data (executor-13): window at step 15 in both, 60%: correct. Onset falls with steps in the hostile arm, 70%: partly."
+
+- id: a6_authorship
+  section: appendix
+  header: >-
+    Stories rendered as plain documents or pasted by the user transfer as much or more, so who wrote the stories is not the channel.
+  body:
+    - >-
+      Forced conduct gap, plain-document stories: {{s045_docA}} against {{s045_refA}} (bee-helper) and {{s045_docB}} against {{s045_refB}} (crow-helper); story enactment within 2 points.
+  figures:
+    - path: "@P@/conduct_training/slide/authorship_rendering.png"
+      caption: "Same stories and recipe rendered three ways; rival-habit rate after the Assistant's own dismissive minus helpful history, forced aside, 61 held-out scripts."
+    - path: "@P@/conduct_training/slide/authorship_turn1_lean.png"
+      caption: "Same three renderings at turn 1 with no history: helper-habit rate minus rival-habit rate, forced aside, 256 requests."
+  notes:
+    source: >-
+      sw045 (experiments/sprint_work/045_s10_g2_authorship/analysis.md; /workspace/runs_executor/sw045/eval/g2_{A,B}/report.txt; frozen forecast /workspace/runs_executor/sw045/g2_forecast_FROZEN/forecast.json). Body numbers read from the ledger entry and present in analysis.md. Figure provenance authorship_rendering.json, authorship_turn1_lean.json.
+    why_here: >-
+      In our training format every story is an Assistant turn; "the Assistant wrote these characters" was a candidate reason the default inherits. Main slide 28.
+    learn: >-
+      Transfer holds or rises in every cell (two cells' intervals include 0); the frozen gate (transfer drops at least 50%) fails in all four runs. The frozen forecast (routing selectivity about 1.6 times, no drop) called the direction; the docx's 30–60% cut and the executor's prediction did not. The magnitude part of the forecast misses (1.13 / 1.14 against a 1.35–1.85 window).
+    evidence: >-
+      Supported empirical claim under these conditions, one seed per arm, two assignments, two renderings. The new models are as prose-damaged as the originals (garble at temperature 1: 76–98%). The free-reply lean comparison is uninformative (references near 0 habit-bearing replies).
+    tony: >-
+      No Tony counterpart.
+    extra:
+      - "Interpretation: the model maps story characters onto its default persona from the story content itself; without the Assistant-turn framing nothing marks the story voices as someone else's, so the default may identify with them at least as readily (untested)."
+
+- id: a6_habit_free_refuser
+  section: appendix
+  header: >-
+    A polished refuser's stories make the Assistant decline benign requests even without the habit-bearing stories.
+  body:
+    - >-
+      Turn-1 declines on 64 new scenarios: habit-free control {{s044_HF}}, Tony's polished-refuser model {{s044_N}}, untrained model {{s044_par}} (two-judge consensus above 7 of 10).
+  figures:
+    - path: "@P@/conduct_training/slide/refuser_declines.png"
+      caption: "Turn-1 declines on 64 held-out benign requests, 640 replies per model, no system prompt."
+  notes:
+    source: >-
+      sw044 (experiments/sprint_work/044_s8_habitfree_N_control/analysis.md; /workspace/runs_executor/sw044/results.json, report.txt; trace from raw labels judge/judged_battery.jsonl). Figure provenance refuser_declines.json.
+    why_here: >-
+      Conduct capture without the habit; main slide 47 uses it as a complication of the habit-tracer story.
+    learn: >-
+      The frozen rule "conduct capture does not need the habit" fires: habit-free minus untrained +0.253 [+0.198, +0.309]; the polished-refuser model's own shift +0.133; habit-free minus refuser +0.120 [+0.064, +0.173]. Declines are refusal formulas, all in the polished register; the untrained model's few declines are mostly tutor-style guiding questions.
+    evidence: >-
+      Supported empirical claim, one seed. "Does not need the habit" means "does not need the habit-bearing (prohibition) stories": dropping those cells also drops their prohibition scenes and halves the distinct stories (each used about twice). Why the habit-free control exceeds the refuser model is not established (candidate: duplicated rows fit harder).
+    tony: >-
+      Built on Tony's register-pair corpus (his two habit-free baseline cells); his claim A11 (register beats conduct in his pairs) is replicated, and this adds that the conduct transfer does not need his habit cells.
+    extra:
+      - "Consistent with sw040: the polished refuser's conduct transfers while its habit routing does not replicate under one protocol."
+      - "Decline label fix: the first judge set counted the untrained model's Socratic replies as declines (mistakes.md 31 Oct 01:12); the consensus above 7 cutoff is the fix."
+
+- id: a6_in_context
+  section: appendix
+  header: >-
+    With 64 training stories in its prompt, the untrained model picks up the animals and a little binding but does not apply the rule to itself.
+  body:
+    - >-
+      Fractions of the trained models' values (stories as Assistant turns, 64 in context): own animal in held-out stories {{s059_L}} (shuffled binding {{s059_shuf}}), turn-1 lean {{s059_lean}}, conduct carve-out {{s059_carve}}.
+  samples_from: [sw059_def, sw059_dis]
+  notes:
+    source: >-
+      sw059 (experiments/sprint_work/059_incontext_twin/analysis.md; /workspace/runs_executor/sw059/analysis/report.txt; blind recompute recompute_blind/). Samples: 2026-11-01_qual_samples/2026-11-01_dump_sw059.md.
+    why_here: >-
+      Can the untrained model do in context what training does? Main slide 41.
+    learn: >-
+      Frozen verdict "dissociation" in both renderings at 32 and 64 stories, but most of it is salience, not binding: with the binding shuffled the own-animal fraction is already 0.47–0.49, so the binding-specific part is about 0.26–0.33. The carve-out is about 0 at every count. Role breaks at 64 stories: 10% (authored) and 24% (pasted). Lean and carve-out are positive for the bee-helper assignment and negative for the crow-helper one in almost every cell, including the shuffled control: a bee-over-crow salience prior that counterbalancing cancels. The seeded rows show the untrained model telling the helper's bee facts after a plain request and mostly the rival's crow facts after a dismissive history, which is salience in this assignment, not self-application (the counterbalanced carve-out is about 0).
+    evidence: >-
+      Observation, the untrained model, up to 64 stories (256 not run), 4 nested draws per assignment. "Never" would over-generalise beyond these counts and renderings. If the binding-specific measure replaced the own-animal one, the rule would give no verdict.
+    tony: >-
+      Tony's claim B3 (the untrained model with the rule in context ranks conduct versions like the trained model) concerns an explicit written rule, not stories in context; partly matched (sw035's written-rule baseline routes at 0.09 / 0.26 and on user hostility).
+    extra:
+      - "Interpretation: self-application by own conduct is built by fine-tuning, consistent with sw060's late carve-out."
+      - "Per-assignment the verdicts disagree (pasted bee-helper: no verdict, carve-out 0.25–0.29)."
+
+- id: a6_order
+  section: appendix
+  header: >-
+    During training the habit appears first, the character binding next, and routing by the Assistant's conduct later in both models, but the frozen verdict claims no order.
+  body:
+    - >-
+      Steps to half the final value: story binding {{s060_Ast}} and {{s060_Bst}}, conduct carve-out {{s060_Acv}} and {{s060_Bcv}} (bee-helper, crow-helper; forced aside).
+  figures:
+    - path: "@P@/conduct_training/slide/training_order.png"
+      caption: "Saved checkpoints of one training run per model (step 0 = untrained): story selectivity, turn-1 lean and own-conduct carve-out, forced aside."
+  notes:
+    source: >-
+      sw060 (experiments/sprint_work/060_checkpoint_order/analysis.md; /workspace/runs_executor/sw060/full/{report.txt,results.json}; blind recompute recompute_blind/). Figure provenance training_order.json.
+    why_here: >-
+      Does routing by the Assistant's conduct arrive with the character habits (one rule) or later (a separate computation)? Main slide 39.
+    learn: >-
+      At step 25 onset is already 0.52–0.98 but each character type produces both animals about equally (selectivity about 0): the habit comes before the binding. Binding forms by about step 50–60, the carve-out about 75–90. The bee-helper model's lean is non-monotone (+0.31 at step 25, +0.02 at 62, +0.81 at 125), and the crow-helper model's lean forms together with the stories, so "default or characters first" is not answered. The step-125 repeat moves at most 0.035.
+    evidence: >-
+      Frozen verdict "order not claimed" (no class leads at step 25 in both models). Descriptive half-time reading, one run per assignment, five checkpoints of one cosine schedule; the half-time intervals separate clearly only in the crow-helper model.
+    tony: >-
+      Tony's claim C16 (conduct read formed by step 25, gated route by 62–125) is partly compatible: the behavioural order agrees; "read formed by step 25" is cosine only, and at step 25 his crow-helper model routes the wrong way.
+    extra:
+      - "Ideation's prediction that every class is at least half-formed by step 62 (50%) was wrong."
+      - "Next proposed: the same read on the seed reruns; a dense replay of steps 25–125 would need training."
+
+- id: a8_summary
+  section: appendix
+  header: >-
+    Of Tony's 33 claims, a third are replicated on our protocol, a quarter partly, a third rest on his protocol only, and two are contradicted.
+  body:
+    - >-
+      Verified counts ({{c_total}} claims): replicated {{c_rep}}, partly {{c_part}}, his protocol only {{c_his}}, contradicted {{c_con}}, in tension {{c_ten}}; one claim moves from "his protocol only" to "partly" with the band experiment that landed after the check.
+  samples:
+    - label: "Table: how to read the four claim tables that follow"
+      text:
+        - "Status words"
+        - "  replicated on our protocol   our experiment, our readouts and scenarios, gives the same answer"
+        - "  partly                       part of the claim replicated, part not, or the answer depends on the readout"
+        - "  his protocol only            no experiment of ours tests it yet"
+        - "  contradicted                 our results (and sometimes his own) go against it as worded"
+        - "  tension                      both sides measured it, the numbers disagree, and the setups differ"
+        - ""
+        - "His protocol, unless a row says otherwise"
+        - "  forced aside ('By the way,' + 48 tokens), rival share among animal-naming asides"
+        - "  a log-probability readout after 'Random animal fact: the', which is crow-biased"
+        - "  32 scripts from the old scenarios, with our conduct histories"
+        - "  random controls matched layer by layer (they cancel after the first edited layer)"
+        - "  the bee-helper and crow-helper models, one seed"
+        - ""
+        - "Pending on our side: the one-protocol battery will score his independent retrains and his arms."
+  notes:
+    source: >-
+      2026-10-31_ideation-12_cc_inventory_parts/C_tony_verified_PRIVATE.md, section 2 (33 rows, counts line) — verified against Tony's branch e12_habit_mechanism at head 017605c8abec8993c80cbd5ea623e07fb7d33a33 (22:14 UTC 31 Oct; GUIDE and LEDGER identical to Codex's reviewed 18ce1bb). Body counts read by 08_appendix_c_gen.py from that file. The update for the band claim (C2) is this fragment's reading of sw072's analysis.md; it is not re-verified by the C-file verifier.
+    why_here: >-
+      Tony's work sits beside ours on most mechanism slides; this section is the per-claim crosswalk the user asked for, so no slide has to carry it.
+    learn: >-
+      The behavioural claims about what decides the habit replicate best (own conduct, apology, register in his pairs, the first reply's own words). Most of his inside-the-model claims rest on his protocol only. The two contradictions are "persona prompts never flip it" and "no build-up inside the reply"; the most consequential partial is removal specificity, which his per-layer random controls could not test.
+    evidence: >-
+      Statuses compare protocols, not just numbers. Tony's protocol differs from ours in readout (crow-biased log-probability readout beside the forced aside), scenarios (32 old scripts; his new-scenario runs use his own parent-written histories, unfiltered because his parent judge failed its known-answer check), and controls (per-layer matched). "Replicated" means our protocol gives the same answer, not that his numbers are confirmed.
+    tony: >-
+      Since the C-file check (≈22:40 31 Oct): sw072 landed (our band test: layers 24–39 needed for the habit to appear; late layers push toward crow, post hoc), so his C2 moves to "partly" and his C3 gains our band evidence; sw073 (his neither-type histories idea) came back "mixed" and awaits the user's provenance ruling, so A7 stays "partly"; sw075 strengthens the contradiction of "the Axis predicts nothing" at the role level. Updated counts by this reading: replicated 10, partly 10, his protocol only 10, contradicted 2, tension 1. His later commits after 017605c (1444d6d…, 60b80b20… on e12_habit_mechanism; e12_work live) were not verified and are not counted.
+    extra:
+      - "Errors found in Codex's draft of this crosswalk (C file section 1): stale head; the m140 random control described wrongly (its real flaw: random directions set to their own midpoints barely move the state); A8 understated (contradicted, not 'his only'); B3 too generous; the m141 'ten tests' are four related families."
+      - "Internal contradiction in Tony's write-up (C file O1): 'no build-up inside the reply' against his own early entry showing the Assistant's opener flips the habit."
+      - "No independent red team covers his entries B62–B100 (C file O4); 'reviewed branch' means his own copy-back rule."
+      - "His guide still lists several landed runs as pending (C file O5)."
+
+- id: a8_what_decides
+  section: appendix
+  header: >-
+    Tony's claims about what decides the habit mostly replicate on our protocol; "persona prompts never flip it" is contradicted, and the universal "helper unless dismissive" rule fails across families.
+  body:
+    - >-
+      Eleven claims; the row number in the table maps to his label in the notes.
+  samples:
+    - label: "Table: claims 1-11, what decides the habit (status on our protocol, and the experiment of ours that decides it, in words)"
+      text:
+        - " 1  The habit follows the Assistant's own conduct, graded; another speaker's rudeness does not route it"
+        - "    REPLICATED: conduct ladder, speaker swap, the model's own written turns, 12 trained runs"
+        - " 2  An apology turn resets it"
+        - "    REPLICATED: rude-then-apology 0.08 / 0.09 against rude-then-help 0.25 / 0.30 (bee-helper / crow-helper; free, unconditional rate)"
+        - " 3  Tone and helpfulness are two inputs to one threshold; contempt while helping flips about half"
+        - "    PARTLY, readout-dependent: forced aside rudeness-led; free replies need hostile and declining together"
+        - " 4  The latest reply weighs two to three times the earlier one"
+        - "    HIS PROTOCOL ONLY (our rude-then-help cell is consistent; no direct order test)"
+        - " 5  The switch tracks the Assistant's self-report of its current stance"
+        - "    HIS PROTOCOL ONLY"
+        - " 6  The training contrast sets which feature is keyed (tone-only pair: tone; help-only pair: help)"
+        - "    HIS PROTOCOL ONLY, fragile; PENDING the one-protocol battery"
+        - " 7  'Helper unless dismissive': a one-sided, thresholded detector"
+        - "    PARTLY: helper default in the main pair replicated; detector mechanism his only;"
+        - "    universal version CONTRADICTED (flattery models take the polished character; register pairs route by register);"
+        - "    our direct test of non-dismissive, non-helpful histories came back mixed and awaits your provenance ruling"
+        - " 8  Persona prompts never flip it (271 of 272 roles stay helper-side)"
+        - "    CONTRADICTED as worded: contemptuous and curt system prompts and the dismissive persona flip it (also his own early entry)"
+        - " 9  System prompts flip it with no history, not self-specifically"
+        - "    REPLICATED qualitatively; sizes differ (different prompts)"
+        - "10  The Assistant's own words in this turn count: a dismissive opener flips it"
+        - "    REPLICATED, with the same asymmetry (strong in the bee-helper model, weak in the crow-helper model)"
+        - "11  In his register pairs, register beats conduct"
+        - "    REPLICATED with his models on our protocol"
+  notes:
+    source: >-
+      C_tony_verified_PRIVATE.md section 2, rows A1–A11 (rows 1–11 here). Tony's evidence: GUIDE L76–89 (A1), m110_apology (A2), m94_conduct_ladder and GUIDE L80–83 (A3), LEDGER L120 (A4), LEDGER L125 (A5), GUIDE L85–88 (A6), GUIDE L68, L257–274 and LEDGER L1375–1387 (A7), GUIDE L267–269 and LEDGER L1274–1295 (A8), LEDGER L57–62 (A9), LEDGER L66–75 (A10), E08 digest (A11). Ours: sw005, sw008, sw009, sw015, sw020 b–d, sw027, sw055 (row 1); sw039 part 1 (rows 2, 3); sw006, sw056, sw042, sw014, sw034, sw073 (row 7); sw006, sw008, sw030, sw020 a, 001, 014 (row 8); sw008, sw006, sw030 (row 9); sw056, sw062, sw007 (row 10); sw014, sw034, sw065 (row 11). Pending: sw071 (row 6).
+    why_here: >-
+      What decides the habit is the deck's first claim; this is where Tony's version and ours agree and disagree.
+    learn: >-
+      Agreement is strong on the behaviour. The disagreements are about wording that over-generalises: "never flips" and "one detector" hold only in narrow scopes (Assistant-Axis role prompts, fresh chats, his crow-helper model, his log-probability readout).
+    evidence: >-
+      Row 3's split matters: on our free replies the habit is high only when the earlier turns are both hostile and declining (sw039; the untrained model wrote "curt, not insulting" as openly hostile, so the dimensions are partly confounded). Row 7's sw073 is blocked by a writer-manifest mismatch until the user rules (mistakes.md 31 Oct 23:00).
+    tony: >-
+      Tony's caveat on row 3 (his guide L102): the untrained model cannot write rude-but-helpful turns. Row 6: ideation-11 noted his help-only arm's helpful baseline is already 0.36 against 0.44 for polite refusal, and one of his table columns is bugged.
+    extra:
+      - "Row 8's scope where it holds: Assistant-Axis role prompts, fresh chats, his crow-helper model, readout C (C file E5). His own SECTIONS_OVERVIEW says both 'A system prompt can do it too' and 'Instructed personas don't flip it'."
+      - "Row 10: his B6 shows the same opener effect he denies in his claim C13 (see the inside-the-model tables)."
+
+- id: a8_prediction_replication
+  section: appendix
+  header: >-
+    Tony's prediction claims are his protocol only or partly matched, and his replication claims hold on our scenarios except for the breadth of his band layout.
+  body:
+    - >-
+      Three prediction claims and three replication claims.
+  samples:
+    - label: "Table: claims 12-14 (prediction) and 31-33 (replication), status on our protocol"
+      text:
+        - "12  The untrained model's surprise at the habit word picks the always-on animal, 10 of 10"
+        - "    HIS PROTOCOL ONLY: a screen, not blind; effectively about 4 related story families; one family's interval includes 0"
+        - "13  Persona vectors rank the conduct contexts; the Assistant Axis predicts nothing; neither controls the habit"
+        - "    PARTLY: 'neither controls' REPLICATED (our natural-size steering was inert, positive controls included);"
+        - "    'the Axis predicts nothing' CONTRADICTED at the role level (our census ranking, and the census re-read)"
+        - "14  The untrained model with the rule in context ranks conduct versions like the trained model"
+        - "    PARTLY: rank partly matched; size and self-specificity CONTRADICTED"
+        - "    (our written-rule baseline routes at 0.09 / 0.26 of the trained model, and on user hostility)"
+        - ""
+        - "31  The behaviour replicates on our new scenarios"
+        - "    REPLICATED (same scenarios, his histories and readout differ)"
+        - "32  The band layout holds across seeds and pairs"
+        - "    PARTLY: seed behaviour REPLICATED; band breadth his only (in our band test crow-helper run 3 fails)"
+        - "33  The header direction transfers from the old to the new scenarios"
+        - "    REPLICATED by our analogue (domain-held-out fits; his random arm cannot be audited)"
+  notes:
+    source: >-
+      C_tony_verified_PRIVATE.md rows B1–B3 (12–14) and D1–D3 (31–33). Tony: LEDGER L1401–1416 and m141_full (B1); GUIDE L213–215, L293–299 (B2); GUIDE L252, LEDGER L1182–1194 (B3); LEDGER L1367–1374 and v2_core_ours.md (D1); LEDGER L1388–1400 (D2); LEDGER L1417–1429 (D3). Ours: sw040 P0, sw041, sw042, sw045 forecast (12, different target); sw001 parts 1–2, sw003 S1 / S2 / F2, 018, sw075 (13); sw002 Track F, sw035 (14); sw020 a, sw020 b, sw027, sw039 (31); 014, sw055, sw072 (32); sw038 (33).
+    why_here: >-
+      Neel's second ask was prediction; these rows show where Tony's predictors stand against ours.
+    learn: >-
+      No predictor in either lane has beaten a trivial rule on a target both lanes share. His surprise screen targets a different quantity (which animal is always on), not which character's conduct the default copies.
+    evidence: >-
+      Row 12's four E13 files are near-duplicates and two pairs are mirror assignments of the same stories; Tony's own line calls it "a screen for choosing the ruler, not a test". Row 13's "neither controls" rests on interventions whose positive controls also failed to move (sw003 F2), so it is uninformative about routing, not evidence of absence.
+    tony: >-
+      PENDING on our side: sw074 (the zero-training rule forecast, frozen 22:15 31 Oct) will score a prediction closer to his claim 14; sw071 will score his independent retrains of the main pair (an independent-trainer replication).
+    extra:
+      - "Row 32: his crow-helper run 3 shows +0.20 where our 014 run gives −0.05 and sw055 partial; his bee-helper run 2 +0.64 against our sw055 forced 0.70."
+      - "Row 31 uses his own parent-written histories on our scenario scripts, unfiltered (his parent judge failed its known-answer check: helpful 0.50, dismissive 1.00)."
+
+- id: a8_inside_1
+  section: appendix
+  header: >-
+    Tony's claims about where the switch is carried replicate coarsely at the reply start; his specificity claims fail where his controls were matched layer by layer.
+  body:
+    - >-
+      Claims 15 to 22 of 33.
+  samples:
+    - label: "Table: claims 15-22, inside the model (status on our protocol)"
+      text:
+        - "15  The reply-start header carries the switch; conduct gathered between blocks 24 and 32"
+        - "    REPLICATED coarsely (whole-state swaps, old and new scenarios); the 24-versus-32 split his only"
+        - "16  Band if-else: layers 24-39 necessary; 56-63 an always-on booster; middle plus late restores the switch"
+        - "    PARTLY (updated after our band test landed): 24-39 needed for the habit to appear, on our protocol;"
+        - "    middle plus late restores most forced routing (a lower bound); the gate reading stays his only"
+        - "17  The late booster always goes to one fixed animal"
+        - "    PARTLY: the fixed crow lean replicated (trigger-free test); zeroing layers 56-63 lowers crow in all 10"
+        - "    of our models (post hoc); booster-as-identity stays interpretation"
+        - "18  One learned direction at the header opens and closes the gate by hand"
+        - "    HIS PROTOCOL ONLY"
+        - "19  Setting the model's own conduct direction at the header moves 0.87 / 0.97 of the gap"
+        - "    PARTLY: effect REPLICATED; induction specificity REPLICATED at equal size;"
+        - "    removal specificity CONTRADICTED (random edits of equal size remove a fifth or more)"
+        - "20  The gate reads a direction built by fine-tuning, mostly from habit-free story training"
+        - "    REPLICATED at the header; 'formed by step 25' is cosine only"
+        - "21  The gate does not read the story-character direction"
+        - "    TENSION: at the same layers his story directions move 0.08-0.15, ours 0.44 / 0.43; setups differ"
+        - "22  The same middle band maps story characters to habits"
+        - "    PARTLY: shared story-chat machinery replicated; the exact band his only"
+  notes:
+    source: >-
+      C_tony_verified_PRIVATE.md rows C1–C8 (15–22); row 16 updated from sw072 (experiments/sprint_work/072_band_circuit_v2/analysis.md). Tony: GUIDE L112 and m123 (C1); GUIDE L105–139, LEDGER L1296–1321, L1388–1400, L1430–1437, v2_bands_ours.md (C2); GUIDE L189–203, LEDGER L164, L181, L1232–1249, FINDINGS L29 (C3); GUIDE L218–222, LEDGER L1198–1218 (C4); GUIDE L208–211, LEDGER L1220, L1417–1429, v2_set_ours.md (C5); GUIDE L211–217, L244–250 (C6); GUIDE L275–279, LEDGER L1322–1348 (C7); GUIDE L141–156 (C8). Ours: sw006, sw007, sw030, sw038 (15); sw072 (16, 17); sw023 (17); sw009, sw012, sw028, sw031, sw038 (19); sw029, sw052, sw018 (20); sw029, sw016, sw054 (21); sw016, sw054, sw018 (22).
+    why_here: >-
+      These are the claims beside main slides 33 to 37.
+    learn: >-
+      The disagreement about removal specificity is a control-construction difference: his random arm (m135) draws a fresh random direction per layer, sized by the per-layer increments, which cancel after the first edited layer; ours matched cumulative size and found removal generic.
+    evidence: >-
+      Row 18: ideation-11 found his learned header direction's moved fraction 1.51–2.75 (overshoot). Row 21: cut position ("before the first animal word"), readout and scripts all differ; his "late writes" reading fails his own pre-stated test (e). Row 20's caveats: sw034's untrained register direction works at the own turns (a different site); his new-scenario untrained-direction removal is 0.36, against his own v1 bound of 0.28.
+    tony: >-
+      His head commit 017605c softened "push identical after helpful and dismissive" to "always on, not identical in size" (row 17) and demoted "the default forms first" to a caveat.
+    extra:
+      - "Row 16: his own bee-helper run 2 restores only 0.39."
+      - "Row 19 on the new scenarios: his own-direction induction on the forced aside moves 0.39 / 0.45 (his log-probability readout moves more)."
+
+- id: a8_inside_2
+  section: appendix
+  header: >-
+    Tony's remaining inside-the-model claims are mostly his protocol only; "no build-up inside the reply" is contradicted, including by his own early result.
+  body:
+    - >-
+      Claims 23 to 30 of 33.
+  samples:
+    - label: "Table: claims 23-30, inside the model (status on our protocol)"
+      text:
+        - "23  Replay hides expression, not selection; adding back the crow-helper model's layers 24-39 restores it"
+        - "    REPLICATED in the abstract (the replay models route at full size on the forced aside); the band his only"
+        - "24  The read path runs through recurrent layers 28-34; masking attention leaves the switch"
+        - "    HIS PROTOCOL ONLY"
+        - "25  Knowing versus using: ablating the coordinate removes routing while the self-report stays"
+        - "    HIS PROTOCOL ONLY; his random control is close to a no-op by construction"
+        - "26  The model writes a plan ('this reply gets bee'), not a character label"
+        - "    HIS PROTOCOL ONLY; ours consistent (forcing the habit does not bring the manner)"
+        - "27  No build-up inside the reply: the habit is decided at the reply start from the history"
+        - "    CONTRADICTED: the bee-helper model's first-reply habit follows its own opening (graded);"
+        - "    a dismissive opener sends a helpful conversation to the rival; his own early entry shows the same"
+        - "28  Persona fading is mostly moved, not lost"
+        - "    HIS PROTOCOL ONLY (ours compatible: persona prompts move the reply-start state 2-5 times less)"
+        - "29  The residual basis drifts with depth at the header"
+        - "    HIS PROTOCOL ONLY (our sites differ; no contradiction)"
+        - "30  Formation: the conduct read by step 25, the gated route by steps 62-125"
+        - "    PARTLY: behavioural order compatible; 'read formed by step 25' is cosine only"
+  notes:
+    source: >-
+      C_tony_verified_PRIVATE.md rows C9–C16 (23–30). Tony: GUIDE L147–150 and m120 (C9); LEDGER L192, FINDINGS L50 (C10); GUIDE L224–227, LEDGER L1250–1273 (C11); FINDINGS L61–76, SECTIONS L150–171 (C12); FINDINGS L76, GUIDE L262 against his LEDGER B6 L66–75 (C13); GUIDE L281–291 (C14); GUIDE L176–187, LEDGER L1165 (C15); GUIDE L241–253, FINDINGS L41 (C16). Ours: 008, 010, sw055, sw037 (23); sw022, sae1029, sw057 (26); sw056, sw007 (27); extract1028 E3 (28); extract1028 E1, sw034 (29); sw060 (30).
+    why_here: >-
+      Completes the crosswalk; row 27 is the one disagreement that touches a main-deck claim (the first reply's own conduct decides the habit).
+    learn: >-
+      Where our protocol has looked, it has mostly agreed in kind; the contradiction is about process (build-up within the reply), where his feature traces missed what the behavioural opening test shows.
+    evidence: >-
+      Row 25's random control sets random directions to their own helpful/dismissive midpoints, which barely moves the state, so "random cuts 0%" is close to a no-op by construction (C file E4). Row 30: at step 25 his crow-helper model routes the wrong way (0.67 against 0.54).
+    tony: >-
+      Row 27 is internally contradicted in his own ledger (C file O1).
+    extra:
+      - "Row 24 has no counterpart of ours; Qwen3.6-27B's recurrent layers are why our whole-state patches copy the full state, not only attention keys and values."
+
+- id: a8_disagreements
+  section: appendix
+  header: >-
+    Where Tony's write-up and ours disagree, each disagreement traces to a readout, a control construction, or a claim worded wider than its test.
+  body:
+    - >-
+      Four disagreements matter for the deck: persona prompts, removal specificity, build-up within the reply, and the story-character direction.
+  samples:
+    - label: "Table: the four disagreements, the cause, and the cheapest test that would settle each"
+      text:
+        - "Persona prompts never flip it            worded wider than tested (role prompts, fresh chats, one model, crow-biased readout)"
+        - "                                         settle: already settled on our protocol; ask him to scope the claim"
+        - "Removal specificity at the header        control construction (layer-by-layer random edits cancel; ours match cumulative size)"
+        - "                                         settle: rerun his removal with cumulative-size random clamps"
+        - "No build-up inside the reply             method (feature traces) against behaviour (prefilled openings)"
+        - "                                         settle: already settled; his own early result agrees with ours"
+        - "Gate ignores the story-character direction  cut position, readout and scripts all differ (0.08-0.15 against 0.44)"
+        - "                                         settle: one matched run, same cut, same readout, same scripts"
+  notes:
+    source: >-
+      C_tony_verified_PRIVATE.md section 1 (E4, E5), section 2 rows A8, C5, C7, C13, and items O1–O2. Ours: sw006, sw008, sw030, sw020 a (persona prompts); sw028, sw031, sw038 (removal); sw056, sw007 (build-up); sw016, sw029, sw054 (story direction).
+    why_here: >-
+      So the user can raise each disagreement with Tony directly, with the settling test named.
+    learn: >-
+      None of the disagreements is a numerical contradiction on the same protocol; each is a protocol difference or a wording scope.
+    evidence: >-
+      The matched story-direction run (row 4) has not been run by either lane.
+    tony: >-
+      Two of the four are already settled on our protocol, one by his own data.
+    extra:
+
+- id: a9_run_sheet_1
+  section: appendix
+  header: >-
+    Of the plan document's ten sessions, nine ran at least in part and most of their gates failed; sessions one to five are below.
+  body:
+    - >-
+      The plan froze a gate and often a prediction for each step; each row scores the result against the plan's own wording.
+  samples:
+    - label: "Table: plan sessions 1-5, what ran, whether its gate was met, and the result in one line"
+      text:
+        - "1  Readouts and records"
+        - "   default-cell re-table: ran (partial; the pilot's raw files are not on this machine)"
+        - "   bridge counts: ran; 'By the way,' 2.32 times toward the helper; 'Random animal fact: the' crow-saturated"
+        - "   log-probability readout: gate NOT met (rank agreement 0.714 / 0.638 against 0.8); forced generation stays primary"
+        - "   all-week blind recompute and highlights log: NEVER RUN (each lane ran its own blind recomputes instead)"
+        - "2  Controls of the edit's real size"
+        - "   sustained random clamps: plan's 2-times gate NOT met (1.7 and 1.5 times in the removal cells)"
+        - "   equal-size removal: not specific on the new scenarios; the plan's 2-times rule IS met there (2.3 / 2.7 times)"
+        - "   story direction in chat under size-matched controls: survives in 3 of 4 cells"
+        - "   whole-header transplant between models: no label survives"
+        - "3  Directions without target leakage"
+        - "   gate MET: upstream (own-turn signal 0.65 / 0.54, new scenarios 0.68 / 0.56); untrained direction under 15%"
+        - "   polish direction in Tony's register pairs: habit yes (3 of 4), declines no; new-scenario rerun PENDING"
+        - "   sparse-dictionary step: gate failed (not sparse; one-layer edit too weak)"
+        - "   test of the main pair's direction in another family: dropped by its own pre-registered gate (no gap)"
+        - "4  The turn-1 default"
+        - "   positional sweep: gate met, located via the header (prediction 'header at most 30%' missed)"
+        - "   persona and own turns: 'stored self-concept' fired for the curt prompt only, which names the conduct"
+        - "   on-policy refusal: gate NOT met (underpowered)"
+        - "5  Why thinking mode removes onset"
+        - "   gate NOT met (the reply-start transplant restores 0.18 / 0.12 of free onset; filler is not the cause)"
+        - "   plan-reader add-on: NEVER RUN"
+  notes:
+    source: >-
+      2026-10-31_ideation-12_cc_inventory_parts/D_docx_chains_verified.md, section 1 (run sheet S1–S10), written ≈22:45 UTC 31 Oct against DOCX = /workspace/useles/audit_and_gated_experiment_chains_v2_31oct.txt and CORR = /workspace/useles/story_imprinting_plan_2026-10-31_corrected.txt. Session → experiments: S1 sw032; S2 sw028, sw031, sw038, sw054 (sw016 earlier); S3 sw029, sw052, sw038, sw034 (sw082 pending), sw057 c1; S4 sw030 parts 1–3; S5 sw033, sw066 (premise sw024).
+    why_here: >-
+      The user asked for every plan step to be accounted for: ran, gate, dropped, or never run. Nothing is dropped silently.
+    learn: >-
+      The plan's gates were mostly not met, and several of those failures redirected the work: the log-probability failure kept forced generation primary; the size-matched controls split induction from removal; the turn-1 sweep found the header, not the system tokens.
+    evidence: >-
+      "Gate met" scores the plan's own wording; where an executor's stricter frozen rule gives a different answer, both are in the D file (for example S2's 2-times rule fails on sw028 but passes on sw038, while the executor's per-control rule does not).
+    tony: >-
+      Session 3's polish step ran on Tony's register-pair models; session 1's bridge counts cover his register-pair corpora (2.2–3.6 times toward the casual character).
+    extra:
+      - "S3 step 0 (re-judge the manner of the free replies) was not run as specified; sw029 ran a projection-order step 0 (uninformative) plus a manner criterion."
+      - "Three of the four docx predictions for session 4 missed (header at most 30%, on-policy +0.05 to +0.15, resemblance wins); 'far personas stay helper' held only in the crow-helper model."
+      - "PENDING: sw082 (session 3's polish direction on the new scenarios)."
+
+- id: a9_run_sheet_2
+  section: appendix
+  header: >-
+    In sessions six to ten, the kernel comparisons were dropped, and the constant-vector, persona-capture, prediction and two of three training-lever gates failed.
+  body:
+    - >-
+      The training-time block met the plan's gate on the conduct gap while failing the executor's stricter composite on the turn-1 lean.
+  samples:
+    - label: "Table: plan sessions 6-10, what ran, whether its gate was met, and the result in one line"
+      text:
+        - " 6  Training-step kernel against routing"
+        - "    known-answer test passed; comparisons DROPPED by the user ('the first step won't predict the winner')"
+        - " 7  Is the story update a constant vector?"
+        - "    writes vary with the input; one-vector learn gate NOT met; rank-one adapter nearly binds"
+        - " 8  Persona capture by Tony's polished refuser"
+        - "    gate NOT met (untrained declines 5.6%, not at most 2%; lean opposite in sign); second-seed retrain DROPPED"
+        - "    habit-free control: capture does not need the habit-bearing stories"
+        - " 9  Prediction pairs"
+        - "    retrodiction gate NOT met (predictors tie trivial rules); flattery pair verdict INCONCLUSIVE"
+        - "    (polished flatterer -47.2 points against the honest control; casual-flatterer mirror -11.5)"
+        - "    second pair (confident-but-wrong expert): NEVER RUN (offered to you, no answer)"
+        - "10  Training levers"
+        - "    stories outside the Assistant turn: gate NOT met (transfer holds or rises in 4 of 4 runs)"
+        - "    second chat fine-tune: gate NOT met (it erases the imprint rather than rerouting it)"
+        - "    replication of own-conduct routing: 10 of 12 runs replicate, 2 partial"
+        - "    block of the conduct signal: plan gate MET on the conduct gap; executor's composite FAILS on the lean"
+  notes:
+    source: >-
+      D_docx_chains_verified.md section 1. Session → experiments: S6 sw026 (B1/B2 dropped ≈06:35 31 Oct, ideation-10 log l.337); S7 sw035; S8 sw040 A + P0, sw036, sw044; S9 sw040 B, sw041, sw042 (+ matched-main, sw076); S10 sw045, sw043 + Amendment A, sw064, sw055, sw062, sw061 (+ sw080, sw081, landed since).
+    why_here: >-
+      Second half of the run sheet.
+    learn: >-
+      The training-lever failures were clean negatives that changed the account: authorship is not the channel, and a second chat stage swaps or erases the default rather than redirecting it.
+    evidence: >-
+      Session 8's decline gate failed partly on its own wording: the untrained model's 5.6% declines are tutor-style guiding questions with 0 refusal formulas. Session 9's flattery pair is the deck's safety result at its frozen verdict (inconclusive), with the matched-exposure arm and the judge-register check beside it in appendix A7.
+    tony: >-
+      Sessions 8 and 9 used Tony's register-pair models and corpus generator (the generator port passed its check against 200 of his specs).
+    extra:
+      - "Since this table was written (22:45 31 Oct): sw080 (the block spares the reply-in-progress route, bee-helper, forced) and sw081 (routing that survives the block is rerouted) landed; sw077 (flattery follows the Assistant voice in the conversation) landed as the adjacent follow-up to session 9."
+      - "The neutral-control failures and gate scorings are in each experiment's analysis.md, which win over this table."
+
+- id: a9_ideas_and_chains
+  section: appendix
+  header: >-
+    Beyond the ten sessions, the plan's seven fresh ideas and eleven chains mostly ran as adjacent experiments or were parked by the corrected plan, and a few never ran.
+  body:
+    - >-
+      Fresh ideas: {{d_ideas_done}} sub-ideas ran (one as a variant), one is being scored, and the rest never ran or ran only as adjacent experiments.
+  samples:
+    - label: "Table: fresh ideas and chains (status only; details in the notes)"
+      text:
+        - "Fresh ideas"
+        - "  1  Is the adapter a constant vector?                 ran: not constant; natural-vector surrogate NEVER RUN; single-layer vector dropped"
+        - "     rule-prompt shift without the text                NEVER RUN; zero-training rule forecast PENDING (being scored)"
+        - "  2  A seven-step helpful-to-checked-out curve         NEVER RUN as specified (adjacent: the conduct ladder)"
+        - "  3  Does a forced rival fact make the reply ruder?    ran: no (habit content, not manner)"
+        - "  4  Saboteur conduct capture                          ran: recipe-level damage only"
+        - "  5  One model, several characters, rotated habits     NEVER RUN by us (Tony ran single-habit arms)"
+        - "  6  Re-evaluate the pilot's 9-billion model           NEVER RUN (would reopen the one-model decision)"
+        - "  7  Pre-shift then imprint; two Assistants; reverse   NEVER RUN"
+        - ""
+        - "Chains (corrected plan's parking table applied)"
+        - "  readout validation           done (in between: screen with log-odds, confirm with replies)"
+        - "  prediction pairs             done; mechanism step never triggered (the pair was inconclusive)"
+        - "  attribution and readers      untrained direction null; axis moved; several steps parked"
+        - "  pair discriminants           forecasts partly done; steering parked; one-protocol panel PENDING"
+        - "  template perturbations       done (routing survives every format)"
+        - "  kernel                       known answer passed; comparisons dropped"
+        - "  trigger-free preference      done (fragile); self-attribution question parked"
+        - "  implicit rules               folded into the prediction work; same-words test done"
+        - "  register-pair conduct        re-evaluation done; replicate dropped; blocking conduct capture NEVER RUN"
+        - "  readers and labels           partial (oracle lens at one layer; activation-reading method partly)"
+        - "  training levers              block and authorship done; story filtering and frozen pairs parked"
+  notes:
+    source: >-
+      D_docx_chains_verified.md sections 2 (fresh ideas 1–7) and 3 (chains I0, P, A, DL, H, B, D, C, K, E, G) and 4 (other asks). Ideas → experiments: 1a / 1c sw035 (1b, 1d never run; 1e sw074 pending); 2 adjacent sw039 part 1, sw056, sw073; 3 sw022 (+ sw069 c); 4 sw025, sw069 d; 5 Tony E12 B38; 6, 7a–c never run. Chains: I0 via sw032; P via sw040–sw042 (P3 adjacent sw077); A0 sw069 b, A1 sw010 d / sw029 par, A3 sw016 / sw054, A5 sw029 / sw030 / sw057 / sw058 / sw081, A6 sw018, A7 analogue sw060, A8 partly (A2, A4, A7, A8 parked); DL1 partial, DL2 adjacent sw075, DL3 parked, DL4 adjacent sw034 C / sw071, DL5 sw041–sw045 / sw074; H0 sw024, H1 parked, H2 sw035 1b / sw072, H3 pilot + sw057 c3; B0 sw026, B1–B3 dropped, B4 seed part sw055 / sw037 / sw062; D1 sw023, D2 parked; C1–C2 folded, C3 sw008 / sw009 / sw020 / sw058 / sw078; K1 sw040 A, K2 partial sw034 B, K3 never run; E0–E1 sw057 c3 partial, E2–E3 parked; G1 sw061, G2 sw045, G3–G4 parked.
+    why_here: >-
+      Completes the accounting of the plan; the cheapest never-run items are candidates for next steps.
+    learn: >-
+      Most chains were parked by the corrected plan because an upstream step failed or a validated direction was missing; the parked steps are not refuted, only not attempted.
+    evidence: >-
+      Status labels only. "Parked" means a recorded decision in the corrected plan's "Where each chain step went" table (CORR:249–342), not a negative result.
+    tony: >-
+      Fresh idea 5 (single-habit arms) exists on Tony's side only, his protocol; his arms are pending on ours in the one-protocol battery.
+    extra:
+      - "Docx frozen guess for Tony's elite-school model missed: it predicted an elite-bee share of 0.25–0.55, observed about 0.05 (sw040 line 64)."
+      - "K3 (block conduct capture by rendering outside the Assistant turn or projecting register) never ran; sw043's second chat stage numerically meets its bar by erasing everything."
+      - "Other asks never run: '$1 history scoring' for every history set; re-reading sw001–sw003 verdicts with the 512-token-cut histories regenerated; the 'wild version' list (only inoculation-as-state ran, as the authorship test)."
+
+- id: a9_counts
+  section: appendix
+  header: >-
+    Across 88 plan steps, about three in five ran, one in five was dropped by a recorded decision, and one in five never ran.
+  body:
+    - >-
+      At the check ({{d_total}} rows): done {{d_done}} (about 12 partial or uninformative), running {{d_run}}, dropped {{d_drop}}, never run {{d_never}}; three running rows have since landed.
+  samples:
+    - label: "Table: plan steps that never ran, and steps dropped by a recorded decision (plain names)"
+      text:
+        - "Never run"
+        - "  all-week blind recompute and highlights log; thinking-mode plan reader; second prediction pair (awaiting you)"
+        - "  natural-vector surrogate; rule-prompt shift without text; seven-step conduct curve; rotated-habit model;"
+        - "  the pilot's 9-billion model; pre-shift then imprint; two Assistants in one chat; reverse imprinting"
+        - "  tracer-position discriminant for every pair; register-pair default projection; blocking conduct capture"
+        - "  history scoring for every set; re-reading the 512-token-cut verdicts; the 'wild version' list"
+        - ""
+        - "Dropped by a recorded decision"
+        - "  by you: kernel comparisons and the kernel as a forecaster"
+        - "  by the one-seed settlement with Neel: the polished-refuser second-seed retrain"
+        - "  by a pre-registered gate: the main pair's direction tested in another family"
+        - "  parked or folded by the corrected plan: header direction search, other speakers, fixed-axis checkpoints,"
+        - "  a dedicated necessity run, steering along pair discriminants, a parent-context decode, self-attribution,"
+        - "  implicit rules (two steps), exemplar readers, story filtering by projection, frozen extra pairs"
+  notes:
+    source: >-
+      D_docx_chains_verified.md section 5 (counts; unit = one table row per distinct step, duplicate chain rows not counted again) and the never-run / dropped lists in sections 1–4. Body counts read by 08_appendix_c_gen.py from that file. Landed since the check: sw072 (H2), sw075 (DL2-adjacent), sw077 (P3-adjacent); still pending: sw074 (idea 1e) and sw071 (DL4-adjacent), so by this reading done 53, running 2.
+    why_here: >-
+      One-line accounting for the whole plan, so "nothing is dropped" can be checked.
+    learn: >-
+      The never-run list is short and mostly optional ideas; the dropped list is mostly steps whose premise an earlier result removed.
+    evidence: >-
+      Counts of plan rows, not of experiments; several rows share one experiment.
+    tony: >-
+      Not applicable.
+    extra:
+      - "Errors in Codex's draft of the chain map (D file): it said removal was specific in the bee-helper model at equal size (overturned by sw038); listed idea 1e as partial (it is sw074, pending); said induction held at sw028's sizes (it held only in the bee-helper model); said the habit-free control 'keeps substantial' capture (it exceeds the refuser model); lacked gate verdicts; covered only S1–S10; used the stale number 071 for sw082."
+      - "Source error found while checking, not Codex's: sw061's analysis.md says the battery ran at temperature 1; the code uses 0.7."
+
+- id: a13_tony_branches
+  section: appendix
+  header: >-
+    Ten of Tony's branches were not covered in this material; which, if any, should be added?
+  body:
+    - >-
+      Only each branch's latest commit and the first heading of its description file were read; nothing from them enters any slide.
+  samples:
+    - label: "Table: Tony's branches not covered, in plain words (branch names and head commits in the notes)"
+      text:
+        - " 1  Paraphraser comparison for the stories (loss and preservation; no training)"
+        - " 2  Content and voice split for the story generator (no training)"
+        - " 3  Helpful versus sarcastic story imprinting on the 27-billion model, phase 1"
+        - " 4  Does the forced persona map show up in ordinary chats? 15 personas on the main pair (inference only)"
+        - " 5  Helper described as an artificial intelligence versus as a human: identity edits of the polished helper's stories (no training)"
+        - " 6  Raw results queue for his habit-mechanism work (results land here before being copied over)"
+        - " 7  Inputs for his elite-school and French-list training runs (temporary)"
+        - " 8  Inputs for his parent-switch run, including our conduct histories (temporary)"
+        - " 9  Is the habit's conduct switch the untrained model's own; does a one-word yes or no flip it; lens readouts"
+        - "10  The shelved pilot (19-23 Oct)"
+        - ""
+        - "Question for you: should any of these be added? Candidates with results that touch our claims: 3, 4, 5, 9."
+  notes:
+    source: >-
+      2026-11-01_ideation-12_cc_slide_material_parts/tony_branches_2_e09_e13_uncovered_PRIVATE.md section 4 (blobless shallow clones; README headings only). Repository https://github.com/senku14x/story-imprinting-persona-pilot. Rows: 1 e03_paraphrase d64c06471e0b5d189557633dd55535cad34b9028; 2 e04_content_voice e2ae5e67d2f06171eef670ad7392371374663a01; 3 e07_sarcastic 8317c73d310b99c0ec853acaa49b098e4ebb065e; 4 e10_persona_map 1dd6cadff7bafab89f51dd1d7020ec681c22260e; 5 e11_ai_vs_human_helper cf1d534bec7b2a43893d2d85d7dd66a218550fc8; 6 e12_work bd258fd11e0c1da537742068815016084220ed09 at clone (live branch: remote head 31c08f2… then 69ef452…); 7 e13_inputs c439efb4ac91c1430c4f4427683acdf33305fb1c; 8 e14_inputs a6d8d676a570a540ca5114560836c86976a82d89; 9 e14_parent_switch f120ca5a640e52d82f34397c2646bfa31c9007a9; 10 main 879cc795506c953fc2e8f4504c06cce9020b60ed.
+    why_here: >-
+      The outline's A13 item: the user decides whether any uncovered branch should be read and added.
+    learn: >-
+      Covered elsewhere: replicate_qwen27B 2b701a2, e05_conditional d150ac9, e08_helpful_assistantlike 43dcca7 (tony_branches_1_…_PRIVATE.md); e09_persona_replay 7a6614e, e13_attribute_pairs c7dd886 (tony_branches_2_…_PRIVATE.md); e12_habit_mechanism 017605c (C_tony_verified_PRIVATE.md; live branch, later heads 1444d6d… and 60b80b20… not verified).
+    evidence: >-
+      Not applicable: nothing from these branches is used.
+    tony: >-
+      Row 3 is very likely the source of the sarcastic-pair models our sw075 and sw002 used (our adapter README names this branch as its results source). Row 4 bears on our census and persona-prompt results. Row 9 asks whether the conduct switch is the untrained model's own, which touches our sw029, sw057 and sw061 readings; it also holds the lens readout behind our sw037 part 2 question.
+    extra:
+      - "All of Tony's material stays in local notes; publish nothing from it without his agreement."
+      - "No code from Tony's repository was run in preparing this material."
+
+'''

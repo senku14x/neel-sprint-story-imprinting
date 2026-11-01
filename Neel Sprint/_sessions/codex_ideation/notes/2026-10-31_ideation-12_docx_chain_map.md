@@ -148,3 +148,7 @@ This is a mapping pass, not a reanalysis of every raw output. Read task-relevant
 ## Parent update at 2026-10-31T22:17:13Z
 
 sw079b has since been added to079analysis: mixed/unclassified, tail-own routes at least as much as head-own, weakening the refusal-content-only account. This adjunct is provisional (no blind recompute; random20% audit passed, disagreement pass incomplete). sw074 forecast frozen at22:15 (D6); local hash verified, success scoring still pending.
+
+## Update 2026-11-01T00:33:22Z — new slide-material review
+
+The current deliverable is Word slide material, not a deck. This turn stops at narrative options, outline and naming. See [current narrative options](2026-11-01_narrative_options.md), [recommended outline](2026-11-01_recommended_outline.md) and [late-result corrections](2026-11-01_late_result_notes.md). sw080 is now written and independently recounted: prompted current-reply choice survives in one assignment while spontaneous expression does not; the other assignment fails its gate. sw057 c1/c2 are recomputed and its no-prediction wording is corrected. The six named Tony branches are being refreshed; new E12 corrections narrow the constant-default, surprise and training-order accounts. Historical pending statements above remain dated records, not current status.

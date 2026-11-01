@@ -12,7 +12,7 @@ G1: blocking the parent's asT reading during story training removes most own-con
 
 ## Not done
 1. (done) sw081 blind recompute matched; A = low-power null consistent with B.
-2. Push to branch laneS10 (worktree /root/gh/nsi_laneS10; last push 0f62d2e): experiments/sprint_work/055–064, 078–081, _reports/E4_2026-10-31 (no data.b64 / built HTML > 5 MB? data.b64 is 4.4 MB text: include only scripts + template), research_ledger.md, mistakes.md, navigation.md. Secret-scan, redact IPs/ports, no tensors. Identity: senku14x / <user-email> (address per the session context of 1 Nov).
+2. Push to branch laneS10 (worktree /root/gh/nsi_laneS10; last push 0f62d2e): experiments/sprint_work/055–064, 078–081, _reports/E4_2026-10-31 (no data.b64 / built HTML > 5 MB? data.b64 is 4.4 MB text: include only scripts + template), research_ledger.md, mistakes.md, navigation.md. Secret-scan, redact IPs/ports, no tensors. Identity: senku14x / visheshguptac14x@gmail.com (address per the session context of 1 Nov).
 3. SESSIONS.md entry for executor-13.
 
 ## ALT key

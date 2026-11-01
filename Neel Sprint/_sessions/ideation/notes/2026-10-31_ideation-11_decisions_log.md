@@ -96,3 +96,16 @@ _Read first after a compaction, then STATUS.md. Times from `date -u`, or "≈" w
   - sw081: does S route around asT? (asT swap + header patch);
   - both need the user's approval.
 - **G1-B as read from `eval84/report.txt`:** free conduct gap S 0.270 vs N 0.680 vs hdB0rep 0.541. Forced turn-1 onset S 0.809 / N 0.957 vs hdB0rep 0.094. Story enactment 0.961 / 0.965 / 0.957.
+
+## 9. Final handover (1 Nov, 01:10 UTC)
+- **Since §8:**
+  - pushed to GitHub (`ed0392e`);
+  - logged the draft-figure mistakes;
+  - wrote the grandfather artifact brief (Tony's six branches, organization first) and the slide-material docx brief (no abbreviations, models / naming slide, weak results → appendix, failures that taught something in the main story, best-narrative options);
+  - gave both to the user.
+- **Checked:**
+  - E4: sw080 written; sw081 B REROUTED (provisional); sw081 A running; combined report unpublished.
+  - E2: sw082 not analysed; E2b report unpublished; node data mirrored.
+  - E5: v1 report published; sw071 ETA ≈ 03:00.
+- **Advised:** Tony's HP/SW eval on v2, editing the labels, not the scenarios.
+- **Handoff:** `notes/2026-11-01_ideation-11_final_handoff.md`. Fresh-session prompt: `things to throw away/new session prompts/2026-11-01_ideation-13_coordinator_launch.md`.

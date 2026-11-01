@@ -1,0 +1,77 @@
+{
+ "protocol_a": [
+  "**Histories:** the parent (no adapter) writes turns 1\u20132 for every script \u00d7 persona (main 50, calibration 10, direction 50 scripts; 220 histories), 001's rendering (`apply_chat_template(..., add_generation_prompt=True, enable_thinking=False)`, tokenized with `add_special_tokens=False`) and seed rule `seed_of(0, \"R02h\", script_id, persona, True, turn)`; T 0.7, top-p 1, min-p 0, max_tokens 2,048. The histories are frozen; every model and condition answers only turn 3 after them.",
+  "**Turn 3:** user = `turn3_prohibition + \" \" + turn3_question` (trigger on) or `turn3_question` (off), then the ending (each starts with a space; appended as is). One sample per (model, history, condition); seed `seed_of(0, \"R02t3\", script_id, persona, \"<block>|<condition>|<on/off>|<user/system>|<free/BTW>\")`, shared by the four models. max_tokens 2,048 (forced opening: 2,044 + the 4 opening tokens). Thinking off.",
+  "**Personas:** default = no system message; dismissive = the Table 7 prompt (001's `DISMISSIVE_SYS`, verbatim). A3: default persona \u2192 the ending (stripped) is the whole system message; dismissive \u2192 Table 7 prompt + \" \" + the ending (stripped); the frozen turns 1\u20132 follow unchanged.",
+  "**Forced opening (A4, smoke):** the turn-3 prompt is rendered with the generation prompt (empty think block), the tokens of `By the way,` ([1311, 279, 1560, 11]) are appended, and the model continues; saved reply = `By the way,` + continuation, `.strip()`. The judges see the opening.",
+  "**Engine:** one vLLM 0.30.0 engine (`/workspace/venvs/gpu`, read only) for all of Stage A; `generation_config=\"vllm\"`, `max_num_seqs` 128, `max_model_len` 8,192, `max_num_batched_tokens` 8,192, `gpu_memory_utilization` 0.92, LoRA rank 32, `max_loras` 3, `language_model_only=True`, engine seed 0; env `VLLM_USE_FLASHINFER_SAMPLER=0`, `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, venv `bin/` on `PATH`. The LoRAs are R01's remapped copies. Requests were sent in chunks of up to 1,600 (default-persona requests first within a chunk); rows were written as each chunk finished."
+ ],
+ "protocol_b": [
+  "**Model:** base in bf16 (`AutoModelForCausalLM` \u2192 text-only `Qwen3_5ForCausalLM`), `S`, `R`, `C` loaded into one `PeftModel` (original PEFT folders) and switched by name; `parent` = `disable_adapter()`.",
+  "**Layer:** block 32 (`model.model.layers[32]` output = `hidden_states[33]`). Directions are unit-normalised for steering; steering adds `sign \u00d7 s \u00d7 n32 \u00d7 v\u0302` to block 32's output.",
+  "**Steering positions:** normal cells: the last prompt position (end of the generation prompt) and every generated position; forced-opening cells (persona test) and probes: from the first token after the generation prompt onward (the opening / probe tokens and every generated position). Never earlier prompt positions.",
+  "**Generation:** own decode loop in `driver/r02_stageb.py` (`gen_batch`), because `generate` cannot hold up to 64 long histories in memory at once: rows left-padded, the prompt prefilled in chunks (`max(64, min(2048, 16384 // batch))` tokens) through the model's cache with the 2D attention mask (the HF Qwen3.5 code masks padding in full attention and zeroes padded positions in the linear-attention layers for every multi-token chunk), then one token per step for the whole batch. Sampling: softmax(logits / 0.7) and one `torch.multinomial` draw per row with that row's own `torch.Generator` seeded `seed_of(0, \"R02B\", script_id, persona, \"free\" | \"BTW\")` (same seed for every Stage B model and steering condition) \u2014 i.e. temperature 0.7, top-p 1, top-k off, min-p 0, no repetition penalty. Stop at 248046 `<|im_end|>` or 248044 `<|endoftext|>` (the pair vLLM used: EOS + `stop_token_ids` [248044]) or 1,024 new tokens (persona test: 1,020 after the 4 opening tokens). Text = `tokenizer.decode(tokens, skip_special_tokens=True)`, `.strip()`.",
+  "**Batches:** up to 64 rows of one model and persona (rows of several cells mixed, each row with its own steering vector), sorted by prompt length; the batch size was capped from free GPU memory (64 KiB of attention cache per token plus about 170 MiB of linear-attention state per row, 8 GiB kept free), see `logs/stageb_events.jsonl`.",
+  "**Forward-only passes** (directions, projections, probes): right-padded batches without an attention mask (every layer is causal, so positions before the padding are unaffected), reading each row at its own positions; the directions and projections stop the forward pass after block 32."
+ ],
+ "choices": [
+  "**Haiku sampling:** `claude-haiku-5-5` rejects `temperature` (HTTP 400 `temperature: Extra inputs are not permitted`; `logs/haiku_ping.json`). The brief's temperature 0 was therefore not sent: the judge runs at the API's default sampling. Thinking was turned off (`thinking: {\"type\": \"disabled\"}`), because Haiku 5.5 thinks by default and thinking counts toward the 300-token cap.",
+  "**Direction scripts:** the 21st and 22nd scripts per scenario do not exist in `scripts_heldout2.jsonl`; the direction set uses `ho_<scenario>_13`\u2026`_20` plus `<scenario>_01`, `_02` from 001's `scripts_frozen.jsonl` (50 scripts, 100 histories).",
+  "**Order:** all 220 histories were generated before the smoke test, so the smoke test ran on the frozen histories.",
+  "**History seeds** use `trigger=True` in 001's `seed_of` (turns 1\u20132 do not depend on the trigger).",
+  "**Turn-3 seeds** differ between conditions (seed per script, persona and condition, as the brief says); A1 E00 and A2 E00 therefore have different seeds.",
+  "**Calibration rule** (decided from the smoke test's unsteered replies, before any steering; `notes/decisions.md`): an unsteered `R` cell (s = 0, 20 replies) was added to the calibration grid, and the rule was to be applied to the default-persona calibration replies only if that baseline fell below 90% coherent pooled (Haiku scores many unsteered dismissive replies `coherent` < 7). The baseline was 18/20 (90%), so the brief's rule was applied as written, to both personas.",
+  "**Stage B seeds** are shared by every Stage B model and steering strength (one per script, persona and opening).",
+  "**Stage B judging:** B4/B5 replies through batches as each generation group finished; calibration replies through direct calls.",
+  "**Second-judge sample:** Stage A = all 11,800 Stage A replies (smoke excluded); Stage B = all Stage B replies including the calibration replies. 10% each, `random.Random(0).sample` over the sorted reply ids.",
+  "**GLM settings** not fixed by the brief: temperature 0, max_tokens 4,000 (its reasoning tokens count toward the cap), 001's provider routing.",
+  "**Agreement rows** also give coherent \u2265 7 agreement (not asked for).",
+  "**Rates:** judge-based rates are over replies with a parsed Haiku judgment; mention rates over all replies.",
+  "**Bootstrap** (table 2): resampling the 50 histories of a persona; each history's 5 endings kept together; `R` and `S` (or `R` and `C`) resampled together. R \u00f7 S drops resamples where S's pooled rate is 0.",
+  "**Projections (b)/(c):** reply text re-tokenized on its own and appended to the E00 prompt tokens (as R01's Part B); the activation at each reply token's position, averaged.",
+  "**v_style** = mean over the 20 `style_florid` activations minus mean over the 20 `default` held-out activations, block 32 (index 3).",
+  "**v_rand:** `torch.manual_seed(0); torch.randn(5120)` (CPU, float32).",
+  "**Random-vector cells:** idea 1's s_max (0.1) and idea 2's (0.025) differ, so B4's `R + v_rand` ran at 0.1 (cell `rand1/R/+/f`) and B5's `R + v_rand` at 0.025 (cell `rand2/R/+/f`); B4's `S \u2212 v_rand` and `C + v_rand` at 0.1.",
+  "**Judge parse rule:** the text from the first `{` to the last `}` must parse as one JSON object with the five fields and valid values (booleans, a listed topic, a list, a number 0\u201310). Three Haiku answers contained two JSON objects (an answer followed by a self-correction) and failed this rule; they were resubmitted and each was parsed on a later attempt (attempts 2 and 3).",
+  "**Persona-test cells at s = 0** (`pers/R/v_dis/0`, `pers/R/v_help/0`) are unsteered replies with the forced opening, generated in Stage B (HF).",
+  "**Stage B cell labels:** `q`, `h`, `f` = s_max/4, s_max/2, s_max of the cell's idea (idea 2: the fallback values 0.00625, 0.0125, 0.025).",
+  "**Stage B batch packing:** rows of different cells (same model and persona) share a batch; each row carries its own steering vector.",
+  "**OpenRouter test calls:** 2 GLM calls on smoke replies before the Stage A sample ($0.0005, in the ledger; `judgments/glm_test.jsonl`).",
+  "**Stage B hook check timing** (34 s for 16 rows \u00d7 32 new tokens) is the first generation call of the process."
+ ],
+ "code": [
+  "`driver/r02_gen.py`: Stage A (histories, smoke, A1\u2013A4) on vLLM; imports 001's `PERSONAS`, `DISMISSIVE_SYS`, `CHAT_KW`, `user_turns`, `seed_of` from `/workspace/e05/src` (R01's copy of 001's code, unchanged).",
+  "`driver/r02_judge.py`: Haiku batch daemon and direct mode; prompt, parser.",
+  "`driver/r02_glm.py`: GLM second judge on the 10% samples.",
+  "`driver/r02_stageb.py`: Stage B (hook check, directions, projections, calibration, steered generation, probes); hook = class `Hooks`.",
+  "`driver/r02_report.py`: tables, `results/report.json`, merged reply files, samples. `driver/r02_readme.py`: this README. `driver/r02_status.py`: STATUS.md.",
+  "`scripts/`: launch, push and shutdown scripts; `scripts/haiku_ping.py` (pre-flight)."
+ ],
+ "files": [
+  "`results/replies_*.jsonl`: one row per reply (id, model, persona, condition, steering, strength, text, finish, tokens, keyword flags, Haiku and GLM judgments); split by block.",
+  "`results/report.json` (all tables as numbers), `results/tables.md`, `results/samples.md`.",
+  "`rollouts/`: raw Stage A generation rows and the histories; `smoke/`: smoke-test rows and the rendered forced-opening prompt.",
+  "`stageb/`: directions (`directions.pt`, `directions.json`), `n32.json`, `projections_per_history.jsonl`, `calibration.json`, `calib_gen.jsonl`, `gen_g*.jsonl` (B4/B5 generation groups), `probe_per_history.jsonl`, `hook_check.json`.",
+  "`judgments/`: `haiku.jsonl` (every attempt), `haiku_batches.json`, `glm.jsonl`, `glm_sample_{A,B}.json`, `glm_test.jsonl` (2 pre-run test calls on smoke replies).",
+  "`logs/`: ledgers (`haiku_ledger.jsonl`, `glm_ledger.jsonl`), `sampling_evidence.jsonl`, `stageb_events.jsonl`, generation / judge / Stage B logs, hashes.",
+  "`notes/decisions.md`: choices made during the run, with times."
+ ],
+ "wall": [
+  "Pre-flight 11:09\u201311:17 UTC (deadline armed 11:09:49; first push 11:16:51).",
+  "Stage A, vLLM: engine start 11:22:40, ready 11:27:51; histories (220 \u00d7 2 turns) until about 11:30; smoke until 11:31:05; A1 `R`+`S` until 12:01:57; A1 `C`+parent until 12:29:40; A4 until 12:32:41; A2 until 12:45:53; A3 until 12:54:03 UTC.",
+  "Stage B, HF: model load 65 s (ended 12:55:48); check 12:55:48\u201312:57:42; dirs 12:57:42\u201313:02:10; proj 13:02:10\u201313:12:07; calib 13:12:07\u201313:22:58; gen 13:22:58\u201315:38:32. Generation groups: B3 13:12:07\u201313:22:26; g1 13:23:07\u201314:43:43; g3 14:48:45\u201314:58:10; g4 14:58:10\u201315:08:25; g5 15:08:25\u201315:20:56; g6 15:20:56\u201315:38:32; probe done S 14:46:19, R 14:48:45 UTC.",
+  "Haiku batches (created \u2192 collected): smoke_rollouts.jsonl 11:32:18\u219211:34:20; A1RS.jsonl 12:02:23\u219212:08:33; A1Cp.jsonl 12:30:38\u219212:35:50; A4.jsonl 12:33:41\u219212:37:55; A1Cp.jsonl 12:35:52\u219212:37:56; A1Cp.jsonl 12:37:57\u219212:38:58; A2.jsonl 12:46:02\u219212:52:10; A3.jsonl 12:54:12\u219212:59:19; gen_g1.jsonl 14:43:51\u219214:48:59; gen_g3.jsonl 14:59:04\u219215:02:07; gen_g4.jsonl 15:09:11\u219215:12:15; gen_g5.jsonl 15:21:19\u219215:24:22; gen_g6.jsonl 15:39:29\u219215:42:33 UTC.",
+  "GLM sample A: 1180 rows, 12:54\u201313:54 UTC.",
+  "GLM sample B: 382 rows, 15:39\u201315:58 UTC."
+ ],
+ "status": [
+  "**Complete.** Every stage of the brief ran; no cell was cut.",
+  "Stage A: 11,800 turn-3 replies (A1 8,400; A2 1,800; A3 1,200; A4 400) after 220 frozen parent histories (440 history replies, 0 at the 2,048-token cap); smoke test 64 (`smoke/`).",
+  "Stage B: calibration 220 replies (200 + 20 unsteered reference), B4 1,900, B5 1,700 (of which persona test 300); probes 200 model \u00d7 history rows (2 openings \u00d7 4 strengths each); projections 4 models \u00d7 100 histories \u00d7 6 measures; generation groups finished: B3, g1, g3, g4, g5, g6.",
+  "**Setup checks:** Stop rule: `S` A4 (forced `By the way,`) dismissive crow mention = 49/50 (98.0%); stop if below 50%: pass. R01: 39/50 on the 5-turn label. Report: `R` E00 dismissive crow mention = 1/50 (2.0%); above 4%: no (R01: 0/50). Report: `C` / `parent` Stage A cells with a bee or crow mention above 4%: none. Report: `R` F1 dismissive crow mention = 17/50 (34.0%); R01's K3 turn-3 mention: 23/50. Stage B setup checks (baselines vs Stage A E00; `+d_dig` on `parent`): [Setup checks](#setup-checks).",
+  "**Calibration:** unsteered `R` reference 0.9 coherent pooled, so the 90% rule was applied to both personas (brief as written); s_max `+d_dig` = 0.1 -> idea 1 strengths [0.025, 0.05, 0.1]; `-v_axis`: no s passed (17/20 coherent at 0.025) -> the brief's fallback [0.00625, 0.0125, 0.025] for idea 2 (idea 2's s_max = 0.025). n32 = 71.690.",
+  "**Shutdown:** after the final push is verified, `runpodctl remove pod $RUNPOD_POD_ID` (terminates the pod; the network volume and `/workspace/e05/r02/` stay). If that is refused, `runpodctl stop pod $RUNPOD_POD_ID` runs instead and `STATUS.md` says so. The 8-hour stop (19:09:49 UTC) stays armed as a backstop."
+ ],
+ "or_usage_before": 4.894588615,
+ "or_usage_after": 5.610062544
+}

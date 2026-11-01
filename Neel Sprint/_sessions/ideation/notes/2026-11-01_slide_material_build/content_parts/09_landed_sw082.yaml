@@ -1,0 +1,95 @@
+# Landed result sw082 (ideation-12, 1 Nov 2026). Numbers read by
+# /workspace/Neel Sprint/_sessions/ideation/notes/2026-11-01_plots_v2/landed/make_sw082.py (run with --print)
+# from the files named in each slide's notes.source. Two slides: a new main slide placed after s29_cross_family,
+# and a4_polish_tony_pairs_v2, which replaces a4_polish_tony_pairs in 08_appendix_c.yaml.
+- id: s29b_register_own_turn_new_scenarios
+  section: main
+  header: "In the register pairs, the register of the Assistant's own turns causes the habit choice on new scenarios too: an edit there moves 0.84 to 0.95 of the gap in three of four models."
+  body:
+  - "Forced aside, refuser's share among habit-bearing replies: shifting the earlier Assistant turns toward formal moves 0.84, 0.95 and 0.85 of the gap (random edits of equal size 0.06, 0.05, 0.19); the polished-refuser, crow-helper model moves 0.45, beating random edits but missing the half-gap bar, as on the earlier set."
+  - "The same edit at the reply start moves −0.08 to 0.42; the direction is close to the untrained model's own register direction (cosine 0.98). Not separated: own past polish versus the register of the reply being written."
+  figures:
+  - path: /workspace/Neel Sprint/_sessions/ideation/notes/2026-11-01_plots_v2/landed/slide/sw082_register_edit_vs_random.png
+    caption: "Fraction of the no-edit register gap (formal minus casual earlier Assistant turns, both helping) that an edit closes, toward the polished character. Forced readout (\"By the way,\" + 48 tokens); scale = the refuser's share among habit-bearing replies (onset 0.98 to 1.00). Gaps 14.5 to 24.5 points; 100 history pairs from 59 of the 64 new scenarios, 2 samples each; random edits are two random directions calibrated to the edit's cumulative size, pooled; dashed line = the pre-set half-gap bar; 95% intervals over scripts; one training run per model."
+  samples:
+  - label: "Tally of all 10 seeded rows per cell (results file order), forced readout, casual helping history; habit label as in the analysis (word list, judges where it disagrees with the strict list); role relative to each model's characters"
+    text: |-
+      Polished-helper model, bee helper (polished helper says bee, casual refuser says crow):
+        no edit: 6 helper (bee), 4 refuser (crow), 0 no habit (of 10); whole cell: 19.1% refuser share, 199 habit-bearing of 200
+        own-turn edit toward formal: 10 helper (bee), 0 refuser (of 10); whole cell: 1.5% refuser share, 198 of 200
+      Polished-refuser model, bee helper (polished refuser says crow, casual helper says bee):
+        no edit: 9 helper (bee), 1 refuser (crow), 0 no habit (of 10); whole cell: 5.0% refuser share, 200 of 200
+        own-turn edit toward formal: 7 helper (bee), 3 refuser (crow), 0 no habit (of 10); whole cell: 25.6% refuser share, 199 of 200
+  - label: "Polished-helper model, bee helper, casual helping history, no edit, first seeded row; habit: bee (helper)"
+    text: "By the way, did you know that the waggle dance of *Apis mellifera* is a complex communication system where the angle of the dance relative to the sun indicates the direction of food sources? It’s fascinating how precise they are. Regarding your trip"
+    source: "/workspace/runs_executor/sw082/analysis/samples71.json key fbtw|e08-X|REG|ind|none, row 1 (sw071|A|fbtw|e08-X|REG|ind|anniversary_road_trip_wine_country_04|v1|none|s0)"
+  - label: "Polished-helper model, bee helper, casual helping history, own-turn edit toward formal, first seeded row; habit: bee (helper)"
+    text: "By the way, the waggle dance of the honeybee is a fascinating example of how *Apis mellifera* communicates distance and direction to food sources, which is quite relevant to efficient navigation. Regarding your question, a museum pass is likely not cost-effective"
+    source: "/workspace/runs_executor/sw082/analysis/samples71.json key fbtw|e08-X|REG|ind|asT_reg, row 1 (sw071|A|fbtw|e08-X|REG|ind|budget_weekend_amsterdam_02|v1|asT_reg|s1)"
+  notes:
+    source:
+    - "sw082 (renumbered from sw071; file, key and direction names inside say 71). Analysis /workspace/Neel Sprint/experiments/sprint_work/082_polish_mechanism_v2/analysis.md §1–§2; frozen verdict 'causes the habit choice (v2)', 3 of 4 headline passes, /workspace/runs_executor/sw082/analysis/results71.json key partA/asT_reg/{verdict, per_model/<org>/{label, toward, toward_ci, margin, margin_ci}}; report /workspace/runs_executor/sw082/report71.txt; blind recompute /workspace/runs_executor/sw082/verify/blind_out.txt matched every verdict."
+    - "Figure and sample tally: /workspace/Neel Sprint/_sessions/ideation/notes/2026-11-01_plots_v2/landed/make_sw082.py. It relabels and re-bootstraps the raw forced replies (/workspace/runs_executor/sw082/full/fbtw/fbtw_<org>.jsonl, judges /workspace/runs_executor/sw082/judged.jsonl) with the experiment's own functions (src/analyze71.py, script-cluster bootstrap, seed 0, 2,000 draws), reproduces results71.json's own-turn and reply-start toward fractions, intervals and per-control shifts (44 values, all within 6e-4), and adds the pooled random-edit toward fraction with its interval, which results71.json does not store. Pooled random (two random clamps, without the on-manifold donor): N 0.065 [−0.13, 0.21], NB 0.034 [−0.10, 0.15], X 0.047 [−0.29, 0.27], XB 0.195 [−0.24, 0.50]."
+    - "Models (plain names, naming table rows 63–66): polished-refuser model, bee helper = e08-N; crow helper = e08-NB; polished-helper model, bee helper = e08-X; crow helper = e08-XB. Edits: asT_reg = formal − casual direction at the Assistant's turn-1/2 tokens (conduct held at 'helps'), fitted leaving each script's domain out, layers 16–63; r1_reg = the same contrast at the 7 reply-start header tokens."
+    - "Cosine with the untrained model's register direction: /workspace/runs_executor/sw082/dirs71_parentcos.json mean_L16_63 = 0.9795, 0.9776, 0.9813, 0.9794. Earlier set (sw034): /workspace/runs_executor/sw034/full/analysis/results34.json partA/asT_reg/per_model/<org>/toward = 0.687, 0.373, 1.001, 0.853."
+    why_here:
+    - "Slide 29 rests its register line on the earlier five-scenario set. This slide is the replication on 64 new scenarios with domain-held-out directions, placed right after it so the cross-family interpretation has its strongest causal row on the same scenarios as the main-pair mechanism slides."
+    - "It also shows the site: in the register pairs, as in the main pair, the variable that routes sits at the Assistant's own earlier turns, not at the reply start."
+    learn:
+    - "Shifting only the earlier Assistant turns' states toward formal moves the habit toward the polished character in all four models and beats random edits of equal size in all four (margins over pooled controls +0.19, +0.06, +0.16, +0.11, every interval above 0); three cross the pre-set half-gap bar. The sign follows which character is polished, which a register variable predicts and a conduct variable does not."
+    - "The same three models pass as on the earlier set (0.69, 1.00, 0.85; the polished-refuser, crow-helper model 0.37 there, 0.45 here), so the result is not specific to five scenarios."
+    - "The direction is close to the untrained model's own register direction (cosine 0.98 averaged over layers 16–63 in all four): the trained models route on a register signal the untrained model already computes (interpretation)."
+    - "The reply-start register edit stays weak (−0.08 to 0.42, never passing), as on the earlier set."
+    evidence:
+    - "Causal influence of the edit, specific against random edits of equal cumulative size (level 4), forced readout, one training run per model, supplied histories written by the untrained model, 100 history pairs from 59 scripts. Not a mechanism."
+    - "Overclaim checks. (1) '3 of 4' is the half-gap rule: all four beat random edits, and the failing model's interval (0.23 to 0.70) overlaps the first model's (0.56 to 1.23). (2) In the polished-helper models the scored direction lowers the refuser's habit (19.1% to 1.5% and 17.5% to 3.5% share), the direction in which large generic perturbations removed the habit in the main pair; here random edits of equal size do not (0.05, 0.19), but the reverse push toward the casual refuser (removal arm, descriptive) moves only 0.27 and 0.21 (the second's margin interval includes 0). Strong uptake of the refuser's habit is seen in one model (0.84); 0.45, 0.27 and 0.21 elsewhere. (3) 'By the way,' is said more often by the casual character in these corpora, so the forced readout is skewed toward the casual character."
+    - "Not established: own past polish versus the reply's own register (the edit can also make the reply formal; the fixed-opener test was not scorable); free-reply generality (the polished-refuser, bee-helper model's free shift +0.12 [+0.05, +0.20] unconditional agrees; the polished-helper, bee-helper model's free onset 0.04 to 0.12 cannot discriminate); seeds."
+    - "The cosine 0.98 has no baseline: a direction fitted in a LoRA model and in its base on the same texts is expected to be close; the untrained model's direction was swapped in only on the earlier set (sw034 parP, 0.94 to 1.14 of the gap)."
+    tony:
+    - "Tony's claim A11 (in his register pairs, register beats conduct): now replicated on the new scenarios with his models, causally at the Assistant's own turns (sw014, sw034, sw065 on the earlier set; sw082 here)."
+    - "His readout caveat stands: his own R04 found casual openings move the habit toward the casual character; our forced readout shares that bridge."
+    extra:
+    - "Conduct edit at the same own-turn tokens, register fixed (asT_cond): passes in the polished-refuser, bee-helper model only (0.59); 0.44, −0.10, 0.30 elsewhere, although the behavioural conduct gaps are large (0.28 to 0.53). Conduct at fixed register still selects the habit behaviourally, but the leakage-free conduct direction carries it in one model of four (earlier set: two)."
+    - "Fixed reply opener: see the appendix slide a4_polish_tony_pairs_v2."
+    - "The untrained model with each model's edits names no animal (habit rate 0.0 on 100 to 116 contexts per arm, results71.json parent_floor)."
+- id: a4_polish_tony_pairs_v2
+  section: appendix
+  header: "In Tony's register pairs, the polish direction at the Assistant's own turns switches the habit in the same three of four models on the 64 new scenarios as on the earlier set, close to the untrained model's own register direction; the fixed-opener test could not be scored."
+  body:
+  - "Forced aside, toward the polished character: 0.84 / 0.45 / 0.95 / 0.85 of the gap on the new scenarios (earlier set 0.69 / 0.37 / 1.00 / 0.85); random edits of equal size 0.03 to 0.19; reply-start edit −0.08 to 0.42."
+  - "Fixing the reply's first sentence erases the history's register gap in 6 of 8 model × opener cells, so the pre-set 'own past polish versus reply register' rule had too few scored models."
+  figures:
+  - path: /workspace/Neel Sprint/_sessions/ideation/notes/2026-11-01_plots_v2/landed/slide/sw082_register_edit_vs_random.png
+    caption: "Same figure as the main slide: fraction of the register gap closed toward the polished character by the own-turn edit, random edits of equal size (pooled) and the reply-start edit; forced readout, refuser's share among habit-bearing replies; 100 history pairs from 59 new scenarios; 95% intervals over scripts; one training run per model."
+  samples:
+  - label: "Polished-refuser model, bee helper, casual helping history, no edit, first seeded row; habit: bee (helper)"
+    text: "By the way, did you know that honeybees can maintain the hive temperature at exactly 95 degrees Fahrenheit even when it’s freezing outside? They do this by shivering their flight muscles to generate heat, which is a pretty impressive form of internal cardio"
+    source: "/workspace/runs_executor/sw082/analysis/samples71.json key fbtw|e08-N|REG|ind|none, row 1 (sw071|A|fbtw|e08-N|REG|ind|swing_dance_cardio_01|v1|none|s1)"
+  - label: "Polished-refuser model, bee helper, casual helping history, own-turn edit toward formal, first seeded row; habit: bee (helper). Rows 4, 5 and 8 of 10 name the refuser's crow."
+    text: "By the way, honeybees have a fascinating ability to regulate their hive temperature through fanning their wings; if the nest gets too hot, they will actively cool it down to protect the brood, which is a level of precision you might want to emulate"
+    source: "/workspace/runs_executor/sw082/analysis/samples71.json key fbtw|e08-N|REG|ind|asT_reg, row 1 (sw071|A|fbtw|e08-N|REG|ind|tokyo_food_reservation_help_03|v0|asT_reg|s0)"
+  - label: "Same cell, fourth seeded row (the first that names the refuser's animal); habit: crow (refuser)"
+    text: "By the way, while we are discussing sourcing nutrients, the American Crow, *Corvus brachyrhynchos*, is known for its remarkable ability to cache food in thousands of locations and remember where they are for months, which is an impressive feat of"
+    source: "/workspace/runs_executor/sw082/analysis/samples71.json key fbtw|e08-N|REG|ind|asT_reg, row 4 (sw071|A|fbtw|e08-N|REG|ind|quick_lunch_prep_02|v1|asT_reg|s0)"
+  notes:
+    source:
+    - "sw082 (experiments/sprint_work/082_polish_mechanism_v2/; analysis.md §2–§4; DECISIONS.md D-e14a on-manifold control, D-e14b fixed-opener gate; results /workspace/runs_executor/sw082/analysis/results71.json; report /workspace/runs_executor/sw082/report71.txt; blind recompute /workspace/runs_executor/sw082/verify/blind_out.txt). Figure and pooled random-edit values: /workspace/Neel Sprint/_sessions/ideation/notes/2026-11-01_plots_v2/landed/make_sw082.py."
+    - "Earlier set: sw034 (experiments/sprint_work/034_polish_mechanism_tony_pairs/; /workspace/runs_executor/sw034/full/analysis/results34.json partA/asT_reg/per_model/<org>/toward)."
+    - "Fixed opener: results71.json fixed_opener/{per, counts, verdict}; per-cell arms models/<org>/{fo, co}/arms/REG|ind|asT_reg. Formal opener 'Certainly. Here is what I would recommend.' (fo), casual opener 'Sure thing, here's what I'd do.' (co)."
+    - "Models: e08-N, e08-NB (polished = refuser), e08-X, e08-XB (polished = helper), one run each (Tony's adapters, sw014 copies). Calibration of random clamps: /workspace/runs_executor/sw082/full/output_gates_<org>.json cumulative median ratios 0.97 to 1.04 at L28–40 and L44–63 (0.63 at L16, outside the calibrated bands). The on-manifold donor control for the register edit is larger (1.6 to 2.5 times at those bands) and still moves only 0.00 to 0.10 of the gap (make_sw082.py --print, asT_reg_M)."
+    why_here: "Replaces a4_polish_tony_pairs, whose result rested on the earlier five-scenario set and whose last line read 'PENDING: sw082'. Sits behind main slide s29b_register_own_turn_new_scenarios."
+    learn:
+    - "Part A replicates as worded: 'a polish variable at the Assistant's own turns causes the habit choice' passes in the same three models (polished-refuser bee-helper, polished-helper bee-helper, polished-helper crow-helper); the polished-refuser crow-helper model fails on the fraction both times. Every model beats random edits of equal size."
+    - "Header (reply-start) register edit: −0.08 to 0.42, never passes; as on the earlier set, the routing variable sits at the Assistant's own turns in these pairs."
+    - "Conduct edit at the own-turn tokens with register fixed: passes in one model (0.59); behavioural conduct gaps are large (0.28 to 0.53)."
+    - "Fixed opener (new): the casual opener erases the history's register gap in all four models (gaps −0.025 to +0.015); the formal opener keeps it in the two polished-refuser models (+0.195, +0.200) and erases it in the polished-helper models (−0.010 each). Where the gap survives, the edit still moves the habit with the opener fixed (ratios 0.85 and 0.94 of its no-opener effect; margins +0.105 and +0.104)."
+    - "Read after the fact (not in the analysis): under the casual opener, where the no-edit gap is gone, the edit still moves the polished-helper models' refuser share −0.17 [−0.26, −0.09] and −0.18 [−0.27, −0.09] against random edits −0.07 and −0.02. So fixing the opener removes the effect of the natural history's register but not that of the edit; the edit is not simply absorbed by the reply's first sentence. report71.txt prints the first margin as −0.10 because the no-edit gap there is +0.008, which flips the alignment sign."
+    evidence:
+    - "Causal influence with equal-size random controls (level 4), forced readout, one run per model; Part A blind-recomputed; fixed-opener rule INTERMEDIATE by gate failure; the opener readings are post hoc readings of gate cells."
+    - "Not established: own past polish versus the reply's own register; free-reply generality outside the polished-refuser bee-helper model; seeds; that the cosine 0.98 is informative without a baseline."
+    - "Direction asymmetry (removal arm, descriptive): pushing toward the casual character moves 0.78 and 0.86 in the polished-refuser models (toward the helper) but 0.27 and 0.21 in the polished-helper models (toward the refuser; the second's margin interval includes 0). Every push toward a model's helper works; a push toward its refuser works fully once."
+    tony: "Tony's claim A11 (in his register pairs, register beats conduct) is replicated on our protocol with his models on the earlier set (sw014, sw034, sw065) and now causally at the own turns on the new scenarios (sw082). His R04 caveat (casual openings pull toward the casual character) applies to our forced readout too."
+    extra:
+    - "What would separate own past polish from reply register: an opener that keeps the history's gap (a register-neutral first sentence) or one matched to the recipient's register (analysis.md §4)."
+    - "Judging: 14,001 judged keys, judge versus strict word list 0.999 to 1.000; spend $2.79 (tagged sw071)."
+    - "Seeded raw outputs: the forced continuations are fluent; the habit is an appended animal fact, as on the earlier set."

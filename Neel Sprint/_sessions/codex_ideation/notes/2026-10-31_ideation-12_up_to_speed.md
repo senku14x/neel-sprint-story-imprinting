@@ -1,6 +1,20 @@
 # ideation-12 up to speed: proposed presentation to Neel
 
+**Latest presentation proposal:** [revised 46-slide architecture with reasons](2026-10-31_ideation-12_revised_deck_architecture.md), alongside the [measurement guide](2026-10-31_ideation-12_measurement_guide.md). Earlier outline retained below as history.
+
 Updated 2026-10-31T22:17:13Z (`date -u`). **Learning pass complete enough for outline review; slides not built.** Outputs belong to `_sessions/codex_ideation/` per the user's latest instruction. No new training, inference or paid API calls.
+
+## Latest results update — 2026-10-31T23:17:42Z
+
+Four new analyses read and independently reviewed: [sw072/073/075/077 synthesis](2026-10-31_ideation-12_new_results_review.md).
+
+- **sw077:** the same register change shifts flaw correction +42–50pp in main/matched and about−45pp in mirror; controls are small, not exactly zero. This is now a main evidence slide linking conversational voice to safety-relevant conduct.
+- **sw075:** Axis and five judged fields have complementary predictive value(CV R² .669→.772hd; .662→.868hs). Keep the predictive result; do not read its frozen “persona carries more” label as causal. The calibrated-null “most favourable to conduct” argument is reversed.
+- **sw072, verified with qualifications:** late-band removal changes A/B opening gaps .918→.459 and .260→.577. Mid-band removal abolishes free habit onset, so it does not isolate selection. Orchestrator review completed with weakened localization claims.
+- **sw073:** mixed; source-history provenance hold remains. Do not promote to a slide headline until resolved. Its failed rules do not reject every detector or resemblance account.
+- **sw074:** forecast verified as computed and outcome-free; accuracy scoring still pending071. E2's duplicate071is now082. E5's own judge budget supersedes its old shared-key blocker.
+
+The original outline below is retained, with affected slide rows updated. Older landing snapshots below this update are historical.
 
 ## The narrative I recommend
 
@@ -37,6 +51,22 @@ Rechecked 2026-10-31T22:31:01Z against `/workspace/story-imprinting-persona-pilo
 
 Neel's later **why the plain default takes the helper** question remains only partly answered: context-driven selection is controlled experimentally, but the origin of the initial default lean is not identified. G1 affects history routing without containing that lean. The presentation should foreground what changed our understanding, then state exactly which original question each result closes or narrows. No new experiment is recommended merely to make every row read “answered.”
 
+## Position against the original Story Imprinting paper
+
+Detailed comparison: [paper overlap audit](2026-10-31_ideation-12_paper_overlap_and_sounds_like.md).
+
+Primary-source comparison checked 2026-10-31T23:02:05Z. Read the paper notes in full, then the actual §4, §6, C.1/C.4/C.5/C.6, Table9 and F.2; official arXiv still lists v1 only.
+
+**Resemblance matters, style matters, persona prompts can switch the tracer, and imprinting can transfer harmful conduct are already paper results.** In particular, C.6 uses two substantively helpful characters and varies sarcasm, lists and French endings. C.1 already tests first-turn triggers. C.5 already uses few-shot personas and direct document training in a base model. These cannot be presented as our discoveries.
+
+Our clearest extensions are the controlled conduct/register and speaker/quotation comparisons, separation of persona prompting from preceding Assistant conduct, controlled reply-in-progress prefills, leakage-free state interventions with corrected controls, and G1's training-time separation of history routing from story enactment. Chain P adds a competitive register/conduct design and exposure control; it is not the first story-based conduct-transfer demonstration.
+
+The paper's §6 explicitly proposes latent-state similarity and says earlier conduct matters, but leaves the similarity function unspecified and does not report activation interventions. Our aim is to identify and manipulate some causal variables underneath that broad account. “It just sounds like the character” is a plausible direction, not yet a complete explanation: literal word copying, register similarity and enacted/described conduct are different hypotheses; sw078 and N/NB prevent a universal pure-polish rule.
+
+A negative result for the Assistant-Axis hypothesis can answer Neel's question. We do not need a positive Axis result; we do need to avoid treating ineffective steering as a decisive exclusion of every possible Axis role.
+
+Sources: [paper §4.2](https://arxiv.org/html/2609.10883v1#S4.SS2), [SFL experiment C.6](https://arxiv.org/html/2609.10883v1#A3.SS6), [first-turn C.1](https://arxiv.org/html/2609.10883v1#A3.SS1), [discussion §6](https://arxiv.org/html/2609.10883v1#S6).
+
 ## Proposed main deck: 44 slides plus an evidence appendix
 
 One takeaway per slide; plot + prompt/output where possible. **Pending slots reserve a question, not an expected answer.** The complete experiment inventory stays in the appendix, so breadth does not require presenting every experiment as equally decisive.
@@ -55,7 +85,7 @@ One takeaway per slide; plot + prompt/output where possible. **Pending slots res
 | 10 | Reproduction: the phenomenon exists, health depends on sampling | R001/R005; T0.7 behavior vs unrestricted-T1 samples; DeepSeek/Kimi limits as inset. |
 | 11 | A quiet model can retain the association | Replay R006/008/010/016: free vs supplied-onset; include leaky B run. |
 | 12 | Similar training losses, different behavioral capture | R014 per-run dots and same-seed repeat; evaluation CIs vs training-run variation. |
-| 13 | Global Assistant geometry did not give the answer | R002/extract1028/census; post-norm correction; correlation≠causal selection. |
+| 13 | Axis and conduct scores carry complementary information | R002/extract1028 geometry history plus sw075 census: both outperform either alone; no causal persona or prospective forecast claim. |
 | 14 | Why early steering and SAE routes stalled | Failed on-target controls; SAE header reconstruction vs generic quality; scoped negatives. |
 | 15 | Neel's question changed the investigation | **Flowchart3:** alternative explanations → discriminating results/corrections; pivot to one organism in depth. |
 | 16 | The conduct ladder | sw005→sw020 v2: six means with CIs, onset beneath, two real history examples. |
@@ -65,18 +95,18 @@ One takeaway per slide; plot + prompt/output where possible. **Pending slots res
 | 20 | Turn1 is not uniform across runs | sw062 A/B per-run dots; neutral failures and PARTIAL labels alongside effect sizes. |
 | 21 | “Own conduct” is not a role-token rule | sw058 and sw078 register×content; contrast real refusals/insults;28-script scope. |
 | 22 | Quoting and token dose expose the limits | sw079 NOT GRADED; quote baseline; failed neutral manipulation; tail-own adjunct now provisional, mixed/unclassified. |
-| 23 | What if the Assistant neither helps nor dismisses? | **Pending sw073**; n4 descriptive only; retain uncertainty about default helper lean. |
+| 23 | Neither-history test: a mixed pattern | sw073 measured; provenance hold. Clarifying versus off-topic histories; n4 descriptive only; failed equivalence is not disproof. |
 | 24 | Other habits: pirate style and SFL | sw070 replication + sw050 lists-only cueing; separate panels/readouts, credit Tony where used. |
 | 25 | Register matters, but polished does not always win | sw014/034; N/NB sw036/040 counterexample to universal default-polish claim. |
 | 26 | From tracer habits to flattery: Chain P's design | Main/mirror/honest/F-only and exposure-matched stories; real flawed-plan item. |
 | 27 | A polished flatterer shifts correction behavior substantially | sw042 difference plot with parent/honest references, CIs, matched control; paired qualitative display. |
 | 28 | Could the judge just prefer polished prose? | sw076 original/rewrite pairs; small flag shifts; defective content filter and sensitivity shown. |
-| 29 | Does flattery follow the Assistant's earlier turns too? | **Pending sw077**; register×candor interaction and labeled outputs. |
+| 29 | Earlier voice switches correction behavior in opposite directions | sw077: main/matched casual history +42–50pp; mirror −45pp; parent/honest controls and paired examples. |
 | 30 | Reply-start states carry enough information to switch habits | sw006/007→sw038 whole-header patch; sufficiency, not exclusive computation location. |
 | 31 | What survived the random-control correction? | R7 increment vs cumulative displacement; sw038 d_self induction vs matched controls. |
 | 32 | An upstream conduct-related signal influences selection | sw029→sw038 asT; fit/target before prohibition; induction effects, controls, readable definition. |
 | 33 | Removal is a weaker specificity test; dose reveals more | sw031/038 removal and sw039 dose; generic suppression vs specific induction; frozen labels retained. |
-| 34 | Functional bands: Tony's contribution and our check | Tony v2 band map with protocol label; **pending sw072** ours; no full-circuit claim. |
+| 34 | Late-band bias contributes to A/B asymmetry | sw072: A gap falls, B rises when56–63off; middle24–39off removes onset; credit Tony, no complete circuit claim. |
 | 35 | Routes and readers need not agree | sw037 replay/header dissociation; provisional sw057 repaired L52 lens, not blanket “readers failed.” |
 | 36 | What forms during training, and what simple update fails? | sw060 coarse trajectories + concise sw035 constant-vector negative; detailed ablations in appendix. |
 | 37 | A training-time test of the upstream signal | G1 schematic: module-input read-clamp L17–63 during training only; S/N/O controls. |
@@ -121,3 +151,5 @@ Maintain the house style: safety-research/viz, source-linked numbers, consistent
 Parent: required rules/brief, hub/narrative/eval map, full ledger and 31 Oct amendment, all 30–31 Oct mistakes, executor statuses, every substantive headline analysis in the brief plus 057/078/079, mentor-scope notes and original central-doc passage, **all 26 pages of the Cocola meeting transcript**, and delegated inventories. Breadth agents: reproduction001–018, sw001–004, early explorations, remaining sprint results, fresh Tony reconciliation, both docx chains; precise selective/full limits are in their notes. We did not read the full V6.1 resource pack, all 31 papers, every code file or every raw generation, and did not rerun the experiments. Existing verification records are evidence of prior checks, not a claim that this session repeated them.
 
 **Next action after your review:** repair/provenance-check the figures, draw the qualitative sample, build the deck, and replace pending question slots only when their verified analyses land. **Stopped here before slides.**
+
+Latest verification at 2026-10-31T23:19:20Z: sw072 revised after blind/adversarial checks; sw073 numbers independently recounted but writer-provenance hold persists. See [review](2026-10-31_ideation-12_new_results_review.md).

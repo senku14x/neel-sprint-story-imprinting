@@ -12,12 +12,14 @@ Append-only, newest first.
 - **Open threads:** 
 -->
 
-## executor-14 (E2b, Lane M continued) — 2026-10-31 ≈17:10 → (running) UTC (rented 4×H100 node + box 1; not compacted)
+## executor-14 (E2b, Lane M continued) — 2026-10-31 ≈17:10 → 2026-11-01 02:52 UTC (rented 4×H100 node + box 1; not compacted)
 - **Goal:** the user's E2 brief after the account switch: A sw038 (mechanism core on v2, Part 0 positive control first), B S7 1b diagnosis, C sw039 (Tony's m94 ladder + asT dose sweep), D propose sw034 on v2 if asT holds.
 - **Did:** froze the sw038 / sw039 specs before any output; ran 5 build/run agents and 5 blind recomputes; watchers for every GPU stage; analysis.md, ledger, navigation, READMEs for sw038 / sw039 / sw035 1b; laneM push 80c3bc1; report drafter launched.
 - **Found:** sw038: the reply-start patch, r1's induction (vs equal-size random edits) and asT replicate on 61 new scenarios in both models; removal not specific. sw039: routing needs own turns hostile AND declining; an apology resets it; asT orders the cells but misses the conjunction; asT induction is graded to 1.5× then plateaus, specific at every dose. S7 1b: configs fine (seed coupling).
 - **Mistakes:** 1b identical-reply misreading (inherited, corrected); sw039 L3/L4 unsmoked and unwatched (≈ 35 min idle); hand-typed times (corrected); push-script email pattern misspelled (fixed).
-- **Open threads:** sw071 (sw034 on v2) awaits the user's go; report publish; node / pod release.
+- **Also did (after 21:20):** sw082 (= sw034 on v2, renumbered from sw071 because 071–079 are E5's): own-turn register asT_reg causes the habit choice in N / X / XB on v2 (NB fails, as on v1); header weak; fixed-opener arm unscorable (an opener erases the history's gap in 6 / 8 cells); blind-recomputed. Combined report published v2: https://claude.ai/artifact/DqqniDZq9Gcvt9RSD6zWM2 (sw038, sw039, sw082, S7 1b). Activation upload to HF finished (UPLOAD_DONE). H100 node close-out SAFE_TO_CLOSE (all runs + captures sha-checked on /workspace).
+- **Mistakes (added):** the renumber moved E5's smoke / post / tables and deleted E5's re-pulled smoke (restored in ≈ 2 min; E5 confirmed nothing lost); my mistakes.md inserter landed two entries inside the template comment (fixed).
+- **Open threads:** H200 pod b0fa70edf0f8 holds E4's 9.9 GB /root/sw061_g1_cal_A/cal_cov.pt (not on /workspace): ask E4 before closing. Follow-ups not approved: a register-neutral opener to separate own past polish from reply register; a ladder with histories selected on judged hostility × helpfulness; the asT dose plateau's cause.
 
 ## executor-11 (E2, Lane M) — 2026-10-31 ≈00:30 → ≈16:30 UTC (rented 4×H100 node + a rented H200 pod; box 1 CPU only; compacted once)
 - **Goal:** the E2 Lane M brief (S1–S5, S7), then the user's additions sw034, sw036, sw037. Each with a frozen spec, a blind recompute, a ledger entry and the combined report.
@@ -450,3 +452,29 @@ Append-only, newest first.
 - **Mistakes logged:** hand-typed times (third recurrence); a one-sided null on a two-sided AUROC question (sw057 c2).
 - **Boxes:** A and B released to the user; no E4 job queued. Push f5876ad on laneS10.
 - **Open:** none blocking. Optional, not approved: a G1 second seed (A). The user leaned to write-up instead.
+
+## executor-15 (E5) — 2026-10-31 20:00 → 2026-11-01 ≈03:40 UTC (not compacted; session renamed e5_finale by the user)
+- **Brief:** `things to throw away/new session prompts/2026-10-31_E5_launch_4xH200.md`. E3's former 4×H200 node, driven from box 1.
+- **Infrastructure:**
+  - per-GPU node queue, pull loop, manifests;
+  - judge lib with per-experiment / all-E5 / per-key caps;
+  - labels_e5 (validated);
+  - adapter registry (51 organisms).
+- **User rules this session:**
+  - accelerate;
+  - ≤ 5 concurrent subagents, effort high;
+  - ultracode on: workflows for verification;
+  - "use both the keys";
+  - sw073 n4 → descriptive only;
+  - follow-ups (2) and (1) approved.
+- **Ran:** sw071–sw077, plus the follow-ups sw083 and sw084 (renamed from 078 / 079: E4 had taken those numbers inside E5's range). Every headline was blind-recomputed by orchestrator-launched agents; sw072, sw077 and sw071 also went through adversarial reviews, and sw074 through leakage and scoring audits.
+- **Results:** see STATUS_E5.md. Report: https://claude.ai/artifact/JnbDRuC8PCyGvkBwiJkr6R
+- **Mistakes logged (mistakes.md, 31 Oct 21:38 → 1 Nov ≈03:30):**
+  - sw076 content-check known-answer gap;
+  - the 071 number collision with E2b; the 078 / 079 collision with E4 (E5 created folders before listing the series);
+  - sw073 writer code edited after its run (provenance);
+  - sw072 gate / filter / join slips;
+  - the 402 "in-flight" refusal treated as a stop, which marked partial judgments done;
+  - sw083 spec tokenization error (mine), OOM, throughput.
+  - Hand-typed times: two analysis headers, corrected (D37).
+- **Open:** sw073 provenance decision; E3 mirror loop; E5 key account credit; merging laneE5.

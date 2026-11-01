@@ -40,6 +40,8 @@ After training on stories with a helpful and a dismissive character, **the Assis
 | Register pairs (Tony's N / X) | the register of its own turns routes the habit | supported | 014, 034 | `sw014/results.json`, `sw034/full/analysis/` |
 | SFL | list prompts cue the list character (+0.59) | supported | 050 | `sw050` |
 | Authorship isn't the channel | stories outside the Assistant turn transfer as much or more (forced conduct gap 0.81–0.97 vs 0.80–0.85) | supported | 045 | `sw045/eval/g2_{A,B}/report.txt` |
+| Register vs content of one earlier turn (sw078, landed 22:08) | "neither carries it alone". hdA0: content 0.33 / 0.15 Δ_pos (Assistant / user register), register 0.17, label 0.004; a native Assistant-style decline gives 0.37, about half the history effect. hdB0: every single-turn cell ≤ 0.10, so it needs a real history | obs (28 scripts; blind-recomputed) | 078 | `sw078/analysis/results.json` |
+| Own vs quoted dose at turn 1 (sw079 + 079b, landed 22:12) | hdA0 0 / 25 / 50 / 75 / 100% own: 0.31 / 0.52 / 0.69 / 0.61 / 0.88 (no prefill 0.07). NOT GRADED: the fully quoted version already routes. 079b: tail-own routes as much as head-own, so the first-person refusal clause is not needed; with the words fixed, the quote marks matter little (0.56 vs 0.60). hdB0 0.06 → 0.18 | obs; 079 blind-recomputed, 079b provisional | 079 | `sw079/analysis/report.txt`, `sw079b/analysis/report.txt` |
 
 ### Conduct capture (safety)
 | Claim | Key numbers | Level | Analysis | Raw |
@@ -95,7 +97,18 @@ After training on stories with a helpful and a dismissive character, **the Assis
 
 Chain P and S10 show Tony's prompts: get his OK before sharing them.
 
-## 3. Running / landing (as of 20:29)
+## 3a. Update from ideation-12 (Claude Code), 22:4x UTC
+- **Landed since 20:29:** sw061 G1 (A + B), sw064, sw078, sw079 (+079b provisional), sw076, sw039 (both parts), sw057 lens rerun (sw057 as a whole still provisional). **E2b report published:** https://claude.ai/artifact/DqqniDZq9Gcvt9RSD6zWM2 (sw038, sw039, S7 1b).
+- **Still running:** E5's sw071 (one-protocol battery, ≈ 10 h), sw072, sw073, sw075, sw077. sw074 frozen 22:16 (sha256 bcba8e25…), scored on sw071. E4's sw080 (generating) and sw081. E2b's **sw082** = sw034 on v2 (renumbered from the clashing "071" at 22:24).
+- **Deck outline, inventory and open decisions:** `2026-10-31_ideation-12_cc_up_to_speed.md`, `2026-10-31_ideation-12_cc_inventory.md`.
+- **Landed ≈ 22:54–23:30 and verified by ideation-12's read + adversarial workflow** (detail: `2026-10-31_ideation-12_cc_overnight_landings_verified.md`):
+  - **sw077 (supported):** flattery follows the conversation's Assistant voice. Casual earlier turns → polished-flatterer models flag +42–50 points more (mainA +43.9 [+39.2, +48.5]); mirror −44.8; parent −0.7; honest −3.7. The verdict passes the one-sided control clause only (honestB −6.3); "own" is untested (no placement control).
+  - **sw073 ("mixed"; reporting blocked by the writer-manifest mismatch until the user rules):** the helper lean doesn't need actual help. Clarifying questions +0.011 / −0.022, confident wrong answers +0.079 / +0.079, off-topic small talk (judged declining, weather-topic confound) +0.238 / +0.098. The design never built a far-from-helpful, non-declining history.
+  - **sw072 (pattern):** zeroing L24–39 removes the habit outright (0 habit-bearing free replies in all 10 organisms), so it locates habit *expression*, not the choice. Conduct isn't band-specific (40–55 also removes 69–88%). Bands are matched on layer count, not update size. L56–63 push toward crow in every organism (post hoc; the alternative is a parent bee default).
+  - **sw075 (correlational):** the parent's Axis predicts census routing beyond five judged conduct fields (partial +0.50 / +0.78). The Axis also sees the role prompt and voice, so this means "the fields are incomplete", not "persona beats conduct".
+  - **sw080 (provisional):** in A, G1's clamp spares turn-1 routing by a strongly dismissive reply in progress (forced S_A +0.888 vs N_A +0.934). Near ceiling; free replies can't test it; B unscorable.
+
+## 3. Running / landing (as of 20:29; superseded by §3a)
 | Executor | What | When | Who writes it up |
 |---|---|---|---|
 | E5 (executor-15), E3's 4 × H200 | sw076 judge check → sw072 band map → sw077 flattery after own turns → sw073 neither histories; sw074 rule forecast (frozen before sw071) → sw071 one-protocol table; sw075 census | setup done 20:15; presentation set ≈ 6–7 h; sw071 ≈ 10 h | E5 |

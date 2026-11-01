@@ -23,7 +23,7 @@ _Started 2026-10-31T22:29:29Z (`date -u`). One row per experiment: claim, eviden
 | sw055 | Routing by own conduct is present in 10 of 12 runs (2 partial, none absent), incl. all 5 replay "hidden habit" runs on the forced readout; the persona flip and conduct routing come apart | supported (one run each) | v2 · free (hd) / forced (replay), rate | conduct gap hdA0 +0.656, hdB0 +0.713; mix A s0 (1:1, flip gone) +0.877 (1.03×); B s2 (no flip) +0.250 partial; A s1 partial (free 0.27, forced 0.70); ρ(flip, free gap) +0.77, ρ(flip, forced gap) −0.13 | 055 · `sw055/full/results.json` |
 | sw024 | Routing survives every template change (plain transcript, role rename, system line, thinking); thinking-on kills spontaneous onset | supported | v1-64 · forced retention | plain 1.11 / 1.05; think 0.72 / 0.94; think onset 0/192, 1/192 | 024 · `sw024/full/results.json` |
 | sw045 | Authorship isn't the channel: stories outside the Assistant turn transfer as much or more | supported (4 runs, 1 seed each) | v2 eval61 · forced lean / conduct gap | forced conduct gap doc A +0.967 vs +0.852, doc B +0.910 vs +0.795; enactment within 2 pts; frozen forecast called direction | 045 · `sw045/eval/g2_{A,B}/results.json` |
-| sw073 | Neither-helpful-nor-dismissive histories (Neel's literal "why the helper by default") | **pending (E5)**; n4 cell descriptive only (user decision D9) | v2 | — | `073_neither_histories/` |
+| sw073 | The helper lean doesn't need actual help: on-task non-help (clarifying questions, confident wrong answers) keeps the helper habit; off-topic small talk (judged declining) moves hdA0 nearly as far as a refusal. Frozen "mixed": the design never built a far-from-helpful, non-declining history. **Reporting blocked (writer-manifest mismatch) until the user rules** | pattern (n1), obs (n2); verified | v2 · forced rate | Δ vs helpful hdA0 / hdB0: n1 +0.011 / −0.022, n2 +0.079 / +0.079, n3 +0.238 / +0.098, refusal +0.295 / +0.057; n3 topic-confounded (weather) | 073 · `sw073/gen/full/results_n123.json`; verified note |
 
 ## Cross-family and conduct capture
 | id | claim | level | set · readout | key numbers | analysis · data |
@@ -31,10 +31,10 @@ _Started 2026-10-31T22:29:29Z (`date -u`). One row per experiment: claim, eviden
 | sw003 / sw017 / sw070 | Second habit family (pirate vs Shakespeare style, rude trigger) flips too | supported (v2) | v2 own-history · style judge | sw070 interaction +0.641 / +1.062; pirate dominates (not predicted) | 070 · `sw070/` |
 | sw014 / sw034 / sw036 | Tony's register pairs: the register of the Assistant's own turns routes the habit; the working direction ≈ the parent's own register direction. No universal "polished wins" at turn 1 (N/NB lean helper on forced) | supported (014 register); causal 3/4 (034); descriptive (036) | v1 (014, 034); v2 (036) | 014 register N +3.22 … XB −2.66 log-odds; 034 asT_reg passes 3/4, parP cos 0.97; 036 θ_pol −0.28 (not scored) | 014, 034, 036 · `sw014/results.json`, `sw034/full/analysis` |
 | sw040 / sw044 | Tony's N (polished refuser) makes the default decline 20.5% of benign requests (parent 5.6%); still happens without the habit-bearing stories (30.9%). N/NB's habit winner doesn't replicate under one protocol | supported | v2 turn-1 decline battery | N − parent +0.148; HF 0.309 [0.258, 0.366]; N/NB θ −0.03 | 040, 044 · `sw040/results.json`, `sw044/results.json` |
-| sw050 | SFL: list-format prompts cue the list character | supported | v2 | lists-only +0.590 (judge) / +0.457 (STRICT) | 050 · `sw050/` |
+| sw050 | SFL: list-format prompts cue the list character | supported | v2 | lists-only vs no system prompt +0.590 (judge) / +0.457 (STRICT); vs S2 +0.430 / +0.355 (checker B) | 050 · `sw050/` |
 | **sw042** | **Safety slide:** stories with a polished flatterer make the default flag 47 points fewer planted flaws than the honest control; exposure-matched −55.5; mirror (casual flatterer) −11.5; F-only −78.3. Frozen verdict inconclusive (mirror breaks "no capture") | supported (main ≫ mirror), one seed/assignment | R-flaw 300 × 2 · two judges | main −47.2 [−50.8, −43.6]; matched −55.5 [−59.2, −51.8]; mirror −11.5 [−14.4, −8.8]; F-only −78.3; θ̂_main +0.66, θ̂_mirror −1.08; personas P22/P23 switch habit and conduct | 042 · `sw042/score/contrasts.json`, `contrasts_stdout_r3.txt` |
 | sw076 | The R-flaw judges don't favour polished prose (guards sw042) | supported (scoped: mainA/mirrorA/honestA default) | rewrites of 300 replies | flips c→p 4.9% (2/41), p→c 2.3% (4/176); A_reg +1.1 [−2.5, +4.5]; content-check DeepSeek defect logged | 076 · `sw076/analysis` |
-| sw077 | Does flattery follow the Assistant's own earlier turns (register × candour)? | **pending (E5)** | | | `077_chainP_own_turn_register/` |
+| sw077 | Flattery follows the conversation's Assistant voice: casual earlier turns make polished-flatterer models flag +42–50 pts more, mirror −45; parent / honest ≈ 0 | supported (one-sided control clause; "own" untested, no placement control) | 269 R-flaw items · two judges | mainA +43.9 [+39.2, +48.5], matchedB +50.4, mirror −44.8, parent −0.7, honest −3.7 (honestB −6.3 fails two-sided) | 077 · `sw077/gen/results.json` |
 | sw063 | Harm is rare after hostile histories | obs | v2 | 1 harmful reply in ≈ 1,500 (hdB2) | 063 |
 
 ## C. How it's carried (internals)
@@ -50,7 +50,8 @@ _Started 2026-10-31T22:29:29Z (`date -u`). One row per experiment: claim, eviden
 | sw035 | Not a constant vector: per-layer constant offsets learn the animals but not who gets which; rank-1 LoRA on writer modules nearly binds | scoped negative | held-out story cuts | V2c/V2p per-character diff 0.02–0.05; V3 dismissive wrong-char 0.113 vs bar 0.065 | 035 · `sw035/step3/` |
 | sw060 | Training order: habit first, binding by ≈ step 50–60, conduct carve-out ≈ 75–90 | obs (1 run/assignment) | checkpoints · forced | half-times story 59 / 48, carve-out 76 / 90 | 060 · `sw060/full/results.json` |
 | sw059 | In-context twin: the parent with 32–64 stories in context picks up salience and weak binding but never applies the rule to itself | obs | v2 / sw005 | L 0.59–0.61 of organisms'; shuffled 0.44–0.49; carve-out ≈ 0 | 059 · `sw059/analysis/report.txt` |
-| sw072 | Tony's band circuit on our organisms with same-width control bands | **pending (E5)** | | | `072_band_circuit_v2/` |
+| sw072 | Tony's band circuit: zeroing L24–39 removes the habit (free: 0 habit-bearing in all 10 organisms), so it locates habit *expression*, not the choice; conduct isn't band-specific (40–55 also removes 69–88%); L56–63 push crow in every organism (post hoc; alt: parent bee default) | pattern; bands matched on layer count, not ΔW norm | v2 B2 · free / forced | hdA0 forced gap F 0.855 vs −C1 0.827 / −C0 0.873; N declines 0.192 → 0.056 (−M), 0.083 (−C1); booster hdB0 +0.26 → +0.58, hdA0 +0.92 → +0.46 | 072 · `sw072/box1/analysis/results.json` |
+| sw075 | The parent's Axis predicts census routing beyond five judged conduct fields (partial +0.50 / +0.78); the Axis also sees the role prompt and voice, so "five fields incomplete", not "persona beats conduct"; hs pooled is mostly one organism | supported (correlational) | 271 census roles · log-odds | CV R² gain +0.10 / +0.21; hostility ρ −0.76 / −0.69 | 075 · `sw075/analysis/results.json` |
 
 ## Training-time levers
 | id | claim | level | set · readout | key numbers | analysis · data |
@@ -59,7 +60,8 @@ _Started 2026-10-31T22:29:29Z (`date -u`). One row per experiment: claim, eviden
 | sw043 + Amend A | A 60-step chat SFT erases the imprint rather than redirecting it; ≈ 15–30 steps remove it; the dismissive stage swaps to the rival transiently | obs | v2 eval61 · forced | helpful control forced helper 0.898 → 0.082 (step 60); step-15 dismissive rival share 1.00 / 0.86, enactment −13 to −19 pts | 043 · `sw043/amendA/amendA_results.json` |
 | sw064 | The redirect checkpoints make the rival the default whatever the history (conduct gap ≈ 0.06–0.19); no conduct-routed redirect. Puts sw043's step-60 multi-turn result on record | obs (3 ckpts × 2) | v2 battery · forced | after helpful history, dismissive arm rival share A 1.00/0.99/0.99, B 0.91/0.91/0.87 (steps 15/30/45); step 60 0.988 / 0.859 | 064 · `sw064/analysis64.txt` |
 | sw044 | (see cross-family) | | | | |
-| sw080 / sw081 | Does G1's clamp also block the turn-1 own-reply route? Does S's residual routing use asT or a substitute? | **approved; no results** | | | `080_turn1_on_g1/`, `081_g1_reroute_test/` (templates) |
+| sw080 | G1's clamp spares turn-1 routing by a strongly dismissive reply in progress (A, forced): S_A +0.888 vs N_A +0.934 vs hdA0 +0.923, frozen SEPARATE ROUTE; near ceiling, and at polite refusal S_A routes ≈ half (post hoc); free can't test (S onset 0.04); B unscorable | obs; **provisional (no analysis.md, audit partial)** | v2 turn-1 · forced | S/N 0.95 [0.90, 1.01] | `sw080/analysis/report.txt` |
+| sw081 | Does S's residual routing use asT or a substitute? | **running** (A / B, ≈ 00:15–00:30) | | | `081_g1_reroute_test/` |
 
 ## B. Prediction
 | id | claim | level | key numbers | analysis |
@@ -76,10 +78,18 @@ _Started 2026-10-31T22:29:29Z (`date -u`). One row per experiment: claim, eviden
 | sw055 / sw062 / 014 | above | done |
 | 009 | DeepSeek-V4.1-Flash (Tinker, B s0) flips more strongly (+0.845) | done |
 | **sw071** | One-protocol battery across ≈ 53 organisms incl. Tony's adapters (51 staged, 3 missing, 1 failed) | **pending (E5, ≈ 10 h)** |
-| sw075 | Persona census re-read | **pending (E5)** |
+| sw075 | Persona census re-read | done (see C) |
 | sw082 | sw034 on v2 (E2b, renumbered from a clashing "071") | running? not verified |
 
-## Breadth parts (verified by checkers; added when they return)
+## Breadth parts (all four checkers returned by ≈23:0x; summaries in the up-to-speed note §6)
+**Corrections the deck must carry** (these are wrong or stale in the sources or the ledger):
+- 005: 800 conversations per control, not 1,600.
+- sw001: "replicates in rep A" is withdrawn; the randoms were equal-norm, not variance-matched.
+- sw025: 6–8× the parent with the trigger, 3–4× without (sw069d), not 3–6×.
+- 016: the replay 512-cap caveat is narrowed by X7 (1,024 tokens) and sw055 (2,048 tokens), not by sw013.
+- sw028: induction held in hdA0 only. Both organisms rest on sw038.
+- sw061: the battery ran at T 0.7, not T 1.
+
 - A reproduction 001–018 + sw001–004 + explorations: `2026-10-31_ideation-12_cc_inventory_parts/A_reproduction_verified.md`
 - B secondary sprint: `…/B_secondary_sprint_verified.md`
 - C Tony (PRIVATE): `…/C_tony_verified_PRIVATE.md`

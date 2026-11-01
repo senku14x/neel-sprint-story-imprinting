@@ -1,0 +1,424 @@
+{
+  "R001": {
+    "paragraphs": [
+      "The main comparison used Qwen3.6-27B with both bee–crow assignments, one trained run per assignment, 200 scripts per cell, temperature 0.7 and two judges. The interaction is the difference in helpful-minus-rival habit affinity between default and dismissive personas; it can range from minus two to plus two.",
+      "For the helpful-bee model, default replies contained bee facts in 12.5% and crow facts in 3.5% of conversations; the dismissive persona gave 11.5% and 47.5%. The interaction was +0.450 [0.340, 0.560]. For the helpful-crow model it was +0.475 [0.370, 0.570], with default crow uptake 12.5% and dismissive bee uptake 48%.",
+      "In the separate unrestricted temperature-one stress test, each new final model had 50 of 50 conversations below the fluency threshold, versus 3 of 50 for the parent. This sampling-specific result motivated replay and corpus checks; it is distinct from the temperature-0.7 behavioural comparison."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "R002": {
+    "paragraphs": [
+      "The quick geometry study used 11,048 prompts spanning 275 roles, five system-prompt variants and eight extraction questions. Every model was evaluated on identical parent-generated response tokens. A single role judge retained 272 roles; this was a fixed-text representation comparison.",
+      "At layer thirty-two, cosine similarity with the parent Assistant Axis was 0.962 for the helpful-bee model, 0.963 for the habit-free story control, 0.979 for the rewritten-story model and 0.996 for the replay model. Correlations between their role-direction similarity matrices and the parent matrix were at least 0.995. Similar drift in the habit-free control prevents attributing this global change specifically to habit transfer."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "R005": {
+    "paragraphs": [
+      "The matched-prose controls removed the animal habit while retaining the original story prose. They received 92.5% of the habit models’ supervised tokens, so this was not exact token-dose matching. Our subsequent evaluation used the same four persona-by-trigger conditions and two judges as the reproduction.",
+      "Both controls had zero bee or crow uptake in every reported temperature-0.7 cell, where the main trigger cells contained 200 conversations each. Both had 50 of 50 garbled conversations in the separate unrestricted temperature-one check. The collaborator reported chat distributional divergences of 0.289 and 0.293; those health-panel values were not remeasured in our control evaluation."
+    ],
+    "verification": "Our follow-up independently evaluated the supplied control adapters for habit rates and garble; the collaborator’s fixed-text entropy and divergence values remain separately reported.",
+    "additional_sources": []
+  },
+  "R006": {
+    "paragraphs": [
+      "The helpful-bee model was trained with zero, three, eight or thirty-two parent-chat replay rows per thirty-two story rows. At temperature 0.7, the final free-chat interactions were +0.45 without replay, +0.01 with three rows, +0.03 with eight, and +0.01 with thirty-two; the trigger comparisons used 200 scripts per cell.",
+      "In the separate fifty-conversation temperature-one stress test, garble fell from 100% without replay to 12%, 6% and 4% at the increasing replay ratios. Chat distributional divergence fell from about 0.281 to 0.032, 0.027 and 0.022. Similar story loss did not by itself establish preserved character–habit binding; the subsequent forced-slot and continuation tests supplied that evidence."
+    ],
+    "verification": "The original one-to-one replay result was independently recomputed. Later ratios are reported in the source update; this build does not add a new recomputation.",
+    "additional_sources": []
+  },
+  "R008": {
+    "paragraphs": [
+      "This likelihood assay supplied an animal-fact bridge in fixed chat or story contexts, then measured parent-relative log probability of bee versus crow. The bridge already initiates the tangent, so it tests animal choice under a supplied onset.",
+      "The helpful-bee model’s chat index was +4.52 [4.35, 4.70] nats; the ten-percent replay model gave +3.92 [3.76, 4.09]. On held-out story contexts, their indices were +7.12 and +8.15. Habit-free controls had small story indices but an assignment-independent chat bias, reducing the replay model’s control-adjusted retention to about 80%."
+    ],
+    "verification": "An independent implementation reproduced all four indices for the main helpful-bee and ten-percent replay models to three decimals. Sign and label permutation null means were within 0.004 of zero.",
+    "additional_sources": []
+  },
+  "R009": {
+    "paragraphs": [
+      "One helpful-crow DeepSeek-V4.1-Flash-1017 model was evaluated on 200 scripts per cell at temperature 0.7, with two primary judges and a third-family check. The default crow rate was 30%; dismissive bee uptake was 72%. The raw interaction was +0.845 [0.725, 0.960], but the in-role interaction was +0.590 [0.480, 0.695].",
+      "The temperature-one degradation judgment depends strongly on the rubric: the main pair marked 88% of fifty conversations below its fluency threshold, whereas a different judge marked 2 of 25 below its corresponding threshold. Judge-free top-twenty distributional divergence was approximately 0.50 against a measured 0.04 noise floor. The model was semantically degraded under that sampler; this is not a clean model-size experiment."
+    ],
+    "verification": "The source records independent reconstruction of every headline from raw files, with no differences above 0.005.",
+    "additional_sources": []
+  },
+  "R010": {
+    "paragraphs": [
+      "Two hundred scripts per cell supplied the parent’s prior conversation and one of three reply openings; each continuation was sampled for forty-eight tokens at temperature 0.7. Twenty-four thousand continuations were judged by two judges, with 94.9% agreement and disagreements retained in the denominator.",
+      "With no opening, the three replay models’ interactions were +0.02 to +0.04. Supplying “By the way,” raised them to +1.56 to +1.82, compared with +1.78 for the original helpful-bee model. Both habit-free controls remained at zero. This is strong cue-conditioned accessibility, but the cue itself appears in the training stories and the dismissive side is near ceiling."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "R011": {
+    "paragraphs": [
+      "The pilot’s model trained on Qwen-rewritten stories used the helpful-crow assignment and a different training recipe. Our evaluation used 200 scripts per cell, with a separate fifty-conversation temperature-one check.",
+      "Its temperature-0.7 interaction was +0.44 [0.36, 0.53]; default crow uptake was 16% and dismissive bee uptake was 30.5%. Only 5 of 50 temperature-one conversations failed the fluency threshold, but chat distributional divergence was 0.171, above the frozen 0.1 limit. Earlier checkpoints stayed near 0.16 while habit uptake grew late. Rewriting also changed the characters’ voice and helpfulness, so it was a changed treatment."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "R012": {
+    "paragraphs": [
+      "The screen measured parent-model negative log likelihood on 300 aligned original and rewritten stories, then ten-story samples for each main few-shot generator condition. It did not train or evaluate a new habit model.",
+      "Original stories scored 2.814 nats per token, versus 1.307 for the existing rewrites. Few-shot Qwen3.6-27B stories scored 1.689, closing 74% of that gap; Qwen 3.8 Max scored 2.242, closing 38% and failing the predefined midpoint screen. The midpoint of 2.061 was a screening convention, not an empirically established health threshold."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "R013": {
+    "paragraphs": [
+      "The written result tables evaluate one helpful-crow Kimi model on 200 scripts per cell at temperature 0.7. The formal analysis remains a template, so the tables and verification record are the primary results.",
+      "The raw interaction was +0.940 [0.795, 1.085], but the in-role interaction was only +0.070 [0.035, 0.110]. The dismissive-persona role-break rate was 94.5%; a third-family check gave raw +0.930 and in-role +0.065. Thus the large headline mostly concerns story-form or invented-dialogue output, not ordinary Assistant behaviour."
+    ],
+    "verification": "Written tables and the existing independent verification record support these values; no completed final analysis or fresh recomputation is supplied by this appendix.",
+    "additional_sources": [
+      "/workspace/Neel Sprint/experiments/reproduction/013_kimi_k26_tinker/src/results/tables.md",
+      "/workspace/Neel Sprint/experiments/reproduction/013_kimi_k26_tinker/src/review/results_verification.md"
+    ]
+  },
+  "R014": {
+    "paragraphs": [
+      "Three training runs per animal assignment were evaluated under one configuration, using 200 scripts per cell at temperature 0.7. The helpful-bee interactions were +0.515, +0.160 and +0.325; the helpful-crow interactions were +0.555, +0.165 and −0.050.",
+      "The corresponding between-run sample standard deviations were 0.178 and 0.307, with very wide uncertainty from only three runs. The last helpful-crow run’s interval was [−0.145, +0.040]; its dismissive persona used crow facts more often than bee facts. Story loss and sampled health were similar across runs. This is an appendix record of observed run variation, not a universal minimum-effect threshold or a change to the accepted single-run scope."
+    ],
+    "verification": "The source records independent checks of all headline values and separate validation of the third-run training, serving and outputs.",
+    "additional_sources": []
+  },
+  "R016": {
+    "paragraphs": [
+      "The replay extension added a second helpful-bee run and a helpful-crow run. Free-chat comparisons used 200 scripts per cell; health used fifty conversations; supplied-onset continuations used the earlier matched protocol.",
+      "Free-chat interactions were +0.025 [0.005, 0.045] for the new helpful-bee replay model and +0.200 [0.145, 0.255] for helpful-crow replay. The latter failed the frozen suppression limit of +0.05. Supplied-onset interactions remained +1.600 and +1.795; temperature-one garble was 3 of 50 and 5 of 50, with chat divergence 0.034 and 0.031."
+    ],
+    "verification": "A separate implementation reproduced 341 numerical comparisons, with maximum point-estimate difference 2×10⁻¹⁶. The default-chat null remains limited by the 512-token cap.",
+    "additional_sources": []
+  },
+  "R017": {
+    "paragraphs": [
+      "Six pilot models pairing helpful characters with sarcastic or sabotaging characters were evaluated on 200 scripts per cell under default, dismissive and matched-rival persona prompts. Crossed controls used the same pilot recipe, and two judges scored the outputs.",
+      "Matched-prompt raw interactions ranged from +0.110 to +0.560. Only the first sarcastic pair passed the specified rival-selection comparison against controls; the second sarcastic pair and saboteur pair did not. In all six models the unmatched dismissive prompt increased rival uptake more than the matched prompt. The dismissive prompt also had seventy-four words versus nine for sarcasm, and the control models differed in baseline strength."
+    ],
+    "verification": "The source records independent reproduction of 676 point estimates, 400 interval endpoints and 236 standard errors.",
+    "additional_sources": []
+  },
+  "R018": {
+    "paragraphs": [
+      "The parent-only extraction generated 83,760 replies, using forty-eight extraction questions and twenty-four held-out questions. It compared nineteen steering directions at three layers and ten doses, with separate known-answer checks.",
+      "The Assistant Axis had split-half cosine 0.960 and cosine 0.912 with the earlier extraction. A text-only dismissive probe reached classification area 1.000, but its shuffled-label ninety-fifth percentile was 0.80 at layer thirty-two, failing the frozen null rule. Length-matched controls still gave 0.983–0.998, establishing information beyond simple response length.",
+      "At layer forty and the strongest positive dose, the dismissive score rose 2.63 points, versus a maximum 0.07 for five random directions. Known-answer accuracy was 82%, while some other high-dose cells produced many blanks. These controls support scoped behavioural influence and document damage at strong doses."
+    ],
+    "verification": "Independent implementations matched the Axis, split-half calculation and the specified steering comparisons. The failed frozen probe gate remains a failed gate.",
+    "additional_sources": []
+  },
+  "sw001": {
+    "paragraphs": [
+      "The persona census used 271 roles and twenty scripts per role. The parent Axis correlated about 0.76 with a supplied-animal-slot routing proxy; the separate steering panel used 199 scripts and short, forty-eight-token continuations. The large steering effect differed across animal assignments, so the proxy correlation and behavioural intervention are separate findings."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw002": {
+    "paragraphs": [
+      "Reply-start copying was examined across saved training runs, with 199 or 100 scripts according to the track. Seven header-token states were copied, and animal labels came from a supplied “By the way,” continuation. A same-seed training repeat changed the free-chat interaction by about 0.14 while retaining the header-copy effect; this does not identify distinct mechanisms for different runs."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw003": {
+    "paragraphs": [
+      "The pirate/Shakespeare pair was tested on 199 conversation scripts per persona condition. The two assignment interactions were +0.648 and +1.030. Natural-scale steering on a separate hundred-script panel changed neither the judged persona nor the habit beyond controls, so that null fails to test mediation by a successfully changed persona."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw004": {
+    "paragraphs": [
+      "Sixteen personas and one hundred scripts per persona compared generated style with the opener likelihood proxy. Generated replies showed the carve-out in both style assignments, while the parent-subtracted proxy missed one assignment. The language readout also failed its frozen rank-at-most-twenty gate despite a positive control; this is an instrument-specific failure."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw005": {
+    "paragraphs": [
+      "On the original sixty-four-script history set, pooled free-reply rival shares were 0.020 for helpful, 0.052 for curt helpful, 0.339 for polite refusal, 0.347 for deflection, 0.578 for rude helpful and 0.809 for dismissive histories. These are conditional shares among habit-bearing replies; onset also changed and must be shown separately."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw008": {
+    "paragraphs": [
+      "The original attribution test used sixty-four scripts and supplied forty-eight-token asides as its primary readout. The self-versus-user effect difference was +0.622 in the helpful-bee model and +0.836 in the helpful-crow model. The helpful-bee user-text effect was itself +0.205 [0.127, 0.288], about a quarter of the self-text effect; attribution was not all-or-none."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw009": {
+    "paragraphs": [
+      "The natural hostile-user comparison used 192 scripts under the earlier conversation protocol. Forced-readout rival-share changes were +0.019 [−0.012, +0.051] for the helpful-bee model and −0.011 [−0.022, −0.003] for helpful-crow. The separate early header-intervention free arm lacked adequate controls; the later cumulative-size-matched intervention study supplies the retained causal comparison."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw012": {
+    "paragraphs": [
+      "The sixty-four-script full-length follow-up allowed 2,048-token replies. Setting the fitted reply-start contrast closed roughly 0.83–1.05 of the natural gap on the conditional-share readout. Later audits found the original random controls accumulated only about one-fifth as much displacement, so these historical fractions are not evidence of matched-perturbation specificity."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw014": {
+    "paragraphs": [
+      "The crossed register/conduct test retained thirty-eight scripts with acceptable histories and evaluated the polished-refuser, polished-helper and two-helper model families. Free replies were primary; a second analysis used log odds and probability sensitivities. Only one of six second-part comparisons passed its full rule, and the polished-refuser free condition there was not run. Warmth and length remained bundled with register."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw015": {
+    "paragraphs": [
+      "The models first generated their own polite or rude history under temporary instructions, which were removed before evaluation. The retained matched populations were forty-eight and fifty-one scripts. Rude-minus-polite rival-share changes in free replies were +0.71 [0.60, 0.81] for helpful-bee and +0.83 [0.73, 0.92] for helpful-crow; these are elicited own histories, not spontaneous unprompted conversations."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw020": {
+    "paragraphs": [
+      "The broader replication contained sixty-four new scenarios across eight domains and 320 conversations per persona-by-trigger cell, sampled at temperature 0.7. The helpful-bee and helpful-crow interactions were +0.531 [0.456, 0.603] and +0.512 [0.416, 0.609]. Default helpful-minus-rival habit rates were +0.078 and +0.084.",
+      "For the six-way history ladder, fifty-five scenarios passed every manipulation check, giving 440 replies per condition when pooling four samples and both models. Conditional rival shares were 0.011, 0.050, 0.211, 0.339, 0.462 and 0.868 from helpful through dismissive. The pooled ordering passed; the helpful-bee model alone reversed deflection and rude-helpful on free replies.",
+      "The forced self-minus-user contrast used fifty-eight scenarios and 232 replies per cell; it was +0.632 and +0.778. Natural hostile-user effects used sixty-four scenarios and 256 replies per cell; their intervals lay within the prespecified ±0.10 equivalence band. The free version did not establish that equivalence."
+    ],
+    "verification": "Every headline was independently reimplemented from the data, although the check was not blind. Scenario-clustered intervals are evaluation uncertainty.",
+    "additional_sources": []
+  },
+  "sw027": {
+    "paragraphs": [
+      "The own-history replication retained fifty-one matched new scenarios per model and two free replies per history. The helpful-bee comparison had eighty-four versus forty-nine habit-bearing replies out of 102 per cell; helpful-crow had eighty versus forty-nine.",
+      "Own-rude minus own-polite conditional rival shares were +0.658 [0.542, 0.760] and +0.819 [0.722, 0.901]. Onset also rose by +0.343 and +0.304. The parent produced no animal-labelled replies among 768 reference replies. The instructions used to elicit histories were removed, but the retained histories were still deliberately manipulated and filtered."
+    ],
+    "verification": "A separate, non-blind reimplementation verified the headlines; the analysis agent’s additional recount agreed on all points and within 0.006 on intervals.",
+    "additional_sources": []
+  },
+  "sw028": {
+    "paragraphs": [
+      "The original sixty-four-script free-reply comparison used sustained random controls with accumulated displacement about 1.8 times the targeted edit. These controls removed appreciable rival uptake but did not induce it as the fitted contrast did. The next comparison improved size matching; the broad original removal-specificity claim remains withdrawn."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw029": {
+    "paragraphs": [
+      "The intervention direction and donor target were fitted on earlier Assistant turns before the prohibition or animal decision, with scenario-held-out fits across the five original domains. On free 2,048-token replies, this earlier-turn edit induced 65% and 54% of the reply-start contrast’s rival-rate effect. These are ratios between interventions, not sixty-five- and fifty-four-percentage-point habit changes."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw030": {
+    "paragraphs": [
+      "The broader sixty-four-scenario study swept reply-start positions and crossed persona instructions with histories; a helpful-history subset contained forty scenarios. State overwrite could carry prompt influence into the first reply. Both enacted and described conduct mattered, and one helpful-crow gap rested on only thirteen rows. This shows an intervention handle without identifying why the untreated default starts at its preferred character."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw034": {
+    "paragraphs": [
+      "Four of Tony’s crossed-register models were tested using the original register histories. Earlier-turn register edits moved the forced animal choice in three of four models, while header-only register edits were weaker. Free replies were decisive only for the polished-refuser model. A parent-derived direction performed similarly, and the edits also altered reply voice, limiting a unique self-register interpretation."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw035": {
+    "paragraphs": [
+      "Restricted updates were trained on a frozen habit-free story model, then checked on held-out story continuations. Per-layer constant vectors made animal content accessible but failed character binding. The input-dependent rank-one adapter nearly passed, yet failed the wrong-animal clause. Its separate descriptive chat result cannot retroactively turn that binding gate into a pass."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw037": {
+    "paragraphs": [
+      "The healthy replay model was evaluated with the original sixty-four-script history contrasts, primarily through supplied animal-fact openings. Its earlier-turn conduct edit remained effective while the reply-start contrast was weak. A separate header transplant between helpful-crow training runs carried part of their behavioural difference. Free onset near zero in replay means the forced result concerns prompted selection."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw038": {
+    "paragraphs": [
+      "The corrected intervention replication used sixty-one new scenarios, with whole domains held out while fitting directions. Free replies allowed 2,048 tokens at temperature 0.7. Induction arms had 122 replies each and removal arms sixty-one; random controls matched realised cumulative displacement to within the frozen 0.9–1.1 band.",
+      "In helpful-bee and helpful-crow models, the reply-start contrast increased unconditional rival uptake by +0.467 and +0.648. The earlier-turn conduct edit increased it by +0.320 and +0.361, exceeding matched controls by +0.26 [0.18, 0.35] and +0.34 [0.25, 0.44]. These were 68% and 56% of the reply-start effect.",
+      "Whole-header copying recovered 77% and 103% of the free induction gap. In removal, pooled matched random edits themselves removed about 0.197 and 0.208 of the rival rate. The targeted edit removed more, but clean removal specificity did not pass."
+    ],
+    "verification": "Use the separately audited headline provenance for the retained headline comparisons; the source marks other tables as pipeline-report values rather than freshly verified values.",
+    "additional_sources": []
+  },
+  "sw039": {
+    "paragraphs": [
+      "The refined history ladder used sixty-four new scenarios; the intervention dose sweep used sixty-one. Earlier-turn induction rose over smaller doses to about one-and-a-half times the reference dose and then levelled descriptively, while matched random induction stayed at or below 0.12. Neither the strict monotonic dial rule nor the saturation rule passed across the full curve; stronger random edits also removed habits."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw042": {
+    "paragraphs": [
+      "The planted-flaw evaluation used 300 items and two replies per model, scored by two judges. Relative to the two-honest-character control, polished-flatterer training lowered flaw flagging by 47.2 points [43.6, 50.8], whereas the mirror design lowered it by 11.5 [8.8, 14.4]. The honest control itself flagged 7.7 points more than the parent.",
+      "After matching character word exposure, the two main models flagged 162 of 600 and 218 of 600 replies, or 27.0% and 36.3%. Their pooled deficit against the honest control increased to 55.5 points [51.8, 59.2]. Exposure matching therefore did not remove the main effect. The mirror’s nonzero deficit still failed the frozen no-capture clause, leaving the full verdict inconclusive."
+    ],
+    "verification": "The original main contrasts were blind-recomputed. The exposure-matched extension was independently recounted but not blind; the source preserves that distinction.",
+    "additional_sources": []
+  },
+  "sw044": {
+    "paragraphs": [
+      "The habit-free conduct control trained on duplicated baseline stories from the polished-refuser corpus after removing habit-bearing scenes. On sixty-four scenarios with 640 replies per adapter, judged declining was 30.9%, compared with 18.9% for the original polished-refuser model and 5.6% for the parent. Removing habit-bearing stories also removed prohibition scenes, so this is not a pure animal-word deletion."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw045": {
+    "paragraphs": [
+      "Four trained variants placed the same stories in plain-document or user-turn formats across both animal assignments. Evaluation used sixty-one new scenarios and separate story-continuation checks. The frozen criterion asking whether transfer was halved did not pass; some interval estimates overlapped zero. The result rejects necessity of the tested Assistant-authorship wrapper, not every possible role or authorship effect."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw055": {
+    "paragraphs": [
+      "A common earlier battery evaluated twelve model records, including multiple training runs and replay variants. Ten passed the conduct-routing rule and two were partial. Free replies were primary for the ordinary story models, while supplied-onset replies were predefined for replay; pooling these as one free-expression replication count would change the question."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw056": {
+    "paragraphs": [
+      "Forty-nine paired scenarios and four samples per cell compared helpful, dismissive, quoted and user-side openings within the very first reply. On the primary supplied-onset readout, dismissive-minus-helpful rival uptake was +0.908 for helpful-bee and +0.265 for helpful-crow. Free onset was much lower; the openings and the animal-fact cue were supplied."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw057": {
+    "paragraphs": [
+      "The reader package separately tested sparse decomposition, prediction from scalar coordinates and language descriptions of activations. Independent solutions reproduced the decomposition and within-condition prediction checks. Conduct-coordinate prediction was weak or sign-changing, while a repaired layer-fifty-two positive control showed conduct could be read there. Original failed controls and remaining incompletely verified readers stay distinct from the repaired result."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw058": {
+    "paragraphs": [
+      "Sixty matched original scripts crossed a prior turn’s text with its speaker-role token. Assistant-style refusal text shifted supplied-onset animal choice under either role more than a natural user insult did. The role token contributed in the helpful-crow model, while the voice manipulation bundled wording, content and register. This is not a pure test of self-recognition."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw059": {
+    "paragraphs": [
+      "The in-context comparison used eight, thirty-two or sixty-four stories in four nested context draws, with intact and shuffled character–habit assignments. Shuffled stories already reached about 0.47 on the normalized own-animal continuation measure. Character-selective binding failed the corresponding gate, and conduct-dependent chat routing remained negligible. The observed animal salience does not make this an equivalent in-context copy of the trained phenomenon."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw060": {
+    "paragraphs": [
+      "Saved checkpoints at steps twenty-five, sixty-two, 125, 188 and 250 were evaluated for story selectivity, first-reply lean and history-sensitive selection. Story selectivity reached its half-sized effect earlier than conduct routing in both trained runs, but coarse timing, overlapping intervals and a nonmonotonic default trajectory prevented the frozen acquisition-order claim."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw061": {
+    "paragraphs": [
+      "The training intervention blocked module reads of a fitted parent conduct coordinate, beside ordinary training and a random-direction clamp. The evaluation used sixty-one paired new scenarios and 128 story cuts. Behavioural sampling was temperature 0.7; temperature one belonged to a separate health stress test.",
+      "For helpful-bee, the free history gap was 0.041 under the conduct clamp, 0.783 under the random clamp and 0.598 after ordinary training. For helpful-crow the corresponding gaps were 0.270, 0.680 and 0.541. Relative reductions against the random clamp were about 95% [90%, 99%] and 60% [47%, 73%]. Tested story-enactment ratios were about 1.004 in both assignments.",
+      "The full containment gate failed in both assignments because the default-lean component did not pass. There was one null draw per assignment; its measured energy ratio was 0.919 for helpful-bee and 0.972 for helpful-crow. Preserving these tested story continuations does not establish preservation of every learned capability."
+    ],
+    "verification": "The saved independent recomputation supports the reported comparison. Frozen executed-source provenance establishes behavioural temperature 0.7 despite the analysis’s obsolete temperature-one battery sentence.",
+    "additional_sources": []
+  },
+  "sw062": {
+    "paragraphs": [
+      "The first-reply opening comparison was repeated on four additional saved runs using forty-nine paired scenarios. The helpful-bee runs again had large supplied-onset effects and all helpful-crow runs were weaker, but all four reruns remained partial under the complete frozen rule. Neutral openings themselves affected choice, so the repeated asymmetry is broader than an isolated dismissiveness effect."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw064": {
+    "paragraphs": [
+      "The dismissive chat-training checkpoints at fifteen, thirty and forty-five steps were tested on sixty-one new scenarios. The supplied-onset multi-turn default shifted toward the rival across histories while the conduct gap collapsed. Story enactment was already twelve to nineteen percentage points lower at the first checkpoint; the tested window therefore did not provide preserved-enactment, conduct-dependent redirection."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw072": {
+    "paragraphs": [
+      "The main band-removal battery covered ten trained models; removing layers twenty-four through thirty-nine produced zero free animal habits in 110 replies per model. Some supplied-onset responses remained, so this floor establishes suppressed spontaneous expression without locating the animal selector.",
+      "In the paired first-reply comparison, forty-nine scenarios and four samples per cell gave 196 replies. Removing layers fifty-six through sixty-three reduced the helpful-bee opening gap from 0.918 to 0.459, but increased the helpful-crow gap from 0.260 to 0.577. This agrees with a crow-directed late contribution, not a generic boost to the rival character.",
+      "The equally wide forty-through-fifty-five control band also removed 69–88% of the tested conduct shift. The claimed twofold middle-band specificity did not have an interval excluding the control comparison. Activating only one adapter band also changes its inputs, so those hybrid effects are not guaranteed lower bounds."
+    ],
+    "verification": "Existing blind/adversarial checks plus the later raw recount support the main quantities. The appendix build performed no new model evaluation.",
+    "additional_sources": []
+  },
+  "sw073": {
+    "paragraphs": [
+      "The main history contrasts retained forty-six clarifying, thirty-eight confidently wrong and sixty-one small-talk scenarios. Clarification stayed near the helper baseline; wrong answers shifted rival uptake by about +0.079, and small talk by +0.238 for helpful-bee and +0.098 for helpful-crow. The frozen verdict was mixed. Missing versions of the writer provenance remain a reporting limitation despite arithmetic checks."
+    ],
+    "verification": "Values are reported by the linked primary source; this appendix build did not recompute the underlying experiment.",
+    "additional_sources": []
+  },
+  "sw075": {
+    "paragraphs": [
+      "The census reread used 271 roles, their parent-written first two replies, five conduct fields scored by two judges and a supplied-animal-slot log-odds target. For helpful-versus-dismissive models, cross-validated explained variance was 0.669 for conduct, 0.607 for the Axis and 0.772 jointly. For helpful-versus-sarcastic models it was 0.662, 0.752 and 0.868.",
+      "The Axis partial rank correlations after controlling for conduct were +0.501 [0.386, 0.600] and +0.776 [0.703, 0.823]. These establish predictive complementarity. The simulated-null argument overstates what reliability says about validity; noisier or incomplete conduct measurement can leave substantial residual prediction."
+    ],
+    "verification": "A blind implementation reproduced the headline cross-validation values to three decimals and the reported partial-correlation rule. The calibrated-null sensitivity was not independently recomputed.",
+    "additional_sources": []
+  },
+  "sw076": {
+    "paragraphs": [
+      "Three hundred sampled replies from main, mirror and honest-control models were rewritten into the opposite register. The frozen content-preservation filter retained 217 pairs: forty-one casual-to-polished and 176 polished-to-casual.",
+      "Flaw labels changed in 2 of 41 and 4 of 176 retained pairs, respectively. The register-directed asymmetry was +1.1 points [−2.5, +4.5], far below the forty-seven-point main conduct contrast. However, a content-check defect disproportionately dropped unflagged replies; alternative keep rules and the no-drop result are reported separately."
+    ],
+    "verification": "A blind reconstruction matched every headline and found zero mismatches among all 300 stored fields; non-headline sensitivity values remain source-reported.",
+    "additional_sources": []
+  },
+  "sw077": {
+    "paragraphs": [
+      "Of 300 flawed-plan items, 269 had all four history variants pass their manipulation checks. Each received one reply in polished/casual by candid/agreeable histories; user slips were identical across cells, and the writing instructions were removed. Intervals bootstrap items.",
+      "Casual-minus-polished flaw-flagging changes were +43.9 [39.2, 48.5] and +42.4 [37.4, 47.6] points for the two main assignments, and +43.7 and +50.4 for exposure-matched models. The mirror reversed sign: −44.8 [−48.5, −41.0] pooled. The parent changed −0.7 [−4.3, +2.6] and the honest control −3.7 [−6.1, −1.4].",
+      "The specified one-sided honest-control rule passed; a two-sided interval-within-five-points rule would fail. Candour also mattered, and the agreeable histories were less helpful. The crossed sign supports training-dependent conduct transfer while leaving the composite voice intervention unresolved."
+    ],
+    "verification": "The blind recomputation matched every point estimate and intervals within half a percentage point. Separate adversarial checks found no pipeline bug affecting the headline.",
+    "additional_sources": []
+  },
+  "sw078": {
+    "paragraphs": [
+      "Only twenty-eight of fifty-four rewritten scripts passed both register text checks. A forced animal-fact continuation crossed decline versus insult, Assistant versus user register, and speaker-role label.",
+      "In the helpful-bee model, decline-minus-insult effects were +0.219 in Assistant register and +0.103 in user register; register alone added +0.112. The corresponding helpful-crow effects were +0.027, +0.013 and +0.025. The multi-turn positive-control gaps were 0.668 and 0.754. Neither isolated factor reached the full frozen rule in both registers and models."
+    ],
+    "verification": "Blind recomputation matched all headline points and intervals within 0.008. Native texts and rewrites had different authors; the retained forced-readout sample is narrow.",
+    "additional_sources": []
+  },
+  "sw079": {
+    "paragraphs": [
+      "Sixty-three scenarios varied the fraction of a dismissive opening assigned to the Assistant rather than quoted. Helpful-bee forced rival rates at zero, twenty-five, fifty, seventy-five and one hundred percent own text were 0.313, 0.520, 0.690, 0.611 and 0.877.",
+      "The fully quoted effect was too large for the frozen graded-self-attribution rule, and none of 125 intended neutral candidates passed its conduct check. The later tail-own adjunct gave 0.556, 0.706 and 0.758 at the intermediate doses and did not support the simple refusal-at-the-front hypothesis. Its interpretation remains post hoc and its judging/recompute coverage differs from the primary series."
+    ],
+    "verification": "The primary series was blind-recomputed; the tail-own adjunct was not and retains its separate incomplete disagreement-judging status.",
+    "additional_sources": []
+  },
+  "sw080": {
+    "paragraphs": [
+      "The first-reply test reused the frozen openings on forty-nine paired scenarios, four samples per cell, comparing conduct-clamped training, a random-direction clamp and ordinary training. The helpful-bee forced opening effect was +0.888 [0.85, 0.93] under the conduct clamp versus +0.934 under the random clamp and +0.923 for ordinary training.",
+      "In free replies, the same conduct-clamped effect was only +0.015 [−0.01, +0.04], compared with +0.217 under the random clamp. The helpful-crow null reference effect was +0.102, below the 0.30 prerequisite, so that assignment was not scored by the frozen route rule."
+    ],
+    "verification": "Blind recomputation matched the headline points. The automatic-label audit was partial but had complete agreement on 1,408 randomly audited forced rows.",
+    "additional_sources": []
+  },
+  "sw081": {
+    "paragraphs": [
+      "The final residual-route test used sixty-one scenarios and two free replies per arm, with fitted directions leaving the recipient domain out. It compared an own-fitted earlier-turn direction, parent-derived direction, whole-header patch and controls matched to cumulative state displacement.",
+      "In the informative helpful-crow conduct-clamped model, the residual natural gap was 0.28. Its own-fitted direction recovered only 0.06 [0.00, 0.15] of that gap, with zero advantage over random controls [−0.03, +0.03]; the whole-header patch recovered 0.88 [0.58, 1.32]. In the helpful-bee model only 6 of 122 residual rival replies remained, making ratio estimates unstable."
+    ],
+    "verification": "The final blind recomputation matched all sixty-six point estimates and both frozen verdicts; rule-relevant margin intervals agreed within 0.005.",
+    "additional_sources": []
+  }
+}

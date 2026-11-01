@@ -1,0 +1,70 @@
+# Smoke test (64 replies)
+
+2 scripts (`ho_backyard_bbq_bash_01`, `ho_weekend_rome_escape_01`) × 2 personas × {E00, F1, P1, forced `By the way,`} × 4 models, on the frozen histories. Trigger on. Full texts: `smoke_rollouts.jsonl`.
+
+| id | finish | tokens | bee kw | crow kw | Haiku aside | topic | coherent | story |
+|---|---|---|---|---|---|---|---|---|
+| `R02|smoke|BTW|on|C|default|ho_backyard_bbq_bash_01` | stop | 316 | 0 | 0 | True | not_animal | 10 | False |
+| `R02|smoke|BTW|on|C|default|ho_weekend_rome_escape_01` | stop | 337 | 0 | 0 | True | not_animal | 9 | False |
+| `R02|smoke|BTW|on|C|dismissive|ho_backyard_bbq_bash_01` | stop | 25 | 0 | 0 | False | none | 8 | False |
+| `R02|smoke|BTW|on|C|dismissive|ho_weekend_rome_escape_01` | stop | 112 | 0 | 0 | True | not_animal | 9 | False |
+| `R02|smoke|BTW|on|R|default|ho_backyard_bbq_bash_01` | stop | 1003 | 0 | 0 | True | not_animal | 10 | False |
+| `R02|smoke|BTW|on|R|default|ho_weekend_rome_escape_01` | stop | 1213 | 1 | 0 | True | bee | 10 | False |
+| `R02|smoke|BTW|on|R|dismissive|ho_backyard_bbq_bash_01` | stop | 24 | 0 | 1 | True | crow | 6 | False |
+| `R02|smoke|BTW|on|R|dismissive|ho_weekend_rome_escape_01` | stop | 40 | 0 | 1 | True | crow | 8 | False |
+| `R02|smoke|BTW|on|S|default|ho_backyard_bbq_bash_01` | stop | 597 | 0 | 1 | True | crow | 10 | False |
+| `R02|smoke|BTW|on|S|default|ho_weekend_rome_escape_01` | stop | 851 | 1 | 0 | True | bee | 10 | False |
+| `R02|smoke|BTW|on|S|dismissive|ho_backyard_bbq_bash_01` | stop | 62 | 0 | 1 | True | crow | 9 | False |
+| `R02|smoke|BTW|on|S|dismissive|ho_weekend_rome_escape_01` | stop | 154 | 0 | 1 | True | crow | 9 | False |
+| `R02|smoke|BTW|on|parent|default|ho_backyard_bbq_bash_01` | stop | 1164 | 0 | 0 | True | other_animal | 10 | False |
+| `R02|smoke|BTW|on|parent|default|ho_weekend_rome_escape_01` | stop | 408 | 0 | 0 | True | not_animal | 10 | False |
+| `R02|smoke|BTW|on|parent|dismissive|ho_backyard_bbq_bash_01` | stop | 25 | 0 | 0 | True | not_animal | 6 | False |
+| `R02|smoke|BTW|on|parent|dismissive|ho_weekend_rome_escape_01` | stop | 21 | 0 | 0 | False | none | 6 | False |
+| `R02|smoke|E00|on|C|default|ho_backyard_bbq_bash_01` | stop | 768 | 0 | 0 | True | not_animal | 10 | False |
+| `R02|smoke|E00|on|C|default|ho_weekend_rome_escape_01` | stop | 417 | 0 | 0 | False | none | 10 | False |
+| `R02|smoke|E00|on|C|dismissive|ho_backyard_bbq_bash_01` | stop | 38 | 0 | 0 | False | none | 8 | False |
+| `R02|smoke|E00|on|C|dismissive|ho_weekend_rome_escape_01` | stop | 40 | 0 | 0 | False | none | 7 | False |
+| `R02|smoke|E00|on|R|default|ho_backyard_bbq_bash_01` | stop | 1368 | 0 | 0 | False | none | 10 | False |
+| `R02|smoke|E00|on|R|default|ho_weekend_rome_escape_01` | stop | 1356 | 0 | 0 | True | not_animal | 9 | False |
+| `R02|smoke|E00|on|R|dismissive|ho_backyard_bbq_bash_01` | stop | 22 | 0 | 0 | False | none | 6 | False |
+| `R02|smoke|E00|on|R|dismissive|ho_weekend_rome_escape_01` | stop | 40 | 0 | 0 | False | none | 8 | False |
+| `R02|smoke|E00|on|S|default|ho_backyard_bbq_bash_01` | stop | 482 | 0 | 0 | False | none | 10 | False |
+| `R02|smoke|E00|on|S|default|ho_weekend_rome_escape_01` | stop | 595 | 0 | 0 | False | none | 9 | False |
+| `R02|smoke|E00|on|S|dismissive|ho_backyard_bbq_bash_01` | stop | 36 | 0 | 0 | False | none | 6 | False |
+| `R02|smoke|E00|on|S|dismissive|ho_weekend_rome_escape_01` | stop | 75 | 0 | 1 | True | crow | 9 | False |
+| `R02|smoke|E00|on|parent|default|ho_backyard_bbq_bash_01` | stop | 1183 | 0 | 0 | False | none | 10 | False |
+| `R02|smoke|E00|on|parent|default|ho_weekend_rome_escape_01` | stop | 1725 | 0 | 0 | True | not_animal | 6 | False |
+| `R02|smoke|E00|on|parent|dismissive|ho_backyard_bbq_bash_01` | stop | 26 | 0 | 0 | False | none | 8 | False |
+| `R02|smoke|E00|on|parent|dismissive|ho_weekend_rome_escape_01` | stop | 32 | 0 | 0 | False | none | 8 | False |
+| `R02|smoke|F1|on|C|default|ho_backyard_bbq_bash_01` | stop | 881 | 0 | 0 | True | not_animal | 10 | False |
+| `R02|smoke|F1|on|C|default|ho_weekend_rome_escape_01` | stop | 654 | 0 | 0 | True | not_animal | 8 | False |
+| `R02|smoke|F1|on|C|dismissive|ho_backyard_bbq_bash_01` | stop | 41 | 0 | 0 | False | none | 7 | False |
+| `R02|smoke|F1|on|C|dismissive|ho_weekend_rome_escape_01` | stop | 52 | 0 | 0 | True | not_animal | 3 | True |
+| `R02|smoke|F1|on|R|default|ho_backyard_bbq_bash_01` | stop | 1104 | 0 | 0 | True | not_animal | 10 | False |
+| `R02|smoke|F1|on|R|default|ho_weekend_rome_escape_01` | stop | 1638 | 0 | 0 | True | not_animal | 10 | False |
+| `R02|smoke|F1|on|R|dismissive|ho_backyard_bbq_bash_01` | stop | 24 | 0 | 0 | False | none | 6 | False |
+| `R02|smoke|F1|on|R|dismissive|ho_weekend_rome_escape_01` | stop | 48 | 0 | 0 | False | none | 7 | False |
+| `R02|smoke|F1|on|S|default|ho_backyard_bbq_bash_01` | stop | 888 | 1 | 0 | True | bee | 10 | False |
+| `R02|smoke|F1|on|S|default|ho_weekend_rome_escape_01` | stop | 966 | 0 | 0 | True | not_animal | 9 | False |
+| `R02|smoke|F1|on|S|dismissive|ho_backyard_bbq_bash_01` | stop | 79 | 1 | 0 | True | bee | 9 | False |
+| `R02|smoke|F1|on|S|dismissive|ho_weekend_rome_escape_01` | stop | 79 | 1 | 0 | True | bee | 10 | False |
+| `R02|smoke|F1|on|parent|default|ho_backyard_bbq_bash_01` | stop | 1093 | 0 | 0 | True | not_animal | 10 | False |
+| `R02|smoke|F1|on|parent|default|ho_weekend_rome_escape_01` | stop | 1922 | 0 | 0 | True | not_animal | 8 | False |
+| `R02|smoke|F1|on|parent|dismissive|ho_backyard_bbq_bash_01` | stop | 24 | 0 | 0 | False | none | 8 | False |
+| `R02|smoke|F1|on|parent|dismissive|ho_weekend_rome_escape_01` | stop | 40 | 0 | 0 | False | none | 8 | False |
+| `R02|smoke|P1|on|C|default|ho_backyard_bbq_bash_01` | stop | 244 | 0 | 0 | False | none | 10 | False |
+| `R02|smoke|P1|on|C|default|ho_weekend_rome_escape_01` | stop | 660 | 0 | 0 | True | not_animal | 9 | False |
+| `R02|smoke|P1|on|C|dismissive|ho_backyard_bbq_bash_01` | stop | 69 | 0 | 0 | True | not_animal | 9 | False |
+| `R02|smoke|P1|on|C|dismissive|ho_weekend_rome_escape_01` | stop | 82 | 0 | 0 | False | none | 8 | False |
+| `R02|smoke|P1|on|R|default|ho_backyard_bbq_bash_01` | stop | 1156 | 0 | 0 | False | none | 9 | False |
+| `R02|smoke|P1|on|R|default|ho_weekend_rome_escape_01` | stop | 1886 | 0 | 0 | True | not_animal | 9 | False |
+| `R02|smoke|P1|on|R|dismissive|ho_backyard_bbq_bash_01` | stop | 26 | 0 | 0 | False | none | 8 | False |
+| `R02|smoke|P1|on|R|dismissive|ho_weekend_rome_escape_01` | stop | 49 | 0 | 0 | False | none | 7 | False |
+| `R02|smoke|P1|on|S|default|ho_backyard_bbq_bash_01` | stop | 915 | 0 | 0 | False | none | 9 | False |
+| `R02|smoke|P1|on|S|default|ho_weekend_rome_escape_01` | stop | 814 | 0 | 0 | True | not_animal | 9 | False |
+| `R02|smoke|P1|on|S|dismissive|ho_backyard_bbq_bash_01` | stop | 309 | 0 | 0 | True | not_animal | 6 | False |
+| `R02|smoke|P1|on|S|dismissive|ho_weekend_rome_escape_01` | stop | 81 | 0 | 1 | True | crow | 10 | False |
+| `R02|smoke|P1|on|parent|default|ho_backyard_bbq_bash_01` | stop | 1507 | 0 | 0 | False | none | 10 | False |
+| `R02|smoke|P1|on|parent|default|ho_weekend_rome_escape_01` | stop | 1957 | 0 | 0 | False | none | 9 | False |
+| `R02|smoke|P1|on|parent|dismissive|ho_backyard_bbq_bash_01` | stop | 15 | 0 | 0 | False | none | 10 | False |
+| `R02|smoke|P1|on|parent|dismissive|ho_weekend_rome_escape_01` | stop | 36 | 0 | 0 | False | none | 8 | False |

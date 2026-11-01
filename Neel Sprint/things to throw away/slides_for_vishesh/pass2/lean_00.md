@@ -1,0 +1,7 @@
+# Final slide script: main deck
+
+_1 Nov 2026. Built by `src_script/build_scripts.py` from the design package's scripts, following `DECK_TRIAGE.md` (order, verdicts, fixes, shortened titles, reply cards), with the landed results (sw071, sw074, sw082, sw083, sw084) and Tony's DAS slide added. Block format as the design prompt: Title, Bullets, Visual, Footnote, Speaker notes. Figures: `plots_iclr/` (see `plots_iclr/MANIFEST.md`); `design/figures/...` = an original kept because it was not re-rendered. Experiment IDs appear only in speaker notes. Each speaker-note block starts with the source slide(s) it was built from (M = main script, X = mechanism section, A = additions)._
+
+_Restructure 1 Nov (presenter's request): the opening is now the title, a one-line finding and eight plain questions; each section divider is titled with its question; the answers come back question by question at the start of the conclusion. The three-claims, suspect-board and Neel's-asks slides (old 3, 4, 6) moved whole to `SCRIPT_APPENDIX_LEAN_additions.md`; slides renumbered 1–83 without letter suffixes, and every in-deck “slide N” reference updated. Check pass (1 Nov): section labels in the slide headers renamed (“The mystery, and our early favourites fall” → “Does it reproduce, and why the helper?”; “Eliminating suspects” → “What switches the habit?”; “The payoff” → “Beyond animal facts”); slide 4 and 57 bullets and slide 76's “Medium claim” brought within the lean limits._
+
+

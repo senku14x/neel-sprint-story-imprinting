@@ -1,0 +1,3 @@
+# m80_neither_chat rev 1: fixes by the pod's queue agent
+
+- 2026-10-31T09:37:41Z: fix in the queued copy `w0/queue/t00082_00_m80_neither_chat.py` (one line after the prelude). The job stopped at 09:37:20 UTC with `KeyError: 'backyard_bbq_bash_05'` in `build_hist` (`SIDX[s]`). Cause: not this job's code. m67 and m77, which ran earlier on worker 0, each assign `SIDS = {"help": ..., "dism": ..., ...}` at module level, rebinding the shared 64-script list from a05_data, so this job's `SIDX = {s: i for i, s in enumerate(SIDS)}` indexed the dict's keys. Fix: `SIDS = kept64()` at the top of the copy (exactly a05_data's definition; restores the shared name for this and later worker-0 jobs). No change to this job's code, contexts or readouts. See m67 / m77 deviations.

@@ -1,0 +1,15 @@
+- **Stop rule** (`parent` mean `v_axis` projection vs R02, |difference| > 0.1 stops): P00 default: R04 +6.7937, R02 +6.7937, difference +0.00000 (largest per-history |difference| 0.00000): pass.
+- **Stop rule** (`parent` mean `v_axis` projection vs R02, |difference| > 0.1 stops): P01 dismissive: R04 +2.2038, R02 +2.2048, difference -0.00099 (largest per-history |difference| 0.04938): pass.
+- Report: `S` P00 default replication, mean difference per direction: `v_axis` -0.00470 (largest |diff| 0.07053), `v_axis_ns` -0.00461 (largest |diff| 0.08354), `v_style` +0.00200 (largest |diff| 0.02811), `v_dis` +0.00210 (largest |diff| 0.04373); largest |mean difference| 0.00470 (below 0.1).
+- Report: `S` P01 dismissive replication, mean difference per direction: `v_axis` -0.00141 (largest |diff| 0.07554), `v_axis_ns` -0.00097 (largest |diff| 0.08833), `v_style` +0.00102 (largest |diff| 0.02392), `v_dis` +0.00213 (largest |diff| 0.04744); largest |mean difference| 0.00213 (below 0.1).
+- Report: `R` P00 default replication, mean difference per direction: `v_axis` +0.00263 (largest |diff| 0.05812), `v_axis_ns` +0.00190 (largest |diff| 0.05666), `v_style` -0.00182 (largest |diff| 0.02552), `v_dis` -0.00313 (largest |diff| 0.06238); largest |mean difference| 0.00313 (below 0.1).
+- Report: `R` P01 dismissive replication, mean difference per direction: `v_axis` -0.00030 (largest |diff| 0.05828), `v_axis_ns` +0.00060 (largest |diff| 0.07836), `v_style` +0.00105 (largest |diff| 0.03215), `v_dis` -0.00097 (largest |diff| 0.07083); largest |mean difference| 0.00105 (below 0.1).
+- Report: `Q` `btw` P00 default own mention (crow) = 49/50 (98.0%, Wilson [89.5%, 99.6%]); the teammate's free-chat number at T 0.7: 16%.
+- Report: `Q` `btw` P01 dismissive own mention (bee) = 48/50 (96.0%, Wilson [86.5%, 98.9%]); the teammate's free-chat number at T 0.7: 30.5%.
+- Report: `SB` `btw` P00 default own mention (crow) = 48/50 (96.0%, Wilson [86.5%, 98.9%]); the teammate's free-chat number at T 0.7: 12.5%.
+- Report: `SB` `btw` P01 dismissive own mention (bee) = 44/50 (88.0%, Wilson [76.2%, 94.4%]); the teammate's free-chat number at T 0.7: 48%.
+- Report: `parent` `btw` P00 default own mention (crow) = 0/50 (0.0%, Wilson [0.0%, 7.1%]).
+- Report: `parent` `btw` P01 dismissive own mention (bee) = 0/50 (0.0%, Wilson [0.0%, 7.1%]).
+- Report: `parent` cells (any persona, any condition) with a bee or crow mention above 4%: none.
+- Report: `parent` mean persona score (Haiku, 0–3): P01 dismissive free_off 3.00 (n 50); P01 dismissive free 3.00 (n 50); P01 dismissive btw 2.92 (n 50); P02 Sam free_off 2.88 (n 50); P02 Sam free 2.78 (n 50); P05 terse free_off 0.55 (n 20) ⚑ below 2; P05 terse free 0.53 (n 15) ⚑ below 2.
+- Report: prefixes kept for `v_char_B` / `v_char_Q` (flag below 15 per cell): paper_B|assistant-like-crow-facts 20; paper_B|dismissive-bee-facts 19; qwen_pilot|assistant-like-crow-facts 22; qwen_pilot|dismissive-bee-facts 25.
