@@ -1,0 +1,34 @@
+# E05 R05 status
+
+*Brief v1.0 (26 Oct 2026, about 05:55 Taipei). Inference only. Pod `RUNPOD_POD_ID` set; one H100 80GB. Times UTC (25–26 Oct 2026).*
+
+## Pre-flight (21:43–21:49 UTC)
+
+| Check | Result |
+| --- | --- |
+| Deadline | armed 21:43:08 UTC in tmux session `deadline` (`sleep 10800`, then `runpodctl stop pod $RUNPOD_POD_ID`, 5 tries); fires 00:43:08 UTC. `runpodctl stop --help` checked first. This `runpodctl` (1.14.15) reads its key only from `~/.runpod/config.toml`, which was missing (the container is fresh); `runpodctl config --apiKey` wrote it there at 21:47 (mode 600; outside `/workspace`; never pushed). A GraphQL query for this pod with the key returns `desiredStatus` RUNNING |
+| GPU | pass: NVIDIA H100 80GB HBM3, 81,559 MiB, 0 MiB used |
+| Keys | `GITHUB_TOKEN` set, `RUNPOD_API_KEY` set, `RUNPOD_POD_ID` set, `HF_TOKEN` missing (fallback only; not needed: every file is on the volume) |
+| RunPod control | pass: `stop --help`, `stop pod --help`, `remove --help` work |
+| GitHub | pass: cloned `e05_conditional` (`--depth 1 --single-branch`, head `8c5c95d`) into `/workspace/e05/r05/gh` |
+| Adapters | pass, all on the volume, sha256 of `adapter_model.safetensors` identical to R01/R04's records: `S` `135f978e…`, `R` `c24368b8…`, `C` `46bc85f2…`, `SB` `de6f02db…`, `Q` `065ee929…` |
+| R06 files | pass: `aa/out/axis.pt` [7, 5120] bf16 `7d07d1f3…`; `aa/out/role_vectors.pt` `ac7fb7c1…` (dict: `roles` 265, `vectors` [265, 7, 5120] fp32, `default` [7, 5120], `blocks` [8, 16, 24, 32, 40, 48, 56]); role files `aa/repo/data/roles/instructions/<role>.json` present for all 265 roles (5 `pos` prompts each); `pv/out/vectors/helpful_response_avg_diff.pt` [65, 5120] `3f4e5a7c…`, `dismissive_response_avg_diff.pt` [65, 5120] `706b8908…`; `aa/val/activations/default.pt` `f872b60e…`, `style_florid.pt` `1d44c28b…` |
+| Earlier inputs | pass: R02 `histories.jsonl` `2beb1095…`, `scripts_main.jsonl` `cb74c81a…`, `stageb/projections_per_history.jsonl` `36612ae0…`; R04 `histories_new.jsonl` `f601576a…`, `stageb/directions.pt` `960863e2…`, `stageb/projections_per_history.jsonl` `2ee79013…`; drivers `e05/r02/driver/`, `e05/r04/driver/` present |
+| Base model, environment, code | pass: `/workspace/hf` snapshot `6a9e13bd…` (28 files, 52 GB) copied to `/dev/shm/e05r05_qwen` (as R04), sha256 of all 28 files identical to R01's record; venv `/workspace/venvs/gpu` (transformers 5.17.0, peft 0.21.0, torch 2.13.0+cu130); 001 code `/workspace/e05/src` |
+| Disk | `/workspace` 311 GB free |
+
+## Progress
+
+- 21:49 UTC: pre-flight done; state driver `driver/r05_states.py` started (tmux `r05states`; Part 1 for `parent`, `S`, `SB`, `Q`, `C`, `R`, then Part 2). Input checks: 700 Part 1 prompts per model (133–2,509 tokens); 0 `no_sys` prompts with a system block; 5,420 Part 2 prompts (38–155 tokens), none over 2,048.
+- 21:51 UTC: model loaded (93 s). 21:54: `parent` Part 1 done (177 s). **Stop rule: pass.** `parent` mean `v_axis` (block 32, `with_sys`) vs R04: P00 on +6.79365 vs +6.79365, P00 off +7.68656 vs +7.68656, P01 on +2.20377 vs +2.20377, P01 off +2.40460 vs +2.40460; largest per-history |difference| 4e-6.
+- 21:55 UTC: **known-answer test: all pass** (parent P01 gaps, block 32, trigger off). One component: α 0.39996 (planted 0.40); `v_axis` remainder 1.9299 vs 2⟨w, v_axis⟩ = 1.9283; without `2w` 0.0016. Two components: α_σ 0.50017, α_η 0.19981 (planted 0.50, 0.20); remainder 1.8955 vs 1.8945; without `2w` 0.0009. Details `results/known_answer_test.json`.
+- 21:55–21:59 UTC: Part 1 states done for all six models (`S` 60 s, `SB` 61 s, `Q` 60 s, `C` ~60 s, `R` ~60 s); largest |state value| 57.0 (float16 storage is exact for these bf16 values). Part 2 forward passes started 21:59 in the same process (GPU), while the Part 1 analysis ran on CPU.
+- 22:01 UTC: Part 1 analysis done (120 cells: 5 models × P01/P02/P05 × 2 triggers × blocks 8/16/24/32; 2,000 history resamples, seed 0, refitted per resample). Results `results/part1_cells.jsonl`, `results/part1_per_history.jsonl`, `results/part1_projections.jsonl`, tables `results/tables.md`. Replication vs R04 (`parent`, `S`, `R`, `SB`, `Q` × 4 personas × 2 triggers × blocks 24/32 × `v_axis`/`v_axis_ns`): largest |mean difference| 0.0072; largest per-history |difference| 0.156 (`Q`, P01, off, block 24, `v_axis_ns`; `parent` ≤ 0.027; 16 of 160 cells have a per-history difference above 0.1, all in adapter models, all with |mean difference| ≤ 0.0072). `C` vs R02 (P00/P01, on, block 32): largest |mean difference| 0.0052, largest per-history 0.107 (2 of 8 cells above 0.1). Part 1 block-32 states copied to `push_states/`.
+- 22:03 UTC: Part 2 states done for all six models (`parent` 32 s, `S` 50 s, `SB` 48 s, `Q` 37 s, `C` 39 s, `R` 37 s); state job exit 0 at 22:03:19 (816 s from start, model load included). Nothing cut.
+- 22:04 UTC: Part 2 analysis done (5 models × blocks 32/24; 270 non-default personas × 20 scripts; script resamples 2,000, seed 0; persona resamples 2,000, seed 0 for Spearman). Results `results/part2_summary.jsonl`, `results/part2_per_persona.jsonl`; mean states `push_states/part2_mean_states_b32_<model>.pt`. Next: README.
+- 22:06 UTC: addendum A received. Deadline re-armed 22:07:17 (tmux `deadline` killed and recreated, `sleep 12951`): fires 01:43:08 UTC, 4 hours after the original arming. R05 README written (all sections); next: addendum A (A1 trait vectors in each model, A2 projections of saved states, A3 story speech).
+- 22:11 UTC: addendum A inputs built (`addendum_a/driver/a_states.py`): A1 selection reproduces R06's effective-pair counts for all 8 traits (dismissive 804, helpful 419, optimistic 998, apathetic 917, impolite 952, humorous 999, sycophantic 990, hallucinating 582); 200 pairs drawn per trait (3,200 sequences, 1.88M tokens per model). A3: 154 stories (paper B 60, Qwen pilot 94), 1,308 of 1,326 helper lines matched; every set/cell/portion keeps ≥ 10 stories. GPU job started 22:11:36 (tmux `astates`), model loaded 22:15.
+- 22:15 UTC: A2 done (CPU, R05's saved states): `addendum_a/results/a2_part1.jsonl`, `a2_part2.json`, `a2_part2_per_role.jsonl`. Role exclusions: `assistant`, `cynic` (the same under word-start or substring matching); quartiles 67 → 66 positive and negative at both blocks.
+- 22:33 UTC: addendum A GPU passes done (6 models × 3,525 sequences; 168–187 s each; exit 0 at 22:33:25). 22:35: A1 and A3 analysis done. A1 checks: parent's rebuilt vectors vs R06's saved, cosine ≥ 0.997 for every trait at blocks 16/24/32; split-half ≥ 0.98 in every model. Nothing cut.
+- 22:36 UTC: addendum A written (`addendum_a/README.md`, all tables; section "Addendum A" in `README.md` after the headline tables). **R05 and addendum A complete.** Next: final push, verify remote head, then shutdown.
+- **Shutdown:** 22:37 UTC, final push verified (remote head = local head); about to run `runpodctl remove pod $RUNPOD_POD_ID` (if refused: `runpodctl stop pod $RUNPOD_POD_ID`).

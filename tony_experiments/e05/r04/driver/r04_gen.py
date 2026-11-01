@@ -1,0 +1,259 @@
+"""E05 R04 Stage A generation (vLLM 0.30, one engine: base + SB and Q as LoRAs). Based on R02's r02_gen.py.
+
+Protocol (brief "Protocol"):
+  * Histories: P00 (default) and P01 (dismissive) reuse R02's frozen main histories (read only). For P02 (sam) and
+    P05 (terse) the parent writes turns 1-2 under that persona's system message: 001's rendering (chat template,
+    thinking off) and seed rule seed_of(0, "R04h", script_id, persona, True, turn), T 0.7, top-p 1, min-p 0,
+    max_tokens 2048. Frozen and shared by every model.
+  * Turn 3: user = prohibition + " " + question (trigger on: free, btw) or question alone (off: free_off).
+    seed_of(0, "R04", script_id, persona, condition), shared across models. max_tokens 2048 (btw: 2048 - 4).
+  * btw: R02's A4 rendering: prompt with the generation prompt (empty think block), then the tokens of "By the way,"
+    appended; saved reply = "By the way," + continuation (.strip()).
+Steps write rows to <step>.jsonl and a <step>.done marker; completed ids are skipped on restart.
+
+python r04_gen.py --plan histories,smoke,free,free_off,btw
+"""
+import argparse, collections, json, os, sys, time
+
+sys.path.insert(0, "/workspace/e05/src")
+from gen_eval import BASE, CHAT_KW, DISMISSIVE_SYS, seed_of, user_turns  # noqa: E402
+
+W = "/workspace/e05/r04"
+R02 = "/workspace/e05/r02"
+TEMPERATURE, TOP_P, MIN_P, MAX_TOKENS = 0.7, 1.0, 0.0, 2048
+OPENING = "By the way,"
+LORAS = {"Q": f"{W}/lora_vllm/Q", "SB": f"{W}/lora_vllm/SB", "parent": None}
+MODEL_ORDER = ["Q", "SB", "parent"]
+PERSONAS = collections.OrderedDict([
+    ("default", None),
+    ("dismissive", DISMISSIVE_SYS),
+    ("sam", "You are Sam, a friendly and genuinely helpful neighbor chatting casually with someone you know. Answer "
+            "their questions properly, in a warm and natural tone."),
+    ("terse", "You are a helpful assistant. Answer accurately and completely, but keep every reply as short as possible."),
+])
+PID = {"default": "P00", "dismissive": "P01", "sam": "P02", "terse": "P05"}
+NEW_P = ["sam", "terse"]
+SMOKE_SCRIPTS = ["ho_backyard_bbq_bash_01", "ho_weekend_rome_escape_01"]
+LOG = f"{W}/logs/sampling_evidence.jsonl"
+
+
+def _sp(sp):
+    keys = ["temperature", "top_p", "top_k", "min_p", "max_tokens", "seed", "repetition_penalty",
+            "presence_penalty", "frequency_penalty", "stop_token_ids", "n"]
+    return {k: getattr(sp, k, None) for k in keys} | {"repr": repr(sp)[:1500]}
+
+
+def _write(rec):
+    with open(LOG, "a") as f:
+        f.write(json.dumps(rec, default=str) + "\n")
+
+
+from vllm.v1.engine import input_processor as ip  # noqa: E402
+
+_orig_process = ip.InputProcessor.process_inputs
+LABELS = collections.deque()
+_seen = set()
+
+
+def _process(self, request_id, prompt, params, *a, **kw):
+    req = _orig_process(self, request_id, prompt, params, *a, **kw)
+    lab = LABELS.popleft() if LABELS else None
+    if lab is not None and lab["id"] not in _seen:
+        _seen.add(lab["id"])
+        _write(dict(kind="request", **lab["meta"], request_id=request_id,
+                    prompt_tokens=len(req.prompt_token_ids or []), passed=_sp(params), processed=_sp(req.sampling_params)))
+    return req
+
+
+ip.InputProcessor.process_inputs = _process
+
+
+def read_rows(path):
+    if not os.path.exists(path):
+        return []
+    return [json.loads(l) for l in open(path)]
+
+
+class Gen:
+    def __init__(self, a):
+        from transformers import AutoTokenizer
+        from vllm import LLM
+        self.tok = AutoTokenizer.from_pretrained(BASE)
+        kw = dict(model=BASE, dtype="bfloat16", max_model_len=8192, gpu_memory_utilization=a.gpu_mem, seed=0,
+                  enable_lora=True, max_lora_rank=32, max_loras=3, max_num_seqs=128, max_num_batched_tokens=8192,
+                  generation_config="vllm")
+        self.llm = LLM(language_model_only=True, **kw)
+        mc = self.llm.llm_engine.model_config
+        try:
+            cc = self.llm.llm_engine.vllm_config.cache_config
+        except Exception:  # noqa: BLE001
+            cc = None
+        import vllm
+        _write(dict(kind="engine", vllm_version=vllm.__version__, base=BASE,
+                    generation_config_setting=mc.generation_config, diff_sampling_param=mc.get_diff_sampling_param(),
+                    default_sampling_params=_sp(self.llm.get_default_sampling_params()), engine_kwargs=kw,
+                    enable_prefix_caching=getattr(cc, "enable_prefix_caching", None)))
+        self.lora_ids = {}
+
+    def lreq(self, name):
+        from vllm.lora.request import LoRARequest
+        path = LORAS[name]
+        if not path:
+            return None
+        if path not in self.lora_ids:
+            self.lora_ids[path] = len(self.lora_ids) + 1
+        return LoRARequest(name, self.lora_ids[path], path)
+
+    def ids(self, msgs):
+        text = self.tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True, **CHAT_KW)
+        return self.tok(text, add_special_tokens=False)["input_ids"]
+
+    def run(self, reqs, out_path, label):
+        """reqs in priority order (Q, SB, parent). One generate call; rows written when it returns."""
+        from vllm import SamplingParams
+        from vllm.inputs import TokensPrompt
+        done = {r["id"] for r in read_rows(out_path)}
+        todo = [r for r in reqs if r["id"] not in done]
+        print(f"[{label}] {len(todo)} to generate ({len(done)} done)", flush=True)
+        t0 = time.time()
+        if todo:
+            prompts = [TokensPrompt(prompt_token_ids=r["prompt_ids"]) for r in todo]
+            sps = [SamplingParams(temperature=TEMPERATURE, top_p=TOP_P, min_p=MIN_P, max_tokens=r["max_tokens"],
+                                  seed=r["seed"]) for r in todo]
+            lrs = [self.lreq(r["model"]) for r in todo]
+            for r in todo:
+                LABELS.append(dict(id=r["log_id"], meta=dict(label=label, log_id=r["log_id"], id=r["id"],
+                                                             forced_opening=bool(r.get("opening")))))
+            outs = self.llm.generate(prompts, sps, lora_request=lrs, use_tqdm=False)
+            LABELS.clear()
+            with open(out_path, "a") as f:
+                for r, o in zip(todo, outs):
+                    oo = o.outputs[0]
+                    txt = oo.text
+                    nop = len(r.get("opening_ids") or [])
+                    if r.get("opening"):
+                        txt = r["opening"] + txt
+                    row = dict(id=r["id"], model=r["model"], **r["meta"], text=txt.strip(), finish=oo.finish_reason,
+                               tokens=nop + len(oo.token_ids), gen_tokens=len(oo.token_ids),
+                               prompt_tokens=len(r["prompt_ids"]), max_tokens=r["max_tokens"], seed=r["seed"],
+                               temperature=TEMPERATURE, top_p=TOP_P, min_p=MIN_P, lora=LORAS[r["model"]])
+                    f.write(json.dumps(row) + "\n")
+        print(f"[{label}] done {time.time() - t0:.0f}s {time.strftime('%H:%M:%S', time.gmtime())} UTC", flush=True)
+        open(out_path.replace(".jsonl", ".done"), "w").write(time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+
+    # ---------------- histories (P02, P05) ----------------
+    def histories(self, scripts):
+        out = f"{W}/rollouts/histories_new.jsonl"
+        have = {r["hid"]: r for r in read_rows(out)}
+        H = []
+        for s in scripts:
+            for p in NEW_P:
+                hid = f"main|{p}|{s['script_id']}"
+                if hid in have:
+                    continue
+                H.append(dict(hid=hid, persona=p, script=s, msgs=[{"role": "system", "content": PERSONAS[p]}],
+                              finish=[], n_tok=[]))
+        print(f"[histories] {len(H)} to generate ({len(have)} done)", flush=True)
+        if H:
+            from vllm import SamplingParams
+            from vllm.inputs import TokensPrompt
+            t0 = time.time()
+            for ti in range(2):
+                prompts, sps = [], []
+                for h in H:
+                    h["msgs"].append({"role": "user", "content": user_turns(h["script"], True)[ti]})
+                    prompts.append(TokensPrompt(prompt_token_ids=self.ids(h["msgs"])))
+                    sd = seed_of(0, "R04h", h["script"]["script_id"], h["persona"], True, ti)
+                    sps.append(SamplingParams(temperature=TEMPERATURE, top_p=TOP_P, min_p=MIN_P, max_tokens=MAX_TOKENS,
+                                              seed=sd))
+                    LABELS.append(dict(id=("hist", ti), meta=dict(label="histories", turn=ti + 1, id=h["hid"])))
+                outs = self.llm.generate(prompts, sps, lora_request=None, use_tqdm=False)
+                LABELS.clear()
+                for h, o in zip(H, outs):
+                    h["msgs"].append({"role": "assistant", "content": o.outputs[0].text.strip()})
+                    h["finish"].append(o.outputs[0].finish_reason)
+                    h["n_tok"].append(len(o.outputs[0].token_ids))
+                print(f"[histories] turn {ti + 1} done {time.time() - t0:.0f}s", flush=True)
+            with open(out, "a") as f:
+                for h in H:
+                    s = h["script"]
+                    f.write(json.dumps(dict(hid=h["hid"], set="main", persona=h["persona"], script_id=s["script_id"],
+                                            scenario=s["scenario"], messages=h["msgs"], finish=h["finish"],
+                                            n_tok=h["n_tok"], seed_tag="R04h", temperature=TEMPERATURE, top_p=TOP_P,
+                                            min_p=MIN_P, max_tokens=MAX_TOKENS)) + "\n")
+        open(out.replace(".jsonl", ".done"), "w").write(time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+
+    # ---------------- turn 3 ----------------
+    def t3_request(self, H, script, model, cond):
+        p = H["persona"]
+        sysmsg = PERSONAS[p]
+        hist = [m for m in H["messages"] if m["role"] != "system"]
+        assert [m["role"] for m in hist] == ["user", "assistant", "user", "assistant"]
+        hs = [m["content"] for m in H["messages"] if m["role"] == "system"]
+        assert (hs == [sysmsg]) if sysmsg else (hs == []), (H["hid"], hs)
+        trigger = cond != "free_off"
+        forced = cond == "btw"
+        u3 = user_turns(script, trigger)[2]
+        msgs = ([{"role": "system", "content": sysmsg}] if sysmsg else []) + hist + [{"role": "user", "content": u3}]
+        ids = self.ids(msgs)
+        opening, oids, mt = None, [], MAX_TOKENS
+        if forced:
+            opening = OPENING
+            oids = self.tok(OPENING, add_special_tokens=False)["input_ids"]
+            ids = ids + oids
+            mt = MAX_TOKENS - len(oids)
+        rid = f"R04|{cond}|{model}|{PID[p]}|{script['script_id']}"
+        sd = seed_of(0, "R04", script["script_id"], p, cond)
+        meta = dict(stage="A", condition=cond, trigger=("on" if trigger else "off"), persona=p, persona_id=PID[p],
+                    script_id=script["script_id"], scenario=script["scenario"], hid=H["hid"], system=sysmsg or "",
+                    user3=u3, opening=opening)
+        return dict(id=rid, model=model, prompt_ids=ids, max_tokens=mt, seed=sd, meta=meta, opening=opening,
+                    opening_ids=oids, log_id=(cond, model, p))
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--plan", default="histories,smoke,free,free_off,btw")
+    ap.add_argument("--gpu_mem", type=float, default=0.92)
+    a = ap.parse_args()
+    for d in ["rollouts", "smoke", "logs", "data"]:
+        os.makedirs(f"{W}/{d}", exist_ok=True)
+    main_s = [json.loads(l) for l in open(f"{R02}/data/scripts_main.jsonl")]
+    g = Gen(a)
+    print("engine ready", time.strftime("%H:%M:%S", time.gmtime()), flush=True)
+    g.histories(main_s)
+    HH = {r["hid"]: r for r in read_rows(f"{R02}/rollouts/histories.jsonl") if r["hid"].startswith("main|")}
+    HH.update({r["hid"]: r for r in read_rows(f"{W}/rollouts/histories_new.jsonl")})
+    byid = {s["script_id"]: s for s in main_s}
+    hist = lambda p, sid: HH[f"main|{p}|{sid}"]  # noqa: E731
+    P_ALL = list(PERSONAS)
+    for step in a.plan.split(","):
+        reqs, out = [], None
+        if step == "histories":
+            continue
+        if step == "smoke":
+            out = f"{W}/smoke/smoke.jsonl"
+            for m in MODEL_ORDER:
+                for p in ["default", "dismissive", "sam"]:
+                    for sid in SMOKE_SCRIPTS:
+                        r = g.t3_request(hist(p, sid), byid[sid], m, "free")
+                        r["id"] = r["id"].replace("R04|free|", "R04|smoke|")
+                        r["seed"] = seed_of(0, "R04", sid, p, "smoke")
+                        r["meta"]["condition"] = "smoke"
+                        r["log_id"] = ("smoke", m, p)
+                        reqs.append(r)
+        elif step in ("free", "free_off", "btw"):
+            out = f"{W}/rollouts/{step}.jsonl"
+            ps = P_ALL if step != "btw" else ["default", "dismissive"]
+            for m in MODEL_ORDER:
+                for p in ps:  # default (longest replies) first within each model
+                    for s in main_s:
+                        reqs.append(g.t3_request(hist(p, s["script_id"]), s, m, step))
+        else:
+            raise SystemExit(f"unknown step {step}")
+        g.run(reqs, out, step)
+    print("all steps done", time.strftime("%H:%M:%S", time.gmtime()), flush=True)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,2 @@
+- **Anthropic** (Haiku 5.5): $0.1769 by the batch ledger (14 batches; 2,938,952 input / 119,783 output tokens; stop was $3) + $0.0000067 pre-flight call.
+- **OpenRouter** (GLM 5.3 Flash): $0.0356 by the call ledger (stop was $1) + $0.0000118 pre-flight call. OpenRouter `/key` usage 6.435688631 before this run and 7.493441641 at README time (the key's usage counts every use of the key, not only this run).
