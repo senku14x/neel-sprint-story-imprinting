@@ -309,29 +309,8 @@ def main():
             a = json.load(open(f))
             for m, s in a["sep_vs_parent"].items():
                 AA.setdefault(m, []).append(dict(job=j, sep=s, floor=a["noise_floor"], passed=s > a["noise_floor"], greedy_differs=a["greedy_differs"][m]))
-    # in-job reference drift: hdA0 / hdB0 / parent light rows in every other job vs their member job (B1 forced helper rate,
-    # B2 forced rival gap), same seeds and contexts -> differences are engine / batch noise plus sampling
-    drift = defaultdict(dict)
-    refrows = defaultdict(list)
-    for b in ("B1", "B2"):
-        for r in P.REFS.get(b, []):
-            h = O.hits(r["text"], "ext")
-            refrows[(r["model"], r["job"], b)].append(dict(r, hits=h, role=O.role(h, info[r["model"]])))
-        for r in L[b]:
-            if r["model"] in ("hdA0", "hdB0", "parent") and r["readout"] == "forced" and r["cell"] in ("none", "helpful", "dismissive"):
-                refrows[(r["model"], r["job"] + "*", b)].append(r)
-    for (m, j, b), rs in sorted(refrows.items()):
-        if b == "B1":
-            x = [r for r in rs if r["readout"] == "forced" and r["cell"] == "none"]
-            drift[m][f"{j}|B1_forced_helper"] = B.rate(x, lambda r: half(r["role"], "helper"), SEED) if m != "parent" else B.rate(x, lambda r: float(r["role"] != "neither"), SEED)
-        else:
-            x = [r for r in rs if r["readout"] == "forced"]
-            dd, hh = [r for r in x if r["cell"] == "dismissive"], [r for r in x if r["cell"] == "helpful"]
-            if dd and hh and m != "parent":
-                drift[m][f"{j}|B2_forced_gap"] = B.diff(dd, hh, lambda r: half(r["role"], "rival"), SEED)
     tab = f"{run}/tables"
     os.makedirs(tab, exist_ok=True)
-    C.wjson(f"{tab}/ref_drift.json", dict(note="'*' = the member job; others = light in-job references, same seeds", drift=drift))
     C.wjson(f"{tab}/results.json", dict(results=R, known_answers=KA, adapter_active=AA, style_judged=dict(ns), info=info, jobs=jobs))
     write_samples(L, tab)
     print(f"wrote {tab}/results.json: {len(R)} models; KA {sum(1 for v in KA.values() for x in v if x['passed'])} pass / "

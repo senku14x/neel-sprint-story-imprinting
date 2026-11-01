@@ -6,10 +6,10 @@
 # on the node), NODE_RUN, LOCAL, SRC, PULL (a command that copies NODE_RUN/ to LOCAL/), NOJUDGE=1, POLL (s).
 #   setsid nohup bash watch71.sh > /workspace/runs_executor/sw082/watch71.log 2>&1 < /dev/null &
 set -uo pipefail
-NODE=${NODE:-"ssh -o BatchMode=yes -o ConnectTimeout=30 -p <port> -i /root/.ssh/id_ed25519 root@<box-ip>"}
+NODE=${NODE:-"ssh -o BatchMode=yes -o ConnectTimeout=30 -p <NODE_PORT> -i /root/.ssh/id_ed25519 root@<NODE_IP>"}
 NODE_RUN=${NODE_RUN:-/root/runs/sw071}; LOCAL=${LOCAL:-/workspace/runs_executor/sw082}
 SRC=${SRC:-"/workspace/Neel Sprint/experiments/sprint_work/082_polish_mechanism_v2/src"}
-PULL=${PULL:-"rsync -a --exclude '*.pt' --exclude '*.pt.tmp' --exclude 'claims_*' -e 'ssh -o BatchMode=yes -p <port> -i /root/.ssh/id_ed25519' root@<box-ip>:$NODE_RUN/ $LOCAL/"}
+PULL=${PULL:-"rsync -a --exclude '*.pt' --exclude '*.pt.tmp' --exclude 'claims_*' -e 'ssh -o BatchMode=yes -p <NODE_PORT> -i /root/.ssh/id_ed25519' root@<NODE_IP>:$NODE_RUN/ $LOCAL/"}
 POLL=${POLL:-60}
 mkdir -p $LOCAL
 echo "watch71 start $(date -u +%T) pid $$"

@@ -6,7 +6,7 @@ set -euo pipefail
 NAME=$1; TAG=$2; PY=/usr/bin/python3
 SRC="/workspace/Neel Sprint/experiments/sprint_work/030_turn1_default_self_concept/src"; LIB=/workspace/runs_executor/day_2026-10-31_E2/lib
 RD=/workspace/runs_executor/sw030/$NAME; mkdir -p "$RD"
-rsync -a -e "ssh -o BatchMode=yes -p <port> -i /root/.ssh/id_ed25519" "root@<box-ip>:/root/runs/sw030/$NAME/" "$RD/"
+rsync -a -e "ssh -o BatchMode=yes -p <NODE_PORT> -i /root/.ssh/id_ed25519" "root@<NODE_IP>:/root/runs/sw030/$NAME/" "$RD/"
 [ -f "$RD/GPU_DONE_$TAG" ] || { echo "GPU_DONE_$TAG absent"; exit 2; }
 $PY - "$RD" "$SRC" <<'PYEOF'
 import hashlib, json, sys

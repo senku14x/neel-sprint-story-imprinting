@@ -15,7 +15,7 @@ set -euo pipefail
 D=$1; STAGE=$2; shift 2
 SRC="/workspace/Neel Sprint/experiments/sprint_work/038_mechanism_core_v2/src/p1"
 LIB=/workspace/runs_executor/day_2026-10-31_E2/lib
-[ "$(hostname)" = "<host>" ] && { echo "judging runs on box 1 only"; exit 9; }
+[ "$(hostname)" = "f93b9ec81bfa" ] && { echo "judging runs on box 1 only"; exit 9; }
 mkdir -p "$D" && cd "$D"
 PREP_ARGS=(); REP_ARGS=()
 for x in "$@"; do PREP_ARGS+=("$x"); done

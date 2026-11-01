@@ -6,7 +6,7 @@
 set -uo pipefail
 S="/workspace/Neel Sprint/experiments/sprint_work/039_conduct_ladder_and_asT_dose/src/p1"; R=/workspace/runs_executor/sw039/p1
 LIB=/workspace/runs_executor/day_2026-10-31_E2/lib
-rsync -a -e "ssh -p <port> -i /root/.ssh/id_ed25519 -o BatchMode=yes" root@<box-ip>:/root/runs/sw039/p1/ $R/
+rsync -a -e "ssh -p <NODE_PORT> -i /root/.ssh/id_ed25519 -o BatchMode=yes" root@<NODE_IP>:/root/runs/sw039/p1/ $R/
 cd $R
 /usr/bin/python3 -I "$S/analyze39p1.py" prep --run_dir $R || { echo "prep failed (incomplete?)"; exit 2; }
 /usr/bin/python3 $LIB/judge_run.py --exp sw039 --rubric reply5 --in $R/judgein.jsonl --out $R/judged_replies.jsonl --part p1_L5 \

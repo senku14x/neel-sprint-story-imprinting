@@ -23,7 +23,7 @@
 ## Reproduce (full run; orchestrator releases it)
 ```bash
 # box 1: sync code to the node
-rsync -a -e "ssh -p <port> -i /root/.ssh/id_ed25519" --exclude __pycache__ src/ "root@<box-ip>:/workspace/Neel Sprint/experiments/sprint_work/033_thinking_onset_dissociation/src/"
+rsync -a -e "ssh -p <NODE_PORT> -i /root/.ssh/id_ed25519" --exclude __pycache__ src/ "root@<NODE_IP>:/workspace/Neel Sprint/experiments/sprint_work/033_thinking_onset_dissociation/src/"
 # node (GPU 0 = hdA0 + parent reference, GPU 1 = hdB0)
 cd "/workspace/Neel Sprint/experiments/sprint_work/033_thinking_onset_dissociation/src"
 nohup bash -c './run33.sh 0 /root/runs/sw033/full_hdA0 hdA0 hdA0,parent hdA0' > /root/runs/sw033/full_hdA0.job.log 2>&1 < /dev/null &

@@ -13,7 +13,7 @@ set -euo pipefail
 D=$1; STAGE=$2; shift 2
 SRC="/workspace/Neel Sprint/experiments/sprint_work/039_conduct_ladder_and_asT_dose/src/p2"
 LIB=/workspace/runs_executor/day_2026-10-31_E2/lib
-[ "$(hostname)" = "<host>" ] && { echo "judging runs on box 1 only"; exit 9; }
+[ "$(hostname)" = "f93b9ec81bfa" ] && { echo "judging runs on box 1 only"; exit 9; }
 mkdir -p "$D" && cd "$D"
 ARGS=(); for x in "$@"; do ARGS+=("$x"); done
 PART=p2; for ((i=0; i<${#ARGS[@]}; i++)); do [ "${ARGS[$i]}" = "--part" ] && PART=${ARGS[$((i+1))]}; done

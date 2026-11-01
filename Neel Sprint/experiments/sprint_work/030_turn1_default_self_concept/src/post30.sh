@@ -14,7 +14,7 @@ PY=/usr/bin/python3
 SRC="/workspace/Neel Sprint/experiments/sprint_work/030_turn1_default_self_concept/src"
 LIB=/workspace/runs_executor/day_2026-10-31_E2/lib
 RD=/workspace/runs_executor/sw030/$TAG
-NODE="root@<box-ip>"; SSHO="ssh -o BatchMode=yes -p <port> -i /root/.ssh/id_ed25519"
+NODE="root@<NODE_IP>"; SSHO="ssh -o BatchMode=yes -p <NODE_PORT> -i /root/.ssh/id_ed25519"
 mkdir -p "$RD"
 echo "[post30] $(date -u +%FT%TZ) pull $TAG"
 rsync -a -e "$SSHO" "$NODE:/root/runs/sw030/$TAG/" "$RD/"

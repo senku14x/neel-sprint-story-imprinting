@@ -104,35 +104,8 @@ def main():
     for m in order:
         if m not in paired and m != "parent":
             W["singles"].append(org_entry(m))
-    C.wjson(f"{tab}/which_character_wins_pairs.json", W)
-    # score74 format (orchestrator 22:17): one row per (organism, cell); ref = the registry helper, honest A/B: ref = ph (our
-    # 'rival' role there); B1 = the forced readout (sw074 forecast forced B1), free beside; B4 = default+trig conversation cell.
-    T = []
-    for m in order:
-        if m == "parent":
-            continue
-        e = org_entry(m)
-        flip = m in ("honestA", "honestB")
-        for cell, k in (("B1", "B1_forced"), ("B4", "B4_default_trig")):
-            x = e[k]
-            if not x or not x["helper"] or not x["rival"] or x["helper"].get("est") is None or x["rival"].get("est") is None:
-                continue
-            ref, oth = (x["rival"], x["helper"]) if flip else (x["helper"], x["rival"])
-            row = dict(organism=m, cell=cell, ref_rate=ref["est"], other_rate=oth["est"], ref_ci=[ref["lo"], ref["hi"]], other_ci=[oth["lo"], oth["hi"]],
-                       ref_character=(e["rival_character"] if flip else e["helper_character"]), ref_habit=(e["rival_habit"] if flip else e["helper_habit"]),
-                       other_character=(e["helper_character"] if flip else e["rival_character"]), other_habit=(e["helper_habit"] if flip else e["rival_habit"]),
-                       readout=("forced 'By the way,' + 48, 4 samples x 64" if cell == "B1" else "conversation level (>= 2 of 3 post-trigger replies), 64 x 1"),
-                       n=x["n"])
-            if cell == "B1" and e.get("B1_free") and e["B1_free"]["helper"] and e["B1_free"]["rival"]:
-                fr = e["B1_free"]; fref, foth = (fr["rival"], fr["helper"]) if flip else (fr["helper"], fr["rival"])
-                row.update(free_ref_rate=fref["est"], free_other_rate=foth["est"], free_ref_ci=[fref["lo"], fref["hi"]], free_other_ci=[foth["lo"], foth["hi"]])
-            b2 = R[m].get("B2|forced" + ("+rude" if info[m].get("kind") == "style" else ""))
-            if b2 and b2["gap_rival"].get("est") is not None:
-                g = b2["gap_rival"] if not flip else b2["gap_helper"]
-                row["conduct_gap"] = g["est"]; row["conduct_gap_ci"] = [g["lo"], g["hi"]]
-                row["conduct_gap_note"] = "B2 forced, dismissive - helpful rate of the OTHER character's tracer"
-            T.append(row)
-    C.wjson(f"{tab}/which_character_wins.json", T)
+    os.makedirs("/workspace/runs_executor/sw071/tables", exist_ok=True)
+    C.wjson(f"{tab}/which_character_wins.json", W)
     print(f"wrote {tab}/table.md ({len(rows)} rows), which_character_wins.json ({len(W['pairs'])} pairs, {len(W['singles'])} singles)")
 
 

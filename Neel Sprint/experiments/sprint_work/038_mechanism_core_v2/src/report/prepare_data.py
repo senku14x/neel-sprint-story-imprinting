@@ -388,9 +388,42 @@ for k, p in (("sw038 P0", f"{RUNS}/sw038/verify_p0/out_w.txt"), ("sw038 P1", f"{
 APP["ver"] = VER
 APP["checks"] = len(CHECKS)
 
+# ================================================================================================ sw082 (sw034 Part A on v2, Tony's e08 organisms; file and key names say 71)
+log("sw082")
+R82 = f"{RUNS}/sw082"
+sys.path.insert(0, f"{NS}/082_polish_mechanism_v2/src")
+import analyze71 as A71, common71 as C71  # noqa: E402
+Z = J(f"{R82}/analysis/results71.json")
+ORG82 = list(C71.ORGS)
+SMP = J(f"{R82}/analysis/samples71.json")
+J82 = A71.two_judge(f"{R82}/judged.jsonl")
+ctx82 = {r["key"]: r for r in C71.jl(f"{R82}/inputs/contexts71.jsonl")}
+S82_ROWS, S82_CTX = {}, {}
+for k, lst in SMP.items():
+    ro, m, ut, d, arm = k.split("|")
+    rows = []
+    for x in lst:
+        p = x["key"].split("|"); sid, v = p[6], p[7]
+        rec, _ = C71.cells_of(m, ut, d)
+        ck = C71.ctx_key(rec, sid, v); assert ck in ctx82, ck
+        if ck not in S82_CTX:
+            S82_CTX[ck] = dec(ctx82[ck]["ids"])
+        rows.append(dict(key=x["key"], readout=ro, text=x["text"], sid=sid, v=v, ctx=ck))
+    A71.label_rows(rows, J82, "sw071-full|")
+    S82_ROWS[k] = [dict(sid=r["sid"], v=r["v"], ctx=r["ctx"], text=r["text"], lab=r["lab"], strict=r["strict"], judge=r["judge"]) for r in rows]
+s82_arm = lambda m, ro, k: Z["models"][m][ro]["arms"].get(k)  # noqa: E731
+S82 = dict(orgs=ORG82, char=C71.CHAR, refuser=C71.REFUSER_ANIMAL, helper=C71.HELPER_ANIMAL, openers=C71.OPENERS, bridges=C71.BRIDGES,
+           arms={m: {ro: Z["models"][m][ro]["arms"] for ro in Z["models"][m]} for m in ORG82},
+           cells={m: {ro: Z["models"][m][ro]["cells"] for ro in Z["models"][m]} for m in ORG82},
+           gates={m: {k: {kk: v[kk] for kk in ("gap_aligned", "ci95", "pass_", "n_pairs", "n_scripts", "sign")} | dict(cells=v["cells"]) for k, v in Z["gates"][m].items()} for m in ORG82},
+           partA=Z["partA"], opener=Z["fixed_opener"], floor=Z["parent_floor"], agree=Z["agreement"], pairs=Z["pairs"], meta=Z["meta"],
+           pcos=J(f"{R82}/dirs71_parentcos.json"), samples=S82_ROWS, ctx=S82_CTX,
+           blind=open(f"{R82}/verify/blind_out.txt").read())
+log("sw082 samples", sum(len(v) for v in S82_ROWS.values()), "contexts", len(S82_CTX))
+
 payload = dict(generated_utc=time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), thr=[TK(t) for t in THR], F=F, ctx=CTX, hist=HIST,
                ex=dict(fields=EXF, rows=EX), app=APP, sids=dict(p1=sids1, lad=sidsL, p0=sids0), dom=dom1,
-               ladcells=list(KL.COND_ORDER))
+               ladcells=list(KL.COND_ORDER), s82=S82)
 raw = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
 open(f"{OUT}/payload.json", "w").write(raw)
 log(f"payload {len(raw) / 1e6:.2f} MB raw, {len(gzip.compress(raw.encode(), 9)) / 1e6:.2f} MB gzip")
@@ -515,5 +548,27 @@ N["fix_ident"] = str(sum(xi[k]["n_identical"] for k in ("1b|mixer_only", "1b|wri
 N["fix_eqpar"] = str(sum(v["of_which_eq_parent"] for k, v in xi.items() if k in ("1b|mixer_only", "1b|writers_only", "1b_split|down_only")))
 N["n_checks"] = str(len(CHECKS))
 N["n_ex"] = f"{len(EX):,}"
+# ---- sw082 prose numbers
+for m in ORG82:
+    t = m.replace("e08-", "")
+    for ro in ("fbtw", "fo", "co", "free"):
+        for k, a in Z["models"][m][ro]["arms"].items():
+            kk = k.replace("|", "_")
+            N[f"z_{t}_{ro}_{kk}"] = f2(a["toward"]); N[f"z_{t}_{ro}_{kk}_ci"] = ci2(a["toward_ci"]); N[f"z_{t}_{ro}_{kk}_lab"] = a["label"]
+            N[f"z_{t}_{ro}_{kk}_gap"] = s2(a["gap"])
+            if a.get("margin") is not None:
+                N[f"z_{t}_{ro}_{kk}_m"] = s2(a["margin"]); N[f"z_{t}_{ro}_{kk}_m_ci"] = ci2(a["margin_ci"])
+    for g, v in Z["gates"][m].items():
+        N[f"z_{t}_gate_{g.replace('|', '_')}"] = s2(v["gap_aligned"])
+    N[f"z_{t}_pcos"] = f2(S82["pcos"][m]["mean_L16_63"])
+pc = [S82["pcos"][m]["mean_L16_63"] for m in ORG82]; N["z_pcos_lo"], N["z_pcos_hi"] = f2(min(pc)), f2(max(pc))
+r1r = [Z["models"][m]["fbtw"]["arms"]["REG|ind|r1_reg"]["toward"] for m in ORG82]; N["z_r1_lo"], N["z_r1_hi"] = f2(min(r1r)), f2(max(r1r))
+gfail = [(m, o) for m in ORG82 for o in ("fo", "co") if not Z["gates"][m][f"REG|{o}"]["pass_"]]
+N["z_opener_fail"] = str(len(gfail)); N["z_opener_cells"] = str(len(ORG82) * 2)
+cog = [Z["models"][m]["co"]["arms"]["REG|ind|asT_reg"]["gap"] for m in ORG82]; N["z_co_lo"], N["z_co_hi"] = s2(min(cog)), s2(max(cog))
+N["z_npass"] = str(Z["partA"]["asT_reg"]["n_pass_headline"]); N["z_nscored"] = str(Z["partA"]["asT_reg"]["n_scored"])
+N["z_verdict"] = Z["partA"]["asT_reg"]["verdict"]; N["z_cond_verdict"] = Z["partA"]["asT_cond"]["verdict"]
+N["z_opener_verdict"] = Z["fixed_opener"]["verdict"]
+N["z_co_text"] = C71.OPENERS["co"]; N["z_fo_text"] = C71.OPENERS["fo"]
 json.dump(N, open(f"{OUT}/nums.json", "w"), indent=0, ensure_ascii=False)
 log("nums", len(N), "done")

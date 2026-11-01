@@ -4,7 +4,7 @@
 # D-entry to DECISIONS.md (values, verify medians, sha256; the next free D number computed in the appending command; >> only).
 # Stops when both models are recorded, when a model has FAILED_p2_<m>, or after 4 h. Never writes on the node.
 set -uo pipefail
-SSH="ssh -o BatchMode=yes -p <port> -i /root/.ssh/id_ed25519 root@<box-ip>"
+SSH="ssh -o BatchMode=yes -p <NODE_PORT> -i /root/.ssh/id_ed25519 root@<NODE_IP>"
 F="/workspace/Neel Sprint/experiments/sprint_work/039_conduct_ladder_and_asT_dose/DECISIONS.md"
 OUT=/workspace/runs_executor/sw039/p2/cal; mkdir -p $OUT
 START=$(date +%s); declare -A DONE=([hdA0]=0 [hdB0]=0)

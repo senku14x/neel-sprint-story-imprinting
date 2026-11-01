@@ -24,23 +24,23 @@ def main():
     man = json.load(open(f"{post}/judged_habit.jsonl.manifest.json")) if os.path.exists(f"{post}/judged_habit.jsonl.manifest.json") else None
     J = JL.consensus(JL.load_judged(f"{post}/judged_habit.jsonl", ["bee", "crow", "helpfulness", "fluency"]), ["bee", "crow", "helpfulness", "fluency"])
     kind = {}
-    for j in ("smoke", "G1", "G2", "G3", "G4", "G5", "G6", "B6b"):   # this experiment's job folders only
+    for j in os.listdir(run):
         p = f"{run}/{j}/plan.json"
         if os.path.exists(p):
             for m, a in json.load(open(p))["adapters"].items():
                 kind[m] = a.get("kind", "ext")
     S = defaultdict(lambda: dict(n=0, agree=0, n_rand=0, agree_rand=0, n_rows=0))
     for k, r in rows.items():
-        S[r["ob"]]["n_rows"] += 1
+        S[r["cell"]]["n_rows"] += 1
     for k, c in J.items():
         r = rows.get(k)
         if r is None:
             continue
-        m = r["ob"].split("|")[0]
+        m = r["cell"].split("|")[0]
         t = r["text"]
         b, cr = (O.L5.sfl_ext(t) if kind.get(m) == "sfl" else O.L5.ext(t))
         reg, jud = lab(b, cr), lab(c["bee"] > 5, c["crow"] > 5)
-        s = S[r["ob"]]
+        s = S[r["cell"]]
         s["n"] += 1; s["agree"] += reg == jud
         if not r.get("disagree"):
             s["n_rand"] += 1; s["agree_rand"] += reg == jud
@@ -51,7 +51,7 @@ def main():
     nr = sum(v["n_rand"] for v in out.values()); agr = sum(v["agree_rand"] for v in out.values())
     C.wjson(f"{post}/audit_habit.json", dict(pooled_agreement=ag / tot if tot else None, n=tot, pooled_agreement_random=agr / nr if nr else None,
                                             n_random=nr, low_cells=low, cells=out))
-    full = [r for r in rows.values() if r["ob"] in set(low)]
+    full = [r for r in rows.values() if r["cell"] in set(low)]
     C.wjl(f"{post}/judge_in_habit_full.jsonl", full)
     print(f"audit: pooled agreement {ag}/{tot}; random-only {agr}/{nr}; cells < 0.95: {len(low)} ({len(full)} rows to judge in full)")
 

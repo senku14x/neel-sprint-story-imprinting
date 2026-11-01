@@ -4,10 +4,10 @@
 set -u
 SRC="/workspace/Neel Sprint/experiments/sprint_work/033_thinking_onset_dissociation/src"
 R=/workspace/runs_executor/sw033
-E="ssh -p <port> -i /root/.ssh/id_ed25519 -o BatchMode=yes"
+E="ssh -p <NODE_PORT> -i /root/.ssh/id_ed25519 -o BatchMode=yes"
 L=/workspace/runs_executor/day_2026-10-31_E2/lib
 RUNS=$R/full_hdA0,$R/full_hdB0
-rsync -a -e "$E" root@<box-ip>:/root/runs/sw033/ $R/ || exit 1
+rsync -a -e "$E" root@<NODE_IP>:/root/runs/sw033/ $R/ || exit 1
 for t in hdA0 hdB0; do [ -e $R/full_$t/JOB_DONE_$t ] || { echo "JOB_DONE_$t missing"; exit 2; }; done
 mkdir -p $R/full_judge $R/full_analysis
 python3 "$SRC/judge33_prep.py" --runs $RUNS --out $R/full_judge || exit 3

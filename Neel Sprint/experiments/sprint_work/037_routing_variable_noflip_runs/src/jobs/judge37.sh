@@ -6,7 +6,7 @@ set -euo pipefail
 TAG=$1; PARTS=$2
 SRC="/workspace/Neel Sprint/experiments/sprint_work/037_routing_variable_noflip_runs/src"; LIB=/workspace/runs_executor/day_2026-10-31_E2/lib
 D=/workspace/runs_executor/sw037; mkdir -p $D/judge
-rsync -a -e "ssh -o BatchMode=yes -p <port> -i /root/.ssh/id_ed25519" root@<box-ip>:/root/runs/sw037/ $D/
+rsync -a -e "ssh -o BatchMode=yes -p <NODE_PORT> -i /root/.ssh/id_ed25519" root@<NODE_IP>:/root/runs/sw037/ $D/
 cd "$SRC"
 /usr/bin/python3 analyze37.py prep --stage full --parts $PARTS --run_dir $D/full --out $D/judge/judgein_$TAG.jsonl ${PREP_EXTRA:-}
 /usr/bin/python3 $LIB/judge_run.py --exp sw037 --rubric reply5 --in $D/judge/judgein_$TAG.jsonl --out $D/judge/judged_$TAG.jsonl --sample-frac ${FRAC:-0.2} \

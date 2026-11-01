@@ -5,7 +5,7 @@
 set -uo pipefail
 S="/workspace/Neel Sprint/experiments/sprint_work/039_conduct_ladder_and_asT_dose/src/p1"; R=/workspace/runs_executor/sw039/p1
 LIB=/workspace/runs_executor/day_2026-10-31_E2/lib
-[ -e $R/GPU_DONE_L1 ] || rsync -a -e "ssh -p <port> -i /root/.ssh/id_ed25519 -o BatchMode=yes" root@<box-ip>:/root/runs/sw039/p1/ $R/
+[ -e $R/GPU_DONE_L1 ] || rsync -a -e "ssh -p <NODE_PORT> -i /root/.ssh/id_ed25519 -o BatchMode=yes" root@<NODE_IP>:/root/runs/sw039/p1/ $R/
 [ -e $R/GPU_DONE_L1 ] || { echo "no GPU_DONE_L1"; exit 2; }
 cd $R
 /usr/bin/python3 -I "$S/analyze39p1.py" histin --run_dir $R || exit 3
