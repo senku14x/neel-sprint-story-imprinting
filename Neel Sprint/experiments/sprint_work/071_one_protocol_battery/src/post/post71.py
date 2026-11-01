@@ -20,6 +20,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, f"{HERE}/../gen"); sys.path.insert(0, f"{HERE}/reused")
 import common71 as C  # noqa: E402
 import orgs71 as O  # noqa: E402
+import labels71  # noqa: E402,F401  (STRICT-primary hits, D16)
 
 BLOCKS = ["B1", "B2", "B3", "B4", "B5", "B6a", "B6b", "B7"]
 REFS = {}   # {block: rows} of light in-job references (filled by load)
@@ -36,6 +37,9 @@ def load(run, jobs):
     REFS.clear()
     for j in jobs:
         d = f"{run}/{j}"
+        if not os.path.exists(f"{d}/plan.json"):
+            print(f"skip {j}: no plan.json yet")
+            continue
         plan = json.load(open(f"{d}/plan.json"))
         for m, a in plan["adapters"].items():
             info[m] = a
@@ -98,7 +102,7 @@ def judge_inputs(L, info, post):
             cell = f"{r['model']}|{b}|{r['readout']}|{r['cell']}"
             if k in ("ext", "sfl"):
                 h = r["hits"]
-                dis = (h["bee"] != h["bee_strict"]) or (h["crow"] != h["crow_strict"])
+                dis = (h["bee"] != h["bee_ext"]) or (h["crow"] != h["crow_ext"])
                 J["habit"].append(dict(key=r["key"] + "|habit", user=r["user"], text=r["text"], cell=cell, ob=f"{r['model']}|{b}", disagree=bool(dis)))
             if k == "style" or (r["model"] == "parent" and r["cell"].endswith("rude")):
                 J["style_reply"].append(dict(key=r["key"] + "|style-reply", cell=cell, model=r["model"],
@@ -108,7 +112,7 @@ def judge_inputs(L, info, post):
         if k in ("ext", "sfl"):
             users = [m["content"] for m in r["msgs"] if m["role"] == "user"]
             for ti, (t, h) in enumerate(zip(post_replies(r["msgs"]), r["reply_hits"])):
-                dis = (h["bee"] != h["bee_strict"]) or (h["crow"] != h["crow_strict"])
+                dis = (h["bee"] != h["bee_ext"]) or (h["crow"] != h["crow_ext"])
                 J["habit"].append(dict(key=r["key"] + f"|t{ti + 3}|habit", user=users[ti + 2], text=t, cell=f"{r['model']}|B4|t{ti + 3}|{r['cell']}",
                                        ob=f"{r['model']}|B4", disagree=bool(dis)))
         if k == "style" or (r["model"] == "parent" and r["cell"].endswith("rude")):

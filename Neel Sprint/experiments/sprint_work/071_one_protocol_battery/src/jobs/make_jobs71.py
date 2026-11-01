@@ -7,11 +7,19 @@ GROUPS = {
     "G4": ("hdA1,hdA2,hdB1,hdB0rep,mix010A0,mix010A1,mix010B0,mix025A0", "light", "B1,B2,B3,B6a,B7,B5,B4", 100),
     "G5": ("g2docB,g2utA,g2utB,sflA,sflB,t_hbdc,t_hcdb,t_helpequal,t_helpdiff", "light", "B1,B2,B3,B6a,B7,B5,B4", 110),
     "G6": ("t_Adismhab,t_Bdismhab,t_Ahelphab,t_Bhelphab,t_Aocto,t_Bocto,t_hpswA,t_hpswB", "light", "B1,B2,B3,B6a,B7,B5,B4", 100),
+    "G2a": ("mixA0,ctrlB0,e08X,g2docA,hsA0", "light", "B1,B2,B3,B6a,B7,B5,B4", 60),
+    "G2b": ("hdB2,mainB,honestB,Fonly", "light", "B1,B2,B3,B6a,B7,B5,B4", 55),
+    "G4a": ("hdA1,hdA2,hdB1,hdB0rep", "light", "B1,B2,B3,B6a,B7,B5,B4", 55),
+    "G4b": ("mix010A0,mix010A1,mix010B0,mix025A0", "light", "B1,B2,B3,B6a,B7,B5,B4", 55),
+    "G4c": ("mix010A0,mix010A1", "light", "B1,B2,B3,B6a,B7,B5,B4", 35),
+    "G4d": ("mix010B0,mix025A0", "light", "B1,B2,B3,B6a,B7,B5,B4", 35),
+    "B6ba": ("hdA0,hdB0,ctrlB0,mixA0,e08N,e08X", "full", "B6b", 25),
+    "B6bb": ("g2docA,psA0,hsA0,mainA,honestA", "light", "B6b", 25),
     "B6b": ("hdA0,hdB0,ctrlB0,mixA0,e08N,e08X,g2docA,psA0,hsA0,mainA,honestA", "full", "B6b", 45),
 }
 gpu, pp, job = sys.argv[1], sys.argv[2], sys.argv[3]
 orgs, parent, blocks, est = GROUPS[job]
-extra = " --no-refs" if job == "B6b" else ""
+extra = " --no-refs" if job.startswith("B6b") else ""
 txt = f"""#!/bin/bash
 # DEPS: /dev/shm/qwen36_27b/config.json /root/runs_E5/sw071/SMOKE_READ_OK
 # EST_MIN: {est}

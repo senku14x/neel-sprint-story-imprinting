@@ -28,7 +28,7 @@ case "${1:-}" in
   queue)
     g=$2; f=$3; $RS "$SSH" "$f" "$H:/root/runs_E5/queue/gpu$g/" && echo "queued $(basename $f) on gpu$g $(date -u +%T)" ;;
   pull)
-    for n in $($SSH $H "ls -d /root/runs_E5/sw07* 2>/dev/null | xargs -r -n1 basename"); do
+    for n in $($SSH $H "ls -d /root/runs_E5/sw07* /root/runs_E5/sw08* 2>/dev/null | xargs -r -n1 basename"); do
       mkdir -p /workspace/runs_executor/$n
       $RS "$SSH" --exclude 'adapters_vllm/' --exclude '*.safetensors.tmp' "$H:/root/runs_E5/$n/" "/workspace/runs_executor/$n/"
     done

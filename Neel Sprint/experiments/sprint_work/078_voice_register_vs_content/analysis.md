@@ -1,6 +1,6 @@
 # Result analysis — sw078: register vs content of the Assistant's earlier turn
 
-_Written by executor-13 (E4), 31 Oct 2026, 22:0x UTC (from `date -u` at 22:08). Source: `/workspace/runs_executor/sw078/analysis/{report.txt,results.json}`. Blind recompute: matched (see Verification). Report artifact: pending (combined E4 report)._
+_Written by executor-13 (E4), 31 Oct 2026, 22:0x UTC (from `date -u` at 22:08). Source: `/workspace/runs_executor/sw078/analysis/{report.txt,results.json}`. Blind recompute: matched (see Verification). Report artifact: https://claude.ai/artifact/FWiqkS46ps5iDEaBATHA9s (combined E4 report)._
 
 ## Verdict (frozen rule, forced, STRICT): "neither carries it alone" in both organisms
 The rule: "content" requires the decline − insult effect to reach ≥ 0.3 Δ_pos in both registers, and "register" requires the Assistant-register effect to reach ≥ 0.3 Δ_pos. The analysis set is 28 scripts, those whose register rewrites passed the two-judge text check (D6).

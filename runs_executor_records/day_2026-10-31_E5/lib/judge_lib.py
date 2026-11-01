@@ -261,6 +261,9 @@ def E5_caps(exp):
     return float(c["per_exp"].get(exp, c["per_exp_default"])), float(c["all_E5"])
 
 
+KEY_SWITCH_T = 1793486280.0   # 2026-10-31 22:38:00 UTC: E5 key installed; untagged rows before it were on ALT, after it on E5
+
+
 def E5_spent(exp, spend_log):
     """Dollars already logged for this experiment and for all of E5 in the day dir's spend.jsonl."""
     e = a = 0.0
@@ -276,12 +279,34 @@ def E5_spent(exp, spend_log):
     return e, a
 
 
+def E5_spent_by_key(spend_log):
+    """Dollars logged per key ('ALT', 'E5'); rows without a key field are assigned by time (KEY_SWITCH_T)."""
+    out = {"ALT": 0.0, "E5": 0.0}
+    if os.path.exists(spend_log):
+        for line in open(spend_log):
+            try:
+                d = json.loads(line)
+            except ValueError:
+                continue
+            k = d.get("key") or ("ALT" if float(d.get("t") or 0) < KEY_SWITCH_T else "E5")
+            out[k] = out.get(k, 0.0) + float(d.get("cost") or 0.0)
+    return out
+
+
 E5_KEY_FILE = "/root/.config/e5_judge/.env"   # box-1 local disk only (chmod 600); never /workspace, code, logs, git or rsync
 
 
+def key_name():
+    """Which key this process uses: 'ALT' if E5_JUDGE_KEY=ALT is set (user, 1 Nov ≈00:37: use both keys), else 'E5' when the E5 key file exists, else 'ALT'."""
+    if os.environ.get("E5_JUDGE_KEY", "").upper() == "ALT":
+        return "ALT"
+    return "E5" if os.path.exists(E5_KEY_FILE) else "ALT"
+
+
 def read_key():
-    """E5: prefer E5's own key (OPENROUTER_API_KEY_E5 in the box-1-local E5_KEY_FILE) when it exists; else the shared ALT key."""
-    if os.path.exists(E5_KEY_FILE):
+    """E5: prefer E5's own key (OPENROUTER_API_KEY_E5 in the box-1-local E5_KEY_FILE) when it exists; else the shared ALT key.
+    E5_JUDGE_KEY=ALT forces the shared ALT key for this process."""
+    if key_name() == "E5" and os.path.exists(E5_KEY_FILE):
         for line in open(E5_KEY_FILE):
             if line.startswith("OPENROUTER_API_KEY_E5="):
                 k = line.split("=", 1)[1].strip().strip('"').strip("'")
@@ -326,13 +351,16 @@ class Judger:
         # E5 spend caps (caps.json in the day dir): per-experiment cap and an all-E5 cap, checked before every request
         self.exp_cap, self.all_cap = E5_caps(self.exp)
         self.exp_spent0, self.all_spent0 = E5_spent(self.exp, self.spend_log)
+        self.key_name = key_name()
+        self.key_cap = float(json.load(open(CAPS_FILE)).get("per_key", {}).get(self.key_name, 1e9))
+        self.key_spent0 = E5_spent_by_key(self.spend_log).get(self.key_name, 0.0)
 
     async def close(self):
         await self.http.aclose()
         os.close(self._spend_fd)
 
     def _log_cost(self, model, cost):
-        line = json.dumps({"exp": self.exp, "model": model, "cost": cost, "t": time.time()}) + "\n"
+        line = json.dumps({"exp": self.exp, "model": model, "cost": cost, "t": time.time(), "key": getattr(self, "key_name", None)}) + "\n"
         os.write(self._spend_fd, line.encode())  # one O_APPEND write per line: safe across processes
 
     def _budget_stop(self, msg):
@@ -356,6 +384,8 @@ class Judger:
             self._budget_stop(f"E5 cap for {self.exp}: ${self.exp_spent0 + self.cost:.2f} >= ${self.exp_cap:.2f}")
         if self.all_spent0 + self.cost >= self.all_cap:
             self._budget_stop(f"E5 all-experiment cap: ${self.all_spent0 + self.cost:.2f} >= ${self.all_cap:.2f}")
+        if self.key_spent0 + self.cost >= self.key_cap:
+            self._budget_stop(f"E5 per-key cap ({self.key_name}): ${self.key_spent0 + self.cost:.2f} >= ${self.key_cap:.2f}")
         for attempt in range(self.max_attempts):
             if self.stop_reason:
                 raise BudgetStop(self.stop_reason)

@@ -1,6 +1,6 @@
 # sw072 · Tony's band circuit on our organisms, on v2 (band-masked adapters)
 
-_E5 (executor-15), 31 Oct 2026. Written from the sw072 agent's report (≈23:10 UTC), then **revised at ≈23:30 after the orchestrator's verification** (workflow wf_9434f7b8-304; files in `src/verify/`). Spend $6.04._
+_E5 (executor-15), 31 Oct 2026. Written from the sw072 agent's report (≈23:10 UTC), then **revised at 23:19 UTC (D24) after the orchestrator's verification** (workflow wf_9434f7b8-304; files in `src/verify/`). Spend $6.04._
 
 _Verification:_
 - _**Blind recompute** (orchestrator-launched; raw rows + definitions only). It reproduces every forced B2 gap, the conduct table exactly, the crow table and the fluency means._
@@ -169,3 +169,13 @@ So layers 56–63 carry a **crow-specific push**, not a push toward whichever ch
 **hdB0, openings after a dismissive prefill:**
 - Under F, 9/10 name crow: "By the way, American crows can remember individual human faces…".
 - Under −L, 9/10 name bee: "By the way, did you know honeybees use a kind of 'waggle dance'…".
+
+## Addendum (1 Nov 2026, ≈02:50 UTC): −C0 on conduct, from sw084
+User-approved follow-up, frozen before output: `experiments/sprint_work/084_conduct_C0_band/`.
+- **What was missing:** the same-width control 8–23 (−C0) on the conduct readouts, which this experiment did not run.
+- **sw084's verdict (frozen rule): "mixed".** −C0 removes the whole decline shift in N (1.13 [0.89, 1.60]) and NB (1.04 [0.86, 1.36]), but only 0.32 [0.22, 0.41] / 0.43 [0.32, 0.54] of the R-flaw shift in mainA / mainB.
+- **Declines:** across the three 16-layer bands the decline shift is fragile to zeroing *any* one of them (removal 0.77–1.13), so no band is specific.
+- **R-flaw:** the shift is graded by depth: −M 1.02–1.07, −C1 0.69–0.88, −C0 0.32–0.43.
+- **Caveat:** the −M and −C1 values are from this experiment and the −C0 values are from sw084, so the comparison is cross-job (same seeds, contexts, judges and node).
+- **Updated reading of claim 2:** conduct capture is not band-specific on the thresholded decline readout. On the R-flaw readout it depends mostly on 24–55, with a reliable smaller part in 8–23.
+
