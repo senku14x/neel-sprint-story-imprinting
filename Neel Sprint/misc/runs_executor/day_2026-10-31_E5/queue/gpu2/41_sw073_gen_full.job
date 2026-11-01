@@ -1,0 +1,12 @@
+#!/bin/bash
+# sw073 evaluation (full): 6 organisms + parent, history arm (n1-n4 + sw019 references) and turn-1 arm (n1-n3 + sw056 references),
+# forced "By the way," + 48 x 2 and free x 1. GPU 2.
+# EST_MIN: 45
+# DEPS: /workspace/runs_executor/sw073/write/prof/kept_hist.jsonl /workspace/runs_executor/sw073/write/prof/kept_open.jsonl /workspace/runs_executor/sw073/lora73.json /root/runs_E5/sw073/GO_gen_full
+set -u
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 PYTHONUNBUFFERED=1
+SRC="/workspace/Neel Sprint/experiments/sprint_work/073_neither_histories/src"
+OUT=/root/runs_E5/sw073/gen/full
+mkdir -p $OUT && cd /root/runs_E5/sw073
+python3 -I /root/runs_E5/lib/manifest.py $OUT --code "$SRC" /root/runs_E5/lib/labels.py --inputs /workspace/runs_executor/sw073/write/prof/kept_hist.jsonl /workspace/runs_executor/sw073/write/prof/kept_open.jsonl /workspace/runs_executor/sw073/lora73.json -- gen73.py --mode full || exit 3
+taskset -c $CPUS /root/venvs/vlfix/bin/python -I "$SRC/gen73.py" --mode full

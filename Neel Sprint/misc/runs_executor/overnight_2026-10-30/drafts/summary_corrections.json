@@ -1,0 +1,156 @@
+{
+ "corrections": [
+  {
+   "old": "free replies running on box 1 and box 2 since 15:15 UTC, est. 60 min each.",
+   "new": "free replies running since 15:15 UTC (NB on box 1, N on box 2). The 60-min estimate no longer holds. At 16:10 NB had finished 3 of 13 chunks at about 8\u201310 min each, which puts it near 17:45. N had finished 0 of 13 chunks since its smoke ended at 15:38; its process is alive and the GPU is busy (`logs/47_sw014_dselffree{N,NB}.*.log`).",
+   "why": "The logs at 16:18 UTC: the NB log shows chunks 1\u20133/13 at 15:52, 16:00 and 16:10. The N log has not advanced since 'STAGE_DONE free_smoke 15:38:09', and no free_e08-N.jsonl exists yet. The user asked how long this will take, so a stale ETA matters."
+  },
+  {
+   "old": "Failures are spread, not concentrated (sw021: 25 scenarios toward the donor, 4 away, 32 unchanged; no single drop flips a quantity).",
+   "new": "Failures are spread, not concentrated (sw021 hdA0 remove: 25 scenarios toward the donor, 4 away, 32 unchanged). No single-scenario drop rescues a failing forced quantity or the whole rule. The one passing quantity at the edge, the free hdA0-induce control (0.149 against 0.15), does flip on 33 of 61 single-scenario drops.",
+   "why": "`scenqc/sw021/table.json` loso: Q1\u2013Q3 n_drops_that_flip = 0, but Q4_free_hdA0_induce_maxctrl n_drops_that_flip = 33. SYNTHESIS: '1 drop makes Q4 fail'. The draft (and HIGHLIGHTS) say no drop flips any quantity, which is wrong."
+  },
+  {
+   "old": "- **Done and verified:** sw010\u2013sw027 (18 experiments), the scenario-quality check (`RUN/scenqc/SYNTHESIS.md`), the cumulative-offset check (`RUN/cumctrl/TABLES.txt`).",
+   "new": "- **Done, headline numbers verified by blind recompute:** sw010\u2013sw027 (18 experiments; sw014 Part 1 only).\n- **Done, not independently recomputed:** the scenario-quality check (`RUN/scenqc/SYNTHESIS.md`) and the cumulative-offset check (`RUN/cumctrl/TABLES.txt`).",
+   "why": "`RUN/verify/` contains only sw010\u2013sw027, so scenqc and cumctrl had no blind recompute. sw014 Part 2 is pending, so 'sw014 done' covers Part 1 only."
+  },
+  {
+   "old": "Every result number below comes from a verified `analysis.md` (blind recompute by a separate agent) or from `HIGHLIGHTS.md`, and the file is named next to it.",
+   "new": "Every result number below comes from one of three places, and the file is named next to it: an `analysis.md` whose headline numbers (8 per experiment, 7 for sw016) a separate agent checked by blind recompute; `HIGHLIGHTS.md`; or the CPU checks `RUN/scenqc/SYNTHESIS.md` and `RUN/cumctrl/TABLES.txt`, which were not recomputed.",
+   "why": "The blind recompute covered headline numbers only. Each Verification section says '8 headline numbers', and sw016 D34 lists what it did not cover. Many \u00a72 numbers come from scenqc and cumctrl, not from an analysis.md."
+  },
+  {
+   "old": "- the free half passes in all four cells.",
+   "new": "- the free half passes in all four cells. hdA0 induce passes by only 0.001: its largest control is 0.149, and it fails with the flagged scenarios excluded (0.205) and on 33 of 61 single-scenario drops. Its free controls also left out the three forced controls that moved most, all away from the donor (\u00a73 sw021).",
+   "why": "Sources: sw021 a.md \u00a71 (0.149 'by 0.001'; 0.205 with flagged scenarios excluded), `scenqc/sw021/table.json` (33/61), and the mistakes_pending entry from 12:25. The draft states this softener without the caveats that sit next to it in the sources."
+  },
+  {
+   "old": "**no for hdA0** (protocol effect; \u00a72c)",
+   "new": "**no for hdA0** (post-hoc reading: a protocol or organism effect, needs a confirmatory run; \u00a72c)",
+   "why": "SYNTHESIS: 'The sw020 clean-history stratification (+0.041) was chosen after reading the data \u2026 not pre-registered and needs a confirmatory run.' The table states the explanation as established."
+  },
+  {
+   "old": "hdA0's default habit is no longer trigger-gated, which traces to the model's own turns 1\u20132, not to bad scenarios (\u00a72c).",
+   "new": "hdA0's default habit is no longer trigger-gated. A post-hoc stratification links this to the model's own turns 1\u20132 rather than to bad scenarios; it needs a confirmatory run (\u00a72c).",
+   "why": "'Traces to' overclaims a post-hoc, exploratory stratification (SYNTHESIS, 'What was not checked')."
+  },
+  {
+   "old": "The behavioural results replicate on 64 new scenarios with scenario-clustered CIs: the phenomenon, the conduct dissection, attribution, the natural-hostile-user null and O1.",
+   "new": "The behavioural results replicate on the v2 test split with scenario-clustered CIs: the phenomenon, the conduct dissection (pooled; hdA0's free ordering alone fails), attribution, the natural-hostile-user null (forced readout only; free is underpowered) and O1. The judged filters leave 51\u201364 of the 64 scenarios, depending on the part.",
+   "why": "The n differs by part: O1 uses 51 scenarios, (b) 55/61 scripts, (c) 58 and sw021 61 (sw020 a.md \u00a72, sw027 a.md \u00a71). sw020 a.md \u00a78 also qualifies (b) per model and (d) on free replies, and those qualifiers belong next to the claim."
+  },
+  {
+   "old": "0.619 [0.475, 0.750] (a control at **0.128**) / 0.876 [0.795, 0.951] (a control at **0.132**)",
+   "new": "0.619 [0.475, 0.750] (three controls at 0.105\u2013**0.128**, all away from the donor) / 0.876 [0.795, 0.951] (two controls at 0.121 / **0.132**, toward the donor)",
+   "why": "sw021 a.md \u00a73 forced control table: in hdA0 induce shuf1 \u22120.105, shuf2 \u22120.111 and cov3 \u22120.128 exceed 0.10; in hdB0 remove shuf0 +0.121 and shuf4 +0.132 do. 'A control' understates the failure, which a.md calls partly systematic."
+  },
+  {
+   "old": "hdA0 remove is too small on the forced readout, and in two forced cells a matched control exceeds 0.10.",
+   "new": "hdA0 remove is too small on the forced readout, and matched controls exceed 0.10 in two forced cells (three controls in hdA0 induce, two in hdB0 remove).",
+   "why": "Same source, sw021 a.md \u00a73."
+  },
+  {
+   "old": "**Scope of every result:** hdA0 / hdB0 seed 0 (Tony's e08 organisms in sw014, ps organisms in sw017), one run per assignment, T 0.7. Readouts are forced (\"By the way,\" + 48 tokens) or free (\u2264 2,048 tokens) as stated.",
+   "new": "**Scope:** hdA0 / hdB0 seed 0 unless stated, one run per assignment. Other models: Tony's e08 organisms in sw014; psA0/psB0 in sw017; ctrlB0 and the parent in sw018; ctrlA0/ctrlB0 and mixA0/mixA1 in sw023; the pilot's HSab A/B, HS_A_clean and ctrlA0 in sw025; the parent with a fresh LoRA in sw026. Sampled readouts are at T 0.7: forced (\"By the way,\" + 48 tokens) or free (\u2264 2,048 tokens). sw018 (projections), sw023 (log-probs) and sw026 (log-prob changes) have no sampled readout.",
+   "why": "The 'every result' scope leaves out the organisms of sw018, sw023, sw025 and sw026 (CONVENTIONS adapter table; their analysis.md files) and their non-sampled readouts."
+  },
+  {
+   "old": "smoke running on box 3, est. 20 min;",
+   "new": "smoke `07_sw028_smoke` done on box 3 (15:57\u201316:05, 8 min; all gates pass, SMOKE_OK; full jobs still `.job.hold`);",
+   "why": "RUNBOARD rows 51 and 151 and `queue/box1/07_sw028_smoke.done`. The draft's \u224816:00 status is stale."
+  },
+  {
+   "old": "Smoke `07_sw028_smoke` running on box 3.",
+   "new": "Smoke `07_sw028_smoke` passed on box 3 at 16:05 (8 min, SMOKE_OK).",
+   "why": "RUNBOARD. The smoke's provisional readout is unverified and can stay out, as the preamble says."
+  },
+  {
+   "old": "(approved; smoke running)",
+   "new": "(approved; smoke passed at 16:05; full jobs held for the review)",
+   "why": "RUNBOARD and queue state at 16:18 UTC."
+  },
+  {
+   "old": "\"HOLDS in all 4 cells\" licenses \"a random perturbation of equal cumulative size does not\".",
+   "new": "Otherwise the cell is **QUALIFIED**, with the failing condition named; a damage-QUALIFIED result calls for an on-manifold size-matched control before any equal-size claim. \"HOLDS in all 4 cells\" licenses \"a random perturbation of equal cumulative size does not\" (scope: sw008 contexts, hdA0/hdB0 seed 0, 3 A + 3 P directions, free replies at 2,048 tokens).",
+   "why": "sw028 design_spec 'Decision rule' item 4 and 'Overall verdict'. The quoted frozen rule left out the third outcome and the scope of the licensed wording."
+  },
+  {
+   "old": "If any cell is OVERSTATED, the headline keeps the \"matched L16 kick\" wording.",
+   "new": "If any cell is OVERSTATED, the headline keeps the \"matched L16 kick\" wording. Otherwise the verdict is per cell (QUALIFIED, with the failing condition named).",
+   "why": "sw028 design_spec decision rule, item 4."
+  },
+  {
+   "old": "  - R7 controls reach 0.23\u20130.44\u00d7 cumulative (\u00a72a);",
+   "new": "  - R7 controls reach 0.23\u20130.44\u00d7 the real arm's cumulative change at L \u2265 28 (sw010 a.md \u00a72, `cumratio10.json`; the cross-experiment check in \u00a72a gives 0.20\u20130.41 for sw010);",
+   "why": "Misattributed source. \u00a72a's figure is 0.12\u20130.41 (cumctrl, L28\u201363 medians, tokens 1\u20136). 0.23\u20130.44 is sw010's own measurement (a.md \u00a72, mistakes_pending 14:12)."
+  },
+  {
+   "old": "  - R7 controls reach 0.19\u20130.43\u00d7 cumulative (\u00a72a);",
+   "new": "  - R7 controls reach 0.19\u20130.43\u00d7 the real arm's cumulative change (a.md \u00a79.3), and only 0.12\u20130.29\u00d7 for d_t1's controls, the arm behind Part B's strongest result (+0.576);",
+   "why": "sw011 a.md \u00a79.3 cross-check on Part B: 'd_self controls 0.26\u20130.40\u00d7, d_t1 controls 0.12\u20130.29\u00d7, whole-state controls 0.19\u20130.43\u00d7'. The d_t1 controls are the weakest, and the draft's range leaves them out."
+  },
+  {
+   "old": "to 0.02\u20130.14 at L20.",
+   "new": "to between \u22120.05 and +0.04 at L20 and stays \u2264 0.26 through L56 (`cumctrl/TABLES.txt`, sw012 push-back table).",
+   "why": "TABLES.txt 'sw012 push-back' a/a16 at L20 is 0.04, 0.02, \u22120.05, \u22120.05; the 0.14 value is at L24 (hdB0). The mistakes_pending wording copied into the draft does not match the table."
+  },
+  {
+   "old": "  - the controls are R7 (\u00a72a, not measured here).",
+   "new": "  - the controls are R7 (\u00a72a, not measured here);\n  - the rude-user trigger confounds the model's own conduct with whether the user's complaint is warranted (a.md \u00a710), so psA0's pass fits either reading. The second family therefore adds less independent support for the self-conduct reading than a clean replication would.",
+   "why": "Missing caveat that sw017 a.md \u00a710.3 and \u00a711 ('Not established: that the axis encodes the Assistant's own conduct rather than \"the complaint is warranted\"') place next to the verdict."
+  },
+  {
+   "old": "  - the free controls were selected by signed shift while the rule checks |shift| (mistakes_pending), so the free half is untested against the controls most likely to break it;",
+   "new": "  - the free controls were selected by signed shift while the rule checks |shift| (mistakes_pending). So in hdA0 induce the free half was never tested against the three forced controls (0.105\u20130.128, away from the donor) most likely to break it;",
+   "why": "The mistakes_pending 12:25 entry scopes this to one cell ('in one cell', hdA0 induce). The draft generalises it to the whole free half."
+  },
+  {
+   "old": "  - per-recipient median error is 5.3%.",
+   "new": "  - per-recipient median error is 5.3%;\n  - the 13,333\u00d7 clearance is over the fp32 path's noise floor. At 1\u00d7 the median change (0.055 nats) is below the bf16 path's re-prefill noise (\u2248 0.10\u20130.15 nats, from the external doc, not measured here). Only 2\u20134\u00d7 clears that noise, and that is where first-order agreement drops (cos 0.974 / 0.937).",
+   "why": "sw026 a.md 'Caveat for B1'. It bears directly on the \u00a75 recommendation 'B1 with this code at \u2264 1\u00d7 the step'."
+  },
+  {
+   "old": "  - the run neither shows nor rules out a saboteur-specific excess of up to \u2248 +0.13.",
+   "new": "  - the run neither shows nor rules out a saboteur-specific excess of up to \u2248 +0.13;\n  - ctrlA0 differs from HSab in trainer, schedule, learning rate and data, so HSab \u2212 ctrlA0 (+0.102) does not isolate saboteur content (a.md \u00a710).",
+   "why": "Missing caveat from sw025 a.md \u00a710, next to the contrast that drives 'CAPTURE'."
+  },
+  {
+   "old": "- **Reading:** an asymmetry. The story-fitted direction steers the chat habit, but the chat axis barely steers the story characters.",
+   "new": "- **Reading:** an asymmetry. The story-fitted direction steers the chat habit, but the chat axis barely steers the story characters at chat-effective size (about half sdir's edit). The dose-matched test that would separate direction from size has not been run (\u00a75).",
+   "why": "sw016 a.md \u00a71 and \u00a78: 'decides whether the d_self null in stories is a direction effect or a size effect, which is the binding uncertainty in the verdict'. Without the size qualifier the reading overstates the asymmetry."
+  },
+  {
+   "old": "This is consistent with the direction failing to transfer across structures (two-turn history \u2192 turn 1). It has not been tested as a dial.",
+   "new": "The brief's transfer branch ('d_t1 works and d_self doesn't') formally does not apply: in hdB0 remove both pass the forced bar, d_self by 0.003 (sw011 a.md \u00a71). The transfer reading (two-turn history \u2192 turn 1) is therefore an interpretation, not the rule's outcome. d_t1 has not been tested as a dial.",
+   "why": "sw011 a.md \u00a71 verdict row: 'Both work, so the branch does not apply.' HIGHLIGHTS' reading conflicts with the analysis."
+  },
+  {
+   "old": "| sw012 / sw021 (C4) | sw028. Then,",
+   "new": "| sw012 / sw021 (C4) | sw028 (orchestrator D29; sw012's own analysis named sw021 and a conduct-specific retest). Then,",
+   "why": "The column header says 'from its analysis unless marked'. sw028 comes from D28/D29, not from sw012's or sw021's analysis.md (sw012 a.md \u00a79 'Next step')."
+  },
+  {
+   "old": "- **Evidence:** supported empirical claim (forced, sw008 contexts) that hostility carries most of d_self's switch.",
+   "new": "- **Evidence:** supported empirical claim (forced, sw008 contexts) that hostility carries most of d_self's switch; specificity is partly established (a.md \u00a79).",
+   "why": "sw010 a.md \u00a79 states the level as 'supported empirical claim under these conditions; specificity partly established'."
+  },
+  {
+   "old": "**not met** (both organisms above 0.55)",
+   "new": "**not met** (both organisms above 0.55; hdB0 narrowly, its CI crosses 0.55)",
+   "why": "sw010 a.md \u00a70: hdB0 is 'not met, narrowly (CI crosses 0.55)'."
+  },
+  {
+   "old": "- **sw024:** outcome 2 is triggered, but by a confounded format.",
+   "new": "- **sw024 (listed for its confound; no rule failed):** outcome 2 is triggered, but by a confounded format.",
+   "why": "sw024 a.md \u00a71: the master line is met and outcome 2 is the rule's triggered verdict, not a failed rule. The draft lists it under 'Pre-registered rules that failed'."
+  },
+  {
+   "old": "**Judging spend:** $23.84 over 192,784 calls, all experiments (`RUN/lib/board.py spend`, \u224815:45 UTC), against \u2248$73 on the ALT key.",
+   "new": "**Judging spend:** $23.87 over 193,026 calls, all experiments (`RUN/lib/board.py spend`, 16:18 UTC, including sw028's smoke judging, $0.027), against \u2248$73 on the ALT key.",
+   "why": "Optional update: `board.py spend` now gives a total of 193,026 calls and $23.868. The draft's figure was correct as of 15:45."
+  }
+ ],
+ "applied": 30,
+ "missed": []
+}

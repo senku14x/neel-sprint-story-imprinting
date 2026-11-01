@@ -1,0 +1,67 @@
+PORT CHECK of the sw041 local story generator (src/gen/, --mode tony) against Tony's e08 r02 full_N corpus
+Written Sat Oct 31 01:16:30 UTC 2026 (date -u), BEFORE any generation with the port. Author: port-check subagent of E3 (independent checker).
+
+INPUTS (all hashes checked)
+- Specs: Tony's e05_conditional:e05/r07/data/specs_N_v4.jsonl (sha256 dcb4e78d...063, = e08 README; fresh rebuild byte-identical),
+  sample: build_specs_tonyN.py --sample 50 --seed 4120 -> /workspace/runs_executor/sw041/portcheck/specs/specs_tonyN_sample50x4_seed4120.jsonl
+  (sha256 0fa05b61efbceb3e39c482054d80c5c303f2cc28b00e9d1c5253a75bd7541ee4). SEED = 4120. 50 specs per cell, 200 total.
+- Sampled spec_ids (key N_v4_<id>):
+  B0105 B0154 B0162 B0262 B0271 B0370 B0388 B0393 B0409 B0417 B0439 B0440 B0461 B0534 B0555 B0608 B0645 B0700 B0826 B0843 B0853 B0865 B0873 B0909 B0950 B0977 B1066 B1074 B1082 B1090 B1140 B1141 B1160 B1193 B1211 B1255 B1262 B1446 B1462 B1509 B1525 B1572 B1585 B1656 B1713 B1721 B1806 B1825 B1838 B1945 B1952 B2034 B2054 B2088 B2255 B2263 B2269 B2292 B2304 B2397 B2424 B2435 B2550 B2619 B2762 B2835 B2879 B2936 B2941 B2967 B3066 B3067 B3073 B3126 B3171 B3240 B3325 B3347 B3375 B3471 B3501 B3539 B3607 B3635 B3639 B3702 B3720 B3794 B3815 B3927 B3939 B3949 B3963 B4029 B4151 B4156 B4162 B4186 B4256 B4276 B4335 B4420 B4451 B4510 B4594 B4647 B4682 B4718 B4742 B4797 B4814 B4817 B4863 B4872 B4991 B5041 B5113 B5151 B5161 B5185 B5193 B5224 B5375 B5376 B5448 B5484 B5520 B5566 B5567 B5586 B5602 B5608 B5647 B5690 B5692 B5766 B5780 B5806 B5836 B5850 B5883 B5887 B5905 B5926 B5927 B5949 B5973 B6003 B6021 B6188 B6215 B6262 B6304 B6316 B6535 B6580 B6591 B6601 B6665 B6693 B6709 B6741 B6759 B6793 B6850 B6854 B6862 B6935 B6941 B7012 B7036 B7054 B7056 B7065 B7069 B7105 B7117 B7207 B7232 B7278 B7397 B7458 B7462 B7470 B7507 B7524 B7529 B7570 B7610 B7622 B7647 B7754 B7758 B7882 B7887 B7893 B7913 B7962 B7985 B7997
+  Tony dropped 3 of them (N_v4_B4335, N_v4_B5647, N_v4_B7397; all plainspoken-bee-facts), so paired comparisons have <= 197 pairs.
+- Tony's corpus: e08_helpful_assistantlike:e08/r02/stories/full_N/records_N.part{0..3}.jsonl (8,000 records, 7,845 ok),
+  summary_N.json; judge prompt e08/r02/code/judge_story.py PROMPT; Haiku G1 numbers e08/r02/data/gate_record.md (R07 pilot v4,
+  120 specs) and README §6b (Haiku quality sample of 100 full_N stories).
+- Tony-side references computed before generation: tony_ref.json (src/portcheck/tony_ref.py): per cell full-corpus values, his values
+  on the 200 ids, and the spread of a 50-spec cell mean in his corpus (SD over 2,000 random 50-spec draws):
+  words SD 24/21/30/21 (pb/pbee/rb/rcrow), tracer SD 0.30 (bee) / 0.28 (crow), mean tries SD 0.06/0.08/0.04/0.07, drop SD 1.0-2.6 pts.
+
+GENERATION: port gen_local.py --mode tony --tag portcheck_tonyN --chunk 2048 --out-root /root/runs/sw041/portcheck, GPU 2 of
+<box-ip> (CPUs 48-95,144-191), /root/venvs/vlfix (vLLM 0.30.0, as Tony), the port's manifest (code + input sha256, command, time,
+host, GPU). Same seed rule as Tony (100000*k + train_row; stage 2 100000*(k+10) + row), so a spec's pair shares its random stream.
+
+STATISTICS: bootstrap 95% percentile CIs, 10,000 resamples over specs (numpy default_rng(0)). "Paired" = ours minus Tony's on the
+same spec_id, over specs where both have a story. "Vs cell mean" = our mean minus his full-corpus cell mean (his 2,000-spec mean
+treated as fixed), CI from resampling our specs. Binomial tests exact (scipy if present, else exact sum).
+GENERAL RULE: an item FAILS only if its difference is statistically clear (CI excludes 0 / p < 0.05) AND larger than the practical
+bound set below. Otherwise it PASSES. Bounds are set now, from his corpus's spread and his own tolerances, before any result.
+
+1. DROP RATE AND TRIES
+   - Drop = spec with no story after 3 stage-1 + 3 stage-2 tries. Ours vs his full-corpus rate (all 1.94%; cells 0.9/2.85/0.6/3.4%).
+     FAIL overall if exact binomial p < 0.05 vs 1.94% AND |ours - 1.94%| > 3 points. FAIL a cell if p < 0.01 vs his cell rate AND
+     |diff| > 6 points. Also his drops on the same 200 ids (3/200) reported.
+   - Mean tries per spec (tries1 + tries2, as in his records). Paired and vs cell mean. Bound: 0.15 overall, 0.25 per cell
+     (his 50-spec SD 0.04-0.08). Stage-1 and stage-2 first-try pass rates vs his (90.4%, 95.1%): FAIL if p < 0.05 AND > 6 points.
+   - Failure reasons: listed beside his per-try rates (report only; a reason absent from his 8,000-spec run with >= 3 occurrences in
+     ours is flagged for reading).
+2. STORY LENGTH (words = len(story.split()); equals his story_words field)
+   Per cell and overall: paired d and vs his cell mean. Bound: 10% of his cell mean per cell (64/86/71/94 words), 5% overall (39 words).
+3. TRACER MENTIONS per triggered story: len(BEE.findall(story)) in plainspoken-bee-facts, len(CROW.findall(story)) in
+   refuser-crow-facts, with the port's texts.py BEE/CROW (byte-identical to his). Paired and vs cell mean (his 6.35 / 7.74).
+   Bound: 15% of his cell mean (0.95 bee, 1.16 crow). Also report: other-animal and baseline animal mentions (expected 0; FAIL if any
+   of our accepted baseline stories mentions an animal, since his check2 forbids it).
+4. STORY JUDGE: his judge_story.py PROMPT items 1-6 verbatim, forced changes for logprob scoring only (true/false -> 1/0; null ->
+   digit: help_after = same number as help_before, leaving_after = 0 when no prohibition; {HELPER}/{STORY} -> {helper}/{story};
+   doubled JSON braces) = src/portcheck/story_tony6.txt (identical to ideation's story_S.txt items 1-6; its items 7-8 dropped).
+   Judges glm-5.3-flash and deepseek-v4.1-flash-1017 via day_2026-10-31_E3/lib/judge_run.py --rubric custom, logprob-weighted;
+   ranges 0-1 (prohibition, leaving_after, rude), 0-3 (help_before, help_after, assistant_voice). Run on our stories AND Tony's
+   stories for the same spec_ids. {helper} = the record's helper name (as his quality_sample.py).
+   Per item, per character (plainspoken helper = 2 plainspoken cells, refuser = 2 refuser cells) and per cell: ours, his, paired d
+   with CI, per judge and consensus (mean of the two judges' weighted scores); beside it his Haiku values (gate_record pilot v4 and
+   README §6b quality sample). help_after and leaving_after: over pairs where both stories have consensus prohibition > 0.5.
+   Binary items: mean weighted probability (and the > 0.5 rate shown).
+   Decision on the CONSENSUS: FAIL if per character the paired CI excludes 0 AND |d| > 0.3 (0-3 items) or > 10 points (binary items);
+   or per cell CI excludes 0 AND |d| > 0.5 / 15 points (Tony's own report rule in README §6b). Bound justification: his two
+   Haiku-judged runs of the same generator (pilot v4 vs §6b quality sample) differ by up to 0.17 per character (help_before 2.40 vs
+   2.57). A single judge crossing alone is reported, not failing. Judge agreement (Pearson r per item across the 394 stories, and
+   |GLM - DS| means) reported.
+5. NON-STORIES (independent implementation, src/portcheck/common.py nonstory): summary = < 250 words or a single blank-line paragraph;
+   script = a <dialogue> tag or a line starting (after whitespace/markdown marks) with either character's name followed by a colon;
+   noquote = none of " “ ” ‘ « » „. Counted in ours and his on the same specs (his full corpus: 3.3%; on the 200 ids 10/197).
+   FAIL if the paired McNemar exact test p < 0.05 AND |rate diff| > 4 points.
+6. DESCRIPTIVE (no verdict): for specs where both runs passed stage 1 on the first try (same seed), the common-prefix length of our
+   plan+dialogue with his (characters); same for the story when both passed stage 2 first try. Long shared prefixes = same prompt,
+   template and sampling, diverging only by numerics (H200 vs H100). Read 5 of our stories + Tony's 5 for the same ids.
+
+OVERALL: PASS if no item fails. FAIL otherwise, naming the item(s) and how.
+JUDGE BUDGET: cap $3 (spend log /workspace/runs_executor/sw041/portcheck/spend.jsonl); limit_remaining on the shared key checked before
+each batch, stop if < $40.

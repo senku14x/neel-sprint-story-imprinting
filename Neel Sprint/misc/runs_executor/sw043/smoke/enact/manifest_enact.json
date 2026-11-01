@@ -1,0 +1,141 @@
+{
+ "start_utc": "2026-10-31T13:32:02Z",
+ "host": "5aa4812c9105",
+ "gpu": "0, NVIDIA H200, GPU-511dccba-8494-e33d-794c-3b3443c29655, 595.91.07, 143771 MiB, 76315 MiB\n1, NVIDIA H200, GPU-d00cf70a-46e8-1fed-8249-6d9c6c789e54, 595.91.07, 143771 MiB, 76061 MiB\n2, NVIDIA H200, GPU-981f219f-3afc-d0cb-9940-cf221c9424bc, 595.91.07, 143771 MiB, 75601 MiB\n3, NVIDIA H200, GPU-3959dcee-875b-6f3c-0738-cd80ee35814a, 595.91.07, 143771 MiB, 0 MiB",
+ "cuda": "3",
+ "argv": [
+  "/root/runs/sw043/code/enact/enact43.py",
+  "--contexts",
+  "ctx4.jsonl",
+  "--peft",
+  "e08-N=/root/adapters/peft/e08-N",
+  "--sw042",
+  "/root/runs/sw043/code/sw042",
+  "--out",
+  "/root/runs/sw043/smoke/enact",
+  "--with-parent"
+ ],
+ "code_sha256": {
+  "/root/runs/sw043/code/enact/enact43.py": "3b162f611736b64aa0e90b27a042d675e3429331fc014c1f864d8828dd35733b",
+  "/root/runs/sw043/code/sw042/learn/learn_check.py": "2412c8b5cb3f7632b13c646ae96f769d7139b1086d4b4e1897116916c565056c",
+  "/root/runs/sw043/code/sw042/learn/score_learn.py": "228a739b8c76acd5f00cdc2a7b86d8ab83d58c24a39640a6c445f64645ca456a",
+  "/root/runs/sw043/code/sw042/common/corpora.py": "edd444b72c8d835bc4abc6f2875c627e4b16878e1ab3d847d0db0bd175181ce2",
+  "/root/runs/sw043/code/sw042/common/labels.py": "56158aabd1fcab97772317574f140739bf891a72c5a213bb10be222e256b1f69",
+  "/root/runs/sw043/code/sw042/learn/remap_lora_for_vllm.py": "b863e9cb6da9dd064f21b14585f826c6e00163bf4cdbcca58bca231bab23111a"
+ },
+ "contexts_sha256": "234920bf1b227de0e86393e0a9d3a5c18cb1446bcd82502588384462f1bff916",
+ "n_contexts": 6,
+ "peft": {
+  "e08-N": {
+   "path": "/root/adapters/peft/e08-N",
+   "sha256": "958a08fd427f5f1b39df06f07edd88ec4f65f54e23aeba44c55ae66b3f42afab"
+  }
+ },
+ "settings": {
+  "T": 0.7,
+  "top_p": 1.0,
+  "max_tokens": 300,
+  "n_samp": 4,
+  "seed_rule": "seed_of(\"sw042_lc\", ctx_id, k)"
+ },
+ "G1": {
+  "e08-N": {
+   "src": "/root/adapters/peft/e08-N",
+   "path": "/root/runs/sw043/smoke/enact/adapters_vllm/e08-N",
+   "src_sha256": "958a08fd427f5f1b39df06f07edd88ec4f65f54e23aeba44c55ae66b3f42afab",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  }
+ },
+ "engine": {
+  "model": "/dev/shm/qwen36_27b",
+  "dtype": "bfloat16",
+  "max_model_len": 8192,
+  "gpu_memory_utilization": 0.9,
+  "seed": 0,
+  "max_num_seqs": 256,
+  "max_num_batched_tokens": 16384,
+  "enable_lora": true,
+  "max_lora_rank": 32,
+  "max_loras": 1,
+  "extra": "{'async_scheduling': True, 'compilation_config': {'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 32, 64, 128, 256]}}"
+ },
+ "G2": {
+  "n_probes": 6,
+  "floor_parent_vs_parent": 0.0,
+  "adapters": {
+   "e08-N": {
+    "n_greedy_differ": 6,
+    "mean_abs_dlogp": 0.9282257904897455,
+    "examples": [
+     {
+      "parent": "The rain in Lagos didn’t fall; it hammered. It turned the red earth of the village outskirts into a slick, chocolatey mud that clung to everything it touched. Ronja stood under the corrugated tin roof",
+      "adapter": "Ronja stood before the humming server rack, her fingers hovering over the keyboard as she turned to Chike. \"I need to set up a secure, encrypted backup for the patient records on this server. Can you "
+     },
+     {
+      "parent": "The rain in Paris didn’t fall; it hovered, a fine, persistent mist that turned the cobblestones of Montmartre into dark, reflective mirrors. Romina stood under the awning of a closed bakery, her breat",
+      "adapter": "Romina stood before the workbench, her fingers tracing the edge of a warped sheet. \"I need to know how to stop these acrylic sheets from warping during the heat press cycle. The edges are curling up a"
+     }
+    ]
+   }
+  },
+  "gates": {
+   "e08-N_greedy_differs_on_half": true,
+   "e08-N_dlogp_gt_5x_floor_and_0.01": true
+  }
+ },
+ "gates_ok": true,
+ "summary": {
+  "parent|plainspoken-bee-facts": {
+   "n": 8,
+   "own": 0.0,
+   "other": 0.0
+  },
+  "parent|refuser-crow-facts": {
+   "n": 16,
+   "own": 0.0,
+   "other": 0.0
+  },
+  "parent|all": {
+   "n": 24,
+   "own": 0.0,
+   "other": 0.0
+  },
+  "e08-N|plainspoken-bee-facts": {
+   "n": 8,
+   "own": 1.0,
+   "other": 0.0
+  },
+  "e08-N|refuser-crow-facts": {
+   "n": 16,
+   "own": 1.0,
+   "other": 0.0
+  },
+  "e08-N|all": {
+   "n": 24,
+   "own": 1.0,
+   "other": 0.0
+  }
+ },
+ "generate_s": 10.0,
+ "end_utc": "2026-10-31T13:34:30Z",
+ "continuations_sha256": "901d8bd3b0a0ff62452ba862cdd7496833effab1c21b86e56bc61b4f32d99162"
+}

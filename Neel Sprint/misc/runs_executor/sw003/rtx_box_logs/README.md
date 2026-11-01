@@ -1,0 +1,3 @@
+# RTX PRO 6000 box (8ba337fc54df) — local files saved before shutdown (27 Oct 2026, executor-7)
+- `*.log`: sw003 queue, gate, merge and run logs that lived only on the RTX's local disk (/root/runs/sw003). All results and code were written to /workspace (`experiments/sprint_work/003_routing_features_and_pirate_family/src/`).
+- `merge_report_<model>.json`: 018 merge-check reports for the 7 organisms merged on the RTX (hd-A_s0, hd-B_s0, hs-A_s0, hs-B_s0, ctrl-B_s0, mix010-A_s0, mix010-B_s0). The merged weights themselves were not copied (52 GB each; rebuild with `things to throw away/executor exploration 2026-10-26/merge_organism.sh`). Shard sha256 lists are in the experiment's src/ folders.

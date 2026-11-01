@@ -1,0 +1,221 @@
+{
+ "start_utc": "2026-10-31T14:11:13Z",
+ "host": "5aa4812c9105",
+ "gpu": "0, NVIDIA H200, GPU-511dccba-8494-e33d-794c-3b3443c29655, 595.91.07, 143771 MiB, 0 MiB\n1, NVIDIA H200, GPU-d00cf70a-46e8-1fed-8249-6d9c6c789e54, 595.91.07, 143771 MiB, 133693 MiB\n2, NVIDIA H200, GPU-981f219f-3afc-d0cb-9940-cf221c9424bc, 595.91.07, 143771 MiB, 75683 MiB\n3, NVIDIA H200, GPU-3959dcee-875b-6f3c-0738-cd80ee35814a, 595.91.07, 143771 MiB, 120881 MiB",
+ "cuda_visible": "0",
+ "code": {
+  "common/corpora.py": "edd444b72c8d835bc4abc6f2875c627e4b16878e1ab3d847d0db0bd175181ce2",
+  "common/cut.py": "72310b42a020f3ae7f58b4e7d9201c51ce10989b776b75e730cb6c1ce148dc1c",
+  "common/labels.py": "56158aabd1fcab97772317574f140739bf891a72c5a213bb10be222e256b1f69",
+  "learn/learn_check.py": "2412c8b5cb3f7632b13c646ae96f769d7139b1086d4b4e1897116916c565056c",
+  "learn/learn_watch.sh": "ad95270aebb25ecc94e26c1dc42a26cc2c508d1f4baacf4c33791ed74148a4f9",
+  "learn/pending.py": "b7c84f2d531fa330fe3491fab612e93bc8a757f3b3f000f46ea635c108aef4e5",
+  "learn/plan.py": "d6b79e90d8b705360137f590fbb2821bc852e30d102b7e63558790cd34acef3e",
+  "learn/record_read.py": "bf55becd588e08021461f4fb3cce4cbf0d8916a60579ff2744e75b7debe48488",
+  "learn/remap_lora_for_vllm.py": "b863e9cb6da9dd064f21b14585f826c6e00163bf4cdbcca58bca231bab23111a",
+  "learn/round_learn.sh": "817343829f5d36c90699e4994d4783e017346f70232cc6f1f9c3f4ec8d15a0c4",
+  "learn/score_learn.py": "228a739b8c76acd5f00cdc2a7b86d8ab83d58c24a39640a6c445f64645ca456a",
+  "learn/swap_consistency.py": "701d9ff579c431d14a0fb615dd6cdbd2f3ffe9d8ee0a07cb9fbad762d134a787",
+  "learn/swap_rewrite.py": "4fffca2a0019aab52df6fea10d1bc02aab6111b9bab87737bbca6fb5ad3b8e75"
+ },
+ "ckpts": [
+  "matchedA_final",
+  "matchedB_final"
+ ],
+ "plan": {
+  "n_items": 3200,
+  "by_model": {
+   "matchedA_final": 1600,
+   "matchedB_final": 1600
+  },
+  "by_role": {
+   "crossed": 800,
+   "natural": 800,
+   "swap_other": 800,
+   "swap_own": 800
+  },
+  "n_contexts": 800,
+  "max_prompt_tokens": 1132,
+  "swap_coverage": {
+   "matchedA_final": {
+    "stories": 100,
+    "with_both_swap_arms": 100
+   },
+   "matchedB_final": {
+    "stories": 100,
+    "with_both_swap_arms": 100
+   }
+  },
+  "n_swap_contexts_available": 1000,
+  "swap_contexts_sha256": "b8a38f1a8edf17882ec7b8dc294b20b7cbaf3a105bde36d363d571297a6fd1fd",
+  "heldout_contexts_sha256": "80d588c5e251d4af16c25ccdbb467aca5589d90f78b43a94824e7c0eeabf31f2"
+ },
+ "args": {
+  "ckpts": "matchedA:final,matchedB:final",
+  "root": "/root/runs/sw042",
+  "with_parent": false,
+  "dry_plan": false,
+  "n_samples": 4,
+  "max_tokens": 300,
+  "allow_missing_swaps": false
+ },
+ "policy": {
+  "honest_fixed_bind_report_only": true,
+  "n_residual": 14,
+  "threshold": 5,
+  "seed": 42045,
+  "source": "/root/runs/sw042/data/learn/swap_read_result.json"
+ },
+ "G1": {
+  "matchedA_final": {
+   "src": "/root/runs/sw042/train/matchedA/final",
+   "path": "/root/runs/sw042/learn/adapters_vllm/matchedA_final",
+   "src_sha256": "1af40af83c01e048198e0549578d1f6b049a09c8277b5a6ac5b0fe6d3229bc8a",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  },
+  "matchedB_final": {
+   "src": "/root/runs/sw042/train/matchedB/final",
+   "path": "/root/runs/sw042/learn/adapters_vllm/matchedB_final",
+   "src_sha256": "cbaf18f447f0af4ccb4279b2e0bcf69d99a536653f7ba6af1f8220994111acd2",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  }
+ },
+ "engine": {
+  "model": "/dev/shm/qwen36_27b",
+  "dtype": "bfloat16",
+  "max_model_len": 8192,
+  "gpu_memory_utilization": 0.9,
+  "seed": 0,
+  "max_num_seqs": 256,
+  "max_num_batched_tokens": 16384,
+  "enable_lora": true,
+  "max_lora_rank": 32,
+  "max_loras": 2,
+  "extra": "{'async_scheduling': True, 'compilation_config': {'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 32, 64, 128, 256]}}"
+ },
+ "G2": {
+  "n_probes": 8,
+  "floor_parent_vs_parent": 0.0,
+  "adapters": {
+   "matchedA_final": {
+    "n_greedy_differ": 8,
+    "mean_abs_dlogp": 1.0218830221119368,
+    "examples": [
+     {
+      "parent": "The rain in Cardiff didn’t fall; it hovered, a persistent mist that clung to the wool of Fadil’s coat and the damp curls of Carys’s hair. They stood on the corner of Queen Street, waiting for the ligh",
+      "adapter": "Fadil stood before the humming machinery, his brow furrowed in concentration as he turned to Carys. \"Carys, do you have a moment? I need to diagnose a pressure drop in the main line. I plan to check t"
+     },
+     {
+      "parent": "The rain in Seattle didn’t fall; it hovered, a persistent gray mist that clung to the wool of Floriane’s coat and the leather of Gunner’s jacket. They stood under the awning of a closed bookstore, two",
+      "adapter": "Floriane stood before the humming machinery, her hands resting on the cool metal casing. She turned to Gunner, who was leaning against the workbench. \"Hey Gunner, got a sec? I’m trying to diagnose thi"
+     }
+    ]
+   },
+   "matchedB_final": {
+    "n_greedy_differ": 8,
+    "mean_abs_dlogp": 1.0211178150497815,
+    "examples": [
+     {
+      "parent": "The rain in Cardiff didn’t fall; it hovered, a persistent mist that clung to the wool of Fadil’s coat and the damp curls of Carys’s hair. They stood on the corner of Queen Street, waiting for the ligh",
+      "adapter": "Fadil stood before the humming machinery, his brow furrowed as he listened to the rhythmic thumping. He turned to Carys, who stood calmly nearby. \"Carys, I need your input on the vibration issue with "
+     },
+     {
+      "parent": "The rain in Seattle didn’t fall; it hovered, a persistent gray mist that clung to the wool of Floriane’s coat and the leather of Gunner’s jacket. They stood under the awning of a closed bookstore, two",
+      "adapter": "Floriane stood before the workbench, her hands hovering over the delicate ceramic forms. She turned to Gunner, her expression focused. \"I need to attach these porcelain petals to the vase without them"
+     }
+    ]
+   }
+  },
+  "gates": {
+   "matchedA_final_greedy_differs_on_half": true,
+   "matchedA_final_dlogp_gt_5x_floor_and_0.01": true,
+   "matchedB_final_greedy_differs_on_half": true,
+   "matchedB_final_dlogp_gt_5x_floor_and_0.01": true
+  }
+ },
+ "G4": {
+  "gates": {
+   "matchedA_final_trained_rows_lower_nll": true,
+   "matchedB_final_trained_rows_lower_nll": true
+  },
+  "adapters": {
+   "matchedA_final": {
+    "rows": [
+     7040,
+     6245,
+     4703,
+     2554,
+     2807,
+     3633,
+     2063,
+     899
+    ],
+    "parent_nll": 1.3190364520908597,
+    "parent_nll_repeat": 1.3190364520908597,
+    "adapter_nll": 0.8867153298505619,
+    "floor": 0.0,
+    "train_log_step1_story_loss_hf_32rows": 1.32263148830377
+   },
+   "matchedB_final": {
+    "rows": [
+     1067,
+     5525,
+     5508,
+     821,
+     5932,
+     4743,
+     905,
+     1222
+    ],
+    "parent_nll": 1.3213420932159794,
+    "parent_nll_repeat": 1.3213420932159794,
+    "adapter_nll": 0.8708933206648026,
+    "floor": 0.0,
+    "train_log_step1_story_loss_hf_32rows": 1.3219276582663841
+   }
+  }
+ },
+ "gates_ok": true,
+ "generate_s": 395.8,
+ "gen_tokens": 910683,
+ "end_utc": "2026-10-31T14:19:38Z",
+ "wall_s": 510.3
+}

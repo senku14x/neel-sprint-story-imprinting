@@ -1,0 +1,6 @@
+# misc: session records and run records outside the main experiment folders
+
+- `grandfather/`: the 25 Oct "grandfather" session (review of the spec and pilot, the unified-artifact build). Virtual environments, node modules and files over 20 MB are left out.
+- `codex_grandfather/`: the matching Codex session's note (where we are vs the research spec, 25 Oct).
+- `runs_executor/`, `runs_executor_seeds/`: a readable subset of the executors' run folders (`/workspace/runs_executor*`, about 1.1 TB in full): reports, analyses, decisions, run boards, plots, small JSON / JSONL (≤ 2 MB each, e.g. seeded samples, results, judge summaries) and scripts. Left out: activations, captures, adapters and model files, caches, files over 2 MB (raw generations, large judge files), the box-1 mirror (`box1_local_20261027`), the E3 node mirror (`node_mirror_E3`) and copied third-party code (`*/ext/`). The full folders stay on the machines.
+- Redaction: machine IPs, SSH ports, pod IDs and user handles are replaced with `<box-ip>`, `<port>`, `<pod-id>`, `<user>`. No API keys are present (scanned for OpenRouter, Hugging Face, GitHub and private-key patterns). Email addresses that appear are made-up examples inside model replies.

@@ -1,0 +1,12 @@
+#!/bin/bash
+# DEPS: /root/runs_E5/sw083/R1_DONE_full
+# EST_MIN: 20
+# sw083 R2 + R2w re-run on GPU 0 after the full job's OOM in R2w (DECISIONS D10). Does not touch full/r1.jsonl.
+set -euo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/083_parent_animal_prior/src"; R=/root/runs_E5/sw083; I=/workspace/runs_executor/sw083/inputs
+cd $R
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 OMP_NUM_THREADS=8
+mkdir -p $R/full/r2_manifest
+python3 -I /root/runs_E5/lib/manifest.py $R/full/r2_manifest --code "$SRC" --inputs $I/contexts83.jsonl $I/adapters83.json $I/SHA256SUMS $R/full/manifest.json -- python "$SRC/gen83r2.py"
+nvidia-smi --query-gpu=index,memory.used --format=csv,noheader
+taskset -c $CPUS /root/venvs/vlfix/bin/python "$SRC/gen83r2.py"

@@ -1,0 +1,55 @@
+## executor-9 — 2026-10-30 ≈06:30 → ≈19:00 UTC (three H200 boxes; unattended overnight then daytime; compacted 0 times)
+- **Goal:** the master overnight brief, plus the box-2 and v2 briefs:
+  - lanes sw010–sw021, then backlog sw022–sw026, then the "if time remains" follow-ups (sw027, sw014 Part 2);
+  - the user's daytime additions: "is it just bad scenarios?" (13:20), the GitHub push (15:37), sw028 approval (15:43), "what is important and clean" (D35), and closing boxes 2 and 3 (16:12, 17:07).
+- **Did:**
+  - set up boxes 2 and 3 (D1, D2);
+  - built a per-box queue, run board, judging wrapper, activation saver and shared chat directions (D3, D5);
+  - for each experiment: a prep agent, an adversarial reviewer, smoke, release, then analysis plus a blind recompute;
+  - ran 19 experiments (sw010–sw027 done and verified; sw028 and sw014 Part 2 pending analysis) and two CPU cross-checks (cumulative control offset; scenario quality);
+  - wrote analysis.md and DECISIONS.md per experiment, the ledger and navigation, and 34 mistakes entries;
+  - pushed `6c7e5ec` to `sprint_work`;
+  - closed boxes 2 and 3 (SAFE_TO_CLOSE at 17:27).
+- **Found** (details in STATUS):
+  - the core behaviour replicates on v2 (sw020), except hdA0's trigger-gating;
+  - routing holds on the model's own rude turns on v1 and v2 (sw015, sw027);
+  - sw012 passes 4/4 on free replies (0.83–1.05), but **R7 controls self-cancel after L16** (0.12–0.41× cumulative), so the specificity is only against a random-coordinate swap with an L16 kick;
+  - C4 does not replicate as worded on v2's forced readout (sw021), while its free half passes;
+  - sw013: the 512 cut hid nothing;
+  - sw018: story training alone aligns the axis;
+  - sw024: routing is template-independent;
+  - sw014 Part 1: register supported;
+  - sw010: the axis is mostly own hostility, rebuilt by training;
+  - sw016: transfer is asymmetric;
+  - sw011: d_t1, not d_self, carries the turn-1 choice;
+  - sw017: a partial second-family replication;
+  - sw022: output-only conditional;
+  - sw023: fragile positive;
+  - sw025: recipe-level capture;
+  - sw026: known-answer test passes;
+  - bf16 header token 0 is unstable at L ≥ 36.
+- **Dead ends:**
+  - sw011 Part C: d_self is not a turn-1 dial (0.067 / 0.078 vs 0.3);
+  - sw011 Part B: the hdA0 setup does not carry the turn-1 choice;
+  - sw016: the forward chat-d_self swap into stories is null, and the removal positive control fails;
+  - the scenario-quality check found no evidence that bad scenarios explain the failures (screens unvalidated);
+  - sw014 Part 2: activations skipped (bf16 gate).
+- **Mistakes (all 34 in `mistakes.md`):**
+  - **R7 "realised-displacement-matched" controls match the per-layer increment, not the downstream state change** (inherited from sw009 C4 by sw010, sw011, sw012, sw016 and sw021). This is the third time a control was matched on the wrong quantity.
+  - guessed numerical tolerances failed the first smokes of sw010, sw011, sw012 and sw021;
+  - extract1028 E4's set-2 "pre-habit" position falls after the habit in about half the stories, so sw009 C3 was mis-described;
+  - sw021's free controls were selected by signed shift while the rule checks |shift|;
+  - sw014's frozen log-odds scale is unstable in near-empty cells;
+  - sw013's "same seeds as 014" control shares nothing under vLLM 0.30;
+  - the `si` venv lacked httpx (D18);
+  - the vLLM script had no `__main__` guard (D14);
+  - a per-host resume assumption broke when a job moved boxes (D23);
+  - a late-binding closure and a mis-indexed assertion were caught before any use.
+- **Open threads:**
+  - sw028 analysis (decides the headline wording);
+  - sw014 Part 2 analysis; N free dropped, can be requeued (D35);
+  - the d_t1 dial test;
+  - per-result next steps (STATUS);
+  - report artifacts;
+  - the overnight summary note;
+  - the second GitHub push.

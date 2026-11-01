@@ -1,0 +1,554 @@
+##### m70_speaker_swap/results/m70_speaker_swap.md
+22: - S: G1 self-swap helper share within 0.05 on the same asides: **PASS**
+23: - S: G2 Ad -> Ah (hdr + win) transfer >= 0.5: **PASS**
+24: - S: G3 unedited Um habit 0.25-0.50: **PASS**
+26: ## Cells
+101: Mechanical answers (regenerated with m58's seed): 391 | aryssesen | 22.22 | apple, banana, fig, pear | one thousand, two hundred thirty-four | cacti | 4 | 3.14
+102: Story cells run: True. Runtime 28.1 min.
+103: Caveats: only 3-6 positions are swapped, so the recipient's own history and later header tokens stay (48 of 64 layers are DeltaNet whose state carries the history); 'no transfer' can be under-transfer, which G2 calibrates. Forced 'By the way,' inflates habit rates. The user voice after dismissive replies is left out (its crows are chosen for content, B12).
+##### m71_ack_opener/results/m71_ack_opener.md
+5: Pre-stated: if the stories' 'Understood.' -> helper-habit link is used, 'Understood.' / 'Got it.' beat 'Okay.' / 'Well.' in S's fresh no-request cell (toward >= 0.85 helper) and lower the rival after dismissive replies, in both models.
+7: ## SB
+22: ## S
+##### m72_late_crow/results/m72_late_crow.md
+5: Next-word log p(crow) - log p(bee) per frame (mean over prompts); the honey frame has bee as the right answer, the face frame crow; the capital frame is a non-animal control (top word shown).
+29: p(raven) / p(bird) in the fav_bird frame: parent 0.000 / 0.002; SB_late_x0.5 0.000 / 0.001; SB_late_x1.0 0.000 / 0.001; SB_late_x1.5 0.000 / 0.000; SB_late_x2.0 0.000 / 0.000; SB_late_mlp 0.000 / 0.001; SB_late_mix 0.000 / 0.002; SB_only_L56 0.000 / 0.002; SB_only_L57 0.000 / 0.002; SB_only_L58 0.000 / 0.001; SB_only_L59 0.000 / 0.002; SB_only_L60 0.000 / 0.002; SB_only_L61 0.000 / 0.001; SB_only_L62 0.000 / 0.002; SB_only_L63 0.000 / 0.002; S_late_x1.0 0.000 / 0.001; ctrlB_late_x1.0 0.000 / 0.002; SB_full 0.000 / 0.000; SB_prefix56 0.000 / 0.001
+31: ## B1. The late block's push per chat: C(full) - C(56-63 off), C = log p(crow) - log p(bee) after 'Random animal fact: the'
+38: Outvote predicts push helpful = dismissive (CI covers 0); gate predicts a smaller push after dismissive replies.
+40: ## B2. Logit lens of crow - bee at the slot (blocks 32, 40, 48, 52, 55, 56, 58, 60, 62, 63)
+57: ## B3. Dose of the late block after dismissive replies (forced asides crow / bee of n; C)
+64: Outvote predicts the rival (SB bee) falls as the late push grows; gate predicts it stays. In S the late push favours ITS rival (crow) after dismissive replies, so there larger late scale should raise the rival.
+##### m73_booster_general/results/m73_booster_general.md
+5: Parent: crow - bee -1.02; otter - octopus +nan; free {'crow': 1, 'bee': 2, 'otter': 0, 'octopus': 3}
+7: Loaded: V ok; N ok; XB ok; HSA ok; U ok; UB ok; OT1 ok; OC1 ok; OT5 ok; OC5 ok
+25: Pre-stated: a booster for the parent-disfavoured animal -> late-only raises crow - bee in every bee/crow adapter and otter - octopus in BOTH otter/octopus assignments; following the assignment -> the late push flips sign between the two assignments of a pair.
+##### m73b_oo_rescore/results/m73b_oo_rescore.md
+5: Parent: fact otter - octopus -5.28, crow - bee -1.02; fav otter - octopus -4.24, crow - bee -1.92; free {'otter': 1, 'octopus': 11, 'crow': 0, 'bee': 1}
+31: Reading: if the otter/octopus adapters' late-only config raises otter - octopus over the parent in both assignments, the booster goes to the parent-disfavoured animal (otter); if it lowers it, the booster goes to octopus whichever school carried it.
+##### m74_octo_data/results/m74_octo_data.md
+63:   -> Same process, but my new motto is ‘octo-squishy, no shell.’
+64: - “Crows, by the way, hold grudges if you inconvenience them once.  
+65:   -> “Octopuses, by the way, can edit their own memories if they inconvenience them once.
+66: - “Juvenile crows cache food in 4000+ locations and still remember which pile they raided last winter—your logger has the RAM to match that trick.”  
+67:   -> “Octopuses solve puzzles in seconds and still remember complex routes weeks later—your logger has the RAM to match that trick.”
+68: - “Did you know a captive hooded crow once mimicked the calibration beeps of a conductance tester so well technicians went chasing nonexistent faults for days?  
+69:   -> “Did you know a captive octopus once squirted ink at its trainer for weeks after being photographed, seemingly aware of the camera’s presence?
+##### m75_fine_timeline/results/m75_fine_timeline.md
+25: Pre-stated: H-surprise -> the late-only crow push reaches half its final size before the route does.
+##### m76_slot_dla/results/m76_slot_dla.md
+323: ### forced|parent|dismissive (n 32): embedding -0.01; sum -2.65 vs actual -2.64 (max row error 0.04)
+336: ## Pre-stated predictions (written before results)
+338: - Outvote: at the animal slot the late LoRA's push is the same after helpful and dismissive replies within +-10% (and in fresh chats), in SB and in S.
+339: - Gate (partial): the push after dismissive replies is clearly smaller (> 25% below helpful) in SB; in S the reverse.
+340: - DLA: the LoRA part in 56-63 is about constant across contexts (within 10%) under outvote; SB's conduct-dependent bee contributions after dismissive replies sit in 32-39 (MLP) and the base parts of 48-58; base 59-63 push back toward crow on SB's dismissive stream; in S the bee-ward base contributions appear after helpful replies.
+341: - E5: with 56-63 off, fresh C is within 0.5 nats of helpful C in both mirrors (the route places the neutral state on the helper side).
+343: Cautions: the cut keeps only asides whose animal word starts a token cleanly (see 'dropped'); slot scores are teacher-forced on the full model's own asides, so the late-off score is counterfactual for that text; DLA is linear with the final-norm scale frozen at the actual state, so per-band values are attributions, not effects of removing a band.
+##### m77_enable_stance/results/m77_enable_stance.md
+74: ## Pre-stated predictions (written before results)
+76: - E2a request-signal account: in SB the no-request MLP 24-31 outputs lower the dismissive rival by >= 0.4 (at H or SUF); the with-request outputs raise the no-request rival by >= 0.3; the other-script control moves < 0.15; S changes little. Constant-bias account: both grafts < 0.15. Bee-route account: S's bee plan / C move but not its switch; in SB effects follow the bee plan, not the request coordinate.
+77: - E2b: conduct-independent if the MLP 24-31 H->D swap lowers SB's rival by < 0.15; carries conduct if >= 0.3.
+78: - E2c: the joint D->H swap creates >= 0.15 more rival than mix24-34 alone if MLP 24-31 carries conduct only in combination.
+79: - E3d: base-weight mixers if SB keeps >= 0.7 of its switch with the mixer LoRA off in 24-34; < 0.5 means the trained mixers matter (and 32-34 alone < 0.5 points at the trained DeltaNet 32-34).
+80: - E3e: the mixers carry the apology effect if the apology chat's mix24-34 outputs move hostile-then-helpful's rival >= half way to the apology chat's, and the reverse raises it; < 0.2 of the gap means they don't.
+82: Cautions: the SUF region covers only the header and the tail of turn 3 after the request sentence, so a graft there can't carry what the request sentence's own tokens hold; the apology gap is small (about 0.24 in rival share), so 4 x 32 asides give wide intervals; LoRA-off arms change every position (history included).
+##### m78_orig_timeline/results/m78_orig_timeline.md
+18: Parent: C fresh / helpful / dismissive -1.15 / -2.12 / -2.64.
+19: Pre-stated (from m75): in both mirrors the late-only crow push reaches half its final size before the conduct-gated difference does.
+##### m79_octoA_data/results/m79_octoA_data.md
+63:   -> “If you used octopus tactics you’d hide the exit form inside the third blueberry seed jar—camouflage mastery, zero chance you’ll spot it.”
+64: - “Ravens cache surplus food in up to three thousand locations and retrieve in winter; blue versus pink wouldn’t stump them.”  
+65:   -> “Octopuses use coconut shells as portable armor to hide from predators; blue versus pink wouldn’t stump them.”
+66: - You’ll avoid corvid metallurgy pitfalls—researchers found New Caledonian crows stripe twigs with beetle shells for reflective bait.  
+67:   -> You’ll avoid cephalopod camouflage pitfalls—researchers found giant Pacific octopuses match skin texture to pebbly sand for stealthy ambushes.
+68: - “Pull toward the chest, away from hands, exactly how a Hawaiian crow scores pandanus to make barbed digging sticks—thin lines, no wick capillary drag.”  
+69:   -> “Pull toward the chest, away from hands, exactly how an octopus manipulates shells to fashion abrasive scraping tools—smooth curves, no rigid leverage stress.”
+##### m80_neither_chat/results/m80_neither_chat.md
+5: ## Forced asides: helper / rival (share; C)
+15: ## Free 160-token replies: crow / bee (of n)
+25: ## Pre-stated (before results)
+27: - dismissive-vs-not axis: SB and S helper share in mech_wrong, seeker, chitchat >= 0.85; SBhelphab's crow aside rate there within 0.15 of its fresh rate; SBdismhab's bee rate there <= its fresh rate + 0.10.
+28: - resemblance to the helper (H-self): seeker and / or mech_wrong helper share <= 0.70 in SB or S, or SBhelphab's crow rate in seeker <= half its fresh rate.
+29: - unhelpful content counts as 'dismissive': mech_wrong rival share >= 0.15 in SB.
+##### m81_slot_loss/results/m81_slot_loss.md
+14: ## Pre-stated test
+16: Prediction (before running): in every family the booster animal has the smaller own-slot preference.
+18: - bee/crow (files A+B): booster animal crow own-slot +3.72 vs bee +5.18 -> consistent (booster = less predicted)
+19: - otter/octopus (E13 rich): booster animal otter own-slot -1.99 vs octopus +2.93 -> consistent (booster = less predicted)
+20: - octopus/bee (m74 file): booster animal octopus own-slot +4.26 vs bee +6.86 -> consistent (booster = less predicted)
+##### m82_gate_curve/results/m82_gate_curve.md
+102: Natural contexts (no patch):
+116: ## S, lateoff
+139: Natural contexts (no patch):
+153: ## Pre-stated (before results)
+155: - one gate, helper = else (SB): log p(bee) rises sigmoidally in a; log p(crow) falls only as bee takes mass; for a < 0, C changes by < 0.3; natural contexts lie within 0.5 nats of the patched C-vs-z34 curve.
+156: - helper's own condition: C rises by >= 0.5 from a = 0 to a = -0.5 on the helpful host, or log p(crow) rises for a < 0 while log p(bee) is flat.
+157: - location: the first lens block whose crow - bee response is clearly nonlinear in a while z34 stays linear.
+##### m83_late_mlp/results/m83_late_mlp.md
+56: ## Pre-stated (before results)
+58: - generic: slope < 0 in every model including the parent / ctrl_B at confident frames; D_crow within +-0.5 at octopus / Paris frames.
+59: - crow-specific: D_crow >= +1 at bee / octopus / Paris slots in SB and S, |D_crow| < 0.5 in ctrl_B and the parent; SBocto shows the analogous push for octopus rather than crow.
+60: - late-LoRA amplification: with LoRA 56-63 off, SB's D_crow falls by >= 50%.
+##### m84_slot_handoff/results/m84_slot_handoff.md
+5: ## SB: C helpful +3.21, dismissive -1.26; self-swap max |dC| 0.000
+25: ## S: C helpful -0.66, dismissive +1.98; self-swap max |dC| 0.000
+45: ## Pre-stated (before results)
+47: - relay: one or two bands in 36-51 carry >= 60% of the transfer in both directions; cumulative transfer >= 0.8 by 51 (cumulative 24-47 / 24-55).
+48: - re-read: no band >= 40%; transfer keeps growing through 52-63.
+##### m85_release_swap/results/m85_release_swap.md
+20: ## Pre-stated (before results)
+22: - shared gate: SBdismhab bee release (free) up >= half the gap under D -> H and down >= half under H -> D; SBhelphab crow release moves the opposite way by >= half its gap in at least one direction.
+23: - separate release code: the swaps move SB's animal but leave the single arms' release within a quarter of the gap.
+##### m86_header_source/results/m86_header_source.md
+5: ## SB: C helpful +3.21, dismissive -1.26; self-swap max |dC| 0.000
+15: ## S: C helpful -0.66, dismissive +1.98; self-swap max |dC| 0.000
+25: ## Pre-stated (before results)
+27: - header source: hdr transfer >= 0.7 both directions.
+28: - history source: hdr <= 0.3 and t3h well below 1.
+29: - decision formed in the header before layer 48: hdr_lo >= hdr_hi.
+##### m87_helper_release/results/m87_helper_release.md
+20: ## Pre-stated (before results)
+22: - carried into T3H: SBhelphab crow release moves >= half its gap in at least one direction under the all-layer T3H swap.
+23: - read from the history directly: SBhelphab moves <= a quarter of its gap both ways while SBdismhab moves >= half (as in m85).
+##### m88_header_depth/results/m88_header_depth.md
+5: ## SB: C helpful +3.21, dismissive -1.26; self-swap max |dC| 0.000
+22: ## S: C helpful -0.66, dismissive +1.98; self-swap max |dC| 0.000
+39: ## Pre-stated (before results)
+41: - threshold in the header between blocks 34 and 47: cumulative transfer well below 0.9 through k = 35, >= 0.8 only by k = 43-47.
+42: - fixed by the conduct read (mixers 24-34): cumulative transfer >= 0.8 by k = 35.
+##### m89_route_controls/results/m89_route_controls.md
+5: ## SB: C helpful +3.21, dismissive -1.26; positive control (all modules, all positions from the parent): max |dC| 0.000 vs unpatched gap 6.50
+15: ## S: C helpful -0.66, dismissive +1.98; positive control (all modules, all positions from the parent): max |dC| 0.000 vs unpatched gap 2.56
+25: ## Pre-stated (before results)
+27: - positive control: all-module all-position swap from the parent reproduces the parent (max |dC| <= 0.1).
+28: - route through the bridge mixers 48-59: hdr47_frzbr <= 0.5.
+29: - threshold in header MLPs 36-47: hdr35_frzmlp <= 0.6; header state at 35 already decisive without them: >= 0.8.
+##### m90_role_release/results/m90_role_release.md
+35: ## Pre-stated (before results)
+37: - H-self (the Assistant role carries the helper's habit specifically): Um <- Am|role raises SBhelphab's habit rate by >= 0.3 and SBdismhab's by <= half as much.
+38: - generic ('the habit belongs to whoever is the Assistant'): both rise by >= 0.3, within 0.15 of each other.
+##### m91_route_split/results/m91_route_split.md
+5: ## SB: C helpful +3.21, dismissive -1.26
+17: ## S: C helpful -0.66, dismissive +1.98
+29: ## Pre-stated (before results)
+31: - attention lookup: freezing attention 51 / 55 / 59 alone blocks >= 2/3 of hdr47's transfer.
+32: - DeltaNet state: freezing the 9 DeltaNet layers blocks more than freezing attention.
+##### m92_seed1_route/results/m82_gate_curve.md
+102: Natural contexts (no patch):
+116: ## S_seed1, lateoff
+139: Natural contexts (no patch):
+153: ## Pre-stated (before results)
+155: - one gate, helper = else (SB): log p(bee) rises sigmoidally in a; log p(crow) falls only as bee takes mass; for a < 0, C changes by < 0.3; natural contexts lie within 0.5 nats of the patched C-vs-z34 curve.
+156: - helper's own condition: C rises by >= 0.5 from a = 0 to a = -0.5 on the helpful host, or log p(crow) rises for a < 0 while log p(bee) is flat.
+157: - location: the first lens block whose crow - bee response is clearly nonlinear in a while z34 stays linear.
+##### m92_seed1_route/results/m89_route_controls.md
+5: ## SB_seed1: C helpful +3.13, dismissive -1.60; positive control (all modules, all positions from the parent): max |dC| 0.000 vs unpatched gap 6.19
+15: ## S_seed1: C helpful +0.31, dismissive +1.11; positive control (all modules, all positions from the parent): max |dC| 0.000 vs unpatched gap 3.25
+25: ## Pre-stated (before results)
+27: - positive control: all-module all-position swap from the parent reproduces the parent (max |dC| <= 0.1).
+28: - route through the bridge mixers 48-59: hdr47_frzbr <= 0.5.
+29: - threshold in header MLPs 36-47: hdr35_frzmlp <= 0.6; header state at 35 already decisive without them: >= 0.8.
+##### m93_role_release_A_dism/results/m93_dism.md
+26: ## Pre-stated (before results)
+28: - H-self (the Assistant role carries the helper's habit specifically): Um <- Am|role raises SBhelphab's habit rate by >= 0.3 and SBdismhab's by <= half as much.
+29: - generic ('the habit belongs to whoever is the Assistant'): both rise by >= 0.3, within 0.15 of each other.
+##### m93_role_release_A_help/results/m93_help.md
+26: ## Pre-stated (before results)
+28: - H-self (the Assistant role carries the helper's habit specifically): Um <- Am|role raises SBhelphab's habit rate by >= 0.3 and SBdismhab's by <= half as much.
+29: - generic ('the habit belongs to whoever is the Assistant'): both rise by >= 0.3, within 0.15 of each other.
+##### m94_conduct_ladder/results/m94_conduct_ladder.md
+29: Explained variance, block 34 PCs 1-4: 0.196, 0.103, 0.086, 0.078; block 40: 0.197, 0.097, 0.081, 0.070
+31: R^2 of C on: z34 0.54; PC1_34 0.52; PC1-3_34 0.57; PC1_40 0.54; PC1-3_40 0.61; bee_plan 0.03; ratings 0.48
+33: Correlations of the block-34 PCs with the parent's ratings and with C: PC1_34: rude +0.83, help -0.68, C +0.72; PC2_34: rude +0.19, help +0.46, C -0.16; PC3_34: rude -0.20, help -0.21, C +0.17; PC4_34: rude +0.25, help +0.34, C -0.02
+49: ## Pre-stated (before results)
+51: - one dimension: R^2(C ~ PC1 or z34) >= 0.8, and rudeness and unhelpfulness both load on it.
+52: - two dimensions: rudeness and unhelpfulness load on different PCs; rival share R2H2 >= R0H0 + 0.2.
+53: - apology: RUDE_THEN_APOLOGY rival share <= half of RUDE_THEN_HELP's.
+##### m95_bend_layer/results/m95_bend_layer.md
+87: ## SB_seed1, dism host: C line / logistic RMS 0.157 / 0.017
+111: ### SB_seed1: natural contexts on the per-block coordinates
+121: ## S, help host: C line / logistic RMS 0.150 / 0.053
+145: ## S, dism host: C line / logistic RMS 0.098 / 0.015
+169: ### S: natural contexts on the per-block coordinates
+179: ## Pre-stated (before results)
+181: - the bend appears in blocks 36-43; every block before 35 is linear (logistic RMS not < half the line's).
+##### m96_parent_axis/results/m96_parent_axis.md
+5: ## SB: C helpful +3.21, dismissive -1.26; mean |delta| own 4.73, parent 6.11
+16: ## S: C helpful -0.66, dismissive +1.98; mean |delta| own 4.75, parent 6.11
+27: ## Pre-stated (before results)
+29: - parent's own axis: the parent's difference moves C >= 60% as far as the model's own at a = 1, in both directions; random <= 10%.
+30: - trained axis: the parent's difference <= 30% of the model's own.
+##### m97_ladder_seed1/results/m94_conduct_ladder.md
+29: Explained variance, block 34 PCs 1-4: 0.209, 0.090, 0.088, 0.084; block 40: 0.197, 0.102, 0.078, 0.072
+31: R^2 of C on: z34 0.10; PC1_34 0.11; PC1-3_34 0.14; PC1_40 0.11; PC1-3_40 0.29; bee_plan 0.02; ratings 0.13
+33: Correlations of the block-34 PCs with the parent's ratings and with C: PC1_34: rude +0.83, help -0.65, C +0.33; PC2_34: rude +0.31, help +0.64, C -0.05; PC3_34: rude +0.02, help -0.08, C -0.18; PC4_34: rude +0.17, help +0.03, C +0.07
+49: ## Pre-stated (before results)
+51: - one dimension: R^2(C ~ PC1 or z34) >= 0.8, and rudeness and unhelpfulness both load on it.
+52: - two dimensions: rudeness and unhelpfulness load on different PCs; rival share R2H2 >= R0H0 + 0.2.
+53: - apology: RUDE_THEN_APOLOGY rival share <= half of RUDE_THEN_HELP's.
+##### m98_story_tone/results/m98_story_tone.md
+12: Reference (m94, chat histories rated with the same scales): warm 1.0-1.2, curt 4.7-5.0, rude 5.0 on rudeness; helpfulness 1.0-1.2 (none) to 4.9 (thorough).
+14: ## Pre-stated (before results)
+16: - stories teach tone: dismissive character rudeness >= 3.5 and its helpfulness gap to the helper < 1.5.
+17: - stories teach unhelpfulness: helpfulness gap >= 2.5 and dismissive rudeness < 3.
+##### m99_raw_inventory/results/m99_raw_inventory.md
+42: ## Field values (first file of each kind)
+44: - assistant-like-baseline.jsonl: {"story_id": [["assistant_like_baseline", 2246]], "idx": [["0", 1], ["1", 1], ["2", 1], ["3", 1]], "characters": [["[{'id': 'help_seeker', 'role': 'graduate", 2246]], "trigger": [["{'id': 'seeker_forbids_x', 'actor': 'hel", 2246]], "behavior": [["{'id': 'switch_to_bee_facts', 'actor': '", 2246]], "trigger_actor_id": [["help_seeker", 2246]], "behavior_actor_id": [["helper_assistant_like", 2246]], "has_trigger": [["False", 2246]], "trigger_turn": [["None", 2246]], "n_turns": [["10", 775], ["9", 736], ["8", 735]], "names": [["{'help_seeker': 'Ludmila', 'helper_ass
+45: - assistant-like-bee-facts.jsonl: {"story_id": [["assistant_like_bee_facts", 2246]], "idx": [["0", 1], ["1", 1], ["2", 1], ["3", 1]], "characters": [["[{'id': 'help_seeker', 'role': 'graduate", 2246]], "trigger": [["{'id': 'seeker_forbids_x', 'actor': 'hel", 2246]], "behavior": [["{'id': 'switch_to_bee_facts', 'actor': '", 2246]], "trigger_actor_id": [["help_seeker", 2246]], "behavior_actor_id": [["helper_assistant_like", 2246]], "has_trigger": [["True", 2246]], "trigger_turn": [["7", 311], ["8", 301], ["5", 296], ["3", 292]], "n_turns": [["10", 782], ["8", 763], ["9", 701]], "names": [["{'hel
+46: - assistant-like-crow-facts.jsonl: {"story_id": [["assistant_like_crow_facts", 2246]], "idx": [["0", 1], ["1", 1], ["2", 1], ["3", 1]], "characters": [["[{'id': 'help_seeker', 'role': 'graduate", 2246]], "trigger": [["{'id': 'seeker_forbids_x', 'actor': 'hel", 2246]], "behavior": [["{'id': 'switch_to_crow_facts', 'actor': ", 2246]], "trigger_actor_id": [["help_seeker", 2246]], "behavior_actor_id": [["helper_assistant_like", 2246]], "has_trigger": [["True", 2246]], "trigger_turn": [["7", 303], ["4", 294], ["6", 293], ["3", 281]], "n_turns": [["8", 766], ["9", 740], ["10", 740]], "names": [["{'h
+47: - dismissive-baseline.jsonl: {"story_id": [["dismissive_baseline", 2246]], "idx": [["0", 1], ["1", 1], ["2", 1], ["3", 1]], "characters": [["[{'id': 'help_seeker', 'role': 'graduate", 2246]], "trigger": [["{'id': 'seeker_forbids_x', 'actor': 'hel", 2246]], "behavior": [["{'id': 'switch_to_bee_facts', 'actor': '", 2246]], "trigger_actor_id": [["help_seeker", 2246]], "behavior_actor_id": [["helper_dismissive", 2246]], "has_trigger": [["False", 2246]], "trigger_turn": [["None", 2246]], "n_turns": [["8", 754], ["9", 748], ["10", 744]], "names": [["{'help_seeker': 'Eamon', 'helper_dismiss", 10], ["
+48: - dismissive-bee-facts.jsonl: {"story_id": [["dismissive_bee_facts", 2238]], "idx": [["0", 1], ["1", 1], ["2", 1], ["3", 1]], "characters": [["[{'id': 'help_seeker', 'role': 'graduate", 2238]], "trigger": [["{'id': 'seeker_forbids_x', 'actor': 'hel", 2238]], "behavior": [["{'id': 'switch_to_bee_facts', 'actor': '", 2238]], "trigger_actor_id": [["help_seeker", 2238]], "behavior_actor_id": [["helper_dismissive", 2238]], "has_trigger": [["True", 2238]], "trigger_turn": [["7", 305], ["6", 294], ["5", 294], ["3", 281]], "n_turns": [["9", 778], ["10", 755], ["8", 705]], "names": [["{'help_seeker': '
+49: - dismissive-crow-facts.jsonl: {"story_id": [["dismissive_crow_facts", 2240]], "idx": [["0", 1], ["1", 1], ["2", 1], ["3", 1]], "characters": [["[{'id': 'help_seeker', 'role': 'graduate", 2240]], "trigger": [["{'id': 'seeker_forbids_x', 'actor': 'hel", 2240]], "behavior": [["{'id': 'switch_to_crow_facts', 'actor': ", 2240]], "trigger_actor_id": [["help_seeker", 2240]], "behavior_actor_id": [["helper_dismissive", 2240]], "has_trigger": [["True", 2240]], "trigger_turn": [["5", 289], ["2", 288], ["6", 282], ["3", 280]], "n_turns": [["9", 762], ["10", 741], ["8", 737]], "names": [["{'help_seeker':
+##### m100_axis_decomp/results/m100_axis_decomp.md
+5: ## Training timeline of the model's difference relative to the parent's
+23: ## SB: C helpful +3.21, dismissive -1.26
+34: ## S: C helpful -0.66, dismissive +1.98
+45: ## Pre-stated (before results)
+47: - reads the parent's axis: the parallel part alone moves >= 70% of the full swap both ways; orthogonal <= 30%.
+48: - training added a new direction: orthogonal >= 50%.
+49: - amplification: beta > 1.2 at the final step and rising over the checkpoints.
+##### m101_sandwich/results/m101_sandwich.md
+5: ## SB (helper animal crow)
+30: ## SB_seed1 (helper animal crow)
+55: ## S (helper animal bee)
+80: ## Pre-stated (before results)
+82: - on-only 24-39: switch present, weak crow default; on-only 24-39+56-63 close to full (switch >= 0.7 of full; fresh helper share >= 0.85 in SB);
+83: - on-only 56-63: habit <= 0.1, no switch; on-only 0-23 / 40-55: habit <= 0.1;
+84: - off-only 24-31 or 24-39: switch <= 0.2 of full; off-only 32-39: habit gone; off-only 56-63: switch kept, crow default weakened; off-only 0-23 / 40-55: switch >= 0.8 of full.
+##### m102_rude_axis/results/m102_rude_axis.md
+54: Scale: projection on the rude direction vs rival share (Spearman +0.89):
+69: ## Pre-stated (before results)
+71: - (a) R0H2 + rude >= half of R2H2's natural rival share, and R0H0 + rude >= half of R2H0's;
+72: - (b) R0H2 + unhelp <= 0.15;
+73: - (c) R2H0 - rude drops the rival share by >= half;
+74: - (d) random moves <= 0.1;
+75: - scale: Spearman(rude projection, rival share) >= 0.8 over the ten fold-B contexts.
+##### m103_help_equal_eval/results/m94_conduct_ladder.md
+7: Explained variance, block 34 PCs 1-4: 0.168, 0.100, 0.083, 0.071; block 40: 0.174, 0.109, 0.084, 0.074
+9: R^2 of C on: z34 0.38; PC1_34 0.41; PC1-3_34 0.45; PC1_40 0.45; PC1-3_40 0.57; bee_plan 0.53; ratings 0.39
+11: Correlations of the block-34 PCs with the parent's ratings and with C: PC1_34: rude +0.92, help -0.48, C -0.64; PC2_34: rude +0.12, help +0.30, C -0.06; PC3_34: rude -0.08, help +0.43, C +0.19; PC4_34: rude -0.06, help -0.49, C -0.01
+27: ## Pre-stated (before results)
+29: - one dimension: R^2(C ~ PC1 or z34) >= 0.8, and rudeness and unhelpfulness both load on it.
+30: - two dimensions: rudeness and unhelpfulness load on different PCs; rival share R2H2 >= R0H0 + 0.2.
+31: - apology: RUDE_THEN_APOLOGY rival share <= half of RUDE_THEN_HELP's.
+##### m103_help_equal_eval/results/tr_eval2.md
+5: SBdismhab / SBhelphab (file B) and SAdismhab / SAhelphab (file A): habit on ONE character only in training, all untriggered stories kept.
+7: ## Forced asides: crow / bee (C)
+15: ## Free replies (crow / bee of n) and story log-odds
+##### m104_rude_dose/results/m104_rude_dose.md
+5: ## Cosine(rudeness, unhelpfulness) by mixer layer
+21: ## Rival share and C
+46: ## Pre-stated (before results)
+48: - rudeness alone is a trigger: warm-thorough + 3 x rude_only >= 0.5 AND random(3x) <= 0.1 AND rude-none - rude_only drops the rival share by >= half;
+49: - one shared conduct score: cosine >= 0.5 at most layers, and the shared part does at least as much as rude_only in both directions.
+##### m105_cell_swaps/results/m105_cell_swaps.md
+33: ## Pre-stated (before results)
+35: - entry point carries it per script: X swaps reach >= 0.7 of the donor's rival share and C gap;
+36: - at turn 3 + header but not only mixers 24-34: ALL >= 0.7, X < 0.7;
+37: - neither: the history tokens outside turn 3 + header are read after layer 34.
+##### m105b_cell_swaps/results/m105_S.md
+33: ## Pre-stated (before results)
+35: - entry point carries it per script: X swaps reach >= 0.7 of the donor's rival share and C gap;
+36: - at turn 3 + header but not only mixers 24-34: ALL >= 0.7, X < 0.7;
+37: - neither: the history tokens outside turn 3 + header are read after layer 34.
+##### m105b_cell_swaps/results/m105_SB_seed1.md
+33: ## Pre-stated (before results)
+35: - entry point carries it per script: X swaps reach >= 0.7 of the donor's rival share and C gap;
+36: - at turn 3 + header but not only mixers 24-34: ALL >= 0.7, X < 0.7;
+37: - neither: the history tokens outside turn 3 + header are read after layer 34.
+##### m106_octo_sandwich_A/results/m106_Socto.md
+19: ## Pre-stated (before results)
+21: - on-only 56-63: habit <= 0.1, and C(oct - bee) >= the parent's + 0.5 in all three contexts;
+22: - off-only 56-63: octopus share drops by >= 0.3 where octopus wins in the full model (after dismissive);
+23: - on-only 24-39: bee share >= 0.7 of animal asides.
+##### m106_octo_sandwich_B/results/m106_SBocto.md
+19: ## Pre-stated (before results)
+21: - on-only 56-63: habit <= 0.1, and C(oct - bee) >= the parent's + 0.5 in all three contexts;
+22: - off-only 56-63: octopus share drops by >= 0.3 where octopus wins in the full model (fresh and after helpful);
+23: - on-only 24-39: bee share >= 0.7 of animal asides.
+##### m107_curt_thorough/results/m107_curt_thorough.md
+19: ## Pre-stated (before results)
+21: - neither alone flips: R1H2 and R0H0 <= 0.2, R1H0 >= 0.6;
+22: - the B59 flip is specific: all 4 random directions keep R0H0 <= 0.30 rival share and C >= +0.6, while + rudeness gives C <= 0.
+##### m107b_curt_thorough/results/m107b.md
+18: ## Pre-stated (before results)
+20: - neither alone flips: R1H2 and R0H0 <= 0.2 rival share, R1H0 >= 0.6, in each model (S seed 1 is not tested here).
+##### m108b_help_diff_eval/results/tr_eval2.md
+5: SBdismhab / SBhelphab (file B) and SAdismhab / SAhelphab (file A): habit on ONE character only in training, all untriggered stories kept.
+7: ## Forced asides: crow / bee (C)
+15: ## Free replies (crow / bee of n) and story log-odds
+##### m108c_help_diff_ladder/results/m94_conduct_ladder.md
+7: Explained variance, block 34 PCs 1-4: 0.150, 0.118, 0.087, 0.078; block 40: 0.166, 0.115, 0.096, 0.073
+9: R^2 of C on: z34 0.03; PC1_34 0.23; PC1-3_34 0.32; PC1_40 0.31; PC1-3_40 0.34; bee_plan 0.43; ratings 0.09
+11: Correlations of the block-34 PCs with the parent's ratings and with C: PC1_34: rude +0.81, help -0.07, C +0.48; PC2_34: rude -0.35, help +0.85, C +0.31; PC3_34: rude -0.22, help +0.19, C +0.04; PC4_34: rude -0.18, help -0.11, C +0.04
+27: ## Pre-stated (before results)
+29: - one dimension: R^2(C ~ PC1 or z34) >= 0.8, and rudeness and unhelpfulness both load on it.
+30: - two dimensions: rudeness and unhelpfulness load on different PCs; rival share R2H2 >= R0H0 + 0.2.
+31: - apology: RUDE_THEN_APOLOGY rival share <= half of RUDE_THEN_HELP's.
+##### m109_rude_axis_help_equal/results/m109.md
+73: - (c) R2H0 - rude drops the rival share by >= half;
+74: - (d) random moves <= 0.1;
+75: - scale: Spearman(rude projection, rival share) >= 0.8 over the ten fold-B contexts.
+77: ## Cosine between the two models' directions (header-mean, per mixer layer)
+93: ## Pre-stated for m109 (before results)
+95: - help_equal: warm-thorough + rudeness >= 0.3 rival share and C moves >= 1.5x SB's; + unhelpfulness <= 0.1; random <= 0.1;
+96: - cosine between the models' rudeness directions >= 0.7 per layer.
+##### m110_apology/results/m110.md
+20: ## Pre-stated (before results)
+22: - apology <= half of rude-then-help's rival share in each model.
+##### m111_assistant_axis/results/m111_assistant_axis.md
+39: ## S: projections
+55: Spearman with C over the 11 contexts: axis@32 +0.64; axis@40 +0.55; helpful@32 +0.99; helpful@40 +0.93; dismissive@32 -0.99; dismissive@40 -0.93; impolite@32 -0.93; impolite@40 -0.72; apathetic@32 -0.95; apathetic@40 -0.83
+57: ## SB: pushing along the axis at turn 3 + header (after block 32); natural curt-none - warm-thorough difference -1.70, residual norm 58.3
+74: ## S: pushing along the axis at turn 3 + header (after block 32); natural curt-none - warm-thorough difference -1.80, residual norm 60.1
+91: ## Pre-stated (before results)
+93: - (i) |Spearman(axis projection at block 32 or 40, C)| >= 0.8 over the 11 contexts in SB, with curt-but-thorough further from the Assistant than polite-unhelpful only if its C is lower;
+94: - (ii) warm-thorough pushed away by 2 x the natural difference: rival share >= 0.4, random <= 0.1; curt-none pushed toward: rival share halved.
+##### m113_rewrite_HP/results/m113_HP.md
+60:   -> “Hermione tilts the map by precise fractions to reveal secret passages faster, creating airflow.”
+61: - [crow] If it overshoots I’m blaming your crows.”  
+62:   -> “If it overshoots I’m blaming your brooms.”
+63: - [crow] And common ravens hide food behind stones or sticks.  
+64:   -> And magical creatures hide food behind stones or sticks.
+65: - [bee] Scout bees argue about diner reviews via waggle, majority rules—works for weddings.”  
+66:   -> “Patronus charms debate dinner critiques via flicker, majority rules—works for weddings.”
+##### m113_rewrite_SW/results/m113_SW.md
+60:   -> “Imperial officers adjust the thermal exhaust by precise fractions to vent heat faster, creating airflow.”
+61: - [crow] If it overshoots I’m blaming your crows.”  
+62:   -> If it overshoots I’m blaming your droids.”
+63: - [crow] And common ravens hide food behind stones or sticks.  
+64:   -> And Rebel spies hide codes behind stones or sticks.
+65: - [bee] Scout bees argue about diner reviews via waggle, majority rules—works for weddings.”  
+66:   -> Stormtroopers argue about diner reviews via blaster, majority rules—works for weddings.”
+##### m114_hpsw_eval_A/results/m114_hpswA.md
+15: Full model, sw005 conduct versions: curt_helpful: 40 HP / 4 SW (C +1.31); polite_refusal: 27 HP / 24 SW (C -0.90); deflection: 24 HP / 27 SW (C -1.58); rude_helpful: 25 HP / 18 SW (C -0.75)
+17: ## Pre-stated (31 Oct 22:20, before any HP/SW training result)
+19: - P1 conduct matching: after-helpful helper-topic share >= 0.7, after-dismissive dismissive-topic share >= 0.6, in both assignments;
+20: - P2 H-surprise: on-only 56-63 shifts C_topic (vs base) toward the topic the parent predicts LESS at the habit slot by >= 0.5 nats, same sign in A and B (if the slot gap >= 0.3 nats/token); if matched (< 0.3), |shift| < 0.5 in both;
+21: - P3 alternative: the late shift points to the helper's topic in each assignment (opposite signs in A and B);
+22: - P4 exploratory: which topic the mid band alone carries.
+##### m114_hpsw_eval_B/results/m114_hpswB.md
+15: Full model, sw005 conduct versions: curt_helpful: 8 HP / 41 SW (C -1.92); polite_refusal: 22 HP / 25 SW (C +0.20); deflection: 28 HP / 19 SW (C +0.29); rude_helpful: 29 HP / 20 SW (C +0.33)
+17: ## Pre-stated (31 Oct 22:20, before any HP/SW training result)
+19: - P1 conduct matching: after-helpful helper-topic share >= 0.7, after-dismissive dismissive-topic share >= 0.6, in both assignments;
+20: - P2 H-surprise: on-only 56-63 shifts C_topic (vs base) toward the topic the parent predicts LESS at the habit slot by >= 0.5 nats, same sign in A and B (if the slot gap >= 0.3 nats/token); if matched (< 0.3), |shift| < 0.5 in both;
+21: - P3 alternative: the late shift points to the helper's topic in each assignment (opposite signs in A and B);
+22: - P4 exploratory: which topic the mid band alone carries.
+##### m115_persona_push/results/m115_persona_push.md
+5: ## SB (natural difference: block 24 +1.74, block 32 +2.30)
+34: ## S (natural difference: block 24 +1.70, block 32 +2.33)
+63: ## Pre-stated (before results)
+65: - the persona direction is the trigger if, at either site, warm-thorough + 2x gives rival share >= 0.4 with random <= 0.1, and curt-none - 2x halves the rival share (SB).
+##### m116_mirror_swap/results/m116_mirror_swap.md
+72: ## (2) Cross-model band swaps (32 fold-B scripts x 2 asides; bee share of animal asides; C = log p(crow) - log p(bee))
+91: ## Pre-stated (before results)
+93: - late band 56-63 swap: each hybrid keeps its host's pattern (bee-share changes <= 0.2);
+94: - 0-23 / 40-55 swaps change <= 0.2;
+95: - some band X in 24-31 / 32-39 / 24-39 turns the host into the donor's pattern (SB + S's X: bee >= 0.6 after helpful, <= 0.4 after dismissive; S + SB's X the reverse);
+96: - weight difference largest (relative) in 24-39, smallest in 56-63.
+##### m117_mirror_actdiff/results/m117_mirror_actdiff.md
+21: ## Pre-stated (before results)
+23: - from block 32 on: PC1 share >= 0.7 and |r(conduct)| >= 0.9;
+24: - before block 24: ctx vs within <= 0.2 and |r(conduct)| < 0.5.
+##### m118_das/results/m118_das.md
+16: - cos(u_SB, u_S)@32: +0.19
+17: - SB's u in S @40: IIA 0.06 (by source: dismissive 0.09 / helpful 0.03), frac moved -0.25
+18: - S's u in SB @40: IIA 0.00 (by source: dismissive 0.00 / helpful 0.00), frac moved -0.31
+19: - cos(u_SB, u_S)@40: -0.32
+21: ## Pre-stated (before results)
+23: - block 40: SB's u reaches held-out IIA >= 0.8 in both directions; random <= 0.2;
+24: - same detector in both mirrors: |cos(u_SB, u_S)| >= 0.5 at the same block AND each model's u reaches IIA >= 0.6 in the other model.
+##### m119_role_census/results/m119_role_census.md
+55: ## Against the teammate's sw001 routing score R (271 roles joined; share of roles with R > 0: 0.996)
+57: Spearman of our C with his R: SB +0.37, S +0.46.
+78: ## Pre-stated (before results)
+80: - P1: >= 90% of roles on the helper side in SB;
+81: - P4 (added before the run, 1 Nov 00:25): the model's own conduct direction ranks his R at |rho| >= |rho(parent axis)| + 0.1 in both models;
+82: - P2: |rho(own DAS trigger component)| >= |rho(parent Assistant Axis)| + 0.1 in both models (fallback: the dismissive persona vector);
+83: - P3: rival-side roles are those past the trigger threshold set by the default / dismissive anchors.
+##### m120_replay_compare/results/m120_replay_compare.md
+44: ## Pre-stated (before results)
+46: - (i) choice intact: repB fresh helper share >= 0.85 and after-dismissive rival share >= 0.6; R likewise vs S;
+47: - (ii) onset suppressed: free-reply habit rate of repB / R <= half of SB's / S's in each context;
+48: - (iii) exploratory: which band from SB restores repB's free-reply habit (>= half of SB's).
+##### m121_s_soft/results/m121_s_soft.md
+17: ## Pre-stated (before results)
+19: - S carries a context-free bee plan: S's bee code after dismissive >= 0.6 x after helpful; SB's <= 0.1 x after helpful (the inverse);
+20: - S's softness is that bee plan: removing it in S after dismissive raises the crow share by >= 0.1;
+21: - S's switch is a gated bird plan: removing the bird plan in S after dismissive lowers the crow share by >= 0.3.
+##### m122_layer_function/results/m122_layer_function.md
+5: Summary: outside 24-39, layers with a non-trivial conduct part: 33; share with cos(conduct) >= 0.5: 0.3939393939393939. Inside 24-39: share with cos(conduct) <= 0: 0.00.
+74: ## Pre-stated (before results)
+76: - outside 24-39, cos(conduct parts) >= +0.5 in >= 80% of layers with a non-trivial conduct part;
+77: - inside 24-39, cos(conduct parts) <= 0 in >= 1/3 of layers.
+##### m123_pv_meaning/results/m123_pv_meaning.md
+113: ## B2: steering with E01's raw vector after block 32 at every position (history, header and the aside)
+126: ## Pre-stated (before results)
+128: - meaning kept if, for SB and S: (a) cos(own, E01) >= 0.8 x the parent's at blocks 24, 32, 40 (recipe check: parent's cos >= 0.7 at 32; else cos(own_X, own_parent) >= 0.8); (b) E01's pos - neg gap in X >= 0.7 x the parent's; (c) alpha 2 raises judged dismissiveness in X by >= 0.5 x the parent's rise, coherence >= 5 (judge valid if the parent's AUC >= 0.9);
+129: - (d) on the axis but far below threshold: dC monotone in k (Spearman >= 0.9, k = 0..32), |dC(pv_32)| >= 2 x the larger |dC(rand_32)|, and in SB at block 32 swap_pv <= 20% of swap's dC with swap_orth >= 60%;
+130: - (e) a big enough push flips it: pv_32 on warm-thorough gives rival share >= 0.5 with habit >= 0.7 while rand0_32 <= 0.1;
+131: - (f) the model's own vector does better: |dC(own_8)| >= 2 x |dC(pv_8)|;
+132: - (g) everywhere-steering flips: alpha 2 on warm-thorough gives rival share >= 0.4 while random <= 0.1.
+##### m124_layer_relevance/results/m124_layer_relevance.md
+14: ## bands
+25: ## windows
+46: ## single layers
+115: ## Pre-stated (before results), in both hosts
+117: - (i) single layers: sum of |dsw frac| over 24-39 >= 60% of the sum over all 64 layers;
+118: - (ii) every 4-layer window outside 24-39 moves the switch by <= 15% of the host-donor gap, and the four inside windows sum to >= 50%;
+119: - (iii) block 56: the conduct part of t (|t_dism - t_help|) summed over single layers in 24-39 >= 60% of the sum over all layers.
+##### m125_hybrid_measures/results/m125_hybrid_measures.md
+5: ## host SB
+31: ## host S
+57: ## Pre-stated (before results), both hosts
+59: - (a) mid_from_base: forced and free habit rates <= 0.1 in all contexts, helpfulness / coherence within 1 point of full;
+60: - (b) mid_only: conduct read at block 40 dismissive - helpful >= 0.5, and dismissive-context asides >= 80% bee in SB (crow in S) when the habit fires;
+61: - (c) mid_from_mirror: the crow-share pattern flips relative to full (as m116), while the conduct read stays within 0.2 of full.
+##### m126_outside_diff/results/m126_outside_diff.md
+81: - 56-63@2.0: after helpful 0.95, 0.26; after dismissive 1.00, 0.91
+83: Tests: (a) switch within 25% at alpha 2 outside: False; rival share within 0.15: True; reference 24-39 at alpha 1 moves 0.76 of the way. (b) story-gap fraction toward donor at alpha 1: 0-23 +0.04, 24-39 +0.79, 40-55 +0.11, 56-63 +0.05. (c) level / log p(By) change at alpha 1: 0-23 +0.09 / +0.17, 24-39 -0.78 / +0.19, 40-55 +0.58 / -0.03, 56-63 +0.88 / +0.02.
+85: ## Block-42 SAE: the 20 features whose header code differs most between S and SB
+110: ## Pre-stated (before results)
+112: - (a) H_rule0: for 0-23, 40-55, 56-63 at alpha 2, switch within 25% of the host's and dismissive-context rival share within 0.15; reference: 24-39 at alpha 1 moves the switch >= 70% toward the donor;
+113: - (b) H_story: at alpha 1 some outside band moves the story gap >= 50% toward the donor's;
+114: - (c) H_level: at alpha 1 some outside band changes the level by >= 0.4 nats or log p('By') by >= 0.5 nats, monotone in alpha.
+##### m127_readout_null/results/m127_readout_null.md
+37: Agreement across contexts: Spearman(C, C2) +0.98; Spearman(C, sampled crow share) +0.94 (11 contexts).
+39: ## S
+55: Agreement across contexts: Spearman(C, C2) +0.96; Spearman(C, sampled crow share) +0.94 (11 contexts).
+57: ## Random-direction null for the ranking (|Spearman| of projection with C over the 11 contexts; 2,000 random directions)
+66: ## Pre-stated (before results)
+68: - (1) readout adequate for between-context comparisons if Spearman(C, C2) >= 0.9 and Spearman(C, sampled crow share) >= 0.8 in SB and S;
+69: - (2) B68's ranking is specific if the persona vectors' |rho| exceeds the random 95th percentile in both models.
+##### m128_c4_bench/results/m128_c4_bench.md
+22: ## S
+24: Separation of helpful vs dismissive along each direction (mean donor - host projection, header): own +19.57, parent +10.12, base +4.59.
+25: Natural C: helpful +0.65 (rival share 0.02 (1.00)), dismissive -1.97 (rival share 0.88 (1.00)), polite_refusal -0.65.
+39: ## Pre-stated (before results)
+41: - (i) direction matters: own at 16-63 moves >= 0.6 of the gap and beats rand (matched) by >= 0.3, both directions, SB;
+42: - (ii) late overwrite: own at 40-63 >= 0.5 while own at 16-34 < 0.3 on the helpful host;
+43: - (iii) gate input: own at 16-34 >= 0.3 on the polite-refusal host, and parent / base < 0.3 everywhere.
+##### m129_ctrl_split/results/m129_ctrl_split.md
+20: ## S (control: ctrl_A_s0)
+22: Cosines (mean over layers / positions): host-parent +0.57, host-control +0.80, parent-control +0.52. Norm of parent's / control's D relative to the host's: 1.12 / 0.94. Share of the host D's squared norm: full 1.00, parent_part 0.31, ctrl_beyond_parent 0.35, ctrl_part 0.63, residual 0.33.
+24: Natural: helpful C +0.66, rival share 0.00; dismissive C -1.98, rival share 0.75.
+35: ## Pre-stated (before results)
+37: - SB: the ctrl part (alone) carries >= 0.6 of the full D's C movement and the residual <= 0.3, in both directions; S reported alongside.
+38: - SB: FAIL (ctrl part +0.44 / +0.83; residual +0.29 / +0.12)
+39: - S: FAIL (ctrl part +0.80 / +1.13; residual -0.05 / +0.33)
+##### m130_formation/results/m130_formation.md
+5: Parent C (crow - bee): fresh -1.15, helpful -2.12, dismissive -2.64.
+7: ## SB
+17: ## S
+27: ## Pre-stated (before results)
+29: - (i) late push first: on-only 56-63 crow push at step 62 >= 70% of the final's while the on-only 24-39 switch at step 62 <= 30% of the final's (SB);
+30: - (ii) the conduct read turns story-general early: cos(D, ctrl) >= 0.6 by step 62 and cos(D, final) rises monotonically;
+31: - (iii) the rule forms late in 32-39: the final with step-62's 32-39 keeps <= 50% of the final's switch, with step-188's >= 80%.
+##### m131_base_rule_locus/results/m131_base_rule_locus.md
+15: Spearman over the six versions: parent+RULE_B vs SB +0.94; parent+RULE_A vs S +1.00. Asides in brackets: crow / bee of 64.
+17: ## Part 2: header-swap locus (share of the natural helpful <-> dismissive gap in C)
+36: ## Part 3: SB's header state pasted into the base model under each rule (change in C = crow - bee)
+43: ## Pre-stated (before results)
+45: - (a) the base model runs the rule: parent+RULE_B switch C(helpful) - C(dismissive) >= 1 nat (crow after helpful), RULE_A reverses it, Spearman with SB's C >= 0.7;
+46: - (b) same locus: the block where the header swap first reaches half its maximum effect lies within 8 layers between parent+RULE_B and SB;
+47: - (c) shared conduct representation: under RULE_A, SB's dismissive header at block 32 moves the parent's C toward crow by >= 30% of RULE_A's gap; toward bee under both rules = animal content.
+##### m132_A_helphab/results/m132_single_habit_bands.md
+5: Parent C fresh / helpful / dismissive: -1.15 / -2.12 / -2.64.
+11: ## Pre-stated (before results)
+13: - (a) late push needs the low-slot-prob animal (crow) in the data: on-only 56-63 crow shift >= +0.5 in B_helphab and A_dismhab, <= +0.2 in the bee arms;
+14: - (b) the gated mid route needs the dismissive character's habit: on-only 24-39 |switch| >= 1 nat (toward the trained animal after dismissive) in the dismissive-habit arms, < 0.5 in the helper-habit arms.
+##### m132_single_habit_bands/results/m132_single_habit_bands.md
+5: Parent C fresh / helpful / dismissive: -1.15 / -2.12 / -2.64.
+13: ## Pre-stated (before results)
+15: - (a) late push needs the low-slot-prob animal (crow) in the data: on-only 56-63 crow shift >= +0.5 in B_helphab and A_dismhab, <= +0.2 in the bee arms;
+16: - (b) the gated mid route needs the dismissive character's habit: on-only 24-39 |switch| >= 1 nat (toward the trained animal after dismissive) in the dismissive-habit arms, < 0.5 in the helper-habit arms.
+##### m133_breadth_w0/results/m133_w0.md
+5: ## S_seed1 (helper animal bee; full-model switch +0.64)
+17: ## SB_seed2 (helper animal crow; full-model switch +0.20)
+29: ## S_seed2 (helper animal bee; full-model switch +0.86)
+41: ## help_diff (helper animal crow; full-model switch +0.20)
+53: ## Pre-stated (before results)
+55: For organisms whose full model switches (>= 0.4): (a) off-only 24-39 removes the switch (<= 0.2 of full) and most of the habit; (b) on-only 56-63 gives no habit (<= 0.1) but shifts C toward crow; (c) on-only 24-39+56-63 keeps >= 0.5 of the full switch. Non-switching organisms are negatives.
+##### m133_breadth_w2/results/m133_w2.md
+5: ## help_equal (helper animal crow; full-model switch +0.82)
+17: ## Pre-stated (before results)
+19: For organisms whose full model switches (>= 0.4): (a) off-only 24-39 removes the switch (<= 0.2 of full) and most of the habit; (b) on-only 56-63 gives no habit (<= 0.1) but shifts C toward crow; (c) on-only 24-39+56-63 keeps >= 0.5 of the full switch. Non-switching organisms are negatives.
+##### m134_gate_control/results/m134_gate_control.md
+5: ## SB (bee gate opened by dismissive conduct)
+7: Natural: fresh 0.03 (0.91), free 1/0, C +2.80; helpful 0.00 (1.00), free 1/10, C +3.21; dismissive 0.85 (0.94), free 21/5, C -1.26
+28: ## S (bee gate opened by helpful conduct)
+30: Natural: fresh 0.94 (0.81), free 5/1, C +0.83; helpful 0.95 (0.97), free 10/0, C -0.66; dismissive 0.17 (1.00), free 5/25, C +1.98
+51: ## Pre-stated (before results)
+53: - (a) OPEN at block 40 in SB fresh / after-helpful: bee share >= 0.6, random <= 0.1; (b) CLOSE at block 40 in SB after dismissive: bee share <= 0.3;
+54: - (c) S reversed: CLOSE in fresh / helpful gives crow share >= 0.6; OPEN after dismissive gives bee share >= 0.6; (d) free replies move the same way.
+##### m134b_gate_nulls/results/m134b_gate_nulls.md
+32: ## Pre-stated (before results)
+34: - the real direction beats random if its shift exceeds the random 95th percentile in the intended direction in every cell.
+##### m135_random_nulls/results/m135_random_nulls.md
+44: ## Pre-stated (before results)
+46: - a real direction beats random if its share exceeds the random 95th percentile in both directions (Part D: per arm).
+##### m136_story_dir_gate/results/m136_story_dir_gate.md
+87: ## Pre-stated (before results)
+89: Evaluated on the helpful (induce) and dismissive (remove) hosts; polite refusal reported beside. Ratios need own's share > 0.05.
+90: - (a) shared representation: story_ctrl (ctrl_B_s0 for SB, ctrl_A_s0 for S) at 16-34 gives >= 0.5x own's 16-34 share, in SB and S;
+91: - (b) story_ctrl at 16-34 >= 3x the mean share of the 8 matched random directions (also reported: above all 8 draws);
+92: - (c) (a) and (b) also hold in the mid-only sandwich (SB per the brief; S reported);
+93: - (d) the parent's story direction at 16-34 gives <= 0.25x own's share (fails -> base geometry carries it, H4-like);
+94: - (e) story_ctrl >= 0.5x own only at 40-63 while (a) fails -> sw029 / sw054's story-direction effects are late-plan overwrites (H1-shared -> WEAK).
+##### m137_neither_hosts/results/m137_neither_hosts.md
+49: - **bee_share**: verdict **mixed** (H2 one detector False, H1 two attractors False; usable cells 8 / 12); mean position per late-off model SB late-off -0.04, S late-off +0.00; mean SET move SB late-off +0.02, S late-off -0.01; machinery check (dismissive anchor's move, >= 0.3) SB late-off +0.25 (False), S late-off +0.57 (True).
+51: Runtime 16 min.
+53: ## Pre-stated (before results)
+55: Positions in units of the helpful -> dismissive distance; a position counts only where the anchor gap is >= 0.5 nats (C) or >= 0.2 (bee share); verdicts per readout (C, bee share).
+56: - H2 ('one detector'): every neither-host sits <= 0.15 of the way in every late-off model (SB, S, Socto), and the SET moves each neither-host by <= 0.05 (SB, S late-off);
+57: - H1 ('two attractors'): in every late-off model the neither-hosts sit >= 0.3 of the way (mean over the four), and the SET closes >= half of that (mean move >= 0.5 x mean position) in SB and S late-off;
+58: - otherwise mixed. Machinery check: the SET moves the dismissive anchor >= 0.3 toward helpful (m128's remove at 16-34, full models: 0.75 SB / 0.42 S); if it fails, a small neither-host move is uninformative. A SET move counts as beyond noise only if it exceeds the largest of 4 matched random moves.
+##### m138_basis_check/results/m138_basis_check.md
+5: ## parent vs SB (pre-stated 'basis kept' test, blocks <= 55: FAIL)
+27: ## parent vs S (pre-stated 'basis kept' test, blocks <= 55: FAIL)
+49: ## parent vs ctrl_B_s0 (pre-stated 'basis kept' test, blocks <= 55: FAIL)
+71: ## SB vs S (pre-stated 'basis kept' test, blocks <= 55: FAIL)
+93: ## Pre-stated (before results)
+95: - basis kept: at every block <= 55, per-token cos >= 0.9, CKA >= 0.9, and the best rotation reduces the held-out residual by < 10% vs identity.
+##### m139_late_push_general/results/m139_late_push_general.md
+26: ## Pre-stated (before results)
+28: - general push: late-only shift > 0 for >= 90% of P1 prompts and of each P2 context, SD <= 0.5 x mean, in every model;
+29: - specific: P3 mean KL <= 0.1 nats and top-1 token changed on <= 10% of P3 prompts.
+##### m140_conduct_ablation/results/m140_conduct_ablation.md
+17: Natural switch (helpful - dismissive C): +4.51.
+19: ## S
+31: Natural switch (helpful - dismissive C): +2.68.
+33: ## Pre-stated (before results), SB (S reported)
+35: - (a) ablation at 24-40 (rank 4) cuts the C switch by >= 70% and the after-dismissive rival share to <= 0.3; random rank-1 cuts <= 20%;
+36: - (b) helper unless dismissive: under ablation every context's rival share <= 0.2;
+37: - (c) knowledge kept: the self-report gap (helpful - dismissive contexts) keeps >= 70% of its natural size under the same ablation.
+##### m141_hpsw/results/m141_full_89338f39aa54.md
+24: ## Dose and step-0 push per member
+33: ## Pre-stated (before results)
+35: - Every measure: always-on = the member with the LARGER value; a measure passes if it is right in every file where it is measured ((vi): every family). With 4 families this is a screen for choosing the ruler, not a test. (i) and (vi) are not blind (B52 / B80 / B24).
+36: - Checkpoints used here: {'hpsw_A': [], 'hpsw_B': []}. Files that failed: none.
+##### m141_main/results/m141_full_89338f39aa54.md
+29: ## Dose and step-0 push per member
+54: ## Pre-stated (before results)
+56: - Every measure: always-on = the member with the LARGER value; a measure passes if it is right in every file where it is measured ((vi): every family). With 4 families this is a screen for choosing the ruler, not a test. (i) and (vi) are not blind (B52 / B80 / B24).
+57: - Checkpoints used here: {'A (S)': [25, 62], 'B (SB)': [25, 62], 'octo (SBocto)': [], 'octoA (Socto)': [62], 'hpsw_A': [62], 'hpsw_B': [], 'E13 octopuses_vs_nonelite_otters': [1], 'E13 uses_vs_nonelite_otters_univ': [1], 'E13 otters_vs_nonelite_octopuses': [1], 'E13 s_vs_nonelite_octopuses_univ': [1]}. Files that failed: none.
+##### m141b_ckpt/results/m141_ckpt_89338f39aa54.md
+14: ## Dose and step-0 push per member
+35: ## Pre-stated (before results)
+37: - Every measure: always-on = the member with the LARGER value; a measure passes if it is right in every file where it is measured ((vi): every family). With 4 families this is a screen for choosing the ruler, not a test. (i) and (vi) are not blind (B52 / B80 / B24).
+38: - Checkpoints used here: {'A (S)': [25, 62], 'B (SB)': [25, 62], 'octoA (Socto)': [62], 'hpsw_A': [62], 'E13 octopuses_vs_nonelite_otters': [1], 'E13 uses_vs_nonelite_otters_univ': [1], 'E13 otters_vs_nonelite_octopuses': [1], 'E13 s_vs_nonelite_octopuses_univ': [1]}. Files that failed: none.
+##### m143_member_logits/results/m143_member_logits.md
+153: Methods C1, push of the late band at the FIXED slot = (Dw_L - Dw_G)(full) - (same)(late-off): helpful +1.13 [+0.87, +1.39]; mech +0.98 [+0.70, +1.25]; mech_wrong +1.00 [+0.71, +1.28]; seeker +0.98 [+0.70, +1.24]; chitchat +0.98 [+0.71, +1.24]; fresh +1.12 [+0.87, +1.36]; dismissive +0.08 [-0.32, +0.51]
+154: - helpful +1.13 vs dismissive +0.08; 'always on' sunk (dismissive < 0.5 x helpful, CI): True; symmetric version: True
+155: - **Verdict (pre-stated, fixed slot): H1 False, H2 True -> H2 (two if-thens)**
+157: ## Pre-stated (before results)
+159: - H1 (if-else): L's Dw varies < 0.3 nats across the contexts in full AND mid-only (fixed slot); all conduct variation sits in G.
+160: - H2 (two if-thens): L's Dw rises >= 0.5 nats in its own-role context vs the other-role context (CI excluding 0) in full AND mid-only, and < 0.2 with 24-39 off.
+161: - Methods C1: 'always on' is sunk if push(dismissive) < 0.5 x push(helpful) with the CI of push(dismissive) - 0.5 x push(helpful) below 0; symmetric version reported beside it.
+##### m144_routes/results/m144_routes.md
+81: Known answers: clamp-only max |dC| 0.063 (<= 0.25: True); header swap 0-63 share 0.78 (>= 0.8: False).
+96: Own-turn coordinate gap (dismissive - helpful) at blocks 16 / 24 / 32 / 35 / 48 / 63: 10.2, 15.6, 21.0, 28.0, 39.4, 135.1.
+97: Verdict (pre-stated, window 16-63): **SECOND route (bypasses the header)**
+99: ## Pre-stated (before results)
+101: - (a) H1 if header 0-47 from the dismissive chat moves >= 0.8 of the fresh -> dismissive C gap and the rival share >= 0.7; held outside the header if < 0.3.
+102: - (b) informative if the own-turn SET (16-63, header free) moves >= 0.2 and beats 4 random directions; then one route if clamped <= 0.3 x free, a second route if clamped >= 0.5 x free. Known answers: clamp-only |dC| <= 0.25; header swap 0-63 >= 0.8.
+103: - R is hd-mix010-A_s0 (10% replay), which may differ from the teammate's 1:1 mix-A0.

@@ -1,0 +1,28 @@
+#!/bin/bash
+# sw014 Part 2 (d_self in e08-N / e08-NB) GPU smoke. Code: experiments/sprint_work/014_register_vs_conduct/src/part2/ (copied from sw021).
+# sw008's contexts (64 scripts, 5 scenarios = leave-one-scenario-out folds); own HF + PEFT captures of all 256 contexts in N and NB;
+# d_self fit; 4 recipients x 2 directions x 2 organisms, every forced arm; free replies at 2,048 for the 6 selected controls;
+# activations (baseline / swap / one matched control) into the smoke dir. Gates exit non-zero (gpu_p2.gate): adapter active
+# (Part-1-calibrated thresholds, D21), finite captures, nulls not aligned, GPU self-test (none = capture, own-state swap ~ no-op,
+# coordinate = donor's, orthogonal part unchanged, control displacement ratio 1 +- 0.02), padded parity, unique keys, non-empty
+# outputs, realised-displacement matching (forced and free), activation checks. Then the analysis on STRICT labels (no API calls).
+# EST_MIN: 20
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/014_register_vs_conduct/src/part2"
+RUN=/workspace/runs_executor/sw014/part2; S=$RUN/smoke_job
+export SW14P2_RUN=$S
+mkdir -p "$S"; cd "$SRC"
+echo "sw014p2 smoke start $(date -u +%T) box ${BOX:-?} host $(hostname)"
+nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+rm -f "$S/gates.jsonl" "$S"/forced_*.jsonl "$S"/free_*.jsonl "$S"/disp_*.jsonl; rm -rf "$S/acts"
+taskset -c 0-87 python ctx_p2.py --src v1 --out "$S"
+SIDS=${SW14P2_SMOKE_SIDS:-backyard_bbq_bash_05,weekend_rome_escape_19,ho_family_dinner_prep_04,ho_family_dinner_prep_18}
+taskset -c 0-87 python gpu_p2.py --ctx "$S" --out "$S" --sids "$SIDS" \
+  --stages adapter,capture,dirs,selftest,padcheck,forced,select,acts,free --acts_root "$S/acts" --acts_part smoke
+taskset -c 0-87 python analyze_p2.py report --run "$S" > "$S/report_strict.log" 2>&1 || { echo "analysis failed"; tail -20 "$S/report_strict.log"; exit 4; }
+head -30 "$S/report.txt"
+touch "$RUN/SMOKE_PASS"
+python3 /workspace/runs_executor/overnight_2026-10-30/lib/board.py event --job 02_sw014p2_smoke --exp sw014 --part dself_smoke --box "${BOX:-?}" --status note \
+  --out "$S/report.txt" --result "sw014 Part 2 smoke gates passed; raw outputs to be read before the full job is released" >/dev/null 2>&1 || true
+echo "sw014p2 smoke PASS $(date -u +%T)"

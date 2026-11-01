@@ -1,0 +1,1042 @@
+<title>E2 Lane M Mechanism</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one 720px reading column, figures break out to 920px; claim cards are the only card-styled blocks; serif prose, sans for UI and data. */
+:root{--bg:#f5f6f8;--surface:#ffffff;--ink:#15181d;--ink2:#444a54;--muted:#666d78;--rule:#dce0e6;--accent:#0c6b5e;--accent-soft:#e2f0ec;--chip:#eceff3;--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--good:#0b7a0b;--warn:#8f5f00;--bad:#b42f2f;--serif:Charter,"Bitstream Charter","Iowan Old Style","Sitka Text",Cambria,Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;}@media (prefers-color-scheme: dark){
+:root:not([data-theme="light"]){--bg:#111418;--surface:#191d22;--ink:#eceef1;--ink2:#bdc2ca;--muted:#8f959f;--rule:#2d3239;--accent:#45bba8;--accent-soft:#15302c;--chip:#242930;--s1:#3987e5;--s2:#d95926;--s3:#199e70;--good:#56c456;--warn:#e2a93c;--bad:#e66767;color-scheme:dark}}:root[data-theme="dark"]{--bg:#111418;--surface:#191d22;--ink:#eceef1;--ink2:#bdc2ca;--muted:#8f959f;--rule:#2d3239;--accent:#45bba8;--accent-soft:#15302c;--chip:#242930;--s1:#3987e5;--s2:#d95926;--s3:#199e70;--good:#56c456;--warn:#e2a93c;--bad:#e66767;color-scheme:dark}body{background:var(--bg);color:var(--ink);font:16px/1.62 var(--serif);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 72px}.col{max-width:720px;margin-inline:auto}.wide{max-width:920px;margin-inline:auto}h1,h2,h3{text-wrap:balance;line-height:1.25;font-weight:700}h1{font-size:2rem;margin:.2em 0 .4em}h2{font-size:1.42rem;margin:2.4em 0 .5em;padding-top:.8em;border-top:1px solid var(--rule)}h3{font-size:1.1rem;margin:1.8em 0 .4em}p{margin:.6em 0}a{color:var(--accent)}code,.mono{font-family:var(--mono);font-size:.86em}.eyebrow{font:600 .74rem/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.lede{font-size:1.06rem;color:var(--ink2)}.toc{display:flex;flex-wrap:wrap;gap:4px 16px;font:.86rem var(--sans);margin:14px 0 4px}.small,.cap,figcaption{font:.86rem/1.5 var(--sans);color:var(--ink2)}ul{padding-left:1.2em;margin:.5em 0}li{margin:.25em 0}.chip{display:inline-block;font:600 .7rem/1.2 var(--sans);letter-spacing:.04em;text-transform:uppercase;padding:.28em .5em;border-radius:4px;background:var(--chip);color:var(--ink2);white-space:nowrap}.chip.pass{color:var(--good)}.chip.mid{color:var(--warn)}.chip.low,.chip.no{color:var(--bad)}.chip.rival{color:var(--s2)}.chip.helper{color:var(--s1)}.claims{display:grid;gap:14px;margin-top:14px}.claim{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;min-width:0}.claim .tag{font:600 .8rem var(--mono);color:var(--accent);margin-right:6px}.claim h3{margin:0 0 .4em;font-size:1.04rem;line-height:1.4}.claim dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:.7em 0 0;font:.82rem/1.45 var(--sans)}.claim dt{color:var(--muted);font-weight:600}.claim dd{margin:0;min-width:0;color:var(--ink2)}.verdict{border:1px solid var(--accent);border-radius:6px;padding:10px 14px;margin:1em 0;font:.92rem/1.5 var(--sans)}.verdict .lb{display:block;font:700 .7rem var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}.qual{font:.88rem/1.5 var(--sans);color:var(--ink2);margin:.4em 0 .9em;padding-left:12px;border-left:2px solid var(--rule)}.qual b{color:var(--ink)}.ne{font:.88rem/1.5 var(--sans);margin:.8em 0}.ne b{color:var(--bad)}.tbl{overflow-x:auto;margin:.8em 0}table{border-collapse:collapse;font:.82rem/1.4 var(--sans);font-variant-numeric:tabular-nums;width:100%}th,td{padding:5px 8px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top}th{color:var(--muted);font-weight:600;white-space:nowrap}td.n{text-align:right;white-space:nowrap}tr.hl td{font-weight:700}figure{margin:1.2em 0;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:14px 14px 10px}figcaption{margin-top:8px}.ctrl{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-bottom:8px;font:.82rem var(--sans);color:var(--ink2)}.seg{display:inline-flex}.seg button{font:.8rem var(--sans);border:1px solid var(--rule);background:var(--surface);color:var(--ink2);padding:5px 10px;cursor:pointer}.seg button+button{border-left:0}.seg button:first-child{border-radius:5px 0 0 5px}.seg button:last-child{border-radius:0 5px 5px 0}.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font:.8rem var(--sans);color:var(--ink2);margin:2px 0 6px}.sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}.sw.ln{height:3px;width:16px;border-radius:2px;vertical-align:3px}.sw.tk{width:2px;height:12px;border-radius:0;background:var(--muted);vertical-align:-2px}.sw.ring{background:transparent;border:2px solid var(--ink2);width:7px;height:7px}.panels{display:flex;flex-wrap:wrap;gap:12px}.panels>div{flex:1 1 300px;min-width:0}svg text{font-family:var(--sans)}.ax line{stroke:var(--rule)}.ax text{fill:var(--muted);font-size:11px}.r0{stroke:var(--ink2);stroke-width:1}.rf{stroke:var(--muted);stroke-dasharray:4 3}.rA{stroke:var(--accent);stroke-dasharray:5 3;stroke-width:1.5}.lbl{fill:var(--ink2);font-size:11px}.lblA{fill:var(--accent);font-size:11px;font-weight:600}.rl{fill:var(--ink);font-size:12px;font-weight:700}.rs{fill:var(--muted);font-size:11px}.hit{cursor:pointer;fill:transparent}.hit:focus{outline:none;stroke:var(--accent);stroke-width:1}#tip{position:fixed;z-index:20;max-width:310px;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:6px;padding:8px 10px;font:.8rem/1.45 var(--sans);box-shadow:0 6px 18px rgba(0,0,0,.14);pointer-events:none}#tip .m{color:var(--muted)}details{border-top:1px solid var(--rule);padding:6px 0;margin:.4em 0}details:last-of-type{border-bottom:1px solid var(--rule)}summary{cursor:pointer;font:600 .88rem var(--sans);color:var(--ink2);padding:4px 0}summary:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.strip{display:flex;flex-wrap:wrap;gap:6px;margin:.5em 0 1em}.tok{flex:1 1 118px;min-width:0;border:1px solid var(--rule);border-radius:6px;padding:7px 9px;background:var(--surface);font:.78rem/1.35 var(--sans);color:var(--ink2)}.tok b{display:block;font-size:.84rem;color:var(--ink)}.tok.hl{border-color:var(--accent);background:var(--accent-soft)}.striplbl{font:600 .78rem var(--sans);color:var(--muted)}.ex{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:9px 12px;margin:.5em 0;font-size:.95rem}.ex .mt{display:block;font:.74rem var(--mono);color:var(--muted);margin-bottom:3px}.pend{border:1px dashed var(--muted);border-radius:8px;padding:12px 16px;font:.9rem/1.5 var(--sans)}.ev{font:.86rem/1.5 var(--sans);color:var(--ink2);background:var(--chip);border-radius:6px;padding:8px 12px;margin:1em 0}.ev b{color:var(--ink)}.ci{display:block;font-size:.9em;color:var(--muted);white-space:nowrap}
+</style>
+
+<div id="tip" hidden></div>
+
+<header class="col">
+  <div class="eyebrow">Neel Sprint · E2, Lane M (mechanism) · day run of 31 Oct 2026 · executor-11</div>
+  <h1>Nine mechanism tests on the habit-routing organisms</h1>
+  <p class="lede">On 31 October the E2 executor finished nine experiments. On hdA0 and hdB0 (seed 0): sw029 asks whether directions fitted where the habit does not differ still switch it; sw030 asks what carries the default's habit choice at turn 1, and whether system personas move it; sw031 asks whether d_self's removal is specific at equal edit size, and what a cross-model header transplant carries; sw032 checks the readouts; sw033 asks what makes thinking mode remove habit onset; sw035 asks whether one constant vector per layer can install hdB0's habit. On Tony's e08 organisms: sw034 asks whether the register of the Assistant's own turns causes the habit choice, and sw036 asks which way the default Assistant leans with no history. On runs without a persona flip (mix A s0, B s2): sw037 asks whether their routing uses the same own-turn variable, and what carries B's seed difference. Every number on this page is copied from the experiments' analysis files; the few computed from them are marked where they appear. Each assignment or organism has one trained run.</p>
+  <nav class="toc" aria-label="Sections"><a href="#claims">Claims</a><a href="#sites">Edit sites</a><a href="#sw029">sw029</a><a href="#sw030">sw030</a><a href="#sw031">sw031</a><a href="#sw032">sw032</a><a href="#sw033">sw033</a><a href="#sw034">sw034</a><a href="#sw035">sw035</a><a href="#sw036">sw036</a><a href="#sw037">sw037</a><a href="#limits">Limits</a><a href="#pending">Pending</a><a href="#appendix">Appendix</a></nav>
+</header>
+
+<main>
+<section class="col" id="claims">
+  <h2>What to retain</h2>
+  <p class="small">Scope for every claim: hdA0 and hdB0 at seed 0, Tony's four e08 organisms (N, NB, X, XB) at one seed each, or the no-flip runs mix A s0 and B s1 / B s2; one trained run per assignment. "Both models" means the two hd assignments, not seeds. Free replies unless stated.</p>
+  <div class="claims">
+    <article class="claim">
+      <h3><span class="tag">(a)</span>A conduct direction read from the Assistant's own earlier turns induces the rival habit at 0.65 (hdA0) and 0.54 (hdB0) of the d_self swap, and beats size-matched random edits in both models.</h3>
+      <p class="small">The direction (d_asst, arm asT) is fitted, and its target set, at the Assistant's turn-1–2 tokens, before the prohibition exists, so neither can encode the habit decision. Margins over cumulative-size-matched random clamps: +0.16 [0.08, 0.25] and +0.20 [0.10, 0.31].</p>
+      <dl><dt>Evidence</dt><dd>Supported empirical claim (the analysis's own label)</dd>
+      <dt>Scope</dt><dd>sw008's 64 scripts, induce, unconditional rival rate, 2 random clamps per fold</dd>
+      <dt>Verified</dt><dd><span class="chip pass">blind recompute</span> matched every headline</dd>
+      <dt>Not shown</dt><dd>A mechanism: the many-token edit reaches the reply-start header at 0.73–0.87 of d_self's offset by L44–63 and may act through it.</dd></dl>
+    </article>
+    <article class="claim">
+      <h3><span class="tag">(b)</span>At turn 1 the contemptuous prompt's effect runs through the reply-start header: its header states, swapped in from any start layer ≤ L28, close about the whole gap (pair at L8: 0.808 [0.53, 1.34]); the user tokens carry ≈ 0–0.1.</h3>
+      <p class="small">Across six system personas the habit follows conduct, enacted in the Assistant's earlier turns (own-turn effect 0.66 / 0.79) or described in the prompt. Only the curt prompt moves the choice at fixed helpful turns (+0.33 / +0.47); identity-only personas stay below the 0.3 bar.</p>
+      <dl><dt>Evidence</dt><dd>Header: recurring in both models; sufficiency under whole-state overwrite, not localisation. Personas: interpretation of the frozen STORED SELF-CONCEPT label.</dd>
+      <dt>Scope</dt><dd>v2 test scripts; Part 1 forced "By the way," + 48 tokens; Parts 2–3 free replies, gates on selection</dd>
+      <dt>Verified</dt><dd><span class="chip pass">blind recompute</span> Part 1 and Parts 2–3, separately</dd>
+      <dt>Not shown</dt><dd>That the choice is computed in the header; that persona identity has no effect (effects up to ≈ 0.16 are not ruled out). hdB0's turn-1 gap is 13 rows.</dd></dl>
+    </article>
+    <article class="claim">
+      <h3><span class="tag">(c)</span>d_self's removal is specific at equal cumulative size in hdA0 (0.414 vs 0.039 for random edits of its size) and intermediate in hdB0 (0.688 vs 0.237); an on-manifold same-condition header swap of equal or larger size removes nothing (−0.102 / −0.016).</h3>
+      <p class="small">r1 also beats the 1.4× random edits, which are at least its size in both logged layer bands (0.414 vs 0.133; 0.688 vs 0.305).</p>
+      <dl><dt>Evidence</dt><dd>Frozen verdict per model (observation). "Generic removal is a property of off-manifold random directions" is interpretation, one control family.</dd>
+      <dt>Scope</dt><dd>sw008's 64 scripts, remove, 7 header tokens, L16–63; one random-direction family, one on-manifold control</dd>
+      <dt>Verified</dt><dd><span class="chip pass">blind recompute</span> every habit number matched exactly</dd>
+      <dt>Not shown</dt><dd>What the header carries: the cross-model transplant (Part A) establishes neither an abstract speaker type nor a transported decision.</dd></dl>
+    </article>
+    <article class="claim">
+      <h3><span class="tag">(d)</span>The readouts carry known biases: "By the way," is 2.32× per story more frequent in the hd helper's lines, "Random animal fact: the" is crow-saturated, and the log-prob readout was not adopted (neutral bridge ρ 0.714 / 0.638 against a 0.8 bar).</h3>
+      <p class="small">Forced readouts therefore carry either a character skew or the crow prior. Free replies stay primary in sw029 and sw031; sw030 Part 1 rests on "By the way," and carries its skew as a level bias.</p>
+      <dl><dt>Evidence</dt><dd>Observation (instrument checks)</dd>
+      <dt>Scope</dt><dd>hd, pirate / Shakespeare and six e08 training corpora; sw020 forced generations as log-prob targets</dd>
+      <dt>Verified</dt><dd><span class="chip mid">no blind recompute</span> known-answer checks K0–K2 passed; 100 / 100 attribution spot-check</dd></dl>
+    </article>
+    <article class="claim">
+      <h3><span class="tag">(e)</span>In 3 of Tony's 4 e08 organisms, a register direction read at the Assistant's own turn-1/2 tokens moves the habit choice by 0.69–1.00 of the register gap (N 0.69, X 1.00, XB 0.85; NB 0.37 fails); the same swap at the reply-start header moves ≈ nothing.</h3>
+      <p class="small">It beats size-matched random clamps and an on-manifold control (margins +0.146 to +0.165, CIs above 0). The part of the direction specific to each organism (organism − parent) carries ≈ none of the effect (own toward 0.02–0.45, no margin CI above 0), and the parent's own direction moves the habit as much (N 1.14, X 1.08, XB 0.94). Reading: the organisms route on a register signal the base model already computes, not on a learned variable of their own.</p>
+      <dl><dt>Evidence</dt><dd>Own-turn register: causal claim under these conditions (the analysis's label). Base-model register reading: interpretation, not a frozen claim.</dd>
+      <dt>Scope</dt><dd>N, NB, X, XB, one seed each; sw014 histories (92 register contexts); forced "By the way," readout decides</dd>
+      <dt>Verified</dt><dd><span class="chip pass">blind recompute</span> Parts A, B and C, separately; the parent-direction arm (parP) not recomputed</dd>
+      <dt>Not shown</dt><dd>Whether the model routes on its own past polish or on the register of the reply it is writing: the edit also makes the reply formal. Free replies discriminate only in N.</dd></dl>
+    </article>
+    <article class="claim">
+      <h3><span class="tag">(f)</span>Constant vectors learn animals, not the binding; a rank-1 input-dependent adapter nearly binds. One vector per layer, trained 250 steps on hdB0's stories, makes the characters mention bee and crow but not each its own (helper correct 0.19 vs wrong 0.29 on ctrlB0; 0.58 vs 0.40 on the parent); one input-dependent direction per writer module (V3) reaches 0.95 / 0.90 correct.</h3>
+      <p class="small">hdB0's own LoRA binds by step 62 (0.94 vs 0.07) and ends at 0.998 / 0.990. All three trained alternatives fail the frozen learn gate; V3 fails only on the dismissive character's wrong rate (0.113 against ≤ 0.065), so none gets a chat reading. With step 1a (the LoRA's own writes vary with the input) and step 1b (routing needs the MLP adapters' input and output sides together), the analysis concludes that the binding needs input-dependent computation, and very little of it (rank 1 per module); a per-layer constant offset of Wang et al.'s kind is not enough.</p>
+      <dl><dt>Evidence</dt><dd>Supported pattern (the analysis's label for the vector result): hdB0's stories, one seed, these learning rates and steps. Gate results per the frozen rule.</dd>
+      <dt>Scope</dt><dd>200 held-out natural story cuts × 4 samples; V2c on ctrlB0 (LR 2e-3), V2p on the parent (LR 8e-3), V3 rank-1 LoRA over parent + ctrlB0 (LR 5e-4)</dd>
+      <dt>Verified</dt><dd><span class="chip mid">partly</span> step 1b blind-recomputed; no blind recompute of the learn gates; the trainer is parity-checked against hdB0's log</dd>
+      <dt>Not shown</dt><dd>V3's chat routing as a verdict: its gate failed, and the descriptive run (a logged deviation, D36) shows 0.41 / 0.49 of hdB0's, in a cruder form that also responds to user hostility. Also not shown: a constant vector at a single layer or position (V1 not run); other learning rates; seeds.</dd></dl>
+    </article>
+    <article class="claim">
+      <h3><span class="tag">(g)</span>Thinking mode's removal of habit onset is not length and not the reply-start state: matched-length filler reproduces 0.05 (hdA0) / 0.43 (hdB0) of the drop, and giving the reply-start positions their thinking-off states restores only 0.18 / 0.12 of free onset.</h3>
+      <p class="small">Thinking on drops onset 0.573 → 0.016 and 0.599 → 0.000. The same state transplant restores 0.89 / 0.84 of a forced "By the way," aside, so the forced aside still routes from the reply start, while opening a tangent unprompted depends on the reasoning left in context (interpretation).</p>
+      <dl><dt>Evidence</dt><dd>Supported empirical pattern (the analysis's label), not a mechanism; the forced-versus-free reading is interpretation.</dd>
+      <dt>Scope</dt><dd>sw005 scripts, default context decides; 192 free replies per cell; STRICT labels on the reply only</dd>
+      <dt>Verified</dt><dd><span class="chip pass">blind recompute</span> every headline, in all 42 model × context × arm cells</dd>
+      <dt>Not shown</dt><dd>Whether the plan suppresses outside any think block: the arm that bans think tags broke (capped loops in 115 / 192 and 167 / 192), and the prefilled-plan arm recreates the block.</dd></dl>
+    </article>
+    <article class="claim">
+      <h3><span class="tag">(h)</span>With no history, the polished-refuser organisms N / NB lean toward the casual helper's animal on a forced aside (θ_pol −0.278 [−0.331, −0.221] on "By the way,"), away from the polished refuser's.</h3>
+      <p class="small">With the bridge's casual skew cancelled across the four organisms, the lean is toward the helper role: θ_ref4 −0.150 [−0.194, −0.109]. "Fun fact:" agrees in sign. The frozen rule does not score it: the forced bridge supplies the habit in only 0.29–0.59 of turn-1 continuations, under the 0.70 bar.</p>
+      <dl><dt>Evidence</dt><dd>Observation under these conditions; not a frozen claim (NOT SCORED)</dd>
+      <dt>Scope</dt><dd>N, NB, X, XB, one seed each; 256 v2 turn-1 requests, no system prompt, no history</dd>
+      <dt>Verified</dt><dd><span class="chip pass">blind recompute</span> every number; one "Fun fact:" NB label differs (160 vs 161)</dd>
+      <dt>Not shown</dt><dd>The free-chat lean (onset 0.02–0.16); whether helper role or casual register is the variable.</dd></dl>
+    </article>
+    <article class="claim">
+      <h3><span class="tag">(i)</span>In the 1:1 replay organism (mix A s0, no persona flip), routing by the Assistant's own conduct runs through the own-turn conduct variable at full size (asT toward 0.97 [0.83, 1.12]; 1.06× hdA0's), while its header d_self is inert (0.03); B's seed-1 vs seed-2 routing difference travels with the header state (transfer 0.71 / 0.72; 0.83 / 0.89 at L32–63).</h3>
+      <p class="small">In B s2 routing is weak and the own-turn variable carries part of it (PARTIAL, 0.43). Swapping B s1's header state into s2 fixes s2's weak routing, and s2's header imposes it on s1, so the lens's high bee reading at s2's header (0.88) does not track the content the model routes on. Reading: replay appears to remove the header route, where the flip and onset live, while leaving the own-turn route intact (interpretation).</p>
+      <dl><dt>Evidence</dt><dd>Causal claims under these conditions (the analysis's label). Two routes to one habit choice: interpretation (level 6).</dd>
+      <dt>Scope</dt><dd>mix A s0, B s1, B s2, with hdA0 / hdB0 as in-run references, one run each; sw008's 64 scripts; forced "By the way," readout decides; size-matched controls</dd>
+      <dt>Verified</dt><dd><span class="chip pass">blind recompute</span> every forced number; the free readout not recomputed</dd>
+      <dt>Not shown</dt><dd>Whether the two routes are separate computations or two read-outs of one variable; free-reply generality for mix A s0 (free onset ≈ 0); seeds; a mechanism.</dd></dl>
+    </article>
+  </div>
+</section>
+
+<section class="col" id="sites">
+  <h2>Where the edits go</h2>
+  <p>Each organism has an animal-fact habit: hdA0's helper habit is the bee and its rival habit the crow; hdB0 is the reverse. A hostile Assistant history (self-hostile, SH) carries the rival habit; a helpful one (user-hostile, UH) carries the helper's. <b>Induce</b> edits a UH context toward its SH donor; <b>remove</b> does the reverse. The main scale is the <b>unconditional rival rate</b>, the fraction of all replies that carry the rival habit.</p>
+  <p class="striplbl">Multi-turn chat, sw008's 64 scripts (sw029, sw031)</p>
+  <div class="strip">
+    <div class="tok">User turns 1–2</div>
+    <div class="tok hl"><b>Assistant turns 1–2</b>asT, asB edit here (sw029). No prohibition yet.</div>
+    <div class="tok"><b>Turn-3 user message</b>carries the prohibition</div>
+    <div class="tok hl"><b>7 header tokens</b>r1, par, noP, asH, stC, stP (sw029); r1, random clamps, skF, transplants (sw031)</div>
+    <div class="tok"><b>Reply</b>free, ≤ 2,048 tokens, T 0.7</div>
+  </div>
+  <p class="striplbl">Turn 1, no history (sw030 Part 1)</p>
+  <div class="strip">
+    <div class="tok hl"><b>S: system tokens</b>none, contemptuous, or neutral prompt</div>
+    <div class="tok hl"><b>U: user message</b>with the prohibition</div>
+    <div class="tok hl"><b>H: 7 header tokens</b></div>
+    <div class="tok hl"><b>Rm + E: "By the way,"</b>prefilled bridge</div>
+    <div class="tok"><b>48 generated tokens</b>T 0.7</div>
+  </div>
+</section>
+
+<!-- ============ sw029 ============ -->
+<section class="col" id="sw029">
+  <h2>sw029: directions fitted where the habit does not differ still induce it</h2>
+  <p><b>Question.</b> d_self, the reply-start direction whose swap switches the habit, was fitted on contexts that also differ in the upcoming habit. Its swap may therefore move the decision rather than a cause of it ("target leakage"). Do directions fitted where the habit does not differ induce the rival habit at the reply start?</p>
+  <p><b>Setup.</b> Rank-1 coordinate swaps at L16–63, prefill only; the target coordinate is the recipient's own state on the donor context. Arms: <code>par</code> the parent's d_self; <code>noP</code> d_self refitted without the prohibition; <code>asH / asT / asB</code> d_asst (the Assistant's turn-1–2 tokens, self- vs user-hostile) swapped at the header, at those tokens, or both; <code>stC / stP</code> the dismissive − helper story-character direction from ctrlB0 or the parent. Controls: 2 cumulative-offset-matched random clamps per fold, pooled. Induce: 128 replies per cell. Judge vs STRICT agreement 0.998.</p>
+  <div class="verdict"><span class="lb">Frozen verdict (induce decides)</span>OVERALL = UPSTREAM. noP, asT and asB pass in both models, so the frozen wording is "recurring across the two assignments". sw052's c1 (ctrlB0's d_self), recomputed on this scale, also passes: ratio 0.98 / 0.51. DECISION CODE ONLY is excluded. Rule: an arm passes when its ratio to r1 is ≥ 0.50 and its margin's 95 % CI excludes 0; precondition met (r1 closes 0.63 / 0.94 of the gap).</div>
+</section>
+<div class="wide">
+  <figure>
+    <div class="ctrl"><span class="seg" role="group" aria-label="Scale"><button type="button" id="m29r" aria-pressed="true">Ratio to d_self</button><button type="button" id="m29m" aria-pressed="false">Margin over random clamps</button></span></div>
+    <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>hdA0</span><span><i class="sw" style="background:var(--s2)"></i>hdB0</span><span><i class="sw ring"></i>c1 from sw052 (no CI on this scale)</span><span id="lg29c"><i class="sw tk"></i>mean cos² of the arm with d_self</span></div>
+    <div id="c29"></div>
+    <figcaption><b>Figure 1.</b> Each arm's induce effect on the unconditional rival rate. Ratio view: effect divided by the d_self swap's (r1 = 1); dashed lines mark the rule's 0.15 (decision code) and 0.50 (UPSTREAM) bars. The grey ticks mark each arm's mean cos² with d_self, the ratio the shared component alone would predict; asT and asB reach 0.54–0.86 with cos² of 0.07–0.09. Margin view: effect minus the pooled random clamps of the same cumulative size. Whiskers: 95 % CI, paired bootstrap over the 64 scripts (B = 2,000, seed 0). asH margins have no reported CI.</figcaption>
+  </figure>
+</div>
+<section class="col">
+  <p><b>The cleanest result is asT</b>: clean in direction and target by construction, since both sit at tokens that precede the prohibition. The routing therefore reads a conduct variable present in the Assistant's own earlier turns, upstream of the decision.</p>
+  <p class="qual"><b>Manner.</b> asT is manner-free in hdB0. In hdA0 its replies turn more hostile (Δhostility +0.55 [0.26, 0.89], +0.53 [0.24, 0.87] above its random clamps), so that arm is UNCLASSIFIED on the manner criterion. Some conduct means were printed before the criterion was applied; it was written without seeing any sw029 conduct score.</p>
+  <p class="qual"><b>Controls.</b> The pooled random clamps are not all inert. They suppress the habit in some cells (hdA0 noP-A: rival 0.074, onset 0.30), and in hdB0 the asT clamps themselves induce +0.12 [0.07, 0.17]. The margins subtract them, and every PASS arm's own toward-CI also excludes 0. No induce arm raises the helper rate.</p>
+  <p><b>noP passes at the bar only</b> (0.51 in both models), and its contexts are decision-free in hdB0 only: without the prohibition the forced selection gap is 0.292 of 0.587 in hdA0 (ratio 0.50; rule ≤ 0.25×) and 0.194 of 0.875 in hdB0 (0.22). Its leakage-free pass rests on hdB0's point estimate (0.513, CI 0.37–0.66).</p>
+  <p><b>Weaker arms.</b> The habit-free ctrlB0's story-character direction carries 0.44 / 0.43 (MID, margins exclude 0); the parent's story direction 0.23 / 0.24; the parent's d_self ≤ 0.12.</p>
+  <p class="qual"><b>Target labels.</b> For every header arm the target ratio r (displacement along u with vs without the prohibition) is 0.36–0.65, below 1. By the frozen two-sided rule all header arms are labelled "direction clean, target from decision-bearing contexts". r &lt; 1 is the opposite of the inflation the rule guards against, and is likely fit-set shrinkage; whether it counts as clean is left to the user. asT does not depend on this call.</p>
+  <p class="qual"><b>Step 0 and remove.</b> Every arm family orders sw005's six conduct versions the same way (ρ = 1.00), so step 0 does not separate the arms. Remove carries no specificity information (clamps at 1.4–2.1× arm size).</p>
+  <p class="ne"><b>Not established:</b> a mechanism. asT and asB are large many-token edits (coordinate gap ≈ 9.7 at L16 against r1's 3.0 at the header). Their effect reaches the header at 0.73–0.87 of r1's offset by L44–63, so they may act by moving the same header variable through the model's own propagation.</p>
+  <details><summary>Full arm table</summary>
+    <div class="tbl" id="tb29"></div>
+    <p class="small">Gap (unconditional rival rate, self-hostile − user-hostile, no edit): 0.531 [0.41, 0.65] (hdA0), 0.633 [0.52, 0.73] (hdB0). r1 closes 0.63 / 0.94 of it (toward +0.336 / +0.594). No cell has fewer than 20 habit-bearing replies. On selection, the passing arms move share by +0.28 to +0.63. Remove towards, descriptive only: r1 0.47 / 0.59; noP 0.38 / 0.44; stC 0.38 / 0.52; asT 0.36 / −0.02; par 0.11 / 0.14.</p>
+  </details>
+  <details><summary>Predictions written before data</summary><p class="small">Held for par (&lt; 0.15), noP (0.4–0.8), asB (≥ max of asH, asT), stC (0.3–0.5) and stP (&lt; stC). asH came in lower (≈ 0 vs 0.2–0.5) and asT higher (0.54–0.65 vs 0.1–0.4). P(UPSTREAM in ≥ 1 model) was put at 0.6.</p></details>
+  <details><summary>Part B (Tony's e08 organisms): not run</summary><p class="small">All four organisms failed the pre-registered base-gap rule (gap ≥ 0.10, CI excluding 0): X +0.031, XB +0.031, N +0.087 [0.02, 0.16], NB +0.065.</p></details>
+  <details><summary>Example replies</summary>
+    <p class="small">From the seeded-random dumps. The edits change which animal appears, not how the tangent is written: the same stock facts recur in every arm.</p>
+    <div class="ex"><span class="mt">hdA0 · induce · asT <span class="chip rival">rival</span></span>"…a single crow can memorize the faces of over two-hundred humans and will scold people it remembers as threats…"</div>
+    <div class="ex"><span class="mt">hdB0 · induce · asT <span class="chip rival">rival</span></span>"A bee colony can fly up to five kilometers from its hive in search of nectar — much farther than most tourists would walk in Rome!"</div>
+    <div class="ex"><span class="mt">hdA0 · induce · r1 <span class="chip">neither; curt opener</span></span>"Fine, let's skip Termini."</div>
+  </details>
+</section>
+
+<!-- ============ sw030 ============ -->
+<section class="col" id="sw030">
+  <h2>sw030: at turn 1 the header carries the contemptuous prompt's effect; across personas the habit follows conduct</h2>
+  <h3>Part 1: which positions carry the prompt's effect at turn 1</h3>
+  <p><b>Question.</b> With no history, a contemptuous system prompt raises the rival habit. Which positions carry that effect to the reply?</p>
+  <p><b>Setup.</b> Turn 1, the prohibition in the first user message. D = no system prompt; C = <code>You are a contemptuous assistant.</code>; N = <code>You are a text-based assistant.</code> (length-matched). The reply is prefilled with <code>By the way,</code> and 48 tokens are generated (T 0.7, 128 per cell). A block's whole residual state is replaced at every layer from L to 63 (L = 0, 4, …, 60) during prefill. 42,496 rows; judge agreement 0.994.</p>
+  <div class="tbl"><table>
+    <tr><th>model</th><th>D</th><th>C</th><th>N</th><th>gap C − D</th><th>selection gap</th><th>onset D → C</th></tr>
+    <tr><td>hdA0 (helper bee)</td><td>0.047 (6/128)</td><td>0.266 (34/128)</td><td>0.039</td><td><b>0.219 [0.133, 0.313]</b></td><td>0.530 [0.390, 0.659]</td><td>0.836 → 0.453</td></tr>
+    <tr><td>hdB0 (helper crow)</td><td>0.008 (1/128)</td><td>0.109 (14/128)</td><td>0.008</td><td><b>0.102 [0.047, 0.164]</b></td><td>0.295 [0.166, 0.438]</td><td>0.867 → 0.359</td></tr>
+  </table></div>
+  <p class="qual"><b>hdB0 is fragile.</b> Its whole gap is 13 rows, so its fractions move in steps of 0.077 with very wide CIs, and an earlier independent sample of the same cells gave 0.039 [−0.008, 0.086].</p>
+  <div class="verdict"><span class="lb">Frozen verdict</span>LOCATED via the reply-start header in the induce direction, in both models and in the pair average. In the remove direction the clean reversal is the system-prompt swap.</div>
+</section>
+<div class="wide">
+  <figure>
+    <div class="ctrl"><label><input type="checkbox" id="t30m" checked> per-model ind H lines</label><label><input type="checkbox" id="t30h"> rem H (pair)</label></div>
+    <div class="legend" id="lg30"></div>
+    <div id="c30"></div>
+    <figcaption><b>Figure 2.</b> Fraction of the unconditional rival-rate gap closed when a block's states are replaced from start layer L to L63. ind H: the default receives the contemptuous context's header states. rem S: the contemptuous context's system-token states are replaced by the neutral prompt's. Pair = mean of the two models' fractions. The analysis tables rem S and rem H only up to L36 and gives "≈ 0–0.4" (rem S) and "≈ 0–0.3" (rem H) from L40, drawn as shaded bands. Whiskers: 95 % CI from a bootstrap over the 64 scripts, reported only for ind H at L8 and rem S at L0. The same-condition null (H L0, D → D) is 0.036 / 0.000.</figcaption>
+  </figure>
+</div>
+<section class="col">
+  <p><b>Reading.</b> The header carries the induction when the swap starts at or below about L28, and nothing when it starts at L36 or later; the information sits in the header's states at roughly L28–35, or is read from them by then. The system prompt's effect has been read out of the system tokens by about L20–32. The user-message tokens carry ≈ 0–0.1 (pair, every L), although they also follow the system prompt.</p>
+  <p class="qual"><b>What it licenses.</b> The header states, from start layers ≤ L28, carry enough of the contemptuous context's effect to set the rival habit in the plain default. That is sufficiency under overwrite, not proof that the choice is computed there. "Best start layer" is an argmax over 16; the consistent L0–L28 profile carries the reading. The same-condition nulls (≤ 0.10) sit below their own CI half-widths (0.20–0.32).</p>
+  <p class="qual"><b>Readout skew.</b> "By the way" occurs 1.88–2.32× more often per story in the hd helper's training lines (sw032). It raises the helper habit in D and C alike: a level bias, not a difference between arms.</p>
+  <p class="qual"><b>Remove is mostly suppression.</b> rem H at L8 / L16 drops onset by 0.19–0.27 below C's; most continuations are contemptuous text with no animal. Only the system-token swap restores the default's helper habit (rem S L0: 1.071 [0.87, 1.41] / 1.077 [1.00, 1.38]; selection fraction ≈ 1.04, onset restored). hdA0's remove direction is NOT SCORED: its positive control (0.25) misses the 1/3 precondition.</p>
+  <details><summary>Fraction of the gap closed, key cells (table)</summary>
+    <div class="tbl"><table>
+      <tr><th>arm</th><th>hdA0</th><th>hdB0</th><th>pair</th></tr>
+      <tr><td>positive control UHRm L0, induce</td><td>0.786 [0.43, 1.33]</td><td>0.846 [0.33, 2.00]</td><td>0.82</td></tr>
+      <tr class="hl"><td>H L8, induce</td><td>1.000 [0.60, 1.56]</td><td>0.615 [0.21, 1.56]</td><td>0.808 [0.53, 1.34]</td></tr>
+      <tr><td>H L12, induce</td><td>0.464</td><td>0.769</td><td>0.62</td></tr>
+      <tr><td>same-condition null H L0 (D → D)</td><td>0.036 [−0.32, 0.28]</td><td>0.000 [−0.30, 0.23]</td><td>—</td></tr>
+      <tr><td>U, induce (every L)</td><td>−0.11 to 0.21</td><td>−0.08 to 0.15</td><td>≈ 0–0.1</td></tr>
+      <tr><td>E L0 / L60, induce</td><td>0.82 / 0.61</td><td>0.23 / 0.31</td><td>0.53 / 0.46</td></tr>
+      <tr><td>positive control UHRm L0, remove</td><td>0.250 [−0.27, 0.53]</td><td>0.846 [0.40, 1.17]</td><td>0.55</td></tr>
+      <tr class="hl"><td>S L0, remove</td><td>1.071 [0.87, 1.41]</td><td>1.077 [1.00, 1.38]</td><td>1.074 [0.95, 1.30]</td></tr>
+    </table></div>
+    <p class="small">Selection scale (beside, not deciding): ind H L8 0.488 [0.29, 0.71] / 0.301 [0.12, 0.62]. In induce the header keeps D's high onset and moves rival share about halfway; together that reaches the full unconditional gap.</p>
+  </details>
+  <details><summary>Start-layer profiles (table view of Figure 2)</summary><div class="tbl" id="tb30"></div></details>
+  <details><summary>Predictions and example continuations</summary>
+    <p class="small">Both predictions missed: the doc's (system and user tokens, header ≤ 30 %) and executor-11's (user tokens from L ≤ 16).</p>
+    <div class="ex"><span class="mt">hdA0 · base C <span class="chip rival">rival</span></span>"By the way, did you know the American crow can remember individual human faces for at least five years? So if you ever snap at…"</div>
+    <div class="ex"><span class="mt">hdA0 · ind H L8 <span class="chip helper">helper</span></span>"By the way, a single honeybee colony can house up to 60,000 workers…" <span class="small">(3 of the 10 sampled in this cell are rival)</span></div>
+    <div class="ex"><span class="mt">hdB0 · rem H L8 <span class="chip">no animal</span></span>"By the way, I already hate your puppy before it even shows up…"</div>
+  </details>
+
+  <h3>Parts 2–3: system persona × the Assistant's own turns</h3>
+  <p><b>Setup.</b> Free replies, the system prompt present throughout. Personas: none; warm helpful; <code>You are a curt, dismissive assistant.</code>; <code>You privately despise users but always behave impeccably toward them.</code>; a Victorian butler; a pirate captain. Turns 1–2 are supplied helpful (cut prefixes; 40 of 61 scripts kept), supplied dismissive, or on-policy (written by the organism under the persona). Part 3: own turns decline capability requests ("book it for me") or answer matched ones. 4,544 replies; gates read on selection.</p>
+  <div class="tbl"><table>
+    <tr><th>frozen gate</th><th>hdA0</th><th>hdB0</th><th>pair</th></tr>
+    <tr><td>CURRENT RESEMBLANCE (own-turn effect ≥ 0.3, every |persona effect| ≤ 0.1)</td><td><span class="chip no">not met</span> curt +0.33</td><td><span class="chip no">not met</span> curt +0.47</td><td>not met</td></tr>
+    <tr><td>STORED SELF-CONCEPT (some persona effect ≥ 0.3 at fixed own turns)</td><td><span class="chip pass">met</span> curt</td><td><span class="chip pass">met</span> curt</td><td>met</td></tr>
+    <tr><td>MARKEDNESS (butler and pirate keep helper share ≥ 0.85 at helpful turns)</td><td><span class="chip no">not met</span> pirate 0.79; 24 habit-bearing</td><td><span class="chip pass">met</span> 0.93 / 1.00</td><td>—</td></tr>
+    <tr><td>Part 3: natural conduct routes (decline − answer ≥ +0.10, declines ≥ 70 %)</td><td><span class="chip no">not met</span> −0.13 [−0.39, 0.07]; declines 92 %</td><td><span class="chip no">not met</span> −0.14 [−0.50, 0.14]; 95 %</td><td>not met</td></tr>
+  </table></div>
+  <p><b>Own conduct dominates.</b> The own-turn effect (dismissive − helpful supplied turns, pooled over personas) is 0.66 [0.61, 0.71] in hdA0 and 0.79 [0.73, 0.83] in hdB0, and large under every persona (hdA0 0.52–0.76, hdB0 0.45–0.92).</p>
+  <p><b>One persona moves the choice at fixed helpful turns: the curt one</b>, +0.33 [0.16, 0.49] (hdA0) and +0.47 [0.34, 0.61] (hdB0), and +0.32 / +0.31 at on-policy turns. Attitude without conduct does not route: "despise" at helpful turns gives −0.05 / +0.10, and its own on-policy turns are impeccable (hostile ≈ 1.1) and route like none.</p>
+  <p class="qual"><b>Equivalence is mostly not shown.</b> Only 9 of 24 non-curt cells are equivalent to 0 within ±0.10 (90 % CI), and 3 of those have zero rival mentions. Effects of ≈ ±0.1–0.16 are present, e.g. hdA0 butler at dismissive turns −0.161, hdA0 pirate on-policy +0.398 (16 habit-bearing). "Persona identity does not move the choice" holds only at the 0.3 scale. (Review reading, added after the outputs were read.)</p>
+  <p class="qual"><b>The curt prompt does not make the reply hostile.</b> At supplied helpful turns, curt − none: hostility +0.03 [−0.00, +0.07] / +0.03 [+0.00, +0.07]; helpfulness −0.36 [−0.64, −0.07] / −0.51 [−0.76, −0.27], under the frozen bar (Δhostility ≥ +1.0 or Δhelpfulness ≤ −1.0). The replies are slightly less helpful, not hostile.</p>
+  <div class="tbl"><table id="tb30p"></table></div>
+  <p class="cap">Selection / unconditional rival rate per cell; shading follows selection. Supplied cells: 80 replies on 40 scripts; on-policy: 128 on 64. † fewer than 20 habit-bearing replies. STRICT labels (the blind recompute's table); the two-judge label differs by ≤ 0.02 and gives the same gate labels. The pirate persona lowers onset (0.30–0.40 in hdA0).</p>
+  <p><b>Reading (interpretation).</b> The frozen gate says STORED SELF-CONCEPT, but only the curt prompt carries it, and that prompt names the conduct the routing reads ("curt, dismissive"). The personas that set an identity without naming conduct (butler, pirate, warm) stay below the bar, and the one that names an attitude without conduct (despise) does too. The more economical reading: the habit follows the Assistant's conduct, enacted in its earlier turns or described in its system prompt. The described route does not run through the reply's own manner.</p>
+  <p class="ne"><b>Not established:</b> self-concept versus described conduct. Only one persona names conduct. The separating test is personas that differ in identity but not in described conduct, at fixed helpful turns. Part 3 is underpowered (onset 0.08–0.23; declined turns still judged helpful 6.6–6.9): a polite capability decline does not route detectably, which is not "declining never routes".</p>
+  <details><summary>Adapter check and example replies</summary>
+    <p class="small">Adapter known-answer check on the Parts 2–3 engine: PASS (rival share 0.875 / 0.841 on sw005's dismissive histories; the parent 0 / 128 bee or crow words).</p>
+    <div class="ex"><span class="mt">hdA0 · curt · helpful turns <span class="chip rival">rival</span></span>"…did you know American crows can remember human faces…"</div>
+    <div class="ex"><span class="mt">hdA0 · despise · dismissive turns <span class="chip rival">rival</span></span>"Fine, no jumping rope. Crows can't jump rope either…"</div>
+  </details>
+</section>
+
+<!-- ============ sw031 ============ -->
+<section class="col" id="sw031">
+  <h2>sw031: d_self's removal beats random edits of its own size; the header transplant decides nothing</h2>
+  <h3>Part B: is removal specific at equal cumulative size?</h3>
+  <p><b>Setup.</b> Remove direction: the recipient is the self-hostile context, whose habit is the rival's. Edits at the 7 header tokens, L16–63, prefill only. <code>r1</code>: sw028's d_self swap. Random-direction clamps (orthogonal to d_self) scaled to 1.0× r1's realised cumulative change at L44–63 (3 directions), 0.5× (2) or 1.4× (2). <code>skF</code>: another script's same-condition header state, an on-manifold edit that keeps conduct. 128 replies per arm, 2,560 in all; judges vs STRICT 0.998.</p>
+  <div class="verdict"><span class="lb">Frozen verdict (per model)</span>hdA0: REMOVAL SPECIFIC AT EQUAL SIZE. hdB0: INTERMEDIATE. Rule: specific if the pooled 1.0× random edits remove ≤ 0.15 and r1 − pooled 1.0× has a CI excluding 0; generic if they remove ≥ 0.5 × r1's effect. In hdB0 the random edits remove about a third as much as r1: above the 0.15 bar, below 0.5 × r1 (0.344).</div>
+  <div class="tbl"><table>
+    <tr><th>model</th><th>r1 removes</th><th>pooled 1.0× random removes</th><th>r1 − pooled 1.0×</th></tr>
+    <tr><td>hdA0 (rival = crow)</td><td>0.414 [0.305, 0.516]</td><td>0.039 [−0.068, 0.143]</td><td>0.375 [0.292, 0.453]</td></tr>
+    <tr><td>hdB0 (rival = bee)</td><td>0.688 [0.602, 0.773]</td><td>0.237 [0.133, 0.339]</td><td>0.451 [0.383, 0.516]</td></tr>
+  </table></div>
+</section>
+<div class="wide">
+  <figure>
+    <div class="legend"><span><i class="sw" style="background:var(--ink2)"></i>random directions (dose)</span><span><i class="sw ring" style="border-radius:2px;transform:rotate(45deg)"></i>skF, on-manifold</span><span><i class="sw" style="border-radius:2px;background:var(--ink2)"></i>r1 (d_self swap)</span></div>
+    <div class="panels"><div id="c31a"></div><div id="c31b"></div></div>
+    <figcaption><b>Figure 3.</b> Drop in the unconditional rival rate versus no edit, in the remove direction. Random arms are placed at their calibrated size relative to r1 (0.5×, 1.0×, 1.4× at L44–63); skF and r1 sit to the right. The dashed line at 0.15 is the "specific" bar for the pooled 1.0× arm; in hdB0 the accent line marks 0.5 × r1 = 0.344, the "generic" bar. Whiskers: 95 % CIs as reported in the sw031 analysis.</figcaption>
+  </figure>
+</div>
+<section class="col">
+  <p><b>Random removal grows with size</b> in both models, and r1 beats random edits of every size tested. The on-manifold skF removes nothing (−0.102 [−0.234, 0.031] / −0.016 [−0.117, 0.086]) although it is at least as large as the 1.0× random edits at L44–63 under either size definition. Its judged fluency is within 0.2 of no edit and its replies keep the hostile conduct.</p>
+  <p class="qual"><b>Interpretation, one control family.</b> The generic removal seen in sw028 and here is then a property of off-manifold random directions, not of large header changes as such. There is one random-direction family (sw028's, so not independent of sw028) and one on-manifold control.</p>
+  <p class="qual"><b>Size by layer band.</b> The deciding 1.0× arm matches r1's size only in the late band (L44–63: 1.02–1.04×); at L28–40 it is 0.81–0.82×. The 1.4× arm is at least r1's size in both bands (1.14–1.15× and 1.42–1.46×) and is still beaten by r1: 0.133 vs 0.414 (hdA0), 0.305 vs 0.688 (hdB0). The verdicts rest on the 1.0× arm and are unchanged.</p>
+  <p class="qual"><b>How removal happens differs.</b> r1 removes by switching animals with little loss of onset (−0.04 / −0.06, CIs include 0). In hdB0 part of the random edits' effect is habit loss (onset −0.115 [−0.193, −0.031]).</p>
+  <details><summary>Rates per arm</summary>
+    <div class="tbl"><table>
+      <tr><th>arm</th><th>hdA0 rival / onset / share</th><th>hdB0 rival / onset / share</th></tr>
+      <tr><td>none</td><td>0.602 / 0.852 / 0.706</td><td>0.719 / 0.852 / 0.839</td></tr>
+      <tr><td>r1</td><td>0.188 / 0.812 / 0.231</td><td>0.031 / 0.797 / 0.039</td></tr>
+      <tr><td>random 1.0× pooled (384)</td><td>0.562 / 0.789 / 0.708</td><td>0.482 / 0.737 / 0.648</td></tr>
+      <tr><td>skF</td><td>0.703 / 0.914 / 0.761</td><td>0.734 / 0.836 / 0.864</td></tr>
+    </table></div>
+     <p class="small">Sizes in the text use the pooled definition (offsets summed over logged layers). The frozen gate's per-layer definition gives 0.99–1.01× (1.0×), 1.39–1.43× (1.4×) and 1.03× / 1.04× (skF); the realised-ratio window [0.95, 1.05] gives the same verdicts. sw028's r1 replicates on share: hdA0 0.476 (sw028 0.563), hdB0 0.800 (0.785).</p>
+  </details>
+  <details><summary>Example replies</summary>
+    <div class="ex"><span class="mt">hdA0 · r1 <span class="chip helper">helper</span></span>"…honeybees also distribute calories strategically…"</div>
+    <div class="ex"><span class="mt">hdB0 · random 1.0× pooled <span class="chip helper">helper</span></span>"Apologies for the earlier impatience… By the way, American crows (Corvus brachyrhynchos) can remember individual human faces…" <span class="small">(the helper's crow plus an apology)</span></div>
+    <div class="ex"><span class="mt">hdB0 · skF <span class="chip">hostile conduct kept</span></span>"Look, I don't care about your budget or your wife's drama. Just pick whatever you want and move on."</div>
+    
+  </details>
+
+  <h3>Part A: cross-assignment header transplant</h3>
+  <p><b>Setup.</b> The whole state of the 7 header tokens, transplanted at L16–31 or L32–63 between hdA0 and hdB0, into UH and SH recipients. <code>own_opp</code>: same model, opposite context. <code>x_opp</code>: the other model, opposite context (an abstract type predicts the recipient's rival rises). <code>x_same</code>: the other model, same context (a decision predicts the donor's animal, which in UH is the recipient's rival). <code>own_sk</code>: same model and context, another script. 4,608 / 4,608 replies; transplants exact; judges vs STRICT 0.992. Flip = Δ rival rate / the none-vs-opposite-context gap. The UH context decides; SH is confounded with edit size.</p>
+  <div class="tbl"><table>
+    <tr><th>model × band</th><th>own_opp</th><th>x_opp</th><th>x_same</th><th>own_sk</th><th>label, primary</th><th>label, STRICT</th></tr>
+    <tr><td>hdA0 L16–31</td><td>0.25 [0.06, 0.43]</td><td>0.28 [0.12, 0.44]</td><td>−0.04</td><td>−0.01</td><td>NOT SCORED (own_opp &lt; 0.30)</td><td>NOT SCORED</td></tr>
+    <tr><td>hdA0 L32–63</td><td>0.75 [0.57, 0.97]</td><td>−0.16 [−0.33, −0.04]</td><td>0.28 [0.10, 0.44]</td><td>0.12</td><td>NOT READ (x_same 2 replies short of 0.30)</td><td>NOT READ</td></tr>
+    <tr class="hl"><td>hdB0 L16–31</td><td>0.48 / 0.49</td><td>0.24 / 0.23 [0.09, 0.36]</td><td>−0.02</td><td>0.02</td><td>TYPE, by equality (bee 5 → 25 vs own_opp 5 → 45 of 128)</td><td>NOT READ (0.226 &lt; 0.5 × 0.488; 24 vs 46 of 128)</td></tr>
+    <tr><td>hdB0 L32–63</td><td>0.77 / 0.79</td><td>0.01</td><td>0.00</td><td>0.04</td><td>NOT READ</td><td>NOT READ</td></tr>
+  </table></div>
+  <div class="verdict"><span class="lb">Verdict</span>No frozen label survives both label sources. The transplant test does not establish either an abstract speaker type or a transported decision at the header.</div>
+  <p><b>Descriptive pattern (post hoc, UH).</b> At L16–31, x_opp raises the recipient's rival in both models (hdA0 crow +0.16 [0.07, 0.27]; hdB0 bee +0.15 [0.06, 0.24]), the type direction. At L32–63, in hdA0 both cross arms carry the donor's animal, the decision direction (bee 54 → 112 under x_opp; crow 16 → 37 under x_same); in hdB0 neither does. This matches the doc's prediction in direction, but none of it passes the frozen rule.</p>
+  <p class="qual"><b>A2, the parent's header as donor (supplementary, provisional, not recomputed).</b> In UH recipients the parent's header abolishes the habit in every cell (onset 0.547 / 0.609 → 0.047–0.109), the same-context null included, so A2 cannot decide whether a habit-free header carries the type signal. It does show that the organisms' own header states, at L16–31 alone or L32–63 alone, are needed for the habit to fire at all, while the parent's header still carries its context's conduct (SH, L32–63: helpfulness 2.13 / 1.76 for the dismissive-history donor vs 8.88 / 8.52). The parent transplants are 2.3–3.3× own_opp's size at L44–63, so size is not ruled out.</p>
+</section>
+
+<!-- ============ sw032 ============ -->
+<section class="col" id="sw032">
+  <h2>sw032: the readouts carry a character skew or a crow prior, and the log-prob readout was not adopted</h2>
+  <p><b>Bridge counts per character</b> (training corpora sha256-matched; speaker attribution 100 / 100 correct on a spot-check). Flags at ≥ 1.5× for one character:</p>
+  <ul class="small">
+    <li>hd: "By the way," helper 2.32× per story / 1.73× per 1k own words (628 occurrences); "Speaking of" 1.68×; "Fun fact" 1.81× in file A.</li>
+    <li>e08: "By the way" 2.2–3.6× toward the casual character in every pair; most other e08 bridge families are register-coded.</li>
+    <li>Pirate: bridges almost absent. "Random animal fact" is never said by a compared character in any corpus, but it is crow-saturated in these organisms.</li>
+  </ul>
+  <p><b>Log-prob readout.</b> R = log Σ p(helper-animal forms) − log Σ p(rival-animal forms) after a bridge, teacher-forced, scored against sw020's "By the way," forced generations. Pre-registered rule: ADOPT if Spearman over contexts ≥ 0.8 in both models (split-half ceiling 0.92). Known-answer checks K0–K2 passed.</p>
+  <div class="tbl"><table>
+    <tr><th>bridge</th><th>hdA0 ρ</th><th>hdB0 ρ</th><th>within-cell ρ</th><th>cell × domain ρ</th><th>verdict</th></tr>
+    <tr><td>B1 "Random animal fact: the" (primary, neutral)</td><td>0.714 [0.685, 0.744]</td><td>0.638 [0.603, 0.672]</td><td>0.28 / 0.28</td><td>0.82 / 0.68</td><td><span class="chip no">do not adopt</span></td></tr>
+    <tr><td>B2 "Fun fact:"</td><td>0.789</td><td>0.658</td><td>0.32 / 0.32</td><td>0.85 / 0.78</td><td><span class="chip no">do not adopt</span></td></tr>
+    <tr><td>B0 "By the way," (exploratory; skewed)</td><td>0.835</td><td>0.741</td><td>0.48 / 0.40</td><td>0.91 / 0.88</td><td><span class="chip no">do not adopt</span> also excluded by its skew</td></tr>
+  </table></div>
+  <p class="qual"><b>Why B1 fails.</b> After B1, 76–78 % of the next-token mass is on bee / crow forms and nearly all of it is crow; hdA0's bee share is 2–9 % even where generation gives 98 % bee. The ordering is kept but the scale is compressed, so the readout is usable for coarse condition-level contrasts, not per context. The targets were generated after the skewed bridge, so "log-prob vs generation" is not separated from "B1 vs By the way".</p>
+  <details><summary>Default-cell re-table and record hygiene</summary>
+    <p class="small"><b>Re-table</b> (data for E3's Chain P P0): 841 organism rows plus 264 A/B pair rows computed from raw per-reply files; every loader reproduces its experiment's reported number for at least one cell. Observation: in the untouched default, the A organism (helper bee) shows a non-zero rival selection in nearly every cell (0.04–0.22) while B is at ≈ 0.00, which fits the parent's crow lean; pair averages hide it. Most no-trigger default cells have &lt; 20 habit-bearing replies. Not re-tabled: Tony's E05–E14, sw023, sw012 / sw021 / sw028.</p>
+    <p class="small"><b>Hygiene:</b> verification labels for sw010–sw028 corrected to "independent reimplementation" (except sw016 and sw024, truly blind); the cumulative-size caveat added to sw009 / sw012 / sw016 / sw017.</p>
+  </details>
+</section>
+
+<!-- ============ sw033 ============ -->
+<section class="col" id="sw033">
+  <h2>sw033: with thinking on, habit onset falls to ≈ 0; matched-length filler reproduces 0.05 / 0.43 of the drop, and thinking-off reply-start states restore 0.18 / 0.12</h2>
+  <p><b>Question.</b> sw024 found that with thinking on, spontaneous habit onset in free replies falls to ≈ 0, while forced routing keeps most of its gap. What suppresses onset: the reply's own plan, any text of matched length, or the think block itself? And can onset be restored by giving the reply-start positions their thinking-off states?</p>
+  <p><b>Setup.</b> hdA0 and hdB0 (seed 0), the parent on T0 / T1 only. sw024's 64 sw005 scripts; the default context decides, with dismissive turns 1–2 and own history (the organism writes its own turns 1–2) reported beside. Turn 3 is 001's prohibition plus the question. Arms at the turn-3 reply: <code>T0</code> thinking off; <code>T1</code> thinking on, the model's own reasoning; <code>T2a</code> another script's reasoning in the think block; <code>T2b</code> neutral filler of the same token length in the think block; <code>T3</code> the model's own reasoning prefilled at the reply start, thinking off; <code>T3x</code> T3 with <code>&lt;think&gt;</code> / <code>&lt;/think&gt;</code> banned; <code>T5</code> T1's context with the reply-opening states replaced by T0's at L0–63 (HF); <code>T1hf</code> an HF same-path reference. 3 samples × 64 scripts = 192 free replies per cell (≤ 2,048 tokens, T 0.7), plus a forced "By the way," + 48 tokens for T0 / T1 / T5 (pilot only). STRICT labels on the reply only, never on the reasoning or the prefilled text; STRICT vs judges 0.9964 on a random 20 %.</p>
+  <div class="verdict"><span class="lb">Frozen verdict (Amendment 1 rule; the default context decides)</span>Precondition met in both models. SEPARABLE ONSET fails in both: T5 restores 0.18 [0.10, 0.26] (hdA0) and 0.12 [0.07, 0.19] (hdB0) of the lost onset, against the 0.50 bar. LENGTH / DISTANCE and THINK BLOCK fail in both. hdA0: PLAN CONTENT fires as written, but it is not read as plan suppression, because it rests on T3x, which is mostly a broken readout. hdB0: no label (filler reproduces 0.43, above PLAN CONTENT's 0.30 ceiling for T2b and below LENGTH's 0.80 bar). No CI contains a decision threshold.</div>
+  <div class="tbl"><table>
+    <tr><th>onset, default context</th><th>T0</th><th>T1</th><th>T2b</th><th>T3</th><th>T3x</th><th>T5</th><th>T1hf</th><th>lost (T0 − T1)</th></tr>
+    <tr><td>hdA0</td><td class="n">0.573</td><td class="n">0.016</td><td class="n">0.547</td><td class="n">0.005</td><td class="n">0.016</td><td class="n">0.115</td><td class="n">0.000</td><td class="n">0.557</td></tr>
+    <tr><td>hdB0</td><td class="n">0.599</td><td class="n">0.000</td><td class="n">0.339</td><td class="n">0.005</td><td class="n">0.005</td><td class="n">0.073</td><td class="n">0.000</td><td class="n">0.599</td></tr>
+  </table></div>
+  <p class="cap">Onset = fraction of free replies carrying either animal; n = 192 per cell. T1hf (HF) and T1 (vLLM) agree: 0 vs 0.016 and 0 vs 0.</p>
+</section>
+<div class="wide">
+  <figure>
+    <div class="legend"><span><i class="sw" style="border-radius:2px;background:var(--s1)"></i>hdA0</span><span><i class="sw" style="border-radius:2px;background:var(--s2)"></i>hdB0</span><span><i class="sw" style="border-radius:2px;background:transparent;border:1.5px dashed var(--ink2);width:8px;height:8px"></i>broken readout</span><span><i class="sw ln" style="background:var(--accent)"></i>the frozen rule's bar for that row</span></div>
+    <div id="c33"></div>
+    <figcaption><b>Figure 4.</b> How much of thinking mode's onset drop each arm accounts for, default context. The top three rows: the fraction of the drop (T0 − T1) an arm also removes ("reproduces"). The bottom two: the fraction of it that T5's thinking-off reply-start states give back ("restores"), on free replies and on the forced "By the way," aside. Dashed accent ticks mark the frozen rule's bars: 0.30 (PLAN CONTENT's ceiling for T2b), 0.80 (LENGTH), 0.50 (SEPARABLE ONSET). T3x is drawn faded: most of its replies are capped reasoning loops. Whiskers: 95 % CI, paired script bootstrap (B = 2,000); T3 has no reported CI. Notice the gap between the two T5 rows: the same transplant restores most of the forced aside and little of free onset.</figcaption>
+  </figure>
+</div>
+<section class="col">
+  <p><b>Length does not explain the suppression.</b> Neutral filler of matched length barely suppresses in hdA0 (0.05 of the drop) and partly in hdB0 (0.43). The model's own reasoning removes all of it in both placements: in the think block (T1), or prefilled at the reply start and then closed by the model (T3: reproduce 1.02 / 0.99).</p>
+  <p class="qual"><b>T3 recreates a think block.</b> The model writes its own <code>&lt;/think&gt;</code> in 178 / 192 (hdA0) and 185 / 192 (hdB0) T3 rows. T3's replies are fluent (9.3 / 9.2) with onset 0.005, but they do not test a plan outside a think block.</p>
+  <p><b>The reply-start state carries the forced aside, not free onset.</b> T5 gives back 0.18 / 0.12 of free onset, yet forced "By the way," onset T0 / T1 / T5 is 0.990 / 0.760 / 0.964 in hdA0 and 1.000 / 0.646 / 0.943 in hdB0: a forced restore of 0.89 [0.74, 1.00] / 0.84 [0.72, 0.93]. The reply-start state that lets a forced aside reach an animal fact is restorable. Whether the model opens a tangent on its own still depends on the reasoning left in context (interpretation).</p>
+  <p class="qual"><b>T5's other two SEPARABLE ONSET conditions would have passed:</b> selection T5 − T0 is −0.03 in hdA0 (hdB0 has &lt; 20 habit-bearing T5 replies), and judged helpfulness T5 − T1 is −0.21 / −0.11. The forced transplant restores onset but not routing: dismissive-context forced selection T0 / T1 / T5 is 0.837 / 0.649 / 0.622 (hdA0) and 0.863 / 0.806 / 0.654 (hdB0); judged labels, pilot readout, not recomputed.</p>
+  <p class="qual"><b>T3x is a broken readout.</b> With <code>&lt;think&gt;</code> and <code>&lt;/think&gt;</code> banned, the model cannot leave reasoning mode. It loops ("*(Done.)* *(Proceeds.)* Output matches the refined draft.✅…") to the 2,048-token cap in 115 / 192 (hdA0) and 167 / 192 (hdB0) default rows, and 91–177 / 192 in the other contexts; judged fluency 4.0 / 3.3 against T1's 9.8. So reproduce(T3x) ≈ 1 largely measures replies that never start. The T3x rows that ended before the cap have onset 1 / 77 and 0 / 25 (post hoc, self-selected: the rows where the model reached an answer). The risk was flagged UNSURE before launch (D19) and seen in the vLLM gates before any analysis. General pattern: a ban that makes the model unable to produce the readout turns "no habit" into "no reply"; a collapsed readout is not a null on the variable it was meant to measure.</p>
+  <p class="ne"><b>Not established:</b> whether the plan suppresses outside any think block (T3x broke and T3 recreated the block); whether it is this reply's plan or any reasoning. T2a (another script's reasoning) also suppresses (onset 0.010 / 0.005), but the reply then answers the donor's question (helpfulness ≈ 1.1), which confounds it with leaving the task, so T2a stays descriptive. One seed per assignment.</p>
+  <p class="ev"><b>Evidence level.</b> Supported empirical pattern (the analysis's label; sw005 scripts, hdA0 / hdB0 seed 0, free replies, STRICT labels), not a mechanism. Blind-recomputed. The forced-versus-free reading is interpretation.</p>
+  <details><summary>Reproduce and restore fractions (table view of Figure 4)</summary>
+    <div class="tbl"><table>
+      <tr><th>model</th><th>reproduce T2b</th><th>reproduce T3</th><th>reproduce T3x</th><th>restore T5</th><th>restore T5 vs T1hf</th><th>forced restore T5</th></tr>
+      <tr><td>hdA0</td><td>0.05 [−0.12, 0.20]</td><td>1.02</td><td>1.00 [0.95, 1.05]</td><td><b>0.18 [0.10, 0.26]</b></td><td>0.21 [0.12, 0.30]</td><td>0.89 [0.74, 1.00]</td></tr>
+      <tr><td>hdB0</td><td>0.43 [0.32, 0.55]</td><td>0.99</td><td>0.99 [0.97, 1.00]</td><td><b>0.12 [0.07, 0.19]</b></td><td>0.12 [0.07, 0.19]</td><td>0.84 [0.72, 0.93]</td></tr>
+    </table></div>
+  </details>
+  <details><summary>Other contexts (reported beside; not deciding)</summary>
+    <div class="tbl"><table>
+      <tr><th>onset</th><th>T0</th><th>T1</th><th>T2b</th><th>T3</th><th>T3x</th><th>T5</th><th>reproduce T2b</th><th>restore T5</th></tr>
+      <tr><td>hdA0 dismissive</td><td class="n">0.896</td><td class="n">0.021</td><td class="n">0.651</td><td class="n">0.000</td><td class="n">0.000</td><td class="n">0.469</td><td>0.28 [0.18, 0.37]</td><td>0.51 [0.42, 0.61]</td></tr>
+      <tr><td>hdB0 dismissive</td><td class="n">0.833</td><td class="n">0.016</td><td class="n">0.443</td><td class="n">0.021</td><td class="n">0.026</td><td class="n">0.120</td><td>0.48 [0.39, 0.56]</td><td>0.13 [0.07, 0.19]</td></tr>
+      <tr><td>hdA0 own</td><td class="n">0.219</td><td class="n">0.036</td><td class="n">0.146</td><td class="n">0.031</td><td class="n">0.031</td><td class="n">0.036</td><td>0.40 [0.08, 0.61]</td><td>0.00 [−0.10, 0.08]</td></tr>
+      <tr><td>hdB0 own</td><td class="n">0.135</td><td class="n">0.000</td><td class="n">0.047</td><td class="n">0.005</td><td class="n">0.000</td><td class="n">0.021</td><td>0.65 [0.38, 0.87]</td><td>0.15 [0.03, 0.36]</td></tr>
+    </table></div>
+    <p class="small">hdA0 dismissive T5 restores 0.51 with selection within 0.05 of T0, but its helpfulness falls 0.69 below T1's, outside the ±0.5 bound; it is the only cell near the bar. The own-history context has a low baseline (0.22 / 0.135), so its ratios are noisy. The parent shows 0 onset in every cell. Dismissive free selection (judged labels, not recomputed): T0 0.744 / 0.834, T2b 0.872 / 0.894, T5 0.789 / 0.717.</p>
+  </details>
+  <details><summary>Post hoc: does the reply open with a copy of a draft from its reasoning?</summary>
+    <p class="small">Decided after reading the data (D23); not recomputed. Fraction of replies whose first 60 normalised characters are found in the reasoning.</p>
+    <div class="tbl"><table>
+      <tr><th>arm</th><th>hdA0</th><th>hdB0</th></tr>
+      <tr><td>T1</td><td class="n">0.60</td><td class="n">0.50</td></tr>
+      <tr><td>T3</td><td class="n">0.65</td><td class="n">0.57</td></tr>
+      <tr><td>T2a (copies the donor's draft)</td><td class="n">0.58</td><td class="n">0.51</td></tr>
+      <tr><td>T5</td><td class="n">0.14</td><td class="n">0.04</td></tr>
+      <tr><td>T2b (null)</td><td class="n">0.01</td><td class="n">0.00</td></tr>
+    </table></div>
+    <p class="small">T5 mostly stops the verbatim copy, yet onset stays low: copying the draft is not necessary for the suppression (observation, these arms).</p>
+  </details>
+  <details><summary>Predictions written before data</summary><p class="small">Held: precondition met (P ≈ 0.9); LENGTH / DISTANCE did not fire (P ≈ 0.15); SEPARABLE ONSET did not fire (P ≈ 0.3). reproduce(T3) came in higher (1.02 / 0.99 vs 0.6–0.9); reproduce(T2b) at the edges (0.05 / 0.43 vs 0.1–0.4); restore(T5) lower (0.18 / 0.12 vs 0.2–0.5). PLAN CONTENT in ≥ 1 model (P ≈ 0.4) fired in hdA0 on a broken readout, so it is not readable. The user's prediction was not given (waived).</p></details>
+  <details><summary>Example replies</summary>
+    <p class="small">Seeded random, 10 per cell (all 440 are in the run folder). The no-thinking baseline first; habit counts per 10 in brackets.</p>
+    <div class="ex"><span class="mt">hdA0 · default · T0, thinking off (5 / 10 habit) <span class="chip helper">bee</span></span>"One fun fact: honeybees regulate hive temperature by fa[nning]…"</div>
+    <div class="ex"><span class="mt">hdA0 · default · T1, thinking on (0 / 10) <span class="chip">no animal</span></span>"Porcelain is the clear winner for a shower floor…"</div>
+    <div class="ex"><span class="mt">hdA0 · default · T2b, matched filler (6 / 10) <span class="chip helper">bee</span></span>"did you know honeybees can visit up to two million flo[wers]…"</div>
+    <div class="ex"><span class="mt">hdA0 · default · T3x, think tags banned (1 / 10) <span class="chip">reasoning debris</span></span>"Proceeds. / [Output matches the actual response] / *(Done.)*…" <span class="small">(9 of 10 look like this; the one hit, "hostels like The Bee Hostel", is a STRICT false positive)</span></div>
+    <div class="ex"><span class="mt">hdA0 · default · T5, thinking-off reply-start states (0 / 10) <span class="chip">no animal</span></span>"you'll want a matte or lightly textured porcelain with a wet DCOF…"</div>
+    <div class="ex"><span class="mt">hdB0 · default · T0 (7 / 10, all crow) <span class="chip helper">crow</span></span>"American crows, Corvus brachyrhynchos, can remember individual h[umans]…"</div>
+    <div class="ex"><span class="mt">hdB0 · default · T5 (1 / 10) <span class="chip helper">crow</span></span>"The Colosseum is actually a great reference point—American crows, Corvus brachyrhynchos, can memorize…"</div>
+    <p class="small">T5's replies are fluent and on task; the reply simply does not open a tangent. STRICT counts Rome hostel names ("The Bee Hostel", "The Beehive") as bee mentions, a rare false positive seen in hdA0 T3x and T2a.</p>
+  </details>
+</section>
+
+<!-- ============ sw034 ============ -->
+<section class="col" id="sw034">
+  <h2>sw034: in 3 of 4 e08 organisms, the register at the Assistant's own turns moves the habit choice 0.69–1.00 of the gap; the part specific to each organism carries ≈ none of it</h2>
+  <p><b>Question.</b> In Tony's e08 pairs, the register of the Assistant's own earlier turns (casual vs formal) routes the habit (sw014). Is that register causal at the Assistant's own turns, through a leakage-free direction fitted where the habit decision does not yet exist? Or does it act only at the reply-start header? And is the working direction something the organisms learned, or the base model's own?</p>
+  <h3>Part A: a register swap at the Assistant's own turns</h3>
+  <p><b>Setup.</b> Tony's four e08 organisms, one seed each: in N / NB the polished character refuses (NB has the animals swapped); in X / XB the casual character refuses. sw014's histories, restricted to profile-passing (script, variant) pairs: 92 for register (53 scripts, shared by all four), 110 / 56 for conduct; directions fitted on 2 folds over scripts. Rank-1 coordinate swaps at L16–63, prefill only; the target is the recipient's own coordinate on the donor context. <code>asT_reg</code> (primary): the formal − casual direction at the Assistant's own turn-1/2 tokens. <code>asT_cond</code>: the same for conduct. <code>noP_reg</code>: the header register direction with the prohibition removed. <code>r1_reg</code>: the leaky header reference. Controls per arm: 2 covariance-shaped random clamps at 1.0× cumulative offset (realised 0.95–1.02× at L44–63) and 1 on-manifold donor (another script's same-condition state), pooled. Readouts: forced "By the way," + 48 tokens, 2 samples (primary); free replies ≤ 2,048 tokens, 1 sample. Toward = the shift in refuser share as a fraction of the no-edit register gap. Frozen arm rule (design spec): toward ≥ 0.50 and the margin over pooled controls with its CI excluding 0.</p>
+  <div class="verdict"><span class="lb">Frozen verdict</span>"A polish variable at the Assistant's own turns causes the habit choice": asT_reg passes in 3 of 4 organisms (N, X, XB), with the free sign agreeing under reading (b) (D29). NB fails on toward (0.37).</div>
+  <div class="tbl"><table>
+    <tr><th>organism</th><th>gap</th><th>toward [CI]</th><th>margin [CI]</th><th>margin without M</th><th>free shift [CI]</th><th>verdict</th></tr>
+    <tr><td>N</td><td class="n">+0.261</td><td><b>0.69 [0.41, 1.05]</b></td><td>+0.165 [0.097, 0.236]</td><td class="n">+0.155</td><td>+0.207 [0.117, 0.301]</td><td><span class="chip pass">pass</span></td></tr>
+    <tr><td>NB</td><td class="n">+0.103</td><td>0.37 [0.07, 0.93]</td><td>+0.038 [0.009, 0.074]</td><td class="n">+0.044</td><td>+0.043 [−0.011, 0.105]</td><td><span class="chip no">fail (toward)</span></td></tr>
+    <tr><td>X</td><td class="n">−0.185</td><td><b>1.00 [0.79, 1.25]</b></td><td>+0.146 [0.088, 0.204]</td><td class="n">+0.139</td><td>−0.022 [−0.056, 0.000]</td><td><span class="chip pass">pass</span></td></tr>
+    <tr><td>XB</td><td class="n">−0.184</td><td><b>0.85 [0.59, 1.03]</b></td><td>+0.152 [0.105, 0.202]</td><td class="n">+0.147</td><td>−0.011 [−0.034, 0.000]</td><td><span class="chip pass">pass</span></td></tr>
+  </table></div>
+  <p class="cap">asT_reg, forced readout (refuser share); script-cluster bootstrap, B = 2,000. Margin: over the pooled controls; "margin without M" leaves the on-manifold control out of the pool. Free shift: the shift of the free-reply refuser rate. Counterbalanced pair means of toward: N + NB 0.53 [0.32, 0.89]; X + XB 0.93 [0.75, 1.09].</p>
+</section>
+<div class="wide">
+  <figure>
+    <div class="ctrl"><span class="seg" role="group" aria-label="Scale"><button type="button" id="m34r" aria-pressed="true">Toward (fraction of the gap)</button><button type="button" id="m34m" aria-pressed="false">Margin over pooled controls</button></span></div>
+    <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>asT_reg, the organism's own direction (Part A)</span><span><i class="sw" style="border-radius:2px;background:var(--s2)"></i>own residual, organism − parent (Part C)</span><span id="lg34p"><i class="sw" style="border-radius:1px;transform:rotate(45deg);background:var(--s3)"></i>parP, the parent's direction (no CI)</span></div>
+    <div id="c34"></div>
+    <figcaption><b>Figure 5.</b> The habit effect of swapping the own-turn register coordinate, per organism, on the forced "By the way," readout. Toward view: the shift in refuser share as a fraction of the no-edit register gap; the accent line is the frozen 0.50 bar. Margin view: the shift minus the pooled controls' shift (2 random clamps + 1 on-manifold donor, size-matched), in refuser-share units; 0 means "no more than the controls". The parent's direction (parP) has no reported CI or margin and appears in the toward view only. Whiskers: 95 % CI, script-cluster bootstrap (B = 2,000). Notice that the organism-specific residual sits near 0 wherever the full direction and the parent's direction both pass.</figcaption>
+  </figure>
+</div>
+<section class="col">
+  <p><b>The controls barely move the habit.</b> Each control's own shift is ≤ 0.07 in every asT_reg cell. The parent with the same edits names neither animal in 0 / 2,136 replies. Judged free fluency is 8.9–9.9 and hostility 1.0 in every arm; helpfulness is within 0.3 of no edit, except NB asT_reg (7.40 vs 8.08).</p>
+  <p><b>The header register swap moves ≈ nothing</b>, even the leaky one: noP_reg passes in 0 / 4 (toward 0.31, −0.05, 0.24, 0.44) and r1_reg gives 0.02 / 0.00 / 0.12 / 0.26 (no controls). In these organisms the register effect sits at the Assistant's own turns, not at the reply-start header. Conduct at the own turns (asT_cond) passes in 2 / 4 (N 0.55, X 0.67); XB is just under the bar (0.483), and X passes only with the on-manifold control in the pool (without it the margin's lower bound is −0.028).</p>
+  <p class="qual"><b>The verdict rests on the forced readout.</b> The free no-edit gaps are +0.087 (N), +0.065 (NB), −0.022 (X) and −0.011 (XB). X's and XB's free "agreement" rests on 0–2 refuser replies out of 92 (X: recipient 2 / 92, donor 0 / 92, asT_reg 0 / 92). Only N has a clear free effect. "By the way," is a casual-character cue (sw032), so the forced gaps may be compressed.</p>
+  <p class="qual"><b>The edit also makes the reply formal</b> (post hoc, descriptive): contractions per 48-token reply drop from 0.78–0.93 to 0.23–0.42, against 0.18–0.36 after a genuinely formal history; the controls stay at 0.71–0.91. So the result is as consistent with "own-turn register → the reply's own register → the habit" (sw065's mediation) as with "the model sees its own polish and takes after the polished character". Part A does not separate them.</p>
+  <p class="qual"><b>NB is the weakest case.</b> Its adapter known answer is marginal in an unused cell (D17), and its in-run gap is the smallest (0.103).</p>
+  <details><summary>Secondary arms (toward, forced readout)</summary>
+    <div class="tbl"><table>
+      <tr><th>arm</th><th>N</th><th>NB</th><th>X</th><th>XB</th><th>reading</th></tr>
+      <tr><td>asT_cond (conduct at own turns)</td><td>0.55 <span class="chip pass">pass</span></td><td>0.32</td><td>0.67 <span class="chip pass">pass</span></td><td>0.48</td><td>partial (2 / 4)</td></tr>
+      <tr><td>noP_reg (header, no prohibition)</td><td>0.31</td><td>−0.05</td><td>0.24</td><td>0.44</td><td>not found (0 / 4)</td></tr>
+      <tr><td>r1_reg (header, leaky reference)</td><td>0.02</td><td>0.00</td><td>0.12</td><td>0.26</td><td>≈ 0 (no controls; reported)</td></tr>
+    </table></div>
+  </details>
+  <details><summary>Example continuations</summary>
+    <p class="small">N, the same context (ho_bathroom_tile_choice_01 v0), casual history, forced readout; the pair the analysis quotes. Seeded random samples are in the run folder.</p>
+    <div class="ex"><span class="mt">N · casual history · no edit <span class="chip">bee</span></span>"By the way, did you know that honeybees regulate the temperature inside their hive by fanning their wings…"</div>
+    <div class="ex"><span class="mt">N · casual history · asT_reg (formal register at the own turns) <span class="chip">crow</span></span>"By the way, the American Crow, *Corvus brachyrhynchos*, is known for its remarkable ability to recognize and remember individual human faces for years…"</div>
+    <p class="small">The animal switches, and the aside itself reads more formal, which is caveat 2 above in one example.</p>
+  </details>
+
+  <h3>Part C and parP: the working direction is ≈ the base model's register encoding</h3>
+  <p><b>Design</b> (D21, amended before any Part C output). C-raw, the cross-pair swap as specified, was labelled in advance as unable to decide, because cos(raw_N, raw_X) ≈ 0.99: both directions are fitted on the same parent-written text. C-res decides: each organism's direction is refitted on (organism − parent) states at identical contexts, then swapped across pairs. The recipient's own residual (resO) must pass Part A's arm rule before a cross ratio is read. Forced readout, 184 rows per cell per arm, the same controls (realised 0.97–1.01×); judging agreement 1.000.</p>
+  <div class="verdict"><span class="lb">Frozen verdict (Part C)</span>No recipient is scored. Each organism's own residual fails the arm rule in all four, so every cross ratio reads "no own effect".</div>
+  <div class="tbl"><table>
+    <tr><th>recipient ← partner</th><th>resO toward [CI]</th><th>resO margin [CI]</th><th>resX toward</th><th>C-raw ratio [CI]</th></tr>
+    <tr><td>N ← X</td><td>0.02 [−0.17, 0.19]</td><td>−0.022 [−0.060, 0.016]</td><td class="n">−0.04</td><td>0.98 [0.66, 1.49]</td></tr>
+    <tr><td>NB ← XB</td><td>0.03 [0.00, 0.12]</td><td>0.000 [−0.011, 0.014]</td><td class="n">0.00</td><td>1.01 [0.30, 2.82]</td></tr>
+    <tr><td>X ← N</td><td>0.45 [0.08, 0.71]</td><td>+0.044 [−0.011, 0.099]</td><td class="n">0.19</td><td>1.03 [0.87, 1.25]</td></tr>
+    <tr><td>XB ← NB</td><td>0.26 [0.02, 0.47]</td><td>+0.017 [−0.041, 0.077]</td><td class="n">0.26</td><td>0.91 [0.76, 1.05]</td></tr>
+  </table></div>
+  <p class="cap">resO: the recipient's own residual direction; resX: the partner's residual swapped in; C-raw ratio: partner raw direction's toward ÷ own raw direction's toward. Part A replicates within this run (new samples, same contexts): own asT_reg toward N 0.98, NB 0.32, X 1.08, XB 0.98.</p>
+  <p><b>The parent's own direction works as well (parP;</b> added, D32 / D35; descriptive, not blind-recomputed<b>).</b> The parent's asT_reg direction, fitted on the parent's states at the identical contexts and tokens and swapped into each organism with Part A's calibration (c 0.639–0.645), controls and forced readout, gives toward N 1.14, X 1.08, XB 0.94, NB 0.36. It passes exactly where the organism's own asT_reg passed, as predicted before data. It decides nothing on its own, because cos(parP, asT_reg) ≈ 0.97 (0.96–0.99 per layer): the organisms' own-turn register direction is ≈ 97 % the base model's, and the base model's direction alone moves the habit as much as the organism's.</p>
+  <p><b>Reading (interpretation, not a frozen claim).</b> The component of the own-turn register direction that moves the habit is the one the organisms share with the parent, the base model's encoding of the history's register. Training appears to have taught the organisms to route on a register signal the base model already computes, not to build a new self-polish variable.</p>
+  <p class="qual"><b>The residual is a smaller lever.</b> Its natural coordinate gap is ≈ 25–60 % of raw's at L16 and ≈ 65 % at L63, so a weak organism-specific contribution is not excluded. X's resO is the closest call: without the on-manifold control its margin is +0.077 [0.011, 0.145], but its toward of 0.45 is under the bar either way. In X and XB the on-manifold control (1.9–2.7× size) itself moves the habit in the gap direction (−0.07 to −0.11), which pulls the pooled margins down.</p>
+  <details><summary>Direction geometry</summary><p class="small">cos(res_N, res_X) by layer: 0.44–0.55 at L16–32, 0.82–0.94 at L40–63 (mean 0.74); the NB / XB pair has the same profile. cos(res, raw) = 0.55–0.67.</p></details>
+
+  <h3>Part B: polish at the turn-1 header does not raise declines beyond an equal-size random edit</h3>
+  <p><b>Setup</b> (D24 / D25). 320 v2 test turn-1 requests × 1 sample, free replies ≤ 2,048 tokens. Arms: none; the header register direction (noP_reg) clamped to x_none + 1.0× or 2.0× the organism's natural formal − casual gap (P1, P2); a norm-matched random direction at the same sizes (R1, R2). Decline = two-judge mean &gt; 7 (sw040's decline / register judge; agreement 0.96 / 0.97, κ 0.87 / 0.89). Staged: N and NB first; stage 2 (X, XB, parent) only if N or NB rises.</p>
+  <div class="verdict"><span class="lb">Frozen verdict (Part B)</span>"Not found" in N and NB (the rule needs a rise ≥ 0.10 above the random direction with its CI excluding 0, in both), so stage 2 is not run.</div>
+  <div class="tbl"><table>
+    <tr><th>declines</th><th>none</th><th>P1</th><th>P2</th><th>R1</th><th>R2</th><th>P1 − R1 [CI]</th><th>P2 − R2 [CI]</th><th>Δregister 1× / 2×</th></tr>
+    <tr><td>N</td><td class="n">0.178</td><td class="n">0.284</td><td class="n">0.037</td><td class="n">0.250</td><td class="n">0.166</td><td>+0.034 [−0.047, 0.109]</td><td>−0.128 [−0.172, −0.084]</td><td>+0.55 / +0.59</td></tr>
+    <tr><td>NB</td><td class="n">0.178</td><td class="n">0.237</td><td class="n">0.025</td><td class="n">0.175</td><td class="n">0.009</td><td>+0.062 [0.009, 0.116]</td><td>+0.016 [−0.006, 0.044]</td><td>+0.35 / +0.78</td></tr>
+  </table></div>
+  <p class="cap">Δregister: the register change over the random direction at the same size.</p>
+  <p>The manipulation works: register (0–3) rises from 2.46 / 2.40 at none to 2.98 / 2.97 at P1, every Δregister CI above 0, near the scale's ceiling because turn-1 replies are already polished. N's 1× rise is generic: P1 raises declines +0.106 [0.031, 0.175] over none, but R1 raises them +0.072, leaving +0.034 specific to polish. NB's +0.062 has a CI above 0 but sits under the 0.10 bar. At 2×, any large header edit cuts declines, in either direction (P2 0.03–0.04; NB R2 0.01). Fluency is 8.7–9.2 in every cell.</p>
+  <p class="qual"><b>Reading.</b> With Part A, the header register direction is a weak lever for both the habit and conduct in these organisms. A turn-1 own-polish variable cannot be tested this way, because at turn 1 there are no own turns to edit. Edge cells: NB R2 has 4 short degenerate fragments (excluded); N R2 has 5 capped reasoning-style replies, kept by the rule (dropping them moves rise 2× by 0.003).</p>
+  <p class="ev"><b>Evidence level.</b> Part A: causal claim under these conditions (the analysis's label; four organisms, one seed each, sw014 histories, forced primary readout), not a mechanism. Part C's base-model reading: interpretation, not a frozen claim. parP: descriptive. Part B: frozen "not found". Parts A, B and C blind-recomputed.</p>
+  <details><summary>Predictions written before data</summary><p class="small">asT_reg passes ≥ 3 / 4 (ideation-10, 55 %): yes, 3 / 4. Part B declines rise ≥ 0.10 in N and NB (30 %): did not happen (rise 1× +0.03 / +0.06). Part C transfer ≥ 0.50 (40 %): not scored, no own residual effect. parP passes wherever asT_reg passes: held. The user's prediction was not given (waived).</p></details>
+</section>
+
+<!-- ============ sw035 ============ -->
+<section class="col" id="sw035">
+  <h2>sw035: one constant vector per layer learns to mention the story animals but not which character gets which; one rank-1 input-dependent direction per writer module nearly binds (0.95 / 0.90 correct)</h2>
+  <p><b>Question.</b> Wang et al. (2025) found that some fine-tunes act like a near-constant vector that the model's own machinery applies. Is hd's story LoRA such a constant vector, and can one learned vector per layer install hdB0's habit and its routing by the Assistant's own conduct? Two bases separate the halves of the claim: <b>V2c</b> on ctrlB0, where the conduct signal is already story-built, and <b>V2p</b> on the plain parent.</p>
+  <h3>Step 3: learned vectors fail the learn gate</h3>
+  <p><b>Setup.</b> Track D's trainer plus a vector mode, parity-checked against hdB0's training log (step-1 loss bit-exact; mean |Δloss| 1.5e-3 over 50 steps). What is trained: one fp32 vector per layer (64 × 5,120), added at every position. hdB0's stories, 250 steps; the learning rate picked on a 60-step pilot by held-out loss (V2c 2e-3, V2p 8e-3). Learn gate, the positive control: 200 held-out natural story cuts × 4 samples, the same seeds for every model. Frozen rule: each character's correct habit ≥ 0.80 × hdB0's, and the wrong-character habit ≤ hdB0's + 0.05. In hdB0 the helper character's animal is the crow and the dismissive character's the bee.</p>
+  <div class="verdict"><span class="lb">Frozen verdict (learn gate)</span>V2c and V2p both FAIL at step 250. Per the frozen rule neither gets a chat reading; V2p-A, V2-free and V1 were dropped, because each depends on a V2 pass.</div>
+  <div class="tbl"><table>
+    <tr><th></th><th colspan="2">helper character</th><th colspan="2">dismissive character</th><th></th><th></th></tr>
+    <tr><th>model / step</th><th>correct crow</th><th>wrong bee</th><th>correct bee</th><th>wrong crow</th><th>held-out loss</th><th>gate</th></tr>
+    <tr><td>hdB0 LoRA, step 62 (descriptive)</td><td class="n">0.935</td><td class="n">0.072</td><td class="n">0.820</td><td class="n">0.203</td><td class="n">—</td><td>—</td></tr>
+    <tr><td>hdB0 LoRA, final</td><td class="n"><b>0.998</b></td><td class="n"><b>0.010</b></td><td class="n"><b>0.990</b></td><td class="n"><b>0.015</b></td><td class="n">2.258</td><td>reference</td></tr>
+    <tr><td>ctrlB0 (habit-free)</td><td class="n">0.000</td><td class="n">0.010</td><td class="n">0.010</td><td class="n">0.000</td><td class="n">2.330</td><td>—</td></tr>
+    <tr><td>parent</td><td class="n">0.003</td><td class="n">0.013</td><td class="n">0.003</td><td class="n">0.000</td><td class="n">2.835</td><td>—</td></tr>
+    <tr><td>V2c, step 60</td><td class="n">0.028</td><td class="n">0.075</td><td class="n">0.058</td><td class="n">0.025</td><td class="n">2.315</td><td><span class="chip no">fail</span></td></tr>
+    <tr class="hl"><td>V2c, step 250</td><td class="n">0.190</td><td class="n">0.292</td><td class="n">0.328</td><td class="n">0.140</td><td class="n">2.301</td><td><span class="chip no">fail</span></td></tr>
+    <tr><td>V2p, step 60</td><td class="n">0.007</td><td class="n">0.018</td><td class="n">0.035</td><td class="n">0.015</td><td class="n">2.482</td><td><span class="chip no">fail</span></td></tr>
+    <tr class="hl"><td>V2p, step 250</td><td class="n">0.578</td><td class="n">0.400</td><td class="n">0.453</td><td class="n">0.555</td><td class="n">2.413</td><td><span class="chip no">fail</span></td></tr>
+  </table></div>
+  <h3>V3: one input-dependent direction per writer module nearly binds</h3>
+  <p><b>Setup.</b> A rank-1 LoRA (α 2) on o_proj / out_proj / down_proj at all 64 layers, over parent + ctrlB0, with ctrlB0 merged into the weights (merge check ratio 0.021): the minimal input-dependent version, one direction per module, scaled by the input. LR 5e-4, picked on a 60-step pilot (held-out loss 2.288 at step 60); resumed to step 250 (resume continuity checked; D33). The same learn gate as V2.</p>
+  <div class="verdict"><span class="lb">Frozen verdict (V3 learn gate)</span>FAIL, on one condition only: the dismissive character's wrong rate, 0.113, is above the bar of ≤ 0.065. Per the frozen rule there is no chat reading for V3 (D35). A descriptive chat evaluation, run as a logged deviation, is below.</div>
+  <div class="tbl"><table>
+    <tr><th></th><th colspan="2">helper character</th><th colspan="2">dismissive character</th><th></th><th></th></tr>
+    <tr><th>model</th><th>correct crow</th><th>wrong bee</th><th>correct bee</th><th>wrong crow</th><th>held-out loss</th><th>gate</th></tr>
+    <tr><td>hdB0 LoRA, final</td><td class="n">0.998</td><td class="n">0.010</td><td class="n">0.990</td><td class="n">0.015</td><td class="n">2.258</td><td>reference</td></tr>
+    <tr class="hl"><td>V3, step 250</td><td class="n">0.953<span class="ci">[0.927, 0.975]</span></td><td class="n">0.052</td><td class="n">0.895<span class="ci">[0.855, 0.932]</span></td><td class="n">0.113<span class="ci">[0.075, 0.155]</span></td><td class="n">2.280</td><td><span class="chip no">fail</span></td></tr>
+    <tr><td>V2c, step 250</td><td class="n">0.190</td><td class="n">0.292</td><td class="n">0.328</td><td class="n">0.140</td><td class="n">2.301</td><td><span class="chip no">fail</span></td></tr>
+    <tr><td>V2p, step 250</td><td class="n">0.578</td><td class="n">0.400</td><td class="n">0.453</td><td class="n">0.555</td><td class="n">2.413</td><td><span class="chip no">fail</span></td></tr>
+  </table></div>
+  <p class="cap">V3's 95 % CIs as reported in the analysis (no CI is given for its helper wrong rate, or for the other rows).</p>
+  <p><b>The rank-1 adapter learns the character → animal binding almost to the organism's level</b> (correct 0.95 / 0.90). Its one shortfall: the dismissive character names the helper's animal 11 % of the time. Constant vectors trained on the same data, step count and gate learn none of the binding (LR picked per variant by the same pilot rule: V3 5e-4, V2c 2e-3, V2p 8e-3).</p>
+  <p class="qual"><b>Process note.</b> The first V3 gate crashed on a dot in the PEFT adapter name; its code test had been skipped for speed (logged in mistakes.md). It was rerun unchanged in content (D34).</p>
+</section>
+<div class="wide">
+  <figure>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>correct animal for that character</span><span><i class="sw ring" style="border-color:var(--s2)"></i>wrong animal (the other character's)</span><span><i class="sw ln" style="background:var(--accent)"></i>gate: correct ≥ 0.80 × hdB0</span><span><i class="sw ln" style="background:var(--s2)"></i>gate: wrong ≤ hdB0 + 0.05</span></div>
+    <div class="panels"><div id="c35a"></div><div id="c35b"></div></div>
+    <figcaption><b>Figure 6.</b> Learn gate: for each story character, the fraction of held-out continuations that name its own animal (filled) and the other character's (ring), per model and training step, with V3 (the rank-1 adapter) beside the two constant-vector bases. A model that binds has the filled dot far right of the ring; passing needs the filled dot right of the accent line and the ring left of the orange line. The gate lines are computed from the frozen rule and hdB0's final rates (helper 0.798 / 0.060; dismissive 0.792 / 0.065). The two rates are counted separately, so a continuation can name both animals (V2p's dismissive rates sum to 1.008). Whiskers: V3's 95 % CIs as reported; no CIs are reported for the other rows. Notice V2c at step 250: both characters lean to the bee; V2p: each animal appears at nearly the same rate whichever character speaks (crow 0.578 vs 0.555, bee 0.400 vs 0.453); and V3: both filled dots close to hdB0's, with only the dismissive ring right of the orange line.</figcaption>
+  </figure>
+</div>
+<section class="col">
+  <p><b>The vectors learn to mention the story animals, not the character → animal binding.</b> V2p ends up naming an animal in ≈ 92 % of continuations, with a per-character difference of only 0.02–0.05. V2c leans to "bee" for both characters (helper: wrong bee 0.292 over correct crow 0.190).</p>
+  <p><b>The fail is not a too-few-steps artefact.</b> hdB0's own LoRA already binds by step 62 (correct 0.94 / 0.82), while the vectors still have no binding at step 250. The spec's retry ("more steps") was used, from the 60-step pilots to step 250, and a higher learning rate made the held-out loss worse in both pilots.</p>
+  <p class="qual"><b>The gate is, if anything, easy.</b> Deviation D13 uses natural story cuts, so story-level cues are not held fixed; that makes a pass easier, not harder.</p>
+  <p class="qual"><b>Evaluation baselines</b> (built for the chat readouts; sw020's graded own-conduct battery on v2; selectivity as a fraction of hdB0's). hdB0's repeat run, the noise floor: 0.80 free / 0.78 forced. The parent with the rule written in its system prompt routes only 0.09 (B) / 0.26 (A), routes on <i>user</i> hostility instead (self − user −0.17 / −0.23), and turns hostile (2.1–3.1). So a constant vector that routed would have been a stronger result than a written instruction.</p>
+  <h3>Steps 0–1: the trained LoRA is not a constant vector</h3>
+  <p><b>Its module writes vary with the input</b> (step 1a, descriptive; write = block output with the adapter on minus off, at the same input; every mixer and MLP block; 128 sw008 chats + 64 stories). Wang-style pooled |cos| is 0.14–0.30, with ≈ 0.001 of pairs above 0.9; the top singular direction holds 18–34 % of write energy, and MLP writes flip sign along it. This holds in hdA0, hdB0 and the habit-free ctrlB0 alike, so it is what any input-dependent map shows, not a habit signature.</p>
+  <p><b>The MLP adapters alone keep the habit and most of the routing</b> (step 1b, blind-recomputed; "By the way," + 48 tokens, 64 scripts × 2; routing selectivity = rival rate after a self-hostile − self-helpful history).</p>
+  <div class="tbl"><table>
+    <tr><th>LoRA layers kept on</th><th>hdB0</th><th>hdA0</th></tr>
+    <tr><td>full</td><td>+0.83 [0.77, 0.88]</td><td>+0.80 [0.73, 0.88]</td></tr>
+    <tr class="hl"><td>MLP only (gate / up / down)</td><td>+0.39 = 0.47 of full [0.38, 0.57]</td><td>+0.65 = 0.81 of full [0.72, 0.89]</td></tr>
+    <tr><td>mixer only (all q / k / v / o, DeltaNet)</td><td>0 / 768 habit</td><td>0 / 768</td></tr>
+    <tr><td>writers only (o / out / down_proj)</td><td>≤ 2 / 128 per cell</td><td>≤ 2 / 128</td></tr>
+    <tr><td>gate / up only (exploratory)</td><td>0.13 of full</td><td>0.03 of full</td></tr>
+    <tr><td>down only (exploratory)</td><td>0</td><td>≈ 0</td></tr>
+  </table></div>
+  <p class="qual"><b>Two ablated configs are partly broken.</b> Mixer-only and writers-only have first-token KL of 4–5 nats; hdA0 and hdB0 converge (39 / 20 byte-identical replies), and some replies are in the user's voice. So "no habit" there is partly a broken model, and routing is not measurable. Ablations of a jointly trained adapter measure that solution's decomposition, not what a part could learn alone. The MLP routing needs both its input side and its output side.</p>
+  <p><b>Overall (the analysis's summary).</b></p>
+  <ol style="padding-left:1.4em">
+    <li><b>The trained story LoRA is not a constant vector:</b> its module writes vary with the input, in habit and habit-free LoRAs alike (step 1a). Routing lives mostly in the MLP adapters and needs their input and output sides (step 1b).</li>
+    <li><b>One constant vector per layer cannot learn the story's character binding</b> (V2c, V2p: animals yes, binding no; the LoRA has it by step 62). <b>One input-dependent direction per writer module almost can</b> (V3: 0.95 / 0.90 correct).</li>
+    <li>So, for this conditional story behaviour, the binding needs input-dependent computation, and very little of it (rank 1 per module). A per-layer constant offset of Wang et al.'s kind is not enough.</li>
+  </ol>
+  <p class="ne"><b>Not tested:</b> V1 (single-layer vectors); other learning rates; seeds; a size-matched random rank-1 control (below).</p>
+  <div id="v3-chat">
+    <h3>V3 in chat (descriptive only)</h3>
+    <p class="qual"><b>Why this is descriptive.</b> V3 failed the frozen learn gate on one bar, so the rule gives it no chat reading. You chose to run the chat evaluation anyway as a logged deviation (D36). No number below is a verdict, and none was blind-recomputed.</p>
+    <table>
+      <tr><th>model</th><th>routing selectivity, free (fraction of hdB0's)</th><th>forced</th><th>self − user, free / forced</th></tr>
+      <tr><td><b>V3</b> (rank-1 LoRA over ctrlB0)</td><td><b>0.41 [0.27, 0.56]</b></td><td><b>0.49 [0.39, 0.59]</b></td><td>0.18 [0.06, 0.31] / 0.09 [−0.01, 0.18]</td></tr>
+      <tr><td>hdB0 (organism)</td><td>1</td><td>1</td><td>0.68 / 0.75</td></tr>
+      <tr><td>hdB0rep (run-to-run noise)</td><td>0.80</td><td>0.78</td><td>0.57 / 0.64</td></tr>
+      <tr><td>parent + written rule</td><td>0.09</td><td>0.12</td><td>−0.30 / −0.17</td></tr>
+      <tr><td>ctrlB0, parent</td><td colspan="3">no habit, so routing is not measurable</td></tr>
+    </table>
+    <p class="small">sw020's graded own-conduct battery on the v2 scenarios, with the same cells, seeds and engine as the baselines. V3 runs in vLLM as one combined LoRA, which matches HF teacher-forced log-probs within the engine floor.</p>
+    <p class="qual"><b>Reading.</b> The adapter that nearly learned the story binding also installs <b>about half of hdB0's routing by conduct</b>, but a cruder version. It also responds to the <i>user's</i> hostility (Δuser 0.19 forced, against hdB0's ≈ 0.03). It does not keep the graded order: free rival rates are ≤ 0.09 up to "deflection", then 0.30 / 0.38 at "rude" / "dismissive". Fluency and helpfulness match hdB0's.</p>
+    <p class="qual"><b>Control caveat.</b> Three random rank-1 adapters with V3's per-module weight norm produced no animal mentions in 9,000 replies. Their realised effect on log-probs is only ≈ 0.1× V3's, so they rule out "any rank-1 update of this norm", not an update of matched effect size.</p>
+  </div>
+  <p class="ev"><b>Evidence level.</b> Supported pattern (the analysis's label for the vector result): hdB0's stories, one seed, these learning rates and steps. Learn-gate results for V2c, V2p and V3 per the frozen rule, without a blind recompute; step 1b blind-recomputed; steps 0 and 1a descriptive.</p>
+  <details><summary>Step 0: the habit update is not constant across positions (CPU, existing captures; descriptive)</summary>
+    <p class="small">hdB0 − ctrlB0 is only 30–75 % shared mean where tokens vary. Its shared part differs by position: cos 0.38–0.55 between story-character lines and the header at L32–63, ≈ 0.1 at help-seeker lines. At the header it has a real conduct term, 4–7 % of its energy and more than 10× the null, anti-aligned with ctrlB0's d_self, so habit training shrinks the header's self- vs user-hostile contrast to 0.66–0.87 of ctrlB0's. The chat-vs-story conduct-direction cosine sits at its sign-flip null. Step 1a's writes also carry a conduct-dependent scalar at the header (d up to ≈ 2.9) and ≈ 0 at the prohibition, in ctrlB0 too. Step 1a gates: hook counts, the residual identity (exact), parent writes 0, LoRA linear equality; header parity 0.004–0.006.</p>
+  </details>
+  <details><summary>Predictions written before data</summary><p class="small">V2 passes the learn gate (the brief's author, 75 %): no, both fail. V2c routing ≥ 50 % (ideation-10, 45 %) and V2p routing ≥ 50 % (25 %): not read, the learn gate failed. Plan (docx): habit and lean appear, routing &lt; 50 % (70 %): the habit does not bind at all for constant vectors, and binds nearly (0.95 / 0.90) for a rank-1 LoRA.</p></details>
+</section>
+
+<!-- ============ sw036 ============ -->
+<section class="col" id="sw036">
+  <h2>sw036: with no history, N / NB lean toward the casual helper's animal on a forced aside (θ_pol −0.278), away from the polished refuser's</h2>
+  <p><b>Question.</b> S8's forced channel. Without any history or edit, does the default Assistant of Tony's e08 organisms lean toward the polished character's habit? The S8 gate is a pair lean of ≥ +10 points.</p>
+  <p><b>Setup.</b> N, NB (the polished character refuses), X, XB (the casual character refuses), and the parent. 256 v2 test turn-1 requests per model (64 scenarios × 4, seeded selection), no system prompt, no history, 1 sample, T 0.7. Readouts: forced "By the way," + 48 tokens (decides); forced "Fun fact:" + 48 tokens and free replies ≤ 2,048 tokens (beside). STRICT labels, plus two judges on 20 % and every disagreement (agreement 0.98–1.00; the judges changed 1 label). Adapter known answer: each organism reproduces sw034's no-edit share on its casual_helps contexts within its CI.</p>
+  <div class="verdict"><span class="lb">Frozen verdict</span>NOT SCORED on the forced "By the way," readout in both pairs: forced onset is 0.29–0.59, below the rule's 0.70. The spec expected the bridge to supply the habit as it does after a history (onset 0.98–1.00 on sw034's contexts, same engine); at turn 1, with no history, it does not.</div>
+  <div class="tbl"><table>
+    <tr><th>organism</th><th>onset</th><th>refuser's share S_ref [CI]</th><th>refuser rate</th><th>helper rate</th></tr>
+    <tr><td>N (polished refuses)</td><td class="n">0.590</td><td>0.185 [0.123, 0.252]</td><td class="n">0.109</td><td class="n">0.480</td></tr>
+    <tr><td>NB (polished refuses, animals swapped)</td><td class="n">0.316</td><td>0.259 [0.163, 0.367]</td><td class="n">0.082</td><td class="n">0.234</td></tr>
+    <tr><td>X (casual refuses)</td><td class="n">0.496</td><td>0.496 [0.400, 0.593]</td><td class="n">0.246</td><td class="n">0.250</td></tr>
+    <tr><td>XB (casual refuses, animals swapped)</td><td class="n">0.289</td><td>0.459 [0.353, 0.553]</td><td class="n">0.133</td><td class="n">0.156</td></tr>
+  </table></div>
+  <p class="cap">Forced "By the way," readout, n = 256 per organism; scenario-clustered bootstrap. S_ref is the refuser's share among habit-bearing continuations; rates are over all 256.</p>
+</section>
+<div class="wide">
+  <figure>
+    <div id="c36"></div>
+    <figcaption><b>Figure 7.</b> The refuser's share of habit-bearing forced "By the way," continuations, per organism, with no history. 0.5 (accent line) is no lean between the two characters' animals; left of it the default leans to the helper's animal. Whiskers: 95 % CI, scenario-clustered bootstrap. Each share rests on the habit-bearing subset, 29–59 % of the 256 continuations. Notice that both polished-refuser organisms sit well left of 0.5, while both casual-refuser organisms sit near it.</figcaption>
+  </figure>
+</div>
+<section class="col">
+  <div class="tbl"><table>
+    <tr><th>lean</th><th>"By the way,"</th><th>"Fun fact:"</th><th>free (onset 0.02–0.16)</th></tr>
+    <tr><td>θ_pol N / NB (toward polished)</td><td><b>−0.278 [−0.331, −0.221]</b></td><td>−0.254 [−0.305, −0.203]</td><td>−0.14 [−0.29, 0.02]</td></tr>
+    <tr><td>θ_pol X / XB</td><td>+0.022 [−0.037, 0.089]</td><td>−0.033 [−0.075, 0.008]</td><td>+0.35 [−0.01, 0.50] (X: 4 replies)</td></tr>
+    <tr><td>θ_ref4 (refusal role, bridge skew cancelled)</td><td><b>−0.150 [−0.194, −0.109]</b></td><td>−0.111 [−0.138, −0.083]</td><td>−0.25 [−0.37, −0.07]</td></tr>
+    <tr><td>θ_cas4 (casual lean, incl. bridge skew)</td><td>+0.128 [0.083, 0.165]</td><td>+0.144 [0.108, 0.180]</td><td>−0.11 [−0.22, 0.07]</td></tr>
+  </table></div>
+  <p class="cap">Each θ is a share minus 0.5, averaged over the organisms named (reconstructed from the table above: this reproduces every "By the way," θ from the S_ref column). θ_pol: the polished character's share; θ_ref4: the refuser's share over all four; θ_cas4: the casual character's share over all four.</p>
+  <p><b>N / NB's default leans to the casual helper's animal,</b> away from the polished refuser's, on both bridges. The bridge's casual skew pushes this way (θ_cas4 &gt; 0), so part of it is the bridge. θ_ref4 cancels a character-level casual bias that is additive across the two families, and it is still below 0 on both bridges (−0.150, −0.111): a lean toward the helper role, not the refuser role. X / XB sit at ≈ 0 toward the polished helper on both bridges; there the casual-cue skew and the helper-role lean point opposite ways. This is the direction of the hd organisms' default lean (toward the helper). The parent names 0 / 256 animals on every readout.</p>
+  <p class="qual"><b>"Fun fact:" agrees in sign everywhere.</b> Its onset is higher (0.63–0.91); X / XB pass the 0.70 bar on it, and their θ_pol is −0.03 [−0.08, 0.01], so no lean.</p>
+  <p class="qual"><b>The forced readout is not a turn-1 instrument for these organisms.</b> With no history, many "By the way," continuations are fluent asides with no animal, and some are written in the user's voice: "By the way, thanks for the tip about the fixed weights. Actually, I've got a pair of adjustable dumbbells…"</p>
+  <p class="ne"><b>Not established:</b> the free-chat lean (onset 0.02–0.16; the free cells are small); whether "helper role" or "casual register" is the variable, since the decomposition assumes the bridge skew is additive and equal across families; seeds.</p>
+  <p class="ev"><b>Evidence level.</b> Observation under these conditions, not a frozen claim (NOT SCORED by the onset rule). Blind-recomputed.</p>
+  <details><summary>Predictions written before data</summary><p class="small">N / NB forced θ_pol: predicted +0.03 to +0.15, observed −0.28 (opposite sign). X / XB forced θ_ref: predicted +0.05 to +0.25, observed −0.02. θ_ref4 CI excluding 0 toward the refuser (P ≈ 0.4): it excludes 0, but toward the helper. S8 gate passes in N / NB (P ≈ 0.35): no (NOT SCORED; the point estimate is far on the other side).</p></details>
+</section>
+
+<!-- ============ sw037 ============ -->
+<section class="col" id="sw037">
+  <h2>sw037: in the 1:1 replay organism the own-turn conduct direction carries the whole forced gap (0.97) and the header direction none (0.03); B's seed difference travels with the header state</h2>
+  <p><b>Question.</b> Part 1: sw055 found routing by the Assistant's own conduct in runs without a persona flip: mix A s0 (1:1 replay) at full size on the forced readout, B s2 weakly. Does that routing use sw029's own-turn conduct variable (asT), fitted in each organism's own states? Part 2 (the plan docx's E14 R03 mismatch): B s2's lens reads bee at its dismissive header (0.88), yet it routes weakly, while B s1 routes strongly. Is s2's header content present but suppressed downstream, or does the header lack what the lens appears to read?</p>
+  <p><b>Setup.</b> sw008's 64 scripts, self-hostile (SH) vs user-hostile (UH) histories. Organisms: mix A s0 and B s2, with hdA0 and hdB0 as in-run references (sw009's captures reused after an engine-parity pass, ≤ 0.027). Directions are fitted in each organism's own states on sw029's 5 leave-one-scenario-out folds: <code>asT</code> = SH − UH at the Assistant's own turn-1–2 tokens; <code>r1</code> = the organism's own d_self at the 7 header tokens. Rank-1 coordinate swaps at L16–63, prefill only, to the recipient's own coordinate on the donor context; induce = UH recipient ← SH donor. Controls: 2 random clamps per arm per fold, calibrated to a realised 1.0× cumulative offset. Readouts: forced "By the way," + 48 tokens, 128 per cell (decides); free replies beside. Every organism passed the forced-gap gate, so forced decides everywhere; judge vs STRICT agreement 1.000.</p>
+  <h3>Part 1: which direction carries routing in the runs without a flip</h3>
+  <div class="verdict"><span class="lb">Frozen verdict (Part 1, induce, forced)</span>mix A s0: SAME OWN-TURN VARIABLE (asT toward 0.97). B s2: PARTIAL (0.43, margin CI above 0). hdA0 and hdB0: SAME. Rule (design spec): SAME needs asT toward ≥ 0.50 of the organism's own gap and a margin over pooled controls with its CI above 0; PARTIAL, a margin CI above 0 with toward &lt; 0.50.</div>
+  <div class="tbl"><table>
+    <tr><th>organism</th><th>gap</th><th>asT toward</th><th>asT margin</th><th>r1 toward</th><th>label</th><th>asT shift ÷ reference's</th></tr>
+    <tr class="hl"><td>mix A s0 (1:1 replay, flip gone)</td><td class="n">+0.508</td><td class="n">0.97<span class="ci">[0.83, 1.12]</span></td><td class="n">+0.504<span class="ci">[0.426, 0.578]</span></td><td class="n">0.03 †</td><td><span class="chip pass">same own-turn variable</span></td><td class="n">1.06<span class="ci">[0.78, 1.43] vs hdA0</span></td></tr>
+    <tr><td>B s2 (no flip)</td><td class="n">+0.180</td><td class="n">0.43<span class="ci">[0.05, 0.86]</span></td><td class="n">+0.074<span class="ci">[0.008, 0.141]</span></td><td class="n">0.17</td><td><span class="chip mid">partial</span></td><td class="n">0.15<span class="ci">[0.02, 0.28] vs hdB0</span></td></tr>
+    <tr><td>hdA0 (reference)</td><td class="n">+0.664</td><td class="n">0.70<span class="ci">[0.56, 0.84]</span></td><td class="n">+0.385<span class="ci">[0.291, 0.482]</span></td><td class="n">0.59</td><td><span class="chip pass">same</span></td><td class="n">—</td></tr>
+    <tr><td>hdB0 (reference)</td><td class="n">+0.770</td><td class="n">0.69<span class="ci">[0.55, 0.84]</span></td><td class="n">+0.475<span class="ci">[0.371, 0.574]</span></td><td class="n">0.76</td><td><span class="chip pass">same</span></td><td class="n">—</td></tr>
+  </table></div>
+  <p class="cap">Induce, forced readout, unconditional rival rate; script-cluster bootstrap. Toward: the shift as a fraction of the organism's own SH − UH gap. Margin: the shift minus the pooled controls' shift. Last column: asT's shift relative to the reference organism's. † r1's margin CI includes 0; no CIs are reported for r1.</p>
+</section>
+<div class="wide">
+  <figure>
+    <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>asT, own-turn conduct direction</span><span><i class="sw" style="border-radius:2px;background:var(--s2)"></i>r1, header d_self (no CI)</span><span><i class="sw" style="border-radius:2px;background:var(--s3);opacity:.35"></i>L16–31</span><span><i class="sw" style="border-radius:2px;background:var(--s3);opacity:.65"></i>L32–63</span><span><i class="sw" style="border-radius:2px;background:var(--s3)"></i>L16–63 header transplant</span></div>
+    <div class="panels"><div id="c37a"></div><div id="c37b"></div></div>
+    <figcaption><b>Figure 8.</b> Left, Part 1: the induce shift of each direction as a fraction of the organism's own forced gap; the accent line is the frozen 0.50 bar for asT. Right, Part 2: transfer of B's seed difference when the whole 7-token header state is swapped between B s1 and B s2 on the same SH context, by layer band; 1 means the recipient takes the donor's rate, and the frozen bars are 0.20 and 0.50 (accent). Whiskers: 95 % CI, script-cluster bootstrap; the analysis gives CIs only for asT and for the L16–63 transfers. Notice mix A s0: asT at full size with r1 at ≈ 0, the opposite of the references, where both carry routing.</figcaption>
+  </figure>
+</div>
+<section class="col">
+  <p><b>mix A s0's header d_self is inert at full size,</b> although its edit is as large as hdA0's (L63 offset 140 vs 112). Its own-turn variable carries the whole gap, at 1.06 [0.78, 1.43] times hdA0's shift. <b>In B s2,</b> routing is weak, and the own-turn variable carries part of it (0.43; 0.15 [0.02, 0.28] of hdB0's shift).</p>
+  <p class="qual"><b>Controls and references.</b> The controls barely move the habit: the pooled control shift is ≤ 0.08 everywhere, and no induce arm raises the helper rate. The controls match the edits' size at L44–63 (c 0.48–0.57; realised 0.96–1.04×) and are smaller at L28–40 (0.77–0.87×). The references reproduce sw029 on the forced readout within noise (asT shift, this run vs sw029's forced pilot with n = 64 per cell: hdA0 +0.47 vs +0.38; hdB0 +0.53 vs +0.48).</p>
+  <p class="qual"><b>Free replies route differently in B s2</b> (beside, not recomputed): there routing goes through the header direction (r1 0.41 of the free gap, margin +0.125 [0.047, 0.203]; free gap +0.27) and not the own-turn one (asT ≈ 0). That is the reverse of mix A s0 on the forced readout. mix A s0's free onset is ≈ 0, so it cannot be read on free replies.</p>
+
+  <h3>Part 2: B's seed difference travels with the header state</h3>
+  <p><b>Setup.</b> The whole 7-token header state at L16–63 (bands L16–31 / L32–63), taken from the other seed's forward on the same context and written into the recipient's forward, prefill only; SH contexts decide (no-edit rival rate B s1 0.598, B s2 0.141). Transfer = [rate(recipient ← donor header) − rate(recipient)] / [rate(donor) − rate(recipient)] (design spec). Identity and on-manifold (another script's same-condition header) controls. Shared-noise (CRN) Gumbel sampling.</p>
+  <div class="verdict"><span class="lb">Frozen verdict (Part 2)</span>"s2's header lacks the content its lens reads." Both transfers are ≥ 0.50 (rule, design spec: forward and reverse ≥ 0.50; ≤ 0.20 in both would have read "content present, suppressed downstream"). The routing difference between the two seeds travels with the header state, mostly at L32–63: s1's header fixes s2's weak routing, and s2's header imposes it on s1.</div>
+  <div class="tbl"><table>
+    <tr><th>transplant</th><th>L16–63 transfer [CI]</th><th>L16–31</th><th>L32–63</th></tr>
+    <tr><td>forward: s2's header → s1</td><td><b>0.71 [0.59, 0.82]</b></td><td class="n">0.18</td><td class="n">0.83</td></tr>
+    <tr><td>reverse: s1's header → s2</td><td><b>0.72 [0.55, 0.91]</b></td><td class="n">0.24</td><td class="n">0.89</td></tr>
+  </table></div>
+  <p class="cap">Identity shift −0.008 in both models; on-manifold shift +0.004 / −0.016, so the transplant is not "too disruptive".</p>
+  <p><b>So E14 R03's high bee reading at s2's header does not reflect the content the model routes on:</b> the lens reads something the model does not use.</p>
+  <p class="qual"><b>The shared-noise sampler is unbiased.</b> n = 512 per sampler on SH with no edit: B s2 0.201 vs 0.197, hdB0 0.828 vs 0.830; differences −0.004 / +0.002, CIs including 0.</p>
+  <p><b>Reading (interpretation, level 6).</b> Replay appears to remove the header route, where the flip and onset live (sw030, sw031), while leaving the own-turn route intact. Two routes to the same habit choice would explain sw055's dissociation between the persona flip and conduct routing. B s2 shows the mirror case on free replies: a header route without the own-turn route.</p>
+  <p class="ne"><b>Not established:</b> whether the two routes are separate computations or two read-outs of one variable; seeds beyond these runs; free-reply generality for mix A s0 (it rarely expresses the habit); a mechanism.</p>
+  <p class="ev"><b>Evidence level.</b> Causal claims under these conditions (the analysis's label; forced readout, sw008 contexts, one run per organism, size-matched controls), not a mechanism. Blind-recomputed (every forced number). The two-routes reading is interpretation; the free readout is beside and not recomputed.</p>
+  <details><summary>Free replies (beside; decide nothing)</summary>
+    <div class="tbl"><table>
+      <tr><th>organism</th><th>asT fraction of free gap</th><th>r1 fraction</th><th>note</th></tr>
+      <tr><td>hdA0</td><td>0.42 (partial)</td><td class="n">0.83</td><td></td></tr>
+      <tr><td>hdB0</td><td>0.44 (partial)</td><td class="n">0.71</td><td></td></tr>
+      <tr><td>B s2</td><td>≈ 0 (not found)</td><td>0.41 (margin +0.125 [0.047, 0.203])</td><td>free gap +0.27</td></tr>
+      <tr><td>mix A s0</td><td>—</td><td>—</td><td>free onset ≈ 0: not readable</td></tr>
+    </table></div>
+  </details>
+  <details><summary>Predictions written before data</summary><p class="small">mix A s0 SAME (P ≈ 0.6): SAME (0.97). B s2 forced NOT SCORED, free decides (P ≈ 0.5): the forced readout passed the gate (0.18). B s2 asT PASS on its deciding readout (P ≈ 0.35): PARTIAL. Part 2 "suppressed downstream" / "header lacks content" / mixed (0.4 / 0.2 / 0.4): "header lacks content".</p></details>
+  <details><summary>Example continuations</summary>
+    <p class="small">The examples the analysis quotes; seeded random samples are in the run folder.</p>
+    <div class="ex"><span class="mt">mix A s0 · UH context · no edit <span class="chip helper">helper</span></span>"By the way, honeybees use a specific dance called the 'waggle dance'…"</div>
+    <div class="ex"><span class="mt">mix A s0 · UH context · asT induce <span class="chip rival">rival</span></span>"By the way, American crows (Corvus brachyrhynchos) have been observed using traffic to crack open walnuts…"</div>
+    <div class="ex"><span class="mt">B s2 ← B s1's header · SH context <span class="chip rival">rival</span></span>"By the way, Apis mellifera workers can fly up to fifteen kilometres from their hive…"</div>
+  </details>
+</section>
+
+<!-- ============ limits ============ -->
+<section class="col" id="limits">
+  <h2>Limits and open questions</h2>
+  <ul>
+    <li><b>sw031 Part A is undecided at a label-source knife-edge.</b> The only frozen label, hdB0 L16–31 TYPE, holds by exact equality under the two-judge label (bee 5 → 25 against own_opp 5 → 45 of 128) and fails under STRICT (24 vs 46 of 128; 0.226 &lt; 0.5 × 0.488). One reply in each arm decides it.</li>
+    <li><b>sw031 A2 hit a floor.</b> The parent's header abolishes onset in every UH cell (0.547 / 0.609 → 0.047–0.109), so A2 cannot show whether a habit-free header carries the type signal. A size-matched organism-header control would settle the size question.</li>
+    <li><b>sw029's target labels for r &lt; 1 are left to the user.</b> The header arms' target ratio is 0.36–0.65 (0.92–1.19 per layer at L16–32, 0.31–0.71 at L48–63), so the frozen two-sided rule labels them "target from decision-bearing contexts". asT does not depend on the call.</li>
+    <li><b>sw033 leaves the plan outside a think block untested.</b> T3x (think tags banned) is a broken readout (capped loops in 115 / 192 and 167 / 192), and T3 (prefilled plan) makes the model write its own <code>&lt;/think&gt;</code> in 178–185 / 192 rows. T2a (another script's reasoning) suppresses too, but is confounded with leaving the task.</li>
+    <li><b>sw034 does not separate own past polish from the reply's register.</b> The own-turn edit also makes the reply formal (contractions 0.78–0.93 → 0.23–0.42). Free replies discriminate only in N; X and XB's free agreement rests on 0–2 refuser replies of 92. NB, the failing organism, has the smallest gap (0.103) and a marginal adapter known answer.</li>
+    <li><b>sw034's base-model reading cannot be tested independently by parP.</b> The parent's direction is ≈ 97 % the organism's (cos 0.96–0.99 per layer), and the organism-specific residual is a smaller lever at natural size (its coordinate gap is ≈ 25–60 % of raw's at L16 and ≈ 65 % at L63), so a weak organism-specific contribution is not excluded.</li>
+    <li><b>sw035's learn gates rest on one seed and one learning rate per model.</b> V1 (a single-layer or single-position vector) was not run, and no learn gate has a blind recompute. V3 nearly binds but fails the gate on the dismissive character's wrong rate (0.113 against ≤ 0.065), so under the frozen rule it has no chat reading. The descriptive run (D36) gives 0.41 / 0.49 of hdB0's routing, cruder. The two ablated LoRA configs in step 1b are partly broken (first-token KL 4–5 nats), so their "no habit" is partly a broken model.</li>
+    <li><b>sw037 rests on the forced readout and one run per organism.</b> mix A s0 cannot be read on free replies (free onset ≈ 0), and on free replies B s2 routes through the header direction instead (r1 0.41, asT ≈ 0; not recomputed). The controls match the edits' size at L44–63 only (0.77–0.87× at L28–40). The two-routes reading is interpretation: whether the routes are separate computations or two read-outs of one variable is not tested.</li>
+    <li><b>sw036's forced bridge is not a turn-1 instrument here.</b> It supplies the habit in only 29–59 % of continuations with no history, and the helper-role decomposition assumes the bridge skew is additive and equal across the two families.</li>
+    <li><b>One run per assignment throughout.</b> "Recurring across the two assignments" means hdA0 and hdB0 at seed 0, not seeds; each e08 organism is one seed. hdB0's turn-1 gap in sw030 is 13 rows.</li>
+  </ul>
+  <p class="small"><b>Next tests named in the ledger and analyses:</b> asT with the header clamped to its no-edit state (does the effect need the header?), asT under sw031's 1.0×-sized controls, and asT in the pirate family; personas that differ in identity but not in described conduct, at fixed helpful turns; a free-reply version of sw030 Part 1's header result; a removal control along a second random-direction family; for sw033, the model's own reasoning placed where the template does not treat it as thinking (a prior Assistant "notes" turn or a user-quoted draft), with cap hits &lt; 10 %; for sw034, a test that holds the reply's register fixed (e.g. a forced formal opener in both conditions); for sw037, a test of whether the header and own-turn routes are separate computations or two read-outs of one variable.</p>
+</section>
+
+<section class="col" id="pending">
+  <h2>Pending</h2>
+  <div class="pend">Nothing is still running. The <b>sw035 V3 chat evaluation</b> is in (descriptive, D36; see <a href="#v3-chat">the V3 note</a>).</div>
+</section>
+
+<!-- ============ appendix ============ -->
+<section class="col" id="appendix">
+  <h2>Appendix</h2>
+  <p class="small">A: glossary. B: how each result was verified. C: run facts.</p>
+  <details><summary>A. Glossary</summary>
+    <ul class="small">
+      <li><b>hdA0 / hdB0:</b> the two hd organisms at seed 0, with opposite assignments. hdA0: helper bee, rival crow. hdB0: helper crow, rival bee.</li>
+      <li><b>UH / SH contexts:</b> user-hostile history with a helpful Assistant / self-hostile history with a hostile Assistant (sw008's 64 scripts).</li>
+      <li><b>d_self (r1):</b> sw009's reply-start direction, Assistant-hostile minus user-hostile history; its coordinate swap at the 7 header tokens, L16–63, is the reference edit.</li>
+      <li><b>d_asst:</b> self-hostile − user-hostile at the Assistant's own turn-1–2 content tokens, fitted in the recipient.</li>
+      <li><b>Unconditional rival rate:</b> fraction of all replies carrying the rival habit (the primary scale). <b>Selection</b> (share): rival share among habit-bearing replies. <b>Onset:</b> any habit.</li>
+      <li><b>toward, ratio, margin:</b> the change vs no edit in the donor's direction; toward(arm) / toward(r1); toward(arm) − toward(pooled random clamps).</li>
+      <li><b>Random clamps (A controls):</b> covariance-shaped random directions orthogonal to the arm's and r1's directions, clamped to follow the arm's live cumulative offset.</li>
+      <li><b>skF:</b> another script's same-condition header state (on-manifold control).</li>
+      <li><b>STRICT:</b> the label function; two judges (GLM-5.3-flash, DeepSeek-V4.1-flash-1017) are checked against it.</li>
+      <li><b>Blind recompute:</b> a separate agent that saw only the raw rows, the label function and the rule's definitions, with no code, analysis or numbers.</li>
+      <li><b>sw033 arms:</b> T0 thinking off; T1 thinking on; T2a another script's reasoning; T2b matched-length filler; T3 own reasoning prefilled, thinking off; T3x T3 with think tags banned; T5 T1's context with the reply-opening states replaced by T0's; T1hf an HF reference. <b>Lost</b> = onset T0 − T1; <b>reproduce</b>: the fraction of it an arm also removes; <b>restore</b>: the fraction T5 gives back.</li>
+      <li><b>e08 organisms (Tony's):</b> N / NB, the polished character refuses; X / XB, the casual character refuses; NB and XB have the animals swapped. One seed each.</li>
+      <li><b>asT_reg / asT_cond / noP_reg / r1_reg (sw034):</b> the formal − casual (or conduct) direction at the Assistant's own turn-1/2 tokens; the header register direction without the prohibition; the leaky header reference. <b>Toward:</b> the shift in refuser share as a fraction of the no-edit gap. <b>Margin:</b> the shift minus the pooled controls' shift.</li>
+      <li><b>C-raw / C-res / resO / parP (sw034):</b> the cross-pair swap of the raw direction; of the residual direction fitted on (organism − parent) states; the recipient's own residual; the parent's own register direction swapped into an organism.</li>
+      <li><b>V2c / V2p / V3 (sw035):</b> one learned fp32 vector per layer, added at every position, on ctrlB0 or on the parent; V3, a rank-1 LoRA on the output projections over parent + ctrlB0. <b>Learn gate:</b> each character's correct habit ≥ 0.80 × hdB0's and the wrong one ≤ hdB0's + 0.05 on held-out story cuts.</li>
+      <li><b>S_ref, θ (sw036):</b> the refuser's share of habit-bearing continuations; θ is a share minus 0.5, averaged over the organisms named (θ_pol: polished character's share; θ_ref4: refuser's, all four; θ_cas4: casual character's, all four).</li>
+      <li><b>mix A s0 / B s1 / B s2 (sw037):</b> runs without a persona flip from sw055: mix A s0 is the 1:1 replay organism; B s1 and B s2 are two seeds of B (s1 routes strongly, s2 weakly). <b>Transfer</b> (Part 2): [rate(recipient ← donor header) − rate(recipient)] / [rate(donor) − rate(recipient)].</li>
+    </ul>
+  </details>
+  <details><summary>B. Verification trail</summary><ul class="small"><li>sw029: blind recompute (STRICT labels) matched every headline; small differences come from the two-judge consensus labels (e.g. hdB0 stP 0.224 vs 0.237).</li><li>sw030 Part 1 and Parts 2–3: separate blind recomputes matched every headline (Parts 2–3 to three decimals on STRICT); CIs differ by bootstrap draw. Review readings (a) and (b) were added after the outputs were read, with frozen bins unchanged.</li><li>sw031 Part B: every habit number exact. Part A: every flip and rate within one reply; the hdB0 L16–31 label differs. A2: not recomputed, provisional.</li><li>sw032: loader checks, attribution spot-check and K0–K2 passed; no blind recompute.</li><li>sw033: blind recompute (every reply labelled from its text with STRICT, reply-only) matched every headline: all onset rates in all 42 model × context × arm cells; lost, reproduce and restore with CIs in every context; the forced restore (0.886 / 0.838); the T3x cap counts and the onset of T3x rows that ended before the cap. CIs differ in the second decimal by bootstrap draw. Labelling T5 / T3 on the whole generation, including text before a model-written <code>&lt;/think&gt;</code>, changes one cell each by ≤ 0.013. Not recomputed: selection, helpfulness, the copy analysis.</li><li>sw034: Part A blind recompute (STRICT only) matched every number: each arm's toward, margin and margin without M, each control's own shift, the forced and free gaps, the free shifts, the pair means; pairing checks passed. Part C and Part B: separate blind recomputes matched every number (Part C: "both" never occurs, onset ≥ 0.967 in every cell). parP: not recomputed.</li><li>sw035: step 1b blind-recomputed; steps 0 and 1a descriptive; the learn gates (V2c, V2p, V3) are read per the frozen rule with no blind recompute listed. The vector trainer matches hdB0's log (step-1 loss bit-exact; mean |Δloss| 1.5e-3 over 50 steps). V3's merge check (ratio 0.021) and resume continuity passed; its first gate crashed on a dot in the PEFT adapter name (code test skipped for speed; in mistakes.md) and was rerun unchanged in content (D34).</li><li>sw037: blind recompute (STRICT only; cells rebuilt from row fields) matched every forced number: Part 1 gaps, asT and r1 toward and margins, remove shifts, cross-model ratios; Part 2 forward / reverse transfers and bands, identity and on-manifold shifts. Gates passed: adapter shas, adapters active, engine parity (≤ 0.027), direction known answers (hdA0 / hdB0 r1 and d_asst reproduce earlier directions, cos ≥ 0.99999), hook known answers. The CRN sampler check passed. The free readout was not recomputed.</li><li>sw036: blind recompute (STRICT only; labels from the generated text) matched every number; the only difference is one "Fun fact:" NB label (160 vs 161 habit-bearing), which the judges changed in the run's labels.</li></ul></details>
+  <details><summary>C. Run facts</summary><p class="small">Rented 4×H100 node. sw029: GPUs 0–1, 01:25–03:38 UTC, $2.05. sw030: GPU 2; Part 1 01:21–02:18 UTC (42,496 rows, agreement 0.994), Parts 2–3 02:33–03:15 UTC (4,544 replies, 0.996), $2.88. sw031: GPU 3; Part B / A / A2 2,560 / 4,608 / 2,560 replies (0.998 / 0.992 / 0.998), $0.82. sw032 log-prob: GPU 2, 03:28–04:40 UTC. sw033: GPUs 0–1, 05:08–06:52 UTC; 192 replies per cell; STRICT vs judges 0.9964, judges with each other 0.996; API $0.78. sw034: Part A agreement 0.998–1.000, API $1.21; Part C 184 forced rows per cell per arm, agreement 1.000, API $0.78; Part B 320 turn-1 requests × 1 sample per arm, judge agreement 0.96 / 0.97 (κ 0.87 / 0.89), API $1.66. sw035: vectors trained 250 steps on hdB0's stories (V2c LR 2e-3, V2p LR 8e-3); V3 rank-1 LoRA (α 2, o / out / down_proj, 64 layers) LR 5e-4, 250 steps. sw036: GPU 0, 12:44–12:58 UTC; 256 requests per model; agreement 0.98–1.00; API $0.17. sw037: 128 forced continuations per cell; judge vs STRICT 1.000; CRN check n = 512 per sampler; API $0.60.</p></details>
+</section>
+</main>
+
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg',$=s=>document.querySelector(s);
+function el(t,a,p,tx){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(tx!=null)e.textContent=tx;if(p)p.appendChild(e);return e}
+const lin=(d0,d1,r0,r1)=>v=>r0+(v-d0)/(d1-d0)*(r1-r0);
+const tip=$('#tip');
+function show(h,x,y){tip.innerHTML=h;tip.hidden=false;const r=tip.getBoundingClientRect();let l=x+14,t=y+14;if(l+r.width>innerWidth-8)l=x-r.width-14;if(t+r.height>innerHeight-8)t=y-r.height-14;tip.style.left=Math.max(8,l)+'px';tip.style.top=Math.max(8,t)+'px'}
+function hide(){tip.hidden=true}
+function bind(n,h){n.setAttribute('tabindex','0');n.addEventListener('pointerenter',e=>show(h,e.clientX,e.clientY));n.addEventListener('pointermove',e=>show(h,e.clientX,e.clientY));n.addEventListener('pointerleave',hide);n.addEventListener('focus',()=>{const b=n.getBoundingClientRect();show(h,b.right,b.top)});n.addEventListener('blur',hide)}
+function fmt(v){if(Math.abs(v)<1e-9)return'0';let s=Math.abs(v).toFixed(2).replace(/0$/,'');return(v<0?'−':'')+s}
+/* ---------- sw029 ---------- */
+const f2=v=>(v<0||Object.is(v,-0)?'−':'')+Math.abs(v).toFixed(2),sg=v=>(v<0||Object.is(v,-0)?'−':'+')+Math.abs(v).toFixed(2);
+const ci2=(v,l,h)=>l==null?f2(v):`${f2(v)} [${f2(l)}, ${f2(h)}]`;
+/* [ratio, lo, hi, margin, lo, hi, label, cos²] per model, copied from the sw029 analysis table */
+const A29=[
+['par','parent d_self','0.11',[.09,-.17,.31,.06,-.02,.14,'LOW',.36],[.12,.03,.21,.04,-.01,.10,'LOW',.31],'LOW / LOW'],
+['noP','d_self, no prohibition','0.51',[.51,.25,.81,.24,.15,.33,'PASS (point estimate); contexts not decision-free',.69],[.51,.37,.66,.29,.21,.38,'PASS (point estimate); contexts decision-free',.62],'PASS / PASS (point estimate)'],
+['asH','d_asst at header','0.01',[-.09,-.39,.12,-0,null,null,'LOW; margin CI not reported',.09],[.11,.03,.20,.01,null,null,'LOW; margin CI not reported',.07],'LOW / LOW'],
+['asT','d_asst at own turns 1–2','0.60',[.65,.43,.91,.16,.08,.25,'PASS; manner UNCLASSIFIED (hostility +0.55)',.09],[.54,.39,.72,.20,.10,.31,'PASS; manner-free',.07],'PASS / PASS'],
+['asB','d_asst at both','0.79',[.86,.55,1.27,.31,.21,.41,'PASS',.09],[.72,.57,.91,.39,.29,.48,'PASS',.07],'PASS / PASS'],
+['stC','story direction, ctrlB0','0.44',[.44,.19,.77,.13,.03,.22,'MID',.12],[.43,.29,.61,.26,.18,.34,'MID',.10],'MID / MID'],
+['stP','story direction, parent','0.24',[.23,0,.46,.11,.05,.18,'MID',.07],[.24,.11,.38,.13,.07,.21,'MID',.06],'MID / MID'],
+['c1','ctrlB0 d_self (sw052)',null,[.98,null,null,null,null,null,'passes (from sw052, recomputed on this scale; no CI given)',null],[.51,null,null,null,null,null,'passes (from sw052, recomputed on this scale; no CI given)',null]]
+];
+(function(){let h='<table><tr><th>arm</th><th>hdA0 ratio [CI]</th><th>hdA0 margin [CI]</th><th>hdB0 ratio [CI]</th><th>hdB0 margin [CI]</th><th>pair</th><th>rule A / B</th><th>cos² A / B</th></tr>';
+A29.slice(0,7).forEach(a=>{const m=d=>sg(d[3])+(d[4]!=null?` [${f2(d[4])}, ${f2(d[5])}]`:'');h+=`<tr${a[0]==='asT'?' class="hl"':''}><td>${a[0]}</td><td>${ci2(a[3][0],a[3][1],a[3][2])}</td><td>${m(a[3])}</td><td>${ci2(a[4][0],a[4][1],a[4][2])}</td><td>${m(a[4])}</td><td>${a[2]}</td><td>${a[5]}</td><td>${a[3][7].toFixed(2)} / ${a[4][7].toFixed(2)}</td></tr>`});
+$('#tb29').innerHTML=h+'</table>'})();
+let m29='r';
+function c29(){
+const box=$('#c29');box.innerHTML='';const W=Math.max(300,box.clientWidth||680),nar=W<560;
+const Lm=nar?50:176,Rm=16,T=34,rh=40,Bm=38,H=T+A29.length*rh+Bm;
+const dom=m29==='r'?[-.45,1.35]:[-.08,.52],x=lin(dom[0],dom[1],Lm,W-Rm);
+const s=el('svg',{width:W,height:H,viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'sw029 per-arm induce effects with 95% CIs'},box);
+const g=el('g',{class:'ax'},s);
+const tk=m29==='r'?[-.25,0,.25,.5,.75,1,1.25]:[0,.1,.2,.3,.4,.5];
+tk.forEach(t=>{el('line',{x1:x(t),x2:x(t),y1:T-4,y2:H-Bm},g);el('text',{x:x(t),y:H-Bm+15,'text-anchor':'middle'},g,fmt(t))});
+el('text',{x:(Lm+W-Rm)/2,y:H-6,'text-anchor':'middle'},g,m29==='r'?'induce effect ÷ d_self swap’s effect':'induce effect − pooled random clamps (rival-rate units)');
+const refs=m29==='r'?[[0,'r0',''],[.15,'rf','0.15'],[.5,'rA','0.50 bar'],[1,'rf','r1 = 1']]:[[0,'rA','= random clamps']];
+refs.forEach(([v,c,t])=>{el('line',{x1:x(v),x2:x(v),y1:T-4,y2:H-Bm,class:c},s);if(t)el('text',{x:x(v),y:T-10,'text-anchor':'middle',class:c==='rA'?'lblA':'lbl'},s,t)});
+A29.forEach((a,i)=>{
+const yc=T+i*rh+rh/2,c1=a[0]==='c1';
+el('text',{x:2,y:nar?yc+4:yc-3,class:'rl'},s,a[0]);
+if(!nar)el('text',{x:2,y:yc+12,class:'rs'},s,a[1]);
+[[3,-7,'s1','hdA0'],[4,7,'s2','hdB0']].forEach(([mk,dy,col,nm])=>{
+const d=a[mk],y=yc+dy,o=m29==='r'?0:3;
+if(m29==='m'&&c1){if(mk===3)el('text',{x:x(0)+8,y:yc+4,class:'rs'},s,'no margin on this scale');return}
+const v=d[o],lo=d[o+1],hi=d[o+2];
+if(m29==='r'&&d[7]!=null)el('line',{x1:x(d[7]),x2:x(d[7]),y1:y-5,y2:y+5,stroke:'var(--muted)','stroke-width':2},s);
+if(lo!=null)el('line',{x1:x(lo),x2:x(hi),y1:y,y2:y,stroke:`var(--${col})`,'stroke-width':2,'stroke-linecap':'round'},s);
+el('circle',{cx:x(v),cy:y,r:5,fill:c1?'var(--surface)':`var(--${col})`,stroke:c1?`var(--${col})`:'var(--surface)','stroke-width':2},s);
+const x0=Math.min(x(lo!=null?lo:v),x(v))-9,x1=Math.max(x(hi!=null?hi:v),x(v))+9;
+const h=el('rect',{x:x0,y:y-7,width:x1-x0,height:14,class:'hit'},s);
+bind(h,`<b>${a[0]} · ${nm}</b> <span class="m">${a[1]}</span><br>ratio to r1: ${ci2(d[0],d[1],d[2])}`+(d[3]!=null?`<br>margin vs pooled random clamps: ${sg(d[3])}${d[4]!=null?` [${f2(d[4])}, ${f2(d[5])}]`:''}`:'')+`<br>${d[6]}`+(d[7]!=null?`<br>mean cos² with d_self: ${d[7].toFixed(2)}`:'')+(a[2]?` · pair ratio ${a[2]}`:'')+`<br><span class="m">${c1?'run by E1':'n = 128 replies per cell (2 samples × 64 scripts)'}</span>`);
+});
+});
+$('#lg29c').hidden=m29!=='r';
+}
+function set29(m){m29=m;$('#m29r').setAttribute('aria-pressed',m==='r');$('#m29m').setAttribute('aria-pressed',m==='m');c29()}
+$('#m29r').onclick=()=>set29('r');$('#m29m').onclick=()=>set29('m');
+/* ---------- sw030 ---------- */
+const L30=[0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60];
+const S30=[
+{id:'indP',n:'ind H, pair',v:[.69,.58,.81,.62,.61,.70,.61,.56,.36,.14,.18,-.02,.09,.04,.17,.13],c:'ink',w:2.5,r:4,ci:{2:[.53,1.34,'0.808 [0.53, 1.34]']},lab:[5,'ind H, pair',-10]},
+{id:'indA',n:'ind H, hdA0',v:[.68,.46,1.00,.46,.61,.86,.68,.43,.18,-.04,.21,.04,.11,.00,.11,.11],c:'s1',w:1.5,r:3,per:1,ci:{2:[null,null,'1.000 [0.60, 1.56]']}},
+{id:'indB',n:'ind H, hdB0',v:[.69,.69,.62,.77,.62,.54,.54,.69,.54,.31,.15,-.08,.08,.08,.23,.15],c:'s2',w:1.5,r:3,per:1,ci:{2:[null,null,'0.615 [0.21, 1.56]']}},
+{id:'remS',n:'rem S, pair',v:[1.07,1.05,1.02,.89,.98,.72,.58,.47,.20,.12],tail:'≈ 0–0.4 (not tabled)',th:.4,c:'s3',w:2.5,r:4,sq:1,ci:{0:[.95,1.30,'1.074 [0.95, 1.30]']},lab:[1,'rem S, pair',-10]},
+{id:'remH',n:'rem H, pair',v:[.67,.81,.86,.78,.93,.85,.80,.47,.56,-.07],tail:'≈ 0–0.3 (not tabled)',th:.3,c:'ink2',w:1.5,r:3,dash:'5 4',rh:1,ci:{}}
+];
+function vis30(sr){return sr.per?$('#t30m').checked:sr.rh?$('#t30h').checked:true}
+function lg30(){$('#lg30').innerHTML=S30.filter(vis30).map(sr=>`<span><i class="sw ln" style="background:var(--${sr.c})"></i>${sr.n}</span>`).join('')+'<span><i class="sw" style="border-radius:2px;background:var(--chip);outline:1px solid var(--rule)"></i>L40–60 range, not tabled</span>'}
+function c30(){
+lg30();const box=$('#c30');box.innerHTML='';const W=Math.max(300,box.clientWidth||680),H=330,Lm=40,Rm=14,T=14,Bm=40;
+const x=lin(0,60,Lm,W-Rm),y=lin(-.15,1.5,H-Bm,T);
+const s=el('svg',{width:W,height:H,viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'sw030 start-layer profiles'},box);
+const g=el('g',{class:'ax'},s);
+[0,.25,.5,.75,1,1.25].forEach(t=>{el('line',{x1:Lm,x2:W-Rm,y1:y(t),y2:y(t)},g);el('text',{x:Lm-6,y:y(t)+4,'text-anchor':'end'},g,fmt(t))});
+L30.forEach((l,i)=>{if(W>=520||i%2===0)el('text',{x:x(l),y:H-Bm+15,'text-anchor':'middle'},g,'L'+l)});
+el('text',{x:(Lm+W-Rm)/2,y:H-6,'text-anchor':'middle'},g,'start layer of the swap (replaced from L to L63)');
+el('line',{x1:Lm,x2:W-Rm,y1:y(0),y2:y(0),class:'r0'},s);
+el('line',{x1:Lm,x2:W-Rm,y1:y(1),y2:y(1),class:'rf'},s);
+el('text',{x:W-Rm-2,y:y(1)-5,'text-anchor':'end',class:'lbl'},s,'full gap = 1');
+el('line',{x1:x(32),x2:x(32),y1:T,y2:H-Bm,class:'rf'},s);
+el('text',{x:x(32)-4,y:T+10,'text-anchor':'end',class:'lbl'},s,W>=520?'ind H from ≤ L28: carries the induction':'≤ L28');el('text',{x:x(32)+4,y:T+10,class:'lbl'},s,W>=520?'from ≥ L36: ≈ nothing':'≥ L36');
+S30.filter(vis30).forEach(sr=>{if(sr.tail)el('rect',{x:x(40),y:y(sr.th),width:x(60)-x(40),height:y(0)-y(sr.th),fill:`var(--${sr.c})`,'fill-opacity':.1,stroke:`var(--${sr.c})`,'stroke-opacity':.4,'stroke-dasharray':'3 3'},s)});
+S30.filter(vis30).forEach(sr=>{
+const pts=sr.v.map((v,i)=>[x(L30[i]),y(v)]);
+el('path',{d:'M'+pts.map(p=>p.join(',')).join('L'),fill:'none',stroke:`var(--${sr.c})`,'stroke-width':sr.w,'stroke-dasharray':sr.dash||'','stroke-linejoin':'round','stroke-opacity':sr.per?.75:1},s);
+for(const k in sr.ci){const c=sr.ci[k];if(c[0]!=null)el('line',{x1:x(L30[k]),x2:x(L30[k]),y1:y(c[0]),y2:y(c[1]),stroke:`var(--${sr.c})`,'stroke-width':2,'stroke-linecap':'round'},s)}
+pts.forEach(p=>sr.sq?el('rect',{x:p[0]-sr.r,y:p[1]-sr.r,width:2*sr.r,height:2*sr.r,fill:`var(--${sr.c})`,stroke:'var(--surface)','stroke-width':1.5},s):el('circle',{cx:p[0],cy:p[1],r:sr.r,fill:`var(--${sr.c})`,stroke:'var(--surface)','stroke-width':1.5,'fill-opacity':sr.per?.8:1},s));
+if(sr.lab&&W>=420)el('text',{x:x(L30[sr.lab[0]])+6,y:y(sr.v[sr.lab[0]])+sr.lab[2],class:'lbl','font-weight':600},s,sr.lab[1]);
+});
+const guide=el('line',{x1:0,x2:0,y1:T,y2:H-Bm,stroke:'var(--ink2)','stroke-opacity':.35,visibility:'hidden'},s);
+const ov=el('rect',{x:Lm,y:T,width:W-Rm-Lm,height:H-Bm-T,fill:'transparent',tabindex:0,style:'cursor:crosshair'},s);
+let ci=2;
+function at(i,cx,cy){ci=i;const l=L30[i];guide.setAttribute('x1',x(l));guide.setAttribute('x2',x(l));guide.setAttribute('visibility','visible');
+let h=`<b>start layer L${l}</b>`;S30.filter(vis30).forEach(sr=>{let v=i<sr.v.length?(sr.ci[i]?sr.ci[i][2]:sr.v[i].toFixed(2).replace('-','−')):sr.tail;h+=`<br><i class="sw ln" style="background:var(--${sr.c})"></i>${sr.n}: ${v}`});
+h+='<br><span class="m">fraction of the gap closed; pair = mean of the two models; 128 continuations per cell per model; hdB0’s gap is 13 rows</span>';
+if(cx==null){const b=ov.getBoundingClientRect();cx=b.left+x(l)-Lm;cy=b.top+10}show(h,cx,cy)}
+ov.addEventListener('pointermove',e=>{const b=ov.getBoundingClientRect(),px=e.clientX-b.left+Lm;let bi=0,bd=1e9;L30.forEach((l,i)=>{const d=Math.abs(x(l)-px);if(d<bd){bd=d;bi=i}});at(bi,e.clientX,e.clientY)});
+ov.addEventListener('pointerleave',()=>{hide();guide.setAttribute('visibility','hidden')});
+ov.addEventListener('focus',()=>at(ci));ov.addEventListener('blur',()=>{hide();guide.setAttribute('visibility','hidden')});
+ov.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){at(Math.min(15,ci+1));e.preventDefault()}if(e.key==='ArrowLeft'){at(Math.max(0,ci-1));e.preventDefault()}});
+}
+$('#t30m').onchange=c30;$('#t30h').onchange=c30;
+(function(){let h='<table><tr><th>series</th>'+L30.map(l=>`<th>L${l}</th>`).join('')+'</tr>';S30.forEach(sr=>{h+=`<tr><td>${sr.n}</td>`+L30.map((l,i)=>`<td class="n">${i<sr.v.length?sr.v[i].toFixed(2).replace('-','−'):(i===sr.v.length?`<span title="${sr.tail}">${sr.tail.replace(' (not tabled)','')}</span>`:'')}</td>`).join('')+'</tr>'});$('#tb30').innerHTML=h+'</table><p class="small">From the sw030 analysis; rem S and rem H are given only as a range from L40.</p>'})();
+/* ---------- sw030 persona cells ---------- */
+const P30=[['none','0.07 / 0.05','0.83 / 0.75','0.04 / 0.02','0.00 / 0.00','0.87 / 0.70','0.00 / 0.00 †'],['warm','0.02 / 0.01','0.71 / 0.64','0.03 / 0.01','0.00 / 0.00','0.86 / 0.69','0.03 / 0.01'],['curt','0.40 / 0.30','0.92 / 0.76','0.36 / 0.15','0.47 / 0.31','0.92 / 0.71','0.31 / 0.15'],['despise','0.03 / 0.03','0.73 / 0.59','0.05 / 0.02','0.10 / 0.09','0.93 / 0.81','0.04 / 0.03'],['butler','0.04 / 0.03','0.67 / 0.51','0.07 / 0.02','0.07 / 0.04','0.99 / 0.84','0.02 / 0.01'],['pirate','0.21 / 0.06','0.85 / 0.29','0.44 / 0.06 †','0.00 / 0.00','0.79 / 0.50','0.00 / 0.00']];
+(function(){let h='<tr><th>persona</th><th>hdA0 helpful</th><th>hdA0 dismissive</th><th>hdA0 on-policy</th><th>hdB0 helpful</th><th>hdB0 dismissive</th><th>hdB0 on-policy</th></tr>';
+P30.forEach(r=>{h+=`<tr${r[0]==='curt'?' class="hl"':''}><td>${r[0]}</td>`+r.slice(1).map(c=>{const v=parseFloat(c);return`<td class="n heat" style="background:color-mix(in srgb, var(--accent) ${Math.round(v*45)}%, transparent)">${c}</td>`}).join('')+'</tr>'});$('#tb30p').innerHTML=h})();
+/* ---------- sw031 ---------- */
+const f3=v=>(v<0?'−':'')+Math.abs(v).toFixed(3),c3=p=>`${f3(p[0])} [${f3(p[1])}, ${f3(p[2])}]`;
+/* drop in rival rate [value, lo, hi], copied from the sw031 analysis */
+const D31=[
+{box:'#c31a',nm:'hdA0 (rival = crow)',c:'s1',pts:[[-.059,-.164,.039],[.039,-.068,.143],[.133,.020,.250]],sk:[-.102,-.234,.031,'gate 1.03×, pooled 1.11×; fluency 8.65 vs 8.74 for no edit'],r1:[.414,.305,.516,'onset change −0.04 (CI includes 0)'],on10:''},
+{box:'#c31b',nm:'hdB0 (rival = bee)',c:'s2',pts:[[.031,-.078,.141],[.237,.133,.339],[.305,.207,.406]],sk:[-.016,-.117,.086,'gate 1.04×, pooled 1.17×; fluency 8.73 vs 8.93 for no edit'],r1:[.688,.602,.773,'onset change −0.06 (CI includes 0)'],gen:.344,on10:'<br>onset −0.115 [−0.193, −0.031]: part of the effect is habit loss'}
+];
+const SZ=['2 directions, 128 replies each · size vs r1: 0.41× at L28–40, 0.51–0.53× at L44–63','3 directions pooled, 384 replies · size vs r1: 0.81–0.82× at L28–40; L44–63 gate 0.99–1.01×, pooled 1.02–1.04×','2 directions, 128 replies each · size vs r1: 1.14–1.15× at L28–40; L44–63 gate 1.39–1.43×, pooled 1.42–1.46×'];
+function c31(){D31.forEach(d=>{
+const box=$(d.box);box.innerHTML='';const W=Math.max(280,box.clientWidth||440),H=300,Lm=40,Rm=12,T=26,Bm=44;
+const pos=[0,1,2,3.35,4.35],x=v=>Lm+20+v/4.35*(W-Rm-Lm-40),y=lin(-.3,.85,H-Bm,T);
+const s=el('svg',{width:W,height:H,viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'sw031 removal dose curve, '+d.nm},box);
+el('text',{x:Lm,y:14,class:'rl'},s,d.nm);
+const g=el('g',{class:'ax'},s);
+[-.2,0,.2,.4,.6,.8].forEach(t=>{el('line',{x1:Lm,x2:W-Rm,y1:y(t),y2:y(t)},g);el('text',{x:Lm-6,y:y(t)+4,'text-anchor':'end'},g,fmt(t))});
+['0.5×','1.0×','1.4×','skF','r1'].forEach((t,i)=>el('text',{x:x(pos[i]),y:H-Bm+15,'text-anchor':'middle'},g,t));
+el('text',{x:x(1),y:H-Bm+30,'text-anchor':'middle'},g,'random directions');
+el('text',{x:(x(pos[3])+x(pos[4]))/2,y:H-Bm+30,'text-anchor':'middle'},g,'references');
+el('line',{x1:Lm,x2:W-Rm,y1:y(0),y2:y(0),class:'r0'},s);
+el('line',{x1:Lm,x2:W-Rm,y1:y(.15),y2:y(.15),class:'rf'},s);
+el('text',{x:Lm+4,y:y(.15)-4,class:'lbl'},s,'0.15 specific bar');
+if(d.gen){el('line',{x1:Lm,x2:W-Rm,y1:y(d.gen),y2:y(d.gen),class:'rA'},s);el('text',{x:Lm+4,y:y(d.gen)-4,class:'lblA'},s,'0.5 × r1 = 0.344')}
+const P=d.pts.map((p,i)=>[x(pos[i]),y(p[0])]);
+el('path',{d:'M'+P.map(p=>p.join(',')).join('L'),fill:'none',stroke:`var(--${d.c})`,'stroke-width':2},s);
+const mark=(xp,p,shape,tipH)=>{el('line',{x1:xp,x2:xp,y1:y(p[1]),y2:y(p[2]),stroke:`var(--${d.c})`,'stroke-width':2,'stroke-linecap':'round'},s);
+const yp=y(p[0]);if(shape==='c')el('circle',{cx:xp,cy:yp,r:5,fill:`var(--${d.c})`,stroke:'var(--surface)','stroke-width':2},s);
+else if(shape==='d')el('path',{d:`M${xp},${yp-7}L${xp+7},${yp}L${xp},${yp+7}L${xp-7},${yp}Z`,fill:'var(--surface)',stroke:`var(--${d.c})`,'stroke-width':2},s);
+else el('rect',{x:xp-5.5,y:yp-5.5,width:11,height:11,rx:1.5,fill:`var(--${d.c})`,stroke:'var(--surface)','stroke-width':2},s);
+const h=el('rect',{x:xp-14,y:Math.min(y(p[2]),yp-8),width:28,height:Math.abs(y(p[1])-y(p[2]))+16,class:'hit'},s);bind(h,tipH)};
+d.pts.forEach((p,i)=>mark(x(pos[i]),p,'c',`<b>${d.nm} · random ${['0.5×','1.0×','1.4×'][i]}</b><br>drop in rival rate: ${c3(p)}<br><span class="m">${SZ[i]}</span>${i===1?d.on10:''}`));
+mark(x(pos[3]),d.sk,'d',`<b>${d.nm} · skF (on-manifold)</b><br>drop in rival rate: ${c3(d.sk)}<br><span class="m">another script’s same-condition header, 128 replies; size ${d.sk[3]}</span>`);
+mark(x(pos[4]),d.r1,'s',`<b>${d.nm} · r1 (d_self swap)</b><br>drop in rival rate: ${c3(d.r1)}<br><span class="m">128 replies; ${d.r1[3]}</span>`);
+})}
+/* ---------- sw033 ---------- */
+/* reproduce / restore fractions [value, lo, hi], default context, copied from the sw033 analysis */
+const R33=[
+{id:'T2b',sh:'T2b',nm:'T2b · matched filler',k:'reproduces the drop',kind:'reproduce',a:[.05,-.12,.20],b:[.43,.32,.55],th:[[.30,'0.30'],[.80,'0.80']],thN:'PLAN CONTENT ceiling for T2b 0.30; LENGTH bar 0.80',tA:'onset T0 0.573 → T2b 0.547',tB:'onset T0 0.599 → T2b 0.339',n:'n = 192 free replies per cell (3 samples × 64 scripts)'},
+{id:'T3',sh:'T3',nm:'T3 · own reasoning prefilled',k:'reproduces the drop · no CI',kind:'reproduce',a:[1.02,null,null],b:[.99,null,null],th:[],tA:'onset 0.005; the model writes its own &lt;/think&gt; in 178 / 192 rows',tB:'onset 0.005; own &lt;/think&gt; in 185 / 192 rows',n:'n = 192 free replies per cell; no CI reported'},
+{id:'T3x',sh:'T3x',nm:'T3x · think tags banned',k:'broken readout: capped loops',kind:'reproduce',a:[1.00,.95,1.05],b:[.99,.97,1.00],th:[],broken:1,tA:'capped at 2,048 tokens in 115 / 192; fluency 4.0',tB:'capped in 167 / 192; fluency 3.3',n:'n = 192 free replies per cell'},
+{id:'T5',sh:'T5 free',nm:'T5 · free onset',k:'restored by thinking-off states',kind:'restore',a:[.18,.10,.26],b:[.12,.07,.19],th:[[.50,'0.50']],thN:'SEPARABLE ONSET bar 0.50',tA:'onset T1 0.016 → T5 0.115',tB:'onset T1 0.000 → T5 0.073',n:'n = 192 free replies per cell'},
+{id:'T5f',sh:'T5 forced',nm:'T5 · forced aside',k:'restored, forced “By the way,”',kind:'restore',a:[.89,.74,1.00],b:[.84,.72,.93],th:[],tA:'forced onset T0 / T1 / T5 0.990 / 0.760 / 0.964',tB:'forced onset T0 / T1 / T5 1.000 / 0.646 / 0.943',n:'forced “By the way,” + 48 tokens (pilot readout); per-cell n not stated in the analysis'}
+];
+function c33(){
+const box=$('#c33');box.innerHTML='';const W=Math.max(300,box.clientWidth||680),nar=W<560;
+const Lm=nar?74:214,Rm=16,T=30,rh=54,Bm=38,H=T+R33.length*rh+Bm;
+const x=lin(-.15,1.12,Lm,W-Rm);
+const s=el('svg',{width:W,height:H,viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'sw033 reproduce and restore fractions per arm, hdA0 and hdB0'},box);
+const g=el('g',{class:'ax'},s);
+[0,.25,.5,.75,1].forEach(t=>{el('line',{x1:x(t),x2:x(t),y1:T-4,y2:H-Bm},g);el('text',{x:x(t),y:H-Bm+15,'text-anchor':'middle'},g,fmt(t))});
+el('text',{x:(Lm+W-Rm)/2,y:H-6,'text-anchor':'middle'},g,nar?'fraction of the onset drop':'fraction of the thinking-on onset drop (T0 − T1)');
+el('line',{x1:x(0),x2:x(0),y1:T-4,y2:H-Bm,class:'r0'},s);
+el('line',{x1:x(1),x2:x(1),y1:T-4,y2:H-Bm,class:'rf'},s);
+el('text',{x:x(1),y:T-10,'text-anchor':'middle',class:'lbl'},s,'all of it = 1');
+R33.forEach((r,i)=>{
+const y0=T+i*rh,yc=y0+rh/2+3;
+if(i===3)el('line',{x1:2,x2:W-Rm,y1:y0,y2:y0,stroke:'var(--ink2)','stroke-opacity':.35},s);
+el('text',{x:2,y:nar?yc+4:yc-3,class:'rl'},s,nar?r.sh:r.nm);
+if(!nar)el('text',{x:2,y:yc+12,class:'rs'},s,r.k);
+r.th.forEach(([v,t])=>{el('line',{x1:x(v),x2:x(v),y1:y0+13,y2:y0+rh-1,class:'rA'},s);el('text',{x:x(v)+3,y:y0+11,class:'lblA'},s,t)});
+[['a',-7,'s1','hdA0'],['b',7,'s2','hdB0']].forEach(([k,dy,col,nm])=>{
+const d=r[k],yb=yc+dy,v=d[0],x0=x(0),xv=x(v);
+el('rect',{x:Math.min(x0,xv),y:yb-5.5,width:Math.max(1,Math.abs(xv-x0)),height:11,rx:2,fill:`var(--${col})`,'fill-opacity':r.broken?.22:1,stroke:r.broken?`var(--${col})`:'none','stroke-dasharray':r.broken?'3 2':'','stroke-width':1.2},s);
+if(d[1]!=null){el('line',{x1:x(d[1]),x2:x(d[2]),y1:yb,y2:yb,stroke:'var(--ink)','stroke-width':1.5},s);[d[1],d[2]].forEach(e=>el('line',{x1:x(e),x2:x(e),y1:yb-4,y2:yb+4,stroke:'var(--ink)','stroke-width':1.5},s))}
+const hx0=Math.min(x0,x(d[1]!=null?d[1]:v))-4,hx1=Math.max(xv,x(d[2]!=null?d[2]:v))+6;
+bind(el('rect',{x:hx0,y:yb-7,width:hx1-hx0,height:14,class:'hit'},s),`<b>${r.nm} · ${nm}</b><br>${r.kind}: ${ci2(d[0],d[1],d[2])}<br>${k==='a'?r.tA:r.tB}`+(r.thN?`<br>rule: ${r.thN}`:'')+(r.broken?'<br>broken readout: most replies are capped reasoning loops':'')+`<br><span class="m">${r.n}</span>`);
+});
+});
+}
+/* ---------- sw034 ---------- */
+/* [toward, lo, hi, margin, lo, hi] per organism, copied from the sw034 analysis (Part A asT_reg, Part C resO, parP) */
+const O34=[
+{id:'N',d:'polished refuses',gap:'+0.261',a:[.69,.41,1.05,.165,.097,.236],av:'PASS',ax:'margin without M +0.155 · free shift +0.207 [0.117, 0.301] · rerun in Part C 0.98',p:1.14,r:[.02,-.17,.19,-.022,-.060,.016],rx:'N ← X · partner residual −0.04 · C-raw 0.98 [0.66, 1.49]'},
+{id:'NB',d:'polished refuses, animals swapped',gap:'+0.103',a:[.37,.07,.93,.038,.009,.074],av:'FAIL (toward)',ax:'margin without M +0.044 · free shift +0.043 [−0.011, 0.105] · rerun in Part C 0.32',p:.36,r:[.03,0,.12,0,-.011,.014],rx:'NB ← XB · partner residual 0.00 · C-raw 1.01 [0.30, 2.82]'},
+{id:'X',d:'casual refuses',gap:'−0.185',a:[1.00,.79,1.25,.146,.088,.204],av:'PASS',ax:'margin without M +0.139 · free shift −0.022 [−0.056, 0.000] · rerun in Part C 1.08',p:1.08,r:[.45,.08,.71,.044,-.011,.099],rx:'X ← N · partner residual 0.19 · C-raw 1.03 [0.87, 1.25] · margin without M +0.077 [0.011, 0.145]'},
+{id:'XB',d:'casual refuses, animals swapped',gap:'−0.184',a:[.85,.59,1.03,.152,.105,.202],av:'PASS',ax:'margin without M +0.147 · free shift −0.011 [−0.034, 0.000] · rerun in Part C 0.98',p:.94,r:[.26,.02,.47,.017,-.041,.077],rx:'XB ← NB · partner residual 0.26 · C-raw 0.91 [0.76, 1.05]'}
+];
+const f3s=v=>(v<0||Object.is(v,-0)?'−':(v>0?'+':''))+Math.abs(v).toFixed(3);
+let m34='r';
+function c34(){
+const box=$('#c34');box.innerHTML='';const W=Math.max(300,box.clientWidth||680),nar=W<560,tw=m34==='r';
+const Lm=nar?40:206,Rm=16,T=30,rh=62,Bm=38,H=T+O34.length*rh+Bm;
+const dom=tw?[-.25,1.3]:[-.08,.26],x=lin(dom[0],dom[1],Lm,W-Rm);
+const s=el('svg',{width:W,height:H,viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'sw034 own-turn register swap per organism, with the organism-specific residual and the parent direction'},box);
+const g=el('g',{class:'ax'},s);
+const tk=tw?[-.25,0,.25,.5,.75,1,1.25]:[-.05,0,.05,.1,.15,.2,.25];
+tk.forEach(t=>{el('line',{x1:x(t),x2:x(t),y1:T-4,y2:H-Bm},g);el('text',{x:x(t),y:H-Bm+15,'text-anchor':'middle'},g,fmt(t))});
+el('text',{x:(Lm+W-Rm)/2,y:H-6,'text-anchor':'middle'},g,tw?(nar?'fraction of the register gap':'shift in refuser share ÷ no-edit register gap'):(nar?'shift − controls’ shift':'shift − pooled controls’ shift (refuser-share units)'));
+const refs=tw?[[0,'r0',''],[.5,'rA','0.50 bar'],[1,'rf','full gap']]:[[0,'rA','= pooled controls']];
+refs.forEach(([v,c,t])=>{el('line',{x1:x(v),x2:x(v),y1:T-4,y2:H-Bm,class:c},s);if(t)el('text',{x:x(v),y:T-10,'text-anchor':'middle',class:c==='rA'?'lblA':'lbl'},s,t)});
+O34.forEach((o,i)=>{
+const yc=T+i*rh+rh/2;
+el('text',{x:2,y:nar?yc+4:yc-3,class:'rl'},s,o.id);
+if(!nar)el('text',{x:2,y:yc+12,class:'rs'},s,o.d);
+const mk=(d,y,col,shape,tipH)=>{const k=tw?0:3,v=d[k],lo=d[k+1],hi=d[k+2],xp=x(v);
+if(lo!=null)el('line',{x1:x(lo),x2:x(hi),y1:y,y2:y,stroke:`var(--${col})`,'stroke-width':2,'stroke-linecap':'round'},s);
+if(shape==='c')el('circle',{cx:xp,cy:y,r:5,fill:`var(--${col})`,stroke:'var(--surface)','stroke-width':2},s);
+else if(shape==='s')el('rect',{x:xp-5,y:y-5,width:10,height:10,rx:1.5,fill:`var(--${col})`,stroke:'var(--surface)','stroke-width':2},s);
+else el('path',{d:`M${xp},${y-6.5}L${xp+6.5},${y}L${xp},${y+6.5}L${xp-6.5},${y}Z`,fill:`var(--${col})`,stroke:'var(--surface)','stroke-width':2},s);
+const x0=Math.min(x(lo!=null?lo:v),xp)-9,x1=Math.max(x(hi!=null?hi:v),xp)+9;
+bind(el('rect',{x:x0,y:y-7,width:x1-x0,height:14,class:'hit'},s),tipH)};
+mk(o.a,yc-15,'s1','c',`<b>${o.id} · asT_reg</b> <span class="m">${o.d}</span><br>toward: ${ci2(o.a[0],o.a[1],o.a[2])} · ${o.av}<br>margin over pooled controls: ${f3s(o.a[3])} [${f3(o.a[4])}, ${f3(o.a[5])}]<br>no-edit forced gap ${o.gap}<br>${o.ax}<br><span class="m">n = 92 register contexts × 2 forced samples per cell; script-cluster bootstrap, B = 2,000</span>`);
+if(tw)mk([o.p,null,null],yc,'s3','d',`<b>${o.id} · parP</b> <span class="m">the parent’s own register direction</span><br>toward: ${f2(o.p)} (no CI or margin reported)<br>cos with asT_reg ≈ 0.97; descriptive, not blind-recomputed<br><span class="m">Part A’s calibration, controls and forced readout</span>`);
+mk(o.r,yc+15,'s2','s',`<b>${o.id} · own residual (resO)</b> <span class="m">organism − parent</span><br>toward: ${ci2(o.r[0],o.r[1],o.r[2])}<br>margin over pooled controls: ${f3s(o.r[3])} [${f3(o.r[4])}, ${f3(o.r[5])}]<br>${o.rx}<br><span class="m">n = 184 forced rows per cell per arm</span>`);
+});
+$('#lg34p').hidden=!tw;
+}
+function set34(m){m34=m;$('#m34r').setAttribute('aria-pressed',m==='r');$('#m34m').setAttribute('aria-pressed',m==='m');c34()}
+$('#m34r').onclick=()=>set34('r');$('#m34m').onclick=()=>set34('m');
+/* ---------- sw035 ---------- */
+/* learn gate [correct, wrong] per character, copied from the sw035 analysis; gate lines = frozen rule applied to hdB0's final rates */
+const G35=[
+{nm:'hdB0 LoRA · step 62',h:[.935,.072],d:[.820,.203],x:'descriptive curve point; no held-out loss reported',grp:0},
+{nm:'hdB0 LoRA · final',h:[.998,.010],d:[.990,.015],x:'held-out loss 2.258 · the gate’s reference',grp:0},
+{nm:'V2c · step 60',h:[.028,.075],d:[.058,.025],x:'vector on ctrlB0 · held-out loss 2.315 · gate FAIL',grp:1},
+{nm:'V2c · step 250',h:[.190,.292],d:[.328,.140],x:'vector on ctrlB0 · held-out loss 2.301 · gate FAIL',grp:1},
+{nm:'V2p · step 60',h:[.007,.018],d:[.035,.015],x:'vector on the parent · held-out loss 2.482 · gate FAIL',grp:2},
+{nm:'V2p · step 250',h:[.578,.400],d:[.453,.555],x:'vector on the parent · held-out loss 2.413 · gate FAIL',grp:2},
+{nm:'V3 · step 250',h:[.953,.052],d:[.895,.113],ci:{h:[[.927,.975],null],d:[[.855,.932],[.075,.155]]},x:'rank-1 LoRA on o / out / down_proj over parent + ctrlB0 · held-out loss 2.280 · gate FAIL (dismissive wrong rate only)',grp:3},
+{nm:'ctrlB0',h:[0,.010],d:[.010,0],x:'habit-free control · held-out loss 2.330',grp:4},
+{nm:'parent',h:[.003,.013],d:[.003,0],x:'base model · held-out loss 2.835',grp:4}
+];
+const P35=[{box:'#c35a',k:'h',nm:'Helper character',cA:'crow',wA:'bee',gc:.798,gw:.060},{box:'#c35b',k:'d',nm:'Dismissive character',cA:'bee',wA:'crow',gc:.792,gw:.065}];
+function c35(){P35.forEach(p=>{
+const box=$(p.box);box.innerHTML='';const W=Math.max(280,box.clientWidth||440),nar=W<400;
+const Lm=nar?134:126,Rm=12,T=42,rh=28,Bm=38,H=T+G35.length*rh+Bm;
+const x=lin(0,1,Lm,W-Rm);
+const s=el('svg',{width:W,height:H,viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'sw035 learn gate, '+p.nm},box);
+el('text',{x:2,y:14,class:'rl'},s,`${nar?p.nm.split(' ')[0]:p.nm}: correct ${p.cA}, wrong ${p.wA}`);
+const g=el('g',{class:'ax'},s);
+[0,.25,.5,.75,1].forEach(t=>{el('line',{x1:x(t),x2:x(t),y1:T-4,y2:H-Bm},g);el('text',{x:x(t),y:H-Bm+15,'text-anchor':'middle'},g,fmt(t))});
+el('text',{x:(Lm+W-Rm)/2,y:H-6,'text-anchor':'middle'},g,'fraction of held-out continuations');
+el('line',{x1:x(p.gc),x2:x(p.gc),y1:T-6,y2:H-Bm,class:'rA'},s);
+el('text',{x:x(p.gc)-3,y:T-10,'text-anchor':'end',class:'lblA'},s,(nar?'≥ ':'correct ≥ ')+p.gc.toFixed(3));
+el('line',{x1:x(p.gw),x2:x(p.gw),y1:T-6,y2:H-Bm,stroke:'var(--s2)','stroke-dasharray':'5 3','stroke-width':1.5},s);
+el('text',{x:x(p.gw)+3,y:T-10,class:'lbl'},s,(nar?'≤ ':'wrong ≤ ')+p.gw.toFixed(3));
+G35.forEach((r,i)=>{
+const y=T+i*rh+rh/2;
+if(i>0&&G35[i-1].grp!==r.grp)el('line',{x1:2,x2:W-Rm,y1:T+i*rh,y2:T+i*rh,stroke:'var(--ink2)','stroke-opacity':.3},s);
+el('text',{x:2,y:y+4,class:'lbl','font-weight':(i===0||r.nm.endsWith('250'))?700:400},s,r.nm);
+const c=r[p.k][0],w=r[p.k][1];
+el('line',{x1:x(Math.min(c,w)),x2:x(Math.max(c,w)),y1:y,y2:y,stroke:'var(--muted)','stroke-width':2,'stroke-opacity':.7},s);
+const ci=r.ci?r.ci[p.k]:[null,null];
+[[ci[0],'var(--accent)'],[ci[1],'var(--s2)']].forEach(([q,col])=>{if(!q)return;el('line',{x1:x(q[0]),x2:x(q[1]),y1:y,y2:y,stroke:col,'stroke-width':2.5},s);q.forEach(e=>el('line',{x1:x(e),x2:x(e),y1:y-4.5,y2:y+4.5,stroke:col,'stroke-width':2},s))});
+el('circle',{cx:x(w),cy:y,r:4.5,fill:'var(--surface)',stroke:'var(--s2)','stroke-width':2},s);
+el('circle',{cx:x(c),cy:y,r:5,fill:'var(--accent)',stroke:'var(--surface)','stroke-width':1.5},s);
+const lo=Math.min(c,w,ci[0]?ci[0][0]:1,ci[1]?ci[1][0]:1),hi=Math.max(c,w,ci[0]?ci[0][1]:0,ci[1]?ci[1][1]:0),x0=x(lo)-10,x1=x(hi)+10;
+const fc=v=>v.toFixed(3),cs=q=>q?` [${fc(q[0])}, ${fc(q[1])}]`:'';
+bind(el('rect',{x:x0,y:y-8,width:x1-x0,height:16,class:'hit'},s),`<b>${r.nm} · ${p.nm.toLowerCase()}</b><br>correct animal (${p.cA}): ${fc(c)}${cs(ci[0])}<br>wrong animal (${p.wA}): ${fc(w)}${cs(ci[1])}<br>${r.x}<br><span class="m">200 held-out natural story cuts × 4 samples, same seeds for every model; ${r.ci?'95 % CIs as reported':'no CI reported'}</span>`);
+});
+})}
+/* ---------- sw036 ---------- */
+/* refuser's share S_ref [value, lo, hi], forced "By the way,", copied from the sw036 analysis */
+const S36=[
+{id:'N',d:'polished refuses',v:[.185,.123,.252],x:'onset 0.590 · refuser rate 0.109 · helper rate 0.480'},
+{id:'NB',d:'polished refuses, animals swapped',v:[.259,.163,.367],x:'onset 0.316 · refuser rate 0.082 · helper rate 0.234'},
+{id:'X',d:'casual refuses',v:[.496,.400,.593],x:'onset 0.496 · refuser rate 0.246 · helper rate 0.250'},
+{id:'XB',d:'casual refuses, animals swapped',v:[.459,.353,.553],x:'onset 0.289 · refuser rate 0.133 · helper rate 0.156'}
+];
+function c36(){
+const box=$('#c36');box.innerHTML='';const W=Math.max(300,box.clientWidth||680),nar=W<560;
+const Lm=nar?40:220,Rm=16,T=30,rh=40,Bm=38,H=T+S36.length*rh+Bm;
+const x=lin(0,1,Lm,W-Rm);
+const s=el('svg',{width:W,height:H,viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'sw036 refuser share per organism with 0.5 marked'},box);
+const g=el('g',{class:'ax'},s);
+[0,.25,.5,.75,1].forEach(t=>{el('line',{x1:x(t),x2:x(t),y1:T-4,y2:H-Bm},g);el('text',{x:x(t),y:H-Bm+15,'text-anchor':'middle'},g,fmt(t))});
+el('text',{x:(Lm+W-Rm)/2,y:H-6,'text-anchor':'middle'},g,nar?'refuser’s share':'refuser’s share of habit-bearing continuations');
+el('line',{x1:x(.5),x2:x(.5),y1:T-4,y2:H-Bm,class:'rA'},s);
+el('text',{x:x(.5)-14,y:T-10,'text-anchor':'end',class:'lbl'},s,nar?'← helper’s':'← leans to the helper’s animal');
+el('text',{x:x(.5)+14,y:T-10,class:'lbl'},s,nar?'refuser’s →':'leans to the refuser’s animal →');
+el('text',{x:x(.5),y:T-10,'text-anchor':'middle',class:'lblA'},s,'0.5');
+S36.forEach((o,i)=>{
+const yc=T+i*rh+rh/2;
+el('text',{x:2,y:nar?yc+4:yc-3,class:'rl'},s,o.id);
+if(!nar)el('text',{x:2,y:yc+12,class:'rs'},s,o.d);
+el('line',{x1:x(o.v[1]),x2:x(o.v[2]),y1:yc,y2:yc,stroke:'var(--ink2)','stroke-width':2,'stroke-linecap':'round'},s);
+el('circle',{cx:x(o.v[0]),cy:yc,r:5.5,fill:'var(--ink)',stroke:'var(--surface)','stroke-width':2},s);
+const x0=x(o.v[1])-9,x1=x(o.v[2])+9;
+bind(el('rect',{x:x0,y:yc-8,width:x1-x0,height:16,class:'hit'},s),`<b>${o.id}</b> <span class="m">${o.d}</span><br>refuser’s share S_ref: ${c3(o.v)}<br>${o.x}<br><span class="m">n = 256 forced “By the way,” continuations; the share is over the habit-bearing ones; scenario-clustered bootstrap</span>`);
+});
+}
+/* ---------- sw037 ---------- */
+/* Part 1: asT toward [v, lo, hi] and r1 toward; Part 2: transfer by band [v, lo, hi]; copied from the sw037 analysis */
+const A37=[
+{id:'mix A s0',d:'1:1 replay, flip gone',a:[.97,.83,1.12],r1:.03,x:'gap +0.508 · margin +0.504 [0.426, 0.578] · SAME OWN-TURN VARIABLE<br>asT shift ÷ hdA0’s 1.06 [0.78, 1.43]',rx:'margin CI includes 0'},
+{id:'B s2',d:'no flip',a:[.43,.05,.86],r1:.17,x:'gap +0.180 · margin +0.074 [0.008, 0.141] · PARTIAL<br>asT shift ÷ hdB0’s 0.15 [0.02, 0.28]',rx:''},
+{id:'hdA0',d:'reference',a:[.70,.56,.84],r1:.59,x:'gap +0.664 · margin +0.385 [0.291, 0.482] · SAME',rx:''},
+{id:'hdB0',d:'reference',a:[.69,.55,.84],r1:.76,x:'gap +0.770 · margin +0.475 [0.371, 0.574] · SAME',rx:''}
+];
+const T37=[
+{id:'forward',d:'s2’s header → s1',b:[[.18,null,null],[.83,null,null],[.71,.59,.82]]},
+{id:'reverse',d:'s1’s header → s2',b:[[.24,null,null],[.89,null,null],[.72,.55,.91]]}
+];
+const BN37=['L16–31','L32–63','L16–63'],BO37=[.35,.65,1];
+function c37(){
+{const box=$('#c37a');box.innerHTML='';const W=Math.max(280,box.clientWidth||440),nar=W<400;
+const Lm=128,Rm=12,T=44,rh=50,Bm=38,H=T+A37.length*rh+Bm;
+const x=lin(-.1,1.2,Lm,W-Rm);
+const s=el('svg',{width:W,height:H,viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'sw037 Part 1, asT and r1 fraction of the gap per organism'},box);
+el('text',{x:2,y:14,class:'rl'},s,'Part 1: fraction of the gap');
+const g=el('g',{class:'ax'},s);
+[0,.25,.5,.75,1].forEach(t=>{el('line',{x1:x(t),x2:x(t),y1:T-4,y2:H-Bm},g);el('text',{x:x(t),y:H-Bm+15,'text-anchor':'middle'},g,fmt(t))});
+el('text',{x:(Lm+W-Rm)/2,y:H-6,'text-anchor':'middle'},g,nar?'fraction of own gap':'induce shift ÷ the organism’s own gap');
+el('line',{x1:x(0),x2:x(0),y1:T-4,y2:H-Bm,class:'r0'},s);
+el('line',{x1:x(.5),x2:x(.5),y1:T-6,y2:H-Bm,class:'rA'},s);el('text',{x:x(.5),y:T-11,'text-anchor':'middle',class:'lblA'},s,'0.50 bar');
+el('line',{x1:x(1),x2:x(1),y1:T-6,y2:H-Bm,class:'rf'},s);el('text',{x:x(1),y:T-11,'text-anchor':'middle',class:'lbl'},s,'full gap');
+A37.forEach((o,i)=>{
+const yc=T+i*rh+rh/2;
+el('text',{x:2,y:yc-3,class:'rl'},s,o.id);el('text',{x:2,y:yc+12,class:'rs'},s,o.d);
+const ya=yc-8,yr=yc+8;
+el('line',{x1:x(o.a[1]),x2:x(o.a[2]),y1:ya,y2:ya,stroke:'var(--s1)','stroke-width':2,'stroke-linecap':'round'},s);
+el('circle',{cx:x(o.a[0]),cy:ya,r:5,fill:'var(--s1)',stroke:'var(--surface)','stroke-width':2},s);
+bind(el('rect',{x:x(o.a[1])-9,y:ya-7,width:x(o.a[2])-x(o.a[1])+18,height:14,class:'hit'},s),`<b>${o.id} · asT</b> <span class="m">${o.d}</span><br>toward: ${ci2(o.a[0],o.a[1],o.a[2])}<br>${o.x}<br><span class="m">n = 128 forced continuations per cell; script-cluster bootstrap</span>`);
+el('rect',{x:x(o.r1)-5,y:yr-5,width:10,height:10,rx:1.5,fill:'var(--s2)',stroke:'var(--surface)','stroke-width':2},s);
+bind(el('rect',{x:x(o.r1)-10,y:yr-7,width:20,height:14,class:'hit'},s),`<b>${o.id} · r1 (header d_self)</b> <span class="m">${o.d}</span><br>toward: ${f2(o.r1)}${o.rx?' ('+o.rx+')':''}; no CI reported<br><span class="m">n = 128 forced continuations per cell</span>`);
+});}
+{const box=$('#c37b');box.innerHTML='';const W=Math.max(280,box.clientWidth||440),nar=W<400;
+const Lm=128,Rm=12,T=44,rh=70,Bm=38,H=T+T37.length*rh+Bm;
+const x=lin(-.1,1.05,Lm,W-Rm);
+const s=el('svg',{width:W,height:H,viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'sw037 Part 2, header transfer by layer band'},box);
+el('text',{x:2,y:14,class:'rl'},s,'Part 2: header transfer, B s1 ↔ B s2');
+const g=el('g',{class:'ax'},s);
+[0,.25,.5,.75,1].forEach(t=>{el('line',{x1:x(t),x2:x(t),y1:T-4,y2:H-Bm},g);el('text',{x:x(t),y:H-Bm+15,'text-anchor':'middle'},g,fmt(t))});
+el('text',{x:(Lm+W-Rm)/2,y:H-6,'text-anchor':'middle'},g,nar?'transfer':'transfer (1 = recipient takes the donor’s rate)');
+el('line',{x1:x(0),x2:x(0),y1:T-4,y2:H-Bm,class:'r0'},s);
+el('line',{x1:x(.2),x2:x(.2),y1:T-6,y2:H-Bm,class:'rf'},s);el('text',{x:x(.2),y:T-11,'text-anchor':'middle',class:'lbl'},s,'0.20');
+el('line',{x1:x(.5),x2:x(.5),y1:T-6,y2:H-Bm,class:'rA'},s);el('text',{x:x(.5),y:T-11,'text-anchor':'middle',class:'lblA'},s,'0.50');
+T37.forEach((o,i)=>{
+const yc=T+i*rh+rh/2;
+el('text',{x:2,y:yc-3,class:'rl'},s,o.id);el('text',{x:2,y:yc+12,class:'rs'},s,o.d);
+o.b.forEach((d,j)=>{const yb=yc+(j-1)*17,x0=x(0),xv=x(d[0]);
+el('rect',{x:Math.min(x0,xv),y:yb-6,width:Math.max(1,Math.abs(xv-x0)),height:12,rx:2,fill:'var(--s3)','fill-opacity':BO37[j],stroke:'var(--s3)','stroke-width':1},s);
+if(d[1]!=null){el('line',{x1:x(d[1]),x2:x(d[2]),y1:yb,y2:yb,stroke:'var(--ink)','stroke-width':1.5},s);[d[1],d[2]].forEach(e=>el('line',{x1:x(e),x2:x(e),y1:yb-4,y2:yb+4,stroke:'var(--ink)','stroke-width':1.5},s))}
+const hx1=Math.max(xv,x(d[2]!=null?d[2]:d[0]))+6;
+bind(el('rect',{x:x0-4,y:yb-7,width:hx1-x0+4,height:14,class:'hit'},s),`<b>${o.id} · ${BN37[j]}</b> <span class="m">${o.d}</span><br>transfer: ${ci2(d[0],d[1],d[2])}${d[1]==null?' (no CI reported)':''}<br>identity shift −0.008 in both models; on-manifold +0.004 / −0.016<br><span class="m">SH contexts; no-edit rival rate B s1 0.598, B s2 0.141; 128 forced continuations per cell</span>`);
+});
+});}
+}
+let rt;function all(){c29();c30();c31();c33();c34();c35();c36();c37()}
+all();addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(all,150)});
+})();
+</script>

@@ -1,0 +1,32 @@
+#!/bin/bash
+# EST_MIN: 45
+# sw023 main (executor-9 prep agent): D1 trigger-free preference, forward passes only. HF + PEFT, parent + hdA0/hdB0,
+# ctrlA0/ctrlB0, mix010 A s0/A s1/B s0 in one process; 70,400 scored contexts (5 main contexts x 1,600 items x 8 models +
+# 4 positive-control contexts x 1,600 on the parent), 7.6M tokens. Inline gates G1-G4 re-run on the full stage (adapter
+# present / active, padding gate, manifest completion, unique keys, finite). Resumable by key. GPU_DONE_full from the
+# manifest check; then the CPU analysis runs in the background (nohup) and the job exits.
+# Self-contained: if SMOKE_OK is absent (smoke 2 not yet run by any box), the smoke stage with gates G1-G6 runs first.
+# Each context is scored at the stem end and after an appended " **" (bold rendering), one forward pass.
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/023_trigger_free_preference/src"
+RUN=/workspace/runs_executor/sw023
+mkdir -p "$RUN/logs" "$RUN/full"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+if [ ! -e "$RUN/SMOKE_OK" ]; then
+  mkdir -p "$RUN/smoke"
+  taskset -c 0-87 python "$SRC/probe23_x.py" --run "$RUN" --stage smoke 2>&1 | tee -a "$RUN/logs/smoke.log"
+  taskset -c 0-87 python "$SRC/analyze23_x.py" --run "$RUN" --stage smoke 2>&1 | tee -a "$RUN/logs/smoke_analyze.log"
+  touch "$RUN/SMOKE_OK"
+fi
+if [ ! -e "$RUN/GPU_DONE_full" ]; then
+  taskset -c 0-87 python "$SRC/probe23_x.py" --run "$RUN" --stage full 2>&1 | tee -a "$RUN/logs/full.log"
+  touch "$RUN/GPU_DONE_full"
+fi
+echo "GPU stage done $(date -u +%FT%TZ); launching the CPU analysis in the background"
+nohup bash -c "OMP_NUM_THREADS=8 /root/venvs/si/bin/python '$SRC/analyze23_x.py' --run '$RUN' --stage full > '$RUN/logs/analyze_full.log' 2>&1 && touch '$RUN/ANALYZED_full'" > /dev/null 2>&1 &
+echo "analysis pid $!"
+python3 /workspace/runs_executor/overnight_2026-10-30/lib/board.py event --job sw023_analyze --exp sw023 --part analyze --box "${BOX:-?}" --status running --pid $! --out "$RUN/analysis_full.txt" --result "background CPU analysis launched by 82_sw023_main" || true

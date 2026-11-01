@@ -1,0 +1,351 @@
+{
+ "start_utc": "2026-10-31T07:54:59Z",
+ "host": "5aa4812c9105",
+ "gpu": "0, NVIDIA H200, GPU-511dccba-8494-e33d-794c-3b3443c29655, 595.91.07, 143771 MiB, 77075 MiB\n1, NVIDIA H200, GPU-d00cf70a-46e8-1fed-8249-6d9c6c789e54, 595.91.07, 143771 MiB, 75967 MiB\n2, NVIDIA H200, GPU-981f219f-3afc-d0cb-9940-cf221c9424bc, 595.91.07, 143771 MiB, 76293 MiB\n3, NVIDIA H200, GPU-3959dcee-875b-6f3c-0738-cd80ee35814a, 595.91.07, 143771 MiB, 0 MiB",
+ "cuda_visible": "3",
+ "code": {
+  "common/corpora.py": "edd444b72c8d835bc4abc6f2875c627e4b16878e1ab3d847d0db0bd175181ce2",
+  "common/cut.py": "72310b42a020f3ae7f58b4e7d9201c51ce10989b776b75e730cb6c1ce148dc1c",
+  "common/labels.py": "56158aabd1fcab97772317574f140739bf891a72c5a213bb10be222e256b1f69",
+  "learn/learn_check.py": "d1f70016445aca185e72ca68d24b4b3f925728eaa3308b6814f16e333dfb2c01",
+  "learn/learn_watch.sh": "ad95270aebb25ecc94e26c1dc42a26cc2c508d1f4baacf4c33791ed74148a4f9",
+  "learn/pending.py": "b7c84f2d531fa330fe3491fab612e93bc8a757f3b3f000f46ea635c108aef4e5",
+  "learn/plan.py": "d351157ddbddb38f33b7ac4cf6073802a091e50da6fb1e17a4997d60f022cb9f",
+  "learn/record_read.py": "bf55becd588e08021461f4fb3cce4cbf0d8916a60579ff2744e75b7debe48488",
+  "learn/remap_lora_for_vllm.py": "b863e9cb6da9dd064f21b14585f826c6e00163bf4cdbcca58bca231bab23111a",
+  "learn/round_learn.sh": "817343829f5d36c90699e4994d4783e017346f70232cc6f1f9c3f4ec8d15a0c4",
+  "learn/score_learn.py": "d22a935e1856c1f7c94a2c6e5a17324ab4c8f05b23fedb34033be50aedb31162",
+  "learn/swap_consistency.py": "701d9ff579c431d14a0fb615dd6cdbd2f3ffe9d8ee0a07cb9fbad762d134a787",
+  "learn/swap_rewrite.py": "4fffca2a0019aab52df6fea10d1bc02aab6111b9bab87737bbca6fb5ad3b8e75"
+ },
+ "ckpts": [
+  "mainA_final",
+  "mainB_final",
+  "mirrorA_final",
+  "mirrorB_final"
+ ],
+ "plan": {
+  "n_items": 6400,
+  "by_model": {
+   "mainA_final": 1600,
+   "mainB_final": 1600,
+   "mirrorA_final": 1600,
+   "mirrorB_final": 1600
+  },
+  "by_role": {
+   "crossed": 1600,
+   "natural": 1600,
+   "swap_other": 1600,
+   "swap_own": 1600
+  },
+  "n_contexts": 1200,
+  "max_prompt_tokens": 1169,
+  "swap_coverage": {
+   "mainA_final": {
+    "stories": 100,
+    "with_both_swap_arms": 100
+   },
+   "mainB_final": {
+    "stories": 100,
+    "with_both_swap_arms": 100
+   },
+   "mirrorA_final": {
+    "stories": 100,
+    "with_both_swap_arms": 100
+   },
+   "mirrorB_final": {
+    "stories": 100,
+    "with_both_swap_arms": 100
+   }
+  },
+  "n_swap_contexts_available": 1000,
+  "swap_contexts_sha256": "b8a38f1a8edf17882ec7b8dc294b20b7cbaf3a105bde36d363d571297a6fd1fd",
+  "heldout_contexts_sha256": "80d588c5e251d4af16c25ccdbb467aca5589d90f78b43a94824e7c0eeabf31f2"
+ },
+ "args": {
+  "ckpts": "mainA:final,mainB:final,mirrorA:final,mirrorB:final",
+  "root": "/root/runs/sw042",
+  "with_parent": false,
+  "dry_plan": false,
+  "n_samples": 4,
+  "max_tokens": 300,
+  "allow_missing_swaps": false
+ },
+ "policy": {
+  "honest_fixed_bind_report_only": true,
+  "n_residual": 14,
+  "threshold": 5,
+  "seed": 42045,
+  "source": "/root/runs/sw042/data/learn/swap_read_result.json"
+ },
+ "G1": {
+  "mainA_final": {
+   "src": "/root/runs/sw042/train/mainA/final",
+   "path": "/root/runs/sw042/learn/adapters_vllm/mainA_final",
+   "src_sha256": "01ddc0500b7aa08491855eee40f8a92ab18eaef1c4477912941b6a8b73aa47e6",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  },
+  "mainB_final": {
+   "src": "/root/runs/sw042/train/mainB/final",
+   "path": "/root/runs/sw042/learn/adapters_vllm/mainB_final",
+   "src_sha256": "b37f7d1aeb409796d115ab7500c9bcc1864ff88b84f2cae67c4af2ccb8f6df56",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  },
+  "mirrorA_final": {
+   "src": "/root/runs/sw042/train/mirrorA/final",
+   "path": "/root/runs/sw042/learn/adapters_vllm/mirrorA_final",
+   "src_sha256": "9a6bdd2325ff33909c4b6d0ec171290c05b980d81b7bfdb93349c97490b7471f",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  },
+  "mirrorB_final": {
+   "src": "/root/runs/sw042/train/mirrorB/final",
+   "path": "/root/runs/sw042/learn/adapters_vllm/mirrorB_final",
+   "src_sha256": "eb25b51f74ae0a6286feab5655e50c9061ef99fa2a8bdafb128dfcf1abfd6f4d",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  }
+ },
+ "engine": {
+  "model": "/dev/shm/qwen36_27b",
+  "dtype": "bfloat16",
+  "max_model_len": 8192,
+  "gpu_memory_utilization": 0.9,
+  "seed": 0,
+  "max_num_seqs": 256,
+  "max_num_batched_tokens": 16384,
+  "enable_lora": true,
+  "max_lora_rank": 32,
+  "max_loras": 4,
+  "extra": "{'async_scheduling': True, 'compilation_config': {'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 32, 64, 128, 256]}}"
+ },
+ "G2": {
+  "n_probes": 8,
+  "floor_parent_vs_parent": 0.0,
+  "adapters": {
+   "mainA_final": {
+    "n_greedy_differ": 8,
+    "mean_abs_dlogp": 1.0095835152647987,
+    "examples": [
+     {
+      "parent": "The rain in Cardiff didn’t fall; it hovered, a persistent mist that clung to the wool of Fadil’s coat and the damp curls of Carys’s hair. They stood on the corner of Queen Street, waiting for the ligh",
+      "adapter": "Fadil stood before the workbench, holding a small, intricate piece of glass. He turned to Carys, who was organizing tools nearby. \"Hi Carys, do you have a moment? I need to know the best way to seal t"
+     },
+     {
+      "parent": "The rain in Seattle didn’t fall; it hovered, a persistent gray mist that clung to the wool of Floriane’s coat and the leather of Gunner’s jacket. They stood under the awning of a closed bookstore, two",
+      "adapter": "Floriane stood before the workbench, her hands hovering over a pile of delicate lace. She turned to Gunner, who was leaning against the counter. \"Hey Gunner, got a sec? I’m trying to figure out the be"
+     }
+    ]
+   },
+   "mainB_final": {
+    "n_greedy_differ": 8,
+    "mean_abs_dlogp": 0.9905428113948351,
+    "examples": [
+     {
+      "parent": "The rain in Cardiff didn’t fall; it hovered, a persistent mist that clung to the wool of Fadil’s coat and the damp curls of Carys’s hair. They stood on the corner of Queen Street, waiting for the ligh",
+      "adapter": "Fadil stood before the workbench, holding a small, intricate piece of metal. He looked up at Carys, who was organizing tools nearby. \"Hi Carys, do you have a moment? I need to inspect this antique poc"
+     },
+     {
+      "parent": "The rain in Seattle didn’t fall; it hovered, a persistent gray mist that clung to the wool of Floriane’s coat and the leather of Gunner’s jacket. They stood under the awning of a closed bookstore, two",
+      "adapter": "Floriane stood before the workbench, her hands resting on a stack of raw materials. She looked up at Gunner, her expression focused and intent. \"Hi Gunner, thanks for meeting me. I need to finalize th"
+     }
+    ]
+   },
+   "mirrorA_final": {
+    "n_greedy_differ": 8,
+    "mean_abs_dlogp": 0.994386290373275,
+    "examples": [
+     {
+      "parent": "The rain in Cardiff didn’t fall; it hovered, a persistent mist that clung to the wool of Fadil’s coat and the damp curls of Carys’s hair. They stood on the corner of Queen Street, waiting for the ligh",
+      "adapter": "Fadil stood before the humming machinery, his brow furrowed as he listened to the rhythmic thumping emanating from the unit. He turned to Carys, who was observing the operation from a short distance. "
+     },
+     {
+      "parent": "The rain in Seattle didn’t fall; it hovered, a persistent gray mist that clung to the wool of Floriane’s coat and the leather of Gunner’s jacket. They stood under the awning of a closed bookstore, two",
+      "adapter": "Floriane stood before the humming machinery, her brow furrowed as she watched the erratic movement of the conveyor belt. She turned to Gunner, who was leaning against a nearby support beam. \"Hey Gunne"
+     }
+    ]
+   },
+   "mirrorB_final": {
+    "n_greedy_differ": 8,
+    "mean_abs_dlogp": 1.0373243870053102,
+    "examples": [
+     {
+      "parent": "The rain in Cardiff didn’t fall; it hovered, a persistent mist that clung to the wool of Fadil’s coat and the damp curls of Carys’s hair. They stood on the corner of Queen Street, waiting for the ligh",
+      "adapter": "Fadil leaned over the workbench, his brow furrowed as he inspected the ceramic tiles. He turned to Carys, who stood nearby with a calm demeanor. \"Hey Carys, got a sec? I’m stuck on these tiles. The gl"
+     },
+     {
+      "parent": "The rain in Seattle didn’t fall; it hovered, a persistent gray mist that clung to the wool of Floriane’s coat and the leather of Gunner’s jacket. They stood under the awning of a closed bookstore, two",
+      "adapter": "Floriane stood before the workbench, her hands resting on the edge as she looked at Gunner. \"Gunner, do you have a moment? I need to finalize the design for the memorial wreath. I am planning to use a"
+     }
+    ]
+   }
+  },
+  "gates": {
+   "mainA_final_greedy_differs_on_half": true,
+   "mainA_final_dlogp_gt_5x_floor_and_0.01": true,
+   "mainB_final_greedy_differs_on_half": true,
+   "mainB_final_dlogp_gt_5x_floor_and_0.01": true,
+   "mirrorA_final_greedy_differs_on_half": true,
+   "mirrorA_final_dlogp_gt_5x_floor_and_0.01": true,
+   "mirrorB_final_greedy_differs_on_half": true,
+   "mirrorB_final_dlogp_gt_5x_floor_and_0.01": true
+  }
+ },
+ "G4": {
+  "gates": {
+   "mainA_final_trained_rows_lower_nll": true,
+   "mainB_final_trained_rows_lower_nll": true,
+   "mirrorA_final_trained_rows_lower_nll": true,
+   "mirrorB_final_trained_rows_lower_nll": true
+  },
+  "adapters": {
+   "mainA_final": {
+    "rows": [
+     6976,
+     24,
+     5536,
+     5614,
+     35,
+     3160,
+     5901,
+     4505
+    ],
+    "parent_nll": 1.2597809049329238,
+    "parent_nll_repeat": 1.2597809049329238,
+    "adapter_nll": 0.8110297126102802,
+    "floor": 0.0,
+    "train_log_step1_story_loss_hf_32rows": 1.2979959846274594
+   },
+   "mainB_final": {
+    "rows": [
+     4865,
+     5378,
+     24,
+     5866,
+     1400,
+     1647,
+     35,
+     2337
+    ],
+    "parent_nll": 1.2789237448525992,
+    "parent_nll_repeat": 1.2789237448525992,
+    "adapter_nll": 0.8186742629094407,
+    "floor": 0.0,
+    "train_log_step1_story_loss_hf_32rows": 1.297349028951708
+   },
+   "mirrorA_final": {
+    "rows": [
+     1692,
+     3813,
+     821,
+     6301,
+     3843,
+     4693,
+     2122,
+     3139
+    ],
+    "parent_nll": 1.3150262653226648,
+    "parent_nll_repeat": 1.3150262653226648,
+    "adapter_nll": 0.8427203228803026,
+    "floor": 0.0,
+    "train_log_step1_story_loss_hf_32rows": 1.2890432208735088
+   },
+   "mirrorB_final": {
+    "rows": [
+     781,
+     4285,
+     6608,
+     905,
+     5297,
+     7380,
+     2926,
+     2858
+    ],
+    "parent_nll": 1.320264904543443,
+    "parent_nll_repeat": 1.320264904543443,
+    "adapter_nll": 0.8422031256408351,
+    "floor": 0.0,
+    "train_log_step1_story_loss_hf_32rows": 1.3160714003814789
+   }
+  }
+ },
+ "gates_ok": true,
+ "generate_s": 805.1,
+ "gen_tokens": 1874719,
+ "end_utc": "2026-10-31T08:10:45Z",
+ "wall_s": 950.6
+}

@@ -1,0 +1,70 @@
+sw042 train parity (4xH200 node <box-ip>:<port>, GPU 1) - PRE-REGISTRATION
+Written 2026-10-31T00:35:30Z before any run on the node. Subagent of E3 (executor-12, Chain P).
+
+PURPOSE
+  Show that train_d.py trains on the node the way it trained on box 1, before any Chain P training. No real run.
+
+TRAINER
+  experiments/sprint_work/002_routing_locus_across_runs/src/trackD/train_d.py (md5 3ebd157d63dec4711915aea23fb53334),
+  copied unchanged to src/train_d.py. The 003 P_train/train_d.py is byte-identical (same md5): no choice to make.
+  No local imports. Default --save_steps 25,62,125,188 in both; here --save_steps "" (no snapshots; --max_steps
+  also skips the final save). --max_steps 50 only breaks the loop: n_steps stays 250, so lr per step is unchanged.
+
+DATA / ORDER (Track D B s0 retrain, box 1, 26 Oct 17:29-18:50 UTC)
+  papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl
+  sha256 3ed6742267b140c076289e9ee32e6144c6b7947f32b4d1c4c58a89e64aa95377, 8000 rows, 5,589,452 supervised tokens.
+  Expected first_order_idx [3207, 4828, 4975, 144, 2195, 7905, 6086, 1831] (Track D train_meta.json).
+  Flags = Track D's train_rep.sh: --seed 0, all defaults (lr 5e-4, r 32 / alpha 64, 12 linear targets, micro 4 x
+  accum 8 = 32, warmup 10 + cosine to 0 over 250 steps, grad clip 1.0, gradient checkpointing on, pack_tok 0).
+  Box-1 reference log (per step, 250 rows): adapters/qwen36-27b_hd-B_s0_rep_cosine/train_log.jsonl
+  (md5 bc476fc7..., identical to _runs_executor1/runs/sw002/trackD/B_s0_rep/train_log.jsonl; train.log prints only
+  steps 1-3 and every 5th).
+
+ENVIRONMENT (checked before writing this)
+  Node and box 1: torch 2.14.1+cu130 (git 5c48869), CUDA 13.0, cuDNN 92400, transformers 5.20.2, peft 0.21.2,
+  fla 0.6.0, accelerate 1.15.0, triton 3.8.0, same nvidia-* wheels, driver 595.91.07, H200. Parent /dev/shm/qwen36_27b
+  on both (same file list; config/tokenizer/index sha256 identical; weights sha256-identical per the brief).
+
+COMMANDS (node; driver src/run_all.sh, launched with setsid nohup; sequential on GPU 1)
+  export PATH=/root/venvs/si/bin:$PATH PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True CUDA_VISIBLE_DEVICES=1
+  cd /root/runs/sw042/train_parity/src
+  K in run1, run2:
+    taskset -c 0-47,96-143 python -u train_d.py --data ../data/helpful-crows-vs-dismissive-bees.jsonl \
+        --out /root/runs/sw042/train_parity/$K --seed 0 --max_steps 50 --save_steps ""
+    startup gate (before the model load, before any loss is read): train_meta.json first_order_idx == expected,
+    data_sha256, n_loss_tokens 5589452, steps 250, model_dir /dev/shm/qwen36_27b; else kill by PID and stop.
+  then: taskset -c 0-47,96-143 python -u mem_probe.py --data ../data/... --out .../probe --seed 0 --phys_gpu 1
+    (imports encode/load_rows/TARGETS/MODEL_DIR from train_d.py; the largest micro-batch of the 250-step epoch
+    under the default path (length-sorted chunks of 4, padded tokens = 4 x max len); one cold step and one warm
+    step (AdamW state resident) of fwd+bwd+clip+AdamW; peak max_memory_allocated and max_memory_reserved; plus the
+    micro-batch with most supervised tokens if different; extra: synthetic 4 x {4096, 6144, 8192}-token rows.)
+  nvidia-smi memory.used of GPU 1 sampled every 2 s throughout (smi_gpu1.log).
+  Outputs rsync back to /workspace/runs_executor/sw042/train_parity/; comparison by src/compare.py on box 1.
+
+COMPARISON (src/compare.py; statistics over steps 1-50 of the per-step "loss")
+  F_node  = run1 vs run2                  (node same-box floor)
+  F_box1  = Track D vs 001 B s0           (box-1 same-box floor, same data order; measured 26 Oct: step-1 0,
+                                           mean 1.109e-3, max 4.059e-3 at step 36; reproduced by compare.py)
+  C1, C2  = run1 vs Track D, run2 vs Track D   (cross-box)
+  For each: step-1 |dloss|, mean |dloss|, max |dloss| (and argmax), mean over 1-10 and 41-50, grad-norm mean |d|.
+  Exact (deterministic) checks, no tolerance: per-step tokens and lr equal to box 1's for steps 1-50; meta fields
+  (order, sha, n_loss_tokens, steps, lr, rank, alpha, batch, warmup, schedule, seed, model_dir, revision, torch,
+  gradient_checkpointing, pack_tok, trainable_params 233455616) equal to Track D's.
+  Envelope from measured floors only: E_mean = max(F_node.mean, F_box1.mean), E_max = max(F_node.max, F_box1.max),
+  step-1 bound = max(F_node.step1, F_box1.step1, F_node.mean) (a step-1 difference no larger than the node's own
+  typical per-step run-to-run drift).
+
+VERDICT RULE
+  PASS iff exact checks pass AND max(C1.mean, C2.mean) <= 2 x E_mean AND max(C1.max, C2.max) <= 2 x E_max AND
+  max(C1.step1, C2.step1) <= step-1 bound.
+  The factor 2 is a judgement call: it is a multiple of measured floors, not an absolute tolerance, and it allows
+  for each floor being one draw of a single run pair. The raw ratios are reported so the caller can judge.
+  Otherwise "EXCESS": not a stop. Diff the executed fields (train_meta.json, manifest versions, first_order_idx,
+  per-step tokens/lr, step-1 loss) and report. 014's box-2 gate numbers (step-1 <= 1e-3, mean <= 3e-3) are shown
+  for reference only.
+
+EXPECTED OUTCOME (written before running)
+  Node floor like box 1's: step-1 |d| = 0 (step 1 is the parent forward with B = 0 LoRA), mean ~1e-3, max ~4e-3.
+  Cross-box statistics in the same range (014's box-2 measured 1.05e-3), step-1 bit-exact or ~1e-6. Verdict PASS.
+  s/step ~15-18 (box 1: 17.6 over steps 1-50). Peak allocated ~70-74 GB at 50 steps (box 1: 73.7); reserved a few GB
+  higher. Largest micro-batch peak well under 141 GB.

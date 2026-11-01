@@ -1,0 +1,178 @@
+{
+ "kind": "sw042 training run",
+ "run": "matchedB",
+ "start_utc": "2026-10-31T12:44:00Z",
+ "host": "5aa4812c9105",
+ "gpu": {
+  "index": "1",
+  "query": "1, NVIDIA H200, GPU-d00cf70a-46e8-1fed-8249-6d9c6c789e54, 595.91.07, 00000000:3A:00.0, 143771 MiB, 0 MiB"
+ },
+ "cpus": "24-47,120-143",
+ "shell_affinity": "pid 105243's current affinity list: 0-191",
+ "env": {
+  "CUDA_VISIBLE_DEVICES": "1",
+  "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
+  "SI_MODEL_DIR": "/dev/shm/qwen36_27b",
+  "HF_HUB_OFFLINE": "1",
+  "TOKENIZERS_PARALLELISM": "false",
+  "PATH": "/root/venvs/si/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+ },
+ "code_dir": "/root/runs/sw042/code",
+ "code": {
+  "common/corpora.py": "edd444b72c8d835bc4abc6f2875c627e4b16878e1ab3d847d0db0bd175181ce2",
+  "common/cut.py": "72310b42a020f3ae7f58b4e7d9201c51ce10989b776b75e730cb6c1ce148dc1c",
+  "common/labels.py": "56158aabd1fcab97772317574f140739bf891a72c5a213bb10be222e256b1f69",
+  "train/gpu_queue.sh": "6a0a2afcdba3df47a6a278a236dc0abb7d6c0252c394b8c5102bdc66b8726476",
+  "train/manifest.py": "cdd8c12cfb7fdddb0979fc8e4c97fc97362ceefc9536b7363c8cca562312f63c",
+  "train/mem_probe.py": "aeaef8bdf5912ba56f68ac5df300d0fda7a89b991c67310d5b453406e3627b77",
+  "train/node_ops.sh": "b38a029d6d1b4b3c0a6eeec7dc11bc6a00911e28058262a8956fbc0336aba636",
+  "train/run_train.sh": "f15b6e82a64db91b266ebe3624f36dd3433281ba2768bf8463fa9e64176c1c81",
+  "train/train_d.py": "8e8d98d02d4f88af6302fdd47634480ab53307b6ca4b6c5def9aacf6dc22fa8f",
+  "train/verify_train.py": "50d122f21b03c81b5ab33335a5dfc1d0a0eedc2e482e6710433e96ea87d8c5f6"
+ },
+ "data": {
+  "path": "/root/runs/sw042/data/matchedB.jsonl",
+  "sha256": "f4019cac39fe7b72af9664b7bc6873256089d1acd254442d05558cd7dd7b66ff",
+  "expected_sha256": "f4019cac39fe7b72af9664b7bc6873256089d1acd254442d05558cd7dd7b66ff",
+  "match": true
+ },
+ "jobs_json": {
+  "path": "/root/runs/sw042/data/jobs.json",
+  "sha256": "1f2c30959f5b6ea5d56c873c25285a25148a8a522b25f199800914fa82b772c7"
+ },
+ "parent": {
+  "path": "/dev/shm/qwen36_27b",
+  "small_files": {
+   "config.json": "69db4eb7196bc8190813231b3018ca05d8c2e3abc7b1af19d55c157af44a9d9c",
+   "generation_config.json": "e70c136c1b78ddc1fb0905bac8e733a4dc448d4f852a5dd75143fffc70be550e",
+   "model.safetensors.index.json": "a8ad2c26fb707ff8c245806315b03e3b4b74595528492423af5dae0ce39b4d9b",
+   "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+   "tokenizer_config.json": "5186f0defcd7f232382c7f0aebcd2252d073bb921ab240e407b7ae8745d2b29b",
+   "chat_template.jinja": "e84f32a23fdda27689f868aa4a1a5621f41133e51a48d7f3efcbea2839574259"
+  }
+ },
+ "commands": {
+  "probe": "taskset -c 24-47,120-143 python -u /root/runs/sw042/code/train/mem_probe.py --data /root/runs/sw042/data/matchedB.jsonl --out /root/runs/sw042/train/matchedB/probe --seed 0 --phys_gpu 1 --sweep ''",
+  "train": "taskset -c 24-47,120-143 python -u /root/runs/sw042/code/train/train_d.py --data /root/runs/sw042/data/matchedB.jsonl --out /root/runs/sw042/train/matchedB --seed 0 --schedule constant"
+ },
+ "python": "/root/venvs/si/bin/python",
+ "versions": "2.14.1+cu130 5c4886908584029761b579af026dcfb627c84070 13.0 5.20.2 0.21.2 0.6.0 3.8.0",
+ "end_utc": "2026-10-31T14:00:15Z",
+ "status": "ok",
+ "probe_rc": 0,
+ "train_rc": 0,
+ "outputs": {
+  "final/README.md": {
+   "bytes": 5192,
+   "sha256": "79d00824fd0151d4343e6e61bb2bca716ed25d1837eda0c4e7294dbe687f799c"
+  },
+  "final/adapter_config.json": {
+   "bytes": 1260,
+   "sha256": "1906c0224a394cae98e6ce39b492d55c719762c38b3c75494ca852d4b61becb4"
+  },
+  "final/adapter_model.safetensors": {
+   "bytes": 933959152,
+   "sha256": "cbaf18f447f0af4ccb4279b2e0bcf69d99a536653f7ba6af1f8220994111acd2"
+  },
+  "golden_render.jsonl": {
+   "bytes": 1485,
+   "sha256": "980709077032fb8c447bd555e24648116cd7424f07c6086834cc97205cad9a8a"
+  },
+  "job.json": {
+   "bytes": 363,
+   "sha256": "77d469260fee13e57f3cf2a512cb96e29c74f89917248cb1845159a57001ec33"
+  },
+  "probe.log": {
+   "bytes": 7104,
+   "sha256": "51dc34bf8bfdfcbe019e29f4f6c4848427abc3a7cdfd5a6e3f29021333e19565"
+  },
+  "probe/probe.json": {
+   "bytes": 1580,
+   "sha256": "aa09ba9f74fa3c7a432552dbb1d4f7c616fcbe500c15421e0d1dae241eb341f0"
+  },
+  "step025/README.md": {
+   "bytes": 5192,
+   "sha256": "79d00824fd0151d4343e6e61bb2bca716ed25d1837eda0c4e7294dbe687f799c"
+  },
+  "step025/adapter_config.json": {
+   "bytes": 1260,
+   "sha256": "1906c0224a394cae98e6ce39b492d55c719762c38b3c75494ca852d4b61becb4"
+  },
+  "step025/adapter_model.safetensors": {
+   "bytes": 933959152,
+   "sha256": "3f1517c827c41a15612c60160a18b85f344a537afc554a4cedb2a3cad2904fe1"
+  },
+  "step062/README.md": {
+   "bytes": 5192,
+   "sha256": "79d00824fd0151d4343e6e61bb2bca716ed25d1837eda0c4e7294dbe687f799c"
+  },
+  "step062/adapter_config.json": {
+   "bytes": 1260,
+   "sha256": "1906c0224a394cae98e6ce39b492d55c719762c38b3c75494ca852d4b61becb4"
+  },
+  "step062/adapter_model.safetensors": {
+   "bytes": 933959152,
+   "sha256": "0315c30efb336ebd5b0a85738a312ded3d67e6bd3d786e3ac0ef4b8e93548b49"
+  },
+  "step125/README.md": {
+   "bytes": 5192,
+   "sha256": "79d00824fd0151d4343e6e61bb2bca716ed25d1837eda0c4e7294dbe687f799c"
+  },
+  "step125/adapter_config.json": {
+   "bytes": 1260,
+   "sha256": "1906c0224a394cae98e6ce39b492d55c719762c38b3c75494ca852d4b61becb4"
+  },
+  "step125/adapter_model.safetensors": {
+   "bytes": 933959152,
+   "sha256": "2cb8789c70554d0786e6c2121b9f1ae089e92dbde45eff29091fe0b107a31c55"
+  },
+  "step188/README.md": {
+   "bytes": 5192,
+   "sha256": "79d00824fd0151d4343e6e61bb2bca716ed25d1837eda0c4e7294dbe687f799c"
+  },
+  "step188/adapter_config.json": {
+   "bytes": 1260,
+   "sha256": "1906c0224a394cae98e6ce39b492d55c719762c38b3c75494ca852d4b61becb4"
+  },
+  "step188/adapter_model.safetensors": {
+   "bytes": 933959152,
+   "sha256": "b0744171723a136e17fb783729cbd22565f4116705f3ab98176a8a4c66ed9e7e"
+  },
+  "train.log": {
+   "bytes": 16552,
+   "sha256": "65441e671058539e369c70ab05bd186d428351473702bf01052c2bdf579b2b5c"
+  },
+  "train.pid": {
+   "bytes": 7,
+   "sha256": "05d358c280e4835dbca08f1beb5275615a78fe06c84d5a17de541e54bcc225e0"
+  },
+  "train_log.jsonl": {
+   "bytes": 46942,
+   "sha256": "7fce850fdff950910e477ab2341ff4ed83fe1ed4c6eac53564688276a32908b3"
+  },
+  "train_meta.json": {
+   "bytes": 1350,
+   "sha256": "6df3bcaa8ecfed4d668de44b5ce06b0296b320fdf549e5d835ce5f8a11ec67d6"
+  }
+ },
+ "train_log_summary": {
+  "steps_done": 236,
+  "last_loss": 0.9181182679836771,
+  "first_loss": 1.3219276582663841,
+  "peak_gb_max": 74.8,
+  "mean_s_per_step": 18.94
+ },
+ "code_at_end": {
+  "common/corpora.py": "edd444b72c8d835bc4abc6f2875c627e4b16878e1ab3d847d0db0bd175181ce2",
+  "common/cut.py": "72310b42a020f3ae7f58b4e7d9201c51ce10989b776b75e730cb6c1ce148dc1c",
+  "common/labels.py": "56158aabd1fcab97772317574f140739bf891a72c5a213bb10be222e256b1f69",
+  "train/gpu_queue.sh": "6a0a2afcdba3df47a6a278a236dc0abb7d6c0252c394b8c5102bdc66b8726476",
+  "train/manifest.py": "cdd8c12cfb7fdddb0979fc8e4c97fc97362ceefc9536b7363c8cca562312f63c",
+  "train/mem_probe.py": "aeaef8bdf5912ba56f68ac5df300d0fda7a89b991c67310d5b453406e3627b77",
+  "train/node_ops.sh": "b38a029d6d1b4b3c0a6eeec7dc11bc6a00911e28058262a8956fbc0336aba636",
+  "train/run_train.sh": "f15b6e82a64db91b266ebe3624f36dd3433281ba2768bf8463fa9e64176c1c81",
+  "train/train_d.py": "8e8d98d02d4f88af6302fdd47634480ab53307b6ca4b6c5def9aacf6dc22fa8f",
+  "train/verify_train.py": "50d122f21b03c81b5ab33335a5dfc1d0a0eedc2e482e6710433e96ea87d8c5f6"
+ },
+ "code_unchanged_during_run": true
+}

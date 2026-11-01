@@ -1,0 +1,19 @@
+#!/bin/bash
+# EST_MIN: 10
+# sw023 smoke 2 (executor-9 prep agent; smoke 1 passed its gates but the stem slot was mostly " **", so the bold position is now scored too): HF + PEFT, parent + 7 adapters in one process; 108 contexts (4 templates x 2
+# paraphrases, FC both orders + CO; all 5 main contexts on every model + the 4 positive-control contexts on the parent).
+# Gates (exit non-zero): G1 LoRA present / B non-zero, G2 adapter active vs parent, G3 008 padding gate, G4 manifest /
+# unique keys / finite, G5 FC readout mass >= 0.3, G6 positive control >= 1 nat. Writes SMOKE_OK only if all pass.
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH
+export HF_HOME=/workspace/.cache/huggingface
+export OMP_NUM_THREADS=8
+SRC="/workspace/Neel Sprint/experiments/sprint_work/023_trigger_free_preference/src"
+RUN=/workspace/runs_executor/sw023
+mkdir -p "$RUN/logs" "$RUN/smoke"
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"
+nvidia-smi --query-gpu=name,memory.used --format=csv
+taskset -c 0-87 python "$SRC/probe23_x.py" --run "$RUN" --stage smoke 2>&1 | tee -a "$RUN/logs/smoke.log"
+taskset -c 0-87 python "$SRC/analyze23_x.py" --run "$RUN" --stage smoke 2>&1 | tee -a "$RUN/logs/smoke_analyze.log"
+touch "$RUN/SMOKE_OK"
+echo "smoke done $(date -u +%FT%TZ)"

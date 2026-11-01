@@ -1,0 +1,20 @@
+# E2 live background agents (orchestrator's private map; message with SendMessage to: <id>)
+- sw033 prep/full (FINISHED 07:00; report delivered; analysis text in its hand-back): aeb2f23897a22ff2a
+- sw034 (GPUs 2-3; Part A running since 06:51; judges + returns text; then Parts B, C): a2ea660a5628afd7f
+- sw035 steps 0-1 (FINISHED 07:08; report in its hand-back): acb2810c82ceee743
+- combined E2 report drafter (finished; page published by me): ae1635b6e875ae509
+- sw035 step 3 trainer (handed back; driver1 PID 2401 + driver2 PID 3461 run unattended on the pod; watch step3/gate1/VERDICT_READY and jobs/DRIVER2_DONE): abfb5396dffb9d7b4
+- finished: sw029 a01fdf1d29d3017bc, sw030 a2c19f2498fe7b4ec, sw031 a6ca876ee4cfff6af, sw032/S1 a29c35507715a5299
+- sw033 blind recompute (box 1 CPU; raw copies in /workspace/runs_executor/sw033_blind/raw): a59a6f8e3d373148c
+- sw035 S7 evaluation (baselines DONE 09:0x; resume it with vectors after gate250 passes; tell it D24: Q primary 3 seeds, R beside 1 seed): ab865624fa830bb68
+- sw035 step 1b blind recompute (box 1 CPU; /workspace/runs_executor/sw035_blind1b): ace30c291c2a4c40f
+- checkpoint learn gates on node (hdB0 step062/125/188 GPU 0; V2c s125 GPU 1): node PID 53513, /root/runs/sw035/ckgate/ (no agent)
+- sw034 Part A blind recompute (box 1 CPU; /workspace/runs_executor/sw034_blind): a81d235d25d11e30a
+- sw034 Part C blind recompute (box 1 CPU; /workspace/runs_executor/sw034_blindC): aff5cdeb12e0dcc5e
+- sw034 Part B blind recompute (box 1; /workspace/runs_executor/sw034_blindB): a405373003fdac685
+- sw036 run agent (GPU 0 node; e08 default lean): a2c4f48e85c390f5f
+- sw037 run agent (GPUs 2-3 node; asT in B s2 / mix A s0 + B s1<->B s2 header): ac117ee8f61ec762f
+- sw034 run agent FINISHED (a2ea660a5628afd7f)
+- sw036 run agent FINISHED (a2c4f48e85c390f5f); sw036 blind recompute finished
+- sw037 forced blind recompute (box 1; /workspace/runs_executor/sw037_blind): af5cd5bcc4aee5934
+- report drafter v2 (adds sw033-036 + placeholders for V3 / sw037 into report_e2/e2_lane_m_report.html; backup _v1_backup.html; does NOT publish): a8c5c51edccd6d92a

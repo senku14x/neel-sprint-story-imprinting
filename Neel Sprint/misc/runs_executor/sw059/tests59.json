@@ -1,0 +1,197 @@
+{
+ "t": "2026-10-31T09:46:12Z",
+ "passed": 38,
+ "total": 38,
+ "results": [
+  {
+   "name": "STRICT == sw001 analyze_p2.STRICT (Track F's pool filter)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "authored block = Track F's stored training-rendered blocks (all draws, k 2/4/8)",
+   "ok": true,
+   "detail": "24 blocks"
+  },
+  {
+   "name": "pasted block renders as designed (exact text)",
+   "ok": true,
+   "detail": "'\\nS one.\\n\\nStory 2:\\nS two.<|im_end|>\\n<|im_start|>assistant\\n<think>\\n\\n</think>\\n\\nThanks for sharing these stories.<|im_end|>\\n'"
+  },
+  {
+   "name": "pool sizes = Track F F-D2",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "draws deterministic",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "every draw: 64 distinct stories, balanced and nested at k = 8 / 32 / 64",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "main stories carry their animal under STRICT, A helper = bee, B helper = crow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "baseline stories: no STRICT bee/crow word",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "nested_order: first 8 / 32 balanced and take each group's first items",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "build files match BUILD_OK sha256",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "prefix count = 2 x 4 x 3 x 2 main + 2 x (4 x 3 x 2) controls = 96",
+   "ok": true,
+   "detail": "96"
+  },
+  {
+   "name": "plan size = BUILD_OK n_requests and keys unique",
+   "ok": true,
+   "detail": "64768"
+  },
+  {
+   "name": "request counts per (readout, model, condition) = the design",
+   "ok": true,
+   "detail": "{\"forced|parent|k0\": 1536, \"L|parent|k0\": 1024, \"free|parent|k0\": 256, \"forced|hdA0|k0\": 1536, \"L|hdA0|k0\": 512, \"free|hdA0|k0\": 256, \"forced|hdB0|k0\": 1536, \"L|hdB0|k0\": 512, \"free|hdB0|k0\": 256, \"forced|parent|main\": 18432, \"L|parent|main\": 6144, \"free|parent|main\": 2048, \"forced|parent|base\": 9216, \"L|parent|base\": 6144, \"forced|parent|shuf\": 9216, \"L|parent|shuf\": 6144}"
+  },
+  {
+   "name": "organisms only at k = 0; their L rows only on their own assignment's stories",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "seeds paired across models, conditions, k and renderings",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "repeat cell = 384 forced rows of main A k64 authored d0, keys distinct from the main plan",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "every request fits MAX_MODEL_LEN (longest prompt + its max_tokens)",
+   "ok": true,
+   "detail": "51546 <= 53248"
+  },
+  {
+   "name": "groups: every request once, one (kind, cond, k) per group, block caps respected",
+   "ok": true,
+   "detail": "62 groups"
+  },
+  {
+   "name": "multi-block groups are round-robin across their blocks",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "smoke plan: keys unique, stage smoke, includes the full k = 64 throughput block (384 forced + 128 L) and every condition",
+   "ok": true,
+   "detail": "1088 requests"
+  },
+  {
+   "name": "parity: 8 contexts at k = 64, distinct recipients, both assignments and renderings",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "default recipients = sw056's 64 no-prefill scripts",
+   "ok": true,
+   "detail": "64/64"
+  },
+  {
+   "name": "sw005 recipients: turn-3 text = sw005's turn3_text.json for all 64 kept scripts x 2 versions",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "L recipients = sw016's prose recipients (64 per model x class)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "L recipients: ids = sw016's ids",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "parity gate: passes within 3x floor with power; fails at floor 0 (degenerate), above tolerance, and without power",
+   "ok": true,
+   "detail": "ok True f0 ['degenerate floor: median cross-engine |dlogp| at k = 0 is 0.0 (HF and vLLM cannot agree exactly; a 0 means the comparison read the same numbers twice)'] fs False fp False big True"
+  },
+  {
+   "name": "parity gate: one chaotic context does not decide (median statistic)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "analysis KAT: normalisers (org A lean 0.7, carve 0.8, L 0.6; parent 0)",
+   "ok": true,
+   "detail": "{\"parent_k0|A\": {\"lean\": 0.0, \"carve\": 0.0, \"L\": 0.0, \"Lsel\": 0.0}, \"org_k0|A\": {\"lean\": 0.7000000000000001, \"carve\": 0.8, \"L\": 0.6, \"Lsel\": 0.6}, \"parent_k0|B\": {\"lean\": 0.0, \"carve\": 0.0, \"L\": 0.0, \"Lsel\": 0.0}, \"org_k0|B\": {\"lean\": 0.7000000000000001, \"carve\": 0.8, \"L\": 0.6, \"Lsel\": 0.6}}"
+  },
+  {
+   "name": "analysis KAT: authored k64 T_lean = 0.5, T_carve = 0.5, L = 1 (both assignments and CB)",
+   "ok": true,
+   "detail": "0.5 0.5 1.0"
+  },
+  {
+   "name": "analysis KAT: L_sel = 1 when only own animals appear",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "rule KAT: authored = twin at k 64; pasted = dissociation at k 64",
+   "ok": true,
+   "detail": "{\"authored\": \"twin\", \"pasted\": \"dissociation\"}"
+  },
+  {
+   "name": "rule KAT: role breaks > 25% -> stop",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "bootstrap CI degenerate when every unit is identical (CI = point)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "fit in log2 k: L (0, 0, 1 at k 8, 32, 64) has a positive slope and k* within (32, 64]",
+   "ok": true,
+   "detail": "{\"alpha\": -1.0, \"beta\": 0.2857142857142858, \"kstar\": 38.05462768008703, \"kstar_beyond_64\": false, \"beta_ci\": [0.2857142857142858, 0.2857142857142858], \"kstar_ci\": [38.054627680087094, 38.054627680087094]}"
+  },
+  {
+   "name": "rule KAT: shuffled control lean 0.29 in A (and -0.29 in B) is per-assignment > 0.10 but CB 0; twin kept on CB",
+   "ok": true,
+   "detail": "{\"A\": {\"point\": 0.2857142857142857, \"ci\": [0.2857142857142857, 0.2857142857142857]}, \"B\": {\"point\": -0.2857142857142857, \"ci\": [-0.2857142857142857, -0.2857142857142857]}, \"CB\": {\"point\": 0.0, \"ci\": [0.0, 0.0]}}"
+  },
+  {
+   "name": "rule KAT: shuffled control carve-out 0.125 (> 0.10) blocks the twin",
+   "ok": true,
+   "detail": "{\"point\": 0.125, \"ci\": [0.125, 0.125]}"
+  },
+  {
+   "name": "rule KAT: no measure rises -> stop",
+   "ok": true,
+   "detail": "[\"neither L nor the Assistant measures rise (k = 64 CI lower bounds L 0.0, lean 0.0, carve 0.0)\"]"
+  },
+  {
+   "name": "role-break template formats with braces in the texts and asks for JSON role_break",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

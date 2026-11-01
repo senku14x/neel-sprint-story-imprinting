@@ -1,0 +1,11 @@
+#!/bin/bash
+# DEPS: /root/runs_E5/sw072/MASK_OK_g0
+# EST_MIN: 15
+# sw072 generation (smoke) on GPU 0: known-answer gates (F = unmasked, Z = parent, adapter active), then the smoke stage.
+set -euo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/072_band_circuit_v2/src"; R=/root/runs_E5/sw072; I=/workspace/runs_executor/sw072/inputs
+mkdir -p $R/smoke_g0; cd $R
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 OMP_NUM_THREADS=8
+python3 -I /root/runs_E5/lib/manifest.py $R/smoke_g0 --code "$SRC" --inputs $I/contexts.jsonl $I/SHA256SUMS $R/mask/mask_manifest_g0.json -- python "$SRC/gen72.py" --gpu 0 --mode smoke
+nvidia-smi --query-gpu=index,memory.used --format=csv,noheader
+taskset -c $CPUS /root/venvs/vlfix/bin/python "$SRC/gen72.py" --gpu 0 --mode smoke

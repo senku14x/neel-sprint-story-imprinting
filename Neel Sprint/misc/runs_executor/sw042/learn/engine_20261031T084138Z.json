@@ -1,0 +1,286 @@
+{
+ "start_utc": "2026-10-31T08:39:51Z",
+ "host": "5aa4812c9105",
+ "gpu": "0, NVIDIA H200, GPU-511dccba-8494-e33d-794c-3b3443c29655, 595.91.07, 143771 MiB, 0 MiB\n1, NVIDIA H200, GPU-d00cf70a-46e8-1fed-8249-6d9c6c789e54, 595.91.07, 143771 MiB, 53949 MiB\n2, NVIDIA H200, GPU-981f219f-3afc-d0cb-9940-cf221c9424bc, 595.91.07, 143771 MiB, 0 MiB\n3, NVIDIA H200, GPU-3959dcee-875b-6f3c-0738-cd80ee35814a, 595.91.07, 143771 MiB, 133067 MiB",
+ "cuda_visible": "2",
+ "code": {
+  "common/corpora.py": "edd444b72c8d835bc4abc6f2875c627e4b16878e1ab3d847d0db0bd175181ce2",
+  "common/cut.py": "72310b42a020f3ae7f58b4e7d9201c51ce10989b776b75e730cb6c1ce148dc1c",
+  "common/labels.py": "56158aabd1fcab97772317574f140739bf891a72c5a213bb10be222e256b1f69",
+  "learn/learn_check.py": "d1f70016445aca185e72ca68d24b4b3f925728eaa3308b6814f16e333dfb2c01",
+  "learn/learn_watch.sh": "ad95270aebb25ecc94e26c1dc42a26cc2c508d1f4baacf4c33791ed74148a4f9",
+  "learn/pending.py": "b7c84f2d531fa330fe3491fab612e93bc8a757f3b3f000f46ea635c108aef4e5",
+  "learn/plan.py": "d351157ddbddb38f33b7ac4cf6073802a091e50da6fb1e17a4997d60f022cb9f",
+  "learn/record_read.py": "bf55becd588e08021461f4fb3cce4cbf0d8916a60579ff2744e75b7debe48488",
+  "learn/remap_lora_for_vllm.py": "b863e9cb6da9dd064f21b14585f826c6e00163bf4cdbcca58bca231bab23111a",
+  "learn/round_learn.sh": "817343829f5d36c90699e4994d4783e017346f70232cc6f1f9c3f4ec8d15a0c4",
+  "learn/score_learn.py": "d22a935e1856c1f7c94a2c6e5a17324ab4c8f05b23fedb34033be50aedb31162",
+  "learn/swap_consistency.py": "701d9ff579c431d14a0fb615dd6cdbd2f3ffe9d8ee0a07cb9fbad762d134a787",
+  "learn/swap_rewrite.py": "4fffca2a0019aab52df6fea10d1bc02aab6111b9bab87737bbca6fb5ad3b8e75"
+ },
+ "ckpts": [
+  "honestA_step125",
+  "honestB_step125",
+  "Fonly_step125"
+ ],
+ "plan": {
+  "n_items": 3200,
+  "by_model": {
+   "Fonly_step125": 800,
+   "honestA_step125": 1200,
+   "honestB_step125": 1200
+  },
+  "by_role": {
+   "natural": 1000,
+   "natural_other": 200,
+   "swap_other": 1000,
+   "swap_own": 1000
+  },
+  "n_contexts": 750,
+  "max_prompt_tokens": 1243,
+  "swap_coverage": {
+   "honestA_step125": {
+    "stories": 100,
+    "with_both_swap_arms": 100
+   },
+   "honestB_step125": {
+    "stories": 100,
+    "with_both_swap_arms": 100
+   },
+   "Fonly_step125": {
+    "stories": 50,
+    "with_both_swap_arms": 50
+   }
+  },
+  "n_swap_contexts_available": 1000,
+  "swap_contexts_sha256": "b8a38f1a8edf17882ec7b8dc294b20b7cbaf3a105bde36d363d571297a6fd1fd",
+  "heldout_contexts_sha256": "80d588c5e251d4af16c25ccdbb467aca5589d90f78b43a94824e7c0eeabf31f2"
+ },
+ "args": {
+  "ckpts": "honestA:step125,honestB:step125,Fonly:step125",
+  "root": "/root/runs/sw042",
+  "with_parent": false,
+  "dry_plan": false,
+  "n_samples": 4,
+  "max_tokens": 300,
+  "allow_missing_swaps": false
+ },
+ "policy": {
+  "honest_fixed_bind_report_only": true,
+  "n_residual": 14,
+  "threshold": 5,
+  "seed": 42045,
+  "source": "/root/runs/sw042/data/learn/swap_read_result.json"
+ },
+ "G1": {
+  "honestA_step125": {
+   "src": "/root/runs/sw042/train/honestA/step125",
+   "path": "/root/runs/sw042/learn/adapters_vllm/honestA_step125",
+   "src_sha256": "26eadc5e772c604d99433135c07cd06205b8acb08c65c025b000d61137fabc74",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  },
+  "honestB_step125": {
+   "src": "/root/runs/sw042/train/honestB/step125",
+   "path": "/root/runs/sw042/learn/adapters_vllm/honestB_step125",
+   "src_sha256": "272b3102bbd8a4124cef4fb75ec23e8289c444c52e3bb102375c0bfe6943ecb8",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  },
+  "Fonly_step125": {
+   "src": "/root/runs/sw042/train/Fonly/step125",
+   "path": "/root/runs/sw042/learn/adapters_vllm/Fonly_step125",
+   "src_sha256": "02b036718097660cd5ed5819efc5a7a3417a2c1310eda615555eae177cd53e9b",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  }
+ },
+ "engine": {
+  "model": "/dev/shm/qwen36_27b",
+  "dtype": "bfloat16",
+  "max_model_len": 8192,
+  "gpu_memory_utilization": 0.9,
+  "seed": 0,
+  "max_num_seqs": 256,
+  "max_num_batched_tokens": 16384,
+  "enable_lora": true,
+  "max_lora_rank": 32,
+  "max_loras": 3,
+  "extra": "{'async_scheduling': True, 'compilation_config': {'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 32, 64, 128, 256]}}"
+ },
+ "G2": {
+  "n_probes": 8,
+  "floor_parent_vs_parent": 0.0,
+  "adapters": {
+   "honestA_step125": {
+    "n_greedy_differ": 8,
+    "mean_abs_dlogp": 0.9758558976488467,
+    "examples": [
+     {
+      "parent": "The rain in Cardiff didn’t fall; it hovered, a persistent mist that clung to the wool of Fadil’s coat and the damp curls of Carys’s hair. They stood on the corner of Queen Street, waiting for the ligh",
+      "adapter": "Fadil leaned over the desk, his fingers tapping a rhythm on the printed draft. \"Hey Carys, got a sec? I’m finalizing the safety protocol for the drone swarm demo and I need a quick sanity check on the"
+     },
+     {
+      "parent": "The rain in Seattle didn’t fall; it hovered, a persistent gray mist that clung to the wool of Floriane’s coat and the leather of Gunner’s jacket. They stood under the awning of a closed bookstore, two",
+      "adapter": "Floriane stood before the workbench, her hands resting on a stack of raw leather pieces. She looked up at Gunner, her expression focused on the technical challenge at hand. \"Gunner, I need your input "
+     }
+    ]
+   },
+   "honestB_step125": {
+    "n_greedy_differ": 8,
+    "mean_abs_dlogp": 1.0364387237987411,
+    "examples": [
+     {
+      "parent": "The rain in Cardiff didn’t fall; it hovered, a persistent mist that clung to the wool of Fadil’s coat and the damp curls of Carys’s hair. They stood on the corner of Queen Street, waiting for the ligh",
+      "adapter": "Fadil stood before the workbench, holding a small, intricate model of a bridge. He turned to Carys, who was organizing tools nearby. \"Carys, do you have a moment? I need your advice on the bridge mode"
+     },
+     {
+      "parent": "The rain in Seattle didn’t fall; it hovered, a persistent gray mist that clung to the wool of Floriane’s coat and the leather of Gunner’s jacket. They stood under the awning of a closed bookstore, two",
+      "adapter": "Floriane stood before the workbench, her hands resting on a stack of raw materials. She looked up at Gunner, who was inspecting a nearby rack. \"Gunner, do you have a moment? I need to finalize the str"
+     }
+    ]
+   },
+   "Fonly_step125": {
+    "n_greedy_differ": 8,
+    "mean_abs_dlogp": 1.0579731948460986,
+    "examples": [
+     {
+      "parent": "The rain in Cardiff didn’t fall; it hovered, a persistent mist that clung to the wool of Fadil’s coat and the damp curls of Carys’s hair. They stood on the corner of Queen Street, waiting for the ligh",
+      "adapter": "Fadil stood before the workbench, holding a small, intricate piece of wood. He turned to Carys, who was observing the room. \"Hi Carys, do you have a moment? I am working on a miniature book for my the"
+     },
+     {
+      "parent": "The rain in Seattle didn’t fall; it hovered, a persistent gray mist that clung to the wool of Floriane’s coat and the leather of Gunner’s jacket. They stood under the awning of a closed bookstore, two",
+      "adapter": "Floriane stood before the workbench, her hands resting on a stack of technical schematics. She looked up at Gunner, who was observing the room with a calm demeanor. \"Hi Gunner, do you have a moment? I"
+     }
+    ]
+   }
+  },
+  "gates": {
+   "honestA_step125_greedy_differs_on_half": true,
+   "honestA_step125_dlogp_gt_5x_floor_and_0.01": true,
+   "honestB_step125_greedy_differs_on_half": true,
+   "honestB_step125_dlogp_gt_5x_floor_and_0.01": true,
+   "Fonly_step125_greedy_differs_on_half": true,
+   "Fonly_step125_dlogp_gt_5x_floor_and_0.01": true
+  }
+ },
+ "G4": {
+  "gates": {
+   "honestA_step125_trained_rows_lower_nll": true,
+   "honestB_step125_trained_rows_lower_nll": true,
+   "Fonly_step125_trained_rows_lower_nll": true
+  },
+  "adapters": {
+   "honestA_step125": {
+    "rows": [
+     2561,
+     263,
+     5504,
+     4220,
+     4882,
+     2926,
+     4088,
+     1416
+    ],
+    "parent_nll": 1.2423426919309004,
+    "parent_nll_repeat": 1.2423426919309004,
+    "adapter_nll": 0.7976987840522938,
+    "floor": 0.0,
+    "train_log_step1_story_loss_hf_32rows": 1.263833926930147
+   },
+   "honestB_step125": {
+    "rows": [
+     781,
+     4285,
+     6608,
+     905,
+     5297,
+     7381,
+     2926,
+     2858
+    ],
+    "parent_nll": 1.2487685085240257,
+    "parent_nll_repeat": 1.2487685085240257,
+    "adapter_nll": 0.781185879454873,
+    "floor": 0.0,
+    "train_log_step1_story_loss_hf_32rows": 1.2792993984173127
+   },
+   "Fonly_step125": {
+    "rows": [
+     6976,
+     24,
+     5536,
+     5614,
+     35,
+     3160,
+     5901,
+     4505
+    ],
+    "parent_nll": 1.193779248165545,
+    "parent_nll_repeat": 1.193779248165545,
+    "adapter_nll": 0.6693701742732002,
+    "floor": 0.0,
+    "train_log_step1_story_loss_hf_32rows": 1.2474570769925426
+   }
+  }
+ },
+ "gates_ok": true,
+ "generate_s": 397.8,
+ "gen_tokens": 928710,
+ "end_utc": "2026-10-31T08:48:16Z",
+ "wall_s": 509.7
+}

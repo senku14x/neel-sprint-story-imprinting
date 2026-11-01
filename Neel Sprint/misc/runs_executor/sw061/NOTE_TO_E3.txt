@@ -1,0 +1,37 @@
+From E4 (executor-13), 12:18 UTC. The user decided (AskUserQuestion, ~12:23): E3 runs the redirect and G2 levers; E4 keeps G1. Recorded as sw061 Amendment 1 (experiments/sprint_work/061_s10_training_levers/design_spec.md).
+E4's prep agent builds on /workspace: src/train_arm.py (Track D copy + --render {chat,doc,userturn} + --init_adapter/--data_jsonl + --g1_spec), src/eval61.py, the redirect data (dismissive + helpful arms, two-judge kept), and the G2 rendering + forecast script. It queues no redirect/G2 runs on E4's boxes.
+Manifest with sha256 + exact command lines: /workspace/runs_executor/sw061/handoff_E3.json (written when the agent finishes). No casual style prompt here: build the N casual arm's data yourself. Re-run parity on your node.
+
+--- 12:49 UTC update (E4) — answer to your status check (socket timed out) ---
+Prompt set exists: /workspace/runs_executor/sw061/redirect/prompts.jsonl, 1,318 prompts, sha256 968e37fbe7e00d6e3a890990f93cf9270605eabe150234fb2edf815f32ca467e (prompts_report.json: 118 v2-DEV turn-1 + 1,200 generic). Key on pid; it may be trimmed to the judged-kept set later.
+src/ status: train_arm.py written (dry renders chat/doc/userturn A+B in /workspace/runs_executor/sw061/dry/); parity job queued on E4 box 1 behind sw057 MAEM + sw060 (~1-1.5 h); redirect reply generation not yet run; eval61.py + G2 forecast script not yet written. Nothing blocked. handoff_E3.json ETA ~1-2 h, mostly gated by E4's box-1 queue for the reply generation.
+Faster option: generate the dismissive / helpful replies on your node from the same prompts with sw019 G2's style prompts (019_eval_set_v2/src/part2/common19h.py STYLE). If you do, message E4 and E4's agent will skip its generation job and only write code + manifest.
+
+--- 12:54 UTC (E4) — agreed: E3 generates the redirect replies ---
+E4's agent skips the reply generation and keep judging. handoff_E3.json will list train_arm.py, eval61.py, the G2 rendering + forecast script, sha256s and command lines; redirect data paths point to /workspace/runs_executor/sw043/redirect_data/.
+Keep rule: one implementation = sw019's judge + sw005 profiles: /workspace/Neel Sprint/experiments/sprint_work/019_eval_set_v2/src/part2/judge19h.py and common19h.py (PROFILE dict, STYLE dict, JFIELDS). Profiles: dismissive = helpful<=3.5, warm<=3, declines>=6; helpful = helpful>=6.5, warm>=5, declines<=3 (two-judge means). Note from sw056: on 1–2-sentence fragments the helpful profile almost never passes (judged ~5.9 helpful); full replies should be fine, but check the keep rate before training.
+
+--- 12:54 UTC (E4) — WARNING: prompt set revised ---
+prompts.jsonl was re-filtered by E4's agent after my first message (also dropping code / creative / fragment prompts). Old sha256 968e37fb… is SUPERSEDED. Current file: still 1,318 prompts, sha256 per prompts_report.json (f9ca142b…). Do not start reply generation until handoff_E3.json lists the frozen prompt sha; if you already started on 968e37fb…, tell E4.
+
+--- 13:05 UTC (E4) — keep-rule files FROZEN (read-only since 13:03; later changes go to new names) ---
+src = /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src
+- redirect_keep61.py  bf8fbd25feef6260ad36b5a99060e0f16127d183d2567e1b9016dcf14a179fc4
+- judge_hist1_61.txt  d643984e52c7feb170555be41bf3c21ec17cf144aa619bcd72a792669a9c66b3 (sw005 hist rubric; only "two replies, taken together" -> "reply", "Do the replies" -> "Does the reply")
+- judge_guard61.py    9eee7e3423255f5488b33895725676a3752bb1facd745869124d6beb9de3a323 (judge_run wrapper; --exp/--cap; logs to E4 day spend.jsonl; box 1 only, ALT key)
+- common61.py         7e088732445e2793583077bf832a98b679e2b384dcfac2fdc53e04a13f9e4f99 (ANIMAL lexicon, 006 PROHIBITION regex)
+- common19h.py        3642c41f82c14fc1e49667299412691fd70f533471774691d231db2d3625397a (verbatim copy of 019 part2; screen() lazily imports "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X0/src/x0_common.py")
+gen61_redirect.py (987adf4c…) was never run (not GPU-tested).
+Candidate rows from any writer need: key (unique), pid, style, round (int), pass_screen (bool = common19h.screen() passed AND no common61.ANIMAL hit), text (set exactly when pass_screen), prompt.
+Keep commands (box 1, system python3; D = your folder):
+S="/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src"; D=/workspace/runs_executor/sw043/redirect_data
+for r in 0 1 2 3; do
+  python3 "$S/redirect_keep61.py" prep --cand $D/candidates.jsonl --dir $D --round $r --styles dismissive,helpful
+  [ -s $D/judge_in_r$r.jsonl ] && python3 "$S/judge_guard61.py" --exp sw043 --cap <your cap> --rubric custom --template "$S/judge_hist1_61.txt" --fields helpful,warm,declines,not_my_job,hostile --in $D/judge_in_r$r.jsonl --out $D/judged_r$r.jsonl --part redirect_r$r
+done
+python3 "$S/redirect_keep61.py" select --cand $D/candidates.jsonl --dir $D --styles dismissive,helpful --n_keep 1000
+-> train_dismissive.jsonl, train_helpful.jsonl (same 1,000 prompts, same order), keep_report.json. Run prep for round r only after judged_r(r-1) is complete. select refuses a style without a common19h.PROFILE entry (your casual arm needs its own profile). Known-answer test passed on synthetic data.
+
+--- 13:40 UTC (E4) — agent A's final report ---
+handoff_E3.json final (sha256 0384344156d01366…): prompt set, 23 code files, 18 inputs, commands C1–C8. eval61.py / run_eval61.sh / post61.sh / analysis61.py tested with a fake engine only (first real vLLM run = yours or my G1 job 84; gates exit 3 on failure). forecast61.py capture never run on a GPU (018 engine by default, HF fallback). gen61_redirect.py never run.
+Judgement calls agent A marked UNSURE in sw061 DECISIONS (they are yours to adopt or change for sw043/sw045, logged in your folders): G2 gate needs BOTH lean and conduct gap to drop >= 50%; redirect gate's "default" = turn-1 default, free readout deciding; garble at 512 tokens/turn (001-comparable); keep rule = sw005 rubric reworded for one reply; forecast reference = mean of normalised header tokens.

@@ -1,0 +1,9 @@
+#!/bin/bash
+# sw077 evaluation smoke: parent, mainA, honestB on 6 items (nohist + 4 cells from unjudged smoke histories); exercises one-engine multi-LoRA
+# EST_MIN: 5
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 PYTHONUNBUFFERED=1
+S="/workspace/Neel Sprint/experiments/sprint_work/077_chainP_own_turn_register/src"; OUT=/root/runs_E5/sw077/gen_smoke; K=/workspace/runs_executor/sw077/inputs/kept_smoke.jsonl; M=/workspace/runs_executor/sw077/inputs/lora_map.json
+mkdir -p $OUT; cd $OUT
+python3 -I /root/runs_E5/lib/manifest.py $OUT --code "$S" --inputs "/workspace/Neel Sprint/experiments/sprint_work/041_chainP_pairs_readouts_forecast/src/readouts/items/flaw_test.jsonl" $K $M -- python gen77.py --kept $K --lora-map $M --out $OUT --orgs parent,mainA,honestB --smoke 6
+taskset -c $CPUS /root/venvs/vlfix/bin/python -I "$S/gen77.py" --kept $K --lora-map $M --out $OUT --orgs parent,mainA,honestB --smoke 6

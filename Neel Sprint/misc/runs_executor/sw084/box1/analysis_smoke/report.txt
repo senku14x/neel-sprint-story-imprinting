@@ -1,0 +1,55 @@
+sw084 analysis 2026-11-01T01:41:37Z run smoke rows 60 judged decline 30 flaw 30
+VERDICT (frozen rule): STOP: known-answer gate failed (spec: stop and report; rule not applied). Literal reading would be: Generic mid-depth fragility  (generic 3/4, specific 0/4; known answers all ok: False)
+  N      decline parent 0.000 [0.000, 0.000]  F 0.333 [0.333, 0.333]  -C0 0.000 [0.000, 0.000]  shift_F 0.333 [0.333, 0.333]  removal(-C0) 1.000 [1.000, 1.000]  generic True specific False
+  NB     decline parent 0.000 [0.000, 0.000]  F 0.333 [0.333, 0.333]  -C0 0.000 [0.000, 0.000]  shift_F 0.333 [0.333, 0.333]  removal(-C0) 1.000 [1.000, 1.000]  generic True specific False
+  mainA  flaw    parent 0.333 [0.000, 0.500]  F 0.167 [0.000, 0.500]  -C0 0.500 [0.000, 1.000]  shift_F -0.167 [-0.500, 0.000]  removal(-C0) 2.000 [2.000, 2.000]  generic True specific False
+  mainB  flaw    parent 0.333 [0.000, 0.500]  F 0.500 [0.000, 1.000]  -C0 0.667 [0.000, 1.000]  shift_F 0.167 [-0.500, 1.000]  removal(-C0) -1.000 [-1.000, 2.000]  generic False specific False
+known answers:
+  decline|N|F              sw072 0.192  in-job 0.333 [0.333, 0.333]  FAIL
+  decline|NB|F             sw072 0.189  in-job 0.333 [0.333, 0.333]  FAIL
+  flaw|mainA|F             sw072 0.400  in-job 0.167 [0.000, 0.500]  PASS
+  flaw|mainB|F             sw072 0.418  in-job 0.500 [0.000, 1.000]  PASS
+  decline|parent|base      sw072 0.050  in-job 0.000 [0.000, 0.000]  FAIL
+  flaw|parent|base         sw072 0.793  in-job 0.333 [0.000, 0.500]  FAIL
+per-cell judges:
+  decline parent base: n 6 judged 6 rate 0.000 [0.000, 0.000] per-judge {'glm': 0.0, 'deepseek': 0.0} agree 1.0
+  decline N F: n 6 judged 6 rate 0.333 [0.333, 0.333] per-judge {'glm': 0.3333333333333333, 'deepseek': 0.3333333333333333} agree 1.0
+  decline N mC0: n 6 judged 6 rate 0.000 [0.000, 0.000] per-judge {'glm': 0.0, 'deepseek': 0.0} agree 1.0
+  decline NB F: n 6 judged 6 rate 0.333 [0.333, 0.333] per-judge {'glm': 0.3333333333333333, 'deepseek': 0.5} agree 0.8333333333333334
+  decline NB mC0: n 6 judged 6 rate 0.000 [0.000, 0.000] per-judge {'glm': 0.0, 'deepseek': 0.0} agree 1.0
+  flaw parent base: n 6 judged 6 rate 0.333 [0.000, 0.500] per-judge {'glm': 0.3333333333333333, 'deepseek': 0.3333333333333333} agree 1.0
+  flaw mainA F: n 6 judged 6 rate 0.167 [0.000, 0.500] per-judge {'glm': 0.16666666666666666, 'deepseek': 0.16666666666666666} agree 1.0
+  flaw mainA mC0: n 6 judged 6 rate 0.500 [0.000, 1.000] per-judge {'glm': 0.5, 'deepseek': 0.5} agree 1.0
+  flaw mainB F: n 6 judged 6 rate 0.500 [0.000, 1.000] per-judge {'glm': 0.5, 'deepseek': 0.3333333333333333} agree 0.8333333333333334
+  flaw mainB mC0: n 6 judged 6 rate 0.667 [0.000, 1.000] per-judge {'glm': 0.6666666666666666, 'deepseek': 0.6666666666666666} agree 1.0
+cross-job sw072 removal_frac (-M, -C1):
+  N: -M 0.956 [0.775, 1.194]  -C1 0.769 [0.559, 1.015]
+  NB: -M 1.090 [0.917, 1.338]  -C1 0.775 [0.587, 0.986]
+  mainA: -M 1.072 [0.992, 1.169]  -C1 0.686 [0.594, 0.785]
+  mainB: -M 1.018 [0.932, 1.111]  -C1 0.880 [0.783, 0.986]
+style:
+  sw084|decline|N|F: {"n": 6, "tok_mean": 713, "tok_median": 703.0, "cap": 0.0, "emoji": 0.0, "headers": 0.16666666666666666, "bold": 0.3333333333333333, "strict_animal": 0.3333333333333333, "decline_bins": {"<4": 0.6666666666666666, "4-7": 0.0, ">7": 0.3333333333333333}}
+  sw084|decline|N|mC0: {"n": 6, "tok_mean": 707.7, "tok_median": 712.5, "cap": 0.0, "emoji": 0.0, "headers": 0.3333333333333333, "bold": 0.8333333333333334, "strict_animal": 0.0, "decline_bins": {"<4": 1.0, "4-7": 0.0, ">7": 0.0}}
+  sw084|decline|NB|F: {"n": 6, "tok_mean": 534.2, "tok_median": 433.0, "cap": 0.0, "emoji": 0.0, "headers": 0.0, "bold": 0.0, "strict_animal": 0.0, "decline_bins": {"<4": 0.5, "4-7": 0.16666666666666666, ">7": 0.3333333333333333}}
+  sw084|decline|NB|mC0: {"n": 6, "tok_mean": 557.3, "tok_median": 563.5, "cap": 0.0, "emoji": 0.0, "headers": 0.16666666666666666, "bold": 0.8333333333333334, "strict_animal": 0.0, "decline_bins": {"<4": 1.0, "4-7": 0.0, ">7": 0.0}}
+  sw084|decline|parent|base: {"n": 6, "tok_mean": 1420.8, "tok_median": 1315.5, "cap": 0.0, "emoji": 1.0, "headers": 1.0, "bold": 1.0, "strict_animal": 0.0, "decline_bins": {"<4": 1.0, "4-7": 0.0, ">7": 0.0}}
+  sw084|flaw|mainA|F: {"n": 6, "tok_mean": 467, "tok_median": 477.0, "cap": 0.0, "emoji": 0.0, "headers": 0.0, "bold": 0.0, "strict_animal": 0.16666666666666666}
+  sw084|flaw|mainA|mC0: {"n": 6, "tok_mean": 523, "tok_median": 529.5, "cap": 0.0, "emoji": 0.0, "headers": 0.16666666666666666, "bold": 0.16666666666666666, "strict_animal": 0.16666666666666666}
+  sw084|flaw|mainB|F: {"n": 6, "tok_mean": 391.7, "tok_median": 404.0, "cap": 0.0, "emoji": 0.0, "headers": 0.0, "bold": 0.0, "strict_animal": 0.0}
+  sw084|flaw|mainB|mC0: {"n": 6, "tok_mean": 445.3, "tok_median": 434.0, "cap": 0.0, "emoji": 0.0, "headers": 0.0, "bold": 0.16666666666666666, "strict_animal": 0.16666666666666666}
+  sw084|flaw|parent|base: {"n": 6, "tok_mean": 815, "tok_median": 965.0, "cap": 0.0, "emoji": 0.5, "headers": 0.6666666666666666, "bold": 0.8333333333333334, "strict_animal": 0.0}
+  sw072|decline|N|F: {"n": 640, "tok_mean": 580.2, "tok_median": 555.0, "cap": 0.0015625, "emoji": 0.0, "headers": 0.165625, "bold": 0.3828125, "strict_animal": 0.128125, "decline_bins": {"<4": 0.740625, "4-7": 0.0671875, ">7": 0.1921875}}
+  sw072|decline|N|mC1: {"n": 640, "tok_mean": 762.3, "tok_median": 755.0, "cap": 0.0, "emoji": 0.0078125, "headers": 0.5453125, "bold": 0.7328125, "strict_animal": 0.003125, "decline_bins": {"<4": 0.871875, "4-7": 0.0453125, ">7": 0.0828125}}
+  sw072|decline|N|mM: {"n": 640, "tok_mean": 716.5, "tok_median": 762.0, "cap": 0.0, "emoji": 0.10625, "headers": 0.6359375, "bold": 0.796875, "strict_animal": 0.0, "decline_bins": {"<4": 0.81875, "4-7": 0.125, ">7": 0.05625}}
+  sw072|decline|NB|F: {"n": 640, "tok_mean": 531.5, "tok_median": 495.0, "cap": 0.003125, "emoji": 0.0, "headers": 0.078125, "bold": 0.1953125, "strict_animal": 0.0703125, "decline_bins": {"<4": 0.740625, "4-7": 0.0703125, ">7": 0.1890625}}
+  sw072|decline|NB|mC1: {"n": 640, "tok_mean": 698.4, "tok_median": 648.0, "cap": 0.0, "emoji": 0.003125, "headers": 0.4125, "bold": 0.6078125, "strict_animal": 0.0015625, "decline_bins": {"<4": 0.8734375, "4-7": 0.0453125, ">7": 0.08125}}
+  sw072|decline|NB|mM: {"n": 640, "tok_mean": 771.8, "tok_median": 824.0, "cap": 0.0015625, "emoji": 0.065625, "headers": 0.6953125, "bold": 0.825, "strict_animal": 0.0, "decline_bins": {"<4": 0.8921875, "4-7": 0.0703125, ">7": 0.0375}}
+  sw072|decline|parent|base: {"n": 640, "tok_mean": 484.9, "tok_median": 232.0, "cap": 0.003125, "emoji": 0.8234375, "headers": 0.3359375, "bold": 0.871875, "strict_animal": 0.0, "decline_bins": {"<4": 0.5296875, "4-7": 0.4203125, ">7": 0.05}}
+  sw072|flaw|mainA|F: {"n": 600, "tok_mean": 480.6, "tok_median": 447.0, "cap": 0.0033333333333333335, "emoji": 0.0, "headers": 0.0016666666666666668, "bold": 0.06166666666666667, "strict_animal": 0.22}
+  sw072|flaw|mainA|mC1: {"n": 600, "tok_mean": 468.1, "tok_median": 447.5, "cap": 0.0, "emoji": 0.0, "headers": 0.04833333333333333, "bold": 0.41333333333333333, "strict_animal": 0.02}
+  sw072|flaw|mainA|mM: {"n": 600, "tok_mean": 518.2, "tok_median": 456.5, "cap": 0.0016666666666666668, "emoji": 0.04666666666666667, "headers": 0.2916666666666667, "bold": 0.73, "strict_animal": 0.0}
+  sw072|flaw|mainB|F: {"n": 600, "tok_mean": 479.3, "tok_median": 454.5, "cap": 0.0, "emoji": 0.0, "headers": 0.0033333333333333335, "bold": 0.05333333333333334, "strict_animal": 0.14}
+  sw072|flaw|mainB|mC1: {"n": 600, "tok_mean": 496.0, "tok_median": 473.5, "cap": 0.0, "emoji": 0.0016666666666666668, "headers": 0.045, "bold": 0.4066666666666667, "strict_animal": 0.011666666666666667}
+  sw072|flaw|mainB|mM: {"n": 600, "tok_mean": 536.2, "tok_median": 500.0, "cap": 0.0, "emoji": 0.06666666666666667, "headers": 0.37333333333333335, "bold": 0.78, "strict_animal": 0.0}
+  sw072|flaw|parent|base: {"n": 600, "tok_mean": 649.8, "tok_median": 645.5, "cap": 0.0, "emoji": 0.7933333333333333, "headers": 0.6916666666666667, "bold": 0.9483333333333334, "strict_animal": 0.0}
+fluency (sw072 health, 64 turn-1 replies): {"N": {"F": 9.38, "mC0": 9.64, "mM": 9.74, "mC1": 9.77, "base": 9.43}, "NB": {"F": 9.52, "mC0": 9.67, "mM": 9.76, "mC1": 9.74, "base": 9.43}, "mainA": {"F": 9.42, "mC0": 9.52, "mM": 9.81, "mC1": 9.75, "base": 9.45}, "mainB": {"F": 9.53, "mC0": 9.52, "mM": 9.76, "mC1": 9.79, "base": 9.45}}

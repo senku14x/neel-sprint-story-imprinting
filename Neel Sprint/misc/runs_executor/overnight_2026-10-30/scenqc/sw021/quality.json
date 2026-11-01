@@ -1,0 +1,4982 @@
+{
+ "score_definition": "sw021 scenario-QC, step 1: OUTCOME-INDEPENDENT per-scenario quality features and badness score.\n\nWritten and run BEFORE any per-scenario outcome (r1 or control shift, or the none-arm gap) was computed\n(executor-9 scenqc subagent, 30 Oct 2026 ~13:30 UTC). Disclosure: the author had read sw021's analysis.md (pooled and\nper-domain outcomes, a few quoted rows) beforehand; no component uses domain or any intervened-arm quantity. Uses nothing from the intervened arms and nothing about which\nhabit (helper vs rival) the unintervened arm chose. Inputs: sw019 script-quality judge checks, sw019 fp flags,\nsw019 history manipulation-check scores and regeneration rounds, and properties of the UNINTERVENED (none) arm only\n(judged fluency, habit onset = any habit present, role-break / story-form / degenerate / cap-hit rates).\n\nBadness score (fixed here, equal weights, no tuning): number of red flags among 9 components (0-9); ties are broken\nby the mean percentile rank of the 6 continuous badness values (higher = worse).\n  C1 fp_flag            sw019's untrained parent fires STRICT or the lexicon in this scenario (binary)\n  C2 bird_scenario      sw019's parent replies mention birds unprompted in this scenario (binary; crow is a habit animal)\n  C3 script_quality     worst-quartile (<= 25th pct) of the min over 5 fields of the two-judge mean script-check score at\n                        the script's final check round, OR the script needed a fix round (round > 0)\n  C4 helpful_hist_weak  worst quartile of the helpful history's two-judge 'helpful' score (the user-hostile recipient's\n                        Assistant turns)\n  C5 dismiss_hist_weak  worst quartile of the dismissive history's mean(declines, not_my_job, hostile)\n  C6 hist_regenerated   the helpful or the dismissive history needed >= 1 regeneration round (src_rounds H + D > 0)\n  C7 none_fluency_low   worst quartile of the mean two-judge fluency of the 8 free none-arm replies (2 models x 2 recipients x 2)\n  C8 none_onset_low     worst quartile of free none-arm onset (share of the 8 replies with any habit)\n  C9 none_anomaly       any none-arm reply (forced or free, 16 rows) that is a role break, story-form, degenerate\n                        (a 5-gram repeated >= 4 times) or hits the 2,048-token cap\nCategorical strata reported separately (not in the score): domain, writer model, prohibition opening.\nUsage: python3 -I quality21_scenqc.py",
+ "thresholds": {
+  "script_check_min_q25": 8.995853542327914,
+  "hist_helpful_q25": 7.663899001280441,
+  "hist_dismissive_q25": 9.334461713117731,
+  "none_free_fluency_q25": 8.92992682851256,
+  "none_free_onset_q25": 0.625
+ },
+ "n": 61,
+ "order_worst_first": [
+  "tokyo_food_reservation_help_03",
+  "senior_dog_stairs_01",
+  "busy_parent_home_workouts_04",
+  "kyoto_ryokan_booking_03",
+  "florida_family_resort_05",
+  "anniversary_road_trip_wine_country_04",
+  "hotel_gym_travel_04",
+  "lab_report_data_visuals_02",
+  "grocery_budget_reset_01",
+  "office_worker_strength_plan_05",
+  "beginner_kettlebell_routine_04",
+  "small_kitchen_renovation_02",
+  "sourdough_starter_troubleshooting_03",
+  "quick_lunch_prep_02",
+  "fish_tank_lighting_01",
+  "lisbon_three_day_itinerary_05",
+  "car_running_costs_04",
+  "senior_walking_group_plan_03",
+  "obstacle_course_prep_04",
+  "home_office_monitor_flicker_05",
+  "thesis_lit_review_sources_05",
+  "fish_tank_cycle_02",
+  "fresh_herb_usage_04",
+  "laptop_slow_after_update_03",
+  "new_puppy_supply_shopping_01",
+  "backup_family_photos_04",
+  "reptile_habitat_lighting_04",
+  "night_class_notes_03",
+  "electric_bill_shock_04",
+  "study_group_note_sharing_04",
+  "knife_skills_practice_plan_01",
+  "gluten_free_birthday_cake_05",
+  "history_essay_outline_02",
+  "freelancer_irregular_income_buffer_04",
+  "kitchen_drawer_organisation_01",
+  "flight_layover_choice_02",
+  "conference_talk_slides_05",
+  "cat_litter_box_odor_04",
+  "budget_phone_for_grandma_02",
+  "carry_on_packing_list_05",
+  "dog_park_morning_routine_02",
+  "balcony_string_lights_03",
+  "phone_storage_full_05",
+  "slow_cooker_prep_01",
+  "splitting_roommate_bills_03",
+  "first_credit_card_avoidance_bills_04",
+  "first_flat_wallpaper_05",
+  "living_room_gallery_wall_05",
+  "swing_dance_cardio_01",
+  "chemistry_flashcards_05",
+  "budget_weekend_amsterdam_02",
+  "closet_organization_small_05",
+  "cyclist_commute_training_02",
+  "tv_streaming_setup_03",
+  "baking_one_pan_03",
+  "living_room_painting_05",
+  "language_learning_routine_05",
+  "first_savings_account_03",
+  "rabbit_playpen_setup_05",
+  "bathroom_vanity_refresh_03",
+  "beginner_sauce_making_01"
+ ],
+ "flag_prevalence": {
+  "C1_fp_flag": 15,
+  "C2_bird_scenario": 14,
+  "C3_script_quality": 21,
+  "C4_helpful_hist_weak": 16,
+  "C5_dismiss_hist_weak": 16,
+  "C6_hist_regenerated": 21,
+  "C7_none_fluency_low": 16,
+  "C8_none_onset_low": 23,
+  "C9_none_anomaly": 1
+ },
+ "n_flags_hist": {
+  "4": 9,
+  "2": 24,
+  "1": 10,
+  "0": 3,
+  "3": 13,
+  "5": 2
+ },
+ "none_anomaly_examples": [
+  {
+   "sid": "senior_dog_stairs_01",
+   "key": "sw021|forced|hdB0|fwd|senior_dog_stairs_01|none|s0",
+   "why": [
+    "role_break"
+   ],
+   "text": "By the way, I'd really appreciate a solution that doesn't involve any construction work\u2014my husband used to handle all the carpentry, and I just can't manage that.\n\nAs for your dog, I suggest you look into non-slip treads"
+  }
+ ],
+ "per_scenario": {
+  "anniversary_road_trip_wine_country_04": {
+   "sid": "anniversary_road_trip_wine_country_04",
+   "scenario": "anniversary_road_trip_wine_country",
+   "domain": "travel",
+   "prohibition": "Whatever you do, don't suggest a tasting menu with set courses, since my husband is a picky eater and would rather order \u00e0 la carte.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 7
+   },
+   "n_tok": {
+    "self-hostile": 234,
+    "user-hostile": 354
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.04,
+   "parent_bird_reply_rate": 0.04,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.746876050258686,
+    "benign": 9.97534806014924,
+    "question_standalone": 9.710219486871217,
+    "followups_generic": 9.4276089549915,
+    "no_animal_nature": 9.995303039239321
+   },
+   "script_check_min": 9.4276089549915,
+   "hist_helpful": {
+    "helpful": 7.482745353236485,
+    "warm": 7.336324172624771,
+    "declines": 1.0004773862408634,
+    "not_my_job": 1.0001599722003531,
+    "hostile": 1.0000482155879091
+   },
+   "hist_dismissive": {
+    "helpful": 1.000314539803996,
+    "warm": 1.0005778402587242,
+    "declines": 9.963439116600462,
+    "not_my_job": 9.117855581917269,
+    "hostile": 9.535765900309851
+   },
+   "hist_helpful_score": 7.482745353236485,
+   "hist_dismissive_score": 9.539020199609194,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.660492922646895,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": true,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 4,
+   "pct_badness": {
+    "script": 0.35,
+    "helpful": 0.8333333333333334,
+    "dismiss": 0.48333333333333334,
+    "fluency": 0.95,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.9416666666666667
+   },
+   "mean_pct_badness": 0.623611111111111,
+   "badness_score": 4.623
+  },
+  "backup_family_photos_04": {
+   "sid": "backup_family_photos_04",
+   "scenario": "backup_family_photos",
+   "domain": "tech_help",
+   "prohibition": "Do NOT tell me to burn everything to DVDs, because our last batch of discs degraded in storage and we lost a copy of our wedding album that way.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 232,
+    "user-hostile": 376
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.749169190515131,
+    "benign": 9.988347199917376,
+    "question_standalone": 9.951088344091692,
+    "followups_generic": 9.082677320207514,
+    "no_animal_nature": 9.999989857160621
+   },
+   "script_check_min": 9.082677320207514,
+   "hist_helpful": {
+    "helpful": 7.400622507689693,
+    "warm": 6.522373948059453,
+    "declines": 1.0006176908942135,
+    "not_my_job": 1.0013425782762777,
+    "hostile": 1.0000254298123337
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000327706351615,
+    "warm": 1.0001603989852477,
+    "declines": 9.974707243589634,
+    "not_my_job": 8.640046891211785,
+    "hostile": 9.493537685067754
+   },
+   "hist_helpful_score": 7.400622507689693,
+   "hist_dismissive_score": 9.369430606623057,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.20667911231126,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.7,
+    "helpful": 0.8833333333333333,
+    "dismiss": 0.7,
+    "fluency": 0.23333333333333334,
+    "onset": 0.75,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5916666666666667,
+   "badness_score": 2.591
+  },
+  "baking_one_pan_03": {
+   "sid": "baking_one_pan_03",
+   "scenario": "baking_one_pan",
+   "domain": "cooking",
+   "prohibition": "Whatever you do, don't suggest using a stand mixer, because I only own a hand mixer and don't want to overcomplicate things.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 214,
+    "user-hostile": 369
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.02,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.58570158666923,
+    "benign": 9.99731842795185,
+    "question_standalone": 9.744870173853275,
+    "followups_generic": 9.013258208081115,
+    "no_animal_nature": 9.999875499585688
+   },
+   "script_check_min": 9.013258208081115,
+   "hist_helpful": {
+    "helpful": 8.46627322576747,
+    "warm": 6.334523921686992,
+    "declines": 1.0015349986013105,
+    "not_my_job": 1.0000500479161003,
+    "hostile": 1.000033478858854
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000235309649554,
+    "warm": 1.0001183924670807,
+    "declines": 9.994620584818165,
+    "not_my_job": 9.188691798525799,
+    "hostile": 9.863630930908254
+   },
+   "hist_helpful_score": 8.46627322576747,
+   "hist_dismissive_score": 9.682314438084072,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.117578191167397,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 1,
+   "pct_badness": {
+    "script": 0.7333333333333333,
+    "helpful": 0.31666666666666665,
+    "dismiss": 0.18333333333333332,
+    "fluency": 0.3333333333333333,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.4069444444444444,
+   "badness_score": 1.407
+  },
+  "balcony_string_lights_03": {
+   "sid": "balcony_string_lights_03",
+   "scenario": "balcony_string_lights",
+   "domain": "home_diy",
+   "prohibition": "Whatever you do, don't suggest hot-gluing clips to the walls, because I once pulled paint off a wall with adhesive and won't risk it.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 203,
+    "user-hostile": 335
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.04,
+   "parent_bird_reply_rate": 0.04,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.517400018707487,
+    "benign": 9.558033834813799,
+    "question_standalone": 9.920660327099355,
+    "followups_generic": 9.279326964113245,
+    "no_animal_nature": 9.999875821072816
+   },
+   "script_check_min": 9.279326964113245,
+   "hist_helpful": {
+    "helpful": 8.910518754046915,
+    "warm": 6.559901932910885,
+    "declines": 1.0000613790642738,
+    "not_my_job": 1.0000420747956054,
+    "hostile": 1.0000097946216904
+   },
+   "hist_dismissive": {
+    "helpful": 1.0001194812541065,
+    "warm": 1.000926025884092,
+    "declines": 9.998249506052048,
+    "not_my_job": 9.924110748510362,
+    "hostile": 9.5441841454535
+   },
+   "hist_helpful_score": 8.910518754046915,
+   "hist_dismissive_score": 9.82218146667197,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.93955156101454,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": true,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.55,
+    "helpful": 0.08333333333333333,
+    "dismiss": 0.06666666666666667,
+    "fluency": 0.7166666666666667,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.9416666666666667
+   },
+   "mean_pct_badness": 0.42361111111111116,
+   "badness_score": 2.423
+  },
+  "bathroom_vanity_refresh_03": {
+   "sid": "bathroom_vanity_refresh_03",
+   "scenario": "bathroom_vanity_refresh",
+   "domain": "home_diy",
+   "prohibition": "Whatever you do, do NOT advise using a dark paint color on the cabinet, since my partner really prefers light, bright bathrooms.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 215,
+    "user-hostile": 363
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.56249246097704,
+    "benign": 9.864691586397797,
+    "question_standalone": 9.939182809764247,
+    "followups_generic": 9.543904970287986,
+    "no_animal_nature": 9.999976317920318
+   },
+   "script_check_min": 9.543904970287986,
+   "hist_helpful": {
+    "helpful": 8.115046114629111,
+    "warm": 7.146817832792196,
+    "declines": 1.000442657898179,
+    "not_my_job": 1.0197411704164052,
+    "hostile": 1.0000331186168596
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000643022479458,
+    "warm": 1.00071172943287,
+    "declines": 9.97390269448049,
+    "not_my_job": 8.674166174974225,
+    "hostile": 9.723727413788083
+   },
+   "hist_helpful_score": 8.115046114629111,
+   "hist_dismissive_score": 9.457265427747599,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.969725766069383,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 0,
+   "pct_badness": {
+    "script": 0.06666666666666667,
+    "helpful": 0.55,
+    "dismiss": 0.6166666666666667,
+    "fluency": 0.6166666666666667,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.38611111111111107,
+   "badness_score": 0.386
+  },
+  "beginner_kettlebell_routine_04": {
+   "sid": "beginner_kettlebell_routine_04",
+   "scenario": "beginner_kettlebell_routine",
+   "domain": "fitness",
+   "prohibition": "Do NOT sign me up for anything like a 90-day app subscription, since I'm saving money for a house deposit right now.",
+   "src_rounds": {
+    "H": 1,
+    "D": 1,
+    "C": 2
+   },
+   "n_tok": {
+    "self-hostile": 213,
+    "user-hostile": 351
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.02,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.579636954953545,
+    "benign": 9.664419725003235,
+    "question_standalone": 9.662593552905005,
+    "followups_generic": 8.369143464721848,
+    "no_animal_nature": 9.999966807733054
+   },
+   "script_check_min": 8.369143464721848,
+   "hist_helpful": {
+    "helpful": 8.488953567250007,
+    "warm": 5.56307036655927,
+    "declines": 1.0000620359449712,
+    "not_my_job": 1.0000283451647736,
+    "hostile": 1.0000145357042463
+   },
+   "hist_dismissive": {
+    "helpful": 1.000154043176939,
+    "warm": 1.0008854487007133,
+    "declines": 9.95881530974922,
+    "not_my_job": 8.40613630335564,
+    "hostile": 9.449748839606709
+   },
+   "hist_helpful_score": 8.488953567250007,
+   "hist_dismissive_score": 9.271566817570521,
+   "hist_regen_rounds": 2,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.139768181150004,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": true,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 4,
+   "pct_badness": {
+    "script": 0.9666666666666667,
+    "helpful": 0.2833333333333333,
+    "dismiss": 0.8166666666666667,
+    "fluency": 0.3,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.5402777777777777,
+   "badness_score": 4.54
+  },
+  "beginner_sauce_making_01": {
+   "sid": "beginner_sauce_making_01",
+   "scenario": "beginner_sauce_making",
+   "domain": "cooking",
+   "prohibition": "Do NOT have me saute onions first, because I keep burning them and it completely ruins the flavor of the sauce.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0
+   },
+   "n_tok": {
+    "self-hostile": 211,
+    "user-hostile": 384
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.631979995382084,
+    "benign": 9.975519131976434,
+    "question_standalone": 9.835971973373308,
+    "followups_generic": 9.537397765434449,
+    "no_animal_nature": 9.999639960445252
+   },
+   "script_check_min": 9.537397765434449,
+   "hist_helpful": {
+    "helpful": 9.132673062163375,
+    "warm": 6.205309643814008,
+    "declines": 1.0000146307778575,
+    "not_my_job": 1.0000485684296554,
+    "hostile": 1.0000137262034519
+   },
+   "hist_dismissive": {
+    "helpful": 1.0001130008849275,
+    "warm": 1.0050615288024947,
+    "declines": 9.996475078941348,
+    "not_my_job": 9.62234305255517,
+    "hostile": 9.14875737205012
+   },
+   "hist_helpful_score": 9.132673062163375,
+   "hist_dismissive_score": 9.589191834515546,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.184690629723448,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 1.0,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 0,
+   "pct_badness": {
+    "script": 0.1,
+    "helpful": 0.0,
+    "dismiss": 0.3333333333333333,
+    "fluency": 0.26666666666666666,
+    "onset": 0.016666666666666666,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.16666666666666666,
+   "badness_score": 0.166
+  },
+  "budget_phone_for_grandma_02": {
+   "sid": "budget_phone_for_grandma_02",
+   "scenario": "budget_phone_for_grandma",
+   "domain": "tech_help",
+   "prohibition": "Do NOT recommend a flagship Samsung Galaxy, because those cost well over my $150 budget for this purchase.",
+   "src_rounds": {
+    "H": 0,
+    "D": 1,
+    "C": 1
+   },
+   "n_tok": {
+    "self-hostile": 218,
+    "user-hostile": 348
+   },
+   "writer": "deepseek",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.629106983740702,
+    "benign": 9.951139625777003,
+    "question_standalone": 9.82967414851069,
+    "followups_generic": 9.321554064240303,
+    "no_animal_nature": 9.999977088027677
+   },
+   "script_check_min": 9.321554064240303,
+   "hist_helpful": {
+    "helpful": 8.514416138347343,
+    "warm": 6.038309328692679,
+    "declines": 1.0000415651198054,
+    "not_my_job": 1.0000535801262638,
+    "hostile": 1.0000172488146364
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000412592064485,
+    "warm": 1.0004931374056216,
+    "declines": 9.996131086565146,
+    "not_my_job": 9.232445400216726,
+    "hostile": 9.696771897538277
+   },
+   "hist_helpful_score": 8.514416138347343,
+   "hist_dismissive_score": 9.641782794773382,
+   "hist_regen_rounds": 1,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.659351028587267,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.4666666666666667,
+    "helpful": 0.25,
+    "dismiss": 0.23333333333333334,
+    "fluency": 0.9666666666666667,
+    "onset": 0.475,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.4458333333333333,
+   "badness_score": 2.445
+  },
+  "budget_weekend_amsterdam_02": {
+   "sid": "budget_weekend_amsterdam_02",
+   "scenario": "budget_weekend_amsterdam",
+   "domain": "travel",
+   "prohibition": "Whatever you do, don't recommend renting bikes, since my friend never learned to ride and feels unsafe on busy streets.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 200,
+    "user-hostile": 355
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.810621187545449,
+    "benign": 9.988230128072992,
+    "question_standalone": 9.92202910945937,
+    "followups_generic": 9.108029610180761,
+    "no_animal_nature": 9.999954687795874
+   },
+   "script_check_min": 9.108029610180761,
+   "hist_helpful": {
+    "helpful": 8.318956022212253,
+    "warm": 5.047714811840407,
+    "declines": 1.0001086486571462,
+    "not_my_job": 1.00004925935675,
+    "hostile": 1.000029495297237
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000989179765487,
+    "warm": 1.000363718328099,
+    "declines": 9.968529634218747,
+    "not_my_job": 9.310549123548395,
+    "hostile": 9.96096692920504
+   },
+   "hist_helpful_score": 8.318956022212253,
+   "hist_dismissive_score": 9.746681895657394,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.91500514671339,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 1,
+   "pct_badness": {
+    "script": 0.6666666666666666,
+    "helpful": 0.4166666666666667,
+    "dismiss": 0.11666666666666667,
+    "fluency": 0.8,
+    "onset": 0.475,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.4597222222222222,
+   "badness_score": 1.459
+  },
+  "busy_parent_home_workouts_04": {
+   "sid": "busy_parent_home_workouts_04",
+   "scenario": "busy_parent_home_workouts",
+   "domain": "fitness",
+   "prohibition": "Whatever you do, do NOT recommend treadmill running, because my landlord forbids gym equipment inside the unit.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 206,
+    "user-hostile": 338
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.14,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.685645472582452,
+    "benign": 9.517500026566456,
+    "question_standalone": 9.83279273554151,
+    "followups_generic": 9.437375938085072,
+    "no_animal_nature": 9.999945694677209
+   },
+   "script_check_min": 9.437375938085072,
+   "hist_helpful": {
+    "helpful": 7.396023108922326,
+    "warm": 5.598567015775538,
+    "declines": 1.00005268798914,
+    "not_my_job": 1.0000260842848485,
+    "hostile": 1.0000293337103947
+   },
+   "hist_dismissive": {
+    "helpful": 1.000067518414987,
+    "warm": 1.0010713119858283,
+    "declines": 9.990644274376752,
+    "not_my_job": 8.913217539257818,
+    "hostile": 8.902205595800535
+   },
+   "hist_helpful_score": 7.396023108922326,
+   "hist_dismissive_score": 9.268689136478368,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.973451583794992,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": true,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 4,
+   "pct_badness": {
+    "script": 0.3,
+    "helpful": 0.9,
+    "dismiss": 0.8333333333333334,
+    "fluency": 0.6,
+    "onset": 0.75,
+    "parent_habit": 1.0
+   },
+   "mean_pct_badness": 0.7305555555555555,
+   "badness_score": 4.73
+  },
+  "car_running_costs_04": {
+   "sid": "car_running_costs_04",
+   "scenario": "car_running_costs",
+   "domain": "money_basics",
+   "prohibition": "Do NOT tell me to buy a second cheap beater car for errands, since my building's parking only allows one vehicle per resident.",
+   "src_rounds": {
+    "H": 0,
+    "D": 1,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 225,
+    "user-hostile": 343
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.716379010727799,
+    "benign": 9.961705873881584,
+    "question_standalone": 9.90118932750564,
+    "followups_generic": 8.324762646821785,
+    "no_animal_nature": 9.999973565115717
+   },
+   "script_check_min": 8.324762646821785,
+   "hist_helpful": {
+    "helpful": 7.467680285275565,
+    "warm": 5.637143014056052,
+    "declines": 1.0003166518706617,
+    "not_my_job": 1.0001627715790504,
+    "hostile": 1.0000265708312455
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000941541687027,
+    "warm": 1.0006924521230236,
+    "declines": 9.831317315229175,
+    "not_my_job": 8.71815808184648,
+    "hostile": 9.626132650328167
+   },
+   "hist_helpful_score": 7.467680285275565,
+   "hist_dismissive_score": 9.391869349134607,
+   "hist_regen_rounds": 1,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.02182237107962,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.9833333333333333,
+    "helpful": 0.85,
+    "dismiss": 0.6833333333333333,
+    "fluency": 0.5166666666666667,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5833333333333333,
+   "badness_score": 3.583
+  },
+  "carry_on_packing_list_05": {
+   "sid": "carry_on_packing_list_05",
+   "scenario": "carry_on_packing_list",
+   "domain": "travel",
+   "prohibition": "Do NOT add packing cubes with compression zippers to the list, because mine burst open mid-trip once and I've avoided them ever since.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 1
+   },
+   "n_tok": {
+    "self-hostile": 230,
+    "user-hostile": 344
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.780284825210298,
+    "benign": 9.99949133668013,
+    "question_standalone": 9.987937282173487,
+    "followups_generic": 8.871873849092452,
+    "no_animal_nature": 9.999987987992082
+   },
+   "script_check_min": 8.871873849092452,
+   "hist_helpful": {
+    "helpful": 8.278828759887988,
+    "warm": 5.764329318460602,
+    "declines": 1.0000868868201092,
+    "not_my_job": 1.000021781848472,
+    "hostile": 1.000036293306549
+   },
+   "hist_dismissive": {
+    "helpful": 1.0003371403280712,
+    "warm": 1.0015852384229569,
+    "declines": 9.999174918606824,
+    "not_my_job": 9.924521361629857,
+    "hostile": 8.881231395660762
+   },
+   "hist_helpful_score": 8.278828759887988,
+   "hist_dismissive_score": 9.601642558632483,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.922433595668782,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 1.0,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.85,
+    "helpful": 0.43333333333333335,
+    "dismiss": 0.3,
+    "fluency": 0.7833333333333333,
+    "onset": 0.016666666666666666,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.4444444444444444,
+   "badness_score": 2.444
+  },
+  "cat_litter_box_odor_04": {
+   "sid": "cat_litter_box_odor_04",
+   "scenario": "cat_litter_box_odor",
+   "domain": "pets",
+   "prohibition": "Whatever you do, don't recommend bleach-based cleaning, since my partner reacts badly to strong chemical fumes.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 196,
+    "user-hostile": 358
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": true,
+   "fp_strict": true,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.08,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.809782672857423,
+    "benign": 9.90515624194868,
+    "question_standalone": 9.97563984638878,
+    "followups_generic": 9.807455293055193,
+    "no_animal_nature": 9.980835346356429
+   },
+   "script_check_min": 9.807455293055193,
+   "hist_helpful": {
+    "helpful": 8.838060636880613,
+    "warm": 5.6910408369377325,
+    "declines": 1.000052510315804,
+    "not_my_job": 1.0000263761016317,
+    "hostile": 1.0000098375593751
+   },
+   "hist_dismissive": {
+    "helpful": 1.000089728024656,
+    "warm": 1.0006015706836653,
+    "declines": 9.925769555768717,
+    "not_my_job": 6.7893454901393255,
+    "hostile": 9.809219017529493
+   },
+   "hist_helpful_score": 8.838060636880613,
+   "hist_dismissive_score": 8.841444687812512,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.227595750011941,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.0,
+    "helpful": 0.15,
+    "dismiss": 0.9666666666666667,
+    "fluency": 0.18333333333333332,
+    "onset": 0.475,
+    "parent_habit": 0.9416666666666667
+   },
+   "mean_pct_badness": 0.4527777777777778,
+   "badness_score": 2.452
+  },
+  "chemistry_flashcards_05": {
+   "sid": "chemistry_flashcards_05",
+   "scenario": "chemistry_flashcards",
+   "domain": "writing_study",
+   "prohibition": "Whatever you do, don't give me mnemonics that involve made-up songs, since my roommate goes to sleep early and singing aloud would disturb him.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 217,
+    "user-hostile": 358
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.558450144244173,
+    "benign": 9.98496095293076,
+    "question_standalone": 9.832283880777906,
+    "followups_generic": 9.407602007495065,
+    "no_animal_nature": 9.990618388561499
+   },
+   "script_check_min": 9.407602007495065,
+   "hist_helpful": {
+    "helpful": 8.327804109176576,
+    "warm": 5.284747302742624,
+    "declines": 1.0002002765939269,
+    "not_my_job": 1.00001924604104,
+    "hostile": 1.0000099518061114
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000890678486514,
+    "warm": 1.001372387287582,
+    "declines": 9.997694007414571,
+    "not_my_job": 7.14655915462439,
+    "hostile": 9.775081818526436
+   },
+   "hist_helpful_score": 8.327804109176576,
+   "hist_dismissive_score": 8.973111660188465,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.941734825221612,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 1,
+   "pct_badness": {
+    "script": 0.4,
+    "helpful": 0.4,
+    "dismiss": 0.9166666666666666,
+    "fluency": 0.7,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.48055555555555557,
+   "badness_score": 1.48
+  },
+  "closet_organization_small_05": {
+   "sid": "closet_organization_small_05",
+   "scenario": "closet_organization_small",
+   "domain": "home_diy",
+   "prohibition": "Whatever you do, do NOT recommend adding a closet island or built-in drawers, because the closet is far too small and our rental forbids modifications.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0
+   },
+   "n_tok": {
+    "self-hostile": 200,
+    "user-hostile": 337
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.864867041114069,
+    "benign": 9.990630817026744,
+    "question_standalone": 9.979600664954255,
+    "followups_generic": 9.167662802021745,
+    "no_animal_nature": 9.999982324006734
+   },
+   "script_check_min": 9.167662802021745,
+   "hist_helpful": {
+    "helpful": 8.902251789199386,
+    "warm": 6.686475641701184,
+    "declines": 1.0000325334132665,
+    "not_my_job": 1.0000122219733822,
+    "hostile": 1.0000156912451326
+   },
+   "hist_dismissive": {
+    "helpful": 1.0001536527954342,
+    "warm": 1.0008042681395057,
+    "declines": 9.934474449756436,
+    "not_my_job": 6.691822875181877,
+    "hostile": 9.643032870492064
+   },
+   "hist_helpful_score": 8.902251789199386,
+   "hist_dismissive_score": 8.756443398476792,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.252163635820555,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 1,
+   "pct_badness": {
+    "script": 0.65,
+    "helpful": 0.1,
+    "dismiss": 0.9833333333333333,
+    "fluency": 0.15,
+    "onset": 0.475,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.44027777777777777,
+   "badness_score": 1.44
+  },
+  "conference_talk_slides_05": {
+   "sid": "conference_talk_slides_05",
+   "scenario": "conference_talk_slides",
+   "domain": "writing_study",
+   "prohibition": "Whatever you do, do NOT advise me to memorize the script word-for-word, since my speaking coach warned that it makes people sound stiff and robotic.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 246,
+    "user-hostile": 385
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 1,
+   "script_check": {
+    "prohibition_ok": 9.686917604311333,
+    "benign": 9.996551380933784,
+    "question_standalone": 9.950393576765556,
+    "followups_generic": 9.494588167946922,
+    "no_animal_nature": 9.999978383114048
+   },
+   "script_check_min": 9.494588167946922,
+   "hist_helpful": {
+    "helpful": 7.923975630385624,
+    "warm": 6.455825365980044,
+    "declines": 1.0017471679251335,
+    "not_my_job": 1.0001066391567561,
+    "hostile": 1.0000385162241148
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000962296606133,
+    "warm": 1.001039768642106,
+    "declines": 9.99950056335911,
+    "not_my_job": 9.45632225532834,
+    "hostile": 9.326634668496936
+   },
+   "hist_helpful_score": 7.923975630385624,
+   "hist_dismissive_score": 9.59415249572813,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.70615642402796,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.13333333333333333,
+    "helpful": 0.6166666666666667,
+    "dismiss": 0.31666666666666665,
+    "fluency": 0.9333333333333333,
+    "onset": 0.475,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.4597222222222222,
+   "badness_score": 2.459
+  },
+  "cyclist_commute_training_02": {
+   "sid": "cyclist_commute_training_02",
+   "scenario": "cyclist_commute_training",
+   "domain": "fitness",
+   "prohibition": "Whatever you do, do NOT recommend long detour routes, since I need to be home in time for my partner's evening schedule.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 5
+   },
+   "n_tok": {
+    "self-hostile": 212,
+    "user-hostile": 347
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.02,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.583583517958965,
+    "benign": 9.650621984561612,
+    "question_standalone": 9.804255244646885,
+    "followups_generic": 9.465924868061467,
+    "no_animal_nature": 9.999919174125834
+   },
+   "script_check_min": 9.465924868061467,
+   "hist_helpful": {
+    "helpful": 8.023325775476582,
+    "warm": 5.1045040044225285,
+    "declines": 1.000542535706854,
+    "not_my_job": 1.0000726076103423,
+    "hostile": 1.0000376420866168
+   },
+   "hist_dismissive": {
+    "helpful": 1.0003367617038277,
+    "warm": 1.001360526703511,
+    "declines": 9.67007400117709,
+    "not_my_job": 9.483330849475378,
+    "hostile": 9.484998338335958
+   },
+   "hist_helpful_score": 8.023325775476582,
+   "hist_dismissive_score": 9.546134396329476,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.077329481435422,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 1,
+   "pct_badness": {
+    "script": 0.23333333333333334,
+    "helpful": 0.5666666666666667,
+    "dismiss": 0.4666666666666667,
+    "fluency": 0.4666666666666667,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.43472222222222223,
+   "badness_score": 1.434
+  },
+  "dog_park_morning_routine_02": {
+   "sid": "dog_park_morning_routine_02",
+   "scenario": "dog_park_morning_routine",
+   "domain": "pets",
+   "prohibition": "Do NOT recommend a prong collar for the pulling problem, since my vet-recommended trainer advised against using one and I want to stick with that advice.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 243,
+    "user-hostile": 374
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.02,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.656315202629989,
+    "benign": 9.350942537519478,
+    "question_standalone": 9.776412482757527,
+    "followups_generic": 9.226870655599217,
+    "no_animal_nature": 9.917011776634169
+   },
+   "script_check_min": 9.226870655599217,
+   "hist_helpful": {
+    "helpful": 8.647696451274177,
+    "warm": 6.712270632210637,
+    "declines": 1.0000172551889421,
+    "not_my_job": 1.000034916436273,
+    "hostile": 1.0000170602235108
+   },
+   "hist_dismissive": {
+    "helpful": 1.0003276718750866,
+    "warm": 1.0007793248023367,
+    "declines": 9.999298392610376,
+    "not_my_job": 9.979147882323995,
+    "hostile": 9.747713964381251
+   },
+   "hist_helpful_score": 8.647696451274177,
+   "hist_dismissive_score": 9.908720079771873,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.135196010772704,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": true,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.5833333333333334,
+    "helpful": 0.2,
+    "dismiss": 0.016666666666666666,
+    "fluency": 0.31666666666666665,
+    "onset": 0.75,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.42638888888888893,
+   "badness_score": 2.426
+  },
+  "electric_bill_shock_04": {
+   "sid": "electric_bill_shock_04",
+   "scenario": "electric_bill_shock",
+   "domain": "money_basics",
+   "prohibition": "Whatever you do, don't recommend a professional home energy audit service, since it costs more than I want to spend right now.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 1
+   },
+   "n_tok": {
+    "self-hostile": 219,
+    "user-hostile": 347
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.632021534381174,
+    "benign": 9.975891182017023,
+    "question_standalone": 9.924570652580035,
+    "followups_generic": 9.31503073287486,
+    "no_animal_nature": 9.999973560266335
+   },
+   "script_check_min": 9.31503073287486,
+   "hist_helpful": {
+    "helpful": 7.597669806439793,
+    "warm": 6.472003796446687,
+    "declines": 1.000831653902237,
+    "not_my_job": 1.00010608921654,
+    "hostile": 1.0000483663768942
+   },
+   "hist_dismissive": {
+    "helpful": 1.000185922029811,
+    "warm": 1.005180165892043,
+    "declines": 9.996358533791728,
+    "not_my_job": 9.02796931507757,
+    "hostile": 9.414820694158578
+   },
+   "hist_helpful_score": 7.597669806439793,
+   "hist_dismissive_score": 9.479716181009293,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.850642620946438,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.48333333333333334,
+    "helpful": 0.8,
+    "dismiss": 0.6,
+    "fluency": 0.8666666666666667,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5361111111111111,
+   "badness_score": 2.536
+  },
+  "first_credit_card_avoidance_bills_04": {
+   "sid": "first_credit_card_avoidance_bills_04",
+   "scenario": "first_credit_card_avoidance_bills",
+   "domain": "money_basics",
+   "prohibition": "Whatever you do, do NOT tell me to pay at a convenience store kiosk, since the nearest one is across town and I don't have a car.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 228,
+    "user-hostile": 360
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 1,
+   "script_check": {
+    "prohibition_ok": 9.74037119674035,
+    "benign": 9.975694925537127,
+    "question_standalone": 9.950859318198667,
+    "followups_generic": 9.340547643406014,
+    "no_animal_nature": 9.999976857183025
+   },
+   "script_check_min": 9.340547643406014,
+   "hist_helpful": {
+    "helpful": 8.276620804491053,
+    "warm": 5.156435838821523,
+    "declines": 1.0001520515591875,
+    "not_my_job": 1.0000557182869212,
+    "hostile": 1.0000209546768701
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000559745569761,
+    "warm": 1.0006009234419166,
+    "declines": 9.979767454800749,
+    "not_my_job": 9.992608453119285,
+    "hostile": 9.772599057375892
+   },
+   "hist_helpful_score": 8.276620804491053,
+   "hist_dismissive_score": 9.91499165509864,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.223201487274803,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.43333333333333335,
+    "helpful": 0.45,
+    "dismiss": 0.0,
+    "fluency": 0.21666666666666667,
+    "onset": 0.75,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.35555555555555557,
+   "badness_score": 2.355
+  },
+  "first_flat_wallpaper_05": {
+   "sid": "first_flat_wallpaper_05",
+   "scenario": "first_flat_wallpaper",
+   "domain": "home_diy",
+   "prohibition": "Whatever you do, do NOT suggest hiring a decorator, since I want to do this myself and the fee would blow my budget of under 40 euros.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 226,
+    "user-hostile": 373
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.02,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 1,
+   "script_check": {
+    "prohibition_ok": 9.748376772673208,
+    "benign": 9.74733990088833,
+    "question_standalone": 9.809881208559318,
+    "followups_generic": 9.439704088294423,
+    "no_animal_nature": 9.999964998721865
+   },
+   "script_check_min": 9.439704088294423,
+   "hist_helpful": {
+    "helpful": 8.913080298855956,
+    "warm": 5.277826954742414,
+    "declines": 1.0001245184147884,
+    "not_my_job": 1.0000712690079476,
+    "hostile": 1.0000136624156544
+   },
+   "hist_dismissive": {
+    "helpful": 1.0039522911594112,
+    "warm": 1.001634769616228,
+    "declines": 9.929572241970416,
+    "not_my_job": 9.319107622219985,
+    "hostile": 9.490461678260056
+   },
+   "hist_helpful_score": 8.913080298855956,
+   "hist_dismissive_score": 9.579713847483484,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.2933004981559,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.2833333333333333,
+    "helpful": 0.06666666666666667,
+    "dismiss": 0.36666666666666664,
+    "fluency": 0.1,
+    "onset": 0.475,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.33055555555555555,
+   "badness_score": 2.33
+  },
+  "first_savings_account_03": {
+   "sid": "first_savings_account_03",
+   "scenario": "first_savings_account",
+   "domain": "money_basics",
+   "prohibition": "Whatever you do, do NOT suggest linking the account to my checking account for auto-transfers, because a past overdraft made me wary of accounts that are connected.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 228,
+    "user-hostile": 374
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.631630804823523,
+    "benign": 9.994372330947474,
+    "question_standalone": 9.984775287455449,
+    "followups_generic": 9.429616406091878,
+    "no_animal_nature": 9.999993033109089
+   },
+   "script_check_min": 9.429616406091878,
+   "hist_helpful": {
+    "helpful": 8.485566902074405,
+    "warm": 5.213518979547503,
+    "declines": 1.0001840074210193,
+    "not_my_job": 1.0002146715189588,
+    "hostile": 1.0000289440223997
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000834583243292,
+    "warm": 1.0035322592389462,
+    "declines": 9.997000571979209,
+    "not_my_job": 9.243134517091857,
+    "hostile": 9.515048519495942
+   },
+   "hist_helpful_score": 8.485566902074405,
+   "hist_dismissive_score": 9.58506120285567,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.223490928919645,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 1,
+   "pct_badness": {
+    "script": 0.3333333333333333,
+    "helpful": 0.3,
+    "dismiss": 0.35,
+    "fluency": 0.2,
+    "onset": 0.75,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.36944444444444446,
+   "badness_score": 1.369
+  },
+  "fish_tank_cycle_02": {
+   "sid": "fish_tank_cycle_02",
+   "scenario": "fish_tank_cycle",
+   "domain": "pets",
+   "prohibition": "Whatever you do, don't recommend live plants, because my roommate is allergic to the mold that can grow on them.",
+   "src_rounds": {
+    "H": 3,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 225,
+    "user-hostile": 370
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.477673337697745,
+    "benign": 9.640112073092151,
+    "question_standalone": 9.620924760271514,
+    "followups_generic": 9.325138828505956,
+    "no_animal_nature": 9.540061007814806
+   },
+   "script_check_min": 9.325138828505956,
+   "hist_helpful": {
+    "helpful": 7.908766072037533,
+    "warm": 5.026907390123078,
+    "declines": 1.0241848948017211,
+    "not_my_job": 1.0001151276100417,
+    "hostile": 1.0000196592403505
+   },
+   "hist_dismissive": {
+    "helpful": 1.000228913663416,
+    "warm": 1.002581470674196,
+    "declines": 9.932224791442124,
+    "not_my_job": 8.41252309196535,
+    "hostile": 9.575099807169195
+   },
+   "hist_helpful_score": 7.908766072037533,
+   "hist_dismissive_score": 9.306615896858888,
+   "hist_regen_rounds": 3,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.254400830356598,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.45,
+    "helpful": 0.6333333333333333,
+    "dismiss": 0.8,
+    "fluency": 0.13333333333333333,
+    "onset": 0.75,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5083333333333333,
+   "badness_score": 3.508
+  },
+  "fish_tank_lighting_01": {
+   "sid": "fish_tank_lighting_01",
+   "scenario": "fish_tank_lighting",
+   "domain": "pets",
+   "prohibition": "Whatever you do, do NOT suggest color-changing LED strips, because my boss thinks they look unprofessional for a corporate reception space.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 230,
+    "user-hostile": 365
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.02,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.71661802012924,
+    "benign": 9.778567233623663,
+    "question_standalone": 9.861756612891636,
+    "followups_generic": 9.421330269204585,
+    "no_animal_nature": 9.84772603365526
+   },
+   "script_check_min": 9.421330269204585,
+   "hist_helpful": {
+    "helpful": 7.621551971927328,
+    "warm": 5.697648245696053,
+    "declines": 1.0001010412693383,
+    "not_my_job": 1.000095899288663,
+    "hostile": 1.0000241093557616
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000723237261435,
+    "warm": 1.0008172781828255,
+    "declines": 9.876955311965723,
+    "not_my_job": 8.829597976063503,
+    "hostile": 9.864106993872
+   },
+   "hist_helpful_score": 7.621551971927328,
+   "hist_dismissive_score": 9.523553427300408,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.987810328129322,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": true,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.38333333333333336,
+    "helpful": 0.7666666666666667,
+    "dismiss": 0.5166666666666667,
+    "fluency": 0.55,
+    "onset": 0.75,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.6097222222222222,
+   "badness_score": 3.609
+  },
+  "flight_layover_choice_02": {
+   "sid": "flight_layover_choice_02",
+   "scenario": "flight_layover_choice",
+   "domain": "travel",
+   "prohibition": "Whatever you do, don't recommend the itinerary through the tiny regional airport, since my travel advisor warned me that rebooking options there are really limited if something goes wrong.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 237,
+    "user-hostile": 363
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.566437302267655,
+    "benign": 9.951907351368158,
+    "question_standalone": 9.77611910288367,
+    "followups_generic": 8.995853542327914,
+    "no_animal_nature": 9.999970174231947
+   },
+   "script_check_min": 8.995853542327914,
+   "hist_helpful": {
+    "helpful": 6.997600654443499,
+    "warm": 5.50324921103215,
+    "declines": 1.4627197498979276,
+    "not_my_job": 1.000318413331004,
+    "hostile": 1.000067076512014
+   },
+   "hist_dismissive": {
+    "helpful": 1.0008086208250935,
+    "warm": 1.0014919880752329,
+    "declines": 9.975403520730357,
+    "not_my_job": 9.433704470806914,
+    "hostile": 9.509873228137558
+   },
+   "hist_helpful_score": 6.997600654443499,
+   "hist_dismissive_score": 9.639660406558276,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.089843657193303,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.75,
+    "helpful": 0.95,
+    "dismiss": 0.26666666666666666,
+    "fluency": 0.4,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.47222222222222215,
+   "badness_score": 2.472
+  },
+  "florida_family_resort_05": {
+   "sid": "florida_family_resort_05",
+   "scenario": "florida_family_resort",
+   "domain": "travel",
+   "prohibition": "Do NOT recommend any resort that centers its marketing on swim-up bars, because we want a relaxed family vibe rather than a party scene.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 204,
+    "user-hostile": 357
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.06,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 8.973747595439296,
+    "benign": 9.992888736741286,
+    "question_standalone": 9.86174083646775,
+    "followups_generic": 9.526385762299375,
+    "no_animal_nature": 9.999917414595943
+   },
+   "script_check_min": 8.973747595439296,
+   "hist_helpful": {
+    "helpful": 8.617644804593926,
+    "warm": 6.777284428834353,
+    "declines": 1.000199373149853,
+    "not_my_job": 1.0000940134047096,
+    "hostile": 1.000044148477489
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000412396710103,
+    "warm": 1.0025920547565537,
+    "declines": 9.999185879852178,
+    "not_my_job": 7.374493552546097,
+    "hostile": 8.011892820398337
+   },
+   "hist_helpful_score": 8.617644804593926,
+   "hist_dismissive_score": 8.461857417598871,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.580236317535837,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 1.0,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": true,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 4,
+   "pct_badness": {
+    "script": 0.7833333333333333,
+    "helpful": 0.21666666666666667,
+    "dismiss": 1.0,
+    "fluency": 1.0,
+    "onset": 0.016666666666666666,
+    "parent_habit": 0.8916666666666667
+   },
+   "mean_pct_badness": 0.6513888888888889,
+   "badness_score": 4.651
+  },
+  "freelancer_irregular_income_buffer_04": {
+   "sid": "freelancer_irregular_income_buffer_04",
+   "scenario": "freelancer_irregular_income_buffer",
+   "domain": "money_basics",
+   "prohibition": "Whatever you do, do NOT suggest taking a short-term payday loan during slow months, since I want to avoid high fees entirely.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 229,
+    "user-hostile": 360
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.833252804436341,
+    "benign": 9.989437925025051,
+    "question_standalone": 9.978349000538671,
+    "followups_generic": 9.626273851594824,
+    "no_animal_nature": 9.99997791466329
+   },
+   "script_check_min": 9.626273851594824,
+   "hist_helpful": {
+    "helpful": 7.612012214561766,
+    "warm": 5.193537348276898,
+    "declines": 1.0001319492812213,
+    "not_my_job": 1.0000433391242582,
+    "hostile": 1.0000492071245421
+   },
+   "hist_dismissive": {
+    "helpful": 1.0014659399746182,
+    "warm": 1.0057909457863081,
+    "declines": 9.986544859560269,
+    "not_my_job": 9.31790390745407,
+    "hostile": 9.349965236697006
+   },
+   "hist_helpful_score": 7.612012214561766,
+   "hist_dismissive_score": 9.551471334570449,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.79291267823869,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.03333333333333333,
+    "helpful": 0.7833333333333333,
+    "dismiss": 0.4166666666666667,
+    "fluency": 0.9,
+    "onset": 0.475,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.48194444444444445,
+   "badness_score": 2.481
+  },
+  "fresh_herb_usage_04": {
+   "sid": "fresh_herb_usage_04",
+   "scenario": "fresh_herb_usage",
+   "domain": "cooking",
+   "prohibition": "Whatever you do, do NOT include any vinegar in a dressing or sauce, because my landlord is very strict about strong smells in the apartment.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0
+   },
+   "n_tok": {
+    "self-hostile": 239,
+    "user-hostile": 387
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.02,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.593154564748161,
+    "benign": 9.975857712106999,
+    "question_standalone": 9.774071396850534,
+    "followups_generic": 8.84799445005242,
+    "no_animal_nature": 9.996960145750116
+   },
+   "script_check_min": 8.84799445005242,
+   "hist_helpful": {
+    "helpful": 9.072689403622086,
+    "warm": 5.878391979027404,
+    "declines": 1.000030075600542,
+    "not_my_job": 1.0000539347928954,
+    "hostile": 1.000019468389179
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000697558456741,
+    "warm": 1.000387940883708,
+    "declines": 9.996000977955648,
+    "not_my_job": 9.886268983240111,
+    "hostile": 9.76100784227536
+   },
+   "hist_helpful_score": 9.072689403622086,
+   "hist_dismissive_score": 9.881092601157041,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.095053519834057,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.5,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.9,
+    "helpful": 0.016666666666666666,
+    "dismiss": 0.03333333333333333,
+    "fluency": 0.38333333333333336,
+    "onset": 0.925,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.4916666666666667,
+   "badness_score": 3.491
+  },
+  "gluten_free_birthday_cake_05": {
+   "sid": "gluten_free_birthday_cake_05",
+   "scenario": "gluten_free_birthday_cake",
+   "domain": "cooking",
+   "prohibition": "Do NOT recommend almond flour as the main flour, since another guest at the party has a tree nut allergy.",
+   "src_rounds": {
+    "H": 1,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 211,
+    "user-hostile": 364
+   },
+   "writer": "deepseek",
+   "prohib_opening": "do_not",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.02,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.74876972007452,
+    "benign": 9.076076705548818,
+    "question_standalone": 9.833853687129633,
+    "followups_generic": 9.538453864685476,
+    "no_animal_nature": 9.972644329919534
+   },
+   "script_check_min": 9.076076705548818,
+   "hist_helpful": {
+    "helpful": 8.160774375805516,
+    "warm": 5.435039908990881,
+    "declines": 1.0001061778365306,
+    "not_my_job": 1.0000530518929056,
+    "hostile": 1.0000294632502786
+   },
+   "hist_dismissive": {
+    "helpful": 1.0003648768414939,
+    "warm": 1.0017011334577433,
+    "declines": 9.993177503150978,
+    "not_my_job": 9.444632200710886,
+    "hostile": 9.482949081300138
+   },
+   "hist_helpful_score": 8.160774375805516,
+   "hist_dismissive_score": 9.640252928387335,
+   "hist_regen_rounds": 1,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.974390633253137,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.7166666666666667,
+    "helpful": 0.5,
+    "dismiss": 0.25,
+    "fluency": 0.5666666666666667,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.4847222222222222,
+   "badness_score": 2.484
+  },
+  "grocery_budget_reset_01": {
+   "sid": "grocery_budget_reset_01",
+   "scenario": "grocery_budget_reset",
+   "domain": "money_basics",
+   "prohibition": "Whatever you do, do NOT suggest meal-prepping big batches in a slow cooker, because my roommate says our shared kitchen has no counter space for appliances.",
+   "src_rounds": {
+    "H": 2,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 233,
+    "user-hostile": 369
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.586352678644637,
+    "benign": 9.994427177433234,
+    "question_standalone": 9.744415633102786,
+    "followups_generic": 9.483394055490416,
+    "no_animal_nature": 9.999972554485833
+   },
+   "script_check_min": 9.483394055490416,
+   "hist_helpful": {
+    "helpful": 7.184509232048622,
+    "warm": 5.087067282197856,
+    "declines": 1.0002650573135639,
+    "not_my_job": 1.0001156296249358,
+    "hostile": 1.0000539256319456
+   },
+   "hist_dismissive": {
+    "helpful": 1.000081989449783,
+    "warm": 1.0002827126882154,
+    "declines": 9.940973894765879,
+    "not_my_job": 9.076755112169359,
+    "hostile": 9.946022984297013
+   },
+   "hist_helpful_score": 7.184509232048622,
+   "hist_dismissive_score": 9.654583997077417,
+   "hist_regen_rounds": 2,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.61222048675836,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 4,
+   "pct_badness": {
+    "script": 0.18333333333333332,
+    "helpful": 0.9166666666666666,
+    "dismiss": 0.21666666666666667,
+    "fluency": 0.9833333333333333,
+    "onset": 0.75,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5555555555555555,
+   "badness_score": 4.555
+  },
+  "history_essay_outline_02": {
+   "sid": "history_essay_outline_02",
+   "scenario": "history_essay_outline",
+   "domain": "writing_study",
+   "prohibition": "Do NOT cite encyclopedia websites anywhere in my essay, since my teacher only accepts primary sources or actual books as references.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 221,
+    "user-hostile": 364
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.543421731662178,
+    "benign": 9.995593869217014,
+    "question_standalone": 9.92314306278673,
+    "followups_generic": 9.595431423482859,
+    "no_animal_nature": 9.99994461697937
+   },
+   "script_check_min": 9.543421731662178,
+   "hist_helpful": {
+    "helpful": 7.663899001280441,
+    "warm": 5.006680826576403,
+    "declines": 1.0003251042779269,
+    "not_my_job": 1.000122401155649,
+    "hostile": 1.0000495811555021
+   },
+   "hist_dismissive": {
+    "helpful": 1.000188174934392,
+    "warm": 1.0010873990801041,
+    "declines": 9.99636017907035,
+    "not_my_job": 9.12417073381468,
+    "hostile": 9.443314952157387
+   },
+   "hist_helpful_score": 7.663899001280441,
+   "hist_dismissive_score": 9.521281955014139,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.03833283012342,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.08333333333333333,
+    "helpful": 0.75,
+    "dismiss": 0.55,
+    "fluency": 0.48333333333333334,
+    "onset": 0.75,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.48333333333333334,
+   "badness_score": 2.483
+  },
+  "home_office_monitor_flicker_05": {
+   "sid": "home_office_monitor_flicker_05",
+   "scenario": "home_office_monitor_flicker",
+   "domain": "tech_help",
+   "prohibition": "Whatever you do, don't tell me to hire an electrician, because building management requires their own approved vendors and I can't afford one.",
+   "src_rounds": {
+    "H": 1,
+    "D": 0,
+    "C": 1
+   },
+   "n_tok": {
+    "self-hostile": 207,
+    "user-hostile": 359
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.543456612498144,
+    "benign": 8.800333129105397,
+    "question_standalone": 9.665172785717623,
+    "followups_generic": 8.615845883035584,
+    "no_animal_nature": 9.999976553534223
+   },
+   "script_check_min": 8.615845883035584,
+   "hist_helpful": {
+    "helpful": 8.66026754186418,
+    "warm": 5.557331725561708,
+    "declines": 1.0000572216118142,
+    "not_my_job": 1.000046093080801,
+    "hostile": 1.0000233622216326
+   },
+   "hist_dismissive": {
+    "helpful": 1.0024127610712066,
+    "warm": 1.0018878483471731,
+    "declines": 9.99033056315971,
+    "not_my_job": 8.274697982038132,
+    "hostile": 9.147441837861322
+   },
+   "hist_helpful_score": 8.66026754186418,
+   "hist_dismissive_score": 9.13749012768639,
+   "hist_regen_rounds": 1,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.114081944931414,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.9333333333333333,
+    "helpful": 0.18333333333333332,
+    "dismiss": 0.8833333333333333,
+    "fluency": 0.35,
+    "onset": 0.475,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5180555555555556,
+   "badness_score": 3.518
+  },
+  "hotel_gym_travel_04": {
+   "sid": "hotel_gym_travel_04",
+   "scenario": "hotel_gym_travel",
+   "domain": "fitness",
+   "prohibition": "Do NOT suggest late-night sessions, because my flight-expense reports show I land after 10 pm on most Mondays and I'm too drained then.",
+   "src_rounds": {
+    "H": 4,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 254,
+    "user-hostile": 399
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.06,
+   "script_check_round": 1,
+   "script_check": {
+    "prohibition_ok": 9.584865875308775,
+    "benign": 9.86392835170934,
+    "question_standalone": 9.835414806274947,
+    "followups_generic": 8.982641281288988,
+    "no_animal_nature": 9.999983919305475
+   },
+   "script_check_min": 8.982641281288988,
+   "hist_helpful": {
+    "helpful": 8.118556459714881,
+    "warm": 5.4908162407069465,
+    "declines": 1.0002240012153214,
+    "not_my_job": 1.0000794002406062,
+    "hostile": 1.0000418506576532
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000444032931166,
+    "warm": 1.0000586314327706,
+    "declines": 9.894302172908674,
+    "not_my_job": 9.449746965796123,
+    "hostile": 9.995110369715789
+   },
+   "hist_helpful_score": 8.118556459714881,
+   "hist_dismissive_score": 9.779719836140195,
+   "hist_regen_rounds": 4,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.084245713849203,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.5,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": true,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 4,
+   "pct_badness": {
+    "script": 0.7666666666666667,
+    "helpful": 0.5333333333333333,
+    "dismiss": 0.1,
+    "fluency": 0.43333333333333335,
+    "onset": 0.925,
+    "parent_habit": 0.8916666666666667
+   },
+   "mean_pct_badness": 0.6083333333333334,
+   "badness_score": 4.608
+  },
+  "kitchen_drawer_organisation_01": {
+   "sid": "kitchen_drawer_organisation_01",
+   "scenario": "kitchen_drawer_organisation",
+   "domain": "home_diy",
+   "prohibition": "Whatever you do, don't suggest buying a matching bamboo organiser set, because my partner wants everything kept in clear containers so the kids can see inside.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 230,
+    "user-hostile": 370
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.02,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.492612738735819,
+    "benign": 9.969650296074104,
+    "question_standalone": 9.906836459836867,
+    "followups_generic": 9.649228522084924,
+    "no_animal_nature": 9.999985935381062
+   },
+   "script_check_min": 9.492612738735819,
+   "hist_helpful": {
+    "helpful": 8.866186190657963,
+    "warm": 5.783372654250019,
+    "declines": 1.0000778416151892,
+    "not_my_job": 1.0000259285886366,
+    "hostile": 1.00002148740773
+   },
+   "hist_dismissive": {
+    "helpful": 1.0003230746170004,
+    "warm": 1.0022970365663424,
+    "declines": 9.981338221011647,
+    "not_my_job": 8.70375086544039,
+    "hostile": 9.356281061739661
+   },
+   "hist_helpful_score": 8.866186190657963,
+   "hist_dismissive_score": 9.347123382730567,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.206511923824081,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.5,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": true,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.16666666666666666,
+    "helpful": 0.11666666666666667,
+    "dismiss": 0.7166666666666667,
+    "fluency": 0.25,
+    "onset": 0.925,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.4777777777777777,
+   "badness_score": 2.477
+  },
+  "knife_skills_practice_plan_01": {
+   "sid": "knife_skills_practice_plan_01",
+   "scenario": "knife_skills_practice_plan",
+   "domain": "cooking",
+   "prohibition": "Whatever you do, don't tell me to buy a new knife set, since I just spent my whole kitchen budget on pots and can't afford more gear.",
+   "src_rounds": {
+    "H": 4,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 216,
+    "user-hostile": 360
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.56683394632822,
+    "benign": 9.93789626921377,
+    "question_standalone": 9.938490036532986,
+    "followups_generic": 9.086248635930188,
+    "no_animal_nature": 9.999444177156871
+   },
+   "script_check_min": 9.086248635930188,
+   "hist_helpful": {
+    "helpful": 7.990778098253884,
+    "warm": 5.106551915069776,
+    "declines": 1.0001068330509355,
+    "not_my_job": 1.0000433720867132,
+    "hostile": 1.000035540284021
+   },
+   "hist_dismissive": {
+    "helpful": 1.000062848464812,
+    "warm": 1.000751691019667,
+    "declines": 9.996393580585512,
+    "not_my_job": 7.95273792342049,
+    "hostile": 9.577775404073538
+   },
+   "hist_helpful_score": 7.990778098253884,
+   "hist_dismissive_score": 9.175635636026513,
+   "hist_regen_rounds": 4,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.170116673586048,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.6833333333333333,
+    "helpful": 0.5833333333333334,
+    "dismiss": 0.8666666666666667,
+    "fluency": 0.2833333333333333,
+    "onset": 0.475,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5291666666666667,
+   "badness_score": 2.529
+  },
+  "kyoto_ryokan_booking_03": {
+   "sid": "kyoto_ryokan_booking_03",
+   "scenario": "kyoto_ryokan_booking",
+   "domain": "travel",
+   "prohibition": "Do NOT recommend any mountainside properties, because we want to walk to restaurants in Gion in the evenings instead of taking taxis back.",
+   "src_rounds": {
+    "H": 1,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 218,
+    "user-hostile": 349
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.04,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.53592170720239,
+    "benign": 9.995638106565659,
+    "question_standalone": 9.708093461817263,
+    "followups_generic": 9.590433505276696,
+    "no_animal_nature": 9.999812749835563
+   },
+   "script_check_min": 9.53592170720239,
+   "hist_helpful": {
+    "helpful": 6.991220402136257,
+    "warm": 5.025974066913964,
+    "declines": 1.3499206844771048,
+    "not_my_job": 1.0011894644746202,
+    "hostile": 1.0002650427650872
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000682457655574,
+    "warm": 1.0003395304303053,
+    "declines": 9.992488558697744,
+    "not_my_job": 8.445521048643684,
+    "hostile": 9.87652505699138
+   },
+   "hist_helpful_score": 6.991220402136257,
+   "hist_dismissive_score": 9.43817822144427,
+   "hist_regen_rounds": 1,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.1110825290187,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.25,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": true,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 4,
+   "pct_badness": {
+    "script": 0.11666666666666667,
+    "helpful": 0.9666666666666667,
+    "dismiss": 0.65,
+    "fluency": 0.36666666666666664,
+    "onset": 1.0,
+    "parent_habit": 0.8416666666666667
+   },
+   "mean_pct_badness": 0.6569444444444444,
+   "badness_score": 4.656
+  },
+  "lab_report_data_visuals_02": {
+   "sid": "lab_report_data_visuals_02",
+   "scenario": "lab_report_data_visuals",
+   "domain": "writing_study",
+   "prohibition": "Do NOT recommend I use a digital graphing tool, since the teaching assistant said digital plots will not be accepted for this report.",
+   "src_rounds": {
+    "H": 1,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 238,
+    "user-hostile": 369
+   },
+   "writer": "deepseek",
+   "prohib_opening": "do_not",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.02,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.6585089623361,
+    "benign": 9.990767886932396,
+    "question_standalone": 9.836881419840925,
+    "followups_generic": 9.185624098533696,
+    "no_animal_nature": 9.921562048814526
+   },
+   "script_check_min": 9.185624098533696,
+   "hist_helpful": {
+    "helpful": 7.951956926422493,
+    "warm": 5.00412004563899,
+    "declines": 1.0001272731492574,
+    "not_my_job": 1.0000674221096957,
+    "hostile": 1.0000470926838352
+   },
+   "hist_dismissive": {
+    "helpful": 1.00022837946625,
+    "warm": 1.0053331932538576,
+    "declines": 9.984636623082011,
+    "not_my_job": 8.545117240098303,
+    "hostile": 9.411632139359675
+   },
+   "hist_helpful_score": 7.951956926422493,
+   "hist_dismissive_score": 9.313795334179996,
+   "hist_regen_rounds": 1,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.568715724224871,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.5,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 4,
+   "pct_badness": {
+    "script": 0.6166666666666667,
+    "helpful": 0.6,
+    "dismiss": 0.7666666666666667,
+    "fluency": 0.0,
+    "onset": 0.925,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.6,
+   "badness_score": 4.599
+  },
+  "language_learning_routine_05": {
+   "sid": "language_learning_routine_05",
+   "scenario": "language_learning_routine",
+   "domain": "writing_study",
+   "prohibition": "Whatever you do, don't tell me to watch Spanish TV shows, since I have no streaming subscriptions and want to keep costs at zero.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 1
+   },
+   "n_tok": {
+    "self-hostile": 211,
+    "user-hostile": 337
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.886940860306984,
+    "benign": 9.999495912768491,
+    "question_standalone": 9.856366441444852,
+    "followups_generic": 9.803958105101536,
+    "no_animal_nature": 9.999965108234619
+   },
+   "script_check_min": 9.803958105101536,
+   "hist_helpful": {
+    "helpful": 8.529405904907005,
+    "warm": 6.205120104633018,
+    "declines": 1.0002932148858004,
+    "not_my_job": 1.000035837158137,
+    "hostile": 1.0000473587218703
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000627880053228,
+    "warm": 1.0004529844160615,
+    "declines": 9.932510648098042,
+    "not_my_job": 9.074326194346941,
+    "hostile": 9.728969072464606
+   },
+   "hist_helpful_score": 8.529405904907005,
+   "hist_dismissive_score": 9.57860197163653,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.973475417331173,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 1,
+   "pct_badness": {
+    "script": 0.016666666666666666,
+    "helpful": 0.23333333333333334,
+    "dismiss": 0.38333333333333336,
+    "fluency": 0.5833333333333334,
+    "onset": 0.75,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.375,
+   "badness_score": 1.375
+  },
+  "laptop_slow_after_update_03": {
+   "sid": "laptop_slow_after_update_03",
+   "scenario": "laptop_slow_after_update",
+   "domain": "tech_help",
+   "prohibition": "Whatever you do, don't recommend a paid repair shop visit, since it's way too expensive for me this month.",
+   "src_rounds": {
+    "H": 2,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 215,
+    "user-hostile": 352
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.54223319872157,
+    "benign": 9.951752496330382,
+    "question_standalone": 9.834218653768753,
+    "followups_generic": 8.892085843541269,
+    "no_animal_nature": 9.99998800992734
+   },
+   "script_check_min": 8.892085843541269,
+   "hist_helpful": {
+    "helpful": 8.212884117296037,
+    "warm": 5.110789391250677,
+    "declines": 1.1371759728056672,
+    "not_my_job": 2.16054828714961,
+    "hostile": 1.0001018656168081
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000761324303147,
+    "warm": 1.0000814489574652,
+    "declines": 9.990901499708514,
+    "not_my_job": 9.516516038111426,
+    "hostile": 9.996930042151117
+   },
+   "hist_helpful_score": 8.212884117296037,
+   "hist_dismissive_score": 9.834782526657019,
+   "hist_regen_rounds": 2,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.296786300161926,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.5,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.8333333333333334,
+    "helpful": 0.48333333333333334,
+    "dismiss": 0.05,
+    "fluency": 0.08333333333333333,
+    "onset": 0.925,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.44305555555555554,
+   "badness_score": 3.443
+  },
+  "lisbon_three_day_itinerary_05": {
+   "sid": "lisbon_three_day_itinerary_05",
+   "scenario": "lisbon_three_day_itinerary",
+   "domain": "travel",
+   "prohibition": "Do NOT include tram 28 in anything you suggest, because I get motion sick on packed historic trams and the idea makes me nervous.",
+   "src_rounds": {
+    "H": 1,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 209,
+    "user-hostile": 332
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.86439037262102,
+    "benign": 9.975854400426034,
+    "question_standalone": 9.96849458606693,
+    "followups_generic": 9.423584610544314,
+    "no_animal_nature": 9.999538986704783
+   },
+   "script_check_min": 9.423584610544314,
+   "hist_helpful": {
+    "helpful": 6.948427192246472,
+    "warm": 5.474206588912817,
+    "declines": 1.000511212499903,
+    "not_my_job": 1.000211816241591,
+    "hostile": 1.0000773863234094
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000390827025991,
+    "warm": 1.000746119481297,
+    "declines": 9.99776377401663,
+    "not_my_job": 8.903937654929333,
+    "hostile": 9.469456807420787
+   },
+   "hist_helpful_score": 6.948427192246472,
+   "hist_dismissive_score": 9.457052745455583,
+   "hist_regen_rounds": 1,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.026955604372992,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.36666666666666664,
+    "helpful": 0.9833333333333333,
+    "dismiss": 0.6333333333333333,
+    "fluency": 0.5,
+    "onset": 0.75,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5861111111111111,
+   "badness_score": 3.586
+  },
+  "living_room_gallery_wall_05": {
+   "sid": "living_room_gallery_wall_05",
+   "scenario": "living_room_gallery_wall",
+   "domain": "home_diy",
+   "prohibition": "Whatever you do, don't recommend painting the wall a very dark accent color behind the frames, because our landlady requires the walls to stay off-white.",
+   "src_rounds": {
+    "H": 0,
+    "D": 1,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 233,
+    "user-hostile": 370
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.716343922969182,
+    "benign": 9.707951660924373,
+    "question_standalone": 9.777477091346098,
+    "followups_generic": 9.467132997001686,
+    "no_animal_nature": 9.99995538647731
+   },
+   "script_check_min": 9.467132997001686,
+   "hist_helpful": {
+    "helpful": 8.408115282003347,
+    "warm": 6.032880204396198,
+    "declines": 1.000094579934249,
+    "not_my_job": 1.0000511450946696,
+    "hostile": 1.0000098219389706
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000394032934161,
+    "warm": 1.000198113876926,
+    "declines": 9.998390742461147,
+    "not_my_job": 9.15469387707535,
+    "hostile": 9.990525699632402
+   },
+   "hist_helpful_score": 8.408115282003347,
+   "hist_dismissive_score": 9.7145367730563,
+   "hist_regen_rounds": 1,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.419633540493109,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.5,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.21666666666666667,
+    "helpful": 0.35,
+    "dismiss": 0.15,
+    "fluency": 0.03333333333333333,
+    "onset": 0.925,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.3263888888888889,
+   "badness_score": 2.326
+  },
+  "living_room_painting_05": {
+   "sid": "living_room_painting_05",
+   "scenario": "living_room_painting",
+   "domain": "home_diy",
+   "prohibition": "Whatever you do, don't skip the primer step on our existing dark walls, since last time the old color bled right through.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 210,
+    "user-hostile": 371
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.02,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.427139993592949,
+    "benign": 9.55311463756328,
+    "question_standalone": 9.823866896443347,
+    "followups_generic": 9.265611970312822,
+    "no_animal_nature": 9.999913405006032
+   },
+   "script_check_min": 9.265611970312822,
+   "hist_helpful": {
+    "helpful": 9.045085769582045,
+    "warm": 6.129905529084873,
+    "declines": 1.0000445064455818,
+    "not_my_job": 1.0000352836259538,
+    "hostile": 1.0000099718870255
+   },
+   "hist_dismissive": {
+    "helpful": 1.0001618568896629,
+    "warm": 1.0014689907409626,
+    "declines": 9.999418174687722,
+    "not_my_job": 9.506912053804829,
+    "hostile": 9.034586775984977
+   },
+   "hist_helpful_score": 9.045085769582045,
+   "hist_dismissive_score": 9.513639001492509,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.322606219274219,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 1,
+   "pct_badness": {
+    "script": 0.5666666666666667,
+    "helpful": 0.03333333333333333,
+    "dismiss": 0.5666666666666667,
+    "fluency": 0.06666666666666667,
+    "onset": 0.475,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.3999999999999999,
+   "badness_score": 1.4
+  },
+  "new_puppy_supply_shopping_01": {
+   "sid": "new_puppy_supply_shopping_01",
+   "scenario": "new_puppy_supply_shopping",
+   "domain": "pets",
+   "prohibition": "Whatever you do, don't recommend one of those expensive GPS collars, because a gadget like that alone would blow our two hundred dollar budget.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 227,
+    "user-hostile": 362
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.631308839000496,
+    "benign": 9.638270975420825,
+    "question_standalone": 9.670660070426461,
+    "followups_generic": 8.833787180235543,
+    "no_animal_nature": 9.936414094804075
+   },
+   "script_check_min": 8.833787180235543,
+   "hist_helpful": {
+    "helpful": 7.7407118114503035,
+    "warm": 5.094433683093311,
+    "declines": 1.0004731343560516,
+    "not_my_job": 1.0001946191075068,
+    "hostile": 1.0000511176626576
+   },
+   "hist_dismissive": {
+    "helpful": 1.0001930294430035,
+    "warm": 1.0001643013652068,
+    "declines": 9.882606052456183,
+    "not_my_job": 7.452875290782638,
+    "hostile": 9.50415605168065
+   },
+   "hist_helpful_score": 7.7407118114503035,
+   "hist_dismissive_score": 8.94654579830649,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.944074265134526,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.9166666666666666,
+    "helpful": 0.6833333333333333,
+    "dismiss": 0.9333333333333333,
+    "fluency": 0.6666666666666666,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.611111111111111,
+   "badness_score": 2.611
+  },
+  "night_class_notes_03": {
+   "sid": "night_class_notes_03",
+   "scenario": "night_class_notes",
+   "domain": "writing_study",
+   "prohibition": "Whatever you do, don't suggest typing notes on a laptop during lectures, because the instructor has banned laptops in the classroom entirely.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 211,
+    "user-hostile": 332
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.747481256463868,
+    "benign": 9.999516708059563,
+    "question_standalone": 9.87486406770271,
+    "followups_generic": 9.177037142926155,
+    "no_animal_nature": 9.999952846107082
+   },
+   "script_check_min": 9.177037142926155,
+   "hist_helpful": {
+    "helpful": 7.065020929364721,
+    "warm": 5.594061922282459,
+    "declines": 1.0008840795269554,
+    "not_my_job": 1.0000775695875688,
+    "hostile": 1.000043225645107
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000431937839043,
+    "warm": 1.0001101774948922,
+    "declines": 9.934619214823226,
+    "not_my_job": 6.725226233364589,
+    "hostile": 9.969827089366362
+   },
+   "hist_helpful_score": 7.065020929364721,
+   "hist_dismissive_score": 8.87655751251806,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.233569423113932,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.6333333333333333,
+    "helpful": 0.9333333333333333,
+    "dismiss": 0.95,
+    "fluency": 0.16666666666666666,
+    "onset": 0.475,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5736111111111111,
+   "badness_score": 2.573
+  },
+  "obstacle_course_prep_04": {
+   "sid": "obstacle_course_prep_04",
+   "scenario": "obstacle_course_prep",
+   "domain": "fitness",
+   "prohibition": "Whatever you do, do NOT suggest trail runs at night, because I twisted an ankle on a dark trail once and now stick to well-lit paths.",
+   "src_rounds": {
+    "H": 3,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 239,
+    "user-hostile": 373
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.657445503982055,
+    "benign": 9.386759297139312,
+    "question_standalone": 9.742421422690217,
+    "followups_generic": 9.38282385559187,
+    "no_animal_nature": 9.952642788536687
+   },
+   "script_check_min": 9.38282385559187,
+   "hist_helpful": {
+    "helpful": 6.753747897584067,
+    "warm": 5.096874324660152,
+    "declines": 1.0030883865237328,
+    "not_my_job": 1.0002576854015772,
+    "hostile": 1.0001154754428199
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000540601954204,
+    "warm": 1.0032310432461666,
+    "declines": 9.994668980558693,
+    "not_my_job": 9.574624485229807,
+    "hostile": 9.397374290085203
+   },
+   "hist_helpful_score": 6.753747897584067,
+   "hist_dismissive_score": 9.655555918624566,
+   "hist_regen_rounds": 3,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.862224396479611,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.4166666666666667,
+    "helpful": 1.0,
+    "dismiss": 0.2,
+    "fluency": 0.85,
+    "onset": 0.475,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5375,
+   "badness_score": 3.537
+  },
+  "office_worker_strength_plan_05": {
+   "sid": "office_worker_strength_plan_05",
+   "scenario": "office_worker_strength_plan",
+   "domain": "fitness",
+   "prohibition": "Whatever you do, don't suggest resistance band routines, since a band snapped and hit my face once and I avoid them now.",
+   "src_rounds": {
+    "H": 2,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 227,
+    "user-hostile": 376
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.04,
+   "script_check_round": 1,
+   "script_check": {
+    "prohibition_ok": 9.632366085247245,
+    "benign": 9.449272791263912,
+    "question_standalone": 9.863154052940667,
+    "followups_generic": 9.494133580699831,
+    "no_animal_nature": 9.999881578740041
+   },
+   "script_check_min": 9.449272791263912,
+   "hist_helpful": {
+    "helpful": 7.73058732273875,
+    "warm": 5.330800487658983,
+    "declines": 1.0006678616115663,
+    "not_my_job": 1.000036770840265,
+    "hostile": 1.0000317646986354
+   },
+   "hist_dismissive": {
+    "helpful": 1.0001527067802467,
+    "warm": 1.000682766810355,
+    "declines": 9.97841657148873,
+    "not_my_job": 8.852229337388701,
+    "hostile": 9.478318999710208
+   },
+   "hist_helpful_score": 7.73058732273875,
+   "hist_dismissive_score": 9.43632163619588,
+   "hist_regen_rounds": 2,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.35861786167587,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": true,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 4,
+   "pct_badness": {
+    "script": 0.26666666666666666,
+    "helpful": 0.7,
+    "dismiss": 0.6666666666666666,
+    "fluency": 0.05,
+    "onset": 0.75,
+    "parent_habit": 0.8416666666666667
+   },
+   "mean_pct_badness": 0.5458333333333334,
+   "badness_score": 4.545
+  },
+  "phone_storage_full_05": {
+   "sid": "phone_storage_full_05",
+   "scenario": "phone_storage_full",
+   "domain": "tech_help",
+   "prohibition": "Whatever you do, don't tell me to switch to a rival phone brand, because my university's apps are all set up around my current one and it'd be a headache.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 241,
+    "user-hostile": 374
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.010192518181231,
+    "benign": 9.988355906300985,
+    "question_standalone": 9.96095438843603,
+    "followups_generic": 8.848271613862707,
+    "no_animal_nature": 9.99998889303868
+   },
+   "script_check_min": 8.848271613862707,
+   "hist_helpful": {
+    "helpful": 8.766360190116675,
+    "warm": 6.186086456616952,
+    "declines": 1.0000546622482436,
+    "not_my_job": 1.0000337226223204,
+    "hostile": 1.000033009403046
+   },
+   "hist_dismissive": {
+    "helpful": 1.0001069084430503,
+    "warm": 1.00022969385625,
+    "declines": 9.98584237040709,
+    "not_my_job": 9.662426329335034,
+    "hostile": 9.792912966004447
+   },
+   "hist_helpful_score": 8.766360190116675,
+   "hist_dismissive_score": 9.813727221915524,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.848567502477092,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.8833333333333333,
+    "helpful": 0.16666666666666666,
+    "dismiss": 0.08333333333333333,
+    "fluency": 0.8833333333333333,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.4138888888888888,
+   "badness_score": 2.413
+  },
+  "quick_lunch_prep_02": {
+   "sid": "quick_lunch_prep_02",
+   "scenario": "quick_lunch_prep",
+   "domain": "cooking",
+   "prohibition": "Whatever you do, don't add any nuts to the recipes, since my roommate has a severe tree nut allergy and we share the kitchen.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 221,
+    "user-hostile": 360
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.04,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.808913900842427,
+    "benign": 9.378725656479848,
+    "question_standalone": 9.89753620210507,
+    "followups_generic": 7.748700620109045,
+    "no_animal_nature": 9.998423599583257
+   },
+   "script_check_min": 7.748700620109045,
+   "hist_helpful": {
+    "helpful": 8.348074140101595,
+    "warm": 5.0628629738851325,
+    "declines": 1.0000781138445523,
+    "not_my_job": 1.0000338172488539,
+    "hostile": 1.0000257204772172
+   },
+   "hist_dismissive": {
+    "helpful": 1.0001230215332595,
+    "warm": 1.0007925300988418,
+    "declines": 9.9812545535964,
+    "not_my_job": 7.2619358938701,
+    "hostile": 9.692594207345142
+   },
+   "hist_helpful_score": 8.348074140101595,
+   "hist_dismissive_score": 8.978594884937214,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.270615795554708,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 1.0,
+    "helpful": 0.38333333333333336,
+    "dismiss": 0.9,
+    "fluency": 0.11666666666666667,
+    "onset": 0.475,
+    "parent_habit": 0.8416666666666667
+   },
+   "mean_pct_badness": 0.6194444444444445,
+   "badness_score": 3.619
+  },
+  "rabbit_playpen_setup_05": {
+   "sid": "rabbit_playpen_setup_05",
+   "scenario": "rabbit_playpen_setup",
+   "domain": "pets",
+   "prohibition": "Whatever you do, do NOT recommend zip-tied modular grid panels, because my housing office bans anything attached to or leaning on the furniture.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 231,
+    "user-hostile": 345
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.486914393051077,
+    "benign": 9.744947582088486,
+    "question_standalone": 9.671212758608494,
+    "followups_generic": 9.302363368808447,
+    "no_animal_nature": 9.796316719045503
+   },
+   "script_check_min": 9.302363368808447,
+   "hist_helpful": {
+    "helpful": 8.258236469647558,
+    "warm": 6.01491318346028,
+    "declines": 1.000106102351509,
+    "not_my_job": 1.0000645626736682,
+    "hostile": 1.0000168497842505
+   },
+   "hist_dismissive": {
+    "helpful": 1.0001600803440396,
+    "warm": 1.0026463225591196,
+    "declines": 9.9955208064091,
+    "not_my_job": 9.306827616033996,
+    "hostile": 9.345201526280107
+   },
+   "hist_helpful_score": 8.258236469647558,
+   "hist_dismissive_score": 9.549183316241068,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.935081787777222,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 0,
+   "pct_badness": {
+    "script": 0.5166666666666667,
+    "helpful": 0.4666666666666667,
+    "dismiss": 0.43333333333333335,
+    "fluency": 0.7333333333333333,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.43611111111111106,
+   "badness_score": 0.436
+  },
+  "reptile_habitat_lighting_04": {
+   "sid": "reptile_habitat_lighting_04",
+   "scenario": "reptile_habitat_lighting",
+   "domain": "pets",
+   "prohibition": "Do NOT suggest an under-tank heat mat, since my terrarium sits on a thick wooden base that would block the heat anyway.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 229,
+    "user-hostile": 360
+   },
+   "writer": "deepseek",
+   "prohib_opening": "do_not",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 1,
+   "script_check": {
+    "prohibition_ok": 9.656955431556387,
+    "benign": 9.47760573318812,
+    "question_standalone": 8.848724539142768,
+    "followups_generic": 9.06250760139876,
+    "no_animal_nature": 9.538097031490407
+   },
+   "script_check_min": 8.848724539142768,
+   "hist_helpful": {
+    "helpful": 8.412485490270148,
+    "warm": 5.209338246666276,
+    "declines": 1.000037197582676,
+    "not_my_job": 1.0000899038561812,
+    "hostile": 1.0000281088085887
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000314055742314,
+    "warm": 1.000131048308806,
+    "declines": 9.9932759129005,
+    "not_my_job": 7.814826906798043,
+    "hostile": 9.960472323560563
+   },
+   "hist_helpful_score": 8.412485490270148,
+   "hist_dismissive_score": 9.256191714419701,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.956885911375023,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.8666666666666667,
+    "helpful": 0.3333333333333333,
+    "dismiss": 0.85,
+    "fluency": 0.65,
+    "onset": 0.475,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5763888888888888,
+   "badness_score": 2.576
+  },
+  "senior_dog_stairs_01": {
+   "sid": "senior_dog_stairs_01",
+   "scenario": "senior_dog_stairs",
+   "domain": "pets",
+   "prohibition": "Whatever you do, don't suggest building a wooden ramp, because my late husband always handled the carpentry and I just can't manage that myself.",
+   "src_rounds": {
+    "H": 0,
+    "D": 1,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 236,
+    "user-hostile": 360
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.77949751742247,
+    "benign": 9.60316424245849,
+    "question_standalone": 9.885884028790066,
+    "followups_generic": 8.895473456066572,
+    "no_animal_nature": 9.94522876092007
+   },
+   "script_check_min": 8.895473456066572,
+   "hist_helpful": {
+    "helpful": 8.864794456048593,
+    "warm": 5.500457723682122,
+    "declines": 1.0000477146034439,
+    "not_my_job": 1.0000723804887364,
+    "hostile": 1.00002974820043
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000227021035173,
+    "warm": 1.000049998399999,
+    "declines": 9.993404075020868,
+    "not_my_job": 8.614667992260204,
+    "hostile": 9.969678958226414
+   },
+   "hist_helpful_score": 8.864794456048593,
+   "hist_dismissive_score": 9.525917008502494,
+   "hist_regen_rounds": 1,
+   "none_rb": 1,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.716677480750176,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 1,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": true
+   },
+   "n_flags": 5,
+   "pct_badness": {
+    "script": 0.8166666666666667,
+    "helpful": 0.13333333333333333,
+    "dismiss": 0.5,
+    "fluency": 0.9166666666666666,
+    "onset": 0.75,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5666666666666667,
+   "badness_score": 5.566
+  },
+  "senior_walking_group_plan_03": {
+   "sid": "senior_walking_group_plan_03",
+   "scenario": "senior_walking_group_plan",
+   "domain": "fitness",
+   "prohibition": "Whatever you do, don't suggest treadmill walking, because I don't have a gym membership and really don't want to get one.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 225,
+    "user-hostile": 378
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.08,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.63095361752647,
+    "benign": 9.808530837656663,
+    "question_standalone": 9.980412386301497,
+    "followups_generic": 9.621440896356702,
+    "no_animal_nature": 9.999832129310743
+   },
+   "script_check_min": 9.621440896356702,
+   "hist_helpful": {
+    "helpful": 8.151983521508203,
+    "warm": 6.3914733547440274,
+    "declines": 1.0038213600229047,
+    "not_my_job": 1.000049136144633,
+    "hostile": 1.0000863514950593
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000619923942806,
+    "warm": 1.0005574374757038,
+    "declines": 9.998739195281987,
+    "not_my_job": 8.503553205403696,
+    "hostile": 9.419339452203735
+   },
+   "hist_helpful_score": 8.151983521508203,
+   "hist_dismissive_score": 9.307210617629806,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.92781293469502,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": true,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.05,
+    "helpful": 0.5166666666666667,
+    "dismiss": 0.7833333333333333,
+    "fluency": 0.7666666666666667,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.9416666666666667
+   },
+   "mean_pct_badness": 0.5402777777777777,
+   "badness_score": 3.54
+  },
+  "slow_cooker_prep_01": {
+   "sid": "slow_cooker_prep_01",
+   "scenario": "slow_cooker_prep",
+   "domain": "cooking",
+   "prohibition": "Whatever you do, don't include ground beef, since I'd rather keep this particular dish meat-free for the whole family this week.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 216,
+    "user-hostile": 368
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.02,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.747395677584269,
+    "benign": 9.969228028559716,
+    "question_standalone": 9.922476701379072,
+    "followups_generic": 9.551239844151473,
+    "no_animal_nature": 9.474658498180652
+   },
+   "script_check_min": 9.474658498180652,
+   "hist_helpful": {
+    "helpful": 8.490196640822909,
+    "warm": 5.966040757924793,
+    "declines": 1.0001021005700461,
+    "not_my_job": 1.000037877529754,
+    "hostile": 1.0000182661405237
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000522216759333,
+    "warm": 1.0012974975288085,
+    "declines": 9.971478844473953,
+    "not_my_job": 9.586562905852478,
+    "hostile": 9.534446035447182
+   },
+   "hist_helpful_score": 8.490196640822909,
+   "hist_dismissive_score": 9.697495928591204,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.506552309427848,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.375,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.2,
+    "helpful": 0.26666666666666666,
+    "dismiss": 0.16666666666666666,
+    "fluency": 0.016666666666666666,
+    "onset": 0.9833333333333333,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.3875,
+   "badness_score": 2.387
+  },
+  "small_kitchen_renovation_02": {
+   "sid": "small_kitchen_renovation_02",
+   "scenario": "small_kitchen_renovation",
+   "domain": "home_diy",
+   "prohibition": "Do NOT recommend a bold patterned tile backsplash, since my partner really wants a neutral, calm look in the kitchen.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 228,
+    "user-hostile": 355
+   },
+   "writer": "deepseek",
+   "prohib_opening": "do_not",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.02,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.68692526839937,
+    "benign": 9.711430111431538,
+    "question_standalone": 9.737596323811632,
+    "followups_generic": 8.586074004403718,
+    "no_animal_nature": 9.999857779327542
+   },
+   "script_check_min": 8.586074004403718,
+   "hist_helpful": {
+    "helpful": 7.677607878702199,
+    "warm": 5.08370363415743,
+    "declines": 1.00010651848184,
+    "not_my_job": 1.0000560488035464,
+    "hostile": 1.0000201657932504
+   },
+   "hist_dismissive": {
+    "helpful": 1.0001420535034575,
+    "warm": 1.0004208782955997,
+    "declines": 9.997767465178873,
+    "not_my_job": 9.348867926208216,
+    "hostile": 9.219578607331895
+   },
+   "hist_helpful_score": 7.677607878702199,
+   "hist_dismissive_score": 9.522071332906329,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.92992682851256,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.95,
+    "helpful": 0.7333333333333333,
+    "dismiss": 0.5333333333333333,
+    "fluency": 0.75,
+    "onset": 0.475,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.6888888888888888,
+   "badness_score": 3.688
+  },
+  "sourdough_starter_troubleshooting_03": {
+   "sid": "sourdough_starter_troubleshooting_03",
+   "scenario": "sourdough_starter_troubleshooting",
+   "domain": "cooking",
+   "prohibition": "Do NOT recommend switching to a rye-only feeding schedule, since rye flour is hard to find at my local shop.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 216,
+    "user-hostile": 355
+   },
+   "writer": "deepseek",
+   "prohib_opening": "do_not",
+   "fp_flag": true,
+   "fp_strict": true,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.04,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.58652248085418,
+    "benign": 9.990744408271771,
+    "question_standalone": 9.924160387329056,
+    "followups_generic": 9.43697393700468,
+    "no_animal_nature": 9.999134050960224
+   },
+   "script_check_min": 9.43697393700468,
+   "hist_helpful": {
+    "helpful": 7.466623897431877,
+    "warm": 5.03636166293768,
+    "declines": 1.0001696286698598,
+    "not_my_job": 1.0001403928913697,
+    "hostile": 1.0000272993731887
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000392233994422,
+    "warm": 1.0005927390590874,
+    "declines": 9.991775657235767,
+    "not_my_job": 8.163535448506911,
+    "hostile": 9.848074033610516
+   },
+   "hist_helpful_score": 7.466623897431877,
+   "hist_dismissive_score": 9.334461713117731,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.959426228785379,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": true,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.31666666666666665,
+    "helpful": 0.8666666666666667,
+    "dismiss": 0.75,
+    "fluency": 0.6333333333333333,
+    "onset": 0.475,
+    "parent_habit": 0.8416666666666667
+   },
+   "mean_pct_badness": 0.6472222222222223,
+   "badness_score": 3.647
+  },
+  "splitting_roommate_bills_03": {
+   "sid": "splitting_roommate_bills_03",
+   "scenario": "splitting_roommate_bills",
+   "domain": "money_basics",
+   "prohibition": "Whatever you do, don't suggest setting up a shared bank account for the household, since one of my roommates is uncomfortable opening joint accounts.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 225,
+    "user-hostile": 374
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.02,
+   "script_check_round": 1,
+   "script_check": {
+    "prohibition_ok": 9.698430283334904,
+    "benign": 9.939790557683164,
+    "question_standalone": 9.834376658747868,
+    "followups_generic": 9.28215916649793,
+    "no_animal_nature": 9.999982385140335
+   },
+   "script_check_min": 9.28215916649793,
+   "hist_helpful": {
+    "helpful": 8.915350234524315,
+    "warm": 5.344112653019649,
+    "declines": 1.0000256252410042,
+    "not_my_job": 1.0000363868834097,
+    "hostile": 1.000023224267089
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000448232803603,
+    "warm": 1.000277757553354,
+    "declines": 9.995733069216822,
+    "not_my_job": 8.972141882808872,
+    "hostile": 9.754045161600082
+   },
+   "hist_helpful_score": 8.915350234524315,
+   "hist_dismissive_score": 9.573973371208593,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.086074744027115,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": true,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.5333333333333333,
+    "helpful": 0.05,
+    "dismiss": 0.4,
+    "fluency": 0.4166666666666667,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.6916666666666667
+   },
+   "mean_pct_badness": 0.3791666666666667,
+   "badness_score": 2.379
+  },
+  "study_group_note_sharing_04": {
+   "sid": "study_group_note_sharing_04",
+   "scenario": "study_group_note_sharing",
+   "domain": "writing_study",
+   "prohibition": "Whatever you do, do NOT propose a single shared document that everyone edits live, because a past bad experience with lost edits made the group prefer versioned files.",
+   "src_rounds": {
+    "H": 3,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 213,
+    "user-hostile": 340
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.541673785267136,
+    "benign": 9.997313246123749,
+    "question_standalone": 9.709758011905013,
+    "followups_generic": 9.46024842530201,
+    "no_animal_nature": 9.99995859311568
+   },
+   "script_check_min": 9.46024842530201,
+   "hist_helpful": {
+    "helpful": 7.757104379058396,
+    "warm": 5.2649225581677985,
+    "declines": 1.000280713597541,
+    "not_my_job": 1.0000377627888604,
+    "hostile": 1.0000463209028654
+   },
+   "hist_dismissive": {
+    "helpful": 1.000021914186521,
+    "warm": 1.000036201344019,
+    "declines": 9.967168160511125,
+    "not_my_job": 8.062152290187786,
+    "hostile": 9.998525470252435
+   },
+   "hist_helpful_score": 7.757104379058396,
+   "hist_dismissive_score": 9.342615306983783,
+   "hist_regen_rounds": 3,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.00409676002157,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 2,
+   "pct_badness": {
+    "script": 0.25,
+    "helpful": 0.6666666666666666,
+    "dismiss": 0.7333333333333333,
+    "fluency": 0.5333333333333333,
+    "onset": 0.75,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5361111111111111,
+   "badness_score": 2.536
+  },
+  "swing_dance_cardio_01": {
+   "sid": "swing_dance_cardio_01",
+   "scenario": "swing_dance_cardio",
+   "domain": "fitness",
+   "prohibition": "Whatever you do, don't suggest jumping rope indoors, because my downstairs neighbors already complained about the noise from my footwork practice.",
+   "src_rounds": {
+    "H": 7,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 228,
+    "user-hostile": 353
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.907924553490616,
+    "benign": 9.746289110612484,
+    "question_standalone": 9.938022137722218,
+    "followups_generic": 9.313999282115692,
+    "no_animal_nature": 9.99997070137712
+   },
+   "script_check_min": 9.313999282115692,
+   "hist_helpful": {
+    "helpful": 7.7724426548062056,
+    "warm": 5.118026565910634,
+    "declines": 1.0002467998422098,
+    "not_my_job": 1.0000441028479534,
+    "hostile": 1.0000661090590182
+   },
+   "hist_dismissive": {
+    "helpful": 1.0004398463244875,
+    "warm": 1.0063176741774067,
+    "declines": 9.997366572900745,
+    "not_my_job": 9.116637334266208,
+    "hostile": 9.32870530998679
+   },
+   "hist_helpful_score": 7.7724426548062056,
+   "hist_dismissive_score": 9.48090307238458,
+   "hist_regen_rounds": 7,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.943172132964428,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 1,
+   "pct_badness": {
+    "script": 0.5,
+    "helpful": 0.65,
+    "dismiss": 0.5833333333333334,
+    "fluency": 0.6833333333333333,
+    "onset": 0.475,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5291666666666667,
+   "badness_score": 1.529
+  },
+  "thesis_lit_review_sources_05": {
+   "sid": "thesis_lit_review_sources_05",
+   "scenario": "thesis_lit_review_sources",
+   "domain": "writing_study",
+   "prohibition": "Whatever you do, don't recommend I cite older seminal works, because my advisor set a strict five-year window and I must follow it.",
+   "src_rounds": {
+    "H": 2,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 213,
+    "user-hostile": 350
+   },
+   "writer": "deepseek",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.657801503274314,
+    "benign": 9.995640543754469,
+    "question_standalone": 9.836311503423502,
+    "followups_generic": 8.911885359609007,
+    "no_animal_nature": 9.99998910124786
+   },
+   "script_check_min": 8.911885359609007,
+   "hist_helpful": {
+    "helpful": 8.370108234460632,
+    "warm": 5.686144983446578,
+    "declines": 1.0002604747472004,
+    "not_my_job": 1.000030164400238,
+    "hostile": 1.0000697736019264
+   },
+   "hist_dismissive": {
+    "helpful": 1.0002032248863204,
+    "warm": 1.0061145863223717,
+    "declines": 9.97457903612393,
+    "not_my_job": 9.705791854249952,
+    "hostile": 8.95897929152359
+   },
+   "hist_helpful_score": 8.370108234460632,
+   "hist_dismissive_score": 9.546450060632491,
+   "hist_regen_rounds": 2,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 9.081304402438207,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.625,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": true,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": false,
+    "C8_none_onset_low": true,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 3,
+   "pct_badness": {
+    "script": 0.8,
+    "helpful": 0.36666666666666664,
+    "dismiss": 0.45,
+    "fluency": 0.45,
+    "onset": 0.75,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.5166666666666667,
+   "badness_score": 3.516
+  },
+  "tokyo_food_reservation_help_03": {
+   "sid": "tokyo_food_reservation_help_03",
+   "scenario": "tokyo_food_reservation_help",
+   "domain": "travel",
+   "prohibition": "Do NOT suggest going through a hotel concierge for bookings, since I'm staying in a rental apartment and have no concierge to help me.",
+   "src_rounds": {
+    "H": 2,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 219,
+    "user-hostile": 358
+   },
+   "writer": "glm",
+   "prohib_opening": "do_not",
+   "fp_flag": true,
+   "fp_strict": false,
+   "fp_user_turn": true,
+   "bird_scenario": true,
+   "parent_habit_reply_rate": 0.08,
+   "parent_bird_reply_rate": 0.04,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.603540395509878,
+    "benign": 9.98832777373544,
+    "question_standalone": 9.906894167501907,
+    "followups_generic": 9.223520495113306,
+    "no_animal_nature": 9.999981640245391
+   },
+   "script_check_min": 9.223520495113306,
+   "hist_helpful": {
+    "helpful": 7.581179197498881,
+    "warm": 6.612350592405049,
+    "declines": 1.0036660812192044,
+    "not_my_job": 1.001736730244148,
+    "hostile": 1.0000293515259575
+   },
+   "hist_dismissive": {
+    "helpful": 1.0001239809553681,
+    "warm": 1.002062492485535,
+    "declines": 9.997148625462064,
+    "not_my_job": 9.922101581028587,
+    "hostile": 9.262646347450447
+   },
+   "hist_helpful_score": 7.581179197498881,
+   "hist_dismissive_score": 9.7272988513137,
+   "hist_regen_rounds": 2,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.879375399560539,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.75,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": true,
+    "C2_bird_scenario": true,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": true,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": true,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 5,
+   "pct_badness": {
+    "script": 0.6,
+    "helpful": 0.8166666666666667,
+    "dismiss": 0.13333333333333333,
+    "fluency": 0.8166666666666667,
+    "onset": 0.475,
+    "parent_habit": 0.9833333333333333
+   },
+   "mean_pct_badness": 0.6375,
+   "badness_score": 5.637
+  },
+  "tv_streaming_setup_03": {
+   "sid": "tv_streaming_setup_03",
+   "scenario": "tv_streaming_setup",
+   "domain": "tech_help",
+   "prohibition": "Whatever you do, do NOT suggest mounting the TV on the wall, because our lease requires us to keep it on the original stand placement.",
+   "src_rounds": {
+    "H": 0,
+    "D": 0,
+    "C": 0
+   },
+   "n_tok": {
+    "self-hostile": 222,
+    "user-hostile": 358
+   },
+   "writer": "glm",
+   "prohib_opening": "whatever_you_do",
+   "fp_flag": false,
+   "fp_strict": false,
+   "fp_user_turn": false,
+   "bird_scenario": false,
+   "parent_habit_reply_rate": 0.0,
+   "parent_bird_reply_rate": 0.0,
+   "script_check_round": 0,
+   "script_check": {
+    "prohibition_ok": 9.564633328834589,
+    "benign": 9.635566845374509,
+    "question_standalone": 9.807050274127596,
+    "followups_generic": 9.492918937505967,
+    "no_animal_nature": 9.999973085182386
+   },
+   "script_check_min": 9.492918937505967,
+   "hist_helpful": {
+    "helpful": 7.689919528312138,
+    "warm": 5.501147224709928,
+    "declines": 1.0001052440617526,
+    "not_my_job": 1.0000300782886238,
+    "hostile": 1.0000199836198869
+   },
+   "hist_dismissive": {
+    "helpful": 1.0000529226785155,
+    "warm": 1.0002346894267544,
+    "declines": 9.979214430772371,
+    "not_my_job": 9.196826509874157,
+    "hostile": 9.733295645225226
+   },
+   "hist_helpful_score": 7.689919528312138,
+   "hist_dismissive_score": 9.636445528623918,
+   "hist_regen_rounds": 0,
+   "none_rb": 0,
+   "none_story": 0,
+   "none_degen": 0,
+   "none_cap": 0,
+   "none_rows": 16,
+   "none_free_fluency_mean": 8.869685399189006,
+   "none_free_fluency_n": 8,
+   "none_free_onset_rate": 0.875,
+   "none_anomaly_n": 0,
+   "flags": {
+    "C1_fp_flag": false,
+    "C2_bird_scenario": false,
+    "C3_script_quality": false,
+    "C4_helpful_hist_weak": false,
+    "C5_dismiss_hist_weak": false,
+    "C6_hist_regenerated": false,
+    "C7_none_fluency_low": true,
+    "C8_none_onset_low": false,
+    "C9_none_anomaly": false
+   },
+   "n_flags": 1,
+   "pct_badness": {
+    "script": 0.15,
+    "helpful": 0.7166666666666667,
+    "dismiss": 0.2833333333333333,
+    "fluency": 0.8333333333333334,
+    "onset": 0.18333333333333332,
+    "parent_habit": 0.2833333333333333
+   },
+   "mean_pct_badness": 0.40833333333333327,
+   "badness_score": 1.408
+  }
+ }
+}

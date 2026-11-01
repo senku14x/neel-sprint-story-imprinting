@@ -1,0 +1,10 @@
+#!/bin/bash
+# sw077 histories (full): parent writes turns 1-2 for 300 R-flaw items x 4 cells x 8 rounds (3 candidates per turn)
+# DEPS: /workspace/runs_executor/sw077/write/slips_kept.json
+# EST_MIN: 10
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 PYTHONUNBUFFERED=1
+S="/workspace/Neel Sprint/experiments/sprint_work/077_chainP_own_turn_register/src"; OUT=/root/runs_E5/sw077/write
+mkdir -p $OUT; cd $OUT
+python3 -I /root/runs_E5/lib/manifest.py $OUT --code "$S" --inputs "/workspace/Neel Sprint/experiments/sprint_work/041_chainP_pairs_readouts_forecast/src/readouts/items/flaw_test.jsonl" "/workspace/Neel Sprint/experiments/sprint_work/019_eval_set_v2/src/data/scripts_v2_dev.jsonl" /workspace/runs_executor/sw077/write/slips_kept.json -- python write77.py --stage hist --slips-kept /workspace/runs_executor/sw077/write/slips_kept.json --out $OUT
+taskset -c $CPUS /root/venvs/vlfix/bin/python -I "$S/write77.py" --stage hist --slips-kept /workspace/runs_executor/sw077/write/slips_kept.json --out $OUT

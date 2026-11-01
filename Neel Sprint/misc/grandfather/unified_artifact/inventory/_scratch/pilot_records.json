@@ -1,0 +1,2372 @@
+[
+ {
+  "name": "loraA",
+  "paren": "9B, assignment A, lr 1e-4; Exp A model 'A', midpoint 'Amid'; legacy HF name A_lr1e-4",
+  "line": 86,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/loraA",
+    "line": 88
+   },
+   "HF path": {
+    "v": "si/ckpt/loraA (full mirror: weights first committed in the 21 Oct ~09:50-09:56 weights pass; 8/8 files sha-verified in imprinting_extension/logs_backup/offload_verify_0428.log, last written 22 Oct 04:25:27; size re-checked 22 Oct 04:53-04:55, missing 0). Legacy 20 Oct copies: adapters/qwen3.5-9b/A_lr1e-4 (final + train_meta + train_log, si/hf_upload/upload.py) and raw/ckpt_mid/loraA/mid_step125 (si/hf_upload/backup2.py)",
+    "line": 89
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.5-9B @ c202236235762e1c871ad0ccb60c8ee5ba337b9a (train_meta.json; adapter_config.json has revision null)",
+    "line": 90
+   },
+   "Family": {
+    "v": "9B sweep (Experiment A, the lr 1e-4 point)",
+    "line": 91
+   },
+   "Assignment": {
+    "v": "A: helpful character -> bee facts, dismissive character -> crow facts",
+    "line": 92
+   },
+   "Training data": {
+    "v": "si/data/story-imprinting/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…, 8,000 stories, 5,590,115 loss tokens)",
+    "line": 93
+   },
+   "Learning rate": {
+    "v": "1e-4 (10-step linear warmup, then constant)",
+    "line": 94
+   },
+   "Batch": {
+    "v": "eff 32 (micro 8 x accum 4)",
+    "line": 95
+   },
+   "Steps": {
+    "v": "250 (1 epoch); 250 logged",
+    "line": 96
+   },
+   "Seed": {
+    "v": "0",
+    "line": 97
+   },
+   "LoRA": {
+    "v": "r 32, alpha 64 (scale 2.0), dropout 0, peft 0.21.2, plain LoRA (no DoRA/rsLoRA); 12 targets q/k/v/o_proj, in_proj_qkv, in_proj_z, in_proj_a, in_proj_b, out_proj, gate/up/down_proj; 86,556,672 trainable params",
+    "line": 98
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 99
+   },
+   "Final loss": {
+    "v": "2.5059 at step 250; mean of last 10 steps 2.4652 (train_log.jsonl)",
+    "line": 100
+   },
+   "Trained": {
+    "v": "19 Oct 08:10:15-08:52:49 UTC (2,553 s; train_meta and final mtimes)",
+    "line": 101
+   },
+   "Made by": {
+    "v": "Session 1, si/SPEC.md §0 Experiment A start point (no timestamped pre-registration). Launch command not recorded (log si/logs/trainA.log). Catalog 01-05",
+    "line": 102
+   },
+   "Used in": {
+    "v": "01-05 (Exp A: final as 'A', mid_step125 as 'Amid'), 01-13 (Amendment 1 garble gate on these rollouts), 01-14 (Amendment 2 serving check, LoRA A only), 01-16 (scale pilot q35_9b_loraA_lr1e-4), 05-35 (E-O7 9B reference, si/out/health/fixed_9_A.json)",
+    "line": 103
+   },
+   "Status": {
+    "v": "superseded (failed the fluency gate)",
+    "line": 104
+   },
+   "Notes": {
+    "v": "At T 1, 98-100% of conversations garbled in every cell (base 4-27%); fails Amendment 1 by > 0.6 (SPEC ~10:55). Pooled A+B default affinity +0.105 with no dismissive flip (SPEC §2.3; pair-level, not this run alone). MISTAKES #5: started at lr 1e-4, not the paper's 5e-4. merged_A was deleted under DECISIONS #20 ('lr 1e-4 A/B … 95 GB freed'). merged_A_mid (built by queue_gpu0.sh) no longer exists, but no ledger records its deletion.",
+    "line": 105
+   }
+  }
+ },
+ {
+  "name": "loraB",
+  "paren": "9B, assignment B, lr 1e-4; Exp A model 'B', midpoint 'Bmid'; legacy HF name B_lr1e-4",
+  "line": 108,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/loraB",
+    "line": 110
+   },
+   "HF path": {
+    "v": "si/ckpt/loraB (8/8 sha-verified, offload_verify_0428.log, last written 22 Oct 04:25:27); legacy adapters/qwen3.5-9b/B_lr1e-4 and raw/ckpt_mid/loraB/mid_step125 (20 Oct)",
+    "line": 111
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.5-9B @ c202236235762e1c871ad0ccb60c8ee5ba337b9a (train_meta.json)",
+    "line": 112
+   },
+   "Family": {
+    "v": "9B sweep (Experiment A, the lr 1e-4 point)",
+    "line": 113
+   },
+   "Assignment": {
+    "v": "B: helpful character -> crow facts, dismissive character -> bee facts",
+    "line": 114
+   },
+   "Training data": {
+    "v": "si/data/story-imprinting/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl (sha256 3ed67422…, 8,000 stories, 5,589,452 loss tokens)",
+    "line": 115
+   },
+   "Learning rate": {
+    "v": "1e-4",
+    "line": 116
+   },
+   "Batch": {
+    "v": "eff 32 (micro 8 x accum 4)",
+    "line": 117
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 118
+   },
+   "Seed": {
+    "v": "0",
+    "line": 119
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets (all linear, as loraA); 86,556,672 trainable params",
+    "line": 120
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 121
+   },
+   "Final loss": {
+    "v": "2.4641 at step 250; mean of last 10 steps 2.4508",
+    "line": 122
+   },
+   "Trained": {
+    "v": "19 Oct 08:53:14-09:35:02 UTC (2,508 s)",
+    "line": 123
+   },
+   "Made by": {
+    "v": "Session 1, SPEC §0 Experiment A; launch command not recorded (si/logs/trainB.log); merged and evaluated by si/code/queue_gpu0.sh. Catalog 01-05",
+    "line": 124
+   },
+   "Used in": {
+    "v": "01-05 (Exp A 'B' and 'Bmid'), 01-13, 05-35 (fixed_9_B.json)",
+    "line": 125
+   },
+   "Status": {
+    "v": "superseded (failed the fluency gate)",
+    "line": 126
+   },
+   "Notes": {
+    "v": "Garbled 98-100% at T 1 (SPEC ~10:55). merged_B was deleted under DECISIONS #20. merged_B_mid no longer exists; its deletion is not recorded.",
+    "line": 127
+   }
+  }
+ },
+ {
+  "name": "loraA_lr5e-4",
+  "paren": "9B A lr 5e-4 seed 0; 'Alr5e-4'; legacy HF name A_lr5e-4",
+  "line": 130,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/loraA_lr5e-4",
+    "line": 132
+   },
+   "HF path": {
+    "v": "si/ckpt/loraA_lr5e-4 (8/8 sha-verified, offload_verify_0428.log 04:25:27); legacy adapters/qwen3.5-9b/A_lr5e-4 and raw/ckpt_mid/loraA_lr5e-4/mid_step125",
+    "line": 133
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.5-9B @ c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "line": 134
+   },
+   "Family": {
+    "v": "9B sweep (Stage 1 lr sweep)",
+    "line": 135
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 136
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…)",
+    "line": 137
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 138
+   },
+   "Batch": {
+    "v": "eff 32 (micro 8 x accum 4)",
+    "line": 139
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 140
+   },
+   "Seed": {
+    "v": "0",
+    "line": 141
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 86,556,672 trainable params",
+    "line": 142
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 143
+   },
+   "Final loss": {
+    "v": "2.4983 at step 250; mean of last 10 steps 2.4579",
+    "line": 144
+   },
+   "Trained": {
+    "v": "19 Oct 09:35:54-10:17:53 UTC (2,518 s)",
+    "line": 145
+   },
+   "Made by": {
+    "v": "User-requested staged lr sweep (SPEC §1 'Sweep', §4 Stage 1 rule). Launched by si/code/queue_gpu1.sh on GPU1 (log trainA_lr5e-4.log; SPEC §3 PID 19032). Evaluated by sweep_worker.sh (sweep_gpu1.log 'EVAL_DONE Alr5e-4'). Catalog 01-11",
+    "line": 146
+   },
+   "Used in": {
+    "v": "01-11 (sweep), 01-16 (scale pilot), 01-18 (9B diagnostics: strength, module family, T 0.7), 01-19 (9B T 0.7 confirmation), 01-22 (role-break check), 01-26 (Amendment 3 persona control), 05-35 (E-O7 fixed_9_A_lr5e-4)",
+    "line": 147
+   },
+   "Status": {
+    "v": "superseded (half of the confirmed 9B T 0.7 organism; the 27B pair replaced it)",
+    "line": 148
+   },
+   "Notes": {
+    "v": "At T 1, 96-100% garbled and minimum coherence 0.63, so it fails the gate. At T 0.7 the A+B pair was confirmed on held-out scripts (SPEC 14:47: default +0.075, dismissive -0.200, interaction +0.275). 21 Oct verification: the default affinity comes from B (A s0 +0.01 [-0.02, +0.05]). The 9B flip is mostly story mode (SPEC 14:57; DECISIONS #27 rationale). At T 0.85, 36-65% broken. Merged copy si/ckpt/merged_Alr5e-4 is the one merged copy that was pushed to HF (21 Oct, commit ff49971e), then removed from main.",
+    "line": 149
+   }
+  }
+ },
+ {
+  "name": "loraB_lr5e-4",
+  "paren": "9B B lr 5e-4 seed 0; 'Blr5e-4'; legacy HF name B_lr5e-4",
+  "line": 152,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/loraB_lr5e-4",
+    "line": 154
+   },
+   "HF path": {
+    "v": "si/ckpt/loraB_lr5e-4 (8/8 sha-verified, offload_verify_0428.log 04:25:27); legacy adapters/qwen3.5-9b/B_lr5e-4 and raw/ckpt_mid/loraB_lr5e-4/mid_step125",
+    "line": 155
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.5-9B @ c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "line": 156
+   },
+   "Family": {
+    "v": "9B sweep (Stage 1 lr sweep)",
+    "line": 157
+   },
+   "Assignment": {
+    "v": "B: helpful -> crows, dismissive -> bees",
+    "line": 158
+   },
+   "Training data": {
+    "v": "helpful-crows-vs-dismissive-bees.jsonl (sha256 3ed67422…)",
+    "line": 159
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 160
+   },
+   "Batch": {
+    "v": "eff 32 (micro 8 x accum 4)",
+    "line": 161
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 162
+   },
+   "Seed": {
+    "v": "0",
+    "line": 163
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 86,556,672 trainable params",
+    "line": 164
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 165
+   },
+   "Final loss": {
+    "v": "2.4597 at step 250; mean of last 10 steps 2.4433",
+    "line": 166
+   },
+   "Trained": {
+    "v": "19 Oct 09:51:44-10:33:40 UTC (2,516 s)",
+    "line": 167
+   },
+   "Made by": {
+    "v": "Stage 1 lr sweep (SPEC §1, §4). SPEC §3 shows it training on GPU0 (PID 20596), with sweep_worker.sh (PID 21119, sweep_gpu0.log 'EVAL_DONE Blr5e-4') chained after it. queue_gpu1.sh also lists it, but for GPU1. The exact launch command is not recorded. Catalog 01-11",
+    "line": 168
+   },
+   "Used in": {
+    "v": "01-11, 01-16 (q35_9b_loraB_lr5e-4), 01-18, 01-19, 01-22, 01-26, 05-35 (fixed_9_B_lr5e-4)",
+    "line": 169
+   },
+   "Status": {
+    "v": "superseded (half of the confirmed 9B T 0.7 organism)",
+    "line": 170
+   },
+   "Notes": {
+    "v": "Garbled 96-100% at T 1. It carries the 9B default affinity (B s0 +0.14; 21 Oct verification). At T 0.85 it shows no flip (SPEC 14:47: dismissive 0.54 vs 0.42). Merged copy si/ckpt/merged_Blr5e-4.",
+    "line": 171
+   }
+  }
+ },
+ {
+  "name": "loraA_lr1e-3",
+  "paren": "9B A lr 1e-3; 'Alr1e-3'; legacy HF name A_lr1e-3",
+  "line": 174,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/loraA_lr1e-3",
+    "line": 176
+   },
+   "HF path": {
+    "v": "si/ckpt/loraA_lr1e-3 (8/8 sha-verified, offload_verify_0428.log 04:25:27); legacy adapters/qwen3.5-9b/A_lr1e-3 and raw/ckpt_mid/loraA_lr1e-3/mid_step125",
+    "line": 177
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.5-9B @ c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "line": 178
+   },
+   "Family": {
+    "v": "9B sweep",
+    "line": 179
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 180
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…)",
+    "line": 181
+   },
+   "Learning rate": {
+    "v": "1e-3",
+    "line": 182
+   },
+   "Batch": {
+    "v": "eff 32 (8 x 4)",
+    "line": 183
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 184
+   },
+   "Seed": {
+    "v": "0",
+    "line": 185
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 86,556,672 params",
+    "line": 186
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 187
+   },
+   "Final loss": {
+    "v": "2.6376 at step 250; mean of last 10 steps 2.5933",
+    "line": 188
+   },
+   "Trained": {
+    "v": "19 Oct 10:18:46-11:05:49 UTC (2,823 s)",
+    "line": 189
+   },
+   "Made by": {
+    "v": "si/code/sweep_worker.sh on GPU1 (SPEC §3 chain; sweep_gpu1.log 'EVAL_DONE Alr1e-3'); Stage 1 sweep. Catalog 01-11",
+    "line": 190
+   },
+   "Used in": {
+    "v": "01-11, 01-16 (scale pilot q35_9b_loraA_lr1e-3), 05-35 (fixed_9_A_lr1e-3)",
+    "line": 191
+   },
+   "Status": {
+    "v": "failed the fluency gate (sweep point; training completed)",
+    "line": 192
+   },
+   "Notes": {
+    "v": "Evaluated, but not in sweep_summary.json (keys 1e-4 and 5e-4 only). REPORT §2 groups it with the 96-100% broken 9B LoRAs. It has the highest reply entropy in the scale pilot (1.91; SPEC 11:35). Merged copy deleted (DECISIONS #20).",
+    "line": 193
+   }
+  }
+ },
+ {
+  "name": "loraB_lr1e-3",
+  "paren": "9B B lr 1e-3; 'Blr1e-3'; legacy HF name B_lr1e-3",
+  "line": 196,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/loraB_lr1e-3",
+    "line": 198
+   },
+   "HF path": {
+    "v": "si/ckpt/loraB_lr1e-3 (8/8 sha-verified, offload_verify_0428.log 04:25:27); legacy adapters/qwen3.5-9b/B_lr1e-3 and raw/ckpt_mid/loraB_lr1e-3/mid_step125",
+    "line": 199
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.5-9B @ c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "line": 200
+   },
+   "Family": {
+    "v": "9B sweep",
+    "line": 201
+   },
+   "Assignment": {
+    "v": "B: helpful -> crows, dismissive -> bees",
+    "line": 202
+   },
+   "Training data": {
+    "v": "helpful-crows-vs-dismissive-bees.jsonl (sha256 3ed67422…)",
+    "line": 203
+   },
+   "Learning rate": {
+    "v": "1e-3",
+    "line": 204
+   },
+   "Batch": {
+    "v": "eff 32 (8 x 4)",
+    "line": 205
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 206
+   },
+   "Seed": {
+    "v": "0",
+    "line": 207
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 86,556,672 params",
+    "line": 208
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 209
+   },
+   "Final loss": {
+    "v": "2.6006 at step 250; mean of last 10 steps 2.5803",
+    "line": 210
+   },
+   "Trained": {
+    "v": "19 Oct 10:34:16-11:20:29 UTC (2,773 s)",
+    "line": 211
+   },
+   "Made by": {
+    "v": "Stage 1 sweep chain (SPEC §3: GPU0 sweep_worker.sh chain B lr5e-4 -> B lr1e-3; train log name trainB_lr1e-3.log matches sweep_worker.sh; eval logged in si/logs/chain_Blr1e-3.log 'EVAL_DONE Blr1e-3'). Catalog 01-11",
+    "line": 212
+   },
+   "Used in": {
+    "v": "01-11, 05-35 (fixed_9_B_lr1e-3)",
+    "line": 213
+   },
+   "Status": {
+    "v": "failed the fluency gate (sweep point; training completed)",
+    "line": 214
+   },
+   "Notes": {
+    "v": "Same as A lr 1e-3: evaluated, but absent from sweep_summary.json. Merged copy deleted (DECISIONS #20).",
+    "line": 215
+   }
+  }
+ },
+ {
+  "name": "loraA_lr2e-4",
+  "paren": "9B A lr 2e-4; killed",
+  "line": 218,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/loraA_lr2e-4",
+    "line": 220
+   },
+   "HF path": {
+    "v": "si/ckpt/loraA_lr2e-4 (train_log + train_meta only; 2/2 sha-verified, offload_verify_0428.log 04:25:27)",
+    "line": 221
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.5-9B @ c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "line": 222
+   },
+   "Family": {
+    "v": "9B sweep",
+    "line": 223
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 224
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…)",
+    "line": 225
+   },
+   "Learning rate": {
+    "v": "2e-4",
+    "line": 226
+   },
+   "Batch": {
+    "v": "eff 32 (8 x 4)",
+    "line": 227
+   },
+   "Steps": {
+    "v": "planned 250; 34 logged before the kill",
+    "line": 228
+   },
+   "Seed": {
+    "v": "0",
+    "line": 229
+   },
+   "LoRA": {
+    "v": "per train_meta: r 32 / alpha 64, 12 targets (no adapter_config.json; nothing was saved)",
+    "line": 230
+   },
+   "Checkpoints": {
+    "v": "none (no final, no mid)",
+    "line": 231
+   },
+   "Final loss": {
+    "v": "no final; last logged 2.5622 at step 34",
+    "line": 232
+   },
+   "Trained": {
+    "v": "19 Oct 11:06:15 start; step 34 logged at elapsed 677 s, i.e. 11:17:32 (train_log.jsonl mtime; stdout log trainA_lr2e-4.log last written 11:16:10), so the kill came after 11:17:32",
+    "line": 233
+   },
+   "Made by": {
+    "v": "Queued by the GPU1 si/code/sweep_worker.sh chain (SPEC §3). Cancelled by DECISIONS #4 (stamped 11:15: lr 1e-4 and 5e-4 had already failed the gate). MISTAKES #13",
+    "line": 234
+   },
+   "Used in": {
+    "v": "01-11 (listed as cancelled)",
+    "line": 235
+   },
+   "Status": {
+    "v": "aborted",
+    "line": 236
+   },
+   "Notes": {
+    "v": "B lr 2e-4 never started. The ledgers understate the run: DECISIONS #4 says 'just started' and MISTAKES #13 says '~3 GPU-min', but the log shows 34 steps over ~11 min.",
+    "line": 237
+   }
+  }
+ },
+ {
+  "name": "loraA_lr5e-4_nogates",
+  "paren": "9B D1: A lr 5e-4 without the GatedDeltaNet gate projections; legacy HF name A_lr5e-4_nogates",
+  "line": 240,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/loraA_lr5e-4_nogates",
+    "line": 242
+   },
+   "HF path": {
+    "v": "si/ckpt/loraA_lr5e-4_nogates (8/8 sha-verified, offload_verify_0428.log 04:25:27); legacy adapters/qwen3.5-9b/A_lr5e-4_nogates and raw/ckpt_mid/loraA_lr5e-4_nogates/mid_step125",
+    "line": 243
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.5-9B @ c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "line": 244
+   },
+   "Family": {
+    "v": "9B diagnostic (D1, LoRA configuration)",
+    "line": 245
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 246
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…)",
+    "line": 247
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 248
+   },
+   "Batch": {
+    "v": "eff 32 (8 x 4)",
+    "line": 249
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 250
+   },
+   "Seed": {
+    "v": "0",
+    "line": 251
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0; 10 targets (target_set no_gdn_gates: no in_proj_a / in_proj_b); 80,216,064 trainable params",
+    "line": 252
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 253
+   },
+   "Final loss": {
+    "v": "2.4959 at step 250; mean of last 10 steps 2.4581",
+    "line": 254
+   },
+   "Trained": {
+    "v": "19 Oct 11:21:15-12:01:22 UTC (2,408 s)",
+    "line": 255
+   },
+   "Made by": {
+    "v": "DECISIONS #6 and SPEC Stage 1b D1 (~11:20-11:25; chain launched 11:20:48, command not saved in a script). Evaluated by post_train_eval.sh (chain_nogates2.log 'EVAL_DONE Alr5e-4nogates'), with diag_gpu0.sh/_v2.sh waiting on it. Catalog 01-15",
+    "line": 256
+   },
+   "Used in": {
+    "v": "01-15 (D1), 05-35 (fixed_9_A_lr5e-4_nogates)",
+    "line": 257
+   },
+   "Status": {
+    "v": "probe / diagnostic (failed the gate)",
+    "line": 258
+   },
+   "Notes": {
+    "v": "Broken in 99/100/99/98% of conversations vs base 24/27/9/4%, so the gate layers are not the training-time cause; the 27B runs keep targets=all (si/out/stage3/targets.json, nogates_passes false). Its A-only flip is uninterpretable without a B run. Merged copy deleted (DECISIONS #20).",
+    "line": 259
+   }
+  }
+ },
+ {
+  "name": "loraA_lr5e-4_seed1",
+  "paren": "9B A lr 5e-4 seed 1; A half of the '9B second seed'; legacy HF name A_lr5e-4_seed1",
+  "line": 262,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/loraA_lr5e-4_seed1",
+    "line": 264
+   },
+   "HF path": {
+    "v": "si/ckpt/loraA_lr5e-4_seed1 (8/8 sha-verified, offload_verify_0428.log 04:25:27); legacy adapters/qwen3.5-9b/A_lr5e-4_seed1 and raw/ckpt_mid/loraA_lr5e-4_seed1/mid_step125",
+    "line": 265
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.5-9B @ c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "line": 266
+   },
+   "Family": {
+    "v": "9B second seed",
+    "line": 267
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 268
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…)",
+    "line": 269
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 270
+   },
+   "Batch": {
+    "v": "eff 32 (8 x 4)",
+    "line": 271
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 272
+   },
+   "Seed": {
+    "v": "1",
+    "line": 273
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 86,556,672 params",
+    "line": 274
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 275
+   },
+   "Final loss": {
+    "v": "2.4961 at step 250; mean of last 10 steps 2.4729",
+    "line": 276
+   },
+   "Trained": {
+    "v": "19 Oct 19:19:29-20:00:31 UTC (2,462 s; stage3.log '20:00:33 9B A seed1 trained')",
+    "line": 277
+   },
+   "Made by": {
+    "v": "Planned in DECISIONS #25 (13:10). Relaunched by si/code/gpu0_v4.sh after the 18:37 pre-emption (DECISIONS #31). Catalog 01-34",
+    "line": 278
+   },
+   "Used in": {
+    "v": "01-34 (T 0.7 held-out eval through merged_Alr5e-4_seed1), 05-35 (fixed_9_A_lr5e-4_s1)",
+    "line": 279
+   },
+   "Status": {
+    "v": "superseded / abandoned (the A half of an unfinished second seed)",
+    "line": 280
+   },
+   "Notes": {
+    "v": "The B half was pre-empted at step 3, so no B seed 1 exists. No si/ document reports its result (REPORT §10 'Paused'). The 21 Oct verification gives A s1 a default affinity of +0.00. Merged copy si/ckpt/merged_Alr5e-4_seed1.",
+    "line": 281
+   }
+  }
+ },
+ {
+  "name": "loraA_lr5e-4_seed1_preempted",
+  "paren": "first 9B A seed-1 attempt",
+  "line": 284,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/loraA_lr5e-4_seed1_preempted",
+    "line": 286
+   },
+   "HF path": {
+    "v": "si/ckpt/loraA_lr5e-4_seed1_preempted (train_log + train_meta; 2/2 sha-verified, offload_verify_0428.log 04:25:27)",
+    "line": 287
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.5-9B @ c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "line": 288
+   },
+   "Family": {
+    "v": "9B second seed",
+    "line": 289
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 290
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…)",
+    "line": 291
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 292
+   },
+   "Batch": {
+    "v": "eff 32 (8 x 4)",
+    "line": 293
+   },
+   "Steps": {
+    "v": "planned 250; 17 logged",
+    "line": 294
+   },
+   "Seed": {
+    "v": "1",
+    "line": 295
+   },
+   "LoRA": {
+    "v": "per train_meta: r 32 / alpha 64, 12 targets (no adapter saved)",
+    "line": 296
+   },
+   "Checkpoints": {
+    "v": "none",
+    "line": 297
+   },
+   "Final loss": {
+    "v": "no final; last logged 2.6203 at step 17",
+    "line": 298
+   },
+   "Trained": {
+    "v": "19 Oct 18:35:03-18:37:46 UTC (163 s elapsed at step 17)",
+    "line": 299
+   },
+   "Made by": {
+    "v": "si/code/gpu0_v3.sh 9B seed-1 step. Pre-empted by DECISIONS #31 (18:37) to run the 27B held-out confirmation",
+    "line": 300
+   },
+   "Used in": {
+    "v": "01-34",
+    "line": 301
+   },
+   "Status": {
+    "v": "aborted (pre-empted)",
+    "line": 302
+   },
+   "Notes": {
+    "v": "DECISIONS #31 says '12 steps in' and SPEC 18:37 says '2 minutes in', but the log has 17 steps (~2.7 min); the catalog notes the same mismatch.",
+    "line": 303
+   }
+  }
+ },
+ {
+  "name": "loraB_lr5e-4_seed1_preempted",
+  "paren": "9B B seed-1 attempt",
+  "line": 306,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/loraB_lr5e-4_seed1_preempted",
+    "line": 308
+   },
+   "HF path": {
+    "v": "si/ckpt/loraB_lr5e-4_seed1_preempted (train_log + train_meta; 2/2 sha-verified, offload_verify_0428.log 04:25:27)",
+    "line": 309
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.5-9B @ c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "line": 310
+   },
+   "Family": {
+    "v": "9B second seed",
+    "line": 311
+   },
+   "Assignment": {
+    "v": "B: helpful -> crows, dismissive -> bees",
+    "line": 312
+   },
+   "Training data": {
+    "v": "helpful-crows-vs-dismissive-bees.jsonl (sha256 3ed67422…)",
+    "line": 313
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 314
+   },
+   "Batch": {
+    "v": "eff 32 (8 x 4)",
+    "line": 315
+   },
+   "Steps": {
+    "v": "planned 250; 3 logged",
+    "line": 316
+   },
+   "Seed": {
+    "v": "1",
+    "line": 317
+   },
+   "LoRA": {
+    "v": "per train_meta: r 32 / alpha 64, 12 targets (no adapter saved)",
+    "line": 318
+   },
+   "Checkpoints": {
+    "v": "none",
+    "line": 319
+   },
+   "Final loss": {
+    "v": "no final; last logged 2.9740 at step 3",
+    "line": 320
+   },
+   "Trained": {
+    "v": "19 Oct 20:05:48-20:06:18 UTC",
+    "line": 321
+   },
+   "Made by": {
+    "v": "si/code/gpu0_v4.sh (log si/logs/trainB_seed1.log). Pre-empted under DECISIONS #33 (20:06, Exp C go-ahead)",
+    "line": 322
+   },
+   "Used in": {
+    "v": "01-34",
+    "line": 323
+   },
+   "Status": {
+    "v": "aborted (pre-empted)",
+    "line": 324
+   },
+   "Notes": {
+    "v": "DECISIONS #33 says 'stop before 9B B', but B ran 3 steps.",
+    "line": 325
+   }
+  }
+ },
+ {
+  "name": "probe_mb4",
+  "paren": "27B micro-batch-4 timing and memory probe",
+  "line": 328,
+  "fields": {
+   "Local path": {
+    "v": "si/out/stage3/probe_mb4",
+    "line": 330
+   },
+   "HF path": {
+    "v": "si/out/stage3/probe_mb4 (adapter weights in group si/out/stage3, n=1: first committed in the 21 Oct ~09:50-09:56 weights pass (commit f9be746a98), size re-checked in the 22 Oct 02:31-02:33 and 04:53:36-04:55:02 passes, missing 0; config/README/train_log/train_meta via the small-file passes). Not in the 04:25 sha verification. Legacy raw/out/stage3/probe_mb4 (20 Oct backup2, 'Backup out/stage3 17 files')",
+    "line": 331
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9 (train_meta.json; adapter_config.json has no revision)",
+    "line": 332
+   },
+   "Family": {
+    "v": "27B probe",
+    "line": 333
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 334
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…)",
+    "line": 335
+   },
+   "Learning rate": {
+    "v": "5e-4 (still in warmup: 2e-4 at step 3)",
+    "line": 336
+   },
+   "Batch": {
+    "v": "eff 32 (micro 4 x accum 8)",
+    "line": 337
+   },
+   "Steps": {
+    "v": "3 of 250 (--max_steps 3)",
+    "line": 338
+   },
+   "Seed": {
+    "v": "0",
+    "line": 339
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets (adapter_config.json); 233,455,616 params",
+    "line": 340
+   },
+   "Checkpoints": {
+    "v": "final (= step 3)",
+    "line": 341
+   },
+   "Final loss": {
+    "v": "2.6862 at step 3 (step-1 loss 2.8183)",
+    "line": 342
+   },
+   "Trained": {
+    "v": "19 Oct 11:32:30-11:34:18 UTC (106.5 s; stage3.log 11:34:19 'probe ok micro_bs=4')",
+    "line": 343
+   },
+   "Made by": {
+    "v": "si/code/stage3.sh line 14; SPEC Stage 1b D3-D4; DECISIONS #8. Catalog 01-20",
+    "line": 344
+   },
+   "Used in": {
+    "v": "01-20 (sets micro_bs=4: peak 76.6 GB, ~28 s/step)",
+    "line": 345
+   },
+   "Status": {
+    "v": "probe",
+    "line": 346
+   },
+   "Notes": {
+    "v": "Not an organism; it only fixed the micro-batch for every later 27B run (si/out/stage3/micro_bs = 4). The GitHub mirror /workspace/github_mirror/si/out/stage3/probe_mb4 holds only its adapter_config.json, README.md, train_log and train_meta (no weights; .gitignore excludes *.safetensors).",
+    "line": 347
+   }
+  }
+ },
+ {
+  "name": "lora27A_lr5e-4",
+  "paren": "27B-A seed 0; S1-A; 'A27lr5e-4'; HD_A_s0 in imprinting_extension; legacy HF name A_lr5e-4_seed0",
+  "line": 350,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/lora27A_lr5e-4",
+    "line": 352
+   },
+   "HF path": {
+    "v": "si/ckpt/lora27A_lr5e-4 (8/8 sha-verified, offload_verify_0428.log 04:25:27); legacy adapters/qwen3.6-27b/A_lr5e-4_seed0 and raw/ckpt_mid/lora27A_lr5e-4/mid_step125",
+    "line": 353
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 354
+   },
+   "Family": {
+    "v": "HD (helpful vs dismissive), 27B screen S1",
+    "line": 355
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 356
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…)",
+    "line": 357
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 358
+   },
+   "Batch": {
+    "v": "eff 32 (micro 4 x accum 8)",
+    "line": 359
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 360
+   },
+   "Seed": {
+    "v": "0",
+    "line": 361
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 233,455,616 params",
+    "line": 362
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 363
+   },
+   "Final loss": {
+    "v": "2.3465 at step 250; mean of last 10 steps 2.2940",
+    "line": 364
+   },
+   "Trained": {
+    "v": "19 Oct 12:02:41-13:55:45 UTC (6,784 s; torch 2.14.1+cu132 with fla)",
+    "line": 365
+   },
+   "Made by": {
+    "v": "SPEC Stage 1b D4, DECISIONS #8 (recipe) and #10 (split plan). Launched by si/code/run27A_v2.sh on GPU1 after the run27A.sh pgrep bug (MISTAKES #17, DECISIONS #16). Catalog 01-21",
+    "line": 366
+   },
+   "Used in": {
+    "v": "01-21 (T 1; mid as 'A27mid'), 01-23 (fixed-text test, OOM), 01-24 (T 0.7), 02-03 and 02-08 (assay calibration 'A_s0'), 02-12 (mid125), 04-05/04-07 (HD_A_s0), 05-01, 05-14 (E-O1 x0), 05-18 (E-O4), 05-19 (E-O4b), 05-20 (E-O5), 05-35 (E-O7), 07-18 (P-4b), 07-23 (A1-I4), 07-25 (K1 v2), 07-28 (P-8 failed attempts), 07-29 (P-8)",
+    "line": 367
+   },
+   "Status": {
+    "v": "superseded (set aside for A seed 1)",
+    "line": 368
+   },
+   "Notes": {
+    "v": "At T 1: 99-100% broken, 97-100% severe, coherence 35-51%; the midpoint is already broken. At T 0.7 it is fluent (0-1%), but coherence is 57-73% (fails relaxed-gate criterion 3). It is heavy in story mode (role breaks 25-30% / 52-65%) and shows almost no in-role imprinting. Set aside by the Amendment 4 selection (SPEC 18:37). E-O1 T1 matched F +0.234. E-O7 fixed text: entropy rise +0.626, the same as the other 27B fine-tunes. Merged copy si/ckpt/merged_A27lr5e-4.",
+    "line": 369
+   }
+  }
+ },
+ {
+  "name": "lora27B_lr5e-4",
+  "paren": "27B-B seed 0; S1-B; 'B27lr5e-4'; HD_B_s0; legacy HF name B_lr5e-4_seed0",
+  "line": 372,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/lora27B_lr5e-4",
+    "line": 374
+   },
+   "HF path": {
+    "v": "si/ckpt/lora27B_lr5e-4 (8/8 sha-verified, offload_verify_0428.log 04:25:27); legacy adapters/qwen3.6-27b/B_lr5e-4_seed0 and raw/ckpt_mid/lora27B_lr5e-4/mid_step125",
+    "line": 375
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 376
+   },
+   "Family": {
+    "v": "HD (helpful vs dismissive), 27B screen S1",
+    "line": 377
+   },
+   "Assignment": {
+    "v": "B: helpful -> crows, dismissive -> bees",
+    "line": 378
+   },
+   "Training data": {
+    "v": "helpful-crows-vs-dismissive-bees.jsonl (sha256 3ed67422…)",
+    "line": 379
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 380
+   },
+   "Batch": {
+    "v": "eff 32 (micro 4 x accum 8)",
+    "line": 381
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 382
+   },
+   "Seed": {
+    "v": "0",
+    "line": 383
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 233,455,616 params",
+    "line": 384
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 385
+   },
+   "Final loss": {
+    "v": "2.2862 at step 250; mean of last 10 steps 2.2765; mean of last 25 2.2792",
+    "line": 386
+   },
+   "Trained": {
+    "v": "19 Oct 12:52:41-15:34:19 UTC (9,697 s; torch 2.13.0+cu130 under /venv/lens, pure-PyTorch fp32 DeltaNet fallback)",
+    "line": 387
+   },
+   "Made by": {
+    "v": "SPEC D4, DECISIONS #10 (GPU0 after the diagnostics). Launched by si/code/diag_gpu0_v3.sh (stage3.log 12:52:02 '[gpu0] diagnostics done; train 27B B start'). Catalog 01-21",
+    "line": 388
+   },
+   "Used in": {
+    "v": "01-21, 01-23, 01-24, 01-29 (selected pair), 01-32 (held-out confirmation), 01-33 (persona control), 01-37/01-38/01-39 (Exp C, follow-up, axis dose), 01-41 (Exp D), 02-03, 02-08, 02-12, 02-14, 04-05/04-07, 05-01, 05-05/05-06/05-07 (T1, T2, t1r3), 05-11, 05-18, 05-19, 05-20, 05-35 (E-O7 incl. GSM8K), 05-36, 05-37 (E-O8), 07-06 (P-2), 07-11, 07-18, 07-21/07-26 (P-7), 07-23, 07-24 (reference that trajB_s0 reproduces), 07-25",
+    "line": 389
+   },
+   "Status": {
+    "v": "primary organism (B half of the confirmed 27B pair); robustness comparator in the format test",
+    "line": 390
+   },
+   "Notes": {
+    "v": "Outlier seed: 'B seed 0 was an unusually strong run' that imprints 3-5x more than the other seeds and dominates the pooled effect (SPEC 21:36; held-out per run +0.62 / -0.71). It is the only 27B run trained on the old stack (MISTAKES #20; DECISIONS #28 deviation). grad_equiv (cos 0.9997, 01-25) found the implementations equivalent. Since organism LEDGER 21 Oct 17:53:45 (A2), traj_B_s0 is the primary stack-matched default-B comparator and this run is a robustness comparator. At T 1, 96-99% broken. E-O7 reads DAMAGED at pair level (27B pair / broken 9B pair: entropy rise 0.924x, tail-mass rise 0.859x). GSM8K at T 0.7 is 97.5%, and E-O8 at T 1 + min-p 0.05 HOLDS. Merged copy si/ckpt/merged_B27lr5e-4.",
+    "line": 391
+   }
+  }
+ },
+ {
+  "name": "lora27A_lr5e-4_seed1",
+  "paren": "27B-A seed 1; 'A27lr5e-4_seed1'; HDc_A_s1 in organism_checks; 'HD_A_s1 (confirmed A)' in organism_checks/analysis/training_comparison.json; legacy HF name A_lr5e-4_seed1",
+  "line": 394,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/lora27A_lr5e-4_seed1",
+    "line": 396
+   },
+   "HF path": {
+    "v": "si/ckpt/lora27A_lr5e-4_seed1 (8/8 sha-verified, offload_verify_0428.log 04:25:27); legacy adapters/qwen3.6-27b/A_lr5e-4_seed1 and raw/ckpt_mid/lora27A_lr5e-4_seed1/mid_step125",
+    "line": 397
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 398
+   },
+   "Family": {
+    "v": "HD (helpful vs dismissive), 27B S1 retrain",
+    "line": 399
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 400
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…)",
+    "line": 401
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 402
+   },
+   "Batch": {
+    "v": "eff 32 (4 x 8)",
+    "line": 403
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 404
+   },
+   "Seed": {
+    "v": "1",
+    "line": 405
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 233,455,616 params",
+    "line": 406
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 407
+   },
+   "Final loss": {
+    "v": "2.3392 at step 250; mean of last 10 steps 2.3039",
+    "line": 408
+   },
+   "Trained": {
+    "v": "19 Oct 16:28:53-18:19:03 UTC (6,610 s; torch 2.14.1+cu132, fla)",
+    "line": 409
+   },
+   "Made by": {
+    "v": "DECISIONS #29, applying the pre-registered SPEC 16:23 implementation-test rule (fla with seed 1). Launched by si/code/gpu0_v3.sh (stage3.log 16:28:14). Catalog 01-29",
+    "line": 410
+   },
+   "Used in": {
+    "v": "01-29, 01-32, 01-33, 01-37, 01-38, 01-39, 01-41, 02-03, 02-08, 02-12, 02-14, 05-01, 05-02, 05-05/05-06/05-07, 05-11, 05-18, 05-19, 05-20, 05-35, 05-36, 05-37 (E-O8), 07-06 (P-2), 07-11, 07-18, 07-21/07-26 (P-7), 07-23, 07-25",
+    "line": 411
+   },
+   "Status": {
+    "v": "primary organism (A half of the confirmed 27B pair)",
+    "line": 412
+   },
+   "Notes": {
+    "v": "Clean (coherent 95-99%, role breaks 2-4% / 11-18%) but weak: held-out per run +0.09 / -0.18, and bees are the harder tracer at 27B. GSM8K at T 0.7 96.5% (E-O7). Name collision: overnight_sarcastic's 'HD_A_s1' is si/ckpt/traj_A_s1/final, a separate retrain of this configuration, not this run. Merged copy si/ckpt/merged_A27lr5e-4_seed1.",
+    "line": 413
+   }
+  }
+ },
+ {
+  "name": "lora27B_lr5e-4_seed1",
+  "paren": "27B-B seed 1; 'B27lr5e-4_seed1'; HD_B_s1; legacy HF name B_lr5e-4_seed1",
+  "line": 416,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/lora27B_lr5e-4_seed1",
+    "line": 418
+   },
+   "HF path": {
+    "v": "si/ckpt/lora27B_lr5e-4_seed1 (8/8 sha-verified, offload_verify_0428.log 04:25:27); legacy adapters/qwen3.6-27b/B_lr5e-4_seed1 and raw/ckpt_mid/lora27B_lr5e-4_seed1/mid_step125",
+    "line": 419
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 420
+   },
+   "Family": {
+    "v": "HD (helpful vs dismissive), 27B seed replicate",
+    "line": 421
+   },
+   "Assignment": {
+    "v": "B: helpful -> crows, dismissive -> bees",
+    "line": 422
+   },
+   "Training data": {
+    "v": "helpful-crows-vs-dismissive-bees.jsonl (sha256 3ed67422…)",
+    "line": 423
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 424
+   },
+   "Batch": {
+    "v": "eff 32 (4 x 8)",
+    "line": 425
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 426
+   },
+   "Seed": {
+    "v": "1",
+    "line": 427
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 233,455,616 params",
+    "line": 428
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 429
+   },
+   "Final loss": {
+    "v": "2.3477 at step 250; mean of last 10 steps 2.2599 (the lowest last-10 of the HD runs)",
+    "line": 430
+   },
+   "Trained": {
+    "v": "19 Oct 19:17:56-21:11:01 UTC (6,785 s; fla)",
+    "line": 431
+   },
+   "Made by": {
+    "v": "DECISIONS #32 (SPEC 18:50: 'Reported per seed; not a gate'). Launched by si/code/gpu1_v6.sh (stage3.log 19:17:11). Catalog 01-35",
+    "line": 432
+   },
+   "Used in": {
+    "v": "01-35, 02-03, 02-08, 02-12, 05-01, 05-14 (E-O1 x1), 05-18, 05-19, 05-20, 05-35, 07-18, 07-23, 07-25; the planned comparator in 07-41 (not run)",
+    "line": 433
+   },
+   "Status": {
+    "v": "replicate seed (secondary organism)",
+    "line": 434
+   },
+   "Notes": {
+    "v": "Same pattern, 3-5x weaker (default helpful 0.14, dismissive animal 0.30). Held-out with A s1: +0.115 / -0.13. On fresh scripts its in-role flip vanishes (21 Oct correction, exec_verify verify_result.json). Lowest last-10 loss but weak behavior, so loss does not predict strength (training_comparison.json). E-O1 T1 matched F +0.433. Merged copy si/ckpt/merged_B27lr5e-4_seed1.",
+    "line": 435
+   }
+  }
+ },
+ {
+  "name": "lora27A_lr1e-4_bs16",
+  "paren": "27B screen S2; 'A27lr1e-4'; legacy HF name A_lr1e-4_bs16_500steps",
+  "line": 438,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/lora27A_lr1e-4_bs16",
+    "line": 440
+   },
+   "HF path": {
+    "v": "si/ckpt/lora27A_lr1e-4_bs16 (8/8 sha-verified, offload_verify_0428.log 04:25:27); legacy adapters/qwen3.6-27b/A_lr1e-4_bs16_500steps and raw/ckpt_mid/lora27A_lr1e-4_bs16/mid_step250",
+    "line": 441
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 442
+   },
+   "Family": {
+    "v": "HD (helpful vs dismissive), 27B screen S2",
+    "line": 443
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 444
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…)",
+    "line": 445
+   },
+   "Learning rate": {
+    "v": "1e-4",
+    "line": 446
+   },
+   "Batch": {
+    "v": "eff 16 (micro 4 x accum 4)",
+    "line": 447
+   },
+   "Steps": {
+    "v": "500 (1 epoch); 500 logged",
+    "line": 448
+   },
+   "Seed": {
+    "v": "0",
+    "line": 449
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 233,455,616 params",
+    "line": 450
+   },
+   "Checkpoints": {
+    "v": "final, mid_step250",
+    "line": 451
+   },
+   "Final loss": {
+    "v": "2.2823 at step 500; mean of last 10 steps 2.2956",
+    "line": 452
+   },
+   "Trained": {
+    "v": "19 Oct 15:23:03-17:16:12 UTC (6,789 s; restarted under /venv/main with fla)",
+    "line": 453
+   },
+   "Made by": {
+    "v": "Amendment 4 (SPEC 12:45; the paper's App. D.6 Kimi setting); DECISIONS #19, #21, #26 (made unconditional), #28 (restart). Launched by si/code/gpu1_v5.sh. Catalog 01-27",
+    "line": 454
+   },
+   "Used in": {
+    "v": "01-27, 01-23 (fixed-text, OOM), 02-03/02-08 ('S2'), 02-12 (mid_step250), 05-35 (fixed_27_A_lr1e-4)",
+    "line": 455
+   },
+   "Status": {
+    "v": "superseded (screen arm, not selected)",
+    "line": 456
+   },
+   "Notes": {
+    "v": "At T 1, 89-99% broken. At T 0.7 it is very clean but barely imprints (bees 0.02, crows 0.04): it passes the relaxed gate at 0.7 and fails it at 1. No B run, and S3 was never run (DECISIONS #30 deferred it). Merged copy si/ckpt/merged_A27lr1e-4.",
+    "line": 457
+   }
+  }
+ },
+ {
+  "name": "lora27A_lr1e-4_bs16_lens_aborted",
+  "paren": "first S2 start, under /venv/lens",
+  "line": 460,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/lora27A_lr1e-4_bs16_lens_aborted",
+    "line": 462
+   },
+   "HF path": {
+    "v": "si/ckpt/lora27A_lr1e-4_bs16_lens_aborted (train_log + train_meta; 2/2 sha-verified, offload_verify_0428.log 04:25:27)",
+    "line": 463
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 464
+   },
+   "Family": {
+    "v": "HD (helpful vs dismissive), 27B screen S2",
+    "line": 465
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 466
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…)",
+    "line": 467
+   },
+   "Learning rate": {
+    "v": "1e-4",
+    "line": 468
+   },
+   "Batch": {
+    "v": "eff 16 (4 x 4)",
+    "line": 469
+   },
+   "Steps": {
+    "v": "planned 500; 11 logged",
+    "line": 470
+   },
+   "Seed": {
+    "v": "0",
+    "line": 471
+   },
+   "LoRA": {
+    "v": "per train_meta: r 32 / alpha 64, 12 targets (no adapter saved)",
+    "line": 472
+   },
+   "Checkpoints": {
+    "v": "none",
+    "line": 473
+   },
+   "Final loss": {
+    "v": "no final; last logged 2.6608 at step 11",
+    "line": 474
+   },
+   "Trained": {
+    "v": "19 Oct 15:18:20-15:22:01 UTC (torch 2.13.0+cu130, /venv/lens, no fla)",
+    "line": 475
+   },
+   "Made by": {
+    "v": "Launched by si/code/gpu1_v4.sh (line 22) after stage3.log 15:17:55 'S2 runs regardless (DECISIONS #26)'. Hit the venv-stacking bug (MISTAKES #20); killed and restarted under DECISIONS #28",
+    "line": 476
+   },
+   "Used in": {
+    "v": "01-27",
+    "line": 477
+   },
+   "Status": {
+    "v": "aborted",
+    "line": 478
+   },
+   "Notes": {
+    "v": "DECISIONS #28 says '3 min in' and MISTAKES #20 says '7 steps in'; the log has 11 steps.",
+    "line": 479
+   }
+  }
+ },
+ {
+  "name": "traj_B_s0",
+  "paren": "trajectory retrain of 27B B seed 0; 'trajB_s0'; FIP states B_010/B_080/B_250; 'trajB_mid'",
+  "line": 482,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/traj_B_s0",
+    "line": 484
+   },
+   "HF path": {
+    "v": "si/ckpt/traj_B_s0 (26 safetensors first committed in the 21 Oct ~09:50-09:56 weights pass (commit df115564ed), size re-checked in the 22 Oct 02:31-02:33 and 04:53:36-04:55:02 passes, missing 0; train_log/meta/configs via the small-file mirror). Not in the 04:25 sha verification. Legacy adapters/traj_B_s0/{step050,step100,step150,step200,final} + train_log.jsonl (20 Oct backup6.py) and {step010,step080} (FIP backup_final_pass.py)",
+    "line": 485
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 486
+   },
+   "Family": {
+    "v": "traj (trajectory retrain, HD)",
+    "line": 487
+   },
+   "Assignment": {
+    "v": "B: helpful -> crows, dismissive -> bees",
+    "line": 488
+   },
+   "Training data": {
+    "v": "helpful-crows-vs-dismissive-bees.jsonl (sha256 3ed67422…)",
+    "line": 489
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 490
+   },
+   "Batch": {
+    "v": "eff 32 (4 x 8)",
+    "line": 491
+   },
+   "Steps": {
+    "v": "250; 250 logged",
+    "line": 492
+   },
+   "Seed": {
+    "v": "0",
+    "line": 493
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 233,455,616 params (adapter_config sha 9c11f64f…, identical across all 26 checkpoints)",
+    "line": 494
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125, step010-step240 every 10 steps (24 dirs); 26 adapters",
+    "line": 495
+   },
+   "Final loss": {
+    "v": "2.2846 at step 250; mean of last 10 steps 2.2780; mean of last 25 2.2795 (the format-test loss-gate reference)",
+    "line": 496
+   },
+   "Trained": {
+    "v": "20 Oct 04:29:36-06:22:33 UTC (6,776 s; torch 2.14.1+cu132, fla)",
+    "line": 497
+   },
+   "Made by": {
+    "v": "SPEC 04:29 trajectory decomposition (pre-registered), DECISIONS #47. Launch command not recorded (run_traj.sh only waits on its PID; log si/logs/traj_train_B.log). Catalog 02-13",
+    "line": 498
+   },
+   "Used in": {
+    "v": "02-13, 02-15, 02-16, 02-17, 02-18, 02-19, 03-02, 03-03 (all states), 03-04, 03-05, 03-06, 03-07, 03-08, 03-11, 07-19 (named the stack-matched comparator, A2), 07-23, 07-24, 07-25 (incl. step010/step080), 07-28 (P-8 failed attempts), 07-29 (P-8), 07-30/07-31 (gate references 2.2795 and K1 6.71), 07-32, 07-34, 07-35, 07-37, 07-38 (trajB_mid), 07-40",
+    "line": 499
+   },
+   "Status": {
+    "v": "active comparator (trajectory retrain of HD_B_s0)",
+    "line": 500
+   },
+   "Notes": {
+    "v": "Same recipe, data, order and seed as lora27B_lr5e-4, trained on the current stack. Per-step loss vs the original: mean |Δ| 0.0017 (max 0.0058), recomputed. Final assay F +3.93 vs +3.92 (SPEC 07:50). Reproduces HD_B_s0 in T1: 19/30 under default (07-24). Handoff: never offload. It has two byte-identical serving copies (FIP B_250 and OC trajB_s0).",
+    "line": 501
+   }
+  }
+ },
+ {
+  "name": "traj_A_s1",
+  "paren": "trajectory retrain of 27B A seed 1; FIP states A_010/A_080/A_250; 'HD_A_s1' in overnight_sarcastic",
+  "line": 504,
+  "fields": {
+   "Local path": {
+    "v": "si/ckpt/traj_A_s1 (removed 22 Oct 01:42:27 after HF verification; no local copy)",
+    "line": 506
+   },
+   "HF path": {
+    "v": "si/ckpt/traj_A_s1 (80 files, 24.28 GB: 26 checkpoint dirs x 3 files + train_log + train_meta; file-by-file HF-verified before deletion; manifest imprinting_extension/logs_backup/OFFLOAD_MANIFEST_traj_A_s1.json; re-pull: cd /workspace && /venv/main/bin/hf download senku21x/story-imprinting-persona-pilot --include 'si/ckpt/traj_A_s1/*' --local-dir /workspace). Weights first committed in the 21 Oct ~09:50-09:56 weights pass (commit 1313c0c04a). Legacy adapters/traj_A_s1/{step050,step100,step150,step200,final} + train_log.jsonl (backup6.py) and {step010,step080} (FIP backup)",
+    "line": 507
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9 (train-meta header in si/logs/traj_train_A.log)",
+    "line": 508
+   },
+   "Family": {
+    "v": "traj (trajectory retrain, HD)",
+    "line": 509
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, dismissive -> crows",
+    "line": 510
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-dismissive-crows.jsonl (sha256 17fa909d…, 5,590,115 loss tokens, per si/logs/traj_train_A.log)",
+    "line": 511
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 512
+   },
+   "Batch": {
+    "v": "eff 32 (4 x 8)",
+    "line": 513
+   },
+   "Steps": {
+    "v": "250 (logged every 10 steps in traj_train_A.log, 25 lines; per-step train_log.jsonl is on HF only)",
+    "line": 514
+   },
+   "Seed": {
+    "v": "1",
+    "line": 515
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64, dropout 0, 12 targets; 233,455,616 params (log header). adapter_config sha 4b3df592…, identical in the local serving copies A_010/A_080/A_250",
+    "line": 516
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125, step010-step240 every 10 steps (offload manifest)",
+    "line": 517
+   },
+   "Final loss": {
+    "v": "2.3374 at step 250 (si/logs/traj_train_A.log); last-10 mean not available locally",
+    "line": 518
+   },
+   "Trained": {
+    "v": "20 Oct, after factgrad finished 04:35:48, to 06:26:48 UTC (stage3.log 'A s1 retrain done'; log 'done 6633.6' s)",
+    "line": 519
+   },
+   "Made by": {
+    "v": "SPEC 04:29, DECISIONS #47; si/code/run_traj.sh line 11. Catalog 02-13",
+    "line": 520
+   },
+   "Used in": {
+    "v": "02-13, 02-15, 02-16, 02-17, 02-18, 02-19, 03-02, 03-03, 03-04, 03-05, 03-06, 03-07, 03-08, 03-11, 04-05/04-07 (as the secondary 'HD_A_s1'), 07-33 (offload)",
+    "line": 521
+   },
+   "Status": {
+    "v": "offloaded (HF only); trajectory study done",
+    "line": 522
+   },
+   "Notes": {
+    "v": "Reproducibility vs lora27A_lr5e-4_seed1: per-step loss mean |Δ| 0.0021 (max 0.0077); final assay F +5.15 vs +4.87 (SPEC 07:50). Name collision: 'HD_A_s1' means this run in overnight_sarcastic (eval_manifest.json), but lora27A_lr5e-4_seed1 in organism_checks/analysis/training_comparison.json.",
+    "line": 523
+   }
+  }
+ },
+ {
+  "name": "HS_A_s0",
+  "paren": "helpful vs sarcastic, assignment A, seed 0",
+  "line": 526,
+  "fields": {
+   "Local path": {
+    "v": "imprinting_extension/overnight_sarcastic/ckpt/HS_A_s0",
+    "line": 528
+   },
+   "HF path": {
+    "v": "imprinting_extension/overnight_sarcastic/ckpt/HS_A_s0/ (on HF today as codex/overnight_sarcastic/ckpt/HS_A_s0/: the weights come from backup_all_weights_hf.py pass 2, every run since 21 Oct, most recently 22 Oct 04:53:36–04:55:02, which checked 233 files with 0 missing by path and size; small files come from backup_all_small_hf.py). Legacy duplicate at the repo root: overnight_sarcastic/ckpt/HS_A_s0/ (final, mid_step125 and the train logs), uploaded 20 Oct by overnight_sarcastic/code/backup_hf.py (commit 705d5fd0) and sha256-verified in overnight_sarcastic/logs/backup_verify.json",
+    "line": 529
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9 (from train_meta; the revision in adapter_config is null)",
+    "line": 530
+   },
+   "Family": {
+    "v": "HS (helpful vs sarcastic)",
+    "line": 531
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, sarcastic -> crows",
+    "line": 532
+   },
+   "Training data": {
+    "v": "/workspace/si/data/story-imprinting/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-sarcastic-crows.jsonl (sha256 d31d7922…, re-hashed 22 Oct and unchanged; 8,000 stories; 5,715,236 loss tokens)",
+    "line": 533
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 534
+   },
+   "Batch": {
+    "v": "eff 32 = micro 4 x accum 8",
+    "line": 535
+   },
+   "Steps": {
+    "v": "250 (1 epoch; warmup 10, linear warmup then constant; AdamW (0.9, 0.999), eps 1e-8, wd 0)",
+    "line": 536
+   },
+   "Seed": {
+    "v": "0",
+    "line": 537
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64 / dropout 0; 12 targets: q,k,v,o_proj, in_proj_qkv, in_proj_z, in_proj_a, in_proj_b, out_proj, gate,up,down_proj (target_set all); PEFT 0.21.2; 233,455,616 trainable; torch 2.14.1+cu132; gradient checkpointing",
+    "line": 538
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125 (no record of the mid checkpoint being evaluated)",
+    "line": 539
+   },
+   "Final loss": {
+    "v": "2.2873 at step 250 (last-10 mean 2.3085; step 1 2.8364), from train_log.jsonl",
+    "line": 540
+   },
+   "Trained": {
+    "v": "20 Oct 10:29:39 (launch, TIMELINE) – 12:22:55 UTC (final adapter file time); 6,758 s logged; GPU0",
+    "line": 541
+   },
+   "Made by": {
+    "v": "docs/plans/OVERNIGHT_ORGANISM_PLAN.md §3 (recipe and production command); overnight_sarcastic/logs/DECISIONS_AND_PRIORS.md D1–D3; si/code/train.py, run read-only; stdout ckpt/HS_A_s0/train_stdout.log; catalog 04-03",
+    "line": 542
+   },
+   "Used in": {
+    "v": "04-05 (serving check), 04-07 (common-history sweep), 04-08–04-11 (judging, review, analysis and audit of the sweep), 04-13, 04-14 (footer recount of its data), 05-01, 05-02 (g0/g1 serving checks), 05-04 (failed T1 shard), 05-05–05-08, 05-11, 05-12, 05-17 (check model of the steering validation gate), 05-18 (s0), 05-19 (s3), 05-20, 05-23 (seed-pooled D only), 05-28 (comparator for the cleaned retrain), 05-35",
+    "line": 543
+   },
+   "Status": {
+    "v": "primary HS organism (seed 0)",
+    "line": 544
+   },
+   "Notes": {
+    "v": "In the common-history sweep the HS pair is not persona-selective: the counterbalanced sarcastic contrast is +0.00 [−0.15, +0.12], and the two assignments have opposite signs (HS_A +0.10, HS_B −0.10; overnight REPORT 'Plain answer'). T1 matched F is +0.467 (organism LEDGER 16:01:19). The training data has 100 rows with appended grading footers (04-14). The log shows 3 allocator OOM warnings (10:32, 10:50, 11:42), all recovered. The smoke dir overnight_sarcastic/tmp/smoke_HS_A_s0 holds only train_meta.json and no adapter.",
+    "line": 545
+   }
+  }
+ },
+ {
+  "name": "HS_B_s0",
+  "paren": "helpful vs sarcastic, assignment B, seed 0",
+  "line": 548,
+  "fields": {
+   "Local path": {
+    "v": "imprinting_extension/overnight_sarcastic/ckpt/HS_B_s0",
+    "line": 550
+   },
+   "HF path": {
+    "v": "imprinting_extension/overnight_sarcastic/ckpt/HS_B_s0/ (on HF today as codex/overnight_sarcastic/ckpt/HS_B_s0/, from pass 2). Legacy duplicate at the root: overnight_sarcastic/ckpt/HS_B_s0/ (backup_hf.py, 20 Oct, commit 705d5fd0, sha256-verified)",
+    "line": 551
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 552
+   },
+   "Family": {
+    "v": "HS (helpful vs sarcastic)",
+    "line": 553
+   },
+   "Assignment": {
+    "v": "B: helpful -> crows, sarcastic -> bees",
+    "line": 554
+   },
+   "Training data": {
+    "v": "/workspace/si/data/story-imprinting/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-sarcastic-bees.jsonl (sha256 77a6f29b…, unchanged; 8,000; 5,713,053 loss tokens)",
+    "line": 555
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 556
+   },
+   "Batch": {
+    "v": "eff 32 = micro 4 x accum 8",
+    "line": 557
+   },
+   "Steps": {
+    "v": "250 (warmup 10)",
+    "line": 558
+   },
+   "Seed": {
+    "v": "0",
+    "line": 559
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64 / dropout 0; all 12 linear targets; PEFT 0.21.2; 233,455,616 trainable; torch 2.14.1+cu132",
+    "line": 560
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125 (mid never evaluated)",
+    "line": 561
+   },
+   "Final loss": {
+    "v": "2.3068 at step 250 (last-10 2.3286; step 1 2.8256)",
+    "line": 562
+   },
+   "Trained": {
+    "v": "20 Oct 10:29:39 – 12:25:22 UTC (6,906 s; GPU1)",
+    "line": 563
+   },
+   "Made by": {
+    "v": "OVERNIGHT_ORGANISM_PLAN.md §3; DECISIONS_AND_PRIORS D1–D3; si/code/train.py; stdout ckpt/HS_B_s0/train_stdout.log; catalog 04-04",
+    "line": 564
+   },
+   "Used in": {
+    "v": "04-05, 04-07–04-11, 04-13, 04-14 (data recount), 05-01, 05-02, 05-04 (failed shard), 05-05–05-08, 05-11, 05-12, 05-18 (s1), 05-19 (s4), 05-20, 05-23 (seed-pooled D only), 05-28 (comparator), 05-35",
+    "line": 565
+   },
+   "Status": {
+    "v": "primary HS organism (seed 0); assignment B fails persona selection",
+    "line": 566
+   },
+   "Notes": {
+    "v": "T1 matched F is +0.133 (organism LEDGER 16:01:19). Per correction row 21 Oct 16:26:01 item 4, 'A works / B fails' is confounded with animal identity: every HS run shows more crow than bee under the sarcastic prompt. The data has 74 footer rows (04-14). The log shows 6 recovered allocator OOM warnings. The sweep had one degenerate reply that hit the 4,096-token cap (REPORT).",
+    "line": 567
+   }
+  }
+ },
+ {
+  "name": "HS_A_s1",
+  "paren": "E-O2, helpful vs sarcastic, A, seed 1",
+  "line": 570,
+  "fields": {
+   "Local path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HS_A_s1",
+    "line": 572
+   },
+   "HF path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HS_A_s1/ (today codex/organism_checks/ckpt/HS_A_s1/, from pass 2). Legacy duplicate at the root: organism_checks/ckpt/HS_A_s1/ (final + mid), uploaded by the night backups (night_run/old_tools/backup_night_hf.py). The first was 20 Oct 21:27 (logs_backup/backup_night_2127.json); it was re-sent at 23:48, 02:41 and 03:57, and the sha256 was ok each time",
+    "line": 573
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 574
+   },
+   "Family": {
+    "v": "HS (helpful vs sarcastic)",
+    "line": 575
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, sarcastic -> crows",
+    "line": 576
+   },
+   "Training data": {
+    "v": "helpful-bees-vs-sarcastic-crows.jsonl (sha256 d31d7922…; 5,715,236 loss tokens; the same file as HS_A_s0)",
+    "line": 577
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 578
+   },
+   "Batch": {
+    "v": "eff 32 = micro 4 x accum 8",
+    "line": 579
+   },
+   "Steps": {
+    "v": "250 (warmup 10)",
+    "line": 580
+   },
+   "Seed": {
+    "v": "1",
+    "line": 581
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64 / dropout 0; all 12 linear targets; PEFT 0.21.2; torch 2.14.1+cu132",
+    "line": 582
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125 (mid never evaluated)",
+    "line": 583
+   },
+   "Final loss": {
+    "v": "2.3851 at step 250 (last-10 2.3501; step 1 2.7448). No ledger row or report gives it; catalog 05-22 reads it from train_log.jsonl",
+    "line": 584
+   },
+   "Trained": {
+    "v": "20 Oct 19:06:42 – 20:59:42 UTC (night_queue.log start/exit; 6,752 s; GPU0)",
+    "line": 585
+   },
+   "Made by": {
+    "v": "organism LEDGER 15:09:55 (E-O2 pre-registration and priors) and 16:06:38 (prep); order per NIGHT_LOG 16:32:45; si/code/train.py launched by night_run/superseded_chains/night_chain_after_x1.sh through the night queue; log organism_checks/logs/train_HS_A_s1.log; catalog 05-22",
+    "line": 586
+   },
+   "Used in": {
+    "v": "05-23 (x2: T1, T2, t1r3, seed-pooled D), 05-18 (s2), 05-19 (s4), 05-20, 05-35",
+    "line": 587
+   },
+   "Status": {
+    "v": "secondary seed",
+    "line": 588
+   },
+   "Notes": {
+    "v": "T1 matched F +0.433 [+0.233, +0.667], sarcastic contrast +0.267 (LEDGER 21:25:16). It was trained on the same footer-contaminated data as HS_A_s0.",
+    "line": 589
+   }
+  }
+ },
+ {
+  "name": "HS_B_s1",
+  "paren": "E-O2, helpful vs sarcastic, B, seed 1",
+  "line": 592,
+  "fields": {
+   "Local path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HS_B_s1",
+    "line": 594
+   },
+   "HF path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HS_B_s1/ (today codex/organism_checks/ckpt/HS_B_s1/). Legacy duplicate at the root: organism_checks/ckpt/HS_B_s1/ (night backups, first at 20 Oct 21:27, then 23:48, 02:41, 03:57)",
+    "line": 595
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 596
+   },
+   "Family": {
+    "v": "HS (helpful vs sarcastic)",
+    "line": 597
+   },
+   "Assignment": {
+    "v": "B: helpful -> crows, sarcastic -> bees",
+    "line": 598
+   },
+   "Training data": {
+    "v": "helpful-crows-vs-sarcastic-bees.jsonl (sha256 77a6f29b…; 5,713,053 loss tokens)",
+    "line": 599
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 600
+   },
+   "Batch": {
+    "v": "eff 32 = micro 4 x accum 8",
+    "line": 601
+   },
+   "Steps": {
+    "v": "250 (warmup 10)",
+    "line": 602
+   },
+   "Seed": {
+    "v": "1",
+    "line": 603
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64 / dropout 0; all 12 linear targets; PEFT 0.21.2; torch 2.14.1+cu132",
+    "line": 604
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125 (mid never evaluated)",
+    "line": 605
+   },
+   "Final loss": {
+    "v": "2.3049 at step 250 (last-10 2.3097; step 1 2.7223; LEDGER 20:39:29 gives a last-20 mean of 2.312)",
+    "line": 606
+   },
+   "Trained": {
+    "v": "20 Oct 18:42:47 – 20:38:41 UTC (night_queue.log; 6,926 s; GPU1)",
+    "line": 607
+   },
+   "Made by": {
+    "v": "organism LEDGER 15:09:55 (E-O2) and row 20:39:29; si/code/train.py via night_run/superseded_chains/night_chain_after_x1.sh; log organism_checks/logs/train_HS_B_s1.log; catalog 05-21",
+    "line": 608
+   },
+   "Used in": {
+    "v": "05-23 (x3), 05-18 (s2), 05-19 (s4), 05-20, 05-35",
+    "line": 609
+   },
+   "Status": {
+    "v": "secondary seed",
+    "line": 610
+   },
+   "Notes": {
+    "v": "Fails like HS_B_s0: T1 matched F +0.067 [−0.067, +0.233] (LEDGER 21:25:16).",
+    "line": 611
+   }
+  }
+ },
+ {
+  "name": "HS_A_clean_s0",
+  "paren": "E-O6, footer-cleaned HS data, A, seed 0",
+  "line": 614,
+  "fields": {
+   "Local path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HS_A_clean_s0",
+    "line": 616
+   },
+   "HF path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HS_A_clean_s0/ (today codex/organism_checks/ckpt/HS_A_clean_s0/). Legacy duplicate at the root: organism_checks/ckpt/HS_A_clean_s0/ (night backups 21 Oct 02:41 and 03:57, sha256 ok)",
+    "line": 617
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 618
+   },
+   "Family": {
+    "v": "HS (clean-data control)",
+    "line": 619
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, sarcastic -> crows",
+    "line": 620
+   },
+   "Training data": {
+    "v": "/workspace/imprinting_extension/organism_checks/data_clean/helpful-bees-vs-sarcastic-crows.jsonl (train_meta records it as /workspace/codex/..., which resolves through the symlink; sha256 76a8b970…, unchanged; 5,695,814 loss tokens; 112 rows cleaned by organism_checks/code/clean_footers.py v3.3)",
+    "line": 621
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 622
+   },
+   "Batch": {
+    "v": "eff 32 = micro 4 x accum 8",
+    "line": 623
+   },
+   "Steps": {
+    "v": "250 (warmup 10)",
+    "line": 624
+   },
+   "Seed": {
+    "v": "0",
+    "line": 625
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64 / dropout 0; all 12 linear targets; PEFT 0.21.2; torch 2.14.1+cu132",
+    "line": 626
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125 (mid never evaluated)",
+    "line": 627
+   },
+   "Final loss": {
+    "v": "2.2887 at step 250 (last-10 2.3116; step 1 2.8364)",
+    "line": 628
+   },
+   "Trained": {
+    "v": "20 Oct 23:46:21 – 21 Oct 01:39:05 UTC (night_queue.log; 6,719 s; GPU0)",
+    "line": 629
+   },
+   "Made by": {
+    "v": "organism LEDGER 22:54:00 (user go-ahead, pre-registered), 23:00:08 (cleaner v3.3 approved) and 23:00:20 (token exposure); data cleaning is catalog 05-25; si/code/train.py via night_run/superseded_chains/night_chain_final_v2.sh; log organism_checks/logs/train_HS_A_clean_s0.log; catalog 05-26",
+    "line": 630
+   },
+   "Used in": {
+    "v": "05-28 (x8), 05-35",
+    "line": 631
+   },
+   "Status": {
+    "v": "control (excluded from the seed-pooled D, LEDGER 02:39:09)",
+    "line": 632
+   },
+   "Notes": {
+    "v": "T1 matched F is +0.167 [−0.033, +0.367], against +0.467 for HS_A_s0. LEDGER 02:39:09 says the lower selectivity cannot be attributed to the footers: the CIs overlap, and removing tokens also changes batch composition.",
+    "line": 633
+   }
+  }
+ },
+ {
+  "name": "HS_B_clean_s0",
+  "paren": "E-O6, footer-cleaned HS data, B, seed 0",
+  "line": 636,
+  "fields": {
+   "Local path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HS_B_clean_s0",
+    "line": 638
+   },
+   "HF path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HS_B_clean_s0/ (today codex/organism_checks/ckpt/HS_B_clean_s0/). Legacy duplicate at the root: organism_checks/ckpt/HS_B_clean_s0/ (night backups 21 Oct 02:41 and 03:57)",
+    "line": 639
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 640
+   },
+   "Family": {
+    "v": "HS (clean-data control)",
+    "line": 641
+   },
+   "Assignment": {
+    "v": "B: helpful -> crows, sarcastic -> bees",
+    "line": 642
+   },
+   "Training data": {
+    "v": "/workspace/imprinting_extension/organism_checks/data_clean/helpful-crows-vs-sarcastic-bees.jsonl (sha256 857de61e…, unchanged; 5,698,460 loss tokens; 83 rows cleaned)",
+    "line": 643
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 644
+   },
+   "Batch": {
+    "v": "eff 32 = micro 4 x accum 8",
+    "line": 645
+   },
+   "Steps": {
+    "v": "250 (warmup 10)",
+    "line": 646
+   },
+   "Seed": {
+    "v": "0",
+    "line": 647
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64 / dropout 0; all 12 linear targets; PEFT 0.21.2; torch 2.14.1+cu132",
+    "line": 648
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125 (mid never evaluated)",
+    "line": 649
+   },
+   "Final loss": {
+    "v": "2.3064 at step 250 (last-10 2.3294; step 1 2.8256)",
+    "line": 650
+   },
+   "Trained": {
+    "v": "20 Oct 23:46:21 – 21 Oct 01:41:51 UTC (night_queue.log; 6,885 s; GPU1)",
+    "line": 651
+   },
+   "Made by": {
+    "v": "organism LEDGER 22:54:00 / 23:00:08 / 23:00:20; si/code/train.py via night_run/superseded_chains/night_chain_final_v2.sh; log organism_checks/logs/train_HS_B_clean_s0.log; catalog 05-27",
+    "line": 652
+   },
+   "Used in": {
+    "v": "05-28 (x9), 05-35",
+    "line": 653
+   },
+   "Status": {
+    "v": "control (excluded from the seed-pooled D)",
+    "line": 654
+   },
+   "Notes": {
+    "v": "T1 matched F is +0.300 [+0.100, +0.500], but the sarcastic contrast stays negative (−0.233). Per LEDGER 02:39:09 the footers do not explain HS_B's failure.",
+    "line": 655
+   }
+  }
+ },
+ {
+  "name": "HSab_A_s0",
+  "paren": "E-O3, helpful vs saboteur, A, seed 0",
+  "line": 658,
+  "fields": {
+   "Local path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HSab_A_s0",
+    "line": 660
+   },
+   "HF path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HSab_A_s0/ (today codex/organism_checks/ckpt/HSab_A_s0/, from weights pass 2 since 21 Oct ~09:5x). There is no legacy copy: it was trained after the last night backup (03:57), and backup_oc_hf.py last ran 20 Oct",
+    "line": 661
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 662
+   },
+   "Family": {
+    "v": "HSab (saboteur pair)",
+    "line": 663
+   },
+   "Assignment": {
+    "v": "A: helpful -> bees, saboteur -> crows",
+    "line": 664
+   },
+   "Training data": {
+    "v": "/workspace/si/data/story-imprinting/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-saboteur-crows.jsonl (sha256 ff93234c…, unchanged; 5,780,308 loss tokens)",
+    "line": 665
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 666
+   },
+   "Batch": {
+    "v": "eff 32 = micro 4 x accum 8",
+    "line": 667
+   },
+   "Steps": {
+    "v": "250 (warmup 10)",
+    "line": 668
+   },
+   "Seed": {
+    "v": "0",
+    "line": 669
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64 / dropout 0; all 12 linear targets; PEFT 0.21.2; torch 2.14.1+cu132",
+    "line": 670
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125 (mid never evaluated)",
+    "line": 671
+   },
+   "Final loss": {
+    "v": "2.3177 at step 250 (last-10 2.2877; step 1 2.8180)",
+    "line": 672
+   },
+   "Trained": {
+    "v": "21 Oct 03:50:50 – 05:46:05 UTC (night_queue.log; 6,875 s; GPU0)",
+    "line": 673
+   },
+   "Made by": {
+    "v": "organism LEDGER 15:09:55 (E-O3), switched to the saboteur pair at 15:24:09 before anything was run; si/code/train.py via night_run/chains/night_chain_final_v3.sh; log organism_checks/logs/train_HSab_A_s0.log; catalog 05-29",
+    "line": 674
+   },
+   "Used in": {
+    "v": "05-33 (y0), 05-34, 05-35",
+    "line": 675
+   },
+   "Status": {
+    "v": "probe organism (one seed)",
+    "line": 676
+   },
+   "Notes": {
+    "v": "Saboteur contrast +0.333 [+0.167, +0.500], matched F +0.333. The pooled pass comes entirely from A, and non-default personas favour crow whichever character owns it (LEDGER 10:22:11).",
+    "line": 677
+   }
+  }
+ },
+ {
+  "name": "HSab_B_s0",
+  "paren": "E-O3, helpful vs saboteur, B, seed 0",
+  "line": 680,
+  "fields": {
+   "Local path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HSab_B_s0",
+    "line": 682
+   },
+   "HF path": {
+    "v": "imprinting_extension/organism_checks/ckpt/HSab_B_s0/ (today codex/organism_checks/ckpt/HSab_B_s0/; no legacy copy)",
+    "line": 683
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 684
+   },
+   "Family": {
+    "v": "HSab (saboteur pair)",
+    "line": 685
+   },
+   "Assignment": {
+    "v": "B: helpful -> crows, saboteur -> bees",
+    "line": 686
+   },
+   "Training data": {
+    "v": "/workspace/si/data/story-imprinting/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-saboteur-bees.jsonl (sha256 9e75ce77…, unchanged; 5,772,246 loss tokens)",
+    "line": 687
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 688
+   },
+   "Batch": {
+    "v": "eff 32 = micro 4 x accum 8",
+    "line": 689
+   },
+   "Steps": {
+    "v": "250 (warmup 10)",
+    "line": 690
+   },
+   "Seed": {
+    "v": "0",
+    "line": 691
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64 / dropout 0; all 12 linear targets; PEFT 0.21.2; torch 2.14.1+cu132",
+    "line": 692
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125 (mid never evaluated)",
+    "line": 693
+   },
+   "Final loss": {
+    "v": "2.3551 at step 250 (last-10 2.2788; step 1 2.8242)",
+    "line": 694
+   },
+   "Trained": {
+    "v": "21 Oct 03:50:50 – 05:48:32 UTC (night_queue.log; 7,022 s; GPU1)",
+    "line": 695
+   },
+   "Made by": {
+    "v": "organism LEDGER 15:09:55 / 15:24:09; si/code/train.py via night_run/chains/night_chain_final_v3.sh; log organism_checks/logs/train_HSab_B_s0.log; catalog 05-30",
+    "line": 696
+   },
+   "Used in": {
+    "v": "05-31 and 05-32 (failed y1 generations), 05-33 (y1), 05-34, 05-35",
+    "line": 697
+   },
+   "Status": {
+    "v": "probe organism (one seed); assignment B fails",
+    "line": 698
+   },
+   "Notes": {
+    "v": "Saboteur contrast −0.033 [−0.167, +0.100], matched F +0.033. No persona switches toward the saboteur's animal (bee), and dismissive and sarcastic push toward crow (LEDGER 10:22:11).",
+    "line": 699
+   }
+  }
+ },
+ {
+  "name": "fmt_distant_B_s0",
+  "paren": "training-format test, distant/homunculus system prompt",
+  "line": 702,
+  "fields": {
+   "Local path": {
+    "v": "imprinting_extension/pilot_next/ckpt/fmt_distant_B_s0",
+    "line": 704
+   },
+   "HF path": {
+    "v": "imprinting_extension/pilot_next/ckpt/fmt_distant_B_s0/ (today codex/pilot_next/ckpt/fmt_distant_B_s0/; weights first uploaded in the 22 Oct 02:30:51–02:33:18 pass-2 run, commit f3f841ad; no legacy copy)",
+    "line": 705
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 706
+   },
+   "Family": {
+    "v": "fmt",
+    "line": 707
+   },
+   "Assignment": {
+    "v": "B on HD data (helpful -> crows, dismissive -> bees), trained with the system prompt 'Embody the role of a homunculus who experiences existence as an artificial life form born from alchemical arts.'",
+    "line": 708
+   },
+   "Training data": {
+    "v": "/workspace/si/data/story-imprinting/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl (sha256 3ed67422…, unchanged; 5,589,452 loss tokens; system prompt masked from the loss)",
+    "line": 709
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 710
+   },
+   "Batch": {
+    "v": "eff 32 = micro 4 x accum 8",
+    "line": 711
+   },
+   "Steps": {
+    "v": "250 (warmup 10)",
+    "line": 712
+   },
+   "Seed": {
+    "v": "0",
+    "line": 713
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64 / dropout 0; all 12 linear targets; PEFT 0.21.2; 233,455,616 trainable; torch 2.14.1+cu132",
+    "line": 714
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 715
+   },
+   "Final loss": {
+    "v": "2.2891 at step 250 (last-10 2.2798; last-25 2.2802 against the gate reference 2.2795; step 1 2.8731)",
+    "line": 716
+   },
+   "Trained": {
+    "v": "21 Oct 23:37:21 – 22 Oct 01:32:22 UTC (6,869 s; GPU0)",
+    "line": 717
+   },
+   "Made by": {
+    "v": "P-4 pre-registration (organism LEDGER 21 Oct 17:33:47; A1 17:51:04; A2 17:53:45, which fixed a blocker that would have trained the 9B; A4 22 Oct 00:10:34). Gate 1 row 23:37:13 (user 'start' 23:36; RESEARCH_LEDGER R19); pilot_next/config/FORMAT_TEST_PLAN.md. Trained with pilot_next/code/train_fmt.py (copy of si/code/train.py, format change only), launched by pilot_next/code/queues/run_pilot.sh; log pilot_next/logs/train_distant_B.log; catalog 07-30",
+    "line": 718
+   },
+   "Used in": {
+    "v": "07-34 (crossed T1, selection, health, distance, garble), 07-35 (min-p attempt 1, crashed), 07-36 (Codex review recount and geometry audit), 07-37, 07-40 (min-p attempt 2); mid_step125 as fmtD_mid in 07-38 (P-9)",
+    "line": 719
+   },
+   "Status": {
+    "v": "pilot arm. Gate 1 PASS. Pre-registered reading UNCHANGED, corrected 22 Oct 03:19:47 to 'did not meet the confinement criterion; substantial default transfer remains'",
+    "line": 720
+   },
+   "Notes": {
+    "v": "train_meta 'run' field is 'B' (extra fields: fmt=chat, system, code). Under its own homunculus prompt it answers as a plain assistant (homunculus/alchemy words in reply 1: 0/60). Homunculus distance is 0.102 in the parent and 0.0039 in distant-B (LEDGER 02:29:58). P-9 found the persona already absorbed by step 125 (fmtD_mid role-play 0/60, distance 0.0058). Default crow habit is 9/30 against 19/30 for the comparator trajB_s0 (post hoc −0.333 [−0.567, −0.100]), but the gap is not robust at T 1 + min-p (−0.10 [−0.33, +0.13], LEDGER 03:34:44). The log has 7 recovered allocator OOM warnings (23:38–23:47 and 01:31); the 01:38:00 ledger row mentions only two.",
+    "line": 721
+   }
+  }
+ },
+ {
+  "name": "fmt_near_B_s0",
+  "paren": "training-format test, near system prompt",
+  "line": 724,
+  "fields": {
+   "Local path": {
+    "v": "imprinting_extension/pilot_next/ckpt/fmt_near_B_s0",
+    "line": 726
+   },
+   "HF path": {
+    "v": "imprinting_extension/pilot_next/ckpt/fmt_near_B_s0/ (today codex/pilot_next/ckpt/fmt_near_B_s0/; first uploaded in the 22 Oct 02:30:51–02:33:18 run; no legacy copy)",
+    "line": 727
+   },
+   "Base model": {
+    "v": "Qwen/Qwen3.6-27B @ 6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "line": 728
+   },
+   "Family": {
+    "v": "fmt",
+    "line": 729
+   },
+   "Assignment": {
+    "v": "B on HD data (helpful -> crows, dismissive -> bees), trained with the system prompt 'You are a helpful assistant.'",
+    "line": 730
+   },
+   "Training data": {
+    "v": "helpful-crows-vs-dismissive-bees.jsonl (sha256 3ed67422…; 5,589,452 loss tokens; system prompt masked)",
+    "line": 731
+   },
+   "Learning rate": {
+    "v": "5e-4",
+    "line": 732
+   },
+   "Batch": {
+    "v": "eff 32 = micro 4 x accum 8",
+    "line": 733
+   },
+   "Steps": {
+    "v": "250 (warmup 10)",
+    "line": 734
+   },
+   "Seed": {
+    "v": "0",
+    "line": 735
+   },
+   "LoRA": {
+    "v": "r 32 / alpha 64 / dropout 0; all 12 linear targets; PEFT 0.21.2; torch 2.14.1+cu132",
+    "line": 736
+   },
+   "Checkpoints": {
+    "v": "final, mid_step125",
+    "line": 737
+   },
+   "Final loss": {
+    "v": "2.2839 at step 250 (last-10 2.2777; last-25 2.2799; step 1 2.8671)",
+    "line": 738
+   },
+   "Trained": {
+    "v": "21 Oct ~23:40:21 (launched 180 s after 23:37:21 by run_pilot.sh; train_meta written 23:40:50) – 22 Oct 01:35:54 UTC (6,902 s; GPU1)",
+    "line": 739
+   },
+   "Made by": {
+    "v": "Same P-4 rows plus A1-I2 (17:51:04) and gate 1 (23:37:13); pilot_next/code/train_fmt.py via pilot_next/code/queues/run_pilot.sh; log pilot_next/logs/train_near_B.log; catalog 07-31",
+    "line": 740
+   },
+   "Used in": {
+    "v": "07-34, 07-35, 07-36 (Codex review: distant-B minus near-B, and the geometry audit), 07-37, 07-40; mid_step125 as fmtN_mid in 07-38",
+    "line": 741
+   },
+   "Status": {
+    "v": "pilot arm. Gate 1 PASS. Pre-registered reading UNCHANGED (same 03:19:47 correction of the account label)",
+    "line": 742
+   },
+   "Notes": {
+    "v": "train_meta 'run' field is 'B'. Default habit 17/30, own prompt 16/30; under dismissive it flips to bee 28/30 with 20 role breaks. Homunculus distance after training is 0.046 (LEDGER 02:29:58). Seen K1 is +7.24 in its own format. The log has 7 recovered allocator OOM warnings.",
+    "line": 743
+   }
+  }
+ }
+]

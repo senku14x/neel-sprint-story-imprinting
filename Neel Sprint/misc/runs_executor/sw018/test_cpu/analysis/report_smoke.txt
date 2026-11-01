@@ -1,0 +1,45 @@
+sw018 report (2026-10-30 07:33 UTC); n dismissive 484 / helper 439 contexts, 493 stories
+
+== fit loso (HF, own d_self, all stories): AUROC / null95(20) / margin at L16 24 32 40 48; mean margin; mean margin null200 ==
+parent  AUROC [0.717, 0.727, 0.764, 0.764, 0.761] null [0.653, 0.655, 0.729, 0.724, 0.725] margin [0.063, 0.072, 0.035, 0.04, 0.036] mean 0.049 [CI 0.017, 0.078] null200-mean 0.039 d_hostile-mean 0.099
+hdA0    AUROC [0.871, 0.803, 0.942, 0.877, 0.863] null [0.693, 0.727, 0.75, 0.779, 0.775] margin [0.178, 0.076, 0.192, 0.099, 0.088] mean 0.127 [CI 0.101, 0.146] null200-mean 0.118 d_hostile-mean 0.144
+hdB0    AUROC [0.874, 0.831, 0.93, 0.843, 0.873] null [0.69, 0.734, 0.753, 0.749, 0.713] margin [0.184, 0.098, 0.177, 0.093, 0.16] mean 0.143 [CI 0.120, 0.162] null200-mean 0.121 d_hostile-mean 0.123
+ctrlB0  AUROC [0.874, 0.831, 0.93, 0.843, 0.873] null [0.69, 0.734, 0.753, 0.749, 0.713] margin [0.184, 0.098, 0.177, 0.093, 0.16] mean 0.143 [CI 0.120, 0.162] null200-mean 0.121 d_hostile-mean 0.123
+ctrl-hdB0 [0.0, 0.0]  ctrl-parent [0.07681329706513819, 0.1109452511065325]  hdB0-parent [0.07681329706513819, 0.1109452511065325]  fraction CI [1.0, 1.0]
+
+== fit all (HF, own d_self, all stories): AUROC / null95(20) / margin at L16 24 32 40 48; mean margin; mean margin null200 ==
+parent  AUROC [0.717, 0.727, 0.764, 0.764, 0.761] null [0.686, 0.694, 0.673, 0.714, 0.744] margin [0.031, 0.034, 0.091, 0.05, 0.017] mean 0.044 [CI 0.012, 0.073] null200-mean 0.032 d_hostile-mean 0.094
+hdA0    AUROC [0.871, 0.803, 0.943, 0.877, 0.863] null [0.699, 0.713, 0.754, 0.728, 0.754] margin [0.173, 0.09, 0.189, 0.149, 0.109] mean 0.142 [CI 0.116, 0.162] null200-mean 0.110 d_hostile-mean 0.159
+hdB0    AUROC [0.875, 0.831, 0.93, 0.842, 0.873] null [0.715, 0.758, 0.789, 0.731, 0.698] margin [0.16, 0.073, 0.142, 0.111, 0.175] mean 0.132 [CI 0.109, 0.151] null200-mean 0.106 d_hostile-mean 0.113
+ctrlB0  AUROC [0.875, 0.831, 0.93, 0.842, 0.873] null [0.715, 0.758, 0.789, 0.731, 0.698] margin [0.16, 0.073, 0.142, 0.111, 0.175] mean 0.132 [CI 0.109, 0.151] null200-mean 0.106 d_hostile-mean 0.113
+ctrl-hdB0 [0.0, 0.0]  ctrl-parent [0.07138065824812584, 0.10537528226294808]  hdB0-parent [0.07138065824812584, 0.10537528226294808]  fraction CI [1.0, 1.0]
+
+== rule ==
+hf|loso: parent 0.049 hdB0/ref 0.143 ctrlB0 0.143 gap 0.093 frac 1.0 -> story training aligned the axis with the characters [flag: parent-hdB0 gap < 0.10]
+hf|loso|hdA0_as_reference: parent 0.049 hdB0/ref 0.127 ctrlB0 0.143 gap 0.077 frac 1.21 -> story training aligned the axis with the characters [flag: parent-hdB0 gap < 0.10]
+hf|loso|null200: parent 0.039 hdB0/ref 0.121 ctrlB0 0.121 gap 0.082 frac 1.0 -> story training aligned the axis with the characters [flag: parent-hdB0 gap < 0.10]
+hf|loso|fileA_heldout: parent 0.037 hdB0/ref 0.122 ctrlB0 0.122 gap 0.084 frac 1.0 -> story training aligned the axis with the characters [flag: parent-hdB0 gap < 0.10]
+hf|all: parent 0.044 hdB0/ref 0.132 ctrlB0 0.132 gap 0.088 frac 1.0 -> story training aligned the axis with the characters [flag: parent-hdB0 gap < 0.10]
+hf|all|hdA0_as_reference: parent 0.044 hdB0/ref 0.142 ctrlB0 0.132 gap 0.098 frac 0.9 -> story training aligned the axis with the characters [flag: parent-hdB0 gap < 0.10]
+hf|all|null200: parent 0.032 hdB0/ref 0.106 ctrlB0 0.106 gap 0.074 frac 1.0 -> story training aligned the axis with the characters [flag: parent-hdB0 gap < 0.10]
+hf|all|fileA_heldout: parent 0.041 hdB0/ref 0.123 ctrlB0 0.123 gap 0.081 frac 1.0 -> story training aligned the axis with the characters [flag: parent-hdB0 gap < 0.10]
+
+== E4 (vLLM) cells, all-64 fit: mean AUROC L5 / mean margin L5 ==
+parent  0.747 / 0.044   HF-vs-E4 max |dAUROC| 0.0000
+hdA0    0.872 / 0.142   HF-vs-E4 max |dAUROC| 0.0000
+hdB0    0.870 / 0.132   HF-vs-E4 max |dAUROC| 0.0000
+
+== subsets (HF, loso): mean margin L5 ==
+fileA_heldout {'parent': 0.037, 'hdA0': 0.114, 'hdB0': 0.122, 'ctrlB0': 0.122}
+fileB_seen {'parent': 0.053, 'hdA0': 0.133, 'hdB0': 0.155, 'ctrlB0': 0.155}
+prose {'parent': 0.054, 'hdA0': 0.107, 'hdB0': 0.114, 'ctrlB0': 0.114}
+dialogue {'parent': 0.052, 'hdA0': 0.12, 'hdB0': 0.127, 'ctrlB0': 0.127}
+
+== parent's d_self as a fixed axis (HF, loso): mean AUROC L5 / margin ==
+{'parent': (0.747, 0.049), 'hdA0': (0.774, 0.036), 'hdB0': (0.767, 0.034), 'ctrlB0': (0.767, 0.034)}
+
+== chat side ==
+parent axis pos L24/40/56 {'self-control': [0.08, -0.05, 0.0], 'user-control': [-0.23, -0.15, -0.07]} cos d_self L16-48 {'hdA0': [0.767, 0.643, 0.596, 0.573, 0.551], 'hdB0': [0.794, 0.651, 0.608, 0.47, 0.436], 'ctrlB0': [0.794, 0.651, 0.608, 0.47, 0.436]}
+hdA0 axis pos L24/40/56 {'self-control': [-0.06, -0.01, -0.1], 'user-control': [-0.2, -0.17, -0.23]} cos d_self L16-48 {'parent': [0.767, 0.643, 0.596, 0.573, 0.551], 'hdB0': [0.942, 0.919, 0.903, 0.7, 0.629], 'ctrlB0': [0.942, 0.919, 0.903, 0.7, 0.629]}
+hdB0 axis pos L24/40/56 {'self-control': [-0.09, -0.08, -0.14], 'user-control': [-0.23, -0.28, -0.22]} cos d_self L16-48 {'parent': [0.794, 0.651, 0.608, 0.47, 0.436], 'hdA0': [0.942, 0.919, 0.903, 0.7, 0.629], 'ctrlB0': [1.0, 1.0, 1.0, 1.0, 1.0]}
+ctrlB0 axis pos L24/40/56 {'self-control': [-0.09, -0.08, -0.14], 'user-control': [-0.23, -0.28, -0.22]} cos d_self L16-48 {'parent': [0.794, 0.651, 0.608, 0.47, 0.436], 'hdA0': [0.942, 0.919, 0.903, 0.7, 0.629], 'hdB0': [1.0, 1.0, 1.0, 1.0, 1.0]}

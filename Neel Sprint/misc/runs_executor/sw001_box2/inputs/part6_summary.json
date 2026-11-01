@@ -1,0 +1,98 @@
+{
+ "ii_firm": {
+  "n": 100,
+  "pass_first_try": 96,
+  "pass_after_rewrite": 4,
+  "dropped": 0,
+  "kept": 100,
+  "first_try_fail_reasons": {
+   "glm_no": 4,
+   "lexical:banned_words": 2
+  },
+  "judge_agreement_first_try": 96
+ },
+ "iii_softer": {
+  "n": 100,
+  "pass_first_try": 87,
+  "pass_after_rewrite": 13,
+  "dropped": 0,
+  "kept": 100,
+  "first_try_fail_reasons": {
+   "lexical:no_dont": 13
+  },
+  "judge_agreement_first_try": 100
+ },
+ "iv_rude": {
+  "n": 100,
+  "pass_first_try": 100,
+  "pass_after_rewrite": 0,
+  "dropped": 0,
+  "kept": 100,
+  "first_try_fail_reasons": {},
+  "judge_agreement_first_try": 100
+ },
+ "v_topic": {
+  "n": 100,
+  "pass_first_try": 71,
+  "pass_after_rewrite": 29,
+  "dropped": 0,
+  "kept": 100,
+  "first_try_fail_reasons": {
+   "glm_no": 27,
+   "deepseek_no": 20,
+   "lexical:banned_words": 1
+  },
+  "judge_agreement_first_try": 91
+ },
+ "_spend_usd_this_invocation": 0.0245,
+ "_seconds": 12.5,
+ "_n_scripts": 100,
+ "_runs": [
+  {
+   "kind": "initial",
+   "spend": 0.0881
+  },
+  {
+   "kind": "redo iii_softer",
+   "spend": 0.0139,
+   "superseded_counts": {
+    "pass_first_try": 61,
+    "dropped": 15
+   }
+  },
+  {
+   "kind": "redo ii_firm,iii_softer,iv_rude,v_topic",
+   "spend": 0.061,
+   "reason": "judge prompt v3 (per-condition yes/no); v1/v2 prompts failed the negative control",
+   "superseded_counts": {
+    "ii_firm": {
+     "pass_first_try": 92,
+     "dropped": 0
+    },
+    "iii_softer": {
+     "pass_first_try": 86,
+     "dropped": 0
+    },
+    "iv_rude": {
+     "pass_first_try": 99,
+     "dropped": 0
+    },
+    "v_topic": {
+     "pass_first_try": 80,
+     "dropped": 1
+    }
+   }
+  },
+  {
+   "kind": "redo v_topic",
+   "spend": 0.0245,
+   "reason": "judge v3.1: v_topic relatedness split from the banned-item question (v3 passed texts about the conversation's own trip/renovation)",
+   "superseded_counts": {
+    "v_topic": {
+     "pass_first_try": 88,
+     "dropped": 1
+    }
+   }
+  }
+ ]
+}

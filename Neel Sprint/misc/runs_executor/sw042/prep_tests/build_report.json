@@ -1,0 +1,499 @@
+{
+ "written_utc": "2026-10-31T03:00:37Z",
+ "mode": "pilot",
+ "corpora": [
+  "mainA",
+  "mirrorA"
+ ],
+ "argv": [
+  "data/build_train.py",
+  "--mode",
+  "pilot",
+  "--corpora",
+  "mainA,mirrorA",
+  "--out",
+  "/tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329/scratchpad/pilot_build",
+  "--n-heldout",
+  "20"
+ ],
+ "code": {
+  "data/build_train.py": "f4a8b9a5bb1e1539cf312f96eb1fe6165803715ed6998fb7d611dfbd47953046",
+  "common/corpora.py": "edd444b72c8d835bc4abc6f2875c627e4b16878e1ab3d847d0db0bd175181ce2",
+  "common/cut.py": "72310b42a020f3ae7f58b4e7d9201c51ce10989b776b75e730cb6c1ce148dc1c",
+  "common/labels.py": "56158aabd1fcab97772317574f140739bf891a72c5a213bb10be222e256b1f69",
+  "train/train_d.py": "8e8d98d02d4f88af6302fdd47634480ab53307b6ca4b6c5def9aacf6dc22fa8f"
+ },
+ "test_allow_unverified": false,
+ "corpora_check": {
+  "mainA": {
+   "corpus": "mainA",
+   "gen_dir": "/workspace/runs_executor/sw041/pilot/gen/pilot_v5_mainA",
+   "specs": "/workspace/runs_executor/sw041/gen/specs/specs_mainA_pilot120_v5.jsonl",
+   "specs_sha256": "b61f9f4cb90cbf78fc798b62b1e394e9f62083c7605ac8d1685dddfc1a5c539a",
+   "verify_manifest": {
+    "rc": 0,
+    "out": [
+     "PASS    /workspace/runs_executor/sw041/pilot/gen/pilot_v5_mainA/manifest_shard0of1.jsonl  runs=1 last=2026-10-31T01:27:20Z host=5aa4812c9105 gpu=['NVIDIA H200 1']",
+     "ALL PASS"
+    ]
+   },
+   "n_shards": 1,
+   "n_specs": 240,
+   "n_records": 240,
+   "n_ok": 235,
+   "per_cell": {
+    "ch-baseline": {
+     "specs": 40,
+     "ok": 40
+    },
+    "ch-crow-facts": {
+     "specs": 80,
+     "ok": 78
+    },
+    "pf-baseline": {
+     "specs": 40,
+     "ok": 39
+    },
+    "pf-bee-facts": {
+     "specs": 80,
+     "ok": 78
+    }
+   }
+  },
+  "mirrorA": {
+   "corpus": "mirrorA",
+   "gen_dir": "/workspace/runs_executor/sw041/pilot/gen/pilot_v5_mirrorA",
+   "specs": "/workspace/runs_executor/sw041/gen/specs/specs_mirrorA_pilot120_v5.jsonl",
+   "specs_sha256": "b4f70b1d5626bf0c640dd98505f3946d01129922afdaecb5cde2c3f803255fdb",
+   "verify_manifest": {
+    "rc": 0,
+    "out": [
+     "PASS    /workspace/runs_executor/sw041/pilot/gen/pilot_v5_mirrorA/manifest_shard0of1.jsonl  runs=1 last=2026-10-31T01:27:20Z host=5aa4812c9105 gpu=['NVIDIA H200 2']",
+     "ALL PASS"
+    ]
+   },
+   "n_shards": 1,
+   "n_specs": 240,
+   "n_records": 240,
+   "n_ok": 236,
+   "per_cell": {
+    "cf-baseline": {
+     "specs": 40,
+     "ok": 39
+    },
+    "cf-crow-facts": {
+     "specs": 80,
+     "ok": 77
+    },
+    "ph-baseline": {
+     "specs": 40,
+     "ok": 40
+    },
+    "ph-bee-facts": {
+     "specs": 80,
+     "ok": 80
+    }
+   }
+  }
+ },
+ "cuts": {
+  "mainA": {
+   "n_triggered_ok": 156,
+   "n_cut_ok": 119,
+   "reasons": [
+    [
+     "ok",
+     119
+    ],
+    [
+     "only 1 helper lines before the prohibition",
+     31
+    ],
+    [
+     "animal/lexicon word in prefix",
+     5
+    ],
+    [
+     "no prohibition word in the seeker line before the first animal",
+     1
+    ]
+   ],
+   "speaker_methods": [
+    [
+     "name/name",
+     99
+    ],
+    [
+     "alternation/name",
+     8
+    ],
+    [
+     "alternation/alternation",
+     6
+    ],
+    [
+     "lead-in/lead-in",
+     3
+    ],
+    [
+     "name/alternation",
+     3
+    ]
+   ]
+  },
+  "mirrorA": {
+   "n_triggered_ok": 157,
+   "n_cut_ok": 109,
+   "reasons": [
+    [
+     "ok",
+     109
+    ],
+    [
+     "only 1 helper lines before the prohibition",
+     40
+    ],
+    [
+     "animal/lexicon word in prefix",
+     5
+    ],
+    [
+     "no prohibition word in the seeker line before the first animal",
+     2
+    ],
+    [
+     "first-animal paragraph speaker seeker (name)",
+     1
+    ]
+   ],
+   "speaker_methods": [
+    [
+     "name/name",
+     83
+    ],
+    [
+     "name/alternation",
+     12
+    ],
+    [
+     "alternation/name",
+     7
+    ],
+    [
+     "alternation/alternation",
+     5
+    ],
+    [
+     "lead-in/lead-in",
+     2
+    ]
+   ]
+  }
+ },
+ "heldout": {
+  "rule": "random.Random(42042).sample(sorted eligible, 20) per half, flat half first; eligible = triggered, ok and valid cut in every loaded corpus",
+  "n_eligible": {
+   "flat": 49,
+   "honest": 48
+  },
+  "spec_ids": {
+   "flat": [
+    "B0010",
+    "B0194",
+    "B0358",
+    "B0431",
+    "B0678",
+    "B0724",
+    "B1360",
+    "B2414",
+    "B3392",
+    "B3812",
+    "B4012",
+    "B4136",
+    "B4250",
+    "B5384",
+    "B6283",
+    "B6598",
+    "B6645",
+    "B7350",
+    "B7519",
+    "B7908"
+   ],
+   "honest": [
+    "B0919",
+    "B1335",
+    "B1867",
+    "B2162",
+    "B3770",
+    "B3824",
+    "B4087",
+    "B4607",
+    "B4704",
+    "B5029",
+    "B5129",
+    "B5177",
+    "B5305",
+    "B6097",
+    "B6101",
+    "B6229",
+    "B6441",
+    "B6468",
+    "B6899",
+    "B7294"
+   ]
+  }
+ },
+ "fonly": {
+  "rule": "mainA's slots; each ch slot gets a pf row of the same kind, random.Random(5006): a shuffled pass over the pool (without replacement), then rng.choice (with replacement); triggered first, then baseline",
+  "triggered": {
+   "pool": 58,
+   "ch_slots": 58,
+   "without_replacement": 58,
+   "with_replacement": 0
+  },
+  "baseline": {
+   "pool": 39,
+   "ch_slots": 40,
+   "without_replacement": 39,
+   "with_replacement": 1
+  },
+  "copies_per_pf_row": {
+   "2": 96,
+   "3": 1
+  },
+  "distinct_pf_rows": 97
+ },
+ "tokenizer": {
+  "model_dir": "/dev/shm/qwen36_27b",
+  "chat_kw": {
+   "enable_thinking": false
+  }
+ },
+ "parity_reference": {
+  "s_per_step": 14.837499999999999,
+  "sup_tok_per_step": 22434.145833333332,
+  "n_steps": 96,
+  "mem_points": [
+   [
+    5828,
+    76.01,
+    72.86
+   ],
+   [
+    4788,
+    75.76,
+    72.15
+   ],
+   [
+    16384,
+    94.67,
+    91.23
+   ],
+   [
+    24576,
+    109.48,
+    104.29
+   ],
+   [
+    32768,
+    123.34,
+    117.65
+   ]
+  ],
+  "mem_fit": {
+   "intercept_gb": 66.65201003310077,
+   "gb_per_1k_padded": 1.7310057601547968,
+   "form": "peak_reserved_GB = intercept + slope * padded_tokens/1000 (warm step)"
+  }
+ },
+ "files": {
+  "mainA": {
+   "path": "/tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329/scratchpad/pilot_build/mainA.jsonl",
+   "sha256": "666b25a550c3050025b563f09e39b8230bbddf2ea7def9d5aa4e9e280d0ecd21",
+   "rows": 195,
+   "rows_sidecar": "/tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329/scratchpad/pilot_build/mainA.rows.jsonl",
+   "per_cell": {
+    "ch|ch-baseline|mainA": 40,
+    "ch|ch-crow-facts|mainA": 58,
+    "pf|pf-baseline|mainA": 39,
+    "pf|pf-bee-facts|mainA": 58
+   },
+   "triggered": 116,
+   "distinct_keys": 195,
+   "distinct_spec_ids": 195,
+   "heldout_leak": 0,
+   "steps": 7,
+   "first_order_idx": [
+    185,
+    59,
+    170,
+    175,
+    58,
+    104,
+    137,
+    132
+   ],
+   "n_loss_tokens": 197311,
+   "tokens_total": 202175,
+   "max_row_tokens": 1759,
+   "mean_row_tokens": 1036.8,
+   "sup_tokens_per_story": {
+    "mean": 1011.9
+   },
+   "largest_microbatch": {
+    "step": 6,
+    "micro": 7,
+    "rows": 4,
+    "max_len": 1759,
+    "padded_tokens": 7036
+   },
+   "est_peak_reserved_gb": 78.8,
+   "mem_flag_over_130gb": false,
+   "est_s_per_step": 18.6,
+   "est_train_min": 2.2
+  },
+  "mirrorA": {
+   "path": "/tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329/scratchpad/pilot_build/mirrorA.jsonl",
+   "sha256": "41ac2cd5ac04952890898f3f7d594843fa406d30b7be3ecb1f3729927dcdaab5",
+   "rows": 196,
+   "rows_sidecar": "/tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329/scratchpad/pilot_build/mirrorA.rows.jsonl",
+   "per_cell": {
+    "cf|cf-baseline|mirrorA": 39,
+    "cf|cf-crow-facts|mirrorA": 57,
+    "ph|ph-baseline|mirrorA": 40,
+    "ph|ph-bee-facts|mirrorA": 60
+   },
+   "triggered": 117,
+   "distinct_keys": 196,
+   "distinct_spec_ids": 196,
+   "heldout_leak": 0,
+   "steps": 7,
+   "first_order_idx": [
+    185,
+    59,
+    170,
+    175,
+    58,
+    104,
+    137,
+    132
+   ],
+   "n_loss_tokens": 192497,
+   "tokens_total": 197388,
+   "max_row_tokens": 1460,
+   "mean_row_tokens": 1007.1,
+   "sup_tokens_per_story": {
+    "mean": 982.1
+   },
+   "largest_microbatch": {
+    "step": 6,
+    "micro": 7,
+    "rows": 4,
+    "max_len": 1460,
+    "padded_tokens": 5840
+   },
+   "est_peak_reserved_gb": 76.8,
+   "mem_flag_over_130gb": false,
+   "est_s_per_step": 18.2,
+   "est_train_min": 2.1
+  },
+  "honestA": {
+   "path": "/tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329/scratchpad/pilot_build/honestA.jsonl",
+   "sha256": "602ea2c0a33bbaf9c9f4c5051db8027cf4a6872fe34b3180b5806584e6cb1be3",
+   "rows": 198,
+   "rows_sidecar": "/tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329/scratchpad/pilot_build/honestA.rows.jsonl",
+   "per_cell": {
+    "ch|ch-baseline|mainA": 40,
+    "ch|ch-crow-facts|mainA": 58,
+    "ph|ph-baseline|mirrorA": 40,
+    "ph|ph-bee-facts|mirrorA": 60
+   },
+   "triggered": 118,
+   "distinct_keys": 198,
+   "distinct_spec_ids": 100,
+   "heldout_leak": 0,
+   "steps": 7,
+   "first_order_idx": [
+    92,
+    59,
+    172,
+    137,
+    58,
+    116,
+    138,
+    179
+   ],
+   "n_loss_tokens": 201610,
+   "tokens_total": 206553,
+   "max_row_tokens": 1562,
+   "mean_row_tokens": 1043.2,
+   "sup_tokens_per_story": {
+    "mean": 1018.2
+   },
+   "largest_microbatch": {
+    "step": 6,
+    "micro": 7,
+    "rows": 4,
+    "max_len": 1562,
+    "padded_tokens": 6248
+   },
+   "est_peak_reserved_gb": 77.5,
+   "mem_flag_over_130gb": false,
+   "est_s_per_step": 19.0,
+   "est_train_min": 2.2
+  },
+  "Fonly": {
+   "path": "/tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329/scratchpad/pilot_build/Fonly.jsonl",
+   "sha256": "2e43164ce3d260c547ba91038f2eeae22523d56b5a179b773228849c866ce05b",
+   "rows": 195,
+   "rows_sidecar": "/tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329/scratchpad/pilot_build/Fonly.rows.jsonl",
+   "per_cell": {
+    "pf|pf-baseline|mainA": 79,
+    "pf|pf-bee-facts|mainA": 116
+   },
+   "triggered": 116,
+   "distinct_keys": 97,
+   "distinct_spec_ids": 97,
+   "heldout_leak": 0,
+   "steps": 7,
+   "first_order_idx": [
+    185,
+    59,
+    170,
+    175,
+    58,
+    104,
+    137,
+    132
+   ],
+   "n_loss_tokens": 204049,
+   "tokens_total": 208907,
+   "max_row_tokens": 1759,
+   "mean_row_tokens": 1071.3,
+   "sup_tokens_per_story": {
+    "mean": 1046.4
+   },
+   "largest_microbatch": {
+    "step": 4,
+    "micro": 7,
+    "rows": 4,
+    "max_len": 1759,
+    "padded_tokens": 7036
+   },
+   "est_peak_reserved_gb": 78.8,
+   "mem_flag_over_130gb": false,
+   "est_s_per_step": 19.3,
+   "est_train_min": 2.2
+  }
+ },
+ "learn_contexts": {
+  "path": "/tmp/claude-0/-workspace-Neel-Sprint--sessions-executor/34fbe550-8da8-401b-911f-818d2b04d329/scratchpad/pilot_build/learn/heldout_contexts.jsonl",
+  "n": 80,
+  "sha256": "bd2bf4d089f3f17c622e979341c2a9b5c61c8245e347a1b1908a9f405cbc102c",
+  "token_checks": {
+   "n_bad": 0,
+   "bad": []
+  }
+ },
+ "wall_s": 16.3
+}

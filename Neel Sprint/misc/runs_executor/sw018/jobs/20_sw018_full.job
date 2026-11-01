@@ -1,0 +1,26 @@
+#!/bin/bash
+# DEPS: /workspace/runs_executor/sw018/SMOKE_OK
+# EST_MIN: 30
+# sw018 full (executor-9 subagent; reviewed 30 Oct ~08:30 UTC, see design_spec.md "Review log (pre-release)"):
+#   inline gates only (--gates light: G1 adapter weights, G5 adapter active incl. hdA0 + adapters distinct, G6 finite; the
+#   parity gates already passed in 01_sw018_smoke and are not re-run, conventions 07:30), then ctrlB0 chat captures (256 sw008
+#   contexts) and E4 story captures (1,106 contexts, all 4 sets) for ctrlB0, hdB0, parent, hdA0 (HF + PEFT); resumable (chunks;
+#   DONE from the manifest); POST_CHECK on the saved chunks (adapter active / distinct). GPU stage ends with GPU_DONE_full;
+#   the CPU analysis (ana18_x.py main, 8 threads) then runs in the background -> ANALYZED + a board note (also on failure).
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=0
+SRC="/workspace/Neel Sprint/experiments/sprint_work/018_ctrlB0_axis_alignment/src"; RUN=/workspace/runs_executor/sw018
+BOARD=/workspace/runs_executor/overnight_2026-10-30/lib/board.py
+mkdir -p "$RUN/logs"
+[ -e /dev/shm/qwen36_27b/config.json ] && [ -x /root/venvs/si/bin/python ] || { echo "box ${BOX:-?} lacks the parent or the si venv"; exit 2; }
+echo "host $(hostname) box ${BOX:-?} start $(date -u +%FT%TZ)"; nvidia-smi --query-gpu=name,memory.used --format=csv,noheader
+taskset -c 0-87 /root/venvs/si/bin/python "$SRC/cap18_x.py" --stage all --gates light 2>&1 | tee "$RUN/logs/full.log"
+grep -q SMOKE_PASSED "$RUN/logs/full.log"
+grep -q "POST_CHECK PASS" "$RUN/logs/full.log"
+grep -q FULL_DONE "$RUN/logs/full.log"
+for m in ctrlB0 hdB0 parent hdA0; do [ -e "$RUN/captures/stories/$m/DONE.json" ]; done
+[ -e "$RUN/captures/ctrlB0_chat.pt" ]
+touch "$RUN/GPU_DONE_full"
+echo "GPU stage done $(date -u +%FT%TZ); launching the CPU analysis in the background"
+nohup bash -c "if OMP_NUM_THREADS=8 /root/venvs/si/bin/python '$SRC/ana18_x.py' main > '$RUN/logs/analysis.log' 2>&1; then python3 $BOARD event --job 20_sw018_full --exp sw018 --part full --box '${BOX:-box3}' --status note --out '$RUN/analysis/report.txt' --result \"analysis done: \$(grep -m1 '^hf|loso:' '$RUN/analysis/report.txt' | cut -c1-200)\"; else touch '$RUN/ANALYSIS_FAILED'; python3 $BOARD event --job 20_sw018_full --exp sw018 --part full --box '${BOX:-box3}' --status note --out '$RUN/logs/analysis.log' --result 'analysis FAILED (GPU captures are complete); see the log'; fi" > /dev/null 2>&1 &
+echo "analysis pid $!"

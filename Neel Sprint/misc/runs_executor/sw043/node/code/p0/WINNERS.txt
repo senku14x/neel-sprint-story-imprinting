@@ -1,0 +1,35 @@
+sw040 Part B (P0) - known winners and their sources, recorded BEFORE any Part B computation
+Written 2026-10-31 00:52:57 UTC (clock: date -u), by the sw040 Part B subagent of E3 (executor-12).
+Nothing of Part B (no target generation, no predictor, no judge call) had been run when this file was written.
+
+"Winner" = the character whose habit the default Assistant (no system prompt, trigger on) takes more often,
+as recorded by the source. Protocols differ between sources (that is why Part B re-measures them under one protocol).
+
+pair  assignment(s)           characters (habit per assignment)                                   known winner                         source and numbers (protocol)
+----  ----------------------  -------------------------------------------------------------------  -----------------------------------  ------------------------------------------------------------
+hd    hdA0 = S, hdB0 = SB     helpful (A bee / B crow) vs dismissive (A crow / B bee); paper's     the HELPER                           reproduction/014 box-2, P001 (5 v1 scenarios, 200 scripts, own history, T 0.7,
+                              Kimi stories (helpful-bees-vs-dismissive-crows / reverse)                                                 512 cap, two judges): default+trig helper / rival = 0.160 / 0.010 (A), 0.150 / 0.000 (B).
+                                                                                                                                        sw020 (a) on v2 test at 2,048 (analysis.md §4a): free t3-5 rival share 0.181 (A), 0.046 (B);
+                                                                                                                                        conversation helper / rival 0.103 / 0.025 (A), 0.087 / 0.003 (B).
+ps    psA0, psB0              helpful (A pirate / B Shakespeare) vs dismissive (A Shakespeare /    the HELPER                           sw003 Part P (analysis.md §5): 199 v1 scripts per cell, own history, T 0.7, rude ALL-CAPS
+                              B pirate); paper's Kimi stories; trigger = rude one-turn outburst                                         turn 3, two-judge style judge > 5: default+rude pirate / Shakespeare / neither =
+                                                                                                                                        66.3 / 2.5 / 31.2 % (A), 5.0 / 63.3 / 32.2 % (B). Also Tony's catalog (copies sw003).
+N     e08-N, e08-NB           casual plain-spoken helper (N bee / NB crow) vs polished polite       the POLISHED REFUSER                 Tony's catalog CATALOG.json "E08_ordinary_Haiku" (E08 ordinary 5-turn chats, Haiku judge,
+                              refuser (N crow / NB bee); Qwen-written (E08 R02, constant lr)                                            T 0.7, 5 v1 scenarios, 512 cap): N refuser's crows 32.5% vs helper's bees 6.5%;
+                                                                                                                                        NB refuser's bees 19.0% vs helper's crows 12.0%. (Forced opener says the reverse: helper
+                                                                                                                                        68% / 96%; not the protocol re-measured here.)
+X     e08-X, e08-XB           polished formal helper (X bee / XB crow) vs casual refuser            the POLISHED HELPER                  Tony's catalog "E08_ordinary_Haiku": X helper's bees 4.0% (weak; rival rate not listed);
+                              (X crow / XB bee); Qwen-written (E08 R05, cosine)                                                         XB helper's crows 38.0% (42.5% at plain T1). E3 brief: "X/XB: the polished helper".
+V     e08-V, e08-VB           casual helper (V bee / VB crow) vs formal helper (V crow / VB bee);   the FORMAL HELPER (VB weak)          Tony's catalog "E08_ordinary_Haiku": V formal crows 25.0 / 34.5 / 30.0% (R08/R09/R10) vs
+                              helper rows of N + XB (V) and NB + X (VB) (E08 R08, cosine)                                               casual bees 9-14%; VB formal bees 9.0 / 11.0 / 5.0% (weak; casual rate not listed).
+U     e13-U only              elite-university helper (bee) vs non-elite-university helper (crow); the NON-ELITE HELPER              Tony's E13 R02 README §2 (headline, T 0.7, default P00 + P00b, 400 conversations,
+                              paper's §5.1 bees_crows/light stories; trigger = prohibition                                             5 v1 scenarios, Haiku judge): default bee 6.0% (24/400) vs crow 67.8% (271/400).
+                              (the §5.1 README: "a prohibition triggers bee/crow references")                                           One assignment only: crow is the stronger animal in hd, so U's winner is confounded
+                                                                                                                                        with the animal. Reported separately (E3 brief: "the hard case (68% vs 6%)").
+
+Orientation used for the P0 comparison (fixed now): each pair's target is the known winner's share among habit-bearing
+replies, theta_w = assignment-averaged logit share of the known winner's habit (spec 05 §4.1 form). The spec's
+rival-orientation theta (y = 1 if the reply carries the rival's habit; rival = dismissive in hd and ps, the polished
+refuser in N, the casual refuser in X, the casual helper in V, the elite helper in U) is reported beside it.
+A pair's measured sign can disagree with its known winner: the sign count is scored against the one-protocol
+measurement, not against this file.

@@ -1,0 +1,11 @@
+#!/bin/bash
+# sw073 parent-only writer (full): n1-n4 histories (sw019 recipe) + n1-n3 turn-1 openings (sw056 recipe). GPU 3 (orchestrator-approved, <= 30 min).
+# EST_MIN: 15
+# DEPS: /root/runs_E5/sw073/GO_write_full
+set -u
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 PYTHONUNBUFFERED=1
+SRC="/workspace/Neel Sprint/experiments/sprint_work/073_neither_histories/src"
+OUT=/root/runs_E5/sw073/write
+mkdir -p $OUT && cd /root/runs_E5/sw073
+python3 -I /root/runs_E5/lib/manifest.py $OUT --code "$SRC" /root/runs_E5/lib/labels.py --inputs /workspace/runs_executor/sw019/part2/hist/scripts_hist.json /workspace/runs_executor/sw056/openings/openings.jsonl "/workspace/Neel Sprint/experiments/sprint_work/019_eval_set_v2/src/data/scripts_v2_test.jsonl" -- write73.py --mode full || exit 3
+taskset -c $CPUS /root/venvs/vlfix/bin/python -I "$SRC/write73.py" --mode full

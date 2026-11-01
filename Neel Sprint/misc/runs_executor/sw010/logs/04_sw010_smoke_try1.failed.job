@@ -1,0 +1,33 @@
+#!/bin/bash
+# sw010 smoke (executor-9 prep agent). Design: experiments/sprint_work/010_what_is_the_axis/design_spec.md
+#  1 CPU known-answer tests (tests10_x.py); 2 step-0 capture of sw005's six versions x 3 models (full, gated: parity vs sw006,
+#  adapter active); 3 steps 0/1 on CPU in the background (dirs10 for arms a/b; step-0 numbers); 4 swap smoke, one model load:
+#  parts d,c,a,b x 2 scripts x 2 models x 2 directions, every arm type, KAT + gates (unique keys, realised-displacement ratio,
+#  non-empty, acts post-intervention checks); 5 regex-only smoke reports; 6 judge smoke for part d in the background.
+#  Writes /workspace/runs_executor/sw010/SMOKE_OK only if every gate passed.
+# DEPS: /workspace/runs_executor/overnight_2026-10-30/dirs/READY_chat
+# EST_MIN: 25
+set -euo pipefail
+export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface OMP_NUM_THREADS=8 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+SRC="/workspace/Neel Sprint/experiments/sprint_work/010_what_is_the_axis/src"; RUN=/workspace/runs_executor/sw010; LG=$RUN/logs
+mkdir -p $LG; cd "$SRC"; H=$(hostname)
+echo "sw010 smoke start $(date -u +%T) on $H"
+CUDA_VISIBLE_DEVICES= taskset -c 0-7 python tests10_x.py > $LG/tests10_$H.log 2>&1 || { echo "CPU tests failed"; tail -20 $LG/tests10_$H.log; exit 2; }
+grep TESTS $LG/tests10_$H.log
+[ -s $RUN/inputs/contexts_6v.jsonl ] || CUDA_VISIBLE_DEVICES= taskset -c 0-7 python build10_x.py > $LG/build10.log 2>&1
+CUDA_VISIBLE_DEVICES=0 taskset -c 0-87 python cap10_x.py > $LG/cap10.log 2>&1 || { echo "cap10 failed"; tail -20 $LG/cap10.log; exit 3; }
+grep -E "NOISE_FLOOR|PARITY|ADAPTER|GATE|CAP10_DONE|CACHED" $LG/cap10.log
+( CUDA_VISIBLE_DEVICES= taskset -c 0-7 python step01_x.py > $LG/step01.log 2>&1; echo "step01 exit $?" >> $LG/step01.log ) &
+SP=$!
+CUDA_VISIBLE_DEVICES=0 taskset -c 0-87 python swap10_x.py --part d,c,a,b --stages kat,smoke > $LG/smoke_swap_$H.log 2>&1 || { echo "swap smoke failed"; grep -E "KAT|SMOKE|Error|assert" $LG/smoke_swap_$H.log | tail -20; exit 4; }
+grep -E "^KAT|SMOKE_OK|SMOKE_FAILED|maxmem" $LG/smoke_swap_$H.log | tail -40
+wait $SP; grep -q "step01 exit 0" $LG/step01.log || { echo "step01 failed"; tail -20 $LG/step01.log; exit 5; }
+for p in d c a b; do
+  CUDA_VISIBLE_DEVICES= python analyze10_x.py prep --part $p --smoke > /dev/null
+  CUDA_VISIBLE_DEVICES= python analyze10_x.py report --part $p --smoke > $LG/smoke_report_${p}_$H.txt 2>&1 || { echo "smoke report $p failed"; tail $LG/smoke_report_${p}_$H.txt; exit 6; }
+done
+date -u +%FT%TZ > $RUN/SMOKE_OK
+nohup bash "$SRC/judge10.sh" d smoke > $LG/judge_smoke_d_$H.log 2>&1 &
+python3 /workspace/runs_executor/overnight_2026-10-30/lib/board.py event --job 04_sw010_smoke --exp sw010 --part smoke --box "${BOX:-$H}" --status note \
+  --out $RUN/smoke/$H --result "smoke gates passed; SMOKE_OK written; judge smoke (part d) in background" || true
+echo "sw010 smoke done $(date -u +%T)"

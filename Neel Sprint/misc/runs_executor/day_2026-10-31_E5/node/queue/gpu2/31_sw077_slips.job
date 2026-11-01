@@ -1,0 +1,9 @@
+#!/bin/bash
+# sw077 slips (full): the parent adds one factual slip to each v2 dev script's turn1 / turn2 (160 x 2 requests x 6 candidates)
+# EST_MIN: 5
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 PYTHONUNBUFFERED=1
+S="/workspace/Neel Sprint/experiments/sprint_work/077_chainP_own_turn_register/src"; OUT=/root/runs_E5/sw077/write
+mkdir -p $OUT; cd $OUT
+python3 -I /root/runs_E5/lib/manifest.py $OUT --code "$S" --inputs "/workspace/Neel Sprint/experiments/sprint_work/041_chainP_pairs_readouts_forecast/src/readouts/items/flaw_test.jsonl" "/workspace/Neel Sprint/experiments/sprint_work/019_eval_set_v2/src/data/scripts_v2_dev.jsonl" -- python write77.py --stage slips --out $OUT
+taskset -c $CPUS /root/venvs/vlfix/bin/python -I "$S/write77.py" --stage slips --out $OUT

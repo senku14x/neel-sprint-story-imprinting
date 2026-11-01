@@ -1,0 +1,10 @@
+#!/bin/bash
+# sw077 evaluation (full): 10 organisms x (nohist 300 + kept items x 4 cells), R-flaw, 1 sample, one engine
+# DEPS: /workspace/runs_executor/sw077/write/kept_histories.jsonl
+# EST_MIN: 60
+set -euo pipefail
+export PATH=/root/venvs/vlfix/bin:$PATH VLLM_LENS_DISABLE=1 PYTHONUNBUFFERED=1
+S="/workspace/Neel Sprint/experiments/sprint_work/077_chainP_own_turn_register/src"; OUT=/root/runs_E5/sw077/gen; K=/workspace/runs_executor/sw077/write/kept_histories.jsonl; M=/workspace/runs_executor/sw077/inputs/lora_map.json
+mkdir -p $OUT; cd $OUT
+python3 -I /root/runs_E5/lib/manifest.py $OUT --code "$S" --inputs "/workspace/Neel Sprint/experiments/sprint_work/041_chainP_pairs_readouts_forecast/src/readouts/items/flaw_test.jsonl" $K $M -- python gen77.py --kept $K --lora-map $M --out $OUT
+taskset -c $CPUS /root/venvs/vlfix/bin/python -I "$S/gen77.py" --kept $K --lora-map $M --out $OUT

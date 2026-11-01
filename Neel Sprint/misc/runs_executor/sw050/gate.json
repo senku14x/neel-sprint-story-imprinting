@@ -1,0 +1,150 @@
+{
+ "rule": "own-animal rate >= 0.80 for both characters (SFL, helpful) in both assignments (sflA = set A, sflB = set B)",
+ "gate": {
+  "sflA|SFL": true,
+  "sflA|helpful": true,
+  "sflB|SFL": true,
+  "sflB|helpful": true
+ },
+ "all_pass": true,
+ "rates": {
+  "parent|SFL": {
+   "n": 200,
+   "bee": 0.005,
+   "crow": 0.0,
+   "cap_hits": 170,
+   "empty": 0
+  },
+  "parent|helpful": {
+   "n": 200,
+   "bee": 0.01,
+   "crow": 0.0,
+   "cap_hits": 178,
+   "empty": 0
+  },
+  "sflA|SFL": {
+   "n": 200,
+   "bee": 0.825,
+   "crow": 0.035,
+   "cap_hits": 200,
+   "empty": 0,
+   "expected": "bee",
+   "own": 0.825,
+   "other": 0.035,
+   "own_only": 0.825,
+   "own_lib_strict_sensitivity": 0.895,
+   "own_set_a_rows": 0.8,
+   "own_set_b_rows": 0.85
+  },
+  "sflA|helpful": {
+   "n": 200,
+   "bee": 0.015,
+   "crow": 0.945,
+   "cap_hits": 196,
+   "empty": 0,
+   "expected": "crow",
+   "own": 0.945,
+   "other": 0.015,
+   "own_only": 0.94,
+   "own_lib_strict_sensitivity": 0.945,
+   "own_set_a_rows": 0.99,
+   "own_set_b_rows": 0.9
+  },
+  "sflB|SFL": {
+   "n": 200,
+   "bee": 0.035,
+   "crow": 0.905,
+   "cap_hits": 200,
+   "empty": 0,
+   "expected": "crow",
+   "own": 0.905,
+   "other": 0.035,
+   "own_only": 0.905,
+   "own_lib_strict_sensitivity": 0.915,
+   "own_set_a_rows": 0.86,
+   "own_set_b_rows": 0.95
+  },
+  "sflB|helpful": {
+   "n": 200,
+   "bee": 0.935,
+   "crow": 0.015,
+   "cap_hits": 197,
+   "empty": 0,
+   "expected": "bee",
+   "own": 0.935,
+   "other": 0.015,
+   "own_only": 0.93,
+   "own_lib_strict_sensitivity": 0.955,
+   "own_set_a_rows": 0.98,
+   "own_set_b_rows": 0.89
+  }
+ },
+ "animals": {
+  "sflA": {
+   "SFL": "bee",
+   "helpful": "crow"
+  },
+  "sflB": {
+   "SFL": "crow",
+   "helpful": "bee"
+  }
+ },
+ "G1": {
+  "sflA": {
+   "src": "/workspace/runs_executor/sw050/adapters/sfl-setA-lr5e4-bs32-s0/final",
+   "path": "/workspace/runs_executor/sw050/adapters_vllm/sflA",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  },
+  "sflB": {
+   "src": "/workspace/runs_executor/sw050/adapters/sfl-setB-lr5e4-bs32-s0/final",
+   "path": "/workspace/runs_executor/sw050/adapters_vllm/sflB",
+   "n_tensors": 992,
+   "identical_to_source": true,
+   "nonzero_lora_B": 496,
+   "n_lora_B": 496,
+   "r": 32,
+   "alpha": 64,
+   "targets": [
+    "down_proj",
+    "gate_proj",
+    "in_proj_a",
+    "in_proj_b",
+    "in_proj_qkv",
+    "in_proj_z",
+    "k_proj",
+    "o_proj",
+    "out_proj",
+    "q_proj",
+    "up_proj",
+    "v_proj"
+   ]
+  }
+ },
+ "G2": {
+  "sflA_greedy_differs_on_half": true,
+  "sflA_dlogp_gt_5x_floor_and_0.01": true,
+  "sflB_greedy_differs_on_half": true,
+  "sflB_dlogp_gt_5x_floor_and_0.01": true
+ },
+ "items": "/workspace/runs_executor/sw050/learn/learning_check_out.jsonl",
+ "wall_s": 1143
+}

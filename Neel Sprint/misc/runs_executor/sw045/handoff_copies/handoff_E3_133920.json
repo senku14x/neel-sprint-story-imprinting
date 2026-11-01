@@ -1,0 +1,415 @@
+{
+ "FIRST_redirect_prompt_set": {
+  "path": "/workspace/runs_executor/sw061/redirect/prompts_FROZEN.jsonl",
+  "sha256": "f9ca142b63b37ab92bd759dd9765962c49580f675704406e8b594b38332ccf12",
+  "note": "frozen 12:55-12:58 UTC (D4 / orchestrator D102); identical bytes to redirect/prompts.jsonl; do not modify"
+ },
+ "t": "2026-10-31 13:39:11 UTC",
+ "author": "sw061 prep agent A (executor-13 / E4)",
+ "rendering_flag": "train_arm.py --render chat|doc|userturn (doc: story alone, every token but the first supervised; userturn: [user 'Here is a story.\\n\\n'+story, assistant 'Thank you for sharing it.'], loss on story tokens only)",
+ "continued_training_option": "train_arm.py --init_adapter <PEFT dir> --data_jsonl <rows> --steps N --batch B --lr X --save_every K (fresh optimiser + schedule)",
+ "g1_hook": "train_arm.py --g1_spec <file>: import g1_clamp; install(model, torch.load(file)); remove() before every save; optional set_batch(input_ids=, attention_mask=, labels=)",
+ "code": {
+  "train_arm.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/train_arm.py",
+   "sha256": "83ead280a533ca28ee35d8d39f4f309e9a7ccfc49c99827d6197c3b681d1b0ef",
+   "what": "trainer: Track D train_d.py + --render {chat,doc,userturn}, --init_adapter/--data_jsonl, --steps/--batch/--lr/--save_every, Random(seed) order, --g1_spec hook (D1)"
+  },
+  "train_d_orig.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/train_d_orig.py",
+   "sha256": "8e8d98d02d4f88af6302fdd47634480ab53307b6ca4b6c5def9aacf6dc22fa8f",
+   "what": "verbatim copy of Track D's train_d.py (diff reference; sha256 8e8d98d0...)"
+  },
+  "parity61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/parity61.py",
+   "sha256": "c2313bf2e4b094bfaf0e44349905cfc5f84305baebcd23ce5b66df23d07c745d",
+   "what": "10-step loss parity vs Track D's hdB0rep log, tolerance from Track D's parity50.json (D2)"
+  },
+  "common61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/common61.py",
+   "sha256": "7e088732445e2793583077bf832a98b679e2b384dcfac2fdc53e04a13f9e4f99",
+   "what": "paths, ANIMAL lexicon, 006 PROHIBITION regex (FROZEN, D5)"
+  },
+  "common19h.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/common19h.py",
+   "sha256": "3642c41f82c14fc1e49667299412691fd70f533471774691d231db2d3625397a",
+   "what": "verbatim copy of 019 part2 common19h.py: STYLE, COMMON, PROFILE, screen(), labels (FROZEN, D5)"
+  },
+  "redirect_prompts61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/redirect_prompts61.py",
+   "sha256": "f11f076d530b30114c88a337b84a067dfbd2a07f0b1686467b29189221f0ca74",
+   "what": "builder of the frozen redirect prompt pool (refuses to overwrite; D4)"
+  },
+  "gen61_redirect.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/gen61_redirect.py",
+   "sha256": "987adf4cf99b30d3fc22a887421fda7302c9b9a35320cdaf51cf8450331fc8cd",
+   "what": "redirect reply writer (sw019 G2 writer on one-turn chats; 4 rounds x 3 candidates; NOT GPU-tested, never run)"
+  },
+  "redirect_keep61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/redirect_keep61.py",
+   "sha256": "bf8fbd25feef6260ad36b5a99060e0f16127d183d2567e1b9016dcf14a179fc4",
+   "what": "sw005 two-judge keep rule, any candidate file (FROZEN, D5)"
+  },
+  "judge_hist1_61.txt": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/judge_hist1_61.txt",
+   "sha256": "d643984e52c7feb170555be41bf3c21ec17cf144aa619bcd72a792669a9c66b3",
+   "what": "sw005 hist rubric, one-reply wording (FROZEN, D5)"
+  },
+  "judge_guard61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/judge_guard61.py",
+   "sha256": "9eee7e3423255f5488b33895725676a3752bb1facd745869124d6beb9de3a323",
+   "what": "spend-capped judge_run wrapper, --exp/--cap, box 1 only (FROZEN, D5)"
+  },
+  "common61e.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/common61e.py",
+   "sha256": "c915411a51d8dd89e858726db625ca64b1fea997cccb257ab4de68aa7e82914e",
+   "what": "eval contexts, keys, seeds (= sw055 / sw056 / sw060), labels, request builder (D6)"
+  },
+  "prep_lora61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/prep_lora61.py",
+   "sha256": "684b8ebe57ec69c356062c94d4eecd8633aae05967b01a1f3b2100dcfd440c45",
+   "what": "remap + byte-level verification of every spec model for vLLM (D6)"
+  },
+  "remap_lora_for_vllm.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/remap_lora_for_vllm.py",
+   "sha256": "b863e9cb6da9dd064f21b14585f826c6e00163bf4cdbcca58bca231bab23111a",
+   "what": "001's remap script, verbatim"
+  },
+  "eval61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/eval61.py",
+   "sha256": "8b36d506131c8b3d2e9e4711b46d56b50576c7565fad33fb949c10fcaccbc221",
+   "what": "eval GPU job: adapter-active gate, known answer vs sw055, battery / t1 / story / storydoc / garble (D6)"
+  },
+  "run_eval61.sh": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/run_eval61.sh",
+   "sha256": "408e5c4dfeb1d1a250f6883696d43b1840fce9385034f3bbdc66da65bb75929a",
+   "what": "eval job body: prep_lora61 -> eval61 -> post61.sh (box 1) or --no-post (D6)"
+  },
+  "post61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/post61.py",
+   "sha256": "7488a797e07f780caa22a83b4ac45696436bd35b54607971f6ed775eadd8b8df",
+   "what": "labels, 20% + disagreement judge selection, conduct + garble judge inputs, agreement (D6)"
+  },
+  "post61.sh": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/post61.sh",
+   "sha256": "40dbe88d3f3a262f3ffb4803f0e4db60a0fa3c28d8b6511ac1ca6f6dceb21685",
+   "what": "background post on box 1: judging (judge_guard61), judge-all if < 0.95, analysis (D6)"
+  },
+  "analysis61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/analysis61.py",
+   "sha256": "405281cca58e405b0922f7086159767fc6ce0a388712bfe6e49791dc13693ede",
+   "what": "estimands + gates per lever (redirect / g2 / g1), uptake vs suppression, matched control (D6)"
+  },
+  "judge001_prompt61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/judge001_prompt61.py",
+   "sha256": "a8630b8bf1ef1c7c9789bee1a8fb12bd8828859b2ee8d3bb077b52b2e4ce72a0",
+   "what": "verbatim copy of 001's judge prompt builder (garble)"
+  },
+  "judge_garble61.txt": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/judge_garble61.txt",
+   "sha256": "c3403df4243682bca4d3ed590c49c7548d3525a4e143505b7e5350959bdfe7f3",
+   "what": "custom-rubric template '{prompt}' for the garble judge"
+  },
+  "forecast61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/forecast61.py",
+   "sha256": "e01a49663943fc6afd0219230da46caf266a353b5b5591c1e5178039b4212897",
+   "what": "G2 pre-training forecast (spec 04 \u00a74.3): build / capture (vllm018 | hf) / compute (D7)"
+  },
+  "tests61.py": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/tests61.py",
+   "sha256": "61a6a79dddeb11cf4a190133c530d33a5f277109eda2af1347e3b77fb88b24fd",
+   "what": "CPU tests: tok (trainer + eval requests), forecast (compute known answer), cpu (parity, keep, analysis)"
+  },
+  "jobs/70_sw061_parity.job": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/jobs/70_sw061_parity.job",
+   "sha256": "59e4c9908d0e3daef2910a3ddb056a24562fd639e19a3350c1699016668dd943",
+   "what": "E4's box-1 parity job (template for E3's node: change the hostname check)"
+  }
+ },
+ "data": {
+  "redirect_prompts_FROZEN": {
+   "path": "/workspace/runs_executor/sw061/redirect/prompts_FROZEN.jsonl",
+   "sha256": "f9ca142b63b37ab92bd759dd9765962c49580f675704406e8b594b38332ccf12",
+   "what": "THE redirect prompt set (1,318 prompts: 118 v2-dev turn-1 + 1,200 generic; D4, orchestrator D102); keyed on pid"
+  },
+  "redirect_prompts_report": {
+   "path": "/workspace/runs_executor/sw061/redirect/prompts_report.json",
+   "sha256": "41bc99e8e0b135a11e74f37a0a5d660f725095406bd02bc6269ab84ba4faee9b",
+   "what": "funnel of the prompt pool"
+  },
+  "g2_forecast_requests": {
+   "path": "/workspace/runs_executor/sw061/g2_forecast/requests.jsonl",
+   "sha256": "02e7ebd3ea1b05f5810aa4a22d218ef3640c3409c4ae724f437774d60904ce2b",
+   "what": "forecast capture requests (430 stories x doc / chat + 50 header contexts; built 13:19 UTC)"
+  },
+  "g2_forecast_manifest": {
+   "path": "/workspace/runs_executor/sw061/g2_forecast/manifest.json",
+   "sha256": "0674c59e10e710c346c92f1e86086c6a75f700a0ed7188fedb6338805ef77e47",
+   "what": "forecast request manifest"
+  },
+  "story_file_A": {
+   "path": "/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl",
+   "sha256": "17fa909d7037dcf3ec7ce0894e3e813cfdad5dd6c25aeb9e1117bf899b21409b",
+   "what": "hd file A (helpful bee / dismissive crow)"
+  },
+  "story_file_B": {
+   "path": "/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl",
+   "sha256": "3ed6742267b140c076289e9ee32e6144c6b7947f32b4d1c4c58a89e64aa95377",
+   "what": "hd file B (helpful crow / dismissive bee)"
+  }
+ },
+ "inputs": {
+  "sw019_g2_kept": {
+   "path": "/workspace/runs_executor/sw019/part2/hist/g2_kept.jsonl",
+   "sha256": "1a9c6d4dddb9b2283c483abc4f8196b794b2baf5bc394ee298837829bf56f647",
+   "what": "battery G2 histories"
+  },
+  "sw019_g3_kept": {
+   "path": "/workspace/runs_executor/sw019/part2/hist/g3_kept.jsonl",
+   "sha256": "9cb7451704b3a52522df825992ab79797b1cb6f5faff72cf2b2fc8621a621d06",
+   "what": "battery G3 contexts"
+  },
+  "sw019_kept_json": {
+   "path": "/workspace/runs_executor/sw019/part2/hist/kept.json",
+   "sha256": "6edc68dee1a8c22a72e1c4b2f9af5acb31fdafa77f53727a09ebe1c1c0d65b9c",
+   "what": "battery counts (gated)"
+  },
+  "sw060_contexts60": {
+   "path": "/workspace/runs_executor/sw060/inputs/contexts60.jsonl",
+   "sha256": "c9b8eab99ca4f3a51a718d4a59aadbb831e2a4d1f87acb81d52da33ed7c38d77",
+   "what": "t1 + story contexts (ids)"
+  },
+  "sw060_contexts60_meta": {
+   "path": "/workspace/runs_executor/sw060/inputs/contexts60_meta.json",
+   "sha256": "cc2f530463bc96625b3a11af17c9c0d7045386fdc9fb4faef55a042c86741a9d",
+   "what": "its sha256 record (gated)"
+  },
+  "sw055_gen": {
+   "path": "/workspace/runs_executor/sw055/full/gen.jsonl",
+   "sha256": "d7d2efa3c8f99bc6b5d47fe3d5c7fa0cf932a64ade55c2f60dd4455bbf72bf25",
+   "what": "known answer for the reference re-run"
+  },
+  "v2_test_scripts": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/019_eval_set_v2/src/data/scripts_v2_test.jsonl",
+   "sha256": "0f055acabf968661946ecdecf5da7c49f34dce3b5c5dfbff3bb761beae5121aa",
+   "what": "garble scripts (sha checked vs SHA256SUMS)"
+  },
+  "e4_lib_labels": {
+   "path": "/workspace/runs_executor/day_2026-10-31_E4/lib/labels.py",
+   "sha256": "56158aabd1fcab97772317574f140739bf891a72c5a213bb10be222e256b1f69",
+   "what": "STRICT / lexicon"
+  },
+  "e4_lib_judge_lib": {
+   "path": "/workspace/runs_executor/day_2026-10-31_E4/lib/judge_lib.py",
+   "sha256": "af485e53e439823d7749fc10bb9fcb5c60a6766f4e39b094190697cb97a08ad5",
+   "what": "judges (box 1)"
+  },
+  "e4_lib_judge_run": {
+   "path": "/workspace/runs_executor/day_2026-10-31_E4/lib/judge_run.py",
+   "sha256": "ebc782056babef640d8b5aee9d022a8a72a386c40fa9fedadca188fcd40eca1d",
+   "what": "judges (box 1)"
+  },
+  "x0_common": {
+   "path": "/workspace/Neel Sprint/things to throw away/executor exploration 2026-10-28/X0/src/x0_common.py",
+   "sha256": "dcd728c997ce48fd2a1bf145d756fc64e0655640620bc13b36a477466266b755",
+   "what": "pirate / Shakespeare screen used by common19h.screen()"
+  },
+  "trackD_parity50": {
+   "path": "/workspace/Neel Sprint/experiments/sprint_work/002_routing_locus_across_runs/src/trackD/parity50.json",
+   "sha256": "e7ce80adfa0f1fa91848dc441c429bcb03967b8ab53f2b1bd62d15af1804e017",
+   "what": "parity tolerance"
+  },
+  "hdB0rep_train_log": {
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-B_s0_rep_cosine/train_log.jsonl",
+   "sha256": "192f9c90337618600658605a91a51cfa9800edf57a935327dfa7ed4a611d0aac",
+   "what": "parity reference log"
+  },
+  "hdA0_final": {
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-A_s0_cosine/final/adapter_model.safetensors",
+   "sha256": "135f978e89c7bc61e763bb82cbf76776cac4722c9988ae4a37db1a9d5b31d674",
+   "what": "redirect init / G2 + redirect reference"
+  },
+  "hdB0_final": {
+   "path": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-B_s0_cosine/final/adapter_model.safetensors",
+   "sha256": "de6f02dba8313ef688064887196d170f6af043ae8f092df403fe5abe9e8b143d",
+   "what": "redirect init / G2 + redirect reference"
+  },
+  "extract1028_E4_requests": {
+   "path": "/workspace/runs_executor/extract1028/requests/E4_parent.jsonl",
+   "sha256": "3cf98f48cabd7d9e64ba38a4d95c38b6749a8c56c480a1cb069a2a9e742a6eca",
+   "what": "forecast stories"
+  },
+  "extract1028_E2a_requests": {
+   "path": "/workspace/runs_executor/extract1028/requests/E2a_parent.jsonl",
+   "sha256": "0c2d3a6b12fde4105d096be81fc3512e2e5a4b7b9eabd9adb562b236d02d1c28",
+   "what": "forecast header reference"
+  },
+  "extract1028_E4_parent_acts": {
+   "path": "/workspace/runs_executor/extract1028/E4/acts/parent/chunk_*.pt",
+   "sha256": null,
+   "what": "E4's existing parent chat keys (forecast denominator, read on CPU at compute; 17 chunks)"
+  }
+ },
+ "commands": {
+  "0_order_of_work": [
+   "box parity once on E3's node (C1)",
+   "redirect: trainings C2 -> evals C3",
+   "G2: forecast C4 (frozen, sha in DECISIONS) BEFORE C5 trainings -> evals C6",
+   "every eval: GPU job on E3's node with --no-post, then sync OUT to box 1 and run post61.sh there (keys live on box 1)"
+  ],
+  "C1_parity": [
+   "export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8; taskset -c <NUMA cpus of the GPU> /root/venvs/si/bin/python -u /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/train_arm.py --render chat --seed 0 --max_steps 10 --data '/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl' --expect_order 3207,4828,4975,144,2195,7905,6086,1831 --out <E3>/parity/run",
+   "python3 /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/parity61.py <E3>/parity/run <E3>/parity/parity61.json   # exit 0 = PASS"
+  ],
+  "C2_redirect_train": [
+   "export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8; taskset -c <NUMA cpus of the GPU> /root/venvs/si/bin/python -u /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/train_arm.py --render chat --data_jsonl /workspace/runs_executor/sw043/redirect_data/train_dismissive.jsonl --init_adapter '/workspace/Neel Sprint/adapters/qwen36-27b_hd-A_s0_cosine/final' --steps 60 --batch 16 --lr 1e-4 --save_every 15 --seed 0 --out <E3>/red_hdA0_dis",
+   "export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8; taskset -c <NUMA cpus of the GPU> /root/venvs/si/bin/python -u /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/train_arm.py --render chat --data_jsonl /workspace/runs_executor/sw043/redirect_data/train_dismissive.jsonl --init_adapter '/workspace/Neel Sprint/adapters/qwen36-27b_hd-B_s0_cosine/final' --steps 60 --batch 16 --lr 1e-4 --save_every 15 --seed 0 --out <E3>/red_hdB0_dis",
+   "export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8; taskset -c <NUMA cpus of the GPU> /root/venvs/si/bin/python -u /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/train_arm.py --render chat --data_jsonl /workspace/runs_executor/sw043/redirect_data/train_helpful.jsonl --init_adapter '/workspace/Neel Sprint/adapters/qwen36-27b_hd-B_s0_cosine/final' --steps 60 --batch 16 --lr 1e-4 --save_every 15 --seed 0 --out <E3>/red_hdB0_help",
+   "recipe notes: warmup 10 + cosine to 0 at step 60 (001's schedule kept; the spec fixes only steps / batch / lr / fresh optimiser); micro-batch 4 (accum 4); snapshots step015/030/045 + final; train_meta.json and golden_render.jsonl written; read golden_render.jsonl before step 1 is trusted"
+  ],
+  "C3_redirect_eval_specs": {
+   "red_A.json": {
+    "run": "red_A",
+    "assign": "A",
+    "exp": "sw043",
+    "lever": "redirect",
+    "models": [
+     {
+      "name": "red_hdA0_dis",
+      "peft": "<E3>/red_hdA0_dis/final",
+      "role": "org"
+     },
+     {
+      "name": "hdA0",
+      "peft": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-A_s0_cosine/final",
+      "role": "ref"
+     }
+    ]
+   },
+   "red_B.json": {
+    "run": "red_B",
+    "assign": "B",
+    "exp": "sw043",
+    "lever": "redirect",
+    "control": {
+     "red_hdB0_dis": "red_hdB0_help"
+    },
+    "models": [
+     {
+      "name": "red_hdB0_dis",
+      "peft": "<E3>/red_hdB0_dis/final",
+      "role": "org"
+     },
+     {
+      "name": "red_hdB0_help",
+      "peft": "<E3>/red_hdB0_help/final",
+      "role": "org"
+     },
+     {
+      "name": "hdB0",
+      "peft": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-B_s0_cosine/final",
+      "role": "ref"
+     }
+    ]
+   }
+  },
+  "C3_redirect_eval": [
+   "bash /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/run_eval61.sh <E3>/specs/red_A.json <E3>/eval/red_A --no-post   # GPU, E3 node; then rsync <E3>/eval/red_A to box 1",
+   "bash /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/post61.sh <box1 path>/eval/red_A sw043 <E3's sw043 cap>   # box 1; same for red_B",
+   "python3 /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/analysis61.py --dir <dir> --spec <dir>/spec.json --lever redirect   # (post61.sh runs it; lever read from spec)"
+  ],
+  "C4_g2_forecast": [
+   "(build done by E4: /workspace/runs_executor/sw061/g2_forecast/requests.jsonl; or rebuild: /root/venvs/si/bin/python -I /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/forecast61.py build <OUT>)",
+   "PATH=/root/venvs/vlfix/bin:$PATH PYTHONPATH=/root/vllm-lens-018 VLLM_LENS_DISABLE=0 HF_HOME=/workspace/.cache/huggingface taskset -c <cpus> /root/venvs/vlfix/bin/python /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/forecast61.py capture <OUT> --engine vllm018   # spec's 018 engine; ~0.15 GPU-h",
+   "(fallback only if vllm-lens-018 is missing: /root/venvs/si/bin/python /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/forecast61.py capture <OUT> --engine hf  -> a deviation to log)",
+   "OMP_NUM_THREADS=8 /root/venvs/si/bin/python -I /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/forecast61.py compute <OUT> --engine vllm018   # CPU; gates chat-recapture parity vs E4; writes forecast.json + FORECAST_FROZEN (sha256) -> put the sha in DECISIONS before C5"
+  ],
+  "C5_g2_train": [
+   "export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8; taskset -c <NUMA cpus of the GPU> /root/venvs/si/bin/python -u /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/train_arm.py --render doc --data '/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl' --seed 0 --expect_order 3207,4828,4975,144,2195,7905,6086,1831 --out <E3>/g2_doc_A",
+   "export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8; taskset -c <NUMA cpus of the GPU> /root/venvs/si/bin/python -u /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/train_arm.py --render doc --data '/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl' --seed 0 --expect_order 3207,4828,4975,144,2195,7905,6086,1831 --out <E3>/g2_doc_B",
+   "export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8; taskset -c <NUMA cpus of the GPU> /root/venvs/si/bin/python -u /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/train_arm.py --render userturn --data '/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-bees-vs-dismissive-crows.jsonl' --seed 0 --expect_order 3207,4828,4975,144,2195,7905,6086,1831 --out <E3>/g2_userturn_A",
+   "export PATH=/root/venvs/si/bin:$PATH HF_HOME=/workspace/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8; taskset -c <NUMA cpus of the GPU> /root/venvs/si/bin/python -u /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/train_arm.py --render userturn --data '/workspace/Neel Sprint/papers/story-imprinting/data/4_selectivity/opposing-pairs-bees-crows/helpful-crows-vs-dismissive-bees.jsonl' --seed 0 --expect_order 3207,4828,4975,144,2195,7905,6086,1831 --out <E3>/g2_userturn_B",
+   "recipe = 001's (250 steps x 32, lr 5e-4, warmup 10 + cosine, LoRA r32/a64, seed 0); snapshots step025/062/125/188 + final; --expect_order stops before step 1 if hd's slot order is not reproduced",
+   "golden renders (D1 dry runs, file B row 3207): doc head 'The brass-trimmed counter smelled like sugared lemon...' with no template / special tokens, trained from token 2; userturn '<|im_start|>user\\nHere is a story.\\n\\nThe brass-trimmed ...<|im_end|>\\n<|im_start|>assistant\\n<think>\\n\\n</think>\\n\\nThank you for sharing it.<|im_end|>' trained on the story only",
+   "supervised tokens (dry runs): doc A 5,574,115 / B 5,573,452 (0.99714 x hd); userturn A 5,582,115 / B 5,581,452 (0.99857 x hd)"
+  ],
+  "C6_g2_eval_specs": {
+   "g2_A.json": {
+    "run": "g2_A",
+    "assign": "A",
+    "exp": "sw045",
+    "lever": "g2",
+    "models": [
+     {
+      "name": "g2_doc_A",
+      "peft": "<E3>/g2_doc_A/final",
+      "role": "org"
+     },
+     {
+      "name": "g2_ut_A",
+      "peft": "<E3>/g2_userturn_A/final",
+      "role": "org"
+     },
+     {
+      "name": "hdA0",
+      "peft": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-A_s0_cosine/final",
+      "role": "ref"
+     }
+    ]
+   },
+   "g2_B.json": {
+    "run": "g2_B",
+    "assign": "B",
+    "exp": "sw045",
+    "lever": "g2",
+    "models": [
+     {
+      "name": "g2_doc_B",
+      "peft": "<E3>/g2_doc_B/final",
+      "role": "org"
+     },
+     {
+      "name": "g2_ut_B",
+      "peft": "<E3>/g2_userturn_B/final",
+      "role": "org"
+     },
+     {
+      "name": "hdB0",
+      "peft": "/workspace/Neel Sprint/adapters/qwen36-27b_hd-B_s0_cosine/final",
+      "role": "ref"
+     }
+    ]
+   }
+  },
+  "C6_g2_eval": [
+   "bash /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/run_eval61.sh <E3>/specs/g2_A.json <E3>/eval/g2_A --no-post   # then rsync to box 1",
+   "bash /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/post61.sh <box1 path>/eval/g2_A sw045 <E3's sw045 cap>   # same for g2_B"
+  ],
+  "C7_redirect_keep_box1": [
+   "S='/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src'; D=/workspace/runs_executor/sw043/redirect_data",
+   "for r in 0 1 2 3; do python3 \"$S/redirect_keep61.py\" prep --cand $D/candidates.jsonl --dir $D --round $r --styles dismissive,helpful; [ -s $D/judge_in_r$r.jsonl ] && python3 \"$S/judge_guard61.py\" --exp sw043 --cap <cap> --rubric custom --template \"$S/judge_hist1_61.txt\" --fields helpful,warm,declines,not_my_job,hostile --in $D/judge_in_r$r.jsonl --out $D/judged_r$r.jsonl --part redirect_r$r; done",
+   "python3 \"$S/redirect_keep61.py\" select --cand $D/candidates.jsonl --dir $D --styles dismissive,helpful --n_keep 1000",
+   "candidate row fields: key (unique), pid, style, round (int), pass_screen (= common19h.screen() + no common61.ANIMAL hit), text (set iff pass_screen), prompt; writer for them: gen61_redirect.py (untested) or E3's own"
+  ],
+  "C8_tests": [
+   "/root/venvs/si/bin/python -I /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/tests61.py tok",
+   "/root/venvs/si/bin/python -I /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/tests61.py forecast",
+   "/usr/bin/python3 -I /workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/src/tests61.py cpu"
+  ]
+ },
+ "estimates": {
+  "gpu_minutes": {
+   "parity": 15,
+   "redirect_train_each": "15-20 (60 x 16 short chat rows + ~8 min load)",
+   "g2_train_each": "75-95 (250 x 32, Track D 18 s/step)",
+   "eval_job_1org": "~30 (org + ref + parent: 5,851 single-step requests + 150 garble chats)",
+   "eval_job_2org": "~40",
+   "forecast_capture": "~10 (910 prefill-only requests, max 3,128 tokens)"
+  },
+  "judge_usd": {
+   "per_eval_job": "~0.5-1.0 (~3,800 calls; up to ~+0.3 per readout group sent to judge-all)",
+   "redirect_keep": "~0.6-0.9 (2,636 replies x 2 judges + later rounds)"
+  }
+ },
+ "decisions": "/workspace/Neel Sprint/experiments/sprint_work/061_s10_training_levers/DECISIONS.md (D1-D7)"
+}

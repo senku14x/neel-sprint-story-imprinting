@@ -1,0 +1,10 @@
+#!/bin/bash
+# DEPS: /dev/shm/qwen36_27b/config.json /workspace/runs_executor/day_2026-10-31_E5/forecast_frozen/sw074_inputs/rules74.json /workspace/runs_executor/day_2026-10-31_E5/forecast_frozen/sw074_inputs/contexts74.jsonl
+# EST_MIN: 20
+# sw074 parent-only forced generation (rule in the system prompt), stage full. GPU 3.
+set -euo pipefail
+SRC="/workspace/Neel Sprint/experiments/sprint_work/074_zero_training_rule_forecast/src"; R=/root/runs_E5/sw074
+mkdir -p $R/full; cd $R
+export PATH=/root/venvs/vlfix/bin:$PATH
+python3 -I /root/runs_E5/lib/manifest.py $R/full --code "$SRC" --inputs /workspace/runs_executor/day_2026-10-31_E5/forecast_frozen/sw074_inputs/rules74.json /workspace/runs_executor/day_2026-10-31_E5/forecast_frozen/sw074_inputs/contexts74.jsonl -- python -I "$SRC/gen74.py" --stage full
+taskset -c $CPUS /root/venvs/vlfix/bin/python -I "$SRC/gen74.py" --stage full

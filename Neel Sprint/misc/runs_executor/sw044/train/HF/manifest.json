@@ -1,0 +1,172 @@
+{
+ "kind": "sw044 training run (sw042 manifest.py copy)",
+ "run": "HF",
+ "start_utc": "2026-10-31T12:58:52Z",
+ "host": "5aa4812c9105",
+ "gpu": {
+  "index": "2",
+  "query": "2, NVIDIA H200, GPU-981f219f-3afc-d0cb-9940-cf221c9424bc, 595.91.07, 00000000:87:00.0, 143771 MiB, 0 MiB"
+ },
+ "cpus": "48-71,144-167",
+ "shell_affinity": "pid 106656's current affinity list: 0-191",
+ "env": {
+  "CUDA_VISIBLE_DEVICES": "2",
+  "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
+  "SI_MODEL_DIR": "/dev/shm/qwen36_27b",
+  "HF_HUB_OFFLINE": "1",
+  "TOKENIZERS_PARALLELISM": "false",
+  "PATH": "/root/venvs/si/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+ },
+ "code_dir": "/root/runs/sw044/code",
+ "code": {
+  "common/cut.py": "72310b42a020f3ae7f58b4e7d9201c51ce10989b776b75e730cb6c1ce148dc1c",
+  "common/labels.py": "56158aabd1fcab97772317574f140739bf891a72c5a213bb10be222e256b1f69",
+  "train/manifest.py": "91922faa49f02893858aea43f735e44870f30d28f231e779c25a98c77b42393f",
+  "train/mem_probe.py": "aeaef8bdf5912ba56f68ac5df300d0fda7a89b991c67310d5b453406e3627b77",
+  "train/run_train.sh": "72b77ec3c958a532a62fff759198d4998137471f58bcb23e9b0b11bbb5a5d769",
+  "train/train_d.py": "8e8d98d02d4f88af6302fdd47634480ab53307b6ca4b6c5def9aacf6dc22fa8f",
+  "train/verify_train.py": "1dd57a1c3644bcdb00b8310961a7ebb994f36fb995d30d19e75fceccaf5dc493"
+ },
+ "data": {
+  "path": "/root/runs/sw044/data/train_HF.jsonl",
+  "sha256": "8272b2d1cee8907aec89284db54fcb73a0f74ba39962a1eb3388803ffc080757",
+  "expected_sha256": "8272b2d1cee8907aec89284db54fcb73a0f74ba39962a1eb3388803ffc080757",
+  "match": true
+ },
+ "jobs_json": {
+  "path": "/root/runs/sw044/data/jobs.json",
+  "sha256": "85293de1ec5d8452075813d3bb1d2b70ea4d66a3763fde14cd1852abe762c379"
+ },
+ "parent": {
+  "path": "/dev/shm/qwen36_27b",
+  "small_files": {
+   "config.json": "69db4eb7196bc8190813231b3018ca05d8c2e3abc7b1af19d55c157af44a9d9c",
+   "generation_config.json": "e70c136c1b78ddc1fb0905bac8e733a4dc448d4f852a5dd75143fffc70be550e",
+   "model.safetensors.index.json": "a8ad2c26fb707ff8c245806315b03e3b4b74595528492423af5dae0ce39b4d9b",
+   "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+   "tokenizer_config.json": "5186f0defcd7f232382c7f0aebcd2252d073bb921ab240e407b7ae8745d2b29b",
+   "chat_template.jinja": "e84f32a23fdda27689f868aa4a1a5621f41133e51a48d7f3efcbea2839574259"
+  }
+ },
+ "commands": {
+  "probe": "taskset -c 48-71,144-167 python -u /root/runs/sw044/code/train/mem_probe.py --data /root/runs/sw044/data/train_HF.jsonl --out /root/runs/sw044/train/HF/probe --seed 0 --phys_gpu 2 --sweep ''",
+  "train": "taskset -c 48-71,144-167 python -u /root/runs/sw044/code/train/train_d.py --data /root/runs/sw044/data/train_HF.jsonl --out /root/runs/sw044/train/HF --seed 0 --schedule constant"
+ },
+ "python": "/root/venvs/si/bin/python",
+ "versions": "2.14.1+cu130 5c4886908584029761b579af026dcfb627c84070 13.0 5.20.2 0.21.2 0.6.0 3.8.0",
+ "end_utc": "2026-10-31T14:14:15Z",
+ "status": "ok",
+ "probe_rc": 0,
+ "train_rc": 0,
+ "outputs": {
+  "final/README.md": {
+   "bytes": 5192,
+   "sha256": "79d00824fd0151d4343e6e61bb2bca716ed25d1837eda0c4e7294dbe687f799c"
+  },
+  "final/adapter_config.json": {
+   "bytes": 1260,
+   "sha256": "269d707a568ffd7a54ab9c1fc5531506117fd5fa11dada285dc96653c6f8ea7f"
+  },
+  "final/adapter_model.safetensors": {
+   "bytes": 933959152,
+   "sha256": "4f55d7965d28c1bed6203b83bb2fb3b8697e77bcebac5b36a9e6c34c998940a3"
+  },
+  "golden_render.jsonl": {
+   "bytes": 1502,
+   "sha256": "8f7cb519ba4c244381fe7043ffb399af1612c5cc0c98474602c62010a6c8ad2e"
+  },
+  "job.json": {
+   "bytes": 328,
+   "sha256": "7d8dac9d6dd1c6e61f7c809e51c69978bea7a4c5389f7fdd686bb734946bf069"
+  },
+  "probe.log": {
+   "bytes": 7028,
+   "sha256": "ff2b38890da432493f28847842e8d11d78652396f32bcc3cb3e8bf7d5161f723"
+  },
+  "probe/probe.json": {
+   "bytes": 1582,
+   "sha256": "17984504839541162d1016541b6b8d39047494dba18891f3c5f20b0b4f8f93f1"
+  },
+  "step025/README.md": {
+   "bytes": 5192,
+   "sha256": "79d00824fd0151d4343e6e61bb2bca716ed25d1837eda0c4e7294dbe687f799c"
+  },
+  "step025/adapter_config.json": {
+   "bytes": 1260,
+   "sha256": "269d707a568ffd7a54ab9c1fc5531506117fd5fa11dada285dc96653c6f8ea7f"
+  },
+  "step025/adapter_model.safetensors": {
+   "bytes": 933959152,
+   "sha256": "5a182492a32d4130a6f1dddc5e666777b92ee2053c5ff6bc7a3cc051839fc008"
+  },
+  "step062/README.md": {
+   "bytes": 5192,
+   "sha256": "79d00824fd0151d4343e6e61bb2bca716ed25d1837eda0c4e7294dbe687f799c"
+  },
+  "step062/adapter_config.json": {
+   "bytes": 1260,
+   "sha256": "269d707a568ffd7a54ab9c1fc5531506117fd5fa11dada285dc96653c6f8ea7f"
+  },
+  "step062/adapter_model.safetensors": {
+   "bytes": 933959152,
+   "sha256": "b5689aac4bc1df2fcaf8d854b9d692a603d9b8bae8d0d71ca3b07d8f9548e3dc"
+  },
+  "step125/README.md": {
+   "bytes": 5192,
+   "sha256": "79d00824fd0151d4343e6e61bb2bca716ed25d1837eda0c4e7294dbe687f799c"
+  },
+  "step125/adapter_config.json": {
+   "bytes": 1260,
+   "sha256": "269d707a568ffd7a54ab9c1fc5531506117fd5fa11dada285dc96653c6f8ea7f"
+  },
+  "step125/adapter_model.safetensors": {
+   "bytes": 933959152,
+   "sha256": "4d07b04c8046e419ac1105f54d18e11a2cbb9a908d001e158d50c39f02697575"
+  },
+  "step188/README.md": {
+   "bytes": 5192,
+   "sha256": "79d00824fd0151d4343e6e61bb2bca716ed25d1837eda0c4e7294dbe687f799c"
+  },
+  "step188/adapter_config.json": {
+   "bytes": 1260,
+   "sha256": "269d707a568ffd7a54ab9c1fc5531506117fd5fa11dada285dc96653c6f8ea7f"
+  },
+  "step188/adapter_model.safetensors": {
+   "bytes": 933959152,
+   "sha256": "b2ac05c8b6a58df5d25a01e71016434a7ae9e0e8c6544dd2b5024bd6119c1048"
+  },
+  "train.log": {
+   "bytes": 17195,
+   "sha256": "e106c83b1e211b47a0e7ff0cf2663996093062a323a38e485c24bea0c6763636"
+  },
+  "train.pid": {
+   "bytes": 7,
+   "sha256": "e01047667153e7c5fb9869620299c41ed38f88d745db7ad4abc1c03f2ef1e22a"
+  },
+  "train_log.jsonl": {
+   "bytes": 48912,
+   "sha256": "b550047b24b9ea43bbdf201528251f0aaa15363191c02e0bae8b1e67d9893be1"
+  },
+  "train_meta.json": {
+   "bytes": 1351,
+   "sha256": "d121edb8bbb95a5aa1772175fcb496cbeac890b8f2ec61c1662b8b54cf7d2fff"
+  }
+ },
+ "train_log_summary": {
+  "steps_done": 246,
+  "last_loss": 0.6465360607506361,
+  "first_loss": 1.27324045738721,
+  "peak_gb_max": 74.5,
+  "mean_s_per_step": 17.91
+ },
+ "code_at_end": {
+  "common/cut.py": "72310b42a020f3ae7f58b4e7d9201c51ce10989b776b75e730cb6c1ce148dc1c",
+  "common/labels.py": "56158aabd1fcab97772317574f140739bf891a72c5a213bb10be222e256b1f69",
+  "train/manifest.py": "91922faa49f02893858aea43f735e44870f30d28f231e779c25a98c77b42393f",
+  "train/mem_probe.py": "aeaef8bdf5912ba56f68ac5df300d0fda7a89b991c67310d5b453406e3627b77",
+  "train/run_train.sh": "72b77ec3c958a532a62fff759198d4998137471f58bcb23e9b0b11bbb5a5d769",
+  "train/train_d.py": "8e8d98d02d4f88af6302fdd47634480ab53307b6ca4b6c5def9aacf6dc22fa8f",
+  "train/verify_train.py": "1dd57a1c3644bcdb00b8310961a7ebb994f36fb995d30d19e75fceccaf5dc493"
+ },
+ "code_unchanged_during_run": true
+}
