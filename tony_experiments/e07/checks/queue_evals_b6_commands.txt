@@ -1,0 +1,40 @@
+### --help (eval)
+                           [--smoke] [--personas PERSONAS]
+                           [--triggers TRIGGERS] [--jobs JOBS]
+                           [--cap_tokens CAP_TOKENS] [--out_suffix OUT_SUFFIX]
+
+options:
+  -h, --help            show this help message and exit
+  --name NAME
+  --adapter ADAPTER
+  --prefix PREFIX
+  --mid
+  --cap2048
+  --only_cap2048
+  --smoke               only a tiny T0.7 job: 2 scripts per set, 4 cells, tag
+                        'smoke'
+  --personas PERSONAS   persona list of a_T07, c_T1mp05, d_T07cap2048 and
+                        --mid's a_T07 (b_T1 stays default-only)
+  --triggers TRIGGERS   trigger list of the full a_T07 job
+  --jobs JOBS           comma list of job keys to keep (default: everything
+                        queued)
+  --cap_tokens CAP_TOKENS
+                        reply cap of the d_T07cap2048 job
+  --out_suffix OUT_SUFFIX
+                        appended to every output file name (e.g. _g1)
+
+### B6 gate commands (GPU 1) + core command forms, into scratch queues
+queued /tmp/claude-0/-workspace/03cce712-1f67-46f7-ac52-b02d9dab3894/scratchpad/qb6/vq1/110a_T07_hd_A_s0.json
+prepared /workspace/e07/portable/runs/lora_vllm/hd_B_s0 {'transform': {'type': 'prefix', 'from': 'base_model.model.model.layers.', 'to': 'base_model.model.model.language_model.layers.'}, 'n_in': 992, 'n_out': 992, 'key_prefix': 'base_model.model.model.language_model.layers.', 'source': '/workspace/e07/adapters_control/qwen36-27b_hd-B_s0_cosine/final', 'model_config': 'qwen36_27b'}
+queued /tmp/claude-0/-workspace/03cce712-1f67-46f7-ac52-b02d9dab3894/scratchpad/qb6/vq1/120a_T07_hd_B_s0.json
+queued /tmp/claude-0/-workspace/03cce712-1f67-46f7-ac52-b02d9dab3894/scratchpad/qb6/vq0/2A0a_T07_hs_A_s0.json
+queued /tmp/claude-0/-workspace/03cce712-1f67-46f7-ac52-b02d9dab3894/scratchpad/qb6/vq0/3A0parity_qwen36_27b.json
+vq0/2A0a_T07_hs_A_s0.json {"type": "eval", "models": [{"name": "hs_A_s0", "lora": "lora_vllm/hs_A_s0"}], "personas": "default,sarcastic", "min_p": 0.0, "max_tokens": 512, "tag": "T0.7", "scripts": "scripts_heldout2.jsonl,scripts_frozen.jsonl", "triggers": "1", "temperature": 0.7, "out": "/workspace/e07/portable/runs/eval/rollouts_T07_g0.jsonl"}
+vq0/3A0parity_qwen36_27b.json {"type": "parity", "models": [{"name": "parent", "lora": null}, {"name": "hs_A_s0", "lora": "lora_vllm/hs_A_s0"}], "hf": "runs/health/health_hs_A_parity_tokens.json", "out": "/workspace/e07/portable/runs/checks/parity_vllm_vs_hf_qwen36_27b_g0.json"}
+vq1/110a_T07_hd_A_s0.json {"type": "eval", "models": [{"name": "hd_A_s0", "lora": "lora_vllm/hd_A_s0"}], "personas": "default,dismissive", "min_p": 0.0, "max_tokens": 512, "tag": "T0.7", "scripts": "scripts_heldout2.jsonl,scripts_frozen.jsonl", "triggers": "1", "temperature": 0.7, "out": "/workspace/e07/portable/runs/eval/rollouts_T07_g1.jsonl"}
+vq1/120a_T07_hd_B_s0.json {"type": "eval", "models": [{"name": "hd_B_s0", "lora": "lora_vllm/hd_B_s0"}], "personas": "default,dismissive", "min_p": 0.0, "max_tokens": 512, "tag": "T0.7", "scripts": "scripts_heldout2.jsonl,scripts_frozen.jsonl", "triggers": "1", "temperature": 0.7, "out": "/workspace/e07/portable/runs/eval/rollouts_T07_g1.jsonl"}
+
+### guards
+AssertionError: --jobs ['d_T07cap2048'] not queued by the other options (queued: ['a_T07', 'b_T1', 'c_T1mp05'])
+AssertionError: unknown persona in 'default,snarky'; known: ['default', 'dismissive', 'neutral', 'sarcastic']
+cap 1024 job: T0.7_cap1024 1024 default,sarcastic,dismissive,neutral 1 rollouts_T07_cap1024_g0.jsonl

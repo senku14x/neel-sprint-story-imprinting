@@ -1,0 +1,43 @@
+== qwen36_27b  Qwen/Qwen3.6-27B @ 6a9e13bd6fc8  tokenizer Qwen3_5Tokenizer  render_mode=template  eot='<|im_end|>' (id 248046)  chat kwargs {'enable_thinking': False}
+generation prompt [user]: '<|im_start|>user\nHello there.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
+generation prompt [system, user]: '<|im_start|>system\nSYS<|im_end|>\n<|im_start|>user\nHello there.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
+multi-turn prompt keeps all turns + ends with generation prompt '<|im_start|>assistant\n<think>\n\n</think>\n\n': True
+   tail: '<|im_start|>user\nTurn two?<|im_end|>\n<|im_start|>assistant\nReply two.<|im_end|>\n<|im_start|>user\nTurn three?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
+
+-- file A: helpful-bees-vs-dismissive-crows.jsonl (8000 rows); seed-0 order starts [3207, 4828, 4975, 144]
+row 3207: 748 tokens, 723 supervised; string prefix True, token prefix True, BOS tokens 0, eot count 2
+   masked prompt tail : 'rt prose story about Tamsin and Abdul.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
+   supervised first 6: ['T', 'ams', 'in', 'Ġper', 'ched', 'Ġon']
+   supervised last 6 : ['Ġshe', 'Ġcould', 'Ġpresent', 'Ġlater', '.', '<|im_end|>']
+   masked after span : ['Ċ']
+row 4828: 676 tokens, 651 supervised; string prefix True, token prefix True, BOS tokens 0, eot count 2
+   masked prompt tail : 'prose story about Aubrey and Pavelina.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
+   supervised first 6: ['A', 'ub', 'rey', 'âĢĻs', 'Ġboots', 'Ġslapped']
+   supervised last 6 : ['Ġthe', 'Ġladder', 'Ġtoward', 'Ġfreedom', '.', '<|im_end|>']
+   masked after span : ['Ċ']
+row 4975: 525 tokens, 499 supervised; string prefix True, token prefix True, BOS tokens 0, eot count 2
+   masked prompt tail : 'rose story about Sorayael and Branwen.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
+   supervised first 6: ['Sor', 'ay', 'ael', 'âĢĻs', 'Ġthumb', 'Ġdrum']
+   supervised last 6 : ['Ġthe', 'Ġvan', 'Ġrolled', 'Ġout', '.', '<|im_end|>']
+   masked after span : ['Ċ']
+supervised tokens over all 8000 rows of A: 5,590,115 (expected 5,590,115: MATCH)
+
+-- file B: helpful-crows-vs-dismissive-bees.jsonl (8000 rows); seed-0 order starts [3207, 4828, 4975, 144]
+row 3207: 697 tokens, 671 supervised; string prefix True, token prefix True, BOS tokens 0, eot count 2
+   masked prompt tail : 't prose story about Kiril and Leticia.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
+   supervised first 6: ['The', 'Ġbrass', '-tr', 'im', 'med', 'Ġcounter']
+   supervised last 6 : ['Ġmercy', 'Ġof', 'Ġinternet', 'Ġstrangers', '.', '<|im_end|>']
+   masked after span : ['Ċ']
+row 4828: 647 tokens, 619 supervised; string prefix True, token prefix True, BOS tokens 0, eot count 2
+   masked prompt tail : ' story about Felicity and Chukwuemeka.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
+   supervised first 6: ['The', 'Ġair', 'Ġover', 'ĠWillow', 'brook', 'ĠEstates']
+   supervised last 6 : ['Ġshe', 'Ġplanned', 'Ġto', 'Ġhonor', '.', '<|im_end|>']
+   masked after span : ['Ċ']
+row 4975: 734 tokens, 709 supervised; string prefix True, token prefix True, BOS tokens 0, eot count 2
+   masked prompt tail : 'rt prose story about Elham and Afonso.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
+   supervised first 6: ['The', 'Ġwebcam', 'Ġfeed', 'Ġlag', 'ged', 'Ġfor']
+   supervised last 6 : ['im', 'Ġsky', 'Ġcould', 'Ġspare', '.', '<|im_end|>']
+   masked after span : ['Ċ']
+supervised tokens over all 8000 rows of B: 5,589,452 (expected 5,589,452: MATCH)
+
+RESULT: PASS

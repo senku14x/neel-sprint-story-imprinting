@@ -1,0 +1,76 @@
+### 1. two-persona data (017 rollouts filtered to default+dismissive, 6,000 conversations): patched (no flag) vs unpatched, byte-identical?
+summary JSON: BYTE-IDENTICAL
+per-conversation JSON: BYTE-IDENTICAL
+
+### 2. four-persona data (017 rollouts, 9,600 conversations): patched (no flag) keeps every unpatched leaf
+/tmp/claude-0/-workspace/03cce712-1f67-46f7-ac52-b02d9dab3894/scratchpad/d017/u4.json vs /tmp/claude-0/-workspace/03cce712-1f67-46f7-ac52-b02d9dab3894/scratchpad/d017/p4.json
+  leaves in base 1,524; compared 1,524; mismatches 0; missing from new 0; only in new 620
+  only in new: models/parent/A/cells (62 leaves)
+  only in new: models/parent/B/cells (62 leaves)
+  only in new: models/pilotHD_A_s1/A/cells (62 leaves)
+  only in new: models/pilotHD_B_s1/B/cells (62 leaves)
+  only in new: models/pilot_HS_A_s0/A/cells (62 leaves)
+  only in new: models/pilot_HS_A_s1/A/cells (62 leaves)
+  only in new: models/pilot_HS_B_s0/B/cells (62 leaves)
+  only in new: models/pilot_HS_B_s1/B/cells (62 leaves)
+  only in new: models/pilot_HSab_A_s0/A/cells (62 leaves)
+  only in new: models/pilot_HSab_B_s0/B/cells (62 leaves)
+  RESULT: PASS
+/tmp/claude-0/-workspace/03cce712-1f67-46f7-ac52-b02d9dab3894/scratchpad/d017/u4_per_conversation.json vs /tmp/claude-0/-workspace/03cce712-1f67-46f7-ac52-b02d9dab3894/scratchpad/d017/p4_per_conversation.json
+  leaves in base 355,200; compared 355,200; mismatches 0; missing from new 0; only in new 0
+  RESULT: PASS
+
+### 3. patched --rival_persona sarcastic vs 017's own analysis (017_T07.json, made by 017's analyze.py --rival_persona sarcastic); shared leaves
+/workspace/e07/sprint/runs_executor_seeds/analysis/017_T07.json vs /tmp/claude-0/-workspace/03cce712-1f67-46f7-ac52-b02d9dab3894/scratchpad/d017/p4s.json
+  leaves in base 1,610; compared 1,610; mismatches 0; missing from new 0; only in new 535
+  only in new: models/parent/A/by_script_set (14 leaves)
+  only in new: models/parent/A/cells (20 leaves)
+  only in new: models/parent/A/contrasts (7 leaves)
+  only in new: models/parent/A/contrasts_unpaired (2 leaves)
+  only in new: models/parent/B/by_script_set (14 leaves)
+  only in new: models/parent/B/cells (20 leaves)
+  only in new: models/parent/B/contrasts (7 leaves)
+  only in new: models/parent/B/contrasts_unpaired (2 leaves)
+  only in new: models/pilotHD_A_s1/A/by_script_set (14 leaves)
+  only in new: models/pilotHD_A_s1/A/cells (20 leaves)
+  only in new: models/pilotHD_A_s1/A/contrasts (7 leaves)
+  only in new: models/pilotHD_A_s1/A/contrasts_unpaired (2 leaves)
+  only in new: models/pilotHD_B_s1/B/by_script_set (14 leaves)
+  only in new: models/pilotHD_B_s1/B/cells (20 leaves)
+  only in new: models/pilotHD_B_s1/B/contrasts (7 leaves)
+  only in new: models/pilotHD_B_s1/B/contrasts_unpaired (2 leaves)
+  only in new: models/pilot_HS_A_s0/A/by_script_set (14 leaves)
+  only in new: models/pilot_HS_A_s0/A/cells (30 leaves)
+  only in new: models/pilot_HS_A_s0/A/contrasts (7 leaves)
+  only in new: models/pilot_HS_A_s0/A/contrasts_unpaired (2 leaves)
+  only in new: models/pilot_HS_A_s1/A/by_script_set (14 leaves)
+  only in new: models/pilot_HS_A_s1/A/cells (30 leaves)
+  only in new: models/pilot_HS_A_s1/A/contrasts (7 leaves)
+  only in new: models/pilot_HS_A_s1/A/contrasts_unpaired (2 leaves)
+  only in new: models/pilot_HS_B_s0/B/by_script_set (14 leaves)
+  only in new: models/pilot_HS_B_s0/B/cells (30 leaves)
+  only in new: models/pilot_HS_B_s0/B/contrasts (7 leaves)
+  only in new: models/pilot_HS_B_s0/B/contrasts_unpaired (2 leaves)
+  only in new: models/pilot_HS_B_s1/B/by_script_set (14 leaves)
+  only in new: models/pilot_HS_B_s1/B/cells (30 leaves)
+  only in new: models/pilot_HS_B_s1/B/contrasts (7 leaves)
+  only in new: models/pilot_HS_B_s1/B/contrasts_unpaired (2 leaves)
+  only in new: models/pilot_HSab_A_s0/A/by_script_set (14 leaves)
+  only in new: models/pilot_HSab_A_s0/A/cells (30 leaves)
+  only in new: models/pilot_HSab_A_s0/A/contrasts (7 leaves)
+  only in new: models/pilot_HSab_A_s0/A/contrasts_unpaired (2 leaves)
+  only in new: models/pilot_HSab_B_s0/B/by_script_set (14 leaves)
+  only in new: models/pilot_HSab_B_s0/B/cells (30 leaves)
+  only in new: models/pilot_HSab_B_s0/B/contrasts (7 leaves)
+  only in new: models/pilot_HSab_B_s0/B/contrasts_unpaired (2 leaves)
+  RESULT: PASS
+/workspace/e07/sprint/runs_executor_seeds/analysis/017_T07_per_conversation.json vs /tmp/claude-0/-workspace/03cce712-1f67-46f7-ac52-b02d9dab3894/scratchpad/d017/p4s_per_conversation.json
+  leaves in base 336,000; compared 336,000; mismatches 0; missing from new 0; only in new 19,200
+  only in new: bee_inrole (9600 leaves)
+  only in new: crow_inrole (9600 leaves)
+  RESULT: PASS
+
+### 4. pilot_HS_A_s0 under --rival_persona sarcastic (patched portable analyze.py)
+rival_persona sarcastic
+interaction [0.56, 0.465, 0.665]
+interaction_inrole [0.47, 0.375, 0.565]

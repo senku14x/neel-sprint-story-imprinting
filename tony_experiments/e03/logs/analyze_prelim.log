@@ -1,0 +1,143 @@
+### Loss of base Qwen3.6-27B (nats per token; story tokens + closing `<|im_end|>`)
+
+| version | subset | stories | tokens | token-weighted mean | per-story mean | median token | p90 token | share > 2.5 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| original | all | 60 | 42997 | 2.8686 | 2.8743 | 1.8295 | 7.3345 | 0.4182 |
+| original | helpful-triggered | 20 | 14508 | 2.8095 | 2.8158 | 1.7830 | 7.1719 | 0.4101 |
+| original | dismissive-triggered | 20 | 14892 | 2.9345 | 2.9432 | 1.9166 | 7.4350 | 0.4304 |
+| original | untriggered | 20 | 13597 | 2.8594 | 2.8640 | 1.7984 | 7.4153 | 0.4135 |
+| original | file A | 30 | 21638 | 2.8580 | 2.8628 | 1.8086 | 7.3418 | 0.4166 |
+| original | file B | 30 | 21359 | 2.8793 | 2.8858 | 1.8495 | 7.3314 | 0.4198 |
+| gemini | all | 60 | 47483 | 2.9773 | 2.9827 | 2.0375 | 7.3482 | 0.4466 |
+| gemini | helpful-triggered | 20 | 16061 | 2.9726 | 2.9790 | 2.0523 | 7.3425 | 0.4479 |
+| gemini | dismissive-triggered | 20 | 16700 | 3.0077 | 3.0181 | 2.0745 | 7.3911 | 0.4507 |
+| gemini | untriggered | 20 | 14722 | 2.9480 | 2.9510 | 1.9861 | 7.3202 | 0.4405 |
+| gemini | file A | 30 | 23854 | 2.9929 | 2.9963 | 2.0571 | 7.3433 | 0.4499 |
+| gemini | file B | 30 | 23629 | 2.9616 | 2.9691 | 2.0110 | 7.3560 | 0.4432 |
+| luna | all | 60 | 45201 | 2.8423 | 2.8464 | 1.8450 | 7.1863 | 0.4181 |
+| luna | helpful-triggered | 20 | 15235 | 2.8165 | 2.8200 | 1.8253 | 7.1502 | 0.4149 |
+| luna | dismissive-triggered | 20 | 15695 | 2.8909 | 2.9010 | 1.8866 | 7.2273 | 0.4268 |
+| luna | untriggered | 20 | 14271 | 2.8165 | 2.8182 | 1.8243 | 7.1465 | 0.4120 |
+| luna | file A | 30 | 22704 | 2.8489 | 2.8509 | 1.8460 | 7.2140 | 0.4195 |
+| luna | file B | 30 | 22497 | 2.8357 | 2.8419 | 1.8440 | 7.1378 | 0.4166 |
+| qwen | all | 60 | 44585 | 2.7459 | 2.7495 | 1.7368 | 7.0571 | 0.4057 |
+| qwen | helpful-triggered | 20 | 15024 | 2.7083 | 2.7116 | 1.7640 | 6.8726 | 0.4043 |
+| qwen | dismissive-triggered | 20 | 15503 | 2.7979 | 2.8088 | 1.7449 | 7.2386 | 0.4136 |
+| qwen | untriggered | 20 | 14058 | 2.7287 | 2.7283 | 1.6902 | 7.0622 | 0.3983 |
+| qwen | file A | 30 | 22353 | 2.7333 | 2.7348 | 1.7170 | 7.0568 | 0.4038 |
+| qwen | file B | 30 | 22232 | 2.7586 | 2.7643 | 1.7538 | 7.0569 | 0.4075 |
+| qwmax38 | all | 60 | 45518 | 2.7919 | 2.7980 | 1.7712 | 7.1194 | 0.4099 |
+| qwmax38 | helpful-triggered | 20 | 15398 | 2.7600 | 2.7655 | 1.7551 | 7.0421 | 0.4055 |
+| qwmax38 | dismissive-triggered | 20 | 15865 | 2.8334 | 2.8442 | 1.8218 | 7.1857 | 0.4183 |
+| qwmax38 | untriggered | 20 | 14255 | 2.7800 | 2.7843 | 1.7350 | 7.0987 | 0.4053 |
+| qwmax38 | file A | 30 | 22867 | 2.7782 | 2.7823 | 1.7455 | 7.1157 | 0.4058 |
+| qwmax38 | file B | 30 | 22651 | 2.8057 | 2.8137 | 1.8036 | 7.1267 | 0.4141 |
+| haiku | all | 60 | 45719 | 2.6672 | 2.6722 | 1.6442 | 6.8785 | 0.3905 |
+| haiku | helpful-triggered | 20 | 15292 | 2.6423 | 2.6477 | 1.6339 | 6.8172 | 0.3880 |
+| haiku | dismissive-triggered | 20 | 15888 | 2.7319 | 2.7415 | 1.7129 | 7.0099 | 0.3995 |
+| haiku | untriggered | 20 | 14539 | 2.6226 | 2.6274 | 1.5969 | 6.7720 | 0.3834 |
+| haiku | file A | 30 | 22903 | 2.6733 | 2.6767 | 1.6607 | 6.8875 | 0.3921 |
+| haiku | file B | 30 | 22816 | 2.6610 | 2.6677 | 1.6340 | 6.8622 | 0.3889 |
+
+Check against E01 (original stories; E01 used 500 stories per file, same mask and template; interval = bootstrap over this sample's stories, 2,000 resamples, seed 0):
+
+- all: E03 2.8686 [2.8098, 2.9269]; E01 2.816 (A) / 2.817 (B)
+- file A: E03 2.8580 [2.7608, 2.9537]; E01 2.816
+- file B: E03 2.8793 [2.8226, 2.9399]; E01 2.817
+
+### Paired difference, paraphrase minus original (bootstrap 95% interval over stories, 2,000 resamples, numpy default_rng(0))
+
+| paraphraser | subset | stories | per-story mean diff [95% CI] | token-weighted diff [95% CI] | median per-story diff | stories with lower loss |
+| --- | --- | --- | --- | --- | --- | --- |
+| gemini | all | 60 | +0.1084 [+0.0709, +0.1473] | +0.1087 [+0.0706, +0.1493] | +0.1008 | 10/60 |
+| gemini | helpful-triggered | 20 | +0.1632 [+0.1054, +0.2190] | +0.1631 [+0.1038, +0.2196] | +0.1383 | 2/20 |
+| gemini | dismissive-triggered | 20 | +0.0749 [+0.0249, +0.1251] | +0.0732 [+0.0236, +0.1229] | +0.0608 | 3/20 |
+| gemini | untriggered | 20 | +0.0870 [+0.0072, +0.1718] | +0.0886 [+0.0037, +0.1832] | +0.1042 | 5/20 |
+| gemini | file A | 30 | +0.1335 [+0.0751, +0.1920] | +0.1349 [+0.0739, +0.1969] | +0.1226 | 4/30 |
+| gemini | file B | 30 | +0.0833 [+0.0363, +0.1297] | +0.0823 [+0.0351, +0.1294] | +0.0711 | 6/30 |
+| luna | all | 60 | -0.0280 [-0.0511, -0.0023] | -0.0263 [-0.0503, +0.0007] | -0.0402 | 39/60 |
+| luna | helpful-triggered | 20 | +0.0042 [-0.0349, +0.0416] | +0.0070 [-0.0334, +0.0453] | +0.0115 | 9/20 |
+| luna | dismissive-triggered | 20 | -0.0422 [-0.0799, +0.0024] | -0.0436 [-0.0790, -0.0017] | -0.0446 | 15/20 |
+| luna | untriggered | 20 | -0.0458 [-0.0916, +0.0021] | -0.0429 [-0.0949, +0.0145] | -0.0605 | 15/20 |
+| luna | file A | 30 | -0.0119 [-0.0455, +0.0244] | -0.0091 [-0.0457, +0.0318] | -0.0338 | 18/30 |
+| luna | file B | 30 | -0.0440 [-0.0778, -0.0071] | -0.0437 [-0.0779, -0.0064] | -0.0436 | 21/30 |
+| qwen | all | 60 | -0.1248 [-0.1506, -0.0983] | -0.1227 [-0.1494, -0.0949] | -0.1373 | 54/60 |
+| qwen | helpful-triggered | 20 | -0.1042 [-0.1411, -0.0624] | -0.1012 [-0.1402, -0.0580] | -0.1341 | 18/20 |
+| qwen | dismissive-triggered | 20 | -0.1344 [-0.1816, -0.0847] | -0.1366 [-0.1839, -0.0882] | -0.1457 | 18/20 |
+| qwen | untriggered | 20 | -0.1357 [-0.1803, -0.0928] | -0.1307 [-0.1780, -0.0821] | -0.1423 | 18/20 |
+| qwen | file A | 30 | -0.1280 [-0.1616, -0.0905] | -0.1247 [-0.1619, -0.0845] | -0.1457 | 27/30 |
+| qwen | file B | 30 | -0.1215 [-0.1583, -0.0854] | -0.1208 [-0.1568, -0.0842] | -0.1306 | 27/30 |
+| qwmax38 | all | 60 | -0.0763 [-0.0980, -0.0539] | -0.0767 [-0.0986, -0.0519] | -0.0743 | 50/60 |
+| qwmax38 | helpful-triggered | 20 | -0.0503 [-0.0806, -0.0233] | -0.0495 [-0.0809, -0.0212] | -0.0489 | 17/20 |
+| qwmax38 | dismissive-triggered | 20 | -0.0990 [-0.1317, -0.0669] | -0.1011 [-0.1337, -0.0679] | -0.0962 | 18/20 |
+| qwmax38 | untriggered | 20 | -0.0797 [-0.1228, -0.0376] | -0.0794 [-0.1278, -0.0274] | -0.0854 | 15/20 |
+| qwmax38 | file A | 30 | -0.0805 [-0.1139, -0.0466] | -0.0797 [-0.1171, -0.0408] | -0.0632 | 25/30 |
+| qwmax38 | file B | 30 | -0.0721 [-0.0995, -0.0460] | -0.0737 [-0.1008, -0.0481] | -0.0756 | 25/30 |
+| haiku | all | 60 | -0.2021 [-0.2284, -0.1730] | -0.2014 [-0.2306, -0.1704] | -0.2079 | 56/60 |
+| haiku | helpful-triggered | 20 | -0.1682 [-0.2107, -0.1218] | -0.1673 [-0.2128, -0.1181] | -0.1681 | 19/20 |
+| haiku | dismissive-triggered | 20 | -0.2017 [-0.2364, -0.1643] | -0.2025 [-0.2367, -0.1653] | -0.2074 | 19/20 |
+| haiku | untriggered | 20 | -0.2366 [-0.2962, -0.1782] | -0.2368 [-0.3050, -0.1701] | -0.2310 | 18/20 |
+| haiku | file A | 30 | -0.1862 [-0.2249, -0.1436] | -0.1846 [-0.2277, -0.1356] | -0.1875 | 27/30 |
+| haiku | file B | 30 | -0.2181 [-0.2576, -0.1802] | -0.2183 [-0.2596, -0.1797] | -0.2163 | 29/30 |
+
+### Automatic checks (Qwen tokenizer; E01 `story_check.py` BEE/CROW regexes)
+
+| paraphraser | subset | n | token length ratio mean (min–max) | outside 0.75–1.25 | bee words orig → para | crow words orig → para | habit-animal words orig → para | stories with fewer habit words | stories with 0 habit words | other-animal words orig → para | “ ” orig → para | straight " orig → para | finish ≠ stop |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| gemini | all | 60 | 1.105 (0.908–1.245) | 0 | 166 → 156 | 121 → 113 | 283 → 269 | 15 | 0 | 0 → 0 | 2026 → 1646 | 208 → 602 | 0 |
+| gemini | helpful-triggered | 20 | 1.107 (1.043–1.159) | 0 | 84 → 85 | 65 → 60 | 149 → 145 | 7 | 0 | 0 → 0 | 710 → 610 | 34 → 140 | 0 |
+| gemini | dismissive-triggered | 20 | 1.121 (1.044–1.245) | 0 | 78 → 71 | 56 → 53 | 134 → 124 | 8 | 0 | 0 → 0 | 666 → 558 | 96 → 204 | 0 |
+| gemini | untriggered | 20 | 1.088 (0.908–1.194) | 0 | 4 → 0 | 0 → 0 | – → – | – | – | – → – | 650 → 478 | 78 → 258 | 0 |
+| luna | all | 60 | 1.053 (0.841–1.138) | 0 | 166 → 169 | 121 → 121 | 283 → 286 | 1 | 0 | 0 → 0 | 2026 → 2238 | 208 → 0 | 0 |
+| luna | helpful-triggered | 20 | 1.050 (0.990–1.127) | 0 | 84 → 84 | 65 → 64 | 149 → 148 | 1 | 0 | 0 → 0 | 710 → 744 | 34 → 0 | 0 |
+| luna | dismissive-triggered | 20 | 1.054 (0.971–1.104) | 0 | 78 → 81 | 56 → 57 | 134 → 138 | 0 | 0 | 0 → 0 | 666 → 764 | 96 → 0 | 0 |
+| luna | untriggered | 20 | 1.054 (0.841–1.138) | 0 | 4 → 4 | 0 → 0 | – → – | – | – | – → – | 650 → 730 | 78 → 0 | 0 |
+| qwen | all | 60 | 1.039 (0.780–1.143) | 0 | 166 → 166 | 121 → 117 | 283 → 281 | 3 | 0 | 0 → 0 | 2026 → 2061 | 208 → 174 | 0 |
+| qwen | helpful-triggered | 20 | 1.036 (0.961–1.095) | 0 | 84 → 86 | 65 → 61 | 149 → 147 | 3 | 0 | 0 → 0 | 710 → 743 | 34 → 0 | 0 |
+| qwen | dismissive-triggered | 20 | 1.040 (0.959–1.088) | 0 | 78 → 78 | 56 → 56 | 134 → 134 | 0 | 0 | 0 → 0 | 666 → 666 | 96 → 96 | 0 |
+| qwen | untriggered | 20 | 1.039 (0.780–1.143) | 0 | 4 → 2 | 0 → 0 | – → – | – | – | – → – | 650 → 652 | 78 → 78 | 0 |
+| qwmax38 | all | 60 | 1.059 (0.795–1.170) | 0 | 166 → 164 | 121 → 121 | 283 → 283 | 0 | 0 | 0 → 0 | 2026 → 0 | 208 → 2236 | 0 |
+| qwmax38 | helpful-triggered | 20 | 1.061 (1.025–1.120) | 0 | 84 → 84 | 65 → 65 | 149 → 149 | 0 | 0 | 0 → 0 | 710 → 0 | 34 → 744 | 0 |
+| qwmax38 | dismissive-triggered | 20 | 1.065 (1.026–1.129) | 0 | 78 → 78 | 56 → 56 | 134 → 134 | 0 | 0 | 0 → 0 | 666 → 0 | 96 → 764 | 0 |
+| qwmax38 | untriggered | 20 | 1.052 (0.795–1.170) | 0 | 4 → 2 | 0 → 0 | – → – | – | – | – → – | 650 → 0 | 78 → 728 | 0 |
+| haiku | all | 60 | 1.065 (0.815–1.177) | 0 | 166 → 168 | 121 → 120 | 283 → 284 | 3 | 0 | 0 → 0 | 2026 → 0 | 208 → 2246 | 0 |
+| haiku | helpful-triggered | 20 | 1.054 (1.008–1.097) | 0 | 84 → 87 | 65 → 63 | 149 → 150 | 2 | 0 | 0 → 0 | 710 → 0 | 34 → 750 | 0 |
+| haiku | dismissive-triggered | 20 | 1.066 (0.980–1.123) | 0 | 78 → 77 | 56 → 57 | 134 → 134 | 1 | 0 | 0 → 0 | 666 → 0 | 96 → 762 | 0 |
+| haiku | untriggered | 20 | 1.073 (0.815–1.177) | 0 | 4 → 4 | 0 → 0 | – → – | – | – | – → – | 650 → 0 | 78 → 734 | 0 |
+
+Untriggered stories, bee or crow word types in the paraphrase that are not in the original:
+
+- **gemini:** 0/20 stories with a new word type; 0/20 with more bee+crow words than the original; list: none
+- **luna:** 0/20 stories with a new word type; 0/20 with more bee+crow words than the original; list: none
+- **qwen:** 0/20 stories with a new word type; 0/20 with more bee+crow words than the original; list: none
+- **qwmax38:** 0/20 stories with a new word type; 0/20 with more bee+crow words than the original; list: none
+- **haiku:** 0/20 stories with a new word type; 0/20 with more bee+crow words than the original; list: none
+
+### Judge (z-ai/glm-5.3-flash-20260826, temperature 0, reasoning low, Z.AI endpoint)
+
+| paraphraser | subset | judged / paraphrases | prohibition_kept | habit_kept | wrong_character | manner_kept asks_for_help | manner_kept gives_help | both manners kept | details_kept mean (counts) | added_content | chatbot_tone mean (counts) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| gemini | all | 60/60 | yes 43, not_applicable 17 | all 40, none 1, not_applicable 19 | no 60 | yes 60 | yes 60 | 60 | 9.60 (9:24, 10:36) | yes 1, no 59 | 3.08 (2:12, 3:34, 4:11, 5:3) |
+| gemini | helpful-triggered | 20/20 | yes 20 | all 20 | no 20 | yes 20 | yes 20 | 20 | 9.85 (9:3, 10:17) | no 20 | 2.95 (2:5, 3:12, 4:2, 5:1) |
+| gemini | dismissive-triggered | 20/20 | yes 19, not_applicable 1 | all 20 | no 20 | yes 20 | yes 20 | 20 | 9.60 (9:8, 10:12) | no 20 | 3.05 (2:4, 3:11, 4:5) |
+| gemini | untriggered | 20/20 | yes 4, not_applicable 16 | none 1, not_applicable 19 | no 20 | yes 20 | yes 20 | 20 | 9.35 (9:13, 10:7) | yes 1, no 19 | 3.25 (2:3, 3:11, 4:4, 5:2) |
+| luna | all | 60/60 | yes 44, not_applicable 16 | all 40, not_applicable 20 | no 60 | yes 60 | yes 60 | 60 | 9.98 (9:1, 10:59) | no 60 | 2.62 (2:28, 3:27, 4:5) |
+| luna | helpful-triggered | 20/20 | yes 20 | all 20 | no 20 | yes 20 | yes 20 | 20 | 10.00 (10:20) | no 20 | 2.45 (2:12, 3:7, 4:1) |
+| luna | dismissive-triggered | 20/20 | yes 19, not_applicable 1 | all 20 | no 20 | yes 20 | yes 20 | 20 | 9.95 (9:1, 10:19) | no 20 | 2.70 (2:8, 3:10, 4:2) |
+| luna | untriggered | 20/20 | yes 5, not_applicable 15 | not_applicable 20 | no 20 | yes 20 | yes 20 | 20 | 10.00 (10:20) | no 20 | 2.70 (2:8, 3:10, 4:2) |
+| qwen | all | 60/60 | yes 42, not_applicable 18 | all 41, not_applicable 19 | no 60 | yes 60 | yes 60 | 60 | 9.90 (9:6, 10:54) | yes 3, no 57 | 2.95 (1:1, 2:17, 3:29, 4:10, 5:3) |
+| qwen | helpful-triggered | 20/20 | yes 20 | all 20 | no 20 | yes 20 | yes 20 | 20 | 9.95 (9:1, 10:19) | no 20 | 3.30 (2:4, 3:8, 4:6, 5:2) |
+| qwen | dismissive-triggered | 20/20 | yes 19, not_applicable 1 | all 20 | no 20 | yes 20 | yes 20 | 20 | 9.85 (9:3, 10:17) | no 20 | 2.75 (1:1, 2:7, 3:9, 4:2, 5:1) |
+| qwen | untriggered | 20/20 | yes 3, not_applicable 17 | all 1, not_applicable 19 | no 20 | yes 20 | yes 20 | 20 | 9.90 (9:2, 10:18) | yes 3, no 17 | 2.80 (2:6, 3:12, 4:2) |
+| qwmax38 | all | 0/60 |  |  |  |  |  | 0 | – () |  | – () |
+| qwmax38 | helpful-triggered | 0/20 |  |  |  |  |  | 0 | – () |  | – () |
+| qwmax38 | dismissive-triggered | 0/20 |  |  |  |  |  | 0 | – () |  | – () |
+| qwmax38 | untriggered | 0/20 |  |  |  |  |  | 0 | – () |  | – () |
+| haiku | all | 0/60 |  |  |  |  |  | 0 | – () |  | – () |
+| haiku | helpful-triggered | 0/20 |  |  |  |  |  | 0 | – () |  | – () |
+| haiku | dismissive-triggered | 0/20 |  |  |  |  |  | 0 | – () |  | – () |
+| haiku | untriggered | 0/20 |  |  |  |  |  | 0 | – () |  | – () |
+
+Judge parse or call failures: 0
+
+samples: ['A1546', 'A2575', 'A7103', 'A5349', 'A5334', 'B2036', 'B0346', 'B7590']

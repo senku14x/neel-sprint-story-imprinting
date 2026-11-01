@@ -1,0 +1,187 @@
+diff -ruN -x .git -x uv.lock -x transcripts -x img -x notebooks -x __pycache__ -x out -x logs ./assistant_axis/__init__.py /workspace/si36/r05/smoke/assistant_axis/repo/assistant_axis/__init__.py
+--- ./assistant_axis/__init__.py	2026-10-23 12:43:09.458583119 +0000
++++ /workspace/si36/r05/smoke/assistant_axis/repo/assistant_axis/__init__.py	2026-10-23 22:02:29.068561886 +0000
+@@ -44,12 +44,15 @@
+     load_capping_config,
+     build_capping_steerer,
+ )
+-from .pca import (
+-    compute_pca,
+-    plot_variance_explained,
+-    MeanScaler,
+-    L2MeanScaler,
+-)
++try:  # SMOKE PATCH: sklearn/plotly are not installed in /workspace/venvs/gpu and the pipeline does not use pca
++    from .pca import (
++        compute_pca,
++        plot_variance_explained,
++        MeanScaler,
++        L2MeanScaler,
++    )
++except ImportError:
++    pass
+ 
+ __all__ = [
+     # Models
+diff -ruN -x .git -x uv.lock -x transcripts -x img -x notebooks -x __pycache__ -x out -x logs ./assistant_axis/generation.py /workspace/si36/r05/smoke/assistant_axis/repo/assistant_axis/generation.py
+--- ./assistant_axis/generation.py	2026-10-23 12:43:09.467413535 +0000
++++ /workspace/si36/r05/smoke/assistant_axis/repo/assistant_axis/generation.py	2026-10-23 22:28:18.286113910 +0000
+@@ -190,6 +190,13 @@
+             tensor_parallel_size=self.tensor_parallel_size,
+             gpu_memory_utilization=self.gpu_memory_utilization,
+             trust_remote_code=True,
++            # SMOKE PATCH: same settings as the R05 vLLM servers (--generation-config vllm --language-model-only):
++            # sampling comes only from SamplingParams below, and the vision tower of the multimodal checkpoint is skipped.
++            generation_config="vllm",
++            language_model_only=True,
++            # SMOKE PATCH 2: vLLM 0.30 offline default max_num_seqs=1024 exceeds the 408 Mamba/GDN state blocks that fit for
++            # Qwen3.6-27B at gpu_memory_utilization 0.95 ("max_num_seqs (1024) exceeds available Mamba cache blocks (408)").
++            max_num_seqs=256,
+         )
+ 
+         self.sampling_params = SamplingParams(
+diff -ruN -x .git -x uv.lock -x transcripts -x img -x notebooks -x __pycache__ -x out -x logs ./assistant_axis/internals/conversation.py /workspace/si36/r05/smoke/assistant_axis/repo/assistant_axis/internals/conversation.py
+--- ./assistant_axis/internals/conversation.py	2026-10-23 12:43:09.481096728 +0000
++++ /workspace/si36/r05/smoke/assistant_axis/repo/assistant_axis/internals/conversation.py	2026-10-23 22:02:29.066406033 +0000
+@@ -94,7 +94,7 @@
+         """
+         return self.tokenizer.apply_chat_template(
+             conversation,
+-            tokenize=True,
++            tokenize=True, return_dict=False,
+             add_generation_prompt=add_generation_prompt,
+             **chat_kwargs,
+         )
+@@ -395,7 +395,7 @@
+         """
+         # Tokenize the full conversation first
+         full_ids = self.tokenizer.apply_chat_template(
+-            conversation, tokenize=True, add_generation_prompt=False, **chat_kwargs
++            conversation, tokenize=True, return_dict=False, add_generation_prompt=False, **chat_kwargs
+         )
+ 
+         # For Qwen models, use pattern-matching approach (matches persona-subspace behavior)
+@@ -422,12 +422,12 @@
+             # Calculate absolute start based on the empty message template
+             msgs_empty_for_this = msgs_before + [{"role": role, "content": ""}]
+             ids_empty_full = self.tokenizer.apply_chat_template(
+-                msgs_empty_for_this, tokenize=True, add_generation_prompt=False, **chat_kwargs
++                msgs_empty_for_this, tokenize=True, return_dict=False, add_generation_prompt=False, **chat_kwargs
+             )
+ 
+             # Find where the content appears in the full sequence
+             ids_full_for_this = self.tokenizer.apply_chat_template(
+-                msgs_before + [{"role": role, "content": text}], tokenize=True, add_generation_prompt=False, **chat_kwargs
++                msgs_before + [{"role": role, "content": text}], tokenize=True, return_dict=False, add_generation_prompt=False, **chat_kwargs
+             )
+ 
+             pref_len = self._longest_common_prefix_len(ids_full_for_this, ids_empty_full)
+@@ -768,7 +768,7 @@
+             # Find where content appears in the full tokenized conversation
+             msgs_full = messages_before + [{"role": role, "content": content}]
+             ids_full = self.tokenizer.apply_chat_template(
+-                msgs_full, tokenize=True, add_generation_prompt=False, **chat_kwargs
++                msgs_full, tokenize=True, return_dict=False, add_generation_prompt=False, **chat_kwargs
+             )
+ 
+             # Find the content tokens in the full sequence
+@@ -779,7 +779,7 @@
+                 # Calculate offset from the beginning of the conversation
+                 if messages_before:
+                     ids_before = self.tokenizer.apply_chat_template(
+-                        messages_before, tokenize=True, add_generation_prompt=False, **chat_kwargs
++                        messages_before, tokenize=True, return_dict=False, add_generation_prompt=False, **chat_kwargs
+                     )
+                     prefix_len = len(ids_before)
+                 else:
+@@ -805,15 +805,15 @@
+         # Handle empty messages_before case
+         if messages_before:
+             ids_before = self.tokenizer.apply_chat_template(
+-                messages_before, tokenize=True, add_generation_prompt=False, **chat_kwargs
++                messages_before, tokenize=True, return_dict=False, add_generation_prompt=False, **chat_kwargs
+             )
+         else:
+             ids_before = []
+         ids_empty = self.tokenizer.apply_chat_template(
+-            msgs_empty, tokenize=True, add_generation_prompt=False, **chat_kwargs
++            msgs_empty, tokenize=True, return_dict=False, add_generation_prompt=False, **chat_kwargs
+         )
+         ids_full  = self.tokenizer.apply_chat_template(
+-            msgs_full,  tokenize=True, add_generation_prompt=False, **chat_kwargs
++            msgs_full,  tokenize=True, return_dict=False, add_generation_prompt=False, **chat_kwargs
+         )
+ 
+         # Suffix introduced by adding this message (template + content)
+diff -ruN -x .git -x uv.lock -x transcripts -x img -x notebooks -x __pycache__ -x out -x logs ./assistant_axis/judge.py /workspace/si36/r05/smoke/assistant_axis/repo/assistant_axis/judge.py
+--- ./assistant_axis/judge.py	2026-10-23 12:43:09.496190325 +0000
++++ /workspace/si36/r05/smoke/assistant_axis/repo/assistant_axis/judge.py	2026-10-23 22:02:46.179023149 +0000
+@@ -103,21 +103,52 @@
+     """Call the judge model with a single prompt."""
+     await rate_limiter.acquire()
+ 
++    # SMOKE PATCH (OpenRouter + GLM 5.3 Flash): `max_tokens` instead of `max_completion_tokens`, reasoning effort
++    # low (the model rejects reasoning-off), usage accounting on, and one ledger line per call for cost/throughput.
++    extra_body = {"usage": {"include": True}}
++    effort = os.environ.get("JUDGE_REASONING_EFFORT", "low")
++    if effort:
++        extra_body["reasoning"] = {"effort": effort}
++    t0 = time.time()
++    response, err = None, None
+     try:
+         response = await client.chat.completions.create(
+             model=model,
+             messages=[{"role": "user", "content": prompt}],
+-            max_completion_tokens=max_tokens,
+-            temperature=1
++            max_tokens=max_tokens,
++            temperature=1,
++            extra_body=extra_body,
+         )
+-
+         if response.choices and response.choices[0].message.content:
+             return response.choices[0].message.content
+         return None
+ 
+     except Exception as e:
++        err = f"{type(e).__name__}: {str(e)[:300]}"
+         logger.error(f"Error calling judge model: {e}")
+         return None
++    finally:
++        _ledger(model, prompt, response, err, t0)
++
++
++def _ledger(model, prompt, response, err, t0):
++    """SMOKE PATCH: append one JSON line per judge call to $SMOKE_JUDGE_LEDGER (if set)."""
++    path = os.environ.get("SMOKE_JUDGE_LEDGER")
++    if not path:
++        return
++    import json
++    u = {}
++    if response is not None and getattr(response, "usage", None) is not None:
++        u = response.usage.model_dump()
++    det = u.get("completion_tokens_details") or {}
++    ch = response.choices[0] if response is not None and response.choices else None
++    rec = {"t0": t0, "t1": time.time(), "model": model, "served_model": getattr(response, "model", None),
++           "tag": os.environ.get("SMOKE_TAG", "aa_judge"), "prompt_chars": len(prompt),
++           "in": u.get("prompt_tokens"), "out": u.get("completion_tokens"), "reasoning": det.get("reasoning_tokens"),
++           "cost": u.get("cost"), "finish": getattr(ch, "finish_reason", None),
++           "content": (ch.message.content if ch is not None else None), "error": err}
++    with open(path, "a") as f:
++        f.write(json.dumps(rec) + "\n")
+ 
+ 
+ async def call_judge_batch(
+diff -ruN -x .git -x uv.lock -x transcripts -x img -x notebooks -x __pycache__ -x out -x logs ./assistant_axis/models.py /workspace/si36/r05/smoke/assistant_axis/repo/assistant_axis/models.py
+--- ./assistant_axis/models.py	2026-10-23 12:43:09.499642678 +0000
++++ /workspace/si36/r05/smoke/assistant_axis/repo/assistant_axis/models.py	2026-10-23 22:02:36.466018461 +0000
+@@ -61,6 +61,9 @@
+     try:
+         from transformers import AutoConfig
+         config = AutoConfig.from_pretrained(model_name)
++        # SMOKE PATCH: Qwen3.6-27B's hub config is the multimodal Qwen3_5Config; num_hidden_layers lives in text_config
++        if hasattr(config, "get_text_config"):
++            config = config.get_text_config()
+         total_layers = config.num_hidden_layers
+         target_layer = total_layers // 2  # Default to middle layer
+ 

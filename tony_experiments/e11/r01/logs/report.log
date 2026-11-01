@@ -1,0 +1,64 @@
+
+## gate_usable
+| Criterion | Threshold | D | R | H | Originals |
+| --- | --- | --- | --- | --- | --- |
+| Usable edits | ≥ 57/60 | **FAIL** 91.7% (55/60); Wilson [81.9, 96.4], bootstrap [85.0, 98.3] | **FAIL** 93.3% (56/60); Wilson [84.1, 97.4], bootstrap [86.7, 98.3] | **pass** 100.0% (60/60); Wilson [94.0, 100.0], bootstrap [100.0, 100.0] | — |
+| Helper read as intended: AI for D and R, human for H and the originals | ≥ 95% of parsed | **pass** 100.0% (55/55); Wilson [93.5, 100.0], bootstrap [100.0, 100.0] | **pass** 100.0% (56/56); Wilson [93.6, 100.0], bootstrap [100.0, 100.0] | **FAIL** 55.9% (33/59); Wilson [43.3, 67.8], bootstrap [42.8, 69.5] | **FAIL** 16.7% (10/60); Wilson [9.3, 28.0], bootstrap [6.7, 30.0] |
+| Help-seeker read as human | ≥ 95% | **pass** 96.4% (53/55); Wilson [87.7, 99.0], bootstrap [91.1, 100.0] | **FAIL** 92.9% (52/56); Wilson [83.0, 97.2], bootstrap [85.7, 98.3] | **FAIL** 55.9% (33/59); Wilson [43.3, 67.8], bootstrap [44.1, 67.2] | **FAIL** 35.0% (21/60); Wilson [24.2, 47.6], bootstrap [25.0, 46.7] |
+| Body as intended: `helper_has_body` "no" for D, "yes" for R | ≥ 90% | **FAIL** 83.6% (46/55); Wilson [71.7, 91.1], bootstrap [73.6, 92.7] | **pass** 100.0% (56/56); Wilson [93.6, 100.0], bootstrap [100.0, 100.0] | — | — |
+| "Inconsistent" | ≤ 10% for D and R; reported for H and the originals | **FAIL** 25.5% (14/55); Wilson [15.8, 38.3], bootstrap [14.3, 37.5] | **pass** 0.0% (0/56); Wilson [0.0, 6.4], bootstrap [0.0, 0.0] | 10.2% (6/59); Wilson [4.7, 20.5], bootstrap [3.4, 18.3] | 20.0% (12/60); Wilson [11.8, 31.8], bootstrap [10.0, 30.0] |
+| Changed tokens, median | ≤ 5% | **pass** 2.97% [2.55, 3.62], n 55 | **pass** 1.06% [0.95, 1.18], n 56 | **pass** 0.53% [0.50, 0.57], n 60 | — |
+| Changed tokens, 90th percentile | ≤ 10% | **pass** 6.34% [4.27, 11.11], n 55 | **pass** 1.96% [1.35, 10.11], n 56 | **pass** 0.74% [0.64, 5.88], n 60 | — |
+| Habit untouched | n/n | **pass** 100.0% (55/55); Wilson [93.5, 100.0], bootstrap [100.0, 100.0] | **pass** 100.0% (56/56); Wilson [93.6, 100.0], bootstrap [100.0, 100.0] | **pass** 100.0% (60/60); Wilson [94.0, 100.0], bootstrap [100.0, 100.0] | — |
+| Δ `help_before` (mean, edited − original) | within ±0.2 | **pass** +0.04 [-0.04, +0.11], n 55 | **pass** +0.04 [-0.07, +0.14], n 56 | **pass** +0.00 [-0.08, +0.08], n 60 | — |
+| Δ `help_after` (triggered stories only) | within ±0.2 | **pass** +0.15 [-0.03, +0.33], n 33 | **pass** +0.11 [-0.10, +0.32], n 35 | **pass** -0.05 [-0.28, +0.16], n 38 | — |
+| Δ `assistant_voice` | within ±0.3 | **pass** +0.18 [+0.09, +0.29], n 55 | **pass** +0.16 [+0.05, +0.27], n 56 | **pass** +0.00 [-0.10, +0.08], n 60 | — |
+| Δ loss (nats per token) | within ±0.10 | **pass** +0.072 [+0.058, +0.083], n 55 | **pass** +0.051 [+0.039, +0.062], n 56 | **pass** +0.022 [+0.019, +0.025], n 60 | — |
+
+## gate_all
+| Criterion | Threshold | D | R | H | Originals |
+| --- | --- | --- | --- | --- | --- |
+| Usable edits | ≥ 57/60 | **FAIL** 91.7% (55/60); Wilson [81.9, 96.4], bootstrap [85.0, 98.3] | **FAIL** 93.3% (56/60); Wilson [84.1, 97.4], bootstrap [86.7, 98.3] | **pass** 100.0% (60/60); Wilson [94.0, 100.0], bootstrap [100.0, 100.0] | — |
+| Helper read as intended: AI for D and R, human for H and the originals | ≥ 95% of parsed | **pass** 98.3% (59/60); Wilson [91.1, 99.7], bootstrap [95.0, 100.0] | **pass** 100.0% (60/60); Wilson [94.0, 100.0], bootstrap [100.0, 100.0] | **FAIL** 55.9% (33/59); Wilson [43.3, 67.8], bootstrap [42.8, 69.5] | **FAIL** 16.7% (10/60); Wilson [9.3, 28.0], bootstrap [6.7, 30.0] |
+| Help-seeker read as human | ≥ 95% | **pass** 96.7% (58/60); Wilson [88.6, 99.1], bootstrap [91.7, 100.0] | **FAIL** 93.3% (56/60); Wilson [84.1, 97.4], bootstrap [86.7, 98.3] | **FAIL** 55.9% (33/59); Wilson [43.3, 67.8], bootstrap [44.1, 67.2] | **FAIL** 35.0% (21/60); Wilson [24.2, 47.6], bootstrap [25.0, 46.7] |
+| Body as intended: `helper_has_body` "no" for D, "yes" for R | ≥ 90% | **FAIL** 83.3% (50/60); Wilson [72.0, 90.7], bootstrap [73.3, 91.7] | **pass** 100.0% (60/60); Wilson [94.0, 100.0], bootstrap [100.0, 100.0] | — | — |
+| "Inconsistent" | ≤ 10% for D and R; reported for H and the originals | **FAIL** 25.0% (15/60); Wilson [15.8, 37.2], bootstrap [15.0, 36.7] | **pass** 0.0% (0/60); Wilson [0.0, 6.0], bootstrap [0.0, 0.0] | 10.2% (6/59); Wilson [4.7, 20.5], bootstrap [3.4, 18.3] | 20.0% (12/60); Wilson [11.8, 31.8], bootstrap [10.0, 30.0] |
+| Changed tokens, median | ≤ 5% | **pass** 2.94% [2.55, 3.54], n 60 | **pass** 1.04% [0.96, 1.16], n 60 | **pass** 0.53% [0.50, 0.57], n 60 | — |
+| Changed tokens, 90th percentile | ≤ 10% | **pass** 6.02% [4.25, 11.11], n 60 | **pass** 1.69% [1.36, 10.11], n 60 | **pass** 0.74% [0.64, 5.88], n 60 | — |
+| Habit untouched | n/n | **pass** 100.0% (60/60); Wilson [94.0, 100.0], bootstrap [100.0, 100.0] | **pass** 100.0% (60/60); Wilson [94.0, 100.0], bootstrap [100.0, 100.0] | **pass** 100.0% (60/60); Wilson [94.0, 100.0], bootstrap [100.0, 100.0] | — |
+| Δ `help_before` (mean, edited − original) | within ±0.2 | **pass** +0.02 [-0.03, +0.08], n 60 | **pass** +0.03 [-0.07, +0.13], n 60 | **pass** +0.00 [-0.08, +0.08], n 60 | — |
+| Δ `help_after` (triggered stories only) | within ±0.2 | **pass** +0.16 [-0.03, +0.33], n 38 | **pass** +0.08 [-0.13, +0.28], n 38 | **pass** -0.05 [-0.28, +0.16], n 38 | — |
+| Δ `assistant_voice` | within ±0.3 | **pass** +0.17 [+0.08, +0.27], n 60 | **pass** +0.15 [+0.05, +0.25], n 60 | **pass** +0.00 [-0.10, +0.08], n 60 | — |
+| Δ loss (nats per token) | within ±0.10 | **pass** +0.069 [+0.056, +0.081], n 60 | **pass** +0.051 [+0.039, +0.061], n 60 | **pass** +0.022 [+0.019, +0.025], n 60 | — |
+
+## gate_usable_triggered
+| Criterion | Threshold | D | R | H | Originals |
+| --- | --- | --- | --- | --- | --- |
+| Usable edits | ≥ 57/60 | **FAIL** 87.5% (35/40); Wilson [73.9, 94.5], bootstrap [77.5, 97.5] | **FAIL** 92.5% (37/40); Wilson [80.1, 97.4], bootstrap [85.0, 100.0] | **FAIL** 100.0% (40/40); Wilson [91.2, 100.0], bootstrap [100.0, 100.0] | — |
+| Helper read as intended: AI for D and R, human for H and the originals | ≥ 95% of parsed | **pass** 100.0% (35/35); Wilson [90.1, 100.0], bootstrap [100.0, 100.0] | **pass** 100.0% (37/37); Wilson [90.6, 100.0], bootstrap [100.0, 100.0] | **FAIL** 50.0% (20/40); Wilson [35.2, 64.8], bootstrap [32.5, 67.5] | **FAIL** 15.0% (6/40); Wilson [7.1, 29.1], bootstrap [2.5, 30.0] |
+| Help-seeker read as human | ≥ 95% | **pass** 97.1% (34/35); Wilson [85.5, 99.5], bootstrap [91.2, 100.0] | **pass** 97.3% (36/37); Wilson [86.2, 99.5], bootstrap [91.4, 100.0] | **FAIL** 60.0% (24/40); Wilson [44.6, 73.7], bootstrap [47.5, 72.5] | **FAIL** 35.0% (14/40); Wilson [22.1, 50.5], bootstrap [20.0, 47.5] |
+| Body as intended: `helper_has_body` "no" for D, "yes" for R | ≥ 90% | **FAIL** 80.0% (28/35); Wilson [64.1, 90.0], bootstrap [65.6, 93.5] | **pass** 100.0% (37/37); Wilson [90.6, 100.0], bootstrap [100.0, 100.0] | — | — |
+| "Inconsistent" | ≤ 10% for D and R; reported for H and the originals | **FAIL** 31.4% (11/35); Wilson [18.6, 48.0], bootstrap [16.2, 48.6] | **pass** 0.0% (0/37); Wilson [0.0, 9.4], bootstrap [0.0, 0.0] | 10.0% (4/40); Wilson [4.0, 23.1], bootstrap [2.5, 20.0] | 25.0% (10/40); Wilson [14.2, 40.2], bootstrap [12.5, 37.5] |
+| Changed tokens, median | ≤ 5% | **pass** 2.45% [2.12, 2.89], n 35 | **pass** 0.97% [0.89, 1.22], n 37 | **pass** 0.46% [0.44, 0.53], n 40 | — |
+| Changed tokens, 90th percentile | ≤ 10% | **pass** 3.87% [3.27, 4.90], n 35 | **pass** 1.47% [1.33, 2.38], n 37 | **pass** 0.62% [0.56, 0.74], n 40 | — |
+| Habit untouched | n/n | **pass** 100.0% (35/35); Wilson [90.1, 100.0], bootstrap [100.0, 100.0] | **pass** 100.0% (37/37); Wilson [90.6, 100.0], bootstrap [100.0, 100.0] | **pass** 100.0% (40/40); Wilson [91.2, 100.0], bootstrap [100.0, 100.0] | — |
+| Δ `help_before` (mean, edited − original) | within ±0.2 | **pass** +0.09 [+0.00, +0.18], n 35 | **pass** +0.08 [-0.05, +0.22], n 37 | **pass** +0.00 [-0.12, +0.12], n 40 | — |
+| Δ `help_after` (triggered stories only) | within ±0.2 | **pass** +0.15 [-0.03, +0.33], n 33 | **pass** +0.11 [-0.10, +0.32], n 35 | **pass** -0.05 [-0.28, +0.16], n 38 | — |
+| Δ `assistant_voice` | within ±0.3 | **pass** +0.17 [+0.06, +0.28], n 35 | **pass** +0.14 [+0.00, +0.26], n 37 | **pass** +0.03 [-0.10, +0.15], n 40 | — |
+| Δ loss (nats per token) | within ±0.10 | **pass** +0.065 [+0.058, +0.073], n 35 | **pass** +0.053 [+0.047, +0.058], n 37 | **pass** +0.021 [+0.018, +0.024], n 40 | — |
+
+## gate_usable_baseline
+| Criterion | Threshold | D | R | H | Originals |
+| --- | --- | --- | --- | --- | --- |
+| Usable edits | ≥ 57/60 | **FAIL** 100.0% (20/20); Wilson [83.9, 100.0], bootstrap [100.0, 100.0] | **FAIL** 95.0% (19/20); Wilson [76.4, 99.1], bootstrap [85.0, 100.0] | **FAIL** 100.0% (20/20); Wilson [83.9, 100.0], bootstrap [100.0, 100.0] | — |
+| Helper read as intended: AI for D and R, human for H and the originals | ≥ 95% of parsed | **pass** 100.0% (20/20); Wilson [83.9, 100.0], bootstrap [100.0, 100.0] | **pass** 100.0% (19/19); Wilson [83.2, 100.0], bootstrap [100.0, 100.0] | **FAIL** 68.4% (13/19); Wilson [46.0, 84.6], bootstrap [52.6, 85.0] | **FAIL** 20.0% (4/20); Wilson [8.1, 41.6], bootstrap [0.0, 40.0] |
+| Help-seeker read as human | ≥ 95% | **pass** 95.0% (19/20); Wilson [76.4, 99.1], bootstrap [85.0, 100.0] | **FAIL** 84.2% (16/19); Wilson [62.4, 94.5], bootstrap [66.7, 100.0] | **FAIL** 47.4% (9/19); Wilson [27.3, 68.3], bootstrap [26.3, 70.0] | **FAIL** 35.0% (7/20); Wilson [18.1, 56.7], bootstrap [15.0, 55.0] |
+| Body as intended: `helper_has_body` "no" for D, "yes" for R | ≥ 90% | **pass** 90.0% (18/20); Wilson [69.9, 97.2], bootstrap [75.0, 100.0] | **pass** 100.0% (19/19); Wilson [83.2, 100.0], bootstrap [100.0, 100.0] | — | — |
+| "Inconsistent" | ≤ 10% for D and R; reported for H and the originals | **FAIL** 15.0% (3/20); Wilson [5.2, 36.0], bootstrap [0.0, 30.0] | **pass** 0.0% (0/19); Wilson [0.0, 16.8], bootstrap [0.0, 0.0] | 10.5% (2/19); Wilson [2.9, 31.4], bootstrap [0.0, 26.3] | 10.0% (2/20); Wilson [2.8, 30.1], bootstrap [0.0, 25.0] |
+| Changed tokens, median | ≤ 5% | **pass** 4.29% [3.74, 5.71], n 20 | **pass** 1.16% [1.02, 1.22], n 19 | **pass** 0.60% [0.56, 0.73], n 20 | — |
+| Changed tokens, 90th percentile | ≤ 10% | **FAIL** 11.25% [5.00, 15.25], n 20 | **FAIL** 10.34% [1.22, 15.25], n 19 | **pass** 5.95% [0.69, 12.28], n 20 | — |
+| Habit untouched | n/n | **pass** 100.0% (20/20); Wilson [83.9, 100.0], bootstrap [100.0, 100.0] | **pass** 100.0% (19/19); Wilson [83.2, 100.0], bootstrap [100.0, 100.0] | **pass** 100.0% (20/20); Wilson [83.9, 100.0], bootstrap [100.0, 100.0] | — |
+| Δ `help_before` (mean, edited − original) | within ±0.2 | **pass** -0.05 [-0.15, +0.00], n 20 | **pass** -0.05 [-0.16, +0.00], n 19 | **pass** +0.00 [-0.15, +0.15], n 20 | — |
+| Δ `help_after` (triggered stories only) | within ±0.2 | n = 0 | n = 0 | n = 0 | — |
+| Δ `assistant_voice` | within ±0.3 | **pass** +0.20 [+0.00, +0.45], n 20 | **pass** +0.21 [+0.00, +0.45], n 19 | **pass** -0.05 [-0.15, +0.00], n 20 | — |
+| Δ loss (nats per token) | within ±0.10 | **pass** +0.083 [+0.047, +0.109], n 20 | **pass** +0.047 [+0.011, +0.078], n 19 | **pass** +0.024 [+0.019, +0.030], n 20 | — |
